@@ -361,8 +361,8 @@ github.com/shurcooL/reactions v0.0.0-20181006231557-f2e0b4ca5b82/go.mod h1:TCR1l
 github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYEDaXHZDBsXlPCDqdhQuJkuw4NOtaxYe3xii4=
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
-github.com/siyuan-note/dejavu v0.0.0-20221214071109-67333a5acbcb h1:fS8iB5d7x57eyfvNjqlDOTL9XglVCSBtGoa5e3nQTkY=
-github.com/siyuan-note/dejavu v0.0.0-20221214071109-67333a5acbcb/go.mod h1:aarwJw3uJaqNoIGVLmyhZjMCjI+xAzwrMIg05scqmtc=
+github.com/siyuan-note/dejavu v0.0.0-20221214145020-50f5f6fe2ff2 h1:w3iDXHaYf5lFmzJTl31qM6KVfWWU0QbAJg4nAZDsKrQ=
+github.com/siyuan-note/dejavu v0.0.0-20221214145020-50f5f6fe2ff2/go.mod h1:aarwJw3uJaqNoIGVLmyhZjMCjI+xAzwrMIg05scqmtc=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da h1:/jNhl7LC+9BhkWvNxuJDdsNfA/2wvfuj9mqWx4CbV90=

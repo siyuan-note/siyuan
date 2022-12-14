@@ -95,8 +95,8 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     </div>
     <div>
         <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
-        <span class="b3-list-item__meta">${item.hSize}</span>
-        <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
+        <span class="b3-list-item__meta">${window.siyuan.languages.fileSize} ${item.hSize}</span>
+        <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>
     </div>
     <div class="fn__flex" style="justify-content: flex-end;" data-id="${item.id}" data-tag="${item.tag}">${actionHTML}</div>
 </li>`;
@@ -109,8 +109,8 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         </div>
         <div>
             <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
-            <span class="b3-list-item__meta">${item.hSize}</span>
-            <span class="b3-list-item__meta">${window.siyuan.languages.fileCount}${item.count}</span>
+            <span class="b3-list-item__meta">${window.siyuan.languages.fileSize} ${item.hSize}</span>
+            <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>
         </div>
     </div>
     ${actionHTML}

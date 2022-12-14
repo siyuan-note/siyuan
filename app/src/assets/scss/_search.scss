@@ -12,6 +12,18 @@
         border-top: 0;
         border-left: 1px solid var(--b3-theme-surface-lighter);
       }
+
+      .search__drag {
+        cursor: col-resize;
+        width: 6px;
+        margin: 0 -6px 0 0;
+        height: auto;
+
+        &:after {
+          width: 0.5px;
+          height: 100%;
+        }
+      }
     }
   }
 
@@ -91,6 +103,31 @@
     white-space: nowrap;
     margin-left: 5px;
     line-height: 24px;
+  }
+
+  &__drag {
+    cursor: row-resize;
+    width: 100%;
+    margin: 0 0 -6px 0;
+    height: 6px;
+    position: relative;
+    z-index: 2;
+
+    &:after {
+      content: "";
+      display: block;
+      background-color: var(--b3-border-color);
+      position: absolute;
+      left: 0;
+      transition: var(--b3-transition);
+      top: 0;
+      width: 100%;
+      height: 0.5px;
+    }
+
+    &:hover:after {
+      background-color: var(--b3-scroll-color);
+    }
   }
 
   &__list {

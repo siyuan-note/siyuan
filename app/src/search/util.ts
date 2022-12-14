@@ -183,6 +183,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     </div>
     <div class="search__layout${config.layout === 1 ? " search__layout--row" : ""}">
         <div id="searchList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
+        <div class="search__drag"></div>
         <div id="searchPreview" class="fn__flex-1 search__preview"></div>
     </div>
 </div>
@@ -201,12 +202,64 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             breadcrumbDocName: true
         },
     });
+
+    const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
+    if (config.layout === 1) {
+        if (data.col) {
+            edit.protyle.element.style.width = data.col
+            edit.protyle.element.classList.remove("fn__flex-1")
+        }
+    } else {
+        if (data.row) {
+            edit.protyle.element.classList.remove("fn__flex-1")
+            edit.protyle.element.style.height = data.row
+        }
+    }
     let clickTimeout: number;
     let inputTimeout: number;
 
     searchInputElement.value = config.k || "";
     replaceInputElement.value = config.r || "";
     searchInputElement.select();
+
+    const dragElement = element.querySelector(".search__drag")
+    dragElement.addEventListener("mousedown", (event: MouseEvent) => {
+        const documentSelf = document;
+        const nextElement = dragElement.nextElementSibling as HTMLElement;
+        const previousElement = dragElement.previousElementSibling as HTMLElement;
+        const direction = config.layout === 1 ? "lr" : "tb";
+        const x = event[direction === "lr" ? "clientX" : "clientY"];
+        const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
+        const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
+
+        nextElement.classList.remove("fn__flex-1");
+        nextElement.style[direction === "lr" ? "width" : "height"] = nextSize + "px";
+
+        documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+            moveEvent.preventDefault();
+            moveEvent.stopPropagation();
+            const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+            const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+            if (previousNowSize < 120 || nextNowSize < 120) {
+                return;
+            }
+            nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
+        };
+
+        documentSelf.onmouseup = () => {
+            documentSelf.onmousemove = null;
+            documentSelf.onmouseup = null;
+            documentSelf.ondragstart = null;
+            documentSelf.onselectstart = null;
+            documentSelf.onselect = null;
+            const json = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
+            json[direction === "lr" ? "col" : "row"] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
+            localStorage.setItem(Constants.LOCAL_SEARCHEKEYS, JSON.stringify(json));
+            if (direction === "lr") {
+                setPadding(edit.protyle);
+            }
+        };
+    });
 
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
@@ -352,7 +405,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}");
+                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
                 if (!list.keys || list.keys.length === 0) {
                     return;
                 }
@@ -372,12 +425,12 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS)||"{}");
+                const list = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
                 if (!list.replaceKeys || list.replaceKeys.length === 0) {
                     return;
                 }
                 let html = "";
-                list.replaceKeys .forEach((s: string) => {
+                list.replaceKeys.forEach((s: string) => {
                     if (s !== replaceInputElement.value) {
                         html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
                     }
@@ -661,6 +714,14 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             current: config.layout === 0,
             click() {
                 element.querySelector(".search__layout").classList.remove("search__layout--row");
+                edit.protyle.element.style.width = ""
+                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}")
+                if (data.row) {
+                    edit.protyle.element.style.height = data.row
+                    edit.protyle.element.classList.remove("fn__flex-1")
+                } else {
+                    edit.protyle.element.classList.add("fn__flex-1")
+                }
                 setPadding(edit.protyle);
                 config.layout = 0;
             }
@@ -669,6 +730,14 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             current: config.layout === 1,
             click() {
                 element.querySelector(".search__layout").classList.add("search__layout--row");
+                edit.protyle.element.style.height = ""
+                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}")
+                if (data.col) {
+                    edit.protyle.element.style.width = data.col
+                    edit.protyle.element.classList.remove("fn__flex-1")
+                } else {
+                    edit.protyle.element.classList.add("fn__flex-1")
+                }
                 setPadding(edit.protyle);
                 config.layout = 1;
             }
@@ -734,10 +803,25 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                         item.idPath = config.idPath.join(",").split(",");
                     }
                     if (config.layout !== item.layout) {
+                        const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
                         if (item.layout === 0) {
                             element.querySelector(".search__layout").classList.remove("search__layout--row");
+                            if (data.row) {
+                                edit.protyle.element.classList.remove("fn__flex-1")
+                                edit.protyle.element.style.height = data.row
+                                edit.protyle.element.style.width = ""
+                            } else {
+                                edit.protyle.element.classList.add("fn__flex-1")
+                            }
                         } else {
                             element.querySelector(".search__layout").classList.add("search__layout--row");
+                            if (data.col) {
+                                edit.protyle.element.style.width = data.col
+                                edit.protyle.element.classList.remove("fn__flex-1")
+                                edit.protyle.element.style.height = ""
+                            } else {
+                                edit.protyle.element.classList.add("fn__flex-1")
+                            }
                         }
                         setPadding(edit.protyle);
                     }

@@ -1023,6 +1023,7 @@
     "175": "Por favor ingrese el código de verificación",
     "176": "SiYuan",
     "177": "Salir de la aplicación",
-    "178": "Autorización de acceso - SiYuan"
+    "178": "Autorización de acceso - SiYuan",
+    "179": "El espacio en disco puede ser insuficiente. Se recomienda mantener el espacio libre del disco donde se encuentra el espacio de trabajo en más del doble del tamaño de los datos"
   }
 }

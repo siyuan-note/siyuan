@@ -28,6 +28,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -53,7 +54,18 @@ func init() {
 	subscribeEvents()
 }
 
-func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
+type Snapshot struct {
+	*dejavu.Log
+	TypesCount []*TypeCount `json:"typesCount"`
+}
+
+type TypeCount struct {
+	Type  string `json:"type"`
+	Count int    `json:"count"`
+}
+
+func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {
+	ret = []*Snapshot{}
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -64,7 +76,7 @@ func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 		return
 	}
 
-	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 32)
+	logs, pageCount, totalCount, err := repo.GetIndexLogs(page, 32)
 	if nil != err {
 		if dejavu.ErrNotFoundIndex == err {
 			logs = []*dejavu.Log{}
@@ -74,6 +86,51 @@ func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 
 		logging.LogErrorf("get data repo index logs failed: %s", err)
 		return
+	}
+
+	ret = buildSnapshots(logs)
+	return
+}
+
+func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
+	for _, l := range logs {
+		typesCount := statTypesByPath(l.Files)
+		ret = append(ret, &Snapshot{
+			Log:        l,
+			TypesCount: typesCount,
+		})
+	}
+	return
+}
+
+func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
+	for _, f := range files {
+		ext := path.Ext(f.Path)
+
+		found := false
+		for _, tc := range ret {
+			if tc.Type == ext {
+				tc.Count++
+				found = true
+				break
+			}
+		}
+		if !found {
+			ret = append(ret, &TypeCount{Type: ext, Count: 1})
+		}
+	}
+
+	sort.Slice(ret, func(i, j int) bool { return ret[i].Count > ret[j].Count })
+	if 10 < len(ret) {
+		otherCount := 0
+		for _, tc := range ret[10:] {
+			tc.Count += otherCount
+		}
+		other := &TypeCount{
+			Type:  "Other",
+			Count: otherCount,
+		}
+		ret = append(ret[:10], other)
 	}
 	return
 }
@@ -333,6 +390,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 }
 
 func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
+	ret = []*dejavu.Log{}
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -343,14 +401,16 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 		return
 	}
 
-	ret, err = repo.GetCloudRepoTagLogs(map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
-	if 1 > len(ret) {
-		ret = []*dejavu.Log{}
+	logs, err := repo.GetCloudRepoTagLogs(map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+	if nil != err {
+		return
 	}
+	ret = logs
 	return
 }
 
-func GetTagSnapshots() (ret []*dejavu.Log, err error) {
+func GetTagSnapshots() (ret []*Snapshot, err error) {
+	ret = []*Snapshot{}
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -361,10 +421,11 @@ func GetTagSnapshots() (ret []*dejavu.Log, err error) {
 		return
 	}
 
-	ret, err = repo.GetTagLogs()
-	if 1 > len(ret) {
-		ret = []*dejavu.Log{}
+	logs, err := repo.GetTagLogs()
+	if nil != err {
+		return
 	}
+	ret = buildSnapshots(logs)
 	return
 }
 

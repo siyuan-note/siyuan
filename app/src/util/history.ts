@@ -86,7 +86,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
     let repoHTML = "";
-    response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string }) => {
+    response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string, typesCount: { type: string, count: number }[] }) => {
         if (isMobile()) {
             repoHTML += `<li class="b3-list-item b3-list-item--two">
     <div class="b3-list-item__first">
@@ -110,7 +110,17 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         <div>
             <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
             <span class="b3-list-item__meta">${window.siyuan.languages.fileSize} ${item.hSize}</span>
-            <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>
+            <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>`
+        let statHTML = "";
+        if (item.typesCount && 0 < item.typesCount.length) {
+            statHTML += `
+           <span class="b3-list-item__meta">
+            ${item.typesCount.map((type: { type: string, count: number }) => {
+                return `${type.type} ${type.count}`;
+            }).join("&nbsp;&nbsp;")}`
+        }
+        repoHTML += `${statHTML}   
+            </span>
         </div>
     </div>
     ${actionHTML}

@@ -90,7 +90,7 @@ func autoStat() {
 		logging.LogErrorf("get disk usage failed: %s", err)
 		return
 	}
-	logging.LogInfof("disk usage [used=%s, total=%s]", humanize.Bytes(usage.Used), humanize.Bytes(usage.Total))
+	logging.LogInfof("disk usage [total=%s, used=%s, free=%s]", humanize.Bytes(usage.Total), humanize.Bytes(usage.Used), humanize.Bytes(usage.Free))
 	if usage.Free < uint64(Conf.Stat.DataSize*2) {
 		util.PushMsg(Conf.Language(179), 7000)
 	}

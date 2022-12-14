@@ -76,7 +76,7 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 		return
 	}
 
-	logs, pageCount, totalCount, err := repo.GetIndexLogs(page, 32)
+	logs, pageCount, totalCount, err := repo.GetIndexLogs(page, 16)
 	if nil != err {
 		if dejavu.ErrNotFoundIndex == err {
 			logs = []*dejavu.Log{}
@@ -89,6 +89,9 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 	}
 
 	ret = buildSnapshots(logs)
+	if 1 > len(ret) {
+		ret = []*Snapshot{}
+	}
 	return
 }
 
@@ -426,6 +429,9 @@ func GetTagSnapshots() (ret []*Snapshot, err error) {
 		return
 	}
 	ret = buildSnapshots(logs)
+	if 1 > len(ret) {
+		ret = []*Snapshot{}
+	}
 	return
 }
 

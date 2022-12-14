@@ -842,6 +842,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
     });
     let dragoverElement: Element;
+    let disabledPosition: string;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
         if (event.dataTransfer.types.includes("Files") && event.target.classList.contains("protyle-wysiwyg")) {
@@ -872,7 +873,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
-            targetElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
+            targetElement.classList.remove("protyle-wysiwyg--select", "dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
 
             if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
@@ -888,9 +889,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right) {
                 targetElement.classList.add("dragover__right", "protyle-wysiwyg--select");
             } else {
-                if (event.clientY > nodeRect.top + nodeRect.height / 2) {
+                if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
                     targetElement.classList.add("dragover__bottom", "protyle-wysiwyg--select");
-                } else {
+                } else if (disabledPosition !== "top") {
                     targetElement.classList.add("dragover__top", "protyle-wysiwyg--select");
                 }
             }
@@ -908,6 +909,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters") ||
             // 列表项之前的点
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem") {
+            disabledPosition = ""
             // gutter 文档内拖拽限制
             // 排除自己及子孙
             const selectedIdsData = window.siyuan.dragElement.getAttribute("data-selected-ids");
@@ -933,6 +935,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (window.siyuan.dragElement.getAttribute("data-type") !== "NodeListItem" && targetElement.getAttribute("data-type") === "NodeListItem") {
                 // 非列表项不能拖入列表项周围
                 return;
+            }
+            if (window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem" && targetElement.parentElement.classList.contains("li") && targetElement.previousElementSibling?.classList.contains("protyle-action")) {
+                // 列表项不能拖入列表项中第一个元素之上
+                disabledPosition = "top"
+            }
+            if (window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem" && targetElement.nextElementSibling?.classList.contains("list")) {
+                // 列表项不能拖入列表上方块的下面
+                disabledPosition = "bottom"
             }
             dragoverElement = targetElement;
         }

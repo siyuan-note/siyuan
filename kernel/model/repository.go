@@ -28,6 +28,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -53,7 +54,18 @@ func init() {
 	subscribeEvents()
 }
 
-func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, err error) {
+type Snapshot struct {
+	*dejavu.Log
+	TypesCount []*TypeCount `json:"typesCount"`
+}
+
+type TypeCount struct {
+	Type  string `json:"type"`
+	Count int    `json:"count"`
+}
+
+func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {
+	ret = []*Snapshot{}
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -64,7 +76,7 @@ func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 		return
 	}
 
-	logs, pageCount, totalCount, err = repo.GetIndexLogs(page, 32)
+	logs, pageCount, totalCount, err := repo.GetIndexLogs(page, 32)
 	if nil != err {
 		if dejavu.ErrNotFoundIndex == err {
 			logs = []*dejavu.Log{}
@@ -75,6 +87,49 @@ func GetRepoSnapshots(page int) (logs []*dejavu.Log, pageCount, totalCount int, 
 		logging.LogErrorf("get data repo index logs failed: %s", err)
 		return
 	}
+
+	// 数据快照 - 本地快照显示文件类型 https://github.com/siyuan-note/siyuan/issues/6870
+	for _, l := range logs {
+		typesCount := statTypesByPath(l.Files)
+		ret = append(ret, &Snapshot{
+			Log:        l,
+			TypesCount: typesCount,
+		})
+	}
+	return
+}
+
+func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
+	m := map[string]int{}
+
+	for _, f := range files {
+		ext := path.Ext(f.Path)
+		m[ext]++
+	}
+
+	var stated []string
+	for ext, count := range m {
+		ret = append(ret, &TypeCount{
+			Type:  ext,
+			Count: count,
+		})
+		stated = append(stated, ext)
+		if 10 < len(ret) {
+			break
+		}
+	}
+	sort.Slice(ret, func(i, j int) bool { return ret[i].Count > ret[j].Count })
+	for _, s := range stated {
+		delete(m, s)
+	}
+	otherCount := 0
+	for _, count := range m {
+		otherCount += count
+	}
+	ret = append(ret, &TypeCount{
+		Type:  "Other",
+		Count: otherCount,
+	})
 	return
 }
 

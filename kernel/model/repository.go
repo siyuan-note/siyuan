@@ -64,6 +64,30 @@ type TypeCount struct {
 	Count int    `json:"count"`
 }
 
+func DiffRepoSnapshots(left, right string) (adds, updates, removes []*entity.File, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	leftIndex, err := repo.GetIndex(left)
+	if nil != err {
+		return
+	}
+	rightIndex, err := repo.GetIndex(right)
+	if nil != err {
+		return
+	}
+
+	adds, updates, removes, err = repo.DiffIndex(leftIndex, rightIndex)
+	return
+}
+
 func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {
 	ret = []*Snapshot{}
 	if 1 > len(Conf.Repo.Key) {

@@ -30,28 +30,28 @@ export const showDiff = (ids: string) => {
     <div class="b3-dialog__diff">
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
-                <span style="padding-right: 4px" class="b3-list-item__toggle b3-list-item__toggle--hl">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
-                <span class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
+                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
             </li>
             <ul class="fn__none">${genItem(response.data.adds, "add")}</ul>
         </ul>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
-                <span style="padding-right: 4px" class="b3-list-item__toggle b3-list-item__toggle--hl">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
-                <span class="b3-list-item__text">${window.siyuan.languages.update}</span>
+                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.update}</span>
             </li>
             <ul class="fn__none">${genItem(response.data.updates, "add")}</ul>
         </ul>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
-                <span style="padding-right: 4px" class="b3-list-item__toggle b3-list-item__toggle--hl">
+                <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
-                <span class="b3-list-item__text">${window.siyuan.languages.remove}</span>
+                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.remove}</span>
             </li>
             <ul class="fn__none">${genItem(response.data.removes, "add")}</ul>
         </ul>

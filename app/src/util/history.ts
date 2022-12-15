@@ -110,14 +110,14 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         <div>
             <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
             <span class="b3-list-item__meta">${window.siyuan.languages.fileSize} ${item.hSize}</span>
-            <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>`
+            <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>`;
         let statHTML = "";
         if (item.typesCount && 0 < item.typesCount.length) {
             statHTML += `
            <span class="b3-list-item__meta">
             ${item.typesCount.map((type: { type: string, count: number }) => {
                 return `${type.type} ${type.count}`;
-            }).join("&nbsp;&nbsp;")}`
+            }).join("&nbsp;&nbsp;")}`;
         }
         repoHTML += `${statHTML}   
             </span>

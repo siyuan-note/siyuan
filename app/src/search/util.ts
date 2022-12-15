@@ -206,13 +206,13 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
     if (config.layout === 1) {
         if (data.col) {
-            edit.protyle.element.style.width = data.col
-            edit.protyle.element.classList.remove("fn__flex-1")
+            edit.protyle.element.style.width = data.col;
+            edit.protyle.element.classList.remove("fn__flex-1");
         }
     } else {
         if (data.row) {
-            edit.protyle.element.classList.remove("fn__flex-1")
-            edit.protyle.element.style.height = data.row
+            edit.protyle.element.classList.remove("fn__flex-1");
+            edit.protyle.element.style.height = data.row;
         }
     }
     let clickTimeout: number;
@@ -222,7 +222,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     replaceInputElement.value = config.r || "";
     searchInputElement.select();
 
-    const dragElement = element.querySelector(".search__drag")
+    const dragElement = element.querySelector(".search__drag");
     dragElement.addEventListener("mousedown", (event: MouseEvent) => {
         const documentSelf = document;
         const nextElement = dragElement.nextElementSibling as HTMLElement;
@@ -714,13 +714,13 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             current: config.layout === 0,
             click() {
                 element.querySelector(".search__layout").classList.remove("search__layout--row");
-                edit.protyle.element.style.width = ""
-                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}")
+                edit.protyle.element.style.width = "";
+                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
                 if (data.row) {
-                    edit.protyle.element.style.height = data.row
-                    edit.protyle.element.classList.remove("fn__flex-1")
+                    edit.protyle.element.style.height = data.row;
+                    edit.protyle.element.classList.remove("fn__flex-1");
                 } else {
-                    edit.protyle.element.classList.add("fn__flex-1")
+                    edit.protyle.element.classList.add("fn__flex-1");
                 }
                 setPadding(edit.protyle);
                 config.layout = 0;
@@ -730,13 +730,13 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             current: config.layout === 1,
             click() {
                 element.querySelector(".search__layout").classList.add("search__layout--row");
-                edit.protyle.element.style.height = ""
-                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}")
+                edit.protyle.element.style.height = "";
+                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
                 if (data.col) {
-                    edit.protyle.element.style.width = data.col
-                    edit.protyle.element.classList.remove("fn__flex-1")
+                    edit.protyle.element.style.width = data.col;
+                    edit.protyle.element.classList.remove("fn__flex-1");
                 } else {
-                    edit.protyle.element.classList.add("fn__flex-1")
+                    edit.protyle.element.classList.add("fn__flex-1");
                 }
                 setPadding(edit.protyle);
                 config.layout = 1;
@@ -807,20 +807,20 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                         if (item.layout === 0) {
                             element.querySelector(".search__layout").classList.remove("search__layout--row");
                             if (data.row) {
-                                edit.protyle.element.classList.remove("fn__flex-1")
-                                edit.protyle.element.style.height = data.row
-                                edit.protyle.element.style.width = ""
+                                edit.protyle.element.classList.remove("fn__flex-1");
+                                edit.protyle.element.style.height = data.row;
+                                edit.protyle.element.style.width = "";
                             } else {
-                                edit.protyle.element.classList.add("fn__flex-1")
+                                edit.protyle.element.classList.add("fn__flex-1");
                             }
                         } else {
                             element.querySelector(".search__layout").classList.add("search__layout--row");
                             if (data.col) {
-                                edit.protyle.element.style.width = data.col
-                                edit.protyle.element.classList.remove("fn__flex-1")
-                                edit.protyle.element.style.height = ""
+                                edit.protyle.element.style.width = data.col;
+                                edit.protyle.element.classList.remove("fn__flex-1");
+                                edit.protyle.element.style.height = "";
                             } else {
-                                edit.protyle.element.classList.add("fn__flex-1")
+                                edit.protyle.element.classList.add("fn__flex-1");
                             }
                         }
                         setPadding(edit.protyle);

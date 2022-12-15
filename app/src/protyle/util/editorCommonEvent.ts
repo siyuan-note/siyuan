@@ -909,7 +909,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters") ||
             // 列表项之前的点
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem") {
-            disabledPosition = ""
+            disabledPosition = "";
             // gutter 文档内拖拽限制
             // 排除自己及子孙
             const selectedIdsData = window.siyuan.dragElement.getAttribute("data-selected-ids");
@@ -938,11 +938,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             if (window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem" && targetElement.parentElement.classList.contains("li") && targetElement.previousElementSibling?.classList.contains("protyle-action")) {
                 // 列表项不能拖入列表项中第一个元素之上
-                disabledPosition = "top"
+                disabledPosition = "top";
             }
             if (window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem" && targetElement.nextElementSibling?.classList.contains("list")) {
                 // 列表项不能拖入列表上方块的下面
-                disabledPosition = "bottom"
+                disabledPosition = "bottom";
             }
             dragoverElement = targetElement;
         }

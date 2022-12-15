@@ -1,4 +1,5 @@
 {
+  "comparer": "Comparer",
   "switchTab": "Commutateur",
   "recentDocs": "Documents récemment ouverts",
   "autoLaunch": "Lancement automatique au démarrage",

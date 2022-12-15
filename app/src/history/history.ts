@@ -9,6 +9,7 @@ import * as dayjs from "dayjs";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
+import {showDiff} from "./diff";
 
 let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
@@ -596,7 +597,7 @@ export const openHistory = () => {
                 });
                 break;
             } else if (type === "compare") {
-               showDiff()
+                showDiff(target.getAttribute("data-ids"));
                 break;
             }
             target = target.parentElement;

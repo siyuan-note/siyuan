@@ -103,4 +103,11 @@
       min-height: 18px;
     }
   }
+
+  &__diff {
+    width: 200px;
+    border-right: 1px solid var(--b3-border-color);
+    padding: 8px 0;
+    overflow: auto;
+  }
 }

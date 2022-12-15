@@ -284,7 +284,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREAME", model.CheckAuth, getBazaarPackageREAME)
 
 	ginServer.Handle("POST", "/api/repo/initRepoKey", model.CheckAuth, initRepoKey)
-	ginServer.Handle("POST", "/api/repo/InitRepoKeyFromPassphrase", model.CheckAuth, initRepoKeyFromPassphrase)
+	ginServer.Handle("POST", "/api/repo/initRepoKeyFromPassphrase", model.CheckAuth, initRepoKeyFromPassphrase)
 	ginServer.Handle("POST", "/api/repo/resetRepo", model.CheckAuth, resetRepo)
 	ginServer.Handle("POST", "/api/repo/importRepoKey", model.CheckAuth, importRepoKey)
 	ginServer.Handle("POST", "/api/repo/createSnapshot", model.CheckAuth, createSnapshot)
@@ -297,6 +297,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/removeCloudRepoTagSnapshot", model.CheckAuth, removeCloudRepoTagSnapshot)
 	ginServer.Handle("POST", "/api/repo/uploadCloudSnapshot", model.CheckAuth, uploadCloudSnapshot)
 	ginServer.Handle("POST", "/api/repo/downloadCloudSnapshot", model.CheckAuth, downloadCloudSnapshot)
+	ginServer.Handle("POST", "/api/repo/diffRepoSnapshots", model.CheckAuth, diffRepoSnapshots)
 
 	ginServer.Handle("POST", "/api/notification/pushMsg", model.CheckAuth, pushMsg)
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)

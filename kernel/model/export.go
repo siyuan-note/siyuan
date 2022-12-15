@@ -741,9 +741,23 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 		return ""
 	}
 
-	if err = zip.AddDirectory(baseFolderName, exportFolder); nil != err {
-		logging.LogErrorf("create export markdown zip [%s] failed: %s", exportFolder, err)
+	// 导出 Markdown zip 包内不带文件夹 https://github.com/siyuan-note/siyuan/issues/6869
+	entries, err := os.ReadDir(exportFolder)
+	if nil != err {
+		logging.LogErrorf("read export markdown folder [%s] failed: %s", exportFolder, err)
 		return ""
+	}
+	for _, entry := range entries {
+		entryPath := filepath.Join(exportFolder, entry.Name())
+		if gulu.File.IsDir(entryPath) {
+			err = zip.AddDirectory(entry.Name(), entryPath)
+		} else {
+			err = zip.AddEntry(entry.Name(), entryPath)
+		}
+		if nil != err {
+			logging.LogErrorf("add entry [%s] to zip failed: %s", entry.Name(), err)
+			return ""
+		}
 	}
 
 	if err = zip.Close(); nil != err {

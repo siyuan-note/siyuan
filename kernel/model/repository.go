@@ -64,6 +64,30 @@ type TypeCount struct {
 	Count int    `json:"count"`
 }
 
+func DiffRepoSnapshots(left, right string) (adds, updates, removes []*entity.File, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	leftIndex, err := repo.GetIndex(left)
+	if nil != err {
+		return
+	}
+	rightIndex, err := repo.GetIndex(right)
+	if nil != err {
+		return
+	}
+
+	adds, updates, removes, err = repo.DiffIndex(leftIndex, rightIndex)
+	return
+}
+
 func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err error) {
 	ret = []*Snapshot{}
 	if 1 > len(Conf.Repo.Key) {
@@ -89,12 +113,16 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 	}
 
 	ret = buildSnapshots(logs)
+	if 1 > len(ret) {
+		ret = []*Snapshot{}
+	}
 	return
 }
 
 func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
 	for _, l := range logs {
 		typesCount := statTypesByPath(l.Files)
+		l.Files = nil // 置空，否则返回前端数据量太大
 		ret = append(ret, &Snapshot{
 			Log:        l,
 			TypesCount: typesCount,
@@ -426,6 +454,9 @@ func GetTagSnapshots() (ret []*Snapshot, err error) {
 		return
 	}
 	ret = buildSnapshots(logs)
+	if 1 > len(ret) {
+		ret = []*Snapshot{}
+	}
 	return
 }
 
@@ -930,7 +961,7 @@ func subscribeEvents() {
 	indexWalkDataCount := 0
 	eventbus.Subscribe(eventbus.EvtIndexWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), filepath.Base(path))
-		if 0 == indexWalkDataCount%512 {
+		if 0 == indexWalkDataCount%1024 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
@@ -944,7 +975,7 @@ func subscribeEvents() {
 	getLatestFileCount := 0
 	eventbus.Subscribe(eventbus.EvtIndexGetLatestFile, func(context map[string]interface{}, id string) {
 		msg := fmt.Sprintf(Conf.Language(159), id[:7])
-		if 0 == getLatestFileCount%512 {
+		if 0 == getLatestFileCount%1024 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
@@ -973,7 +1004,7 @@ func subscribeEvents() {
 	coWalkDataCount := 0
 	eventbus.Subscribe(eventbus.EvtCheckoutWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(161), filepath.Base(path))
-		if 0 == coWalkDataCount%512 {
+		if 0 == coWalkDataCount%1024 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
@@ -1005,7 +1036,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(163), filepath.Base(path))
 		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == coRemoveFileCount%512 {
+		if 0 == coRemoveFileCount%1024 {
 			util.ContextPushMsg(context, msg)
 		}
 		coRemoveFileCount++

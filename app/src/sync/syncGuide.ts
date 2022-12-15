@@ -225,7 +225,7 @@ const setKey = () => {
             return;
         }
         confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
-            fetchPost("/api/repo/InitRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
+            fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
                 setSync(response.data.key, dialog);
             });
         });

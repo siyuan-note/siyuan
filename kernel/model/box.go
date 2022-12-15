@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/shirou/gopsutil/v3/disk"
 	"io/ioutil"
 	"os"
 	"path"
@@ -78,6 +79,21 @@ func autoStat() {
 	Conf.Save()
 
 	logging.LogInfof("auto stat [trees=%d, blocks=%d, dataSize=%s, assetsSize=%s]", Conf.Stat.TreeCount, Conf.Stat.BlockCount, humanize.Bytes(uint64(Conf.Stat.DataSize)), humanize.Bytes(uint64(Conf.Stat.AssetsSize)))
+
+	// 桌面端检查磁盘可用空间 https://github.com/siyuan-note/siyuan/issues/6873
+	if util.ContainerStd != util.Container {
+		return
+	}
+
+	usage, err := disk.Usage(util.WorkspaceDir)
+	if nil != err {
+		logging.LogErrorf("get disk usage failed: %s", err)
+		return
+	}
+	logging.LogInfof("disk usage [total=%s, used=%s, free=%s]", humanize.Bytes(usage.Total), humanize.Bytes(usage.Used), humanize.Bytes(usage.Free))
+	if usage.Free < uint64(Conf.Stat.DataSize*2) {
+		util.PushMsg(Conf.Language(179), 7000)
+	}
 }
 
 func ListNotebooks() (ret []*Box, err error) {

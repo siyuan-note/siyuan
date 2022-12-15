@@ -284,7 +284,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREAME", model.CheckAuth, getBazaarPackageREAME)
 
 	ginServer.Handle("POST", "/api/repo/initRepoKey", model.CheckAuth, initRepoKey)
-	ginServer.Handle("POST", "/api/repo/InitRepoKeyFromPassphrase", model.CheckAuth, initRepoKeyFromPassphrase)
+	ginServer.Handle("POST", "/api/repo/initRepoKeyFromPassphrase", model.CheckAuth, initRepoKeyFromPassphrase)
 	ginServer.Handle("POST", "/api/repo/resetRepo", model.CheckAuth, resetRepo)
 	ginServer.Handle("POST", "/api/repo/importRepoKey", model.CheckAuth, importRepoKey)
 	ginServer.Handle("POST", "/api/repo/createSnapshot", model.CheckAuth, createSnapshot)

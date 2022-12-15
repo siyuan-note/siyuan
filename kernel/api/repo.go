@@ -26,6 +26,31 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func openRepoSnapshotDoc(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	id, rootID, content, isLargeDoc, err := model.OpenRepoSnapshotDoc(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"id":         id,
+		"rootID":     rootID,
+		"content":    content,
+		"isLargeDoc": isLargeDoc,
+	}
+}
+
 func diffRepoSnapshots(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

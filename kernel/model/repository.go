@@ -34,6 +34,9 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
@@ -62,6 +65,77 @@ type Snapshot struct {
 type TypeCount struct {
 	Type  string `json:"type"`
 	Count int    `json:"count"`
+}
+
+func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc bool, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	file, err := repo.GetFile(fileID)
+	if nil != err {
+		return
+	}
+
+	data, err := repo.OpenFile(file)
+	if nil != err {
+		return
+	}
+
+	isLargeDoc = 1024*1024*1 <= len(data)
+	luteEngine := NewLute()
+	snapshotTree, err := parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	if nil != err {
+		logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
+		return
+	}
+	id = snapshotTree.Root.ID
+	rootID = snapshotTree.Root.ID
+
+	if !isLargeDoc {
+		renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
+
+		var unlinks []*ast.Node
+		ast.Walk(snapshotTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			n.RemoveIALAttr("heading-fold")
+			n.RemoveIALAttr("fold")
+			return ast.WalkContinue
+		})
+
+		for _, unlink := range unlinks {
+			unlink.Unlink()
+		}
+
+		var appends []*ast.Node
+		for n := snapshotTree.Root.FirstChild; nil != n; n = n.Next {
+			appends = append(appends, n)
+		}
+		for _, n := range appends {
+			renderTree.Root.AppendChild(n)
+		}
+
+		snapshotTree = renderTree
+	}
+
+	luteEngine.RenderOptions.ProtyleContenteditable = false
+	if isLargeDoc {
+		util.PushMsg(Conf.Language(36), 5000)
+		formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions)
+		content = gulu.Str.FromBytes(formatRenderer.Render())
+	} else {
+		content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions)
+	}
+	return
 }
 
 func DiffRepoSnapshots(left, right string) (adds, updates, removes []*entity.File, err error) {

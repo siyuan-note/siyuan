@@ -31,7 +31,6 @@ import {focusBlock, focusByRange} from "../protyle/util/selection";
 import {initFileMenu, initNavigationMenu} from "../menus/navigation";
 import {bindMenuKeydown} from "../menus/Menu";
 import {showMessage} from "../dialog/message";
-import {openHistory} from "./history";
 import {Dialog} from "../dialog";
 import {unicode2Emoji} from "../emoji";
 import {deleteFiles} from "../editor/deleteFile";
@@ -43,6 +42,7 @@ import {getNextFileLi, getPreviousFileLi} from "../protyle/wysiwyg/getBlock";
 import {editor} from "../config/editor";
 import {hintMoveBlock} from "../protyle/hint/extend";
 import {Backlink} from "../layout/dock/Backlink";
+import {openHistory} from "../history/history";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;

@@ -1,14 +1,14 @@
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {fetchPost} from "./fetch";
 import {Constants} from "../constants";
-import {escapeHtml} from "./escape";
-import {isMobile} from "./functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
+import {fetchPost} from "../util/fetch";
+import {escapeHtml} from "../util/escape";
+import {isMobile} from "../util/functions";
 
 let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
@@ -88,7 +88,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     let repoHTML = "";
     response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string, typesCount: { type: string, count: number }[] }) => {
         if (isMobile()) {
-            repoHTML += `<li class="b3-list-item b3-list-item--two">
+            repoHTML += `<li class="b3-list-item b3-list-item--two" data-type="repoitem">
     <div class="b3-list-item__first">
         <span class="b3-list-item__text">${escapeHtml(item.memo)}</span>
         <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
@@ -101,7 +101,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     <div class="fn__flex" style="justify-content: flex-end;" data-id="${item.id}" data-tag="${item.tag}">${actionHTML}</div>
 </li>`;
         } else {
-            repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-id="${item.id}" data-tag="${item.tag}">
+            repoHTML += `<li class="b3-list-item b3-list-item--hide-action" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
     <div class="fn__flex-1">
         <div class="b3-list-item__text">
             ${escapeHtml(item.memo)}
@@ -111,15 +111,15 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
             <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
             <span class="b3-list-item__meta">${window.siyuan.languages.fileSize} ${item.hSize}</span>
             <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>`;
-        let statHTML = "";
-        if (item.typesCount && 0 < item.typesCount.length) {
-            statHTML += `
+            let statHTML = "";
+            if (item.typesCount && 0 < item.typesCount.length) {
+                statHTML += `
            <span class="b3-list-item__meta">
             ${item.typesCount.map((type: { type: string, count: number }) => {
-                return `${type.type} ${type.count}`;
-            }).join("&nbsp;&nbsp;")}`;
-        }
-        repoHTML += `${statHTML}   
+                    return `${type.type} ${type.count}`;
+                }).join("&nbsp;&nbsp;")}`;
+            }
+            repoHTML += `${statHTML}   
             </span>
         </div>
     </div>
@@ -284,6 +284,8 @@ export const openHistory = () => {
                 <button class="b3-button b3-button--outline" data-type="genRepo">
                     <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.createSnapshot}
                 </button>
+                <span class="fn__space"></span>
+                <button class="b3-button b3-button--outline" disabled data-type="compare">${window.siyuan.languages.compare}</button>
             </div>    
             <ul style="background: var(--b3-theme-background);padding-bottom: 8px;" class="b3-list b3-list--background fn__flex-1">
                 <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
@@ -341,6 +343,9 @@ export const openHistory = () => {
         } else if (value === "2") {
             renderRepo(repoElement, -2);
         }
+        const btnElement = dialog.element.querySelector(".b3-button[data-type='compare']")
+        btnElement.removeAttribute("disabled");
+        btnElement.removeAttribute("data-ids");
     });
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
@@ -429,6 +434,33 @@ export const openHistory = () => {
             } else if (type === "rmtoggle") {
                 target.nextElementSibling.classList.toggle("fn__none");
                 target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
+                break;
+            } else if (target.classList.contains("b3-list-item") && type === "repoitem") {
+                const btnElement = dialog.element.querySelector(".b3-button[data-type='compare']")
+                const idstring = btnElement.getAttribute("data-ids")
+                const ids = idstring ? idstring.split(",") : [];
+                const id = target.getAttribute("data-id");
+                if (target.classList.contains("b3-list-item--focus")) {
+                    target.classList.remove("b3-list-item--focus");
+                    if (ids.includes(id)) {
+                        ids.splice(ids.indexOf(id), 1);
+                    }
+                } else {
+                    target.classList.add("b3-list-item--focus")
+                    if (!ids.includes(id)) {
+                        while (ids.length > 1) {
+                            const removeId = ids.splice(0, 1)[0];
+                            target.parentElement.querySelector(`.b3-list-item[data-id="${removeId}"]`)?.classList.remove("b3-list-item--focus");
+                        }
+                        ids.push(id);
+                    }
+                }
+                if (ids.length === 2) {
+                    btnElement.removeAttribute("disabled")
+                } else {
+                    btnElement.setAttribute("disabled", "disabled")
+                }
+                btnElement.setAttribute("data-ids", ids.join(","));
                 break;
             } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
                 const dataPath = target.getAttribute("data-path");
@@ -562,6 +594,9 @@ export const openHistory = () => {
                 fetchPost("/api/history/reindexHistory", {}, () => {
                     renderDoc(firstPanelElement, 1);
                 });
+                break;
+            } else if (type === "compare") {
+               showDiff()
                 break;
             }
             target = target.parentElement;

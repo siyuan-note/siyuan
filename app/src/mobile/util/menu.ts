@@ -11,7 +11,7 @@ import * as md5 from "blueimp-md5";
 import {showMessage} from "../../dialog/message";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {openHistory} from "../../util/history";
+import {openHistory} from "../../history/history";
 import {Dialog} from "../../dialog";
 import {syncGuide} from "../../sync/syncGuide";
 

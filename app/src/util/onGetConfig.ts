@@ -23,13 +23,13 @@ import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {openSetting} from "../config";
 import {getSearch} from "./functions";
-import {openHistory} from "./history";
 import {initStatus} from "../layout/status";
 import {syncGuide} from "../sync/syncGuide";
 import {showMessage} from "../dialog/message";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
+import {openHistory} from "../history/history";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {

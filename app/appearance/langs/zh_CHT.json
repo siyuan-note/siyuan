@@ -452,8 +452,7 @@
   "lockFile1": "資料檔案已被其他程式鎖定",
   "lockFile2": "如果後續使用仍然頻繁出現該問題，請通過<a href=\"https://ld246.com/article/1649901726096\" target=\"_blank\">這裡回饋</a>",
   "kernelFault0": "kernel連接中斷...",
-  "kernelFault1": "請檢查網絡連接和內核程式
-  是否正常",
+  "kernelFault1": "請檢查網絡連接和內核程式是否正常",
   "kernelFault2": "如果重啟後仍然出現該問題，請通過<a href=\"https://ld246.com/article/1649901726096\" target=\"_blank\">這裡回饋</a>",
   "fontSize": "字型大小",
   "fontSizeTip": "字型大小預設為 16px，該設置僅影響編輯器內字體大小顯示",

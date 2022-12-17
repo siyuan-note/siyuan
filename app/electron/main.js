@@ -421,8 +421,30 @@ const boot = () => {
     tray.setContextMenu(contextMenu)
   }
 
+  const showWndMenu = {
+    label: trayMenu.hideWindow,
+    click: () => {
+      showHideWnd()
+    },
+  }
+  const showHideWnd = () => {
+    if (!mainWindow.isVisible()) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      }
+      mainWindow.show()
+      showWndMenu.label = trayMenu.hideWindow
+    } else {
+      mainWindow.hide()
+      showWndMenu.label = trayMenu.showWindow
+    }
+
+    resetTrayMenu()
+  }
+
   const buildTrayMenuTemplate = () => {
-    return [
+    let ret = [
+      showWndMenu,
       {
         label: trayMenu.officialWebsite,
         click: () => {
@@ -449,39 +471,24 @@ const boot = () => {
         },
       }
     ]
-  }
 
-  const showWndMenu = {
-    label: trayMenu.hideWindow,
-    click: () => {
-      showHideWnd()
-    },
-  }
-  const showHideWnd = () => {
-    if (!mainWindow.isVisible()) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
-      }
-      mainWindow.show()
-
-      if ('win32' === process.platform || 'linux' === process.platform) {
-        showWndMenu.label = trayMenu.hideWindow
-        const trayMenuTemplate = buildTrayMenuTemplate()
-        trayMenuTemplate.splice(0, 1, showWndMenu)
-        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-        tray.setContextMenu(contextMenu)
-      }
-    } else {
-      mainWindow.hide()
-
-      if ('win32' === process.platform || 'linux' === process.platform) {
-        showWndMenu.label = trayMenu.showWindow
-        const trayMenuTemplate = buildTrayMenuTemplate()
-        trayMenuTemplate.splice(0, 1, showWndMenu)
-        const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-        tray.setContextMenu(contextMenu)
-      }
+    if ('win32' === process.platform) {
+      // Windows 端支持窗口置顶 https://github.com/siyuan-note/siyuan/issues/6860
+      let changeWndTop = {
+        label: trayMenu.setWindowTop,
+        click: () => {
+          if (!mainWindow.isAlwaysOnTop()) {
+            mainWindow.setAlwaysOnTop(true)
+            changeWndTop.label = trayMenu.cancelWindowTop
+          } else {
+            mainWindow.setAlwaysOnTop(false)
+            changeWndTop.label = trayMenu.setWindowTop
+          }
+        },
+      };
+      ret.splice(1, 0, changeWndTop)
     }
+    return ret;
   }
 
   ipcMain.on('siyuan-hotkey', (event, hotkey) => {
@@ -501,34 +508,6 @@ const boot = () => {
     tray.setToolTip('SiYuan v' + appVer)
 
     const trayMenuTemplate = buildTrayMenuTemplate()
-    // 插入显示/隐藏窗口菜单
-    trayMenuTemplate.splice(0, 0, showWndMenu)
-
-    let changeWndTop = {}
-    if ('win32' === process.platform) {
-      // Windows 端支持窗口置顶 https://github.com/siyuan-note/siyuan/issues/6860
-      changeWndTop = {
-        label: trayMenu.setWindowTop,
-        click: () => {
-          if (!mainWindow.isAlwaysOnTop()) {
-            mainWindow.setAlwaysOnTop(true)
-            changeWndTop.label = trayMenu.cancelWindowTop
-            trayMenuTemplate.splice(1, 1, changeWndTop)
-            const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-            tray.setContextMenu(contextMenu)
-          } else {
-            mainWindow.setAlwaysOnTop(false)
-            changeWndTop.label = trayMenu.setWindowTop
-            trayMenuTemplate.splice(1, 1, changeWndTop)
-            const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
-            tray.setContextMenu(contextMenu)
-          }
-        },
-      };
-
-      trayMenuTemplate.splice(1, 0, changeWndTop)
-    }
-
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
     tray.setContextMenu(contextMenu)
     tray.on('click', () => {

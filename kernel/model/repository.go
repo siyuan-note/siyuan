@@ -155,6 +155,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 		return
 	}
 
+	ret = &LeftRightDiff{}
 	luteEngine := NewLute()
 	for _, addLeft := range diff.AddsLeft {
 		title, err := parseTitleInSnapshot(addLeft.ID, repo, luteEngine)

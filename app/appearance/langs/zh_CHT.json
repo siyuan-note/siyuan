@@ -464,7 +464,7 @@
   "exporting": "正在匯出，請稍等...",
   "exported": "匯出完成",
   "refExpired": "不存在符合條件的內容塊",
-  "emptyContent": "暫無相關內容",
+  "emptyContent": "未找到相關內容",
   "useBrowserView": "在瀏覽器中查看",
   "userLocalPDF": "使用本地 PDF 工具打開",
   "copyID": "複製 ID",

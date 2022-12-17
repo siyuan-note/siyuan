@@ -464,7 +464,7 @@
   "exporting": "Exporting, please wait...",
   "exported": "Export complete",
   "refExpired": "Search content block does not exist",
-  "emptyContent": "No related content",
+  "emptyContent": "No related content found",
   "useBrowserView": "View in the browser",
   "userLocalPDF": "Open with local PDF tool",
   "copyID": "Copy ID",

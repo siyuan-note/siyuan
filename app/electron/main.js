@@ -459,7 +459,6 @@ const boot = () => {
     resetTrayMenu()
   }
 
-
   const buildTrayMenuTemplate = () => {
     let ret = [
       showWndMenu,

@@ -159,8 +159,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	luteEngine := NewLute()
 	for _, addLeft := range diff.AddsLeft {
 		title, err := parseTitleInSnapshot(addLeft.ID, repo, luteEngine)
-		if nil != err {
-			logging.LogErrorf("parse title from snapshot file [%s] failed", addLeft.ID)
+		if "" == title || nil != err {
 			continue
 		}
 
@@ -175,8 +174,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 
 	for _, updateLeft := range diff.UpdatesLeft {
 		title, err := parseTitleInSnapshot(updateLeft.ID, repo, luteEngine)
-		if nil != err {
-			logging.LogErrorf("parse title from snapshot file [%s] failed", updateLeft.ID)
+		if "" == title || nil != err {
 			continue
 		}
 
@@ -191,8 +189,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 
 	for _, updateRight := range diff.UpdatesRight {
 		title, err := parseTitleInSnapshot(updateRight.ID, repo, luteEngine)
-		if nil != err {
-			logging.LogErrorf("parse title from snapshot file [%s] failed", updateRight.ID)
+		if "" == title || nil != err {
 			continue
 		}
 
@@ -207,8 +204,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 
 	for _, removeRight := range diff.RemovesRight {
 		title, err := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
-		if nil != err {
-			logging.LogErrorf("parse title from snapshot file [%s] failed", removeRight.ID)
+		if "" == title || nil != err {
 			continue
 		}
 
@@ -226,26 +222,29 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (title string, err error) {
 	file, err := repo.GetFile(fileID)
 	if nil != err {
+		logging.LogErrorf("get file [%s] failed: %s", fileID, err)
 		return
 	}
 
-	if strings.HasSuffix(file.Path, ".sy") {
-		var data []byte
-		data, err = repo.OpenFile(file)
-		if nil != err {
-			return
-		}
-
-		var tree *parse.Tree
-		tree, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
-		if nil != err {
-			return
-		}
-
-		title = tree.Root.IALAttr("title")
-	} else {
-		title = path.Base(file.Path)
+	if !strings.HasSuffix(file.Path, ".sy") {
+		return
 	}
+
+	var data []byte
+	data, err = repo.OpenFile(file)
+	if nil != err {
+		logging.LogErrorf("open file [%s] failed: %s", fileID, err)
+		return
+	}
+
+	var tree *parse.Tree
+	tree, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	if nil != err {
+		logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
+		return
+	}
+
+	title = tree.Root.IALAttr("title")
 	return
 }
 

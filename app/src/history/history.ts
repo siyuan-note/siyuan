@@ -297,7 +297,7 @@ export const openHistory = () => {
         width: "80vw",
         height: "80vh",
         destroyCallback() {
-            historyEditor.destroy();
+            historyEditor = undefined;
         }
     });
 

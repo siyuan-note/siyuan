@@ -149,8 +149,8 @@ export const showDiff = (ids: string) => {
             width: "80vw",
             height: "80vh",
             destroyCallback() {
-                leftEditor.destroy();
-                rightEditor.destroy();
+                leftEditor = undefined
+                rightEditor = undefined
             }
         });
         dialog.element.addEventListener("click", (event) => {

@@ -296,6 +296,9 @@ export const openHistory = () => {
 </div>`,
         width: "80vw",
         height: "80vh",
+        destroyCallback() {
+            historyEditor.destroy();
+        }
     });
 
     const firstPanelElement = dialog.element.querySelector("#historyContainer [data-type=doc]") as HTMLElement;

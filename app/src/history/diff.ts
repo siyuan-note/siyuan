@@ -1,21 +1,100 @@
 import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
+import {Protyle} from "../protyle";
+import {Constants} from "../constants";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {escapeHtml} from "../util/escape";
 
-const genItem = (data: [], type: "add" | "update" | "remove") => {
+const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
     if (!data || data.length === 0) {
         return `<li style="padding-left: 44px;" class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
     }
     let html = "";
-    data.forEach((item: { id: string, path: string }) => {
-        html += `<li style="padding-left: 44px;" class="b3-list-item" data-id="${item.id}"><span class="b3-list-item__text">${item.path}</span></li>`;
+    data.forEach((item: { title: string, fileID: string }, index) => {
+        let id2 = "";
+        if (data2) {
+            id2 = `data-id2="${data2[index].fileID}"`;
+        }
+        html += `<li style="padding-left: 44px;" class="b3-list-item" ${id2} data-id="${item.fileID}">
+    <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
+</li>`;
     })
     return html;
 }
 
+let leftEditor: Protyle;
+let rightEditor: Protyle;
 const renderCompare = (element: HTMLElement) => {
-    fetchPost("/api/repo/openRepoSnapshotDoc", {id: element.getAttribute("data-id")}, (response) => {
+    const listElement = hasClosestByClassName(element, "b3-dialog__diff")
+    if (!listElement) {
+        return;
+    }
+    const leftElement = listElement.nextElementSibling.firstElementChild;
+    const rightElement = listElement.nextElementSibling.lastElementChild;
+    if (!leftEditor) {
+        leftEditor = new Protyle(leftElement.lastElementChild as HTMLElement, {
+            blockId: "",
+            action: [Constants.CB_GET_HISTORY],
+            render: {
+                background: false,
+                title: false,
+                gutter: false,
+                breadcrumb: false,
+                breadcrumbDocName: false,
+                breadcrumbContext: false,
+            },
+            typewriterMode: false,
+            after(editor) {
+                disabledProtyle(editor.protyle);
+            }
+        });
+        rightEditor = new Protyle(rightElement.lastElementChild as HTMLElement, {
+            blockId: "",
+            action: [Constants.CB_GET_HISTORY],
+            render: {
+                background: false,
+                title: false,
+                gutter: false,
+                breadcrumb: false,
+                breadcrumbDocName: false,
+                breadcrumbContext: false,
+            },
+            typewriterMode: false,
+            after(editor) {
+                disabledProtyle(editor.protyle);
+            }
+        });
+    }
 
+    fetchPost("/api/repo/openRepoSnapshotDoc", {id: element.getAttribute("data-id")}, (response) => {
+        if (response.data.isLargeDoc) {
+            (leftElement.firstElementChild as HTMLTextAreaElement).value = response.data.content;
+            leftElement.firstElementChild.classList.remove("fn__none");
+            leftElement.lastElementChild.classList.add("fn__none");
+        } else {
+            leftElement.firstElementChild.classList.add("fn__none");
+            leftElement.lastElementChild.classList.remove("fn__none");
+            onGet(response, leftEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+        }
     })
+    const id2 = element.getAttribute("data-id2")
+    if (id2) {
+        rightElement.classList.remove("fn__none");
+        fetchPost("/api/repo/openRepoSnapshotDoc", {id: id2}, (response) => {
+            if (response.data.isLargeDoc) {
+                (rightElement.firstElementChild as HTMLTextAreaElement).value = response.data.content;
+                rightElement.firstElementChild.classList.remove("fn__none");
+                rightElement.lastElementChild.classList.add("fn__none");
+            } else {
+                rightElement.firstElementChild.classList.add("fn__none");
+                rightElement.lastElementChild.classList.remove("fn__none");
+                onGet(response, rightEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+            }
+        })
+    } else {
+        rightElement.classList.add("fn__none");
+    }
 }
 
 export const showDiff = (ids: string) => {
@@ -33,18 +112,18 @@ export const showDiff = (ids: string) => {
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
-                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
+                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.update}</span>
             </li>
-            <ul class="fn__none">${genItem(response.data.adds, "add")}</ul>
+            <ul class="fn__none">${genItem(response.data.updatesRight, response.data.updatesLeft)}</ul>
         </ul>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
-                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.update}</span>
+                <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
             </li>
-            <ul class="fn__none">${genItem(response.data.updates, "add")}</ul>
+            <ul class="fn__none">${genItem(response.data.addsLeft)}</ul>
         </ul>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
@@ -53,13 +132,26 @@ export const showDiff = (ids: string) => {
                 </span>
                 <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.remove}</span>
             </li>
-            <ul class="fn__none">${genItem(response.data.removes, "add")}</ul>
+            <ul class="fn__none">${genItem(response.data.removesRight)}</ul>
         </ul>
     </div>
-    <div class="fn__flex-1"></div>
+    <div class="fn__flex-1 fn__flex">
+        <div class="fn__flex-1">
+            <textarea class="history__text fn__none"></textarea>
+            <div style="min-height: 100%;"></div>
+        </div>
+        <div class="fn__none fn__flex-1" style="border-left: 1px solid var(--b3-border-color);">
+            <textarea class="history__text fn__none"></textarea>
+            <div style="min-height: 100%;"></div>
+        </div>
+    </div>
 </div>`,
             width: "80vw",
             height: "80vh",
+            destroyCallback() {
+                leftEditor.destroy();
+                rightEditor.destroy();
+            }
         });
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

@@ -131,7 +131,7 @@ export const onGetConfig = (isStart: boolean) => {
     }
     /// #if !BROWSER
     ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, window.siyuan.config.appearance.closeButtonBehavior);
-    ipcRenderer.send(Constants.SIYUAN_INIT);
+    ipcRenderer.send(Constants.SIYUAN_INIT, window.siyuan.languages);
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
     /// #endif
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {

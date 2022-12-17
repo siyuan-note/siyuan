@@ -846,6 +846,16 @@
     "xy": "%d 年%s",
     "max": "很久%s"
   },
+  "_trayMenu": {
+    "showWindow": "顯示主窗口",
+    "hideWindow": "隱藏主窗口",
+    "setWindowTop": "窗口置頂",
+    "cancelWindowTop": "取消窗口置頂",
+    "officialWebsite": "訪問官方網站",
+    "openSource": "訪問 GitHub 開源項目",
+    "resetWindow": "重啟時重置窗口",
+    "quit": "退出程序"
+  },
   "_kernel": {
     "0": "查詢筆記本失敗",
     "1": "檔案名重複",

@@ -393,48 +393,66 @@ const boot = () => {
     globalShortcut.unregisterAll()
     writeLog('exited ui')
   })
-  ipcMain.on('siyuan-init', async () => {
+
+  let trayMenu = {
+    "showWindow": "Show Window",
+    "hideWindow": "Hide Window",
+    "setWindowTop": "Set Window top",
+    "cancelWindowTop": "Cancel Window top",
+    "officialWebsite": "Visit official website",
+    "openSource": "Visit Project on Github",
+    "resetWindow": "Reset Window on restart",
+    "quit": "Quit application"
+  }
+  ipcMain.on('siyuan-init', async (event, languages) => {
+    trayMenu = languages['_trayMenu'];
+    resetTrayMenu()
     await fetch(getServer() + '/api/system/uiproc?pid=' + process.pid,
       {method: 'POST'})
   })
 
-  // 系统托盘菜单
-  const trayMenuTemplate = [
-    {
-      label: 'Official Website',
-      click: () => {
-        shell.openExternal('https://b3log.org/siyuan/')
-      },
-    },
-    {
-      label: 'Open Source',
-      click: () => {
-        shell.openExternal('https://github.com/siyuan-note/siyuan')
-      },
-    },
-    {
-      label: '中文反馈',
-      click: () => {
-        shell.openExternal('https://ld246.com/article/1649901726096')
-      },
-    },
-    {
-      label: 'Reset Window on restart',
-      type: 'checkbox',
-      click: v => {
-        resetWindowStateOnRestart = v.checked
-      },
-    },
-    {
-      label: 'Quit',
-      click: () => {
-        mainWindow.webContents.send('siyuan-save-close', true)
-      },
+  const resetTrayMenu = () => {
+    if ('win32' !== process.platform && 'linux' !== process.platform) {
+      return
     }
-  ]
+
+    const trayMenuTemplate = buildTrayMenuTemplate()
+    const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
+    tray.setContextMenu(contextMenu)
+  }
+
+  const buildTrayMenuTemplate = () => {
+    return [
+      {
+        label: trayMenu.officialWebsite,
+        click: () => {
+          shell.openExternal('https://b3log.org/siyuan/')
+        },
+      },
+      {
+        label: trayMenu.openSource,
+        click: () => {
+          shell.openExternal('https://github.com/siyuan-note/siyuan')
+        },
+      },
+      {
+        label: trayMenu.resetWindow,
+        type: 'checkbox',
+        click: v => {
+          resetWindowStateOnRestart = v.checked
+        },
+      },
+      {
+        label: trayMenu.quit,
+        click: () => {
+          mainWindow.webContents.send('siyuan-save-close', true)
+        },
+      }
+    ]
+  }
 
   const showWndMenu = {
-    label: 'Hide Window',
+    label: trayMenu.hideWindow,
     click: () => {
       showHideWnd()
     },
@@ -447,7 +465,8 @@ const boot = () => {
       mainWindow.show()
 
       if ('win32' === process.platform || 'linux' === process.platform) {
-        showWndMenu.label = "Hide Window"
+        showWndMenu.label = trayMenu.hideWindow
+        const trayMenuTemplate = buildTrayMenuTemplate()
         trayMenuTemplate.splice(0, 1, showWndMenu)
         const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
         tray.setContextMenu(contextMenu)
@@ -456,7 +475,8 @@ const boot = () => {
       mainWindow.hide()
 
       if ('win32' === process.platform || 'linux' === process.platform) {
-        showWndMenu.label = "Show Window"
+        showWndMenu.label = trayMenu.showWindow
+        const trayMenuTemplate = buildTrayMenuTemplate()
         trayMenuTemplate.splice(0, 1, showWndMenu)
         const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
         tray.setContextMenu(contextMenu)
@@ -480,6 +500,7 @@ const boot = () => {
     tray = new Tray(path.join(appDir, 'stage', 'icon-large.png'))
     tray.setToolTip('SiYuan v' + appVer)
 
+    const trayMenuTemplate = buildTrayMenuTemplate()
     // 插入显示/隐藏窗口菜单
     trayMenuTemplate.splice(0, 0, showWndMenu)
 
@@ -487,17 +508,17 @@ const boot = () => {
     if ('win32' === process.platform) {
       // Windows 端支持窗口置顶 https://github.com/siyuan-note/siyuan/issues/6860
       changeWndTop = {
-        label: 'Set Window top',
+        label: trayMenu.setWindowTop,
         click: () => {
           if (!mainWindow.isAlwaysOnTop()) {
             mainWindow.setAlwaysOnTop(true)
-            changeWndTop.label = 'Cancel Window top'
+            changeWndTop.label = trayMenu.cancelWindowTop
             trayMenuTemplate.splice(1, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)
           } else {
             mainWindow.setAlwaysOnTop(false)
-            changeWndTop.label = 'Set Window top'
+            changeWndTop.label = trayMenu.setWindowTop
             trayMenuTemplate.splice(1, 1, changeWndTop)
             const contextMenu = Menu.buildFromTemplate(trayMenuTemplate)
             tray.setContextMenu(contextMenu)
@@ -823,6 +844,7 @@ app.on('before-quit', (event) => {
 })
 
 const {powerMonitor} = require('electron')
+const {build} = require("electron-builder");
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')

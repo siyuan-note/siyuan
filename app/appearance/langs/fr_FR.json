@@ -846,6 +846,16 @@
     "xy": "%d ans %s",
     "max": "un bon moment %s"
   },
+  "_trayMenu": {
+    "showWindow": "Afficher la fenêtre principale",
+    "hideWindow": "Masquer la fenêtre principale",
+    "setWindowTop": "Fenêtre en haut",
+    "cancelWindowTop": "Annuler le haut de la fenêtre",
+    "officialWebsite": "Visiter le site officiel",
+    "openSource": "Accéder aux projets open source GitHub",
+    "resetWindow": "Réinitialiser l'état de la fenêtre au redémarrage",
+    "quit": "Quitter le programme"
+  },
   "_kernel": {
     "0": "Échec du cahier de requêtes",
     "1": "Nom de fichier dupliqué",

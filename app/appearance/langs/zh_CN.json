@@ -846,6 +846,16 @@
     "xy": "%d 年%s",
     "max": "很久%s"
   },
+  "_trayMenu": {
+    "showWindow": "显示主窗口",
+    "hideWindow": "隐藏主窗口",
+    "setWindowTop": "窗口置顶",
+    "cancelWindowTop": "取消窗口置顶",
+    "officialWebsite": "访问官方网站",
+    "openSource": "访问 GitHub 开源项目",
+    "resetWindow": "重启时重置窗口",
+    "quit": "退出程序"
+  },
   "_kernel": {
     "0": "查询笔记本失败",
     "1": "文件名重复",

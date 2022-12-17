@@ -846,6 +846,16 @@
     "xy": "%d years %s",
     "max": "a long while %s"
   },
+  "_trayMenu": {
+    "showWindow": "Show Window",
+    "hideWindow": "Hide Window",
+    "setWindowTop": "Set Window top",
+    "cancelWindowTop": "Cancel Window top",
+    "officialWebsite": "Visit official website",
+    "openSource": "Visit Project on Github",
+    "resetWindow": "Reset Window on restart",
+    "quit": "Quit application"
+  },
   "_kernel": {
     "0": "Query notebook failed",
     "1": "Duplicated filename",

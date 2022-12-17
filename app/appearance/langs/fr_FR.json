@@ -853,7 +853,7 @@
     "cancelWindowTop": "Annuler le haut de la fenêtre",
     "officialWebsite": "Visiter le site officiel",
     "openSource": "Accéder aux projets open source GitHub",
-    "resetWindow": "Réinitialiser l'état de la fenêtre au redémarrage",
+    "resetWindow": "Réinitialiser la fenêtre et quitter le programme",
     "quit": "Quitter le programme"
   },
   "_kernel": {

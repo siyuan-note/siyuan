@@ -494,6 +494,7 @@ const boot = () => {
         type: 'checkbox',
         click: v => {
           resetWindowStateOnRestart = v.checked
+          mainWindow.webContents.send('siyuan-save-close', true)
         },
       },
       {

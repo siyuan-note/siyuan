@@ -853,7 +853,7 @@
     "cancelWindowTop": "Cancelar ventana superior",
     "officialWebsite": "Visita el sitio web oficial",
     "openSource": "Visita el proyecto en Github",
-    "resetWindow": "Restablecer ventana al reiniciar",
+    "resetWindow": "Restablecer ventana y salir del programa",
     "quit": "Salir de la aplicación"
   },
   "_kernel": {

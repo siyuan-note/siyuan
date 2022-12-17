@@ -853,7 +853,7 @@
     "cancelWindowTop": "Cancel Window top",
     "officialWebsite": "Visit official website",
     "openSource": "Visit Project on Github",
-    "resetWindow": "Reset Window on restart",
+    "resetWindow": "Reset window and quit the program",
     "quit": "Quit application"
   },
   "_kernel": {

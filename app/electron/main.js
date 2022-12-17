@@ -441,6 +441,24 @@ const boot = () => {
 
     resetTrayMenu()
   }
+  const setWndTopMenu = {
+    label: trayMenu.cancelWindowTop,
+    click: () => {
+      setCancelWndTop()
+    },
+  }
+  const setCancelWndTop = () => {
+    if (!mainWindow.isAlwaysOnTop()) {
+      mainWindow.setAlwaysOnTop(true)
+      setWndTopMenu.label = trayMenu.cancelWindowTop
+    } else {
+      mainWindow.setAlwaysOnTop(false)
+      setWndTopMenu.label = trayMenu.setWindowTop
+    }
+
+    resetTrayMenu()
+  }
+
 
   const buildTrayMenuTemplate = () => {
     let ret = [
@@ -477,13 +495,7 @@ const boot = () => {
       let changeWndTop = {
         label: trayMenu.setWindowTop,
         click: () => {
-          if (!mainWindow.isAlwaysOnTop()) {
-            mainWindow.setAlwaysOnTop(true)
-            changeWndTop.label = trayMenu.cancelWindowTop
-          } else {
-            mainWindow.setAlwaysOnTop(false)
-            changeWndTop.label = trayMenu.setWindowTop
-          }
+
         },
       };
       ret.splice(1, 0, changeWndTop)

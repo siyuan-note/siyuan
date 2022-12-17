@@ -169,6 +169,9 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			Title:  title,
 		})
 	}
+	if 1 > len(ret.AddsLeft) {
+		ret.AddsLeft = []*DiffFile{}
+	}
 
 	for _, updateLeft := range diff.UpdatesLeft {
 		title, err := parseTitleInSnapshot(updateLeft.ID, repo, luteEngine)
@@ -181,6 +184,9 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID: updateLeft.ID,
 			Title:  title,
 		})
+	}
+	if 1 > len(ret.UpdatesLeft) {
+		ret.UpdatesLeft = []*DiffFile{}
 	}
 
 	for _, updateRight := range diff.UpdatesRight {
@@ -195,6 +201,9 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			Title:  title,
 		})
 	}
+	if 1 > len(ret.UpdatesRight) {
+		ret.UpdatesRight = []*DiffFile{}
+	}
 
 	for _, removeRight := range diff.RemovesRight {
 		title, err := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
@@ -207,6 +216,9 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID: removeRight.ID,
 			Title:  title,
 		})
+	}
+	if 1 > len(ret.RemovesRight) {
+		ret.RemovesRight = []*DiffFile{}
 	}
 	return
 }

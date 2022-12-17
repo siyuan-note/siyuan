@@ -270,6 +270,7 @@ declare interface IExport {
     pandocBin: string
     paragraphBeginningSpace: boolean;
     addTitle: boolean;
+    addFooter: boolean;
 }
 
 declare interface IEditor {

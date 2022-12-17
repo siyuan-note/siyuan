@@ -442,7 +442,7 @@ const boot = () => {
     resetTrayMenu()
   }
   const setWndTopMenu = {
-    label: trayMenu.cancelWindowTop,
+    label: trayMenu.setWindowTop,
     click: () => {
       setCancelWndTop()
     },
@@ -492,13 +492,7 @@ const boot = () => {
 
     if ('win32' === process.platform) {
       // Windows 端支持窗口置顶 https://github.com/siyuan-note/siyuan/issues/6860
-      let changeWndTop = {
-        label: trayMenu.setWindowTop,
-        click: () => {
-
-        },
-      };
-      ret.splice(1, 0, changeWndTop)
+      ret.splice(1, 0, setWndTopMenu)
     }
     return ret;
   }

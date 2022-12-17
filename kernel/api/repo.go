@@ -70,7 +70,10 @@ func diffRepoSnapshots(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"diff": diff,
+		"addsLeft":     diff.AddsLeft,
+		"updatesLeft":  diff.UpdatesLeft,
+		"updatesRight": diff.UpdatesRight,
+		"removesRight": diff.RemovesRight,
 	}
 }
 

@@ -128,10 +128,10 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 }
 
 type LeftRightDiff struct {
-	AddsLeft     []*DiffFile
-	UpdatesLeft  []*DiffFile
-	UpdatesRight []*DiffFile
-	RemovesRight []*DiffFile
+	AddsLeft     []*DiffFile `json:"addsLeft"`
+	UpdatesLeft  []*DiffFile `json:"updatesLeft"`
+	UpdatesRight []*DiffFile `json:"updatesRight"`
+	RemovesRight []*DiffFile `json:"removesRight"`
 }
 
 type DiffFile struct {

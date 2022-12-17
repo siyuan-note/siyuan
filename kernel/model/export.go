@@ -28,6 +28,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
@@ -684,6 +685,7 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 
 		id := docIAL["id"]
 		hPath, md := exportMarkdownContent(id)
+		md = yfm(docIAL) + md
 		dir, name = path.Split(hPath)
 		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590
 		name = util.FilterFileName(name)
@@ -767,6 +769,62 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 	os.RemoveAll(exportFolder)
 	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
 	return
+}
+
+func yfm(docIAL map[string]string) string {
+	// 导出 Markdown 文件时开头附上一些元数据 https://github.com/siyuan-note/siyuan/issues/6880
+
+	buf := bytes.Buffer{}
+	buf.WriteString("---\n")
+	var title, created, updated, tags string
+	for k, v := range docIAL {
+		if "id" == k {
+			createdTime, parseErr := time.Parse("20060102150405", util.TimeFromID(v))
+			if nil == parseErr {
+				created = createdTime.Format(time.RFC3339)
+			}
+			continue
+		}
+		if "title" == k {
+			title = v
+			continue
+		}
+		if "updated" == k {
+			updatedTime, parseErr := time.Parse("20060102150405", v)
+			if nil == parseErr {
+				updated = updatedTime.Format(time.RFC3339)
+			}
+			continue
+		}
+		if "tags" == k {
+			tags = v
+			continue
+		}
+	}
+	if "" != title {
+		buf.WriteString("title: ")
+		buf.WriteString(title)
+		buf.WriteString("\n")
+	}
+	if "" == updated {
+		updated = time.Now().Format(time.RFC3339)
+	}
+	if "" == created {
+		created = updated
+	}
+	buf.WriteString("created: ")
+	buf.WriteString(created)
+	buf.WriteString("\n")
+	buf.WriteString("updated: ")
+	buf.WriteString(updated)
+	buf.WriteString("\n")
+	if "" != tags {
+		buf.WriteString("tags: [")
+		buf.WriteString(tags)
+		buf.WriteString("]\n")
+	}
+	buf.WriteString("---\n\n")
+	return buf.String()
 }
 
 func exportBoxSYZip(boxID string) (zipPath string) {

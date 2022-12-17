@@ -135,8 +135,8 @@ type LeftRightDiff struct {
 }
 
 type DiffFile struct {
-	FileID string
-	Title  string
+	FileID string `json:"fileID"`
+	Title  string `json:"title"`
 }
 
 func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {

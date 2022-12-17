@@ -62,7 +62,7 @@ func diffRepoSnapshots(c *gin.Context) {
 
 	left := arg["left"].(string)
 	right := arg["right"].(string)
-	adds, updates, removes, err := model.DiffRepoSnapshots(left, right)
+	diff, err := model.DiffRepoSnapshots(left, right)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -70,9 +70,7 @@ func diffRepoSnapshots(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"adds":    adds,
-		"updates": updates,
-		"removes": removes,
+		"diff": diff,
 	}
 }
 

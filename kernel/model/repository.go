@@ -34,6 +34,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
@@ -77,20 +78,8 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 	if nil != err {
 		return
 	}
-
-	file, err := repo.GetFile(fileID)
-	if nil != err {
-		return
-	}
-
-	data, err := repo.OpenFile(file)
-	if nil != err {
-		return
-	}
-
-	isLargeDoc = 1024*1024*1 <= len(data)
 	luteEngine := NewLute()
-	snapshotTree, err := parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	isLargeDoc, snapshotTree, err := parseTreeInSnapshot(fileID, repo, luteEngine)
 	if nil != err {
 		logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 		return
@@ -138,7 +127,19 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 	return
 }
 
-func DiffRepoSnapshots(left, right string) (adds, updates, removes []*entity.File, err error) {
+type LeftRightDiff struct {
+	AddsLeft     []*DiffFile
+	UpdatesLeft  []*DiffFile
+	UpdatesRight []*DiffFile
+	RemovesRight []*DiffFile
+}
+
+type DiffFile struct {
+	FileID string
+	Title  string
+}
+
+func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -149,16 +150,108 @@ func DiffRepoSnapshots(left, right string) (adds, updates, removes []*entity.Fil
 		return
 	}
 
-	leftIndex, err := repo.GetIndex(left)
-	if nil != err {
-		return
-	}
-	rightIndex, err := repo.GetIndex(right)
+	diff, err := repo.DiffIndex(left, right)
 	if nil != err {
 		return
 	}
 
-	adds, updates, removes, err = repo.DiffIndex(leftIndex, rightIndex)
+	luteEngine := NewLute()
+	for _, addLeft := range diff.AddsLeft {
+		title, err := parseTitleInSnapshot(addLeft.ID, repo, luteEngine)
+		if nil != err {
+			logging.LogErrorf("parse title from snapshot file [%s] failed", addLeft.ID)
+			continue
+		}
+
+		ret.AddsLeft = append(ret.AddsLeft, &DiffFile{
+			FileID: addLeft.ID,
+			Title:  title,
+		})
+	}
+
+	for _, updateLeft := range diff.UpdatesLeft {
+		title, err := parseTitleInSnapshot(updateLeft.ID, repo, luteEngine)
+		if nil != err {
+			logging.LogErrorf("parse title from snapshot file [%s] failed", updateLeft.ID)
+			continue
+		}
+
+		ret.UpdatesLeft = append(ret.UpdatesLeft, &DiffFile{
+			FileID: updateLeft.ID,
+			Title:  title,
+		})
+	}
+
+	for _, updateRight := range diff.UpdatesRight {
+		title, err := parseTitleInSnapshot(updateRight.ID, repo, luteEngine)
+		if nil != err {
+			logging.LogErrorf("parse title from snapshot file [%s] failed", updateRight.ID)
+			continue
+		}
+
+		ret.UpdatesRight = append(ret.UpdatesRight, &DiffFile{
+			FileID: updateRight.ID,
+			Title:  title,
+		})
+	}
+
+	for _, removeRight := range diff.RemovesRight {
+		title, err := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
+		if nil != err {
+			logging.LogErrorf("parse title from snapshot file [%s] failed", removeRight.ID)
+			continue
+		}
+
+		ret.RemovesRight = append(ret.RemovesRight, &DiffFile{
+			FileID: removeRight.ID,
+			Title:  title,
+		})
+	}
+	return
+}
+
+func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (title string, err error) {
+	file, err := repo.GetFile(fileID)
+	if nil != err {
+		return
+	}
+
+	if strings.HasSuffix(file.Path, ".sy") {
+		var data []byte
+		data, err = repo.OpenFile(file)
+		if nil != err {
+			return
+		}
+
+		var tree *parse.Tree
+		tree, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		if nil != err {
+			return
+		}
+
+		title = tree.Root.IALAttr("title")
+	} else {
+		title = path.Base(file.Path)
+	}
+	return
+}
+
+func parseTreeInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
+	file, err := repo.GetFile(fileID)
+	if nil != err {
+		return
+	}
+
+	data, err := repo.OpenFile(file)
+	if nil != err {
+		return
+	}
+
+	isLargeDoc = 1024*1024*1 <= len(data)
+	tree, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	if nil != err {
+		return
+	}
 	return
 }
 

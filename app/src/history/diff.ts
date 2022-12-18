@@ -44,11 +44,9 @@ const renderCompare = (element: HTMLElement) => {
                 breadcrumbDocName: false,
                 breadcrumbContext: false,
             },
-            typewriterMode: false,
-            after(editor) {
-                disabledProtyle(editor.protyle);
-            }
+            typewriterMode: false
         });
+        disabledProtyle(leftEditor.protyle);
         rightEditor = new Protyle(rightElement.lastElementChild as HTMLElement, {
             blockId: "",
             action: [Constants.CB_GET_HISTORY],
@@ -60,11 +58,9 @@ const renderCompare = (element: HTMLElement) => {
                 breadcrumbDocName: false,
                 breadcrumbContext: false,
             },
-            typewriterMode: false,
-            after(editor) {
-                disabledProtyle(editor.protyle);
-            }
+            typewriterMode: false
         });
+        disabledProtyle(rightEditor.protyle);
     }
 
     fetchPost("/api/repo/openRepoSnapshotDoc", {id: element.getAttribute("data-id")}, (response) => {
@@ -137,11 +133,11 @@ export const showDiff = (ids: string) => {
     </div>
     <div class="fn__flex-1 fn__flex">
         <div class="fn__flex-1">
-            <textarea class="history__text fn__none"></textarea>
+            <textarea style="height: 100%;width: 100%;" class="history__text fn__none"></textarea>
             <div style="min-height: 100%;"></div>
         </div>
         <div class="fn__none fn__flex-1" style="border-left: 1px solid var(--b3-border-color);">
-            <textarea class="history__text fn__none"></textarea>
+            <textarea style="height: 100%;width: 100%;" class="history__text fn__none"></textarea>
             <div style="min-height: 100%;"></div>
         </div>
     </div>

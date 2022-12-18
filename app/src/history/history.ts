@@ -332,10 +332,8 @@ export const openHistory = () => {
             breadcrumbContext: false,
         },
         typewriterMode: false,
-        after(editor) {
-            disabledProtyle(editor.protyle);
-        }
     });
+    disabledProtyle(historyEditor.protyle);
     const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
     const selectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
     selectElement.addEventListener("change", () => {

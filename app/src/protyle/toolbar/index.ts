@@ -1026,11 +1026,13 @@ export class Toolbar {
             if (types.includes("NodeHTMLBlock")) {
                 // 需 div 包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
                 let html = textElement.value;
-                if (!html.startsWith("<div>\n")) {
-                    html = `<div>\n${html}`;
-                }
-                if (!html.startsWith("\n</div>")) {
-                    html = `${html}\n</div>`;
+                if (html) {
+                    if (!html.startsWith("<div>\n")) {
+                        html = `<div>\n${html}`;
+                    }
+                    if (!html.endsWith("\n</div>")) {
+                        html = `${html}\n</div>`;
+                    }
                 }
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(html));
             } else if (isInlineMemo) {

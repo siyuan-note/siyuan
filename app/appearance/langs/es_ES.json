@@ -464,7 +464,7 @@
   "exporting": "Exportando, por favor espere...",
   "exported": "Exportación completada",
   "refExpired": "El bloque de contenido de búsqueda no existe",
-  "emptyContent": "No hay contenido relacionado",
+  "emptyContent": "No se encontró contenido relacionado",
   "useBrowserView": "Ver en el navegador",
   "userLocalPDF": "Abrir con la herramienta local de PDF",
   "copyID": "ID de copia",
@@ -852,8 +852,8 @@
     "setWindowTop": "Establecer parte superior de la ventana",
     "cancelWindowTop": "Cancelar ventana superior",
     "officialWebsite": "Visita el sitio web oficial",
-    "openSource": "Visita el proyecto en Github",
-    "resetWindow": "Restablecer ventana al reiniciar",
+    "openSource": "Visita el proyecto en GitHub",
+    "resetWindow": "Restablecer ventana y salir del programa",
     "quit": "Salir de la aplicación"
   },
   "_kernel": {

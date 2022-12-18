@@ -464,7 +464,7 @@
   "exporting": "Exporting, please wait...",
   "exported": "Export complete",
   "refExpired": "Search content block does not exist",
-  "emptyContent": "No related content",
+  "emptyContent": "No related content found",
   "useBrowserView": "View in the browser",
   "userLocalPDF": "Open with local PDF tool",
   "copyID": "Copy ID",
@@ -852,8 +852,8 @@
     "setWindowTop": "Set Window top",
     "cancelWindowTop": "Cancel Window top",
     "officialWebsite": "Visit official website",
-    "openSource": "Visit Project on Github",
-    "resetWindow": "Reset Window on restart",
+    "openSource": "Visit project on GitHub",
+    "resetWindow": "Reset window and quit the program",
     "quit": "Quit application"
   },
   "_kernel": {

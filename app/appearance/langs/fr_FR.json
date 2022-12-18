@@ -464,7 +464,7 @@
   "exporting": "En cours d'exportation, veuillez patienter...",
   "exported": "Exportation terminée",
   "refExpired": "Le bloc de contenu de recherche n'existe pas",
-  "emptyContent": "Aucun contenu pertinent pour le moment",
+  "emptyContent": "Aucun contenu connexe trouvé",
   "useBrowserView": "Afficher dans le navigateur",
   "userLocalPDF": "Ouvrir avec un outil PDF local",
   "copyID": "Copie ID",
@@ -852,8 +852,8 @@
     "setWindowTop": "Fenêtre en haut",
     "cancelWindowTop": "Annuler le haut de la fenêtre",
     "officialWebsite": "Visiter le site officiel",
-    "openSource": "Accéder aux projets open source GitHub",
-    "resetWindow": "Réinitialiser l'état de la fenêtre au redémarrage",
+    "openSource": "Visitez le projet sur GitHub",
+    "resetWindow": "Réinitialiser la fenêtre et quitter le programme",
     "quit": "Quitter le programme"
   },
   "_kernel": {

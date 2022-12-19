@@ -861,7 +861,6 @@ app.on('before-quit', (event) => {
 })
 
 const {powerMonitor} = require('electron')
-const {build} = require("electron-builder");
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')

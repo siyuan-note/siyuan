@@ -8,7 +8,7 @@ import {escapeHtml} from "../util/escape";
 
 const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
     if (!data || data.length === 0) {
-        return `<li style="padding-left: 44px;" class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
+        return `<li style="padding-left: 44px;" class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
     }
     let html = "";
     data.forEach((item: { title: string, fileID: string }, index) => {
@@ -19,14 +19,14 @@ const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
         html += `<li style="padding-left: 44px;" class="b3-list-item" ${id2} data-id="${item.fileID}">
     <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
 </li>`;
-    })
+    });
     return html;
-}
+};
 
 let leftEditor: Protyle;
 let rightEditor: Protyle;
 const renderCompare = (element: HTMLElement) => {
-    const listElement = hasClosestByClassName(element, "b3-dialog__diff")
+    const listElement = hasClosestByClassName(element, "b3-dialog__diff");
     if (!listElement) {
         return;
     }
@@ -73,8 +73,8 @@ const renderCompare = (element: HTMLElement) => {
             leftElement.lastElementChild.classList.remove("fn__none");
             onGet(response, leftEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
         }
-    })
-    const id2 = element.getAttribute("data-id2")
+    });
+    const id2 = element.getAttribute("data-id2");
     if (id2) {
         rightElement.classList.remove("fn__none");
         fetchPost("/api/repo/openRepoSnapshotDoc", {id: id2}, (response) => {
@@ -87,11 +87,11 @@ const renderCompare = (element: HTMLElement) => {
                 rightElement.lastElementChild.classList.remove("fn__none");
                 onGet(response, rightEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
             }
-        })
+        });
     } else {
         rightElement.classList.add("fn__none");
     }
-}
+};
 
 export const showDiff = (ids: string) => {
     const idArray = ids.split(",");
@@ -145,8 +145,8 @@ export const showDiff = (ids: string) => {
             width: "80vw",
             height: "80vh",
             destroyCallback() {
-                leftEditor = undefined
-                rightEditor = undefined
+                leftEditor = undefined;
+                rightEditor = undefined;
             }
         });
         dialog.element.addEventListener("click", (event) => {
@@ -162,10 +162,10 @@ export const showDiff = (ids: string) => {
                     }
                     dialog.element.querySelector(".b3-dialog__diff .b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                     target.classList.add("b3-list-item--focus");
-                    renderCompare(target)
+                    renderCompare(target);
                 }
                 target = target.parentElement;
             }
         });
     });
-}
+};

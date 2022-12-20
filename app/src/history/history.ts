@@ -345,7 +345,7 @@ export const openHistory = () => {
         } else if (value === "2") {
             renderRepo(repoElement, -2);
         }
-        const btnElement = dialog.element.querySelector(".b3-button[data-type='compare']")
+        const btnElement = dialog.element.querySelector(".b3-button[data-type='compare']");
         btnElement.removeAttribute("disabled");
         btnElement.removeAttribute("data-ids");
     });
@@ -438,8 +438,8 @@ export const openHistory = () => {
                 target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
                 break;
             } else if (target.classList.contains("b3-list-item") && type === "repoitem") {
-                const btnElement = dialog.element.querySelector(".b3-button[data-type='compare']")
-                const idstring = btnElement.getAttribute("data-ids")
+                const btnElement = dialog.element.querySelector(".b3-button[data-type='compare']");
+                const idstring = btnElement.getAttribute("data-ids");
                 const ids = idstring ? idstring.split(",") : [];
                 const id = target.getAttribute("data-id");
                 if (target.classList.contains("b3-list-item--focus")) {
@@ -448,7 +448,7 @@ export const openHistory = () => {
                         ids.splice(ids.indexOf(id), 1);
                     }
                 } else {
-                    target.classList.add("b3-list-item--focus")
+                    target.classList.add("b3-list-item--focus");
                     if (!ids.includes(id)) {
                         while (ids.length > 1) {
                             const removeId = ids.splice(0, 1)[0];
@@ -458,9 +458,9 @@ export const openHistory = () => {
                     }
                 }
                 if (ids.length === 2) {
-                    btnElement.removeAttribute("disabled")
+                    btnElement.removeAttribute("disabled");
                 } else {
-                    btnElement.setAttribute("disabled", "disabled")
+                    btnElement.setAttribute("disabled", "disabled");
                 }
                 btnElement.setAttribute("data-ids", ids.join(","));
                 break;

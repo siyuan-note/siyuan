@@ -27,6 +27,7 @@ const {
 } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const net = require("net");
 const fetch = require('electron-fetch').default
 process.noAsar = true
 const appDir = path.dirname(app.getAppPath())
@@ -34,7 +35,6 @@ const isDevEnv = process.env.NODE_ENV === 'development'
 const appVer = app.getVersion()
 const confDir = path.join(app.getPath('home'), '.config', 'siyuan')
 const windowStatePath = path.join(confDir, 'windowState.json')
-const portJSONPath = path.join(confDir, 'port.json')
 let tray // 托盘必须使用全局变量，以防止被垃圾回收 https://www.electronjs.org/docs/faq#my-apps-windowtray-disappeared-after-a-few-minutes
 let mainWindow // 从托盘处激活报错 https://github.com/siyuan-note/siyuan/issues/769
 let firstOpenWindow, bootWindow
@@ -42,17 +42,12 @@ let closeButtonBehavior = 0
 let siyuanOpenURL
 let firstOpen = false
 let resetWindowStateOnRestart = false
-let kernelPort = "6806"
 const localhost = "127.0.0.1"
 require('@electron/remote/main').initialize()
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()
   return
-}
-
-const getServer = () => {
-  return "http://" + localhost + ":" + kernelPort
 }
 
 const showErrorWindow = (title, content) => {
@@ -567,9 +562,7 @@ const initKernel = (initData) => {
       },
     })
 
-    const kernelName = 'win32' === process.platform
-      ? 'SiYuan-Kernel.exe'
-      : 'SiYuan-Kernel'
+    const kernelName = 'win32' === process.platform ? 'SiYuan-Kernel.exe' : 'SiYuan-Kernel'
     const kernelPath = path.join(appDir, 'kernel', kernelName)
     if (!fs.existsSync(kernelPath)) {
       showErrorWindow('⚠️ 内核文件丢失 Kernel is missing',
@@ -579,7 +572,8 @@ const initKernel = (initData) => {
       return
     }
 
-    const cmds = ['--wd', appDir]
+    const availablePort = await getKernelPort()
+    const cmds = ['--port', availablePort, '--wd', appDir]
     if (isDevEnv) {
       cmds.push('--mode', 'dev')
     }
@@ -641,44 +635,6 @@ const initKernel = (initData) => {
       })
     }
 
-    const getKernelPort = async () => {
-      if (isDevEnv) {
-        return kernelPort
-      }
-
-      await sleep(200)
-      let gotPort = false
-      let count = 0
-      while (!gotPort) {
-        try {
-          const portJSON = JSON.parse(fs.readFileSync(portJSONPath, 'utf8'))
-          const ret = portJSON[kernelProcessPid]
-          if (ret) {
-            gotPort = true
-            return ret
-          }
-          await sleep(100)
-        } catch (e) {
-          await sleep(100)
-        } finally {
-          count++
-          if (64 < count) {
-            writeLog('get kernel port failed [pid=' + kernelProcessPid + '], try to use 6806')
-            return
-          }
-        }
-      }
-    }
-
-    kernelPort = await getKernelPort()
-    if (!kernelPort) {
-      showErrorWindow('⚠️ 获取内核服务端口失败 Failed to get kernel serve port',
-        '<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to get kernel serve port, please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>')
-      bootWindow.destroy()
-      resolve(false)
-    }
-    writeLog("got kernel port [" + kernelPort + "]")
-
     let gotVersion = false
     let apiData
     let count = 0
@@ -698,8 +654,12 @@ const initKernel = (initData) => {
         count++
         if (14 < count) {
           writeLog('get kernel ver failed')
+
+          showErrorWindow('⚠️ 获取内核服务端口失败 Failed to get kernel serve port',
+            '<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to get kernel serve port, please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>')
           bootWindow.destroy()
           resolve(false)
+          return
         }
       }
     }
@@ -861,7 +821,6 @@ app.on('before-quit', (event) => {
 })
 
 const {powerMonitor} = require('electron')
-const {build} = require("electron-builder");
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')
@@ -911,4 +870,44 @@ const isOnline = async () => {
       return false;
     }
   }
+}
+
+let kernelPort = 6806
+
+const getKernelPort = async () => {
+  if (isDevEnv) {
+    writeLog("got kernel port [" + kernelPort + "]")
+    return kernelPort
+  }
+
+  // 改进桌面端拉起内核 https://github.com/siyuan-note/siyuan/issues/6894
+  kernelPort = await getAvailablePort()
+  writeLog("got kernel available port [" + kernelPort + "]")
+  return kernelPort
+}
+
+let tryGetPortCount = 0
+const getAvailablePort = (port = kernelPort) => {
+  // https://gist.github.com/mikeal/1840641
+
+  const server = net.createServer()
+  return new Promise((resolve, reject) => server
+    .on('error', error => {
+      writeLog(error)
+      if (2048 < ++tryGetPortCount) {
+        writeLog('failed to get available port [tryCount=' + tryGetPortCount + ', port=' + port + ']')
+        reject(error)
+        return
+      }
+      server.listen(++port)
+    })
+    .on('listening', () => {
+      writeLog('found an available port [' + port + ']')
+      server.close(() => resolve(port))
+    })
+    .listen(port, '127.0.0.1'))
+}
+
+const getServer = () => {
+  return "http://" + localhost + ":" + kernelPort
 }

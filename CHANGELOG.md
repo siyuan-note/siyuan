@@ -1,3 +1,27 @@
+## v2.5.5 / 2022-12-20
+
+### 改进功能
+
+* [搜索上下及左右布局可进行大小调整](https://github.com/siyuan-note/siyuan/issues/6762)
+* [屏蔽列表项拖拽到列表项第一个块上方和列表前一个块的下方](https://github.com/siyuan-note/siyuan/issues/6843)
+* [支持数据快照对比](https://github.com/siyuan-note/siyuan/issues/6858)
+* [导出 Markdown zip 包内不带文件夹](https://github.com/siyuan-note/siyuan/issues/6869)
+* [显示本地数据快照文件类型计数](https://github.com/siyuan-note/siyuan/issues/6870)
+* [改进数据快照加载性能](https://github.com/siyuan-note/siyuan/issues/6872)
+* [桌面端检查磁盘可用空间](https://github.com/siyuan-note/siyuan/issues/6873)
+* [导出 Markdown 文件时开头附上一些元数据](https://github.com/siyuan-note/siyuan/issues/6880)
+* [支持去掉 PDF 导出页脚处 `由思源笔记导出`](https://github.com/siyuan-note/siyuan/issues/6881)
+* [改进部分繁体中文为习惯性用语](https://github.com/siyuan-note/siyuan/pull/6882)
+* [托盘菜单支持多语言](https://github.com/siyuan-note/siyuan/issues/6883)
+* [改进桌面端拉起内核](https://github.com/siyuan-note/siyuan/issues/6894)
+
+### 修复缺陷
+
+* [复制超链接嵌套行级代码丢失链接地址](https://github.com/siyuan-note/siyuan/issues/6868)
+* [HTML 块渲染可能触发状态异常](https://github.com/siyuan-note/siyuan/issues/6884)
+* [数据同步报错 `file exists`](https://github.com/siyuan-note/siyuan/issues/6888)
+* [建立索引时无法解析 `v2.2.0-` 版本的块引用](https://github.com/siyuan-note/siyuan/issues/6889)
+
 ## v2.5.4 / 2022-12-13
 
 ### 改进功能

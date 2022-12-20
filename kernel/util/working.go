@@ -41,7 +41,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "2.5.4"
+	Ver       = "2.5.5"
 	IsInsider = false
 )
 
@@ -446,10 +446,16 @@ func GetDataAssetsAbsPath() (ret string) {
 
 func tryLockWorkspace() {
 	WorkspaceLock = flock.New(filepath.Join(WorkspaceDir, ".lock"))
-	if err := WorkspaceLock.Lock(); nil != err {
-		logging.LogErrorf("lock workspace [%s] failed: %s", WorkspaceDir, err)
-		os.Exit(ExitCodeWorkspaceLocked)
+	ok, err := WorkspaceLock.TryLock()
+	if ok {
+		return
 	}
+	if nil != err {
+		logging.LogErrorf("lock workspace [%s] failed: %s", WorkspaceDir, err)
+	} else {
+		logging.LogErrorf("lock workspace [%s] failed", WorkspaceDir)
+	}
+	os.Exit(ExitCodeWorkspaceLocked)
 }
 
 func UnlockWorkspace() {

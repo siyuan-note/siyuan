@@ -35,7 +35,6 @@ type System struct {
 	DataDir      string `json:"dataDir"`
 
 	NetworkServe bool          `json:"networkServe"` // 是否开启网络伺服
-	FixedPort    bool          `json:"fixedPort"`    // 是否使用固定端口 6806
 	NetworkProxy *NetworkProxy `json:"networkProxy"`
 
 	UploadErrLog           bool `json:"uploadErrLog"`

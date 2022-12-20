@@ -38,8 +38,6 @@
   "floatWindowMode": "Pase el cursor para mostrar una ventana flotante",
   "floatWindowModeTip": "Después de habilitar, aparecerá una ventana flotante cuando el mouse se desplace sobre la referencia del bloque, el ícono del bloque de navegación, etc. Después de deshabilitar, debe mantener presionada la tecla <code class='fn__code'>${hotkey}</code> para aparece la ventana flotante",
   "codeSnippet": "Fragmento de código",
-  "useFixedPort": "Usar puerto fijo",
-  "useFixedPortTip": "Después de habilitarlo, solo se usará el puerto <code class='fn__code'>6806</code>. Cuando está deshabilitado, se utilizarán tanto los puertos aleatorios como <code class='fn__code'>6806</code>. La aplicación se cerrará automáticamente después de la modificación, por favor reinicie manualmente",
   "expandDown": "Expandir hacia abajo",
   "expandUp": "Expandir hacia arriba",
   "goForward": "Ir hacia adelante",

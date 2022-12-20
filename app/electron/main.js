@@ -548,46 +548,6 @@ const boot = () => {
   }
 }
 
-let kernelPort = 6806
-let tryGetPortCount = 0
-const net = require("net");
-const getAvailablePort = (port = kernelPort) => {
-  // https://gist.github.com/mikeal/1840641
-
-  const server = net.createServer()
-  return new Promise((resolve, reject) => server
-    .on('error', error => {
-      writeLog(error)
-      if (2048 < ++tryGetPortCount) {
-        writeLog('failed to get available port [tryCount=' + tryGetPortCount + ', port=' + port + ']')
-        reject(error)
-        return
-      }
-      server.listen(++port)
-    })
-    .on('listening', () => {
-      writeLog('found an available port [' + port + ']')
-      server.close(() => resolve(port))
-    })
-    .listen(port, '127.0.0.1'))
-}
-
-const getKernelPort = async () => {
-  if (isDevEnv) {
-    writeLog("got kernel port [" + kernelPort + "]")
-    return kernelPort
-  }
-
-  // 改进桌面端拉起内核 https://github.com/siyuan-note/siyuan/issues/6894
-  kernelPort = await getAvailablePort()
-  writeLog("got kernel available port [" + kernelPort + "]")
-  return kernelPort
-}
-
-const getServer = () => {
-  return "http://" + localhost + ":" + kernelPort
-}
-
 const initKernel = (initData) => {
   return new Promise(async (resolve) => {
     bootWindow = new BrowserWindow({
@@ -909,4 +869,44 @@ const isOnline = async () => {
       return false;
     }
   }
+}
+
+let kernelPort = 6806
+let tryGetPortCount = 0
+const net = require("net");
+const getAvailablePort = (port = kernelPort) => {
+  // https://gist.github.com/mikeal/1840641
+
+  const server = net.createServer()
+  return new Promise((resolve, reject) => server
+    .on('error', error => {
+      writeLog(error)
+      if (2048 < ++tryGetPortCount) {
+        writeLog('failed to get available port [tryCount=' + tryGetPortCount + ', port=' + port + ']')
+        reject(error)
+        return
+      }
+      server.listen(++port)
+    })
+    .on('listening', () => {
+      writeLog('found an available port [' + port + ']')
+      server.close(() => resolve(port))
+    })
+    .listen(port, '127.0.0.1'))
+}
+
+const getKernelPort = async () => {
+  if (isDevEnv) {
+    writeLog("got kernel port [" + kernelPort + "]")
+    return kernelPort
+  }
+
+  // 改进桌面端拉起内核 https://github.com/siyuan-note/siyuan/issues/6894
+  kernelPort = await getAvailablePort()
+  writeLog("got kernel available port [" + kernelPort + "]")
+  return kernelPort
+}
+
+const getServer = () => {
+  return "http://" + localhost + ":" + kernelPort
 }

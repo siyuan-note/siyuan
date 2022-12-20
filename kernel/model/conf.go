@@ -296,13 +296,6 @@ func InitConf() {
 		Conf.AccessAuthCode = util.AccessAuthCode
 	}
 
-	if util.ContainerStd != util.Container {
-		Conf.System.FixedPort = true
-	}
-	if Conf.System.FixedPort {
-		util.ServerPort = util.FixedPort
-	}
-
 	Conf.LocalIPs = util.GetLocalIPs()
 
 	Conf.Save()

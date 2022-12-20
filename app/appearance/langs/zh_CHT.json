@@ -38,8 +38,6 @@
   "floatWindowMode": "懸停出現浮窗",
   "floatWindowModeTip": "啟用後鼠標懸停塊引、導覽路徑塊標等位置會出現浮窗，關閉後需按住 <code class='fn__code'>${hotkey}</code> 鍵才會出現浮窗",
   "codeSnippet": "代碼片段",
-  "useFixedPort": "使用固定端口",
-  "useFixedPortTip": "啟用後將僅使用固定端口 <code class='fn__code'>6806</code>，關閉時同時使用隨機端口和 <code class='fn__code'>6806</code>。修改後會自動關閉應用，請手動重啟",
   "expandDown": "向下擴選",
   "expandUp": "向上擴選",
   "goForward": "前進",

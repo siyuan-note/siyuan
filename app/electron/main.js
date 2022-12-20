@@ -27,6 +27,7 @@ const {
 } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const net = require("net");
 const fetch = require('electron-fetch').default
 process.noAsar = true
 const appDir = path.dirname(app.getAppPath())
@@ -886,7 +887,6 @@ const getKernelPort = async () => {
 }
 
 let tryGetPortCount = 0
-const net = require("net");
 const getAvailablePort = (port = kernelPort) => {
   // https://gist.github.com/mikeal/1840641
 

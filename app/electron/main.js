@@ -872,6 +872,19 @@ const isOnline = async () => {
 }
 
 let kernelPort = 6806
+
+const getKernelPort = async () => {
+  if (isDevEnv) {
+    writeLog("got kernel port [" + kernelPort + "]")
+    return kernelPort
+  }
+
+  // 改进桌面端拉起内核 https://github.com/siyuan-note/siyuan/issues/6894
+  kernelPort = await getAvailablePort()
+  writeLog("got kernel available port [" + kernelPort + "]")
+  return kernelPort
+}
+
 let tryGetPortCount = 0
 const net = require("net");
 const getAvailablePort = (port = kernelPort) => {
@@ -893,18 +906,6 @@ const getAvailablePort = (port = kernelPort) => {
       server.close(() => resolve(port))
     })
     .listen(port, '127.0.0.1'))
-}
-
-const getKernelPort = async () => {
-  if (isDevEnv) {
-    writeLog("got kernel port [" + kernelPort + "]")
-    return kernelPort
-  }
-
-  // 改进桌面端拉起内核 https://github.com/siyuan-note/siyuan/issues/6894
-  kernelPort = await getAvailablePort()
-  writeLog("got kernel available port [" + kernelPort + "]")
-  return kernelPort
 }
 
 const getServer = () => {

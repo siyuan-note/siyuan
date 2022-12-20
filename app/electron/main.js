@@ -567,9 +567,7 @@ const initKernel = (initData) => {
       },
     })
 
-    const kernelName = 'win32' === process.platform
-      ? 'SiYuan-Kernel.exe'
-      : 'SiYuan-Kernel'
+    const kernelName = 'win32' === process.platform ? 'SiYuan-Kernel.exe' : 'SiYuan-Kernel'
     const kernelPath = path.join(appDir, 'kernel', kernelName)
     if (!fs.existsSync(kernelPath)) {
       showErrorWindow('⚠️ 内核文件丢失 Kernel is missing',
@@ -663,7 +661,7 @@ const initKernel = (initData) => {
         } finally {
           count++
           if (64 < count) {
-            writeLog('get kernel port failed [pid=' + kernelProcessPid + '], try to use 6806')
+            writeLog('get kernel port failed [pid=' + kernelProcessPid + ']')
             return
           }
         }

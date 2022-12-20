@@ -222,7 +222,7 @@ You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd
 
 **Note**: Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory
 
-### Is there any #Note# for deleting docs?
+### Is there any note for deleting docs?
 
 After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate data history.
 

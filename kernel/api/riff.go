@@ -67,7 +67,7 @@ func getRiffDueCards(c *gin.Context) {
 	ret.Data = cards
 }
 
-func removeRiffCard(c *gin.Context) {
+func removeRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -77,8 +77,12 @@ func removeRiffCard(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
-	blockID := arg["blockID"].(string)
-	err := model.RemoveFlashcard(blockID, deckID)
+	blockIDsArg := arg["blockIDs"].([]interface{})
+	var blockIDs []string
+	for _, blockID := range blockIDsArg {
+		blockIDs = append(blockIDs, blockID.(string))
+	}
+	err := model.RemoveFlashcards(deckID, blockIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -86,7 +90,7 @@ func removeRiffCard(c *gin.Context) {
 	}
 }
 
-func addRiffCard(c *gin.Context) {
+func addRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -96,8 +100,12 @@ func addRiffCard(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
-	blockID := arg["blockID"].(string)
-	err := model.AddFlashcard(blockID, deckID)
+	blockIDsArg := arg["blockIDs"].([]interface{})
+	var blockIDs []string
+	for _, blockID := range blockIDsArg {
+		blockIDs = append(blockIDs, blockID.(string))
+	}
+	err := model.AddFlashcards(deckID, blockIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -115,12 +123,13 @@ func createRiffDeck(c *gin.Context) {
 	}
 
 	name := arg["name"].(string)
-	err := model.CreateDeck(name)
+	deck, err := model.CreateDeck(name)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+	ret.Data = deck
 }
 
 func getRiffDecks(c *gin.Context) {

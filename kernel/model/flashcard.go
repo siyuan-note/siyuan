@@ -71,12 +71,14 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	return
 }
 
-func RemoveFlashcard(blockID string, deckID string) (err error) {
+func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
 	deck := Decks[deckID]
 	deckLock.Unlock()
 
-	deck.RemoveCard(blockID)
+	for _, blockID := range blockIDs {
+		deck.RemoveCard(blockID)
+	}
 	err = deck.Save()
 	if nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
@@ -85,13 +87,15 @@ func RemoveFlashcard(blockID string, deckID string) (err error) {
 	return
 }
 
-func AddFlashcard(blockID string, deckID string) (err error) {
+func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
 	deck := Decks[deckID]
 	deckLock.Unlock()
 
-	cardID := ast.NewNodeID()
-	deck.AddCard(cardID, blockID)
+	for _, blockID := range blockIDs {
+		cardID := ast.NewNodeID()
+		deck.AddCard(cardID, blockID)
+	}
 	err = deck.Save()
 	if nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
@@ -128,10 +132,10 @@ func InitFlashcards() {
 	}
 }
 
-func CreateDeck(name string) (err error) {
+func CreateDeck(name string) (deck *riff.Deck, err error) {
 	riffSavePath := getRiffDir()
 	deckID := ast.NewNodeID()
-	deck, err := riff.LoadDeck(riffSavePath, deckID)
+	deck, err = riff.LoadDeck(riffSavePath, deckID)
 	if nil != err {
 		logging.LogErrorf("load deck [%s] failed: %s", deckID, err)
 		return

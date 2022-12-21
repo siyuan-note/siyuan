@@ -195,4 +195,11 @@
       z-index: 1;
     }
   }
+
+  &__date {
+    text-align: center;
+    line-height: 20px;
+    color: var(--b3-theme-on-surface);
+    background: var(--b3-theme-background);
+  }
 }

@@ -65,6 +65,7 @@ const renderCompare = (element: HTMLElement) => {
     }
 
     fetchPost("/api/repo/openRepoSnapshotDoc", {id: element.getAttribute("data-id")}, (response) => {
+        leftElement.classList.remove("fn__none");
         const textElement = (leftElement.firstElementChild.nextElementSibling as HTMLTextAreaElement)
         if (response.data.isLargeDoc) {
             textElement.value = response.data.content;
@@ -135,15 +136,15 @@ export const showDiff = (ids: string) => {
         </ul>
     </div>
     <div class="fn__flex-1 fn__flex">
-        <div class="fn__flex-1 fn__flex-column">
-            <div>${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
-            <textarea style="height: 100%;width: 100%;" class="history__text fn__none"></textarea>
-            <div style="min-height: 100%;"></div>
+        <div class="fn__none fn__flex-1 fn__flex-column">
+            <div class="history__date">${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
+            <textarea class="history__text fn__none fn__flex-1"></textarea>
+            <div class="fn__flex-1"></div>
         </div>
         <div class="fn__none fn__flex-1 fn__flex-column" style="border-left: 1px solid var(--b3-border-color);">
-            <div>${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
-            <textarea style="height: 100%;width: 100%;" class="history__text fn__none"></textarea>
-            <div style="min-height: 100%;"></div>
+            <div class="history__date">${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
+            <textarea class="history__text fn__none fn__flex-1"></textarea>
+            <div class="fn__flex-1"></div>
         </div>
     </div>
 </div>`,

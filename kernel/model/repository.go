@@ -613,6 +613,9 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 		return
 	}
 	ret = logs
+	if 1 > len(ret) {
+		ret = []*dejavu.Log{}
+	}
 	return
 }
 

@@ -128,17 +128,22 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 }
 
 type LeftRightDiff struct {
-	LeftIndex    *entity.Index `json:"leftIndex"`
-	RightIndex   *entity.Index `json:"rightIndex"`
-	AddsLeft     []*DiffFile   `json:"addsLeft"`
-	UpdatesLeft  []*DiffFile   `json:"updatesLeft"`
-	UpdatesRight []*DiffFile   `json:"updatesRight"`
-	RemovesRight []*DiffFile   `json:"removesRight"`
+	LeftIndex    *DiffIndex  `json:"leftIndex"`
+	RightIndex   *DiffIndex  `json:"rightIndex"`
+	AddsLeft     []*DiffFile `json:"addsLeft"`
+	UpdatesLeft  []*DiffFile `json:"updatesLeft"`
+	UpdatesRight []*DiffFile `json:"updatesRight"`
+	RemovesRight []*DiffFile `json:"removesRight"`
 }
 
 type DiffFile struct {
 	FileID string `json:"fileID"`
 	Title  string `json:"title"`
+}
+
+type DiffIndex struct {
+	ID      string `json:"id"`
+	Created int64  `json:"created"`
 }
 
 func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
@@ -157,12 +162,15 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 		return
 	}
 
-	diff.LeftIndex.Files = nil
-	diff.RightIndex.Files = nil
-
 	ret = &LeftRightDiff{
-		LeftIndex:  diff.LeftIndex,
-		RightIndex: diff.RightIndex,
+		LeftIndex: &DiffIndex{
+			ID:      diff.LeftIndex.ID,
+			Created: diff.LeftIndex.Created,
+		},
+		RightIndex: &DiffIndex{
+			ID:      diff.RightIndex.ID,
+			Created: diff.RightIndex.Created,
+		},
 	}
 	luteEngine := NewLute()
 	for _, addLeft := range diff.AddsLeft {

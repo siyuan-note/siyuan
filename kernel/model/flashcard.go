@@ -32,15 +32,15 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
-func ReviewFlashcard(deckName string, blockID string, rating riff.Rating) (err error) {
+func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
-	deck := Decks[deckName]
+	deck := Decks[deckID]
 	deckLock.Unlock()
 
 	deck.Review(blockID, rating)
 	err = deck.Save()
 	if nil != err {
-		logging.LogErrorf("save deck [%s] failed: %s", deckName, err)
+		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
 	return
@@ -51,9 +51,9 @@ type Flashcard struct {
 	BlockID string
 }
 
-func GetDueFlashcards(deckName string) (ret []*Flashcard, err error) {
+func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
-	deck := Decks[deckName]
+	deck := Decks[deckID]
 	deckLock.Unlock()
 
 	cards := deck.Dues()
@@ -71,30 +71,30 @@ func GetDueFlashcards(deckName string) (ret []*Flashcard, err error) {
 	return
 }
 
-func RemoveFlashcard(blockID string, deckName string) (err error) {
+func RemoveFlashcard(blockID string, deckID string) (err error) {
 	deckLock.Lock()
-	deck := Decks[deckName]
+	deck := Decks[deckID]
 	deckLock.Unlock()
 
 	deck.RemoveCard(blockID)
 	err = deck.Save()
 	if nil != err {
-		logging.LogErrorf("save deck [%s] failed: %s", deckName, err)
+		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
 	return
 }
 
-func AddFlashcard(blockID string, deckName string) (err error) {
+func AddFlashcard(blockID string, deckID string) (err error) {
 	deckLock.Lock()
-	deck := Decks[deckName]
+	deck := Decks[deckID]
 	deckLock.Unlock()
 
 	cardID := ast.NewNodeID()
 	deck.AddCard(cardID, blockID)
 	err = deck.Save()
 	if nil != err {
-		logging.LogErrorf("save deck [%s] failed: %s", deckName, err)
+		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
 	return
@@ -113,18 +113,16 @@ func InitFlashcards() {
 	}
 	for _, entry := range entries {
 		name := entry.Name()
-		if strings.HasSuffix(name, "-deck.msgpack") {
-			name = name[:len(name)-len("-deck.msgpack")]
-			deckName := strings.Split(name, "-")[0]
-			algo := strings.Split(name, "-")[1]
-			deck, loadErr := riff.LoadDeck(riffSavePath, deckName, riff.Algo(algo))
+		if strings.HasSuffix(name, ".deck") {
+			deckID := strings.TrimSuffix(name, ".deck")
+			deck, loadErr := riff.LoadDeck(riffSavePath, deckID)
 			if nil != loadErr {
 				logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
 				continue
 			}
 
 			deckLock.Lock()
-			Decks[deckName] = deck
+			Decks[deckID] = deck
 			deckLock.Unlock()
 		}
 	}
@@ -132,37 +130,29 @@ func InitFlashcards() {
 
 func CreateDeck(name string) (err error) {
 	riffSavePath := getRiffDir()
-	deck, err := riff.LoadDeck(riffSavePath, name, riff.AlgoFSRS)
+	deckID := ast.NewNodeID()
+	deck, err := riff.LoadDeck(riffSavePath, deckID)
 	if nil != err {
-		logging.LogErrorf("load deck [%s] failed: %s", name, err)
+		logging.LogErrorf("load deck [%s] failed: %s", deckID, err)
 		return
 	}
+	deck.Name = name
 
 	deckLock.Lock()
-	Decks[name] = deck
+	Decks[deckID] = deck
 	deckLock.Unlock()
 	return
 }
 
-func GetDecks() (ret []string) {
+func GetDecks() (decks []*riff.Deck) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	for name := range Decks {
-		ret = append(ret, name)
+	for _, deck := range Decks {
+		decks = append(decks, deck)
 	}
-	return
-}
-
-func SaveDeck(name string) (err error) {
-	deckLock.Lock()
-	deck := Decks[name]
-	deckLock.Unlock()
-
-	err = deck.Save()
-	if nil != err {
-		logging.LogErrorf("save deck [%s] failed: %s", name, err)
-		return
+	if 1 > len(decks) {
+		decks = []*riff.Deck{}
 	}
 	return
 }

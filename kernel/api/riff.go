@@ -35,10 +35,10 @@ func reviewRiffCard(c *gin.Context) {
 		return
 	}
 
-	deckName := arg["deck"].(string)
+	deckID := arg["deckID"].(string)
 	blockID := arg["blockID"].(string)
 	rating := int(arg["rating"].(float64))
-	err := model.ReviewFlashcard(deckName, blockID, riff.Rating(rating))
+	err := model.ReviewFlashcard(deckID, blockID, riff.Rating(rating))
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -55,9 +55,9 @@ func getRiffDueCards(c *gin.Context) {
 		return
 	}
 
-	deckName := arg["deck"].(string)
+	deckID := arg["deckID"].(string)
 
-	cards, err := model.GetDueFlashcards(deckName)
+	cards, err := model.GetDueFlashcards(deckID)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -76,9 +76,9 @@ func removeRiffCard(c *gin.Context) {
 		return
 	}
 
-	deckName := arg["deck"].(string)
+	deckID := arg["deckID"].(string)
 	blockID := arg["blockID"].(string)
-	err := model.RemoveFlashcard(blockID, deckName)
+	err := model.RemoveFlashcard(blockID, deckID)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -95,9 +95,9 @@ func addRiffCard(c *gin.Context) {
 		return
 	}
 
-	deckName := arg["deck"].(string)
+	deckID := arg["deckID"].(string)
 	blockID := arg["blockID"].(string)
-	err := model.AddFlashcard(blockID, deckName)
+	err := model.AddFlashcard(blockID, deckID)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -129,7 +129,10 @@ func createRiffDeck(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	ret.Data = deck
+	ret.Data = map[string]interface{}{
+		"id":   deck.ID,
+		"name": deck.Name,
+	}
 }
 
 func getRiffDecks(c *gin.Context) {
@@ -137,5 +140,12 @@ func getRiffDecks(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	decks := model.GetDecks()
-	ret.Data = decks
+	var data []interface{}
+	for _, deck := range decks {
+		data = append(data, map[string]interface{}{
+			"id":   deck.ID,
+			"name": deck.Name,
+		})
+	}
+	ret.Data = data
 }

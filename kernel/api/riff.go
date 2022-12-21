@@ -21,9 +21,51 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func reviewRiffCard(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	deckName := arg["deck"].(string)
+	blockID := arg["blockID"].(string)
+	rating := int(arg["rating"].(float64))
+	err := model.ReviewFlashcard(deckName, blockID, riff.Rating(rating))
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func getRiffDueCards(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	deckName := arg["deck"].(string)
+
+	cards, err := model.GetDueFlashcards(deckName)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = cards
+}
 
 func removeRiffCard(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

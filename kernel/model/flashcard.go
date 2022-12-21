@@ -17,14 +17,16 @@
 package model
 
 import (
-	"github.com/88250/lute/ast"
-	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/riff"
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/88250/gulu"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/riff"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var Decks = map[string]*riff.Deck{}
@@ -47,6 +49,10 @@ func AddFlashcard(blockID string, deckName string) (err error) {
 
 func InitFlashcards() {
 	riffSavePath := filepath.Join(util.DataDir, "storage", "riff")
+	if !gulu.File.IsDir(riffSavePath) {
+		return
+	}
+
 	entries, err := os.ReadDir(riffSavePath)
 	if nil != err {
 		logging.LogErrorf("read riff dir failed: %s", err)

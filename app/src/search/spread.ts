@@ -77,6 +77,10 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
     } else if (window.siyuan.config.keymap.general.globalSearch.custom === hotkey) {
         hPath = localData.hPath || "";
         idPath = localData.idPath || [];
+        // 历史原因，2.5.2 之前为 string https://github.com/siyuan-note/siyuan/issues/6902
+        if (typeof idPath === "string") {
+            idPath = [idPath];
+        }
     }
 
     let range: Range;

@@ -300,6 +300,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/openRepoSnapshotDoc", model.CheckAuth, openRepoSnapshotDoc)
 
 	ginServer.Handle("POST", "/api/riff/createRiffDeck", model.CheckAuth, createRiffDeck)
+	ginServer.Handle("POST", "/api/riff/addRiffCard", model.CheckAuth, addRiffCard)
 
 	ginServer.Handle("POST", "/api/notification/pushMsg", model.CheckAuth, pushMsg)
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, pushErrMsg)

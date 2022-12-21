@@ -17,12 +17,32 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"net/http"
 )
+
+func addRiffCard(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	deckName := arg["deck"].(string)
+	blockID := arg["blockID"].(string)
+	err := model.AddFlashcard(blockID, deckName)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
 
 func createRiffDeck(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -33,18 +53,11 @@ func createRiffDeck(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	id, rootID, content, isLargeDoc, err := model.OpenRepoSnapshotDoc(id)
+	name := arg["name"].(string)
+	err := model.CreateDeck(name)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
-	}
-
-	ret.Data = map[string]interface{}{
-		"id":         id,
-		"rootID":     rootID,
-		"content":    content,
-		"isLargeDoc": isLargeDoc,
 	}
 }

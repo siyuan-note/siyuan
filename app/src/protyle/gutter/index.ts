@@ -7,7 +7,7 @@ import {
 import {getIconByType} from "../../editor/getIcon";
 import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
-import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
+import {copySubMenu, openAttr, openDiffCard, openWechatNotify} from "../../menus/commonMenuItem";
 import {copyPlainText, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
@@ -1427,8 +1427,14 @@ export class Gutter {
                     openWechatNotify(nodeElement);
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.riffCard,
+            click() {
+                openDiffCard([nodeElement]);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         let updateHTML = nodeElement.getAttribute("updated") || "";
         if (updateHTML) {
             updateHTML = `${window.siyuan.languages.modifiedAt} ${dayjs(updateHTML).format("YYYY-MM-DD HH:mm:ss")}<br>`;

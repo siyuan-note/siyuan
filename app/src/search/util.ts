@@ -796,81 +796,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                         }
                         return;
                     }
-                    const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
-                    if (dialogElement && dialogElement.getAttribute("data-key") === window.siyuan.config.keymap.general.search.custom) {
-                        // https://github.com/siyuan-note/siyuan/issues/6828
-                        item.hPath = config.hPath;
-                        item.idPath = config.idPath.join(",").split(",");
-                    }
-                    if (config.layout !== item.layout) {
-                        const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
-                        if (item.layout === 0) {
-                            element.querySelector(".search__layout").classList.remove("search__layout--row");
-                            if (data.row) {
-                                edit.protyle.element.classList.remove("fn__flex-1");
-                                edit.protyle.element.style.height = data.row;
-                                edit.protyle.element.style.width = "";
-                            } else {
-                                edit.protyle.element.classList.add("fn__flex-1");
-                            }
-                        } else {
-                            element.querySelector(".search__layout").classList.add("search__layout--row");
-                            if (data.col) {
-                                edit.protyle.element.style.width = data.col;
-                                edit.protyle.element.classList.remove("fn__flex-1");
-                                edit.protyle.element.style.height = "";
-                            } else {
-                                edit.protyle.element.classList.add("fn__flex-1");
-                            }
-                        }
-                        setPadding(edit.protyle);
-                    }
-                    if (config.hasReplace !== item.hasReplace) {
-                        if (item.hasReplace) {
-                            element.querySelector("#replaceHistoryBtn").parentElement.classList.remove("fn__none");
-                        } else {
-                            element.querySelector("#replaceHistoryBtn").parentElement.classList.add("fn__none");
-                        }
-                    }
-                    if (item.hPath) {
-                        element.querySelector("#searchPathInput").innerHTML = `${item.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
-                    } else {
-                        element.querySelector("#searchPathInput").innerHTML = "";
-                    }
-                    if (config.group !== item.group) {
-                        if (item.group === 0) {
-                            element.querySelector("#searchExpand").parentElement.classList.add("fn__none");
-                        } else {
-                            element.querySelector("#searchExpand").parentElement.classList.remove("fn__none");
-                        }
-                    }
-                    let includeChild = true;
-                    let enableIncludeChild = false;
-                    item.idPath.forEach(item => {
-                        if (item.endsWith(".sy")) {
-                            includeChild = false;
-                        }
-                        if (item.split("/").length > 1) {
-                            enableIncludeChild = true;
-                        }
-                    });
-                    const searchIncludeElement = element.querySelector("#searchInclude");
-                    if (includeChild) {
-                        searchIncludeElement.classList.remove("b3-button--cancel");
-                    } else {
-                        searchIncludeElement.classList.add("b3-button--cancel");
-                    }
-                    if (enableIncludeChild) {
-                        searchIncludeElement.removeAttribute("disabled");
-                    } else {
-                        searchIncludeElement.setAttribute("disabled", "disabled");
-                    }
-                    (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
-                    (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
-                    Object.assign(config, item);
-                    inputEvent(element, config, undefined, edit);
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
-                    window.siyuan.menus.menu.remove();
+                    updateConfig(element, item, config, edit);
                 });
             }
         });
@@ -882,8 +808,115 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             submenu: searchSubMenu
         }).element);
     }
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: window.siyuan.languages.removeCriterion,
+        click() {
+            updateConfig(element, {
+                sort: 0,
+                group: 0,
+                layout: 0,
+                hasReplace: false,
+                method: 0,
+                hPath: "",
+                idPath: [],
+                k: "",
+                r: "",
+                types: {
+                    document: window.siyuan.config.search.document,
+                    heading: window.siyuan.config.search.heading,
+                    list: window.siyuan.config.search.list,
+                    listItem: window.siyuan.config.search.listItem,
+                    codeBlock: window.siyuan.config.search.codeBlock,
+                    htmlBlock: window.siyuan.config.search.htmlBlock,
+                    mathBlock: window.siyuan.config.search.mathBlock,
+                    table: window.siyuan.config.search.table,
+                    blockquote: window.siyuan.config.search.blockquote,
+                    superBlock: window.siyuan.config.search.superBlock,
+                    paragraph: window.siyuan.config.search.paragraph,
+                }
+            }, config, edit);
+        }
+    }).element);
     window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
 };
+
+const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle) => {
+    const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
+    if (dialogElement && dialogElement.getAttribute("data-key") === window.siyuan.config.keymap.general.search.custom) {
+        // https://github.com/siyuan-note/siyuan/issues/6828
+        item.hPath = config.hPath;
+        item.idPath = config.idPath.join(",").split(",");
+    }
+    if (config.layout !== item.layout) {
+        const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
+        if (item.layout === 0) {
+            element.querySelector(".search__layout").classList.remove("search__layout--row");
+            if (data.row) {
+                edit.protyle.element.classList.remove("fn__flex-1");
+                edit.protyle.element.style.height = data.row;
+                edit.protyle.element.style.width = "";
+            } else {
+                edit.protyle.element.classList.add("fn__flex-1");
+            }
+        } else {
+            element.querySelector(".search__layout").classList.add("search__layout--row");
+            if (data.col) {
+                edit.protyle.element.style.width = data.col;
+                edit.protyle.element.classList.remove("fn__flex-1");
+                edit.protyle.element.style.height = "";
+            } else {
+                edit.protyle.element.classList.add("fn__flex-1");
+            }
+        }
+        setPadding(edit.protyle);
+    }
+    if (config.hasReplace !== item.hasReplace) {
+        if (item.hasReplace) {
+            element.querySelector("#replaceHistoryBtn").parentElement.classList.remove("fn__none");
+        } else {
+            element.querySelector("#replaceHistoryBtn").parentElement.classList.add("fn__none");
+        }
+    }
+    if (item.hPath) {
+        element.querySelector("#searchPathInput").innerHTML = `${item.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
+    } else {
+        element.querySelector("#searchPathInput").innerHTML = "";
+    }
+    if (config.group !== item.group) {
+        if (item.group === 0) {
+            element.querySelector("#searchExpand").parentElement.classList.add("fn__none");
+        } else {
+            element.querySelector("#searchExpand").parentElement.classList.remove("fn__none");
+        }
+    }
+    let includeChild = true;
+    let enableIncludeChild = false;
+    item.idPath.forEach(item => {
+        if (item.endsWith(".sy")) {
+            includeChild = false;
+        }
+        if (item.split("/").length > 1) {
+            enableIncludeChild = true;
+        }
+    });
+    const searchIncludeElement = element.querySelector("#searchInclude");
+    if (includeChild) {
+        searchIncludeElement.classList.remove("b3-button--cancel");
+    } else {
+        searchIncludeElement.classList.add("b3-button--cancel");
+    }
+    if (enableIncludeChild) {
+        searchIncludeElement.removeAttribute("disabled");
+    } else {
+        searchIncludeElement.setAttribute("disabled", "disabled");
+    }
+    (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
+    (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
+    Object.assign(config, item);
+    inputEvent(element, config, undefined, edit);
+    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
+    window.siyuan.menus.menu.remove();
+}
 
 const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
     const filterDialog = new Dialog({

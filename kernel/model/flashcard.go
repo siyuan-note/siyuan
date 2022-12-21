@@ -48,7 +48,7 @@ func AddFlashcard(blockID string, deckName string) (err error) {
 }
 
 func InitFlashcards() {
-	riffSavePath := filepath.Join(util.DataDir, "storage", "riff")
+	riffSavePath := getRiffDir()
 	if !gulu.File.IsDir(riffSavePath) {
 		return
 	}
@@ -78,7 +78,7 @@ func InitFlashcards() {
 }
 
 func CreateDeck(name string) (err error) {
-	riffSavePath := filepath.Join(util.DataDir, "storage", "riff")
+	riffSavePath := getRiffDir()
 	deck, err := riff.LoadDeck(riffSavePath, name, riff.AlgoFSRS)
 	if nil != err {
 		logging.LogErrorf("load deck [%s] failed: %s", name, err)
@@ -102,4 +102,8 @@ func SaveDeck(name string) (err error) {
 		return
 	}
 	return
+}
+
+func getRiffDir() string {
+	return filepath.Join(util.DataDir, "storage", "riff")
 }

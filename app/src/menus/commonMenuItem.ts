@@ -106,7 +106,7 @@ export const openDiffCard = (nodeElement: Element[]) => {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
                     }, () => {
-
+                        showMessage(window.siyuan.languages.addDeck)
                     })
                     event.stopPropagation();
                     event.preventDefault();
@@ -116,7 +116,7 @@ export const openDiffCard = (nodeElement: Element[]) => {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
                     }, () => {
-
+                        showMessage(window.siyuan.languages.removeDeck)
                     })
                     event.stopPropagation();
                     event.preventDefault();

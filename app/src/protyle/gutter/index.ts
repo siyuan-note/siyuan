@@ -672,6 +672,13 @@ export class Gutter {
         appearanceElement.lastElementChild.classList.add("b3-menu__submenu--row");
         this.genAlign(selectsElement, protyle);
         this.genWidths(selectsElement, protyle);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.riffCard,
+            click() {
+                openDiffCard(selectsElement);
+            }
+        }).element);
         return window.siyuan.menus.menu;
     }
 

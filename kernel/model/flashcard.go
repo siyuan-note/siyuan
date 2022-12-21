@@ -17,12 +17,12 @@
 package model
 
 import (
-	"github.com/88250/gulu"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"

@@ -74,6 +74,8 @@ func diffRepoSnapshots(c *gin.Context) {
 		"updatesLeft":  diff.UpdatesLeft,
 		"updatesRight": diff.UpdatesRight,
 		"removesRight": diff.RemovesRight,
+		"left":         diff.LeftIndex,
+		"right":        diff.RightIndex,
 	}
 }
 

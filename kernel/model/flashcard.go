@@ -32,6 +32,45 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
+func ReviewFlashcard(deckName string, blockID string, rating riff.Rating) (err error) {
+	deckLock.Lock()
+	deck := Decks[deckName]
+	deckLock.Unlock()
+
+	deck.Review(blockID, rating)
+	err = deck.Save()
+	if nil != err {
+		logging.LogErrorf("save deck [%s] failed: %s", deckName, err)
+		return
+	}
+	return
+}
+
+type Flashcard struct {
+	ID      string
+	BlockID string
+}
+
+func GetDueFlashcards(deckName string) (ret []*Flashcard, err error) {
+	deckLock.Lock()
+	deck := Decks[deckName]
+	deckLock.Unlock()
+
+	cards := deck.Dues()
+	for _, card := range cards {
+		blockID := card.BlockID()
+		_, getErr := GetBlock(blockID)
+		if nil != getErr {
+			continue
+		}
+		ret = append(ret, &Flashcard{
+			ID:      card.ID(),
+			BlockID: blockID,
+		})
+	}
+	return
+}
+
 func RemoveFlashcard(blockID string, deckName string) (err error) {
 	deckLock.Lock()
 	deck := Decks[deckName]

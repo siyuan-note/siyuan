@@ -192,7 +192,7 @@ Although it does not support third-party sync disks, it supports third-party clo
 * S3 compatible object storage services, such as [Qiniu](https://s.qiniu.com/VbQfeu), [Aliyun OSS](https://www.aliyun.com/product/oss?userCode=yqovuas2), [Cloudflare R2](https://www.cloudflare.com/)
 * WebDAV protocol, such as [TeraCLOUD](https://teracloud.jp/), [Koofr](https://koofr.eu/)
 
-Synchronizing data through third-party cloud storage services is also ((20210721112229-fp97j3c "end-to-end encrypted")), and third-party cloud storage service providers cannot obtain our plaintext data.
+Synchronizing data through third-party cloud storage services is also end-to-end encrypted, and third-party cloud storage service providers cannot obtain our plaintext data.
 
 In addition, you can also consider manually exporting and importing data to achieve data synchronization:
 
@@ -222,9 +222,9 @@ You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd
 
 **Note**: Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory
 
-### Is there any #Note# for deleting docs?
+### Is there any note for deleting docs?
 
-After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate ((20210615213222-vs5tzbd "data history")).
+After deletion, the doc will not appear in the operating system's recycle bin, but will be deleted directly. When deleted, SiYuan will generate data history.
 
 ### How can I just wrap and not start a new paragraph?
 

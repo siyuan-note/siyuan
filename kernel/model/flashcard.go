@@ -144,6 +144,16 @@ func CreateDeck(name string) (err error) {
 	return
 }
 
+func GetDecks() (ret []string) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	for name := range Decks {
+		ret = append(ret, name)
+	}
+	return
+}
+
 func SaveDeck(name string) (err error) {
 	deckLock.Lock()
 	deck := Decks[name]

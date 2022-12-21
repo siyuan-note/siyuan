@@ -122,3 +122,11 @@ func createRiffDeck(c *gin.Context) {
 		return
 	}
 }
+
+func getRiffDecks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	decks := model.GetDecks()
+	ret.Data = decks
+}

@@ -1,4 +1,7 @@
 {
+  "createDeck": "Créer un deck",
+  "addDeck": "Ajouter au deck",
+  "removeDeck": "Retirer du deck",
   "riffCard": "Carte flash",
   "comparer": "Comparer",
   "switchTab": "Commutateur",

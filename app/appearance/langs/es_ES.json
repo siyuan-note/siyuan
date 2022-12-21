@@ -1,4 +1,7 @@
 {
+  "createDeck": "Crear mazo",
+  "addDeck": "Añadir al mazo",
+  "removeDeck": "Eliminar del mazo",
   "riffCard": "Tarjeta Flash",
   "comparar": "Comparar",
   "switchTab": "Conmutador",

@@ -1,4 +1,7 @@
 {
+  "createDeck": "創建卡包",
+  "addDeck": "加入卡包",
+  "removeDeck": "從卡包中移除",
   "riffCard": "閃卡",
   "compare": "比較",
   "switchTab": "頁籤切換",

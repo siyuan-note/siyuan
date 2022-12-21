@@ -39,12 +39,12 @@ const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) 
 };
 
 const genCardItem = (item: { id: string, name: string }) => {
-    return `<li data-id="${item.id}" class="b3-list-item b3-list-item--hide-action">
+    return `<li style="margin: 0 !important;" data-id="${item.id}" class="b3-list-item b3-list-item--hide-action">
 <span class="b3-list-item__text">${item.name}</span>
-<span data-type="add" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addAttr}">
+<span data-type="add" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addDeck}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </span>
-<span data-type="remove" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
+<span data-type="remove" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconMin"></use></svg>
 </span>
 </li>`
@@ -64,13 +64,13 @@ export const openDiffCard = (nodeElement: Element[]) => {
             width: isMobile() ? "80vw" : "50vw",
             height: "70vh",
             title: window.siyuan.languages.riffCard,
-            content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing: border-box">
+            content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing: border-box;height: 100%">
     <div class="fn__flex">
         <input class="b3-text-field fn__flex-1">
         <span class="fn__space"></span>
         <button data-type="create" class="b3-button b3-button--outline" style="width: 100px">
             <svg><use xlink:href="#iconAdd"></use></svg>
-            ${window.siyuan.languages.addAttr}
+            ${window.siyuan.languages.createDeck}
         </button>
     </div>
     <div class="fn__hr"></div>
@@ -92,7 +92,7 @@ export const openDiffCard = (nodeElement: Element[]) => {
                             hideMessage(msgId);
                         }
                         fetchPost("/api/riff/createRiffDeck", {name: inputElement.value}, (response) => {
-                            dialog.element.querySelector(".b3-list").insertAdjacentHTML("beforeend", genCardItem(response.data))
+                            dialog.element.querySelector(".b3-list").insertAdjacentHTML("afterbegin", genCardItem(response.data))
                             inputElement.value = '';
                         })
                     } else {

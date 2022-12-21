@@ -28,18 +28,18 @@ require (
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gofrs/flock v0.8.1
-	github.com/imroc/req/v3 v3.26.4
+	github.com/imroc/req/v3 v3.26.5
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/user_agent v0.5.3
 	github.com/olahol/melody v1.1.1
-	github.com/panjf2000/ants/v2 v2.7.0
+	github.com/panjf2000/ants/v2 v2.7.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.22.11
-	github.com/siyuan-note/dejavu v0.0.0-20221218044903-166a39f286d7
+	github.com/siyuan-note/dejavu v0.0.0-20221221052742-914221eec6f8
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
@@ -61,7 +61,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.162 // indirect
+	github.com/aws/aws-sdk-go v1.44.164 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -75,7 +75,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/google/pprof v0.0.0-20221212185716-aee1124e3a93 // indirect
+	github.com/google/pprof v0.0.0-20221219190121-3cb0bae90811 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect

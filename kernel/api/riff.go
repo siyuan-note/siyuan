@@ -25,6 +25,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func removeRiffCard(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	deckName := arg["deck"].(string)
+	blockID := arg["blockID"].(string)
+	err := model.RemoveFlashcard(blockID, deckName)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func addRiffCard(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

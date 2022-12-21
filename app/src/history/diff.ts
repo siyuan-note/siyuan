@@ -5,6 +5,7 @@ import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {escapeHtml} from "../util/escape";
+import * as dayjs from "dayjs";
 
 const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
     if (!data || data.length === 0) {
@@ -64,12 +65,13 @@ const renderCompare = (element: HTMLElement) => {
     }
 
     fetchPost("/api/repo/openRepoSnapshotDoc", {id: element.getAttribute("data-id")}, (response) => {
+        const textElement = (leftElement.firstElementChild.nextElementSibling as HTMLTextAreaElement)
         if (response.data.isLargeDoc) {
-            (leftElement.firstElementChild as HTMLTextAreaElement).value = response.data.content;
-            leftElement.firstElementChild.classList.remove("fn__none");
+            textElement.value = response.data.content;
+            textElement.classList.remove("fn__none");
             leftElement.lastElementChild.classList.add("fn__none");
         } else {
-            leftElement.firstElementChild.classList.add("fn__none");
+            textElement.classList.add("fn__none");
             leftElement.lastElementChild.classList.remove("fn__none");
             onGet(response, leftEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
         }
@@ -78,12 +80,13 @@ const renderCompare = (element: HTMLElement) => {
     if (id2) {
         rightElement.classList.remove("fn__none");
         fetchPost("/api/repo/openRepoSnapshotDoc", {id: id2}, (response) => {
+            const textElement = (rightElement.firstElementChild.nextElementSibling as HTMLTextAreaElement)
             if (response.data.isLargeDoc) {
-                (rightElement.firstElementChild as HTMLTextAreaElement).value = response.data.content;
-                rightElement.firstElementChild.classList.remove("fn__none");
+                textElement.value = response.data.content;
+                textElement.classList.remove("fn__none");
                 rightElement.lastElementChild.classList.add("fn__none");
             } else {
-                rightElement.firstElementChild.classList.add("fn__none");
+                textElement.classList.add("fn__none");
                 rightElement.lastElementChild.classList.remove("fn__none");
                 onGet(response, rightEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
             }
@@ -132,11 +135,13 @@ export const showDiff = (ids: string) => {
         </ul>
     </div>
     <div class="fn__flex-1 fn__flex">
-        <div class="fn__flex-1">
+        <div class="fn__flex-1 fn__flex-column">
+            <div>${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
             <textarea style="height: 100%;width: 100%;" class="history__text fn__none"></textarea>
             <div style="min-height: 100%;"></div>
         </div>
-        <div class="fn__none fn__flex-1" style="border-left: 1px solid var(--b3-border-color);">
+        <div class="fn__none fn__flex-1 fn__flex-column" style="border-left: 1px solid var(--b3-border-color);">
+            <div>${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
             <textarea style="height: 100%;width: 100%;" class="history__text fn__none"></textarea>
             <div style="min-height: 100%;"></div>
         </div>

@@ -147,5 +147,8 @@ func getRiffDecks(c *gin.Context) {
 			"name": deck.Name,
 		})
 	}
+	if 1 > len(data) {
+		data = []interface{}{}
+	}
 	ret.Data = data
 }

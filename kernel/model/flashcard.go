@@ -32,6 +32,20 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
+func RemoveFlashcard(blockID string, deckName string) (err error) {
+	deckLock.Lock()
+	deck := Decks[deckName]
+	deckLock.Unlock()
+
+	deck.RemoveCard(blockID)
+	err = deck.Save()
+	if nil != err {
+		logging.LogErrorf("save deck [%s] failed: %s", deckName, err)
+		return
+	}
+	return
+}
+
 func AddFlashcard(blockID string, deckName string) (err error) {
 	deckLock.Lock()
 	deck := Decks[deckName]

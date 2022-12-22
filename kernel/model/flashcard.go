@@ -45,12 +45,11 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 	return
 }
 
-type Flashcard struct {
-	ID      string
-	BlockID string
-}
+func GetDueFlashcards(deckID string) (ret []string, err error) {
+	if "" == deckID {
+		return getAllDueFlashcards()
+	}
 
-func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
 	deck := Decks[deckID]
 	deckLock.Unlock()
@@ -62,10 +61,29 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 		if nil != getErr {
 			continue
 		}
-		ret = append(ret, &Flashcard{
-			ID:      card.ID(),
-			BlockID: blockID,
-		})
+		ret = append(ret, blockID)
+	}
+	return
+}
+
+func getAllDueFlashcards() (ret []string, err error) {
+	blockIDs := map[string]bool{}
+	for _, deck := range Decks {
+		cards := deck.Dues()
+		for _, card := range cards {
+			blockID := card.BlockID()
+			_, getErr := GetBlock(blockID)
+			if nil != getErr {
+				continue
+			}
+
+			if blockIDs[blockID] {
+				continue
+			}
+
+			ret = append(ret, blockID)
+			blockIDs[blockID] = true
+		}
 	}
 	return
 }

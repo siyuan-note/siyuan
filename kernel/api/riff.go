@@ -56,7 +56,6 @@ func getRiffDueCards(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
-
 	cards, err := model.GetDueFlashcards(deckID)
 	if nil != err {
 		ret.Code = -1

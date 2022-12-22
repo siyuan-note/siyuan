@@ -27,7 +27,7 @@ export const openCard = () => {
         <div style="margin-left: 8px" class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}" data-type="count">${countHTML}</div>
     </div>
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
-    <div class="b3-dialog__cardblock fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
+    <div class="b3-dialog__cardblock b3-dialog__cardblock--show fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
     <div class="b3-dialog__cardempty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">${window.siyuan.languages.noDueCard}</div>
     <div class="fn__hr"></div>
     <div class="fn__flex${blocks.length === 0 ? " fn__none" : ""}" data-type="action">
@@ -117,7 +117,7 @@ export const openCard = () => {
                 event.preventDefault();
                 event.stopPropagation();
                 if (type === "-1") {
-                    editor.protyle.element.classList.toggle("b3-dialog__cardblock");
+                    editor.protyle.element.classList.toggle("b3-dialog__cardblock--show");
                     return;
                 }
                 if (["0", "1", "2", "3"].includes(type)) {

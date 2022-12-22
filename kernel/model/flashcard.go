@@ -88,8 +88,8 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	cards := deck.Dues()
 	for _, card := range cards {
 		blockID := card.BlockID()
-		_, getErr := GetBlock(blockID)
-		if nil != getErr {
+
+		if nil == treenode.GetBlockTree(blockID) {
 			continue
 		}
 		ret = append(ret, &Flashcard{
@@ -109,8 +109,7 @@ func getAllDueFlashcards() (ret []*Flashcard, err error) {
 		cards := deck.Dues()
 		for _, card := range cards {
 			blockID := card.BlockID()
-			_, getErr := GetBlock(blockID)
-			if nil != getErr {
+			if nil == treenode.GetBlockTree(blockID) {
 				continue
 			}
 

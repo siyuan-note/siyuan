@@ -111,12 +111,23 @@
     overflow: auto;
   }
 
-  &__card {
+  &__cardempty {
     display: flex;
     justify-content: center;
     flex-direction: column;
     flex: 1;
     text-align: center;
     color: var(--b3-theme-on-surface);
+  }
+
+  &__cardblock {
+    .protyle-wysiwyg {
+      padding: 16px;
+    }
+
+    span[data-type~=mark] {
+      transition: var(--b3-transition);
+      color: var(--b3-protyle-inline-mark-background) !important;
+    }
   }
 }

@@ -343,7 +343,7 @@ export const globalShortcut = () => {
             return;
         }
 
-        if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && ["a", "h", "g", "e"].includes(event.key.toLowerCase())) {
+        if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && ["s","a", "h", "g", "e"].includes(event.key.toLowerCase())) {
             const openCardDialog = window.siyuan.dialogs.find(item => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
                     return true;

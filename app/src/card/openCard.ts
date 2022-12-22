@@ -21,21 +21,23 @@ export const openCard = () => {
             }
             const dialog = new Dialog({
                 title: window.siyuan.languages.riffCard,
-                content: `<div class="fn__flex-column b3-dialog__content" style="box-sizing: border-box">
+                content: `<div class="fn__flex-column b3-dialog__content" style="box-sizing: border-box;max-height: 100%">
     <div class="fn__flex">
         <select class="b3-select fn__flex-1">${decksHTML}</select>
         <div style="margin-left: 8px" class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}" data-type="count">${countHTML}</div>
     </div>
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
-    <div class="fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
-    <div class="b3-dialog__card${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">${window.siyuan.languages.noDueCard}</div>
+    <div class="b3-dialog__cardblock fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
+    <div class="b3-dialog__cardempty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">${window.siyuan.languages.noDueCard}</div>
     <div class="fn__hr"></div>
     <div class="fn__flex${blocks.length === 0 ? " fn__none" : ""}" data-type="action">
-        <button data-type="0" class="b3-button b3-button--white">Again Rating (A)</button>
+        <button data-type="-1" class="b3-button">Show (S)</button>
         <span class="fn__flex-1"></span>
-        <button data-type="1" class="b3-button b3-button--outline">Hard (H)</button>
+        <button data-type="0" class="b3-button">Again Rating (A)</button>
         <span class="fn__flex-1"></span>
-        <button data-type="2" class="b3-button b3-button--cancel">Good (G)</button>
+        <button data-type="1" class="b3-button">Hard (H)</button>
+        <span class="fn__flex-1"></span>
+        <button data-type="2" class="b3-button">Good (G)</button>
         <span class="fn__flex-1"></span>
         <button data-type="3" class="b3-button">Easy (E)</button>
     </div>
@@ -99,6 +101,8 @@ export const openCard = () => {
                         type = "2"
                     } else if (event.detail === "e") {
                         type = "3"
+                    }else if (event.detail === "s") {
+                        type = "-1"
                     }
                 }
                 if (!type) {
@@ -107,7 +111,13 @@ export const openCard = () => {
                         type = buttonElement.getAttribute("data-type");
                     }
                 }
-                if (!type) {
+                if (!type || !blocks[index]) {
+                    return;
+                }
+                event.preventDefault();
+                event.stopPropagation();
+                if (type === "-1") {
+                    editor.protyle.element.classList.toggle("b3-dialog__cardblock");
                     return;
                 }
                 if (["0", "1", "2", "3"].includes(type)) {
@@ -129,8 +139,6 @@ export const openCard = () => {
                             onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                         });
                     })
-                    event.preventDefault();
-                    event.stopPropagation();
                 }
             })
         })

@@ -110,4 +110,13 @@
     padding: 8px 0;
     overflow: auto;
   }
+
+  &__card {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    flex: 1;
+    text-align: center;
+    color: var(--b3-theme-on-surface);
+  }
 }

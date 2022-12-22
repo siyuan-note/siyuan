@@ -4,6 +4,7 @@ import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const openCard = () => {
     let decksHTML = '<option value="">All</option>';
@@ -17,21 +18,19 @@ export const openCard = () => {
             let index = 0
             if (blocks.length > 0) {
                 countHTML = `<span>1</span>/${blocks.length}`
-            } else {
-                countHTML = window.siyuan.languages.noDueCard
             }
             const dialog = new Dialog({
                 title: window.siyuan.languages.riffCard,
                 content: `<div class="fn__flex-column b3-dialog__content" style="box-sizing: border-box">
     <div class="fn__flex">
         <select class="b3-select fn__flex-1">${decksHTML}</select>
-        <span class="fn__space"></span>
-        <div class="ft__on-surface ft__smaller fn__flex-center" data-type="count">
-            ${countHTML}
-        </div>
+        <div style="margin-left: 8px" class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}" data-type="count">${countHTML}</div>
     </div>
-    <div class="fn__flex-1" data-type="render"></div>
-    <div class="fn__flex">
+    <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
+    <div class="fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
+    <div class="b3-dialog__card${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">${window.siyuan.languages.noDueCard}</div>
+    <div class="fn__hr"></div>
+    <div class="fn__flex${blocks.length === 0 ? " fn__none" : ""}" data-type="action">
         <button data-type="0" class="b3-button b3-button--white">Again Rating (A)</button>
         <span class="fn__flex-1"></span>
         <button data-type="1" class="b3-button b3-button--outline">Hard (H)</button>
@@ -44,6 +43,7 @@ export const openCard = () => {
                 width: isMobile() ? "80vw" : "50vw",
                 height: "70vh",
             })
+            dialog.element.querySelector("input").focus();
             const editor = new Protyle(dialog.element.querySelector("[data-type='render']") as HTMLElement, {
                 blockId: "",
                 action: [Constants.CB_GET_HISTORY],
@@ -58,60 +58,81 @@ export const openCard = () => {
                 typewriterMode: false
             });
             disabledProtyle(editor.protyle);
-            fetchPost("/api/riff/renderRiffCard", {id: blocks[index]}, (response) => {
-                onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
-            });
+            if (blocks.length > 0) {
+                fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
+                    onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                });
+            }
             dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom)
             const countElement = dialog.element.querySelector('[data-type="count"]')
+            const actionElement = dialog.element.querySelector('[data-type="action"]')
             const selectElement = dialog.element.querySelector("select")
             selectElement.addEventListener("change", (event) => {
                 fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {
                     blocks = cardsChangeResponse.data;
                     index = 0
-                    let countHTML = ''
                     if (blocks.length > 0) {
-                        countHTML = `<span>1</span>/${blocks.length}`
+                        countElement.innerHTML = `<span>1</span>/${blocks.length}`
+                        countElement.classList.remove("fn__none")
+                        editor.protyle.element.classList.remove("fn__none")
+                        editor.protyle.element.nextElementSibling.classList.add("fn__none")
+                        actionElement.classList.remove("fn__none")
+                        fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
+                            onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                        });
                     } else {
-                        countHTML = window.siyuan.languages.noDueCard
+                        countElement.classList.add("fn__none")
+                        editor.protyle.element.classList.add("fn__none")
+                        editor.protyle.element.nextElementSibling.classList.remove("fn__none")
+                        actionElement.classList.add("fn__none")
                     }
-                    countElement.innerHTML = countHTML;
-                    fetchPost("/api/riff/renderRiffCard", {id: blocks[index]}, (response) => {
-                        onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
-                    });
                 })
             })
             dialog.element.addEventListener("click", (event) => {
-                let target = event.target as HTMLElement;
-                while (target && !target.isSameNode(dialog.element)) {
-                    const type = target.getAttribute("data-type");
-                    if (["0", "1", "2", "3"].includes(type)) {
-                        fetchPost("/api/riff/reviewRiffCard", {
-                            deckID: selectElement.value,
-                            blockID: blocks[index],
-                            rating: parseInt(type)
-                        }, (response) => {
-                            index++
-                            if (index > blocks.length - 1) {
-                                countElement.innerHTML = window.siyuan.languages.noDueCard
-                                editor.protyle.element.classList.add("fn__none")
-                                return;
-                            }
-                            countElement.firstElementChild.innerHTML = index.toString()
-                            fetchPost("/api/riff/renderRiffCard", {id: blocks[index]}, (response) => {
-                                onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
-                            });
-                        })
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
+                let type = ""
+                if (typeof event.detail === "string") {
+                    if (event.detail === "a") {
+                        type = "0"
+                    } else if (event.detail === "h") {
+                        type = "1"
+                    } else if (event.detail === "g") {
+                        type = "2"
+                    } else if (event.detail === "e") {
+                        type = "3"
                     }
-                    target = target.parentElement;
+                }
+                if (!type) {
+                    const buttonElement = hasClosestByClassName(event.target as HTMLElement, "b3-button")
+                    if (buttonElement) {
+                        type = buttonElement.getAttribute("data-type");
+                    }
+                }
+                if (!type) {
+                    return;
+                }
+                if (["0", "1", "2", "3"].includes(type)) {
+                    fetchPost("/api/riff/reviewRiffCard", {
+                        deckID: blocks[index].deckID,
+                        blockID: blocks[index].blockID,
+                        rating: parseInt(type)
+                    }, () => {
+                        index++
+                        if (index > blocks.length - 1) {
+                            countElement.classList.add("fn__none")
+                            editor.protyle.element.classList.add("fn__none")
+                            editor.protyle.element.nextElementSibling.classList.remove("fn__none")
+                            actionElement.classList.add("fn__none")
+                            return;
+                        }
+                        countElement.firstElementChild.innerHTML = (index + 1).toString()
+                        fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
+                            onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                        });
+                    })
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
             })
         })
     })
-}
-
-export const matchCardKey = (event: KeyboardEvent) => {
-
 }

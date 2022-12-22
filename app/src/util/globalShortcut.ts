@@ -43,7 +43,7 @@ import {editor} from "../config/editor";
 import {hintMoveBlock} from "../protyle/hint/extend";
 import {Backlink} from "../layout/dock/Backlink";
 import {openHistory} from "../history/history";
-import {matchCardKey, openCard} from "../card/openCard";
+import {openCard} from "../card/openCard";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -343,7 +343,7 @@ export const globalShortcut = () => {
             return;
         }
 
-        if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.key === "s") {
+        if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && ["a", "h", "g", "e"].includes(event.key.toLowerCase())) {
             const openCardDialog = window.siyuan.dialogs.find(item => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
                     return true;
@@ -351,7 +351,7 @@ export const globalShortcut = () => {
             });
             if (openCardDialog) {
                 event.preventDefault();
-                matchCardKey(event);
+                openCardDialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
                 return;
             }
         }

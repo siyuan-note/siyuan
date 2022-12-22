@@ -43,7 +43,7 @@ import {editor} from "../config/editor";
 import {hintMoveBlock} from "../protyle/hint/extend";
 import {Backlink} from "../layout/dock/Backlink";
 import {openHistory} from "../history/history";
-import {openCard} from "../card/openCard";
+import {matchCardKey, openCard} from "../card/openCard";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -343,6 +343,19 @@ export const globalShortcut = () => {
             return;
         }
 
+        if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.key === "s") {
+            const openCardDialog = window.siyuan.dialogs.find(item => {
+                if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
+                    return true;
+                }
+            });
+            if (openCardDialog) {
+                event.preventDefault();
+                matchCardKey(event);
+                return;
+            }
+        }
+
         // 仅处理以下快捷键操作
         if (!event.ctrlKey && !isCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey &&
             !/^F\d{1,2}$/.test(event.key) && event.key.indexOf("Arrow") === -1 && event.key !== "Enter" && event.key !== "Backspace" && event.key !== "Delete") {
@@ -460,6 +473,7 @@ export const globalShortcut = () => {
                 return;
             }
         }
+
         if (matchHotKey(window.siyuan.config.keymap.general.recentDocs.custom, event)) {
             const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {

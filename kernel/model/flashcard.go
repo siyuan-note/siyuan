@@ -17,6 +17,8 @@
 package model
 
 import (
+	"github.com/88250/lute"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +32,27 @@ import (
 
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
+
+func RenderFlashcard(blockID string) (content string, err error) {
+	tree, err := loadTreeByBlockID(blockID)
+	if nil != err {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		return
+	}
+
+	luteEngine := NewLute()
+	luteEngine.RenderOptions.ProtyleContenteditable = false
+	if ast.NodeDocument == node.Type {
+		content = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
+	} else {
+		content = lute.RenderNodeBlockDOM(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	}
+	return
+}
 
 func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
@@ -63,6 +86,9 @@ func GetDueFlashcards(deckID string) (ret []string, err error) {
 		}
 		ret = append(ret, blockID)
 	}
+	if 1 > len(ret) {
+		ret = []string{}
+	}
 	return
 }
 
@@ -84,6 +110,9 @@ func getAllDueFlashcards() (ret []string, err error) {
 			ret = append(ret, blockID)
 			blockIDs[blockID] = true
 		}
+	}
+	if 1 > len(ret) {
+		ret = []string{}
 	}
 	return
 }

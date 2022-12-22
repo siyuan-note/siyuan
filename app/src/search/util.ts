@@ -1201,13 +1201,14 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
 const onSearch = (data: IBlock[], edit: Protyle, element: Element) => {
     let resultHTML = "";
     data.forEach((item, index) => {
+        const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text">${escapeHtml(getNotebookName(item.box))}${item.hPath}</span>
+<span class="b3-list-item__text" title="${title}">${title}</span>
 </div><div>`;
             item.children.forEach((childItem, childIndex) => {
                 resultHTML += `<div style="padding-left: 22px" data-type="search-item" class="b3-list-item${childIndex === 0 && index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
@@ -1218,7 +1219,6 @@ ${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
             });
             resultHTML += "</div>";
         } else {
-            const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
             resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}

@@ -129,6 +129,7 @@ export abstract class Constants {
             backlinks: {default: "⌥7", custom: "⌥7"},
             graphView: {default: "⌥8", custom: "⌥8"},
             globalGraph: {default: "⌥9", custom: "⌥9"},
+            riffCard: {default: "⌥0", custom: "⌥0"},
             config: {default: "⌥P", custom: "⌥P"},
             dataHistory: {default: "⌥H", custom: "⌥H"},
             toggleWin: {default: "⌥M", custom: "⌥M"},

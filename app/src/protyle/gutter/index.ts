@@ -7,7 +7,7 @@ import {
 import {getIconByType} from "../../editor/getIcon";
 import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
-import {copySubMenu, openAttr, openDiffCard, openWechatNotify} from "../../menus/commonMenuItem";
+import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {copyPlainText, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
@@ -36,6 +36,7 @@ import {mathRender} from "../markdown/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {movePathTo} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
+import {makeCard} from "../../card/makeCard";
 
 export class Gutter {
     public element: HTMLElement;
@@ -676,7 +677,7 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.riffCard,
             click() {
-                openDiffCard(selectsElement);
+                makeCard(selectsElement);
             }
         }).element);
         return window.siyuan.menus.menu;
@@ -1438,7 +1439,7 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.riffCard,
             click() {
-                openDiffCard([nodeElement]);
+                makeCard([nodeElement]);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

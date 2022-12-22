@@ -43,6 +43,7 @@ import {editor} from "../config/editor";
 import {hintMoveBlock} from "../protyle/hint/extend";
 import {Backlink} from "../layout/dock/Backlink";
 import {openHistory} from "../history/history";
+import {openCard} from "../card/openCard";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -521,6 +522,11 @@ export const globalShortcut = () => {
             }
         });
         if (matchDock) {
+            return;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.general.riffCard.custom, event)) {
+            openCard()
+            event.preventDefault();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {

@@ -30,6 +30,7 @@ import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
 import {openHistory} from "../history/history";
+import {openCard} from "../card/openCard";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -178,6 +179,9 @@ const initBar = () => {
 <div id="barDailyNote" data-menu="true" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg><use xlink:href="#iconCalendar"></use></svg>
 </div>
+<div id="barRiffCard" data-menu="true" aria-label="${window.siyuan.languages.iconRiffCard} ${updateHotkeyTip(window.siyuan.config.keymap.general.iconRiffCard.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
+    <svg><use xlink:href="#iconRiffCard"></use></svg>
+</div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg><use xlink:href="#iconBack"></use></svg>
 </button>
@@ -268,6 +272,10 @@ const initBar = () => {
                 break;
             } else if (target.id === "barSearch") {
                 openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barRiffCard") {
+                openCard();
                 event.stopPropagation();
                 break;
             } else if (target.id === "barDailyNote") {

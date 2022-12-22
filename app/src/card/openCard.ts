@@ -33,7 +33,7 @@ export const openCard = () => {
     <div class="fn__flex${blocks.length === 0 ? " fn__none" : ""}" data-type="action">
         <button data-type="-1" class="b3-button">Show (S)</button>
         <span class="fn__flex-1"></span>
-        <button data-type="0" class="b3-button">Again Rating (A)</button>
+        <button data-type="0" class="b3-button">Again (A)</button>
         <span class="fn__flex-1"></span>
         <button data-type="1" class="b3-button">Hard (H)</button>
         <span class="fn__flex-1"></span>

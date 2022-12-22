@@ -5,7 +5,7 @@ import {isMobile} from "../util/functions";
 import {hideMessage, showMessage} from "../dialog/message";
 
 const genCardItem = (item: { id: string, name: string }) => {
-    return `<li style="margin: 0 !important;" data-id="${item.id}" class="b3-list-item b3-list-item--hide-action">
+    return `<li style="margin: 0 !important;" data-id="${item.id}" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">${item.name}</span>
 <span data-type="add" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addDeck}">
     <svg><use xlink:href="#iconAdd"></use></svg>

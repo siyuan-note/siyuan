@@ -14,6 +14,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {openHistory} from "../../history/history";
 import {Dialog} from "../../dialog";
 import {syncGuide} from "../../sync/syncGuide";
+import {openCard} from "../../card/openCard";
 
 const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) => {
     closePanel();
@@ -123,6 +124,9 @@ export const popMenu = () => {
 </div>
 <div id="menuNewDaily" class="b3-list-item b3-list-item--big">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconCalendar"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dailyNote}</span>
+</div>
+<div id="menuCard" class="b3-list-item b3-list-item--big">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>
 </div>
 <div class="b3-list-item b3-list-item--big" id="menuNewNotebook">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
@@ -413,6 +417,11 @@ ${accountHTML}
                     break;
                 } else if (target.id === "menuNewDaily") {
                     newDailyNote();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.id === "menuCard") {
+                    openCard();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

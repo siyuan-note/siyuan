@@ -121,9 +121,17 @@
     font-size: 16px;
   }
 
+  &__cardaction .b3-button {
+    margin-top: 8px;
+  }
+
   &__cardblock {
     .protyle-wysiwyg {
       padding: 16px;
+
+      [data-node-id][custom-riff-decks] {
+        box-shadow: none;
+      }
     }
 
     &--show span[data-type~=mark] {

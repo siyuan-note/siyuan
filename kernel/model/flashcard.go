@@ -86,6 +86,9 @@ func GetDueFlashcards(deckID string) (ret []string, err error) {
 		}
 		ret = append(ret, blockID)
 	}
+	if 1 > len(ret) {
+		ret = []string{}
+	}
 	return
 }
 
@@ -107,6 +110,9 @@ func getAllDueFlashcards() (ret []string, err error) {
 			ret = append(ret, blockID)
 			blockIDs[blockID] = true
 		}
+	}
+	if 1 > len(ret) {
+		ret = []string{}
 	}
 	return
 }

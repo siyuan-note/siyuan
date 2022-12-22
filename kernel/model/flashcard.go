@@ -22,7 +22,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -46,12 +45,11 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 	return
 }
 
-type Flashcard struct {
-	ID      string
-	BlockID string
-}
+func GetDueFlashcards(deckID string) (ret []string, err error) {
+	if "" == deckID {
+		return getAllDueFlashcards()
+	}
 
-func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
 	deck := Decks[deckID]
 	deckLock.Unlock()
@@ -63,10 +61,29 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 		if nil != getErr {
 			continue
 		}
-		ret = append(ret, &Flashcard{
-			ID:      card.ID(),
-			BlockID: blockID,
-		})
+		ret = append(ret, blockID)
+	}
+	return
+}
+
+func getAllDueFlashcards() (ret []string, err error) {
+	blockIDs := map[string]bool{}
+	for _, deck := range Decks {
+		cards := deck.Dues()
+		for _, card := range cards {
+			blockID := card.BlockID()
+			_, getErr := GetBlock(blockID)
+			if nil != getErr {
+				continue
+			}
+
+			if blockIDs[blockID] {
+				continue
+			}
+
+			ret = append(ret, blockID)
+			blockIDs[blockID] = true
+		}
 	}
 	return
 }
@@ -106,7 +123,8 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 
 func InitFlashcards() {
 	riffSavePath := getRiffDir()
-	if !gulu.File.IsDir(riffSavePath) {
+	if err := os.MkdirAll(riffSavePath, 0755); nil != err {
+		logging.LogErrorf("create riff dir [%s] failed: %s", riffSavePath, err)
 		return
 	}
 
@@ -125,11 +143,30 @@ func InitFlashcards() {
 				continue
 			}
 
-			deckLock.Lock()
 			Decks[deckID] = deck
-			deckLock.Unlock()
 		}
 	}
+
+	if 1 > len(Decks) {
+		deck, createErr := CreateDeck("Default Deck")
+		if nil == createErr {
+			Decks[deck.ID] = deck
+		}
+	}
+}
+
+func RenameDeck(deckID string, name string) (err error) {
+	deckLock.Lock()
+	deck := Decks[deckID]
+	deckLock.Unlock()
+
+	deck.Name = name
+	err = deck.Save()
+	if nil != err {
+		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
+		return
+	}
+	return
 }
 
 func CreateDeck(name string) (deck *riff.Deck, err error) {

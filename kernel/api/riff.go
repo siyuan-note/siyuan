@@ -56,7 +56,6 @@ func getRiffDueCards(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
-
 	cards, err := model.GetDueFlashcards(deckID)
 	if nil != err {
 		ret.Code = -1
@@ -106,6 +105,25 @@ func addRiffCards(c *gin.Context) {
 		blockIDs = append(blockIDs, blockID.(string))
 	}
 	err := model.AddFlashcards(deckID, blockIDs)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func renameRiffDeck(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	deckID := arg["deckID"].(string)
+	name := arg["name"].(string)
+	err := model.RenameDeck(deckID, name)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -66,7 +66,7 @@ const renderCompare = (element: HTMLElement) => {
 
     fetchPost("/api/repo/openRepoSnapshotDoc", {id: element.getAttribute("data-id")}, (response) => {
         leftElement.classList.remove("fn__none");
-        const textElement = (leftElement.firstElementChild.nextElementSibling as HTMLTextAreaElement)
+        const textElement = (leftElement.firstElementChild.nextElementSibling as HTMLTextAreaElement);
         if (response.data.isLargeDoc) {
             textElement.value = response.data.content;
             textElement.classList.remove("fn__none");
@@ -81,7 +81,7 @@ const renderCompare = (element: HTMLElement) => {
     if (id2) {
         rightElement.classList.remove("fn__none");
         fetchPost("/api/repo/openRepoSnapshotDoc", {id: id2}, (response) => {
-            const textElement = (rightElement.firstElementChild.nextElementSibling as HTMLTextAreaElement)
+            const textElement = (rightElement.firstElementChild.nextElementSibling as HTMLTextAreaElement);
             if (response.data.isLargeDoc) {
                 textElement.value = response.data.content;
                 textElement.classList.remove("fn__none");

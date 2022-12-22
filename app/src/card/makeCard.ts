@@ -13,20 +13,20 @@ const genCardItem = (item: { id: string, name: string }) => {
 <span data-type="remove" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconMin"></use></svg>
 </span>
-</li>`
-}
+</li>`;
+};
 
 export const makeCard = (nodeElement: Element[]) => {
     const range = getEditorRange(nodeElement[0]);
     fetchPost("/api/riff/getRiffDecks", {}, (response) => {
-        let html = ''
-        const ids: string[] = []
+        let html = "";
+        const ids: string[] = [];
         nodeElement.forEach(item => {
-            ids.push(item.getAttribute("data-node-id"))
-        })
+            ids.push(item.getAttribute("data-node-id"));
+        });
         response.data.forEach((item: { id: string, name: string }) => {
-            html += genCardItem(item)
-        })
+            html += genCardItem(item);
+        });
         const dialog = new Dialog({
             width: isMobile() ? "80vw" : "50vw",
             height: "70vh",
@@ -52,18 +52,18 @@ export const makeCard = (nodeElement: Element[]) => {
             while (target && !target.isSameNode(dialog.element)) {
                 const type = target.getAttribute("data-type");
                 if (type === "create") {
-                    let msgId = ""
+                    let msgId = "";
                     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
                     if (inputElement.value) {
                         if (msgId) {
                             hideMessage(msgId);
                         }
                         fetchPost("/api/riff/createRiffDeck", {name: inputElement.value}, (response) => {
-                            dialog.element.querySelector(".b3-list").insertAdjacentHTML("afterbegin", genCardItem(response.data))
-                            inputElement.value = '';
-                        })
+                            dialog.element.querySelector(".b3-list").insertAdjacentHTML("afterbegin", genCardItem(response.data));
+                            inputElement.value = "";
+                        });
                     } else {
-                        msgId = showMessage(window.siyuan.languages._kernel[142])
+                        msgId = showMessage(window.siyuan.languages._kernel[142]);
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -73,8 +73,8 @@ export const makeCard = (nodeElement: Element[]) => {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
                     }, () => {
-                        showMessage(window.siyuan.languages.addDeck)
-                    })
+                        showMessage(window.siyuan.languages.addDeck);
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -83,14 +83,14 @@ export const makeCard = (nodeElement: Element[]) => {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
                     }, () => {
-                        showMessage(window.siyuan.languages.removeDeck)
-                    })
+                        showMessage(window.siyuan.languages.removeDeck);
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
                 }
                 target = target.parentElement;
             }
-        })
-    })
+        });
+    });
 };

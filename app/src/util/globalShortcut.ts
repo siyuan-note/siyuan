@@ -539,7 +539,7 @@ export const globalShortcut = () => {
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.riffCard.custom, event)) {
-            openCard()
+            openCard();
             event.preventDefault();
             return;
         }

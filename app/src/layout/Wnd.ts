@@ -282,9 +282,9 @@ export class Wnd {
             const oldTab = getInstanceById(tabId) as Tab;
             if (oldTab.model instanceof  Asset) {
                 // https://github.com/siyuan-note/siyuan/issues/6890
-                const pdfViewerElement = oldTab.model.element.querySelector("#viewerContainer")
+                const pdfViewerElement = oldTab.model.element.querySelector("#viewerContainer");
                 if (pdfViewerElement) {
-                    pdfViewerElement.setAttribute("data-scrolltop", pdfViewerElement.scrollTop.toString())
+                    pdfViewerElement.setAttribute("data-scrolltop", pdfViewerElement.scrollTop.toString());
                 }
             }
             if (dragElement.style.height === "50%" || dragElement.style.width === "50%") {

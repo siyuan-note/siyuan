@@ -11,13 +11,13 @@ export const openCard = () => {
     fetchPost("/api/riff/getRiffDecks", {}, (response) => {
         response.data.forEach((deck: { id: string, name: string }) => {
             decksHTML += `<option value="${deck.id}">${deck.name}</option>`;
-        })
+        });
         fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
             let blocks = cardsResponse.data;
-            let countHTML = ''
-            let index = 0
+            let countHTML = "";
+            let index = 0;
             if (blocks.length > 0) {
-                countHTML = `<span>1</span>/${blocks.length}`
+                countHTML = `<span>1</span>/${blocks.length}`;
             }
             const dialog = new Dialog({
                 title: window.siyuan.languages.riffCard,
@@ -43,7 +43,7 @@ export const openCard = () => {
 </div>`,
                 width: isMobile() ? "80vw" : "50vw",
                 height: "70vh",
-            })
+            });
             dialog.element.querySelector("input").focus();
             const editor = new Protyle(dialog.element.querySelector("[data-type='render']") as HTMLElement, {
                 blockId: "",
@@ -64,48 +64,48 @@ export const openCard = () => {
                     onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                 });
             }
-            dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom)
-            const countElement = dialog.element.querySelector('[data-type="count"]')
-            const actionElement = dialog.element.querySelector('[data-type="action"]')
-            const selectElement = dialog.element.querySelector("select")
-            selectElement.addEventListener("change", (event) => {
+            dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
+            const countElement = dialog.element.querySelector('[data-type="count"]');
+            const actionElement = dialog.element.querySelector('[data-type="action"]');
+            const selectElement = dialog.element.querySelector("select");
+            selectElement.addEventListener("change", () => {
                 fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {
                     blocks = cardsChangeResponse.data;
-                    index = 0
+                    index = 0;
                     if (blocks.length > 0) {
-                        countElement.innerHTML = `<span>1</span>/${blocks.length}`
-                        countElement.classList.remove("fn__none")
-                        editor.protyle.element.classList.remove("fn__none")
-                        editor.protyle.element.nextElementSibling.classList.add("fn__none")
-                        actionElement.classList.remove("fn__none")
+                        countElement.innerHTML = `<span>1</span>/${blocks.length}`;
+                        countElement.classList.remove("fn__none");
+                        editor.protyle.element.classList.remove("fn__none");
+                        editor.protyle.element.nextElementSibling.classList.add("fn__none");
+                        actionElement.classList.remove("fn__none");
                         fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
                             onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                         });
                     } else {
-                        countElement.classList.add("fn__none")
-                        editor.protyle.element.classList.add("fn__none")
-                        editor.protyle.element.nextElementSibling.classList.remove("fn__none")
-                        actionElement.classList.add("fn__none")
+                        countElement.classList.add("fn__none");
+                        editor.protyle.element.classList.add("fn__none");
+                        editor.protyle.element.nextElementSibling.classList.remove("fn__none");
+                        actionElement.classList.add("fn__none");
                     }
-                })
-            })
+                });
+            });
             dialog.element.addEventListener("click", (event) => {
-                let type = ""
+                let type = "";
                 if (typeof event.detail === "string") {
                     if (event.detail === "a") {
-                        type = "0"
+                        type = "0";
                     } else if (event.detail === "h") {
-                        type = "1"
+                        type = "1";
                     } else if (event.detail === "g") {
-                        type = "2"
+                        type = "2";
                     } else if (event.detail === "e") {
-                        type = "3"
+                        type = "3";
                     } else if (event.detail === "s") {
-                        type = "-1"
+                        type = "-1";
                     }
                 }
                 if (!type) {
-                    const buttonElement = hasClosestByClassName(event.target as HTMLElement, "b3-button")
+                    const buttonElement = hasClosestByClassName(event.target as HTMLElement, "b3-button");
                     if (buttonElement) {
                         type = buttonElement.getAttribute("data-type");
                     }
@@ -125,21 +125,21 @@ export const openCard = () => {
                         blockID: blocks[index].blockID,
                         rating: parseInt(type)
                     }, () => {
-                        index++
+                        index++;
                         if (index > blocks.length - 1) {
-                            countElement.classList.add("fn__none")
-                            editor.protyle.element.classList.add("fn__none")
-                            editor.protyle.element.nextElementSibling.classList.remove("fn__none")
-                            actionElement.classList.add("fn__none")
+                            countElement.classList.add("fn__none");
+                            editor.protyle.element.classList.add("fn__none");
+                            editor.protyle.element.nextElementSibling.classList.remove("fn__none");
+                            actionElement.classList.add("fn__none");
                             return;
                         }
-                        countElement.firstElementChild.innerHTML = (index + 1).toString()
+                        countElement.firstElementChild.innerHTML = (index + 1).toString();
                         fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
                             onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
                         });
-                    })
+                    });
                 }
-            })
-        })
-    })
-}
+            });
+        });
+    });
+};

@@ -916,7 +916,7 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     inputEvent(element, config, undefined, edit);
     localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(config));
     window.siyuan.menus.menu.remove();
-}
+};
 
 const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
     const filterDialog = new Dialog({

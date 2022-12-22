@@ -812,10 +812,10 @@ func yfm(docIAL map[string]string) string {
 	if "" == created {
 		created = updated
 	}
-	buf.WriteString("created: ")
+	buf.WriteString("date: ")
 	buf.WriteString(created)
 	buf.WriteString("\n")
-	buf.WriteString("updated: ")
+	buf.WriteString("lastmod: ")
 	buf.WriteString(updated)
 	buf.WriteString("\n")
 	if "" != tags {

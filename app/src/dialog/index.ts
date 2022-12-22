@@ -1,4 +1,3 @@
-import {getEventName} from "../protyle/util/compatibility";
 import {genUUID} from "../util/genID";
 
 export class Dialog {
@@ -31,17 +30,19 @@ export class Dialog {
   <div style="height:${options.height || "auto"}">${options.content}</div>
 </div></div>`;
 
-        this.element.querySelector(".b3-dialog__scrim").addEventListener(getEventName(), (event) => {
+        this.element.querySelector(".b3-dialog__scrim").addEventListener("click", (event) => {
             if (!this.disableClose) {
                 this.destroy();
             }
+            event.preventDefault();
             event.stopPropagation();
             // https://ld246.com/article/1657969292700/comment/1658147006669#comments
             window.siyuan.menus.menu.remove();
         });
         if (!this.disableClose) {
-            this.element.querySelector(".b3-dialog__close").addEventListener(getEventName(), (event) => {
+            this.element.querySelector(".b3-dialog__close").addEventListener("click", (event) => {
                 this.destroy();
+                event.preventDefault();
                 event.stopPropagation();
             });
         }

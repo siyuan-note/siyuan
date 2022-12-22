@@ -26,6 +26,28 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func renderRiffCard(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	blockID := arg["blockID"].(string)
+	content, err := model.RenderFlashcard(blockID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"content": content,
+	}
+}
+
 func reviewRiffCard(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

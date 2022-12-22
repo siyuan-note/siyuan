@@ -17,16 +17,19 @@
 package model
 
 import (
-	"github.com/88250/lute"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -148,6 +151,63 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
 	deck := Decks[deckID]
 	deckLock.Unlock()
+
+	var rootIDs []string
+	blockRoots := map[string]string{}
+	for _, blockID := range blockIDs {
+		bt := treenode.GetBlockTree(blockID)
+		if nil == bt {
+			continue
+		}
+
+		rootIDs = append(rootIDs, bt.RootID)
+		blockRoots[blockID] = bt.RootID
+	}
+	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
+
+	trees := map[string]*parse.Tree{}
+	for _, blockID := range blockIDs {
+		rootID := blockRoots[blockID]
+
+		tree := trees[rootID]
+		if nil == tree {
+			tree, _ = loadTreeByBlockID(blockID)
+		}
+		if nil == tree {
+			continue
+		}
+		trees[rootID] = tree
+
+		node := treenode.GetNodeInTree(tree, blockID)
+		if nil == node {
+			continue
+		}
+
+		oldAttrs := parse.IAL2Map(node.KramdownIAL)
+
+		deckAttrs := node.IALAttr("custom-riff-decks")
+		deckIDs := strings.Split(deckAttrs, ",")
+		deckIDs = append(deckIDs, deckID)
+		deckIDs = gulu.Str.RemoveDuplicatedElem(deckIDs)
+		val := strings.Join(deckIDs, ",")
+		val = strings.TrimPrefix(val, ",")
+		val = strings.TrimSuffix(val, ",")
+		node.SetIALAttr("custom-riff-decks", val)
+
+		if err = indexWriteJSONQueue(tree); nil != err {
+			return
+		}
+
+		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
+
+		newAttrs := parse.IAL2Map(node.KramdownIAL)
+		doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: blockID}
+		trans := []*Transaction{{
+			DoOperations:   []*Operation{doOp},
+			UndoOperations: []*Operation{},
+		}}
+		pushBroadcastAttrTransactions(trans)
+	}
 
 	for _, blockID := range blockIDs {
 		cardID := ast.NewNodeID()

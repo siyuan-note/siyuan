@@ -68,7 +68,12 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 	return
 }
 
-func GetDueFlashcards(deckID string) (ret []string, err error) {
+type Flashcard struct {
+	DeckID  string `json:"deckID"`
+	BlockID string `json:"blockID"`
+}
+
+func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	if "" == deckID {
 		return getAllDueFlashcards()
 	}
@@ -84,15 +89,18 @@ func GetDueFlashcards(deckID string) (ret []string, err error) {
 		if nil != getErr {
 			continue
 		}
-		ret = append(ret, blockID)
+		ret = append(ret, &Flashcard{
+			DeckID:  deckID,
+			BlockID: blockID,
+		})
 	}
 	if 1 > len(ret) {
-		ret = []string{}
+		ret = []*Flashcard{}
 	}
 	return
 }
 
-func getAllDueFlashcards() (ret []string, err error) {
+func getAllDueFlashcards() (ret []*Flashcard, err error) {
 	blockIDs := map[string]bool{}
 	for _, deck := range Decks {
 		cards := deck.Dues()
@@ -107,12 +115,15 @@ func getAllDueFlashcards() (ret []string, err error) {
 				continue
 			}
 
-			ret = append(ret, blockID)
+			ret = append(ret, &Flashcard{
+				DeckID:  deck.ID,
+				BlockID: blockID,
+			})
 			blockIDs[blockID] = true
 		}
 	}
 	if 1 > len(ret) {
-		ret = []string{}
+		ret = []*Flashcard{}
 	}
 	return
 }

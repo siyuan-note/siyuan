@@ -28,7 +28,6 @@ All local features are free.
 
 * Content block
   * Block-level reference and two-way links
-  * Document relationship diagram, global relationship diagram
   * Custom attributes
   * SQL query embed
   * Protocol `siyuan://`
@@ -47,11 +46,6 @@ All local features are free.
   * Standard Markdown with assets
   * PDF, Word and HTML
   * Copy to WeChat MP, Zhihu and Yuque
-* Community bazaar
-  * Themes
-  * Icons
-  * Templates
-  * Widgets
 * End-to-end encrypted data sync and backup via the third-party cloud storage services
   * S3
   * WebDAV
@@ -62,6 +56,7 @@ All local features are free.
 * Android/iOS APP
 * Docker deployment
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+* Community bazaar
 
 ### Paid subscription
 

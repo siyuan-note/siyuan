@@ -103,6 +103,21 @@
     }
   }
 
+  &--error {
+    color: var(--b3-card-error-color);
+    background-color: var(--b3-card-error-background);
+  }
+
+  &--warning {
+    color: var(--b3-card-warning-color);
+    background-color: var(--b3-card-warning-background);
+  }
+
+  &--success {
+    color: var(--b3-card-success-color);
+    background-color: var(--b3-card-success-background);
+  }
+
   &:disabled {
     opacity: 0.37;
     cursor: not-allowed;

@@ -203,6 +203,7 @@ func getRiffDecks(c *gin.Context) {
 		data = append(data, map[string]interface{}{
 			"id":   deck.ID,
 			"name": deck.Name,
+			"size": len(deck.BlockCard),
 		})
 	}
 	if 1 > len(data) {

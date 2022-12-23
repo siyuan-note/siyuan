@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -201,9 +202,11 @@ func getRiffDecks(c *gin.Context) {
 	var data []interface{}
 	for _, deck := range decks {
 		data = append(data, map[string]interface{}{
-			"id":   deck.ID,
-			"name": deck.Name,
-			"size": len(deck.BlockCard),
+			"id":      deck.ID,
+			"name":    deck.Name,
+			"size":    len(deck.BlockCard),
+			"created": time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"),
+			"updated": time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05"),
 		})
 	}
 	if 1 > len(data) {

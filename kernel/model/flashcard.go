@@ -336,7 +336,7 @@ func InitFlashcards() {
 				deck.Created = time.Now().Unix()
 			}
 			if 0 == deck.Updated {
-				deck.Updated = time.Now().UnixMilli()
+				deck.Updated = deck.Created
 			}
 
 			Decks[deckID] = deck

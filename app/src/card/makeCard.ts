@@ -8,6 +8,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 const genCardItem = (item: ICard) => {
     return `<li style="margin: 0 !important;" data-id="${item.id}" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">${item.name}</span>
+<span class="popover__block counter b3-tooltips b3-tooltips__w${isMobile()?"": " fn__none"}" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
 <span data-type="add" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addDeck}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </span>
@@ -20,8 +21,8 @@ const genCardItem = (item: ICard) => {
 <span data-type="delete" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
+<span class="popover__block counter b3-tooltips b3-tooltips__w${isMobile()?" fn__none": ""}" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
 <span class="b3-list-item__meta${isMobile()?" fn__none": ""}">${item.updated}</span>
-<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
 </li>`;
 };
 

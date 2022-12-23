@@ -452,7 +452,6 @@ func moveTree(tree *parse.Tree) {
 
 func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	luteEngine := lute.New()
-	luteEngine.SetProtyleWYSIWYG(true)
 	luteEngine.SetFootnotes(false)
 	luteEngine.SetToC(false)
 	luteEngine.SetIndentCodeBlock(false)
@@ -510,6 +509,14 @@ func genTreeID(tree *parse.Tree) {
 		if "" == n.ID && 0 < len(n.KramdownIAL) && ast.NodeDocument != n.Type {
 			n.ID = n.IALAttr("id")
 		}
+
+		if ast.NodeParagraph == n.Type && nil != n.FirstChild && ast.NodeTaskListItemMarker == n.FirstChild.Type {
+			// 踢掉任务列表的第一个子节点左侧空格
+			n.FirstChild.Next.Tokens = bytes.TrimLeft(n.FirstChild.Next.Tokens, " ")
+			// 调整 li.p.tlim 为 li.tlim.p
+			n.InsertBefore(n.FirstChild)
+		}
+
 		return ast.WalkContinue
 	})
 	tree.Root.KramdownIAL = parse.Tokens2IAL(tree.Root.LastChild.Tokens)

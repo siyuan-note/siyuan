@@ -5,7 +5,7 @@ import {isMobile} from "../util/functions";
 import {hideMessage, showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
 
-const genCardItem = (item: { id: string, name: string }) => {
+const genCardItem = (item: ICard) => {
     return `<li style="margin: 0 !important;" data-id="${item.id}" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">${item.name}</span>
 <span data-type="add" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addDeck}">
@@ -20,6 +20,8 @@ const genCardItem = (item: { id: string, name: string }) => {
 <span data-type="delete" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
+<span class="b3-list-item__meta">${item.updated}</span>
+<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
 </li>`;
 };
 
@@ -31,7 +33,7 @@ export const makeCard = (nodeElement: Element[]) => {
         nodeElement.forEach(item => {
             ids.push(item.getAttribute("data-node-id"));
         });
-        response.data.forEach((item: { id: string, name: string }) => {
+        response.data.forEach((item: ICard) => {
             html += genCardItem(item);
         });
         const dialog = new Dialog({
@@ -79,8 +81,8 @@ export const makeCard = (nodeElement: Element[]) => {
                     fetchPost("/api/riff/addRiffCards", {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
-                    }, () => {
-                        showMessage(window.siyuan.languages.addDeck);
+                    }, (addResponse) => {
+                        target.parentElement.outerHTML = genCardItem(addResponse.data)
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -89,14 +91,14 @@ export const makeCard = (nodeElement: Element[]) => {
                     fetchPost("/api/riff/removeRiffCards", {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
-                    }, () => {
-                        showMessage(window.siyuan.languages.removeDeck);
+                    }, (removeResponse) => {
+                        target.parentElement.outerHTML = genCardItem(removeResponse.data)
                     });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
                 } else if (type === "delete") {
-                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.confirmDelete + "?", () => {
+                    confirmDialog(window.siyuan.languages.confirm, `${window.siyuan.languages.confirmDelete} <b>${target.parentElement.querySelector(".b3-list-item__text").textContent}</b>?`, () => {
                         fetchPost("/api/riff/removeRiffDeck", {
                             deckID: target.parentElement.getAttribute("data-id"),
                         }, () => {

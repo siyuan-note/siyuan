@@ -812,7 +812,7 @@ func bootSyncRepo() (err error) {
 			syncingFiles.Store(id, true)
 			continue
 		}
-		if strings.HasPrefix(name, "/storage/") {
+		if strings.HasPrefix(fetchedFile.Path, "/storage/") {
 			syncingStorages = true
 		}
 	}

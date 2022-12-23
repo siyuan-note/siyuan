@@ -972,18 +972,29 @@ func syncRepo(exit, byHand bool) (err error) {
 	// 有数据变更，需要重建索引
 	var upserts, removes []string
 	var upsertTrees int
+	var needReloadFlashcard bool
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
+		if strings.HasPrefix(file.Path, "/storage/riff/") {
+			needReloadFlashcard = true
+		}
+
 		if strings.HasSuffix(file.Path, ".sy") {
 			upsertTrees++
 		}
 	}
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
+		if strings.HasPrefix(file.Path, "/storage/riff/") {
+			needReloadFlashcard = true
+		}
 	}
 
-	cache.ClearDocsIAL() // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
+	if needReloadFlashcard {
+		InitFlashcards()
+	}
 
+	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
 		FullReindex()
 		return

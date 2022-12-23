@@ -3,6 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {hideMessage, showMessage} from "../dialog/message";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 const genCardItem = (item: { id: string, name: string }) => {
     return `<li style="margin: 0 !important;" data-id="${item.id}" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
@@ -12,6 +13,12 @@ const genCardItem = (item: { id: string, name: string }) => {
 </span>
 <span data-type="remove" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconMin"></use></svg>
+</span>
+<span data-type="rename" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.rename}">
+    <svg><use xlink:href="#iconEdit"></use></svg>
+</span>
+<span data-type="delete" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
+    <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
 </li>`;
 };
@@ -84,6 +91,50 @@ export const makeCard = (nodeElement: Element[]) => {
                         blockIDs: ids
                     }, () => {
                         showMessage(window.siyuan.languages.removeDeck);
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "delete") {
+                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.confirmDelete + "?", () => {
+                        fetchPost("/api/riff/removeRiffDeck", {
+                            deckID: target.parentElement.getAttribute("data-id"),
+                        }, () => {
+                            target.parentElement.remove();
+                        });
+                    })
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "rename") {
+                    const renameDialog = new Dialog({
+                        title: window.siyuan.languages.rename,
+                        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                        width: isMobile() ? "80vw" : "520px",
+                    });
+                    const inputElement = renameDialog.element.querySelector("input") as HTMLInputElement;
+                    const btnsElement = renameDialog.element.querySelectorAll(".b3-button");
+                    renameDialog.bindInput(inputElement, () => {
+                        (btnsElement[1] as HTMLButtonElement).click();
+                    });
+                    inputElement.value = target.parentElement.querySelector(".b3-list-item__text").textContent
+                    inputElement.focus();
+                    inputElement.select();
+                    btnsElement[0].addEventListener("click", () => {
+                        renameDialog.destroy();
+                    });
+                    btnsElement[1].addEventListener("click", () => {
+                        fetchPost("/api/riff/renameRiffDeck", {
+                            name: inputElement.value,
+                            deckID: target.parentElement.getAttribute("data-id"),
+                        }, () => {
+                            target.parentElement.querySelector(".b3-list-item__text").textContent = inputElement.value
+                        });
+                        renameDialog.destroy();
                     });
                     event.stopPropagation();
                     event.preventDefault();

@@ -17,6 +17,7 @@
 package model
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,9 +60,14 @@ func RenderFlashcard(blockID string) (content string, err error) {
 
 func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
-	deck := Decks[deckID]
-	deckLock.Unlock()
+	defer deckLock.Unlock()
 
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	deck := Decks[deckID]
 	deck.Review(blockID, rating)
 	err = deck.Save()
 	if nil != err {
@@ -77,14 +83,19 @@ type Flashcard struct {
 }
 
 func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
 	if "" == deckID {
 		return getAllDueFlashcards()
 	}
 
-	deckLock.Lock()
 	deck := Decks[deckID]
-	deckLock.Unlock()
-
 	cards := deck.Dues()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -132,9 +143,14 @@ func getAllDueFlashcards() (ret []*Flashcard, err error) {
 
 func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
-	deck := Decks[deckID]
-	deckLock.Unlock()
+	defer deckLock.Unlock()
 
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	deck := Decks[deckID]
 	var rootIDs []string
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
@@ -214,9 +230,14 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 
 func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
-	deck := Decks[deckID]
-	deckLock.Unlock()
+	defer deckLock.Unlock()
 
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	deck := Decks[deckID]
 	var rootIDs []string
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
@@ -324,9 +345,14 @@ func InitFlashcards() {
 
 func RenameDeck(deckID, name string) (err error) {
 	deckLock.Lock()
-	deck := Decks[deckID]
-	deckLock.Unlock()
+	defer deckLock.Unlock()
 
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	deck := Decks[deckID]
 	deck.Name = name
 	err = deck.Save()
 	if nil != err {
@@ -337,6 +363,14 @@ func RenameDeck(deckID, name string) (err error) {
 }
 
 func RemoveDeck(deckID string) (err error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
 	riffSavePath := getRiffDir()
 	deckPath := filepath.Join(riffSavePath, deckID+".deck")
 	if err = os.Remove(deckPath); nil != err {
@@ -352,6 +386,14 @@ func RemoveDeck(deckID string) (err error) {
 }
 
 func CreateDeck(name string) (deck *riff.Deck, err error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
 	riffSavePath := getRiffDir()
 	deckID := ast.NewNodeID()
 	deck, err = riff.LoadDeck(riffSavePath, deckID)
@@ -360,10 +402,7 @@ func CreateDeck(name string) (deck *riff.Deck, err error) {
 		return
 	}
 	deck.Name = name
-
-	deckLock.Lock()
 	Decks[deckID] = deck
-	deckLock.Unlock()
 	return
 }
 

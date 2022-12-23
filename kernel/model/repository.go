@@ -755,6 +755,7 @@ func IndexRepo(memo string) (err error) {
 }
 
 var syncingFiles = sync.Map{}
+var syncingStorages = false
 
 func IsSyncingFile(rootID string) (ret bool) {
 	_, ret = syncingFiles.Load(rootID)
@@ -803,14 +804,17 @@ func bootSyncRepo() (err error) {
 	}
 
 	syncingFiles = sync.Map{}
+	syncingStorages = false
 	for _, fetchedFile := range fetchedFiles {
 		name := path.Base(fetchedFile.Path)
-		if !(strings.HasSuffix(name, ".sy")) {
+		if strings.HasSuffix(name, ".sy") {
+			id := name[:len(name)-3]
+			syncingFiles.Store(id, true)
 			continue
 		}
-
-		id := name[:len(name)-3]
-		syncingFiles.Store(id, true)
+		if strings.HasPrefix(name, "/storage/") {
+			syncingStorages = true
+		}
 	}
 
 	elapsed := time.Since(start)
@@ -843,6 +847,7 @@ func bootSyncRepo() (err error) {
 				return
 			}
 			syncingFiles = sync.Map{}
+			syncingStorages = false
 		}()
 	}
 	return

@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -329,6 +330,13 @@ func InitFlashcards() {
 			if nil != loadErr {
 				logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
 				continue
+			}
+
+			if 0 == deck.Created {
+				deck.Created = time.Now().Unix()
+			}
+			if 0 == deck.Updated {
+				deck.Updated = time.Now().UnixMilli()
 			}
 
 			Decks[deckID] = deck

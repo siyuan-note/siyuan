@@ -359,33 +359,11 @@
 									"Data": "Reference to a specific asset file, such as a picture or a file. If the asset file is a PDF and is "
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20210923104413-csbeop3"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "annotated"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210923104413-csbeop3",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "annotated"
 								},
 								{
 									"Type": "NodeText",
@@ -480,32 +458,11 @@
 					"Data": ", you can clean up unreferenced assets by one-click. If you need to retrieve files that have been deleted by mistake, please via "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20210104091559-kgrtuyh"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "Rollback"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210104091559-kgrtuyh",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Rollback"
 				},
 				{
 					"Type": "NodeText",

@@ -135,33 +135,11 @@
 					"Data": "In addition to local data history, data snapshots are also used for cloud "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20210721112206-mhr9wxi"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "data synchronization"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210721112206-mhr9wxi",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "data synchronization"
 				},
 				{
 					"Type": "NodeText",
@@ -359,33 +337,11 @@
 									"Data": "When using "
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20210115224203-q8bj2gd"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "Cleanup unreferenced assets"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210115224203-q8bj2gd",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Cleanup unreferenced assets"
 								},
 								{
 									"Type": "NodeText",

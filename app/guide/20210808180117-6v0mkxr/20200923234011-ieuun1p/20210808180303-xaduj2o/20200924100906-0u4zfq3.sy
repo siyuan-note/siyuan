@@ -74,32 +74,11 @@
 					"Data": "If the screen of the device you are using is small, you can consider "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20201004194026-s8h2cog"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "use on browser"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201004194026-s8h2cog",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "use on browser"
 				},
 				{
 					"Type": "NodeText",

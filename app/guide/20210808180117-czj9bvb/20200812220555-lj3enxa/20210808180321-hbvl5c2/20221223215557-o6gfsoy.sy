@@ -1,0 +1,331 @@
+{
+	"ID": "20221223215557-o6gfsoy",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20221223215557-o6gfsoy",
+		"title": "闪卡",
+		"updated": "20221223221838"
+	},
+	"Children": [
+		{
+			"ID": "20221223215557-glo2lx8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223215557-glo2lx8",
+				"updated": "20221223215621"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20221223215621-389av1h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221223215621-389av1h",
+				"updated": "20221223221748"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将内容块设置为闪卡后会自动通过间隔重复算法 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler",
+					"TextMarkTextContent": "FSRS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 安排复习。"
+				}
+			]
+		},
+		{
+			"ID": "20221223215830-w8x8z8q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223215830-w8x8z8q",
+				"updated": "20221223215834"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20221223215834-z8ny593",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223215834-z8ny593",
+				"updated": "20221223221347"
+			},
+			"Children": [
+				{
+					"ID": "20221223220707-il9wt7t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223220707-il9wt7t",
+						"updated": "20221223221347"
+					},
+					"Children": [
+						{
+							"ID": "20221223220707-v0oxdls",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223220707-v0oxdls",
+								"updated": "20221223221347"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "标记"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 元素会被视作挖空的答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223220723-2ltt4np",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223220723-2ltt4np"
+					},
+					"Children": [
+						{
+							"ID": "20221223220723-ti8ofs3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223220723-ti8ofs3",
+								"updated": "20221223220723"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在块标菜单中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "闪卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，然后选择将该内容块添加到一个卡包中"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223220710-o4y8jae",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223220710-o4y8jae"
+					},
+					"Children": [
+						{
+							"ID": "20221223220710-n98j2n8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223220710-n98j2n8",
+								"updated": "20221223220711"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通过点击顶栏菜单中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "闪卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 可进入复习界面"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221223221214-wr48h8b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221214-wr48h8b",
+				"updated": "20221223221216"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20221223221217-uwk0y7w",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221217-uwk0y7w",
+				"updated": "20221223221400"
+			},
+			"Children": [
+				{
+					"ID": "20221223221218-t9lwyc0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221218-t9lwyc0",
+						"updated": "20221223221400"
+					},
+					"Children": [
+						{
+							"ID": "20221223221218-yg6b7jy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221218-yg6b7jy",
+								"updated": "20221223221400"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块被删除（或者 ID 改变）后对应的闪卡会失效"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221223220732-dnlb630",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223220732-dnlb630",
+				"updated": "20221223220940"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "技术实现"
+				}
+			]
+		},
+		{
+			"ID": "20221223220757-67tsme7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223220757-67tsme7",
+				"updated": "20221223221838"
+			},
+			"Children": [
+				{
+					"ID": "20221223221124-i31so3y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221124-i31so3y",
+						"updated": "20221223221838"
+					},
+					"Children": [
+						{
+							"ID": "20221223221124-9sxp1o4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221124-9sxp1o4",
+								"updated": "20221223221838"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "卡包数据通过 MessagePack 序列化协议存储在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/data/storage/riff/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文件夹下"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221126-3dokoaw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221126-3dokoaw",
+						"updated": "20221223221417"
+					},
+					"Children": [
+						{
+							"ID": "20221223221126-0gr7zxn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221126-0gr7zxn",
+								"updated": "20221223221417"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "启动时加载所有卡包数据到内存，数据同步下载后重新加载一次"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

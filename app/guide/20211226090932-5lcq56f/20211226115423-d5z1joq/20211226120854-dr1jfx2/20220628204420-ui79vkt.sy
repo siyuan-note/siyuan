@@ -414,33 +414,11 @@
 					"Data": "在實際執行優化排版之前，思源會自動備份一次原有的文檔，這樣如果優化結果不滿意也能夠通過"
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20211226122707-8cr09co"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "數據歷史"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122707-8cr09co",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "數據歷史"
 				},
 				{
 					"Type": "NodeText",

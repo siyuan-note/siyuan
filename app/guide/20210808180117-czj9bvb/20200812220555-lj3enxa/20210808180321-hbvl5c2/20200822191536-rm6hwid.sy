@@ -74,32 +74,11 @@
 					"Data": "如果你正在使用的设备屏幕较小，可以考虑"
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20201004184819-nj8ibyg"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "通过浏览器使用"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201004184819-nj8ibyg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "通过浏览器使用"
 				},
 				{
 					"Type": "NodeText",

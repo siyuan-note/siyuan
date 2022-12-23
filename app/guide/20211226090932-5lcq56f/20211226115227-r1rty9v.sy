@@ -1354,33 +1354,11 @@
 					"Data": "文檔被刪除後不會出現在作業系統回收站中，而是直接刪除，刪除時思源會生成"
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20211226122707-8cr09co"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "數據歷史"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122707-8cr09co",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "數據歷史"
 				},
 				{
 					"Type": "NodeText",

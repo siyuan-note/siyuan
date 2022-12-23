@@ -40,32 +40,11 @@
 					"Data": "Hover the mouse over the content block and the corresponding icon will appear on the left side of the content block. For format usage, please refer to "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200924093441-ft2rhps"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "Markdown Complete Demo"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924093441-ft2rhps",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Markdown Complete Demo"
 				},
 				{
 					"Type": "NodeText",
@@ -120,33 +99,11 @@
 									"Data": "th",
 									"Children": [
 										{
-											"Type": "NodeBlockRef",
-											"Data": "span",
-											"Children": [
-												{
-													"Type": "NodeOpenParen"
-												},
-												{
-													"Type": "NodeOpenParen"
-												},
-												{
-													"Type": "NodeBlockRefID",
-													"Data": "20200925102736-x94e40g"
-												},
-												{
-													"Type": "NodeBlockRefSpace"
-												},
-												{
-													"Type": "NodeBlockRefText",
-													"Data": "Meta Type"
-												},
-												{
-													"Type": "NodeCloseParen"
-												},
-												{
-													"Type": "NodeCloseParen"
-												}
-											]
+											"Type": "NodeTextMark",
+											"TextMarkType": "block-ref",
+											"TextMarkBlockRefID": "20200925102736-x94e40g",
+											"TextMarkBlockRefSubtype": "s",
+											"TextMarkTextContent": "Meta Type"
 										}
 									]
 								}
@@ -1758,32 +1715,11 @@
 					"Data": "The unordered list block is a type "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200925102736-x94e40g"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "container block"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
 				},
 				{
 					"Type": "NodeText",
@@ -1968,32 +1904,11 @@
 					"Data": "An ordered list block is a type "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200925102736-x94e40g"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "container block"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
 				},
 				{
 					"Type": "NodeText",
@@ -2166,32 +2081,11 @@
 					"Data": "The task list block is a type "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200925102736-x94e40g"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "container block"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
 				},
 				{
 					"Type": "NodeText",
@@ -2272,32 +2166,11 @@
 					"Data": "The basic usage of outline notes can be realized through the list item block. The list item block is a type "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200925102736-x94e40g"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "container block"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
 				},
 				{
 					"Type": "NodeText",
@@ -2404,32 +2277,11 @@
 					"Data": "The block reference block is a type "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200925102736-x94e40g"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "container block"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
 				},
 				{
 					"Type": "NodeText",
@@ -2511,32 +2363,11 @@
 					"Data": "The super block is a type "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200925102736-x94e40g"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "container block"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
 				},
 				{
 					"Type": "NodeText",
@@ -2617,32 +2448,11 @@
 					"Data": "The entire document is a block, and the document block is a type "
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20200925102736-x94e40g"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "container block"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
 				},
 				{
 					"Type": "NodeText",

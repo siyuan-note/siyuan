@@ -1,0 +1,333 @@
+{
+	"ID": "20221223221501-mops33i",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20221223221501-mops33i",
+		"title": "閃卡",
+		"updated": "20221223221852"
+	},
+	"Children": [
+		{
+			"ID": "20221223221502-s7obktn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221502-s7obktn",
+				"updated": "20221223221502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20221223221502-wolnn20",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221223221502-wolnn20",
+				"updated": "20221223221743"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將內容塊設置為閃卡後會自動通過間隔重複算法 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler",
+					"TextMarkTextContent": "FSRS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 安排複習。"
+				}
+			]
+		},
+		{
+			"ID": "20221223221502-ezm96rt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221502-ezm96rt",
+				"updated": "20221223221502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20221223221502-rkjnzs0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221502-rkjnzs0",
+				"updated": "20221223221530"
+			},
+			"Children": [
+				{
+					"ID": "20221223221502-pk248zi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221502-pk248zi",
+						"updated": "20221223221502"
+					},
+					"Children": [
+						{
+							"ID": "20221223221502-ydmpbkv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221502-ydmpbkv",
+								"updated": "20221223221502"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "標記"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 元素會被視作挖空的答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221502-8vhk110",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221502-8vhk110",
+						"updated": "20221223221526"
+					},
+					"Children": [
+						{
+							"ID": "20221223221502-3asr889",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221502-3asr889",
+								"updated": "20221223221526"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在塊標菜單中選擇  "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "闪卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，然後選擇將該內容塊添加到一個卡包中"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221502-7e3upud",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221502-7e3upud",
+						"updated": "20221223221530"
+					},
+					"Children": [
+						{
+							"ID": "20221223221502-168jv05",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221502-168jv05",
+								"updated": "20221223221530"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過點擊頂欄菜單中的  "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "闪卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 可進入複習界面"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221223221502-cqcjal6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221502-cqcjal6",
+				"updated": "20221223221502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20221223221502-n4qqurn",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221502-n4qqurn",
+				"updated": "20221223221502"
+			},
+			"Children": [
+				{
+					"ID": "20221223221502-punrhny",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221502-punrhny",
+						"updated": "20221223221502"
+					},
+					"Children": [
+						{
+							"ID": "20221223221502-u6e20cj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221502-u6e20cj",
+								"updated": "20221223221502"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊被刪除（或者 ID 改變）後對應的閃卡會失效"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221223221502-gtk5evt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221502-gtk5evt",
+				"updated": "20221223221502"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "技術實現"
+				}
+			]
+		},
+		{
+			"ID": "20221223221502-2rwr82o",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221502-2rwr82o",
+				"updated": "20221223221852"
+			},
+			"Children": [
+				{
+					"ID": "20221223221502-nrh9pu3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221502-nrh9pu3",
+						"updated": "20221223221852"
+					},
+					"Children": [
+						{
+							"ID": "20221223221502-iku6lwx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221502-iku6lwx",
+								"updated": "20221223221852"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "卡包數據通過 MessagePack 序列化協議存儲在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空間/data/storage/riff/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文件夾下"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221502-vrom8jb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221502-vrom8jb",
+						"updated": "20221223221502"
+					},
+					"Children": [
+						{
+							"ID": "20221223221502-yfedqlh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221502-yfedqlh",
+								"updated": "20221223221502"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "啟動時加載所有卡包數據到內存，數據同步下載後重新加載一次"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

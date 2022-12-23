@@ -209,56 +209,14 @@
 					}
 				},
 				{
-					"Type": "NodeBlockRef",
+					"Type": "NodeTextMark",
 					"Properties": {
 						"id": ""
 					},
-					"Children": [
-						{
-							"Type": "NodeOpenParen",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeOpenParen",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20211226122545-lsv6dhu",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeBlockRefSpace",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "鑒權密碼",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Properties": {
-								"id": ""
-							}
-						},
-						{
-							"Type": "NodeCloseParen",
-							"Properties": {
-								"id": ""
-							}
-						}
-					]
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122545-lsv6dhu",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "鑒權密碼"
 				},
 				{
 					"Type": "NodeText",

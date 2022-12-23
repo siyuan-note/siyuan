@@ -1,0 +1,329 @@
+{
+	"ID": "20221223221636-ms2b4w9",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20221223221636-ms2b4w9",
+		"title": "Flashcard",
+		"updated": "20221223221956"
+	},
+	"Children": [
+		{
+			"ID": "20221223221639-cllnc0l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-cllnc0l",
+				"updated": "20221223221639"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-ii0381j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221223221639-ii0381j",
+				"updated": "20221223221754"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After setting the content block as a flashcard, it will automatically arrange the review through the spaced repetition algorithm "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler",
+					"TextMarkTextContent": "FSRS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-0ovzqis",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-0ovzqis",
+				"updated": "20221223221639"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-4wtuvaf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221639-4wtuvaf",
+				"updated": "20221223221956"
+			},
+			"Children": [
+				{
+					"ID": "20221223221639-jm5vt4w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-jm5vt4w",
+						"updated": "20221223221715"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-rx7gp3h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-rx7gp3h",
+								"updated": "20221223221715"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "Mark"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " elements in content blocks will be treated as knockout answers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221639-e1gfrb2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-e1gfrb2",
+						"updated": "20221223221956"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-lokw910",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-lokw910",
+								"updated": "20221223221956"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Flashcard"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the block menu, then choose to add this content block to a card deck"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221639-4udcuga",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-4udcuga",
+						"updated": "20221223221656"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-rjod2g1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-rjod2g1",
+								"updated": "20221223221656"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "You can enter the review interface by clicking "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Flashcard"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the top bar menu"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-djlafd4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-djlafd4",
+				"updated": "20221223221808"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-ycrps4p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221639-ycrps4p",
+				"updated": "20221223221824"
+			},
+			"Children": [
+				{
+					"ID": "20221223221639-k6sg60p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-k6sg60p",
+						"updated": "20221223221824"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-sudl568",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-sudl568",
+								"updated": "20221223221824"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After the content block is deleted (or the ID is changed), the corresponding flashcard will become invalid"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-llefimn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-llefimn",
+				"updated": "20221223221804"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Technical implementation"
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-6l0aw8c",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221639-6l0aw8c",
+				"updated": "20221223221949"
+			},
+			"Children": [
+				{
+					"ID": "20221223221639-4e7uw7m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-4e7uw7m",
+						"updated": "20221223221940"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-y3f8vtv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-y3f8vtv",
+								"updated": "20221223221940"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The card deck data is stored in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/storage/riff/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ folder through the MessagePack serialization protocol"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221639-tplv5uh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-tplv5uh",
+						"updated": "20221223221949"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-cfvh72w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-cfvh72w",
+								"updated": "20221223221949"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Load all card deck data to the memory at startup, and reload once after the data is downloaded synchronously"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

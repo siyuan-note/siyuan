@@ -336,33 +336,11 @@
 									"Data": "引用具體的資料文件，比如圖片或者文件。如果資料文件是 PDF 且做過"
 								},
 								{
-									"Type": "NodeBlockRef",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeBlockRefID",
-											"Data": "20211226122955-ganeraz"
-										},
-										{
-											"Type": "NodeBlockRefSpace"
-										},
-										{
-											"Type": "NodeBlockRefText",
-											"Data": "標註"
-										},
-										{
-											"Type": "NodeCloseParen"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226122955-ganeraz",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "標註"
 								},
 								{
 									"Type": "NodeText",
@@ -461,33 +439,11 @@
 					"Data": "，如果需要找回被誤刪的文件，請通過"
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20211226122720-u1qd8zw"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "回滾（Rollback）"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122720-u1qd8zw",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "回滾（Rollback）"
 				},
 				{
 					"Type": "NodeText",

@@ -444,33 +444,11 @@
 					"Data": "在实际执行优化排版之前，思源会自动备份一次原有的文档，这样如果优化结果不满意也能够通过"
 				},
 				{
-					"Type": "NodeBlockRef",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeBlockRefID",
-							"Data": "20210615211733-v6rzowm"
-						},
-						{
-							"Type": "NodeBlockRefSpace"
-						},
-						{
-							"Type": "NodeBlockRefText",
-							"Data": "数据历史"
-						},
-						{
-							"Type": "NodeCloseParen"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210615211733-v6rzowm",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "数据历史"
 				},
 				{
 					"Type": "NodeText",

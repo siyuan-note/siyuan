@@ -110,6 +110,9 @@ func removeRiffCards(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
+	deck := model.Decks[deckID]
+	ret.Data = deckData(deck)
 }
 
 func addRiffCards(c *gin.Context) {
@@ -133,6 +136,9 @@ func addRiffCards(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
+	deck := model.Decks[deckID]
+	ret.Data = deckData(deck)
 }
 
 func renameRiffDeck(c *gin.Context) {
@@ -188,10 +194,7 @@ func createRiffDeck(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	ret.Data = map[string]interface{}{
-		"id":   deck.ID,
-		"name": deck.Name,
-	}
+	ret.Data = deckData(deck)
 }
 
 func getRiffDecks(c *gin.Context) {
@@ -201,16 +204,20 @@ func getRiffDecks(c *gin.Context) {
 	decks := model.GetDecks()
 	var data []interface{}
 	for _, deck := range decks {
-		data = append(data, map[string]interface{}{
-			"id":      deck.ID,
-			"name":    deck.Name,
-			"size":    len(deck.BlockCard),
-			"created": time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"),
-			"updated": time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05"),
-		})
+		data = append(data, deckData(deck))
 	}
 	if 1 > len(data) {
 		data = []interface{}{}
 	}
 	ret.Data = data
+}
+
+func deckData(deck *riff.Deck) map[string]interface{} {
+	return map[string]interface{}{
+		"id":      deck.ID,
+		"name":    deck.Name,
+		"size":    len(deck.BlockCard),
+		"created": time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"),
+		"updated": time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05"),
+	}
 }

@@ -55,13 +55,10 @@ All local features are free.
 * End-to-end encrypted data sync and backup via the third-party cloud storage services
   * S3
   * WebDAV
-* Hierarchical tag
+* Spaced repetition
 * Multi-tab, drag and drop to split screen
-* Fulltext search
 * Template snippet
 * JavaScript/CSS snippet
-* Keymap
-* Themes and icons
 * Android/iOS APP
 * Docker deployment
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)

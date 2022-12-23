@@ -58,13 +58,9 @@
 * 通过第三方云端存储服务实现端到端加密数据同步和备份
   * S3 
   * WebDAV
-* 层级标签
-* 多页签拖拽分屏
-* 全文搜索
+* 间隔重复
 * 模板片段
 * JavaScript/CSS 代码片段
-* 快捷键
-* 主题和图标
 * Android/iOS APP
 * Docker 部署
 * [API](API_zh_CN.md)

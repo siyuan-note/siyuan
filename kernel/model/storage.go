@@ -233,10 +233,11 @@ func SetCriterion(criterion *Criterion) (err error) {
 	return
 }
 
-func GetCriteria() (ret []*Criterion, err error) {
+func GetCriteria() (ret []*Criterion) {
 	criteriaLock.Lock()
 	defer criteriaLock.Unlock()
-	return getCriteria()
+	ret, _ = getCriteria()
+	return
 }
 
 func setCriteria(criteria []*Criterion) (err error) {

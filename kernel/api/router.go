@@ -301,6 +301,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/riff/createRiffDeck", model.CheckAuth, createRiffDeck)
 	ginServer.Handle("POST", "/api/riff/renameRiffDeck", model.CheckAuth, renameRiffDeck)
+	ginServer.Handle("POST", "/api/riff/removeRiffDeck", model.CheckAuth, removeRiffDeck)
 	ginServer.Handle("POST", "/api/riff/getRiffDecks", model.CheckAuth, getRiffDecks)
 	ginServer.Handle("POST", "/api/riff/addRiffCards", model.CheckAuth, addRiffCards)
 	ginServer.Handle("POST", "/api/riff/removeRiffCards", model.CheckAuth, removeRiffCards)

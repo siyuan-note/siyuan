@@ -293,6 +293,8 @@ func InitFlashcards() {
 		return
 	}
 
+	Decks = map[string]*riff.Deck{}
+
 	entries, err := os.ReadDir(riffSavePath)
 	if nil != err {
 		logging.LogErrorf("read riff dir failed: %s", err)
@@ -320,7 +322,7 @@ func InitFlashcards() {
 	}
 }
 
-func RenameDeck(deckID string, name string) (err error) {
+func RenameDeck(deckID, name string) (err error) {
 	deckLock.Lock()
 	deck := Decks[deckID]
 	deckLock.Unlock()
@@ -331,6 +333,21 @@ func RenameDeck(deckID string, name string) (err error) {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
+	return
+}
+
+func RemoveDeck(deckID string) (err error) {
+	riffSavePath := getRiffDir()
+	deckPath := filepath.Join(riffSavePath, deckID+".deck")
+	if err = os.Remove(deckPath); nil != err {
+		return
+	}
+	cardsPath := filepath.Join(riffSavePath, deckID+".cards")
+	if err = os.Remove(cardsPath); nil != err {
+		return
+	}
+
+	InitFlashcards()
 	return
 }
 

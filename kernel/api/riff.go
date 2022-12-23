@@ -153,6 +153,24 @@ func renameRiffDeck(c *gin.Context) {
 	}
 }
 
+func removeRiffDeck(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	deckID := arg["deckID"].(string)
+	err := model.RemoveDeck(deckID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func createRiffDeck(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

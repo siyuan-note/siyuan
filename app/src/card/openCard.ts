@@ -30,15 +30,15 @@ export const openCard = () => {
     <div class="b3-dialog__cardblock b3-dialog__cardblock--show fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
     <div class="b3-dialog__cardempty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">${window.siyuan.languages.noDueCard}</div>
     <div class="fn__flex b3-dialog__cardaction${blocks.length === 0 ? " fn__none" : ""}" style="flex-wrap: wrap" data-type="action">
-        <button data-type="-1" class="b3-button b3-button--outline">Show (S)</button>
+        <button data-type="-1" class="b3-button">Show (S)</button>
         <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
         <button data-type="0" class="b3-button b3-button--error">Again (A)</button>
         <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
         <button data-type="1" class="b3-button b3-button--warning">Hard (H)</button>
         <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
-        <button data-type="2" class="b3-button b3-button--success">Good (G)</button>
+        <button data-type="2" class="b3-button b3-button--info">Good (G)</button>
         <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
-        <button data-type="3" class="b3-button">Easy (E)</button>
+        <button data-type="3" class="b3-button b3-button--success">Easy (E)</button>
     </div>
 </div>`,
                 width: isMobile() ? "80vw" : "50vw",

@@ -45,7 +45,7 @@ func main() {
 	go model.AutoSync()
 	go model.AutoStat()
 	util.SetBooted()
-	util.ClearPushProgress(100)
+	util.PushClearAllMsg()
 	go model.AutoRefreshCheck()
 	go model.AutoFlushTx()
 	go sql.AutoFlushTreeQueue()

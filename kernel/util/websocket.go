@@ -177,6 +177,11 @@ const (
 	PushProgressCodeEnd        = 2 // 关闭进度
 )
 
+func PushClearAllMsg() {
+	ClearPushProgress(100)
+	PushClearMsg("")
+}
+
 func ClearPushProgress(total int) {
 	PushProgress(PushProgressCodeEnd, total, total, "")
 }

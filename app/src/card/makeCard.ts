@@ -82,7 +82,7 @@ export const makeCard = (nodeElement: Element[]) => {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
                     }, (addResponse) => {
-                        target.parentElement.outerHTML = genCardItem(addResponse.data)
+                        target.parentElement.outerHTML = genCardItem(addResponse.data);
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -92,7 +92,7 @@ export const makeCard = (nodeElement: Element[]) => {
                         deckID: target.parentElement.getAttribute("data-id"),
                         blockIDs: ids
                     }, (removeResponse) => {
-                        target.parentElement.outerHTML = genCardItem(removeResponse.data)
+                        target.parentElement.outerHTML = genCardItem(removeResponse.data);
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -104,7 +104,7 @@ export const makeCard = (nodeElement: Element[]) => {
                         }, () => {
                             target.parentElement.remove();
                         });
-                    })
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -123,7 +123,7 @@ export const makeCard = (nodeElement: Element[]) => {
                     renameDialog.bindInput(inputElement, () => {
                         (btnsElement[1] as HTMLButtonElement).click();
                     });
-                    inputElement.value = target.parentElement.querySelector(".b3-list-item__text").textContent
+                    inputElement.value = target.parentElement.querySelector(".b3-list-item__text").textContent;
                     inputElement.focus();
                     inputElement.select();
                     btnsElement[0].addEventListener("click", () => {
@@ -134,7 +134,7 @@ export const makeCard = (nodeElement: Element[]) => {
                             name: inputElement.value,
                             deckID: target.parentElement.getAttribute("data-id"),
                         }, () => {
-                            target.parentElement.querySelector(".b3-list-item__text").textContent = inputElement.value
+                            target.parentElement.querySelector(".b3-list-item__text").textContent = inputElement.value;
                         });
                         renameDialog.destroy();
                     });

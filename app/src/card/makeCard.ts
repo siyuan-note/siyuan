@@ -20,7 +20,7 @@ const genCardItem = (item: ICard) => {
 <span data-type="delete" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
-<span class="b3-list-item__meta">${item.updated}</span>
+<span class="b3-list-item__meta${isMobile()?" fn__none": ""}">${item.updated}</span>
 <span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
 </li>`;
 };

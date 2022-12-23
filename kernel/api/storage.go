@@ -122,12 +122,7 @@ func getCriteria(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	data, err := model.GetCriteria()
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	data := model.GetCriteria()
 	ret.Data = data
 }
 

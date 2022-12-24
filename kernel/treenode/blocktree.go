@@ -59,6 +59,9 @@ func GetBlockTreeByPath(path string) *BlockTree {
 }
 
 func CountTrees() (ret int) {
+	blockTreesLock.Lock()
+	defer blockTreesLock.Unlock()
+
 	roots := map[string]bool{}
 	for _, b := range blockTrees {
 		roots[b.RootID] = true
@@ -68,6 +71,8 @@ func CountTrees() (ret int) {
 }
 
 func CountBlocks() (ret int) {
+	blockTreesLock.Lock()
+	defer blockTreesLock.Unlock()
 	return len(blockTrees)
 }
 

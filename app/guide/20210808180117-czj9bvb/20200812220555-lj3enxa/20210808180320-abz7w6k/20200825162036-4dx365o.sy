@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20221225004401"
+		"updated": "20221225012910"
 	},
 	"Children": [
 		{
@@ -3116,34 +3116,278 @@
 			]
 		},
 		{
-			"ID": "20221105164044-b22rtsr",
+			"ID": "20221225011731-fkkxxrw",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20221105164044-b22rtsr",
-				"updated": "20221225004401"
+				"id": "20221225011731-fkkxxrw",
+				"updated": "20221225012400"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "需使用 "
+					"Data": "可使用如下三种格式定义："
+				}
+			]
+		},
+		{
+			"ID": "20221225011757-zcfae5d",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221225011757-zcfae5d",
+				"updated": "20221225012910"
+			},
+			"Children": [
+				{
+					"ID": "20221225011757-ojf9val",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221225011757-ojf9val",
+						"updated": "20221225012827"
+					},
+					"Children": [
+						{
+							"ID": "20221225011757-48mzmh0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221225011757-48mzmh0",
+								"updated": "20221225011759"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "JSON"
+								}
+							]
+						},
+						{
+							"ID": "20221225012020-fclr7wc",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20221225012020-fclr7wc",
+								"updated": "20221225012827"
+							},
+							"Children": [
+								{
+									"ID": "20221225012020-ccv0cpm",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221225012020-ccv0cpm",
+										"updated": "20221225012827"
+									},
+									"Children": [
+										{
+											"ID": "20221225012020-a7nibhu",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20221225012020-a7nibhu",
+												"updated": "20221225012827"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "anNvbg=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "{\n    \"propName\": \"propValue\"\n}\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{\u0026quot;key\u0026quot;: \u0026quot;value\u0026quot;}"
+					"ID": "20221225011800-6pbspkn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221225011800-6pbspkn"
+					},
+					"Children": [
+						{
+							"ID": "20221225011800-2y5560p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221225011800-2y5560p",
+								"updated": "20221225011804"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "JavaScript Object"
+								}
+							]
+						},
+						{
+							"ID": "20221225012504-vri2cye",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20221225012504-vri2cye"
+							},
+							"Children": [
+								{
+									"ID": "20221225012503-52bpd8m",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221225012503-52bpd8m"
+									},
+									"Children": [
+										{
+											"ID": "20221225012503-osjhbni",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20221225012503-osjhbni",
+												"updated": "20221225012615"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "amF2YXNjcmlwdA=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "{\n    propName: 'propValue',\n}\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
 				},
+				{
+					"ID": "20221225011805-qla9i5b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221225011805-qla9i5b",
+						"updated": "20221225012910"
+					},
+					"Children": [
+						{
+							"ID": "20221225011805-gv1d4ep",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221225011805-gv1d4ep",
+								"updated": "20221225012006"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "返回一个 JavaScript Object 的立即执行函数"
+								}
+							]
+						},
+						{
+							"ID": "20221225012629-qdzqfiq",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20221225012629-qdzqfiq",
+								"updated": "20221225012910"
+							},
+							"Children": [
+								{
+									"ID": "20221225012629-wkougnr",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221225012629-wkougnr",
+										"updated": "20221225012910"
+									},
+									"Children": [
+										{
+											"ID": "20221225012629-1ha6h2j",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20221225012629-1ha6h2j",
+												"updated": "20221225012910"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "amF2YXNjcmlwdA=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "(() =\u003e {\n    const option = {};\n    option.propName = `propValue`;\n    return option;\n})()\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221105164044-b22rtsr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221105164044-b22rtsr",
+				"updated": "20221225012142"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​ 形式的 JSON 格式或 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{propName: propValue}"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 形式的 JavaScript Object 格式，语法请参考 "
+					"Data": "具体语法请参考 "
 				},
 				{
 					"Type": "NodeTextMark",

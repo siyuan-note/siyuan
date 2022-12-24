@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20221225004617"
+		"updated": "20221225013408"
 	},
 	"Children": [
 		{
@@ -3119,34 +3119,281 @@
 			]
 		},
 		{
-			"ID": "20221105164926-hhpq6np",
+			"ID": "20221225013111-k0tinm3",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20221105164926-hhpq6np",
-				"updated": "20221225004617"
+				"id": "20221225013111-k0tinm3",
+				"updated": "20221225013144"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The JSON format in the form of "
+					"Data": "It can be defined in the following three formats:"
+				}
+			]
+		},
+		{
+			"ID": "20221225013111-f97ur4a",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221225013111-f97ur4a",
+				"updated": "20221225013408"
+			},
+			"Children": [
+				{
+					"ID": "20221225013111-jhcu06t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221225013111-jhcu06t",
+						"updated": "20221225013111"
+					},
+					"Children": [
+						{
+							"ID": "20221225013111-6lkoa8j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221225013111-6lkoa8j",
+								"updated": "20221225013111"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "JSON"
+								}
+							]
+						},
+						{
+							"ID": "20221225013111-t6sb6j6",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20221225013111-t6sb6j6",
+								"updated": "20221225013111"
+							},
+							"Children": [
+								{
+									"ID": "20221225013111-7mps9wm",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221225013111-7mps9wm",
+										"updated": "20221225013111"
+									},
+									"Children": [
+										{
+											"ID": "20221225013111-r6474wt",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20221225013111-r6474wt",
+												"updated": "20221225013111"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "anNvbg=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "{\n    \"propName\": \"propValue\"\n}\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{\u0026quot;key\u0026quot;: \u0026quot;value\u0026quot;}"
+					"ID": "20221225013111-whe7nls",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221225013111-whe7nls",
+						"updated": "20221225013111"
+					},
+					"Children": [
+						{
+							"ID": "20221225013111-nspyxcz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221225013111-nspyxcz",
+								"updated": "20221225013111"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "JavaScript Object"
+								}
+							]
+						},
+						{
+							"ID": "20221225013111-unluh7r",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20221225013111-unluh7r",
+								"updated": "20221225013111"
+							},
+							"Children": [
+								{
+									"ID": "20221225013111-oy9fq7l",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221225013111-oy9fq7l",
+										"updated": "20221225013111"
+									},
+									"Children": [
+										{
+											"ID": "20221225013111-hdaldw8",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20221225013111-hdaldw8",
+												"updated": "20221225013111"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "amF2YXNjcmlwdA=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "{\n    propName: 'propValue',\n}\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
 				},
+				{
+					"ID": "20221225013111-jpxi1rx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221225013111-jpxi1rx",
+						"updated": "20221225013408"
+					},
+					"Children": [
+						{
+							"ID": "20221225013111-n32s76k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221225013111-n32s76k",
+								"updated": "20221225013408"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "An Immediately-Invoked Function Expression (IIFE)  that returns a JavaScript Object"
+								}
+							]
+						},
+						{
+							"ID": "20221225013111-ech372z",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20221225013111-ech372z",
+								"updated": "20221225013111"
+							},
+							"Children": [
+								{
+									"ID": "20221225013111-hhjn30z",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221225013111-hhjn30z",
+										"updated": "20221225013111"
+									},
+									"Children": [
+										{
+											"ID": "20221225013111-vq3lqmp",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20221225013111-vq3lqmp",
+												"updated": "20221225013111"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "amF2YXNjcmlwdA=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "(() =\u003e {\n    const option = {};\n    option.propName = `propValue`;\n    return option;\n})()\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221105164926-hhpq6np",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221105164926-hhpq6np",
+				"updated": "20221225013054"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​ or the JavaScript Object format in the form of "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{propName: propValue}"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ is required. For the syntax, please refer to "
+					"Data": "For the specific syntax, please refer to "
 				},
 				{
 					"Type": "NodeTextMark",

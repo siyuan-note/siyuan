@@ -50,7 +50,6 @@ func RenderFlashcard(blockID string) (content string, err error) {
 	}
 
 	luteEngine := NewLute()
-	luteEngine.RenderOptions.ProtyleContenteditable = false
 	if ast.NodeDocument == node.Type {
 		content = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
 	} else {

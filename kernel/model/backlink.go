@@ -147,53 +147,7 @@ func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, 
 		return
 	}
 
-	var renderNodes []*ast.Node
-	expand := true
-	if ast.NodeListItem == n.Type {
-		if nil == n.FirstChild {
-			return
-		}
-
-		c := n.FirstChild
-		if 3 == n.ListData.Typ {
-			c = n.FirstChild.Next
-		}
-
-		if c != n.LastChild { // 存在子列表
-			for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
-				if treenode.IsBlockRef(liFirstBlockSpan) {
-					continue
-				}
-				if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
-					expand = false
-					break
-				}
-			}
-		}
-
-		renderNodes = append(renderNodes, n)
-	} else if ast.NodeHeading == n.Type {
-		c := n.FirstChild
-		if nil == c {
-			return
-		}
-
-		for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
-			if treenode.IsBlockRef(headingFirstSpan) {
-				continue
-			}
-			if "" != strings.TrimSpace(headingFirstSpan.Text()) {
-				expand = false
-				break
-			}
-		}
-
-		renderNodes = append(renderNodes, n)
-		cc := treenode.HeadingChildren(n)
-		renderNodes = append(renderNodes, cc...)
-	} else {
-		renderNodes = append(renderNodes, n)
-	}
+	renderNodes, expand := getBacklinkRenderNodes(n)
 
 	if 0 < len(mentionKeywords) {
 		for _, renderNode := range renderNodes {
@@ -237,6 +191,56 @@ func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, 
 		DOM:        dom,
 		BlockPaths: buildBlockBreadcrumb(n),
 		Expand:     expand,
+	}
+	return
+}
+
+func getBacklinkRenderNodes(n *ast.Node) (ret []*ast.Node, expand bool) {
+	expand = true
+	if ast.NodeListItem == n.Type {
+		if nil == n.FirstChild {
+			return
+		}
+
+		c := n.FirstChild
+		if 3 == n.ListData.Typ {
+			c = n.FirstChild.Next
+		}
+
+		if c != n.LastChild { // 存在子列表
+			for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
+				if treenode.IsBlockRef(liFirstBlockSpan) {
+					continue
+				}
+				if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
+					expand = false
+					break
+				}
+			}
+		}
+
+		ret = append(ret, n)
+	} else if ast.NodeHeading == n.Type {
+		c := n.FirstChild
+		if nil == c {
+			return
+		}
+
+		for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
+			if treenode.IsBlockRef(headingFirstSpan) {
+				continue
+			}
+			if "" != strings.TrimSpace(headingFirstSpan.Text()) {
+				expand = false
+				break
+			}
+		}
+
+		ret = append(ret, n)
+		cc := treenode.HeadingChildren(n)
+		ret = append(ret, cc...)
+	} else {
+		ret = append(ret, n)
 	}
 	return
 }

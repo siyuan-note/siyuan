@@ -705,8 +705,13 @@ func getDoc(c *gin.Context) {
 		endID = endIDArg.(string)
 		size = 36
 	}
+	isBacklinkArg := arg["isBacklink"]
+	isBacklink := false
+	if nil != isBacklinkArg {
+		isBacklink = isBacklinkArg.(bool)
+	}
 
-	blockCount, childBlockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, err := model.GetDoc(startID, endID, id, index, keyword, mode, size)
+	blockCount, childBlockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, isBacklinkExpand, err := model.GetDoc(startID, endID, id, index, keyword, mode, size, isBacklink)
 	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
@@ -727,19 +732,20 @@ func getDoc(c *gin.Context) {
 	isSyncing := model.IsSyncingFile(rootID)
 
 	ret.Data = map[string]interface{}{
-		"id":              id,
-		"mode":            mode,
-		"parentID":        parentID,
-		"parent2ID":       parent2ID,
-		"rootID":          rootID,
-		"type":            typ,
-		"content":         content,
-		"blockCount":      blockCount,
-		"childBlockCount": childBlockCount,
-		"eof":             eof,
-		"box":             boxID,
-		"path":            docPath,
-		"isSyncing":       isSyncing,
+		"id":               id,
+		"mode":             mode,
+		"parentID":         parentID,
+		"parent2ID":        parent2ID,
+		"rootID":           rootID,
+		"type":             typ,
+		"content":          content,
+		"blockCount":       blockCount,
+		"childBlockCount":  childBlockCount,
+		"eof":              eof,
+		"box":              boxID,
+		"path":             docPath,
+		"isSyncing":        isSyncing,
+		"isBacklinkExpand": isBacklinkExpand,
 	}
 }
 

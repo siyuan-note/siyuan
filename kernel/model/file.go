@@ -452,7 +452,7 @@ func getMarkSpanEnd() string {
 	return "</span>"
 }
 
-func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, err error) {
+func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int, isBacklink bool) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, isBacklinkExpand bool, err error) {
 	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
@@ -477,9 +477,16 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 		return
 	}
 
+	if isBacklink { // 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
+		if ast.NodeParagraph == node.Type {
+			node = node.Parent
+		}
+	}
+
 	located := false
 	isDoc := ast.NodeDocument == node.Type
 	isHeading := ast.NodeHeading == node.Type
+
 	boxID = node.Box
 	docPath = node.Path
 	if isDoc {
@@ -582,16 +589,20 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	}
 
 	var nodes []*ast.Node
-
-	// 如果同时存在 startID 和 endID，则只加载 startID 和 endID 之间的块 [startID, endID]
-	if "" != startID && "" != endID {
-		nodes, eof = loadNodesByStartEnd(tree, startID, endID)
-		if 1 > len(nodes) {
-			// 按 mode 加载兜底
+	if isBacklink {
+		// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
+		nodes, isBacklinkExpand = getBacklinkRenderNodes(node)
+	} else {
+		// 如果同时存在 startID 和 endID，则只加载 startID 和 endID 之间的块 [startID, endID]
+		if "" != startID && "" != endID {
+			nodes, eof = loadNodesByStartEnd(tree, startID, endID)
+			if 1 > len(nodes) {
+				// 按 mode 加载兜底
+				nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
+			}
+		} else {
 			nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
 		}
-	} else {
-		nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
 	}
 
 	refCount := sql.QueryRootChildrenRefCount(rootID)

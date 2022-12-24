@@ -83,6 +83,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     if (action.includes(Constants.CB_GET_APPEND) || action.includes(Constants.CB_GET_BEFORE) || action.includes(Constants.CB_GET_HTML)) {
         setHTML({
             content: html,
+            expand: data.data.isBacklinkExpand,
             action,
             unScroll: false,
             isSyncing: data.data.isSyncing,
@@ -115,6 +116,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
 
         setHTML({
             content: html,
+            expand: data.data.isBacklinkExpand,
             action,
             unScroll: (scrollObj && scrollObj.focusId) ? true : false,
             isSyncing: data.data.isSyncing,
@@ -131,6 +133,7 @@ const setHTML = (options: {
     content: string,
     action?: string[],
     isSyncing: boolean,
+    expand: boolean,
     unScroll?: boolean
 }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none")) {
@@ -176,6 +179,27 @@ const setHTML = (options: {
         }
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
+    }
+    if (options.action.includes(Constants.CB_GET_BACKLINK)) {
+        if (protyle.wysiwyg.element.firstElementChild.classList.contains("li")) {
+            if (options.expand) {
+                const thirdLiElement = protyle.wysiwyg.element.querySelector(".li .li .li");
+                if (thirdLiElement) {
+                    thirdLiElement.setAttribute("fold", "1");
+                }
+            } else {
+                protyle.wysiwyg.element.firstElementChild.setAttribute("fold", "1");
+            }
+        } else if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-type") === "NodeHeading") {
+            Array.from(protyle.wysiwyg.element.children).forEach((item, index) => {
+                if ((options.expand && index > 2) || (!options.expand && index > 1)) {
+                    if ((options.expand && index === 3) || (!options.expand && index === 2)) {
+                        item.insertAdjacentHTML("beforebegin", "<div style=\"max-width: 100%;justify-content: center;\" contenteditable=\"false\" class=\"protyle-breadcrumb__item\"><svg><use xlink:href=\"#iconMore\"></use></svg></div>");
+                    }
+                    item.classList.add("fn__none");
+                }
+            });
+        }
     }
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);

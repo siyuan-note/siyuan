@@ -7,7 +7,10 @@ let yDiff: number;
 
 export const handleTouchEnd = () => {
     if (window.siyuan.mobileEditor) {
-        window.siyuan.mobileEditor.protyle.breadcrumb?.show();
+        document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
+            item.classList.remove("protyle-breadcrumb__bar--hide")
+        })
+        window.siyuan.hideBreadcrumb = false;
     }
 
     if (!clientX || !clientY || navigator.userAgent.indexOf("iPhone") === -1) {

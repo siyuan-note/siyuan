@@ -51,14 +51,17 @@ export const openCard = () => {
                 render: {
                     background: false,
                     title: false,
-                    gutter: true,
+                    gutter: false,
                     breadcrumbDocName: true,
-                    breadcrumbContext: true,
                 },
                 typewriterMode: false
             });
             if (blocks.length > 0) {
-                fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
+                fetchPost("/api/filetree/getDoc", {
+                    id: blocks[index].blockID,
+                    mode: 0,
+                    size: Constants.SIZE_GET_MAX
+                }, (response) => {
                     onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
                 });
             }
@@ -76,7 +79,11 @@ export const openCard = () => {
                         editor.protyle.element.classList.remove("fn__none");
                         editor.protyle.element.nextElementSibling.classList.add("fn__none");
                         actionElement.classList.remove("fn__none");
-                        fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
+                        fetchPost("/api/filetree/getDoc", {
+                            id: blocks[index].blockID,
+                            mode: 0,
+                            size: Constants.SIZE_GET_MAX
+                        }, (response) => {
                             onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
                         });
                     } else {
@@ -132,7 +139,11 @@ export const openCard = () => {
                             return;
                         }
                         countElement.firstElementChild.innerHTML = (index + 1).toString();
-                        fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
+                        fetchPost("/api/filetree/getDoc", {
+                            id: blocks[index].blockID,
+                            mode: 0,
+                            size: Constants.SIZE_GET_MAX
+                        }, (response) => {
                             onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
                         });
                     });

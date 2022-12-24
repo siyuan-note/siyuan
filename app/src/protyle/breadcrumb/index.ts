@@ -359,6 +359,7 @@ export class Breadcrumb {
 <div class="fn__flex">${window.siyuan.languages.image}<span class="fn__space fn__flex-1"></span>${response.data.imageCount}</div>
 <div class="fn__flex">${window.siyuan.languages.ref}<span class="fn__space fn__flex-1"></span>${response.data.refCount}</div>`,
             }).element);
+            window.siyuan.menus.menu.element.style.zIndex = "310";
             window.siyuan.menus.menu.popup(position);
         });
     }
@@ -445,10 +446,5 @@ export class Breadcrumb {
     public hide() {
         this.element.classList.add("protyle-breadcrumb__bar--hide");
         window.siyuan.hideBreadcrumb = true;
-    }
-
-    public show() {
-        this.element.classList.remove("protyle-breadcrumb__bar--hide");
-        window.siyuan.hideBreadcrumb = false;
     }
 }

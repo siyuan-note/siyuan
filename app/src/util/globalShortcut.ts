@@ -85,14 +85,10 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
 export const globalShortcut = () => {
     window.addEventListener("mousemove", (event) => {
         if (window.siyuan.hideBreadcrumb) {
-            getAllModels().editor.forEach(item => {
-                item.editor.protyle.breadcrumb.show();
-            });
-            window.siyuan.blockPanels.forEach(item => {
-                item.editors.forEach(edit => {
-                    edit.protyle.breadcrumb.show();
-                });
-            });
+            document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
+                item.classList.remove("protyle-breadcrumb__bar--hide")
+            })
+            window.siyuan.hideBreadcrumb = false;
         }
 
         const eventPath0 = event.composedPath()[0] as HTMLElement;
@@ -540,6 +536,11 @@ export const globalShortcut = () => {
         }
         if (matchHotKey(window.siyuan.config.keymap.general.riffCard.custom, event)) {
             openCard();
+            if (target.classList.contains("protyle-wysiwyg") ||
+                target.classList.contains("protyle-title__input") ||
+                target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+                target.blur();
+            }
             event.preventDefault();
             return;
         }

@@ -126,12 +126,8 @@
   }
 
   &__cardblock {
-    .protyle-wysiwyg {
-      padding: 16px;
-
-      [data-node-id][custom-riff-decks] {
-        box-shadow: none;
-      }
+    .protyle-wysiwyg [data-node-id][custom-riff-decks] {
+      box-shadow: none;
     }
 
     &--show span[data-type~=mark] {

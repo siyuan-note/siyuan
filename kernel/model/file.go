@@ -482,7 +482,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 			if nil != node.Parent && ast.NodeListItem == node.Parent.Type {
 				node = node.Parent
 			} else {
-				if parent := treenode.HeadingParent(node); nil != parent {
+				if parent := treenode.HeadingParent(node); nil != parent && ast.NodeDocument != parent.Type {
 					node = parent
 				}
 			}

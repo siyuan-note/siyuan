@@ -1,6 +1,7 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../util/hasClosest";
+import {looseJsonParse} from "../../util/functions";
 
 export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let echartsElements: Element[] = [];
@@ -38,7 +39,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                     try {
                         renderElement.style.height = e.style.height;
-                        const option = JSON.parse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
+                        const option = looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
                         echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
                         e.setAttribute("data-render", "true");
                         renderElement.classList.remove("ft__error");

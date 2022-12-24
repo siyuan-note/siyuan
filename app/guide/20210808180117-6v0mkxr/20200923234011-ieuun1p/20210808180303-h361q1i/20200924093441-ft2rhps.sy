@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20221105164926"
+		"updated": "20221225004617"
 	},
 	"Children": [
 		{
@@ -3123,7 +3123,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221105164926-hhpq6np",
-				"updated": "20221105164926"
+				"updated": "20221225004617"
 			},
 			"Children": [
 				{
@@ -3134,6 +3134,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "{\u0026quot;key\u0026quot;: \u0026quot;value\u0026quot;}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ or the JavaScript Object format in the form of "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{propName: propValue}"
 				},
 				{
 					"Type": "NodeText",

@@ -151,7 +151,6 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 		return
 	}
 
-	deck := Decks[deckID]
 	var rootIDs []string
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
@@ -218,13 +217,16 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 		pushBroadcastAttrTransactions(trans)
 	}
 
-	for _, blockID := range blockIDs {
-		deck.RemoveCard(blockID)
-	}
-	err = deck.Save()
-	if nil != err {
-		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
-		return
+	deck := Decks[deckID]
+	if nil != deck {
+		for _, blockID := range blockIDs {
+			deck.RemoveCard(blockID)
+		}
+		err = deck.Save()
+		if nil != err {
+			logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
+			return
+		}
 	}
 	return
 }

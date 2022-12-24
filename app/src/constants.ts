@@ -50,6 +50,7 @@ export abstract class Constants {
     public static readonly CB_GET_FOCUSFIRST = "cb-get-focusfirst"; // 动态定位到第一个块
     public static readonly CB_GET_SETID = "cb-get-setid"; // 重置 blockid
     public static readonly CB_GET_ALL = "cb-get-all"; // 获取所有块
+    public static readonly CB_GET_BACKLINK = "cb-get-backlink"; // 悬浮窗为传递型需展示上下文
     public static readonly CB_GET_UNUNDO = "cb-get-unundo"; // 不需要记录历史
     public static readonly CB_GET_SCROLL = "cb-get-scroll"; // 滚动到指定位置
     public static readonly CB_GET_CONTEXT = "cb-get-context"; // 包含上下文

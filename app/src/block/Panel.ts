@@ -187,10 +187,15 @@ export class BlockPanel {
 
     private initProtyle(editorElement: HTMLElement) {
         const index = parseInt(editorElement.getAttribute("data-index"));
+        const action = [Constants.CB_GET_ALL];
+        if (this.targetElement.classList.contains("protyle-attr--refcount")||
+            this.targetElement.classList.contains("counter")) {
+            action.push(Constants.CB_GET_BACKLINK);
+        }
         const editor = new Protyle(editorElement, {
             blockId: this.nodeIds[index],
             defId: this.defIds[index] || this.defIds[0] || "",
-            action: [Constants.CB_GET_ALL],
+            action,
             render: {
                 gutter: true,
                 breadcrumbDocName: true,

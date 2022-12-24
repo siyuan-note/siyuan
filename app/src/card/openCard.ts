@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {onGet} from "../protyle/util/onGet";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const openCard = () => {
@@ -47,21 +47,19 @@ export const openCard = () => {
             dialog.element.querySelector("input").focus();
             const editor = new Protyle(dialog.element.querySelector("[data-type='render']") as HTMLElement, {
                 blockId: "",
-                action: [Constants.CB_GET_HISTORY],
+                action: [Constants.CB_GET_ALL],
                 render: {
                     background: false,
                     title: false,
-                    gutter: false,
-                    breadcrumb: false,
-                    breadcrumbDocName: false,
-                    breadcrumbContext: false,
+                    gutter: true,
+                    breadcrumbDocName: true,
+                    breadcrumbContext: true,
                 },
                 typewriterMode: false
             });
-            disabledProtyle(editor.protyle);
             if (blocks.length > 0) {
                 fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
-                    onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                    onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
                 });
             }
             dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
@@ -79,7 +77,7 @@ export const openCard = () => {
                         editor.protyle.element.nextElementSibling.classList.add("fn__none");
                         actionElement.classList.remove("fn__none");
                         fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
-                            onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                            onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
                         });
                     } else {
                         countElement.classList.add("fn__none");
@@ -135,7 +133,7 @@ export const openCard = () => {
                         }
                         countElement.firstElementChild.innerHTML = (index + 1).toString();
                         fetchPost("/api/riff/renderRiffCard", {blockID: blocks[index].blockID}, (response) => {
-                            onGet(response, editor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                            onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
                         });
                     });
                 }

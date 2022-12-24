@@ -164,6 +164,7 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 	}
 	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 
+	availableDeckIDs := getDeckIDs()
 	trees := map[string]*parse.Tree{}
 	for _, blockID := range blockIDs {
 		rootID := blockRoots[blockID]
@@ -187,7 +188,7 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 		deckAttrs := node.IALAttr("custom-riff-decks")
 		var deckIDs []string
 		for _, dID := range strings.Split(deckAttrs, ",") {
-			if dID != deckID {
+			if dID != deckID && gulu.Str.Contains(dID, availableDeckIDs) {
 				deckIDs = append(deckIDs, dID)
 			}
 		}
@@ -433,4 +434,11 @@ func GetDecks() (decks []*riff.Deck) {
 
 func getRiffDir() string {
 	return filepath.Join(util.DataDir, "storage", "riff")
+}
+
+func getDeckIDs() (deckIDs []string) {
+	for deckID := range Decks {
+		deckIDs = append(deckIDs, deckID)
+	}
+	return
 }

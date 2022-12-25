@@ -644,25 +644,23 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 				n.Tokens = gulu.Str.ToBytes(text)
 			}
 
-			if ast.NodeText == n.Type {
-				if 0 < len(keywords) {
-					hitBlock := false
-					for p := n.Parent; nil != p; p = p.Parent {
-						if p.ID == id {
-							hitBlock = true
-							break
-						}
-					}
-					if hitBlock {
-						if markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine) {
-							return ast.WalkContinue
-						}
+			if 0 < len(keywords) {
+				hitBlock := false
+				for p := n.Parent; nil != p; p = p.Parent {
+					if p.ID == id {
+						hitBlock = true
+						break
 					}
 				}
+				if hitBlock {
+					if markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine) {
+						return ast.WalkContinue
+					}
+				}
+			}
 
-				if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
-					return ast.WalkContinue
-				}
+			if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
+				return ast.WalkContinue
 			}
 			return ast.WalkContinue
 		})

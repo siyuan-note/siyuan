@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20221225013408"
+		"updated": "20221225103242"
 	},
 	"Children": [
 		{
@@ -3138,7 +3138,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221225013111-f97ur4a",
-				"updated": "20221225013408"
+				"updated": "20221225103242"
 			},
 			"Children": [
 				{
@@ -3150,7 +3150,7 @@
 					},
 					"Properties": {
 						"id": "20221225013111-jhcu06t",
-						"updated": "20221225013111"
+						"updated": "20221225103242"
 					},
 					"Children": [
 						{
@@ -3168,54 +3168,29 @@
 							]
 						},
 						{
-							"ID": "20221225013111-t6sb6j6",
-							"Type": "NodeList",
-							"ListData": {},
+							"ID": "20221225103239-3a212px",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20221225013111-t6sb6j6",
-								"updated": "20221225013111"
+								"id": "20221225103239-3a212px",
+								"updated": "20221225103242"
 							},
 							"Children": [
 								{
-									"ID": "20221225013111-7mps9wm",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20221225013111-7mps9wm",
-										"updated": "20221225013111"
-									},
-									"Children": [
-										{
-											"ID": "20221225013111-r6474wt",
-											"Type": "NodeCodeBlock",
-											"IsFencedCodeBlock": true,
-											"Properties": {
-												"id": "20221225013111-r6474wt",
-												"updated": "20221225013111"
-											},
-											"Children": [
-												{
-													"Type": "NodeCodeBlockFenceOpenMarker",
-													"Data": "```"
-												},
-												{
-													"Type": "NodeCodeBlockFenceInfoMarker",
-													"CodeBlockInfo": "anNvbg=="
-												},
-												{
-													"Type": "NodeCodeBlockCode",
-													"Data": "{\n    \"propName\": \"propValue\"\n}\n"
-												},
-												{
-													"Type": "NodeCodeBlockFenceCloseMarker",
-													"Data": "```"
-												}
-											]
-										}
-									]
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "anNvbg=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "{\n    \"propName\": \"propValue\"\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
 								}
 							]
 						}
@@ -3248,54 +3223,29 @@
 							]
 						},
 						{
-							"ID": "20221225013111-unluh7r",
-							"Type": "NodeList",
-							"ListData": {},
+							"ID": "20221225103231-nffgx96",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20221225013111-unluh7r",
-								"updated": "20221225013111"
+								"id": "20221225103231-nffgx96",
+								"updated": "20221225103236"
 							},
 							"Children": [
 								{
-									"ID": "20221225013111-oy9fq7l",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20221225013111-oy9fq7l",
-										"updated": "20221225013111"
-									},
-									"Children": [
-										{
-											"ID": "20221225013111-hdaldw8",
-											"Type": "NodeCodeBlock",
-											"IsFencedCodeBlock": true,
-											"Properties": {
-												"id": "20221225013111-hdaldw8",
-												"updated": "20221225013111"
-											},
-											"Children": [
-												{
-													"Type": "NodeCodeBlockFenceOpenMarker",
-													"Data": "```"
-												},
-												{
-													"Type": "NodeCodeBlockFenceInfoMarker",
-													"CodeBlockInfo": "amF2YXNjcmlwdA=="
-												},
-												{
-													"Type": "NodeCodeBlockCode",
-													"Data": "{\n    propName: 'propValue',\n}\n"
-												},
-												{
-													"Type": "NodeCodeBlockFenceCloseMarker",
-													"Data": "```"
-												}
-											]
-										}
-									]
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "amF2YXNjcmlwdA=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "{\n    propName: 'propValue',\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
 								}
 							]
 						}
@@ -3328,54 +3278,29 @@
 							]
 						},
 						{
-							"ID": "20221225013111-ech372z",
-							"Type": "NodeList",
-							"ListData": {},
+							"ID": "20221225103222-gizv6uz",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20221225013111-ech372z",
-								"updated": "20221225013111"
+								"id": "20221225103222-gizv6uz",
+								"updated": "20221225103227"
 							},
 							"Children": [
 								{
-									"ID": "20221225013111-hhjn30z",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20221225013111-hhjn30z",
-										"updated": "20221225013111"
-									},
-									"Children": [
-										{
-											"ID": "20221225013111-vq3lqmp",
-											"Type": "NodeCodeBlock",
-											"IsFencedCodeBlock": true,
-											"Properties": {
-												"id": "20221225013111-vq3lqmp",
-												"updated": "20221225013111"
-											},
-											"Children": [
-												{
-													"Type": "NodeCodeBlockFenceOpenMarker",
-													"Data": "```"
-												},
-												{
-													"Type": "NodeCodeBlockFenceInfoMarker",
-													"CodeBlockInfo": "amF2YXNjcmlwdA=="
-												},
-												{
-													"Type": "NodeCodeBlockCode",
-													"Data": "(() =\u003e {\n    const option = {};\n    option.propName = `propValue`;\n    return option;\n})()\n"
-												},
-												{
-													"Type": "NodeCodeBlockFenceCloseMarker",
-													"Data": "```"
-												}
-											]
-										}
-									]
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "amF2YXNjcmlwdA=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "(() =\u003e {\n    const option = {};\n    option.propName = `propValue`;\n    return option;\n})()\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
 								}
 							]
 						}

@@ -177,11 +177,9 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 			n.RemoveIALAttr("heading-fold")
 			n.RemoveIALAttr("fold")
 
-			if ast.NodeText == n.Type {
-				if 0 < len(keywords) {
-					if markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine) {
-						return ast.WalkContinue
-					}
+			if 0 < len(keywords) {
+				if markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine) {
+					return ast.WalkContinue
 				}
 			}
 			return ast.WalkContinue

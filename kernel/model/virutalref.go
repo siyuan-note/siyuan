@@ -35,6 +35,10 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 		return false
 	}
 
+	if ast.NodeText != n.Type {
+		return false
+	}
+
 	parentBlock := treenode.ParentBlock(n)
 	if nil == parentBlock || 0 < refCount[parentBlock.ID] {
 		return false

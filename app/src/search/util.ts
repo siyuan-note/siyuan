@@ -78,7 +78,6 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     hPath: "",
                     idPath: [],
                     group: localData.group || 0,
-                    layout: localData.layout || 0,
                     sort: localData.sort || 0,
                     types: localData.types
                 }
@@ -110,6 +109,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             enableIncludeChild = true;
         }
     });
+    const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
     element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: 4px;overflow: hidden;" : ""}">
     <div class="b3-form__icon search__header">
         <span class="fn__a" id="searchHistoryBtn">
@@ -181,7 +181,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             </span>
         </div>
     </div>
-    <div class="search__layout${config.layout === 1 ? " search__layout--row" : ""}">
+    <div class="search__layout${data.layout === 1 ? " search__layout--row" : ""}">
         <div id="searchList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
         <div class="search__drag"></div>
         <div id="searchPreview" class="fn__flex-1 search__preview"></div>
@@ -202,9 +202,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             breadcrumbDocName: true
         },
     });
-
-    const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
-    if (config.layout === 1) {
+    if (data.layout === 1) {
         if (data.col) {
             edit.protyle.element.style.width = data.col;
             edit.protyle.element.classList.remove("fn__flex-1");
@@ -227,7 +225,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         const documentSelf = document;
         const nextElement = dragElement.nextElementSibling as HTMLElement;
         const previousElement = dragElement.previousElementSibling as HTMLElement;
-        const direction = config.layout === 1 ? "lr" : "tb";
+        const direction = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}").layout === 1 ? "lr" : "tb";
         const x = event[direction === "lr" ? "clientX" : "clientY"];
         const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
         const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
@@ -706,40 +704,44 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             }
         }]
     }).element);
+    const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}")
+    if (typeof localData.layout === "undefined") {
+        localData.layout = 0;
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.layout,
         type: "submenu",
         submenu: [{
             label: window.siyuan.languages.topBottomLayout,
-            current: config.layout === 0,
+            current: localData.layout === 0,
             click() {
                 element.querySelector(".search__layout").classList.remove("search__layout--row");
                 edit.protyle.element.style.width = "";
-                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
-                if (data.row) {
-                    edit.protyle.element.style.height = data.row;
+                if (localData.row) {
+                    edit.protyle.element.style.height = localData.row;
                     edit.protyle.element.classList.remove("fn__flex-1");
                 } else {
                     edit.protyle.element.classList.add("fn__flex-1");
                 }
                 setPadding(edit.protyle);
-                config.layout = 0;
+                localData.layout = 0;
+                localStorage.setItem(Constants.LOCAL_SEARCHEKEYS, JSON.stringify(localData));
             }
         }, {
             label: window.siyuan.languages.leftRightLayout,
-            current: config.layout === 1,
+            current: localData.layout === 1,
             click() {
                 element.querySelector(".search__layout").classList.add("search__layout--row");
                 edit.protyle.element.style.height = "";
-                const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
-                if (data.col) {
-                    edit.protyle.element.style.width = data.col;
+                if (localData.col) {
+                    edit.protyle.element.style.width = localData.col;
                     edit.protyle.element.classList.remove("fn__flex-1");
                 } else {
                     edit.protyle.element.classList.add("fn__flex-1");
                 }
                 setPadding(edit.protyle);
-                config.layout = 1;
+                localData.layout = 1;
+                localStorage.setItem(Constants.LOCAL_SEARCHEKEYS, JSON.stringify(localData));
             }
         }]
     }).element);
@@ -814,7 +816,6 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             updateConfig(element, {
                 sort: 0,
                 group: 0,
-                layout: 0,
                 hasReplace: false,
                 method: 0,
                 hPath: "",
@@ -846,29 +847,6 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
         // https://github.com/siyuan-note/siyuan/issues/6828
         item.hPath = config.hPath;
         item.idPath = config.idPath.join(",").split(",");
-    }
-    if (config.layout !== item.layout) {
-        const data = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
-        if (item.layout === 0) {
-            element.querySelector(".search__layout").classList.remove("search__layout--row");
-            if (data.row) {
-                edit.protyle.element.classList.remove("fn__flex-1");
-                edit.protyle.element.style.height = data.row;
-                edit.protyle.element.style.width = "";
-            } else {
-                edit.protyle.element.classList.add("fn__flex-1");
-            }
-        } else {
-            element.querySelector(".search__layout").classList.add("search__layout--row");
-            if (data.col) {
-                edit.protyle.element.style.width = data.col;
-                edit.protyle.element.classList.remove("fn__flex-1");
-                edit.protyle.element.style.height = "";
-            } else {
-                edit.protyle.element.classList.add("fn__flex-1");
-            }
-        }
-        setPadding(edit.protyle);
     }
     if (config.hasReplace !== item.hasReplace) {
         if (item.hasReplace) {

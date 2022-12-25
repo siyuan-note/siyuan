@@ -109,7 +109,6 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         hPath,
         idPath,
         group: localData.group || 0,
-        layout: localData.layout || 0,
         sort: localData.sort || 0,
         types: localData.types
     }, dialog.element.querySelector(".b3-dialog__container").lastElementChild, () => {

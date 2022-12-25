@@ -8,8 +8,8 @@ let yDiff: number;
 export const handleTouchEnd = () => {
     if (window.siyuan.mobileEditor) {
         document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
-            item.classList.remove("protyle-breadcrumb__bar--hide")
-        })
+            item.classList.remove("protyle-breadcrumb__bar--hide");
+        });
         window.siyuan.hideBreadcrumb = false;
     }
 

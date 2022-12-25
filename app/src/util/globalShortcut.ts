@@ -86,8 +86,8 @@ export const globalShortcut = () => {
     window.addEventListener("mousemove", (event) => {
         if (window.siyuan.hideBreadcrumb) {
             document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
-                item.classList.remove("protyle-breadcrumb__bar--hide")
-            })
+                item.classList.remove("protyle-breadcrumb__bar--hide");
+            });
             window.siyuan.hideBreadcrumb = false;
         }
 

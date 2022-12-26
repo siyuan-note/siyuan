@@ -339,7 +339,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	return
 }
 
-func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom string) {
+func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, dom string) {
 	savePath = strings.TrimSpace(savePath)
 	tree, _ := loadTreeByBlockID(id)
 
@@ -438,7 +438,7 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 				return
 			}
 		}
-	} else { // 导出 PDF 需要将资源文件路径改为 HTTP 伺服
+	} else if pdf && !image { // 导出 PDF 需要将资源文件路径改为 HTTP 伺服
 		luteEngine.RenderOptions.LinkBase = "http://" + util.LocalHost + ":" + util.ServerPort + "/"
 	}
 

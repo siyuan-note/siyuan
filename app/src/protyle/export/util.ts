@@ -45,6 +45,7 @@ export const exportImage = (id: string) => {
     fetchPost("/api/export/exportPreviewHTML", {
         id,
         keepFold: false,
+        image: true,
     }, (response) => {
         const previewElement = exportDialog.element.querySelector("#preview");
         previewElement.innerHTML = response.data.content;

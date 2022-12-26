@@ -32,6 +32,9 @@ export const makeCard = (nodeElement: Element[]) => {
         let html = "";
         const ids: string[] = [];
         nodeElement.forEach(item => {
+            if (item.getAttribute("data-type") === "NodeThematicBreak") {
+                return;
+            }
             ids.push(item.getAttribute("data-node-id"));
         });
         response.data.forEach((item: ICard) => {

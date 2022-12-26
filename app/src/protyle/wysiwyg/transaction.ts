@@ -446,6 +446,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             return;
         }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+            if (item.getAttribute("data-type") === "NodeThematicBreak") {
+                return;
+            }
             Object.keys(data.old).forEach(key => {
                 item.removeAttribute(key);
             });

@@ -1437,14 +1437,16 @@ export class Gutter {
                 }
             }).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.riffCard,
-            icon: "iconRiffCard",
-            click() {
-                makeCard([nodeElement]);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        if (type !== "NodeThematicBreak") {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.riffCard,
+                icon: "iconRiffCard",
+                click() {
+                    makeCard([nodeElement]);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        }
         let updateHTML = nodeElement.getAttribute("updated") || "";
         if (updateHTML) {
             updateHTML = `${window.siyuan.languages.modifiedAt} ${dayjs(updateHTML).format("YYYY-MM-DD HH:mm:ss")}<br>`;

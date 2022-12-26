@@ -115,7 +115,7 @@ func getNodeRefText(node *ast.Node) string {
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
 	}
-	ret := renderBlockText(node)
+	ret := renderBlockText(node, nil)
 	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(ret) {
 		ret = gulu.Str.SubStr(ret, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 	}
@@ -193,7 +193,7 @@ type BlockPath struct {
 	Children []*BlockPath `json:"children"`
 }
 
-func BuildBlockBreadcrumb(id string) (ret []*BlockPath, err error) {
+func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, err error) {
 	ret = []*BlockPath{}
 	tree, err := loadTreeByBlockID(id)
 	if nil == tree {
@@ -205,11 +205,11 @@ func BuildBlockBreadcrumb(id string) (ret []*BlockPath, err error) {
 		return
 	}
 
-	ret = buildBlockBreadcrumb(node)
+	ret = buildBlockBreadcrumb(node, excludeTypes)
 	return
 }
 
-func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
+func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPath) {
 	ret = []*BlockPath{}
 	if nil == node {
 		return
@@ -243,9 +243,9 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type {
-					name = gulu.Str.SubStr(renderBlockText(fc), maxNameLen)
+					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes), maxNameLen)
 				} else {
-					name = gulu.Str.SubStr(renderBlockText(parent), maxNameLen)
+					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes), maxNameLen)
 				}
 			}
 			if ast.NodeHeading == parent.Type {
@@ -262,7 +262,7 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 		}
 		if ast.NodeListItem == parent.Type {
 			if "" == name {
-				name = gulu.Str.SubStr(renderBlockText(fc), maxNameLen)
+				name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes), maxNameLen)
 			}
 		}
 
@@ -287,7 +287,7 @@ func buildBlockBreadcrumb(node *ast.Node) (ret []*BlockPath) {
 			}
 
 			if ast.NodeHeading == b.Type && headingLevel > b.HeadingLevel {
-				name = gulu.Str.SubStr(renderBlockText(b), maxNameLen)
+				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes), maxNameLen)
 				ret = append([]*BlockPath{{
 					ID:      b.ID,
 					Name:    name,

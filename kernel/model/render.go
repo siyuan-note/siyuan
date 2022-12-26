@@ -67,8 +67,8 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 	return
 }
 
-func renderBlockText(node *ast.Node) (ret string) {
-	ret = treenode.NodeStaticContent(node)
+func renderBlockText(node *ast.Node, excludeTypes []string) (ret string) {
+	ret = treenode.NodeStaticContent(node, excludeTypes)
 	ret = strings.TrimSpace(ret)
 	ret = strings.ReplaceAll(ret, "\n", "")
 	ret = html.EscapeString(ret)

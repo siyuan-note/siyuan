@@ -18,6 +18,7 @@ package treenode
 
 import (
 	"bytes"
+	"github.com/88250/gulu"
 	"strings"
 	"sync"
 
@@ -52,7 +53,7 @@ func IsBlockRef(n *ast.Node) bool {
 
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
 	md = ExportNodeStdMd(node, luteEngine)
-	content = NodeStaticContent(node)
+	content = NodeStaticContent(node, nil)
 	return
 }
 
@@ -74,7 +75,7 @@ func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
 	return markdown
 }
 
-func NodeStaticContent(node *ast.Node) string {
+func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 	if nil == node {
 		return ""
 	}
@@ -99,6 +100,10 @@ func NodeStaticContent(node *ast.Node) string {
 			return ast.WalkContinue
 		}
 
+		if gulu.Str.Contains(n.Type.String(), excludeTypes) {
+			return ast.WalkContinue
+		}
+
 		switch n.Type {
 		case ast.NodeLinkText:
 			buf.Write(n.Tokens)
@@ -116,6 +121,14 @@ func NodeStaticContent(node *ast.Node) string {
 			}
 			buf.Write(tokens)
 		case ast.NodeTextMark:
+			for _, excludeType := range excludeTypes {
+				if strings.HasPrefix(excludeType, "TextMark-") {
+					if n.IsTextMarkType(excludeType[9:]) {
+						return ast.WalkContinue
+					}
+				}
+			}
+
 			if n.IsTextMarkType("tag") {
 				buf.WriteByte('#')
 			}

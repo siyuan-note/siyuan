@@ -325,7 +325,15 @@ func getBlockBreadcrumb(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	blockPath, err := model.BuildBlockBreadcrumb(id)
+	excludeTypesArg := arg["excludeTypes"]
+	var excludeTypes []string
+	if nil != excludeTypesArg {
+		for _, excludeType := range excludeTypesArg.([]interface{}) {
+			excludeTypes = append(excludeTypes, excludeType.(string))
+		}
+	}
+
+	blockPath, err := model.BuildBlockBreadcrumb(id, excludeTypes)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

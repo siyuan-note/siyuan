@@ -240,7 +240,11 @@ func exportPreviewHTML(c *gin.Context) {
 	if nil != arg["merge"] {
 		merge = arg["merge"].(bool)
 	}
-	name, content := model.ExportHTML(id, "", true, keepFold, merge)
+	image := false
+	if nil != arg["image"] {
+		image = arg["image"].(bool)
+	}
+	name, content := model.ExportHTML(id, "", true, image, keepFold, merge)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
@@ -271,7 +275,7 @@ func exportHTML(c *gin.Context) {
 	if nil != arg["merge"] {
 		merge = arg["merge"].(bool)
 	}
-	name, content := model.ExportHTML(id, savePath, pdf, keepFold, merge)
+	name, content := model.ExportHTML(id, savePath, pdf, false, keepFold, merge)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,

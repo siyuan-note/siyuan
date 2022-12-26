@@ -590,6 +590,13 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     }
                     nodeElement.outerHTML = newHTML;
                     nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+                    // https://github.com/siyuan-note/siyuan/issues/6864
+                    if (nodeElement.getAttribute("data-type") === "NodeTable") {
+                        nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
+                            item.style.width = "80px";
+                        });
+                        newHTML = nodeElement.outerHTML;
+                    }
                     updateTransaction(protyle, id, newHTML, html);
                 } else {
                     let newHTML = protyle.lute.SpinBlockDOM(textContent);
@@ -597,13 +604,21 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block"><div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div><div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }
                     nodeElement.insertAdjacentHTML("afterend", newHTML);
+                    const oldHTML = nodeElement.outerHTML;
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);
+                    nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${newId}"]`);
+                    // https://github.com/siyuan-note/siyuan/issues/6864
+                    if (nodeElement.getAttribute("data-type") === "NodeTable") {
+                        nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
+                            item.style.width = "80px";
+                        });
+                    }
                     transaction(protyle, [{
-                        data: nodeElement.outerHTML,
+                        data: oldHTML,
                         id,
                         action: "update"
                     }, {
-                        data: newHTML,
+                        data: nodeElement.outerHTML,
                         id: newId,
                         previousID: id,
                         action: "insert"
@@ -615,7 +630,6 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                         id,
                         action: "update"
                     }]);
-                    nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${newId}"]`);
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && value.length > 3)) {
                     protyle.toolbar.showRender(protyle, nodeElement);

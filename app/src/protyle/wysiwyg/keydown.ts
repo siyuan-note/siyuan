@@ -1330,7 +1330,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.table.custom, event)) {
             protyle.hint.splitChar = "/";
             protyle.hint.lastIndex = -1;
-            protyle.hint.fill(`| col1${Lute.Caret} | col2 | col3 |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, protyle);
+            protyle.hint.fill(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, protyle);
             event.preventDefault();
             event.stopPropagation();
             return;

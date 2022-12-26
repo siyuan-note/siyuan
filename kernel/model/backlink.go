@@ -189,7 +189,7 @@ func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, 
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
 	ret = &Backlink{
 		DOM:        dom,
-		BlockPaths: buildBlockBreadcrumb(n),
+		BlockPaths: buildBlockBreadcrumb(n, nil),
 		Expand:     expand,
 	}
 	return

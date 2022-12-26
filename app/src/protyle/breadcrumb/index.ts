@@ -389,7 +389,12 @@ export class Breadcrumb {
             return;
         }
         this.id = id;
-        fetchPost("/api/block/getBlockBreadcrumb", {id}, (response) => {
+        const excludeTypes: string[] = []
+        if (this.element.parentElement.classList.contains("b3-dialog__cardblock")) {
+            // 闪卡面包屑不能显示答案
+            excludeTypes.push("NodeTextMark-mark");
+        }
+        fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes}, (response) => {
             let html = "";
             response.data.forEach((item: IBreadcrumb, index: number) => {
                 let isCurrent = false;

@@ -73,7 +73,8 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             });
             inputElement.addEventListener("input", () => {
                 if (inputElement.value) {
-                    element.textContent = Lute.EscapeHTMLStr(inputElement.value);
+                    // 不能使用 textContent，否则 < 会变为 &lt;
+                    element.innerHTML = Lute.EscapeHTMLStr(inputElement.value);
                 } else {
                     fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
                         element.innerHTML = response.data;

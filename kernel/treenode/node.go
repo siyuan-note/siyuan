@@ -122,8 +122,8 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 			buf.Write(tokens)
 		case ast.NodeTextMark:
 			for _, excludeType := range excludeTypes {
-				if strings.HasPrefix(excludeType, "TextMark-") {
-					if n.IsTextMarkType(excludeType[9:]) {
+				if strings.HasPrefix(excludeType, "NodeTextMark-") {
+					if n.IsTextMarkType(excludeType[len("NodeTextMark-"):]) {
 						return ast.WalkContinue
 					}
 				}

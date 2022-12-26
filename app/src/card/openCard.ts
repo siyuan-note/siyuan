@@ -65,6 +65,7 @@ export const openCard = () => {
                     onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
                 });
             }
+            (dialog.element.firstElementChild as HTMLElement).style.zIndex = "200";
             dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
             const countElement = dialog.element.querySelector('[data-type="count"]');
             const actionElement = dialog.element.querySelector('[data-type="action"]');

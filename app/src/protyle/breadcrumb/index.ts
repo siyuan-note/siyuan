@@ -389,7 +389,7 @@ export class Breadcrumb {
             return;
         }
         this.id = id;
-        const excludeTypes: string[] = []
+        const excludeTypes: string[] = [];
         if (this.element.parentElement?.parentElement && this.element.parentElement.parentElement.classList.contains("b3-dialog__cardblock")) {
             // 闪卡面包屑不能显示答案
             excludeTypes.push("NodeTextMark-mark");

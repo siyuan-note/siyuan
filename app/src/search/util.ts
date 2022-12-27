@@ -704,7 +704,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             }
         }]
     }).element);
-    const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}")
+    const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEKEYS) || "{}");
     if (typeof localData.layout === "undefined") {
         localData.layout = 0;
     }

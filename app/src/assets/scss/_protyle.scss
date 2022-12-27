@@ -322,7 +322,7 @@
       top: auto;
       margin-left: -44px;
       left: auto;
-      right: 8px;
+      right: 32px; // 仅 iPone，设置 index 也无效 https://github.com/siyuan-note/siyuan/issues/6926
 
       &:nth-child(3) {
         right: auto;

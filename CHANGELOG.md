@@ -1,3 +1,36 @@
+## v2.6.0 / 2022-12-27
+
+### 引入特性
+
+* [支持间隔复习](https://github.com/siyuan-note/siyuan/issues/6710)
+
+### 改进功能
+
+* [改进块引计数浮窗显示逻辑](https://github.com/siyuan-note/siyuan/issues/6853)
+* [新建表格时移除表头 col1 col2 col3](https://github.com/siyuan-note/siyuan/issues/6864)
+* [PDF 页签移动后阅读位置保留](https://github.com/siyuan-note/siyuan/issues/6890)
+* [改进数据同步算法](https://github.com/siyuan-note/siyuan/issues/6898)
+* [数据快照对比加入时间标识](https://github.com/siyuan-note/siyuan/issues/6899)
+* [为搜索添加 `移除命名查询` 功能](https://github.com/siyuan-note/siyuan/issues/6901)
+* [按文档分组搜索结果时文档 title 属性丢失](https://github.com/siyuan-note/siyuan/pull/6904)
+* [导出 Markdown 文件日期元数据字段变更](https://github.com/siyuan-note/siyuan/issues/6905)
+* [编辑器过窄时引用数被滚动条遮挡](https://github.com/siyuan-note/siyuan/issues/6914)
+* [官方数据同步使用加速域名](https://github.com/siyuan-note/siyuan/issues/6915)
+* [ECharts 图表块支持 loose-json](https://github.com/siyuan-note/siyuan/pull/6917)
+* [命名查询不再持久化布局](https://github.com/siyuan-note/siyuan/issues/6919)
+* [iOS 端题头图删除按钮不易被点中](https://github.com/siyuan-note/siyuan/issues/6926)
+
+### 修复缺陷
+
+* [不存在 `云端标记的快照` 时界面一直转圈](https://github.com/siyuan-note/siyuan/issues/6896)
+* [搜索界面报错](https://github.com/siyuan-note/siyuan/issues/6902)
+* [数据同步报错 `file exists`](https://github.com/siyuan-note/siyuan/issues/6906)
+* [导入 Markdown 时转换 Base64 图片失效](https://github.com/siyuan-note/siyuan/issues/6909)
+* [搜索内容编辑后面包屑不可见](https://github.com/siyuan-note/siyuan/issues/6916)
+* [Windows 端设置开机启动失效](https://github.com/siyuan-note/siyuan/issues/6920)
+* [设置块引静态锚文本转义问题](https://github.com/siyuan-note/siyuan/issues/6924)
+* [文档导出为图片时图片地址不正确](https://github.com/siyuan-note/siyuan/issues/6925)
+
 ## v2.5.5 / 2022-12-20
 
 ### 改进功能

@@ -224,10 +224,15 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 0;
+  width: 1px;
   z-index: 200;
   cursor: ew-resize;
   right: -6px;
+  background-color: var(--b3-border-color);
+
+  &:hover {
+    background-color: var(--b3-scroll-color);
+  }
 }
 
 #loadingBar {

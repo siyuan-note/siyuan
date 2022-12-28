@@ -118,7 +118,7 @@ export class Asset extends Model {
           </div>
         </div>
         <div id="sidebarResizer"></div>
-      </div>  <!-- sidebarContainer -->
+      </div>
       <div id="mainContainer">
         <div class="findbar b3-menu fn__hidden doorHanger" id="findbar">
             <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.search}" tabindex="91">

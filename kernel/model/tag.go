@@ -24,7 +24,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/html"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/facette/natsort"
 	"github.com/siyuan-note/logging"
@@ -360,7 +359,7 @@ func buildTags(root Tags, labels []string, depth int) Tags {
 		}
 	}
 	if i == len(root) {
-		root = append(root, &Tag{Name: html.EscapeHTMLStr(labels[0]), Type: "tag", Depth: depth})
+		root = append(root, &Tag{Name: util.EscapeHTML(labels[0]), Type: "tag", Depth: depth})
 	}
 	depth++
 	root[i].tags = buildTags(root[i].tags, labels[1:], depth)

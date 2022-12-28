@@ -31,7 +31,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/jinzhu/copier"
@@ -228,7 +227,7 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 				}
 			case ast.NodeTextMark:
 				if n.IsTextMarkType("code") {
-					escapedKey := html.EscapeString(keyword)
+					escapedKey := util.EscapeHTML(keyword)
 					if 0 == method {
 						if strings.Contains(n.TextMarkTextContent, escapedKey) {
 							n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, replacement)
@@ -692,7 +691,7 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 		marked = text
 
 		if strings.Contains(marked, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
-			marked = html.EscapeString(text)
+			marked = util.EscapeHTML(text)
 			marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "<mark>")
 			marked = strings.ReplaceAll(marked, search.SearchMarkRight, "</mark>")
 			return

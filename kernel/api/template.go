@@ -20,7 +20,6 @@ import (
 	"net/http"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -40,7 +39,7 @@ func docSaveAsTemplate(c *gin.Context) {
 	code, err := model.DocSaveAsTemplate(id, overwrite)
 	if nil != err {
 		ret.Code = -1
-		ret.Msg = html.EscapeString(err.Error())
+		ret.Msg = util.EscapeHTML(err.Error())
 		return
 	}
 	ret.Code = code
@@ -60,7 +59,7 @@ func renderTemplate(c *gin.Context) {
 	content, err := model.RenderTemplate(p, id)
 	if nil != err {
 		ret.Code = -1
-		ret.Msg = html.EscapeString(err.Error())
+		ret.Msg = util.EscapeHTML(err.Error())
 		return
 	}
 

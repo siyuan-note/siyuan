@@ -16,6 +16,22 @@
 
 package util
 
+import (
+	"strings"
+
+	"github.com/88250/lute/html"
+)
+
+func EscapeHTML(s string) string {
+	if strings.Contains(s, "&amp;") {
+		return s
+	}
+	if strings.ContainsAny(s, "<>\"'") {
+		return html.EscapeString(s)
+	}
+	return s
+}
+
 func Reverse(s string) string {
 	runes := []rune(s)
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {

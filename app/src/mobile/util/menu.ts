@@ -417,16 +417,19 @@ ${accountHTML}
                     break;
                 } else if (target.id === "menuNewDaily") {
                     newDailyNote();
+                    closePanel();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuCard") {
                     openCard();
+                    closePanel();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuNewNotebook") {
                     newNotebook();
+                    closePanel();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -460,6 +463,7 @@ ${accountHTML}
                     break;
                 } else if (target.id === "menuHistory" && !window.siyuan.config.readonly) {
                     openHistory();
+                    closePanel();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

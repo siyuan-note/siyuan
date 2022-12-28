@@ -28,7 +28,7 @@ export const newDailyNote = () => {
     const localNotebookId = localStorage.getItem(Constants.LOCAL_DAILYNOTEID);
     if (localNotebookId && getNotebookName(localNotebookId) && !isMobile()) {
         fetchPost("/api/filetree/createDailyNote", {
-            notebook:localNotebookId,
+            notebook: localNotebookId,
             app: Constants.SIYUAN_APPID,
         });
     } else {
@@ -68,7 +68,7 @@ export const newDailyNote = () => {
 
 export const mountHelp = () => {
     const notebookId = Constants.HELP_PATH[window.siyuan.config.appearance.lang as "zh_CN" | "en_US"];
-    fetchPost("/api/notebook/removeNotebook", {notebook: notebookId, callback:Constants.CB_MOUNT_REMOVE}, () => {
+    fetchPost("/api/notebook/removeNotebook", {notebook: notebookId, callback: Constants.CB_MOUNT_REMOVE}, () => {
         fetchPost("/api/notebook/openNotebook", {
             callback: Constants.CB_MOUNT_HELP,
             notebook: notebookId

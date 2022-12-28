@@ -7,6 +7,15 @@ import {onGet} from "../protyle/util/onGet";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const openCard = () => {
+    const exit = window.siyuan.dialogs.find(item => {
+        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
+            item.destroy();
+            return true
+        }
+    })
+    if (exit) {
+        return;
+    }
     let decksHTML = '<option value="">All</option>';
     fetchPost("/api/riff/getRiffDecks", {}, (response) => {
         response.data.forEach((deck: { id: string, name: string }) => {

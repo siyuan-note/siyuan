@@ -7,6 +7,15 @@ import {getNotebookName, getOpenNotebookCount} from "./pathName";
 import {validateName} from "../editor/rename";
 
 export const newDailyNote = () => {
+    const exit = window.siyuan.dialogs.find(item => {
+        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.dailyNote.custom) {
+            item.destroy();
+            return true
+        }
+    })
+    if (exit) {
+        return;
+    }
     const openCount = getOpenNotebookCount();
     if (openCount === 0) {
         showMessage(window.siyuan.languages.newFileTip);
@@ -48,6 +57,7 @@ export const newDailyNote = () => {
 </div>`,
             width: isMobile() ? "80vw" : "520px",
         });
+        dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.dailyNote.custom);
         const btnsElement = dialog.element.querySelectorAll(".b3-button");
         const selectElement = dialog.element.querySelector(".b3-select") as HTMLSelectElement;
         selectElement.value = localNotebookId;

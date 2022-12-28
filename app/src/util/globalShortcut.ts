@@ -537,6 +537,7 @@ export const globalShortcut = () => {
         if (matchHotKey(window.siyuan.config.keymap.general.riffCard.custom, event)) {
             openCard();
             if (target.classList.contains("protyle-wysiwyg") ||
+                target.tagName === "TABLE" ||
                 target.classList.contains("protyle-title__input") ||
                 target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
                 target.blur();
@@ -547,6 +548,7 @@ export const globalShortcut = () => {
         if (matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
             newDailyNote();
             if (target.classList.contains("protyle-wysiwyg") ||
+                target.tagName === "TABLE" ||
                 target.classList.contains("protyle-title__input") ||
                 target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
                 target.blur();

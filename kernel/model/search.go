@@ -878,7 +878,7 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 	if ast.NodeText == n.Type {
 		text = search.EncloseHighlighting(text, keywords, getMarkSpanStart(markSpanDataType), getMarkSpanEnd(), Conf.Search.CaseSensitive)
 		n.Tokens = gulu.Str.ToBytes(text)
-		if bytes.Contains(n.Tokens, []byte("search-mark")) {
+		if bytes.Contains(n.Tokens, []byte(searchMarkDataType)) {
 			n.Tokens = lex.EscapeMarkers(n.Tokens)
 			linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 			var children []*ast.Node
@@ -892,8 +892,39 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 			return true
 		}
 	} else if ast.NodeTextMark == n.Type {
-		// TODO 搜索结果高亮支持大部分行级元素 https://github.com/siyuan-note/siyuan/issues/6745
-		
+		// 搜索结果高亮支持大部分行级元素 https://github.com/siyuan-note/siyuan/issues/6745
+		if n.IsTextMarkType("inline-math") || n.IsTextMarkType("inline-memo") {
+			return false
+		}
+
+		startTag := getMarkSpanStart(markSpanDataType)
+		text = search.EncloseHighlighting(text, keywords, startTag, getMarkSpanEnd(), Conf.Search.CaseSensitive)
+		if strings.Contains(text, searchMarkDataType) {
+			dataType := getMarkSpanStart(n.TextMarkType + " " + searchMarkDataType)
+			text = strings.ReplaceAll(text, startTag, dataType)
+			tokens := gulu.Str.ToBytes(text)
+			linkTree := parse.Inline("", tokens, luteEngine.ParseOptions)
+			var children []*ast.Node
+			for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+				if ast.NodeText == c.Type {
+					c.Type = ast.NodeTextMark
+					c.TextMarkType = n.TextMarkType
+					c.TextMarkTextContent = string(c.Tokens)
+				}
+
+				children = append(children, c)
+				if nil != n.Next && ast.NodeKramdownSpanIAL == n.Next.Type {
+					c.KramdownIAL = n.KramdownIAL
+					ial := &ast.Node{Type: ast.NodeKramdownSpanIAL, Tokens: n.Next.Tokens}
+					children = append(children, ial)
+				}
+			}
+			for _, c := range children {
+				n.InsertBefore(c)
+			}
+			*unlinks = append(*unlinks, n)
+			return true
+		}
 	}
 	return false
 }

@@ -269,6 +269,10 @@ func getRefIDs(c *gin.Context) {
 		return
 	}
 
+	if nil == arg["id"] {
+		arg["id"] = ""
+	}
+
 	id := arg["id"].(string)
 	refIDs, refTexts, defIDs := model.GetBlockRefIDs(id)
 	ret.Data = map[string][]string{

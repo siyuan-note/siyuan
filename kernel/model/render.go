@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
@@ -71,7 +72,7 @@ func renderBlockText(node *ast.Node, excludeTypes []string) (ret string) {
 	ret = treenode.NodeStaticContent(node, excludeTypes)
 	ret = strings.TrimSpace(ret)
 	ret = strings.ReplaceAll(ret, "\n", "")
-	ret = html.EscapeString(ret)
+	ret = util.EscapeHTML(ret)
 	ret = strings.TrimSpace(ret)
 	if "" == ret {
 		// 复制内容为空的块作为块引用时粘贴无效 https://github.com/siyuan-note/siyuan/issues/4962

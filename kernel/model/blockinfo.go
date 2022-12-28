@@ -26,7 +26,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -124,6 +123,8 @@ func getNodeRefText(node *ast.Node) string {
 
 func GetBlockRefIDs(id string) (refIDs, refTexts, defIDs []string) {
 	refIDs = []string{}
+	refTexts = []string{}
+	defIDs = []string{}
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
@@ -237,9 +238,9 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 			fc = fc.Next
 		}
 
-		name := html.EscapeHTMLStr(parent.IALAttr("name"))
+		name := util.EscapeHTML(parent.IALAttr("name"))
 		if ast.NodeDocument == parent.Type {
-			name = html.EscapeHTMLStr(path.Join(boxName, hPath))
+			name = util.EscapeHTML(path.Join(boxName, hPath))
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type {

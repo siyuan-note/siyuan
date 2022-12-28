@@ -224,13 +224,22 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1px;
+  width: 6px;
   z-index: 200;
   cursor: ew-resize;
   right: -6px;
-  background-color: var(--b3-border-color);
 
-  &:hover {
+  &:after {
+    content: "";
+    width: 1px;
+    height: 100%;
+    background-color: var(--b3-border-color);
+    position: absolute;
+    top: 0;
+    left: 3px;
+  }
+
+  &:hover:after {
     background-color: var(--b3-scroll-color);
   }
 }

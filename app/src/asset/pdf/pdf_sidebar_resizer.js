@@ -53,7 +53,8 @@ class PDFSidebarResizer {
    * @type {number}
    */
   get outerContainerWidth() {
-    return (this._outerContainerWidth ||= this.outerContainer.clientWidth);
+    // NOTE
+    return this.outerContainer.clientWidth;
   }
 
   /**
@@ -63,7 +64,8 @@ class PDFSidebarResizer {
   _updateWidth(width = 0) {
     // Prevent the sidebar from becoming too narrow, or from occupying more
     // than half of the available viewer width.
-    const maxWidth = Math.floor(this.outerContainerWidth / 2);
+    // NOTE
+    const maxWidth = Math.floor(this.outerContainerWidth / 3 * 2);
     if (width > maxWidth) {
       width = maxWidth;
     }
@@ -84,6 +86,7 @@ class PDFSidebarResizer {
    * @private
    */
   _mouseMove(evt) {
+    // NOTE
     let width = evt.clientX - this.outerContainer.getBoundingClientRect().left;
     // For sidebar resizing to work correctly in RTL mode, invert the width.
     if (this.isRTL) {

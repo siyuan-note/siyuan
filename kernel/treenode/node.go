@@ -266,12 +266,11 @@ var typeAbbrMap = map[string]string{
 	"NodeThematicBreak":    "tb",
 	"NodeVideo":            "video",
 	"NodeAudio":            "audio",
-	// 行级元素 TODO: 移除旧版中的行级元素实现代码 https://github.com/siyuan-note/siyuan/issues/6819
-	"NodeText":     "text",
-	"NodeImage":    "img",
-	"NodeLinkText": "link_text",
-	"NodeLinkDest": "link_dest",
-	"NodeTextMark": "textmark",
+	"NodeText":             "text",
+	"NodeImage":            "img",
+	"NodeLinkText":         "link_text",
+	"NodeLinkDest":         "link_dest",
+	"NodeTextMark":         "textmark",
 }
 
 var abbrTypeMap = map[string]string{}

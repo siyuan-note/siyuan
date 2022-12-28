@@ -61,6 +61,9 @@ export class BlockPanel {
             if (this.element && window.siyuan.blockPanels.length > 1) {
                 this.element.classList.add("block__popover--top");
             }
+            if (hasClosestByClassName(event.target, "block__icon")) {
+                return;
+            }
             let iconsElement = hasClosestByClassName(event.target, "block__icons");
             let type = "move";
             let x = event.clientX - parseInt(this.element.style.left);
@@ -132,6 +135,11 @@ export class BlockPanel {
                     this.editors.forEach(item => {
                         setPadding(item.protyle);
                     });
+                } else {
+                    const pinElement = this.element.firstElementChild.querySelector('[data-type="pin"]')
+                    pinElement.classList.add("block__icon--active");
+                    pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+                    this.element.setAttribute("data-pin", "true");
                 }
             };
         });
@@ -188,7 +196,7 @@ export class BlockPanel {
     private initProtyle(editorElement: HTMLElement) {
         const index = parseInt(editorElement.getAttribute("data-index"));
         const action = [Constants.CB_GET_ALL];
-        if (this.targetElement.classList.contains("protyle-attr--refcount")||
+        if (this.targetElement.classList.contains("protyle-attr--refcount") ||
             this.targetElement.classList.contains("counter")) {
             action.push(Constants.CB_GET_BACKLINK);
         }

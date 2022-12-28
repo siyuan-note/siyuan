@@ -947,6 +947,9 @@ export class Toolbar {
                 this.subElement.firstElementChild.setAttribute("data-drag", "true");
             };
             documentSelf.onmouseup = () => {
+                const pinElement = headerElement.querySelector('[data-type="pin"]');
+                pinElement.classList.add("block__icon--active");
+                pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
                 this.subElement.style.userSelect = "auto";
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;

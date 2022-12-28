@@ -45,7 +45,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
 	github.com/siyuan-note/httpclient v0.0.0-20221213030227-fa8d21fd9cf8
 	github.com/siyuan-note/logging v0.0.0-20221031125421-9b7234d79d8a
-	github.com/siyuan-note/riff v0.0.0-20221223145438-041dea8f7945
+	github.com/siyuan-note/riff v0.0.0-20221228031102-17d458a1217b
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.0.0-20221109171924-60ec5ad56012
 	github.com/vmihailenco/msgpack/v5 v5.3.5
@@ -134,6 +134,7 @@ require (
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5
 
 //replace github.com/siyuan-note/dejavu => D:\88250\dejavu
+//replace github.com/siyuan-note/riff => D:\88250\riff
 //replace github.com/siyuan-note/httpclient => D:\88250\httpclient
 //replace github.com/siyuan-note/filelock => D:\88250\filelock
 //replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute

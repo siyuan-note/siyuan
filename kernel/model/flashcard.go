@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -78,8 +79,9 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 }
 
 type Flashcard struct {
-	DeckID  string `json:"deckID"`
-	BlockID string `json:"blockID"`
+	DeckID   string                 `json:"deckID"`
+	BlockID  string                 `json:"blockID"`
+	NextDues map[riff.Rating]string `json:"nextDues"`
 }
 
 func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
@@ -97,15 +99,23 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 
 	deck := Decks[deckID]
 	cards := deck.Dues()
+	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
 
 		if nil == treenode.GetBlockTree(blockID) {
 			continue
 		}
+
+		nextDues := map[riff.Rating]string{}
+		for rating, due := range card.NextDues() {
+			nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+		}
+
 		ret = append(ret, &Flashcard{
-			DeckID:  deckID,
-			BlockID: blockID,
+			DeckID:   deckID,
+			BlockID:  blockID,
+			NextDues: nextDues,
 		})
 	}
 	if 1 > len(ret) {
@@ -116,6 +126,7 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 
 func getAllDueFlashcards() (ret []*Flashcard, err error) {
 	blockIDs := map[string]bool{}
+	now := time.Now()
 	for _, deck := range Decks {
 		cards := deck.Dues()
 		for _, card := range cards {
@@ -128,9 +139,15 @@ func getAllDueFlashcards() (ret []*Flashcard, err error) {
 				continue
 			}
 
+			nextDues := map[riff.Rating]string{}
+			for rating, due := range card.NextDues() {
+				nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+			}
+
 			ret = append(ret, &Flashcard{
-				DeckID:  deck.ID,
-				BlockID: blockID,
+				DeckID:   deck.ID,
+				BlockID:  blockID,
+				NextDues: nextDues,
 			})
 			blockIDs[blockID] = true
 		}

@@ -12,6 +12,9 @@ import {
     openFileAttr,
     openFileWechatNotify,
 } from "../../menus/commonMenuItem";
+/// #if !BROWSER
+import {getCurrentWindow} from "@electron/remote";
+/// #endif
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {matchHotKey} from "../util/hotKey";
@@ -47,10 +50,7 @@ export class Title {
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
             event.stopPropagation();
             event.preventDefault();
-            const range = getEditorRange(this.editElement);
-            range.deleteContents();
-            range.insertNode(document.createTextNode(replaceFileName(event.clipboardData.getData("text/plain"))));
-            range.collapse(false);
+            document.execCommand("insertText", false, replaceFileName(event.clipboardData.getData("text/plain")))
             this.rename(protyle);
         });
         this.editElement.addEventListener("click", () => {
@@ -83,6 +83,20 @@ export class Title {
                 return true;
             }
 
+            /// #if !BROWSER
+            if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
+                getCurrentWindow().webContents.undo();
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
+                getCurrentWindow().webContents.redo();
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            /// #endif
             if (event.key === "ArrowDown") {
                 const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
                 // https://github.com/siyuan-note/siyuan/issues/4923

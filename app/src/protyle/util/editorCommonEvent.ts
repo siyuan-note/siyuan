@@ -141,11 +141,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 topSourceElement = targetElement;
             }
         }
-        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+        if (isCopy && item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
             item.removeAttribute("fold");
-            if (isCopy) {
-                foldHeadingIds.push({id, parentID});
-            }
+            foldHeadingIds.push({id, parentID});
         }
         let copyId;
         let copyElement;
@@ -359,11 +357,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             if (index === 0) {
                 afterPreviousID = isCopy ? copyId : id;
             }
-            if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+            if (isCopy && item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                 item.removeAttribute("fold");
-                if (isCopy) {
-                    foldHeadingIds.push({id, parentID});
-                }
+                foldHeadingIds.push({id, parentID});
             }
             if (isCopy) {
                 undoOperations.push({

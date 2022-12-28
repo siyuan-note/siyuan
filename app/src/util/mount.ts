@@ -10,9 +10,9 @@ export const newDailyNote = () => {
     const exit = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.dailyNote.custom) {
             item.destroy();
-            return true
+            return true;
         }
-    })
+    });
     if (exit) {
         return;
     }

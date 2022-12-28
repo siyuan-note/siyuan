@@ -136,7 +136,7 @@ export class BlockPanel {
                         setPadding(item.protyle);
                     });
                 } else {
-                    const pinElement = this.element.firstElementChild.querySelector('[data-type="pin"]')
+                    const pinElement = this.element.firstElementChild.querySelector('[data-type="pin"]');
                     pinElement.classList.add("block__icon--active");
                     pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
                     this.element.setAttribute("data-pin", "true");

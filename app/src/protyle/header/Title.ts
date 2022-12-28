@@ -50,7 +50,7 @@ export class Title {
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
             event.stopPropagation();
             event.preventDefault();
-            document.execCommand("insertText", false, replaceFileName(event.clipboardData.getData("text/plain")))
+            document.execCommand("insertText", false, replaceFileName(event.clipboardData.getData("text/plain")));
             this.rename(protyle);
         });
         this.editElement.addEventListener("click", () => {

@@ -39,7 +39,7 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
-func GetFlashcards(deckID string, page int) (blockIDs []string) {
+func GetFlashcards(deckID string, page int) (blockIDs []string, total, pageCount int) {
 	deck := Decks[deckID]
 	if nil == deck {
 		return
@@ -60,6 +60,8 @@ func GetFlashcards(deckID string, page int) (blockIDs []string) {
 		end = len(allBlockIDs)
 	}
 	blockIDs = allBlockIDs[start:end]
+	total = len(allBlockIDs)
+	pageCount = total / 20
 	return
 }
 

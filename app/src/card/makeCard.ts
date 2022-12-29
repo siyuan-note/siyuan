@@ -52,7 +52,7 @@ export const makeCard = (nodeElement: Element[]) => {
             html += genCardItem(item);
         });
         const dialog = new Dialog({
-            width: isMobile() ? "80vw" : "50vw",
+            width: isMobile() ? "90vw" : "50vw",
             height: "70vh",
             title: window.siyuan.languages.riffCard,
             content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing: border-box;height: 100%">
@@ -185,14 +185,14 @@ const viewCards = (deckID: string, title: string) => {
         <div class="fn__flex-1"></div>
     </div>
     <div class="fn__hr"></div>
-    <div class="fn__flex fn__flex-1">
+    <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1">
         <ul class="fn__flex-1 b3-list b3-list--background">
             ${renderViewItem(response.data.blocks)}
         </ul>
         <div id="cardPreview" class="fn__flex-1"></div>
     </div>
 </div>`,
-            width: "80vw",
+            width: isMobile() ? "90vw" : "80vw",
             height: "80vh",
             destroyCallback() {
                 edit.destroy()
@@ -306,16 +306,16 @@ const renderViewItem = (blocks: IBlock[]) => {
 ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
 <span data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
-    <svg><use xlink:href="#iconMin"></use></svg>
+    <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${hPath}">${hPath}</span>
+<span class="${isMobile() ? "fn__none " : ""}b3-list-item__meta b3-list-item__meta--ellipsis" title="${hPath}">${hPath}</span>
 </div>`;
             isFirst = false;
         } else {
             listHTML += `<div data-type="card-item" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">${item.content}</span>
 <span data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
-    <svg><use xlink:href="#iconMin"></use></svg>
+    <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
 </div>`;
         }

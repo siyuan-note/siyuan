@@ -1040,6 +1040,7 @@
     "176": "SiYuan",
     "177": "Quitter l'application",
     "178": "Autorisation d'accès - SiYuan",
-    "179": "L'espace disque peut être insuffisant. Il est recommandé de conserver l'espace libre du disque où se trouve l'espace de travail à plus de deux fois la taille des données"
+    "179": "L'espace disque peut être insuffisant. Il est recommandé de conserver l'espace libre du disque où se trouve l'espace de travail à plus de deux fois la taille des données",
+    "180": "Le bloc de contenu de recherche n'existe pas"
   }
 }

@@ -1040,6 +1040,7 @@
     "176": "SiYuan",
     "177": "Salir de la aplicación",
     "178": "Autorización de acceso - SiYuan",
-    "179": "El espacio en disco puede ser insuficiente. Se recomienda mantener el espacio libre del disco donde se encuentra el espacio de trabajo en más del doble del tamaño de los datos"
+    "179": "El espacio en disco puede ser insuficiente. Se recomienda mantener el espacio libre del disco donde se encuentra el espacio de trabajo en más del doble del tamaño de los datos",
+    "180": "El bloque de contenido de búsqueda no existe"
   }
 }

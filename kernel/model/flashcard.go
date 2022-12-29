@@ -77,6 +77,15 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 		blocks = []*Block{}
 		return
 	}
+
+	for i, b := range blocks {
+		if nil == b {
+			blocks[i] = &Block{
+				ID:      blockIDs[i],
+				Content: Conf.Language(180),
+			}
+		}
+	}
 	return
 }
 

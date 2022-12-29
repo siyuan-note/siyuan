@@ -308,7 +308,7 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 	resp, err := httpclient.NewBrowserRequest().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
 		if pushProgress {
 			progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
-			logging.LogDebugf("downloading bazaar package [%d]", progress)
+			//logging.LogDebugf("downloading bazaar package [%f]", progress)
 			util.PushDownloadProgress(pushID, progress)
 		}
 	}).Get(u)

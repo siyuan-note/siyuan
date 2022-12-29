@@ -27,7 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func renderRiffCard(c *gin.Context) {
+func getRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -36,16 +36,13 @@ func renderRiffCard(c *gin.Context) {
 		return
 	}
 
-	blockID := arg["blockID"].(string)
-	content, err := model.RenderFlashcard(blockID)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
+	deckID := arg["deckID"].(string)
+	page := int(arg["page"].(float64))
+	blockIDs, total, pageCount := model.GetFlashcards(deckID, page)
 	ret.Data = map[string]interface{}{
-		"content": content,
+		"blockIDs":  blockIDs,
+		"total":     total,
+		"pageCount": pageCount,
 	}
 }
 

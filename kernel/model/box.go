@@ -563,6 +563,8 @@ func FullReindex() {
 	}
 	IndexRefs()
 	treenode.SaveBlockTree()
+	InitFlashcards()
+
 	util.PushEndlessProgress(Conf.Language(58))
 	go func() {
 		time.Sleep(1 * time.Second)

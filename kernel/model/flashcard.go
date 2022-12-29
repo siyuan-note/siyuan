@@ -18,14 +18,15 @@ package model
 
 import (
 	"errors"
+	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
@@ -39,22 +40,33 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
-func RenderFlashcard(blockID string) (content string, err error) {
-	tree, err := loadTreeByBlockID(blockID)
-	if nil != err {
+func GetFlashcards(deckID string, page int) (blockIDs []string, total, pageCount int) {
+	blockIDs = []string{}
+	deck := Decks[deckID]
+	if nil == deck {
 		return
 	}
 
-	node := treenode.GetNodeInTree(tree, blockID)
-	if nil == node {
+	const pageSize = 20
+	var allBlockIDs []string
+	for bID, _ := range deck.BlockCard {
+		allBlockIDs = append(allBlockIDs, bID)
+	}
+	sort.Strings(allBlockIDs)
+
+	start := (page - 1) * pageSize
+	end := page * pageSize
+	if start > len(allBlockIDs) {
 		return
 	}
-
-	luteEngine := NewLute()
-	if ast.NodeDocument == node.Type {
-		content = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
-	} else {
-		content = lute.RenderNodeBlockDOM(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	if end > len(allBlockIDs) {
+		end = len(allBlockIDs)
+	}
+	blockIDs = allBlockIDs[start:end]
+	total = len(allBlockIDs)
+	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
+	if 1 > len(blockIDs) {
+		blockIDs = []string{}
 	}
 	return
 }
@@ -365,7 +377,7 @@ func InitFlashcards() {
 	}
 
 	if 1 > len(Decks) {
-		deck, createErr := CreateDeck("Default Deck")
+		deck, createErr := createDeck("Default Deck")
 		if nil == createErr {
 			Decks[deck.ID] = deck
 		}
@@ -402,12 +414,17 @@ func RemoveDeck(deckID string) (err error) {
 
 	riffSavePath := getRiffDir()
 	deckPath := filepath.Join(riffSavePath, deckID+".deck")
-	if err = os.Remove(deckPath); nil != err {
-		return
+	if gulu.File.IsExist(deckPath) {
+		if err = os.Remove(deckPath); nil != err {
+			return
+		}
 	}
+
 	cardsPath := filepath.Join(riffSavePath, deckID+".cards")
-	if err = os.Remove(cardsPath); nil != err {
-		return
+	if gulu.File.IsExist(cardsPath) {
+		if err = os.Remove(cardsPath); nil != err {
+			return
+		}
 	}
 
 	InitFlashcards()
@@ -417,7 +434,10 @@ func RemoveDeck(deckID string) (err error) {
 func CreateDeck(name string) (deck *riff.Deck, err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
+	return createDeck(name)
+}
 
+func createDeck(name string) (deck *riff.Deck, err error) {
 	if syncingStorages {
 		err = errors.New(Conf.Language(81))
 		return

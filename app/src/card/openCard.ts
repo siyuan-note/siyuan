@@ -75,7 +75,7 @@ export const openCard = () => {
                 render: {
                     background: false,
                     title: false,
-                    gutter: false,
+                    gutter: true,
                     breadcrumbDocName: true,
                 },
                 typewriterMode: false

@@ -164,7 +164,7 @@ export const openCard = () => {
                         rating: parseInt(type)
                     }, () => {
                         index++;
-                        editor.protyle.element.classList.remove("b3-dialog__cardblock--hide");
+                        editor.protyle.element.classList.add("b3-dialog__cardblock--hide");
                         if (index > blocks.length - 1) {
                             countElement.classList.add("fn__none");
                             editor.protyle.element.classList.add("fn__none");

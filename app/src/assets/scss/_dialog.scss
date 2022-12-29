@@ -134,9 +134,15 @@
       box-shadow: none;
     }
 
-    &--hide span[data-type~=mark] {
-      transition: var(--b3-transition);
-      color: var(--b3-protyle-inline-mark-background) !important;
+    &--hide {
+      .sb > div:nth-of-type(n+2):not(.protyle-attr) {
+        display: none;
+      }
+
+      span[data-type~=mark] {
+        transition: var(--b3-transition);
+        color: var(--b3-protyle-inline-mark-background) !important;
+      }
     }
   }
 }

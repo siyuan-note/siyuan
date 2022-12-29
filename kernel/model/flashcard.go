@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"math"
 	"os"
 	"path/filepath"
@@ -40,8 +41,8 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
-func GetFlashcards(deckID string, page int) (blockIDs []string, total, pageCount int) {
-	blockIDs = []string{}
+func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
+	blocks = []*Block{}
 	deck := Decks[deckID]
 	if nil == deck {
 		return
@@ -62,11 +63,19 @@ func GetFlashcards(deckID string, page int) (blockIDs []string, total, pageCount
 	if end > len(allBlockIDs) {
 		end = len(allBlockIDs)
 	}
-	blockIDs = allBlockIDs[start:end]
+	blockIDs := allBlockIDs[start:end]
 	total = len(allBlockIDs)
 	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
 	if 1 > len(blockIDs) {
-		blockIDs = []string{}
+		blocks = []*Block{}
+		return
+	}
+
+	sqlBlocks := sql.GetBlocks(blockIDs)
+	blocks = fromSQLBlocks(&sqlBlocks, "", 36)
+	if 1 > len(blocks) {
+		blocks = []*Block{}
+		return
 	}
 	return
 }

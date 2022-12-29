@@ -40,7 +40,7 @@ func getRiffCards(c *gin.Context) {
 	page := int(arg["page"].(float64))
 	blockIDs, total, pageCount := model.GetFlashcards(deckID, page)
 	ret.Data = map[string]interface{}{
-		"blockIDs":  blockIDs,
+		"blocks":    blockIDs,
 		"total":     total,
 		"pageCount": pageCount,
 	}

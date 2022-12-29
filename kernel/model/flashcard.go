@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -45,14 +46,15 @@ func GetFlashcards(deckID string, page int) (blockIDs []string, total, pageCount
 		return
 	}
 
+	const pageSize = 20
 	var allBlockIDs []string
 	for bID, _ := range deck.BlockCard {
 		allBlockIDs = append(allBlockIDs, bID)
 	}
 	sort.Strings(allBlockIDs)
 
-	start := (page - 1) * 20
-	end := page * 20
+	start := (page - 1) * pageSize
+	end := page * pageSize
 	if start > len(allBlockIDs) {
 		return
 	}
@@ -61,7 +63,7 @@ func GetFlashcards(deckID string, page int) (blockIDs []string, total, pageCount
 	}
 	blockIDs = allBlockIDs[start:end]
 	total = len(allBlockIDs)
-	pageCount = total / 20
+	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
 	return
 }
 

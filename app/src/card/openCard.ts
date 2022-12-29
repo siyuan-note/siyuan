@@ -45,22 +45,22 @@ export const openCard = () => {
     </div>
     <div class="fn__flex b3-dialog__cardaction fn__none">
         <div>
-            <span>${blocks[index].nextDues[0]}</span>
+            <span></span>
             <button data-type="0" class="b3-button b3-button--error">Again (A)</button>
         </div>
         <span class="fn__flex-1"></span>
         <div>
-            <span>${blocks[index].nextDues[1]}</span>
+            <span></span>
             <button data-type="1" class="b3-button b3-button--warning">Hard (H)</button>
         </div>
         <span class="fn__flex-1"></span>
         <div>
-            <span>${blocks[index].nextDues[2]}</span>
+            <span></span>
             <button data-type="2" class="b3-button b3-button--info">Good (G)</button>
         </div>
         <span class="fn__flex-1"></span>
         <div>
-            <span>${blocks[index].nextDues[3]}</span>
+            <span></span>
             <button data-type="3" class="b3-button b3-button--success">Easy (E)</button>
         </div>
     </div>
@@ -151,6 +151,9 @@ export const openCard = () => {
                 if (type === "-1") {
                     editor.protyle.element.classList.remove("b3-dialog__cardblock--hide");
                     actionElements[0].classList.add("fn__none");
+                    actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
+                        element.previousElementSibling.textContent = blocks[index].nextDues[btnIndex];
+                    })
                     actionElements[1].classList.remove("fn__none");
                     return;
                 }

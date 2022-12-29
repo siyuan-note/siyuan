@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
-		"updated": "20221223221852"
+		"updated": "20221229111623"
 	},
 	"Children": [
 		{
@@ -63,116 +63,155 @@
 			]
 		},
 		{
-			"ID": "20221223221502-rkjnzs0",
+			"ID": "20221229111606-kwmh3f1",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20221223221502-rkjnzs0",
-				"updated": "20221223221530"
+				"id": "20221229111606-kwmh3f1",
+				"updated": "20221229111623"
 			},
 			"Children": [
 				{
-					"ID": "20221223221502-pk248zi",
+					"ID": "20221229111606-92hkjay",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221223221502-pk248zi",
-						"updated": "20221223221502"
+						"id": "20221229111606-92hkjay",
+						"updated": "20221229111615"
 					},
 					"Children": [
 						{
-							"ID": "20221223221502-ydmpbkv",
+							"ID": "20221229111606-eh5ev9r",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20221223221502-ydmpbkv",
-								"updated": "20221223221502"
+								"id": "20221229111606-eh5ev9r",
+								"updated": "20221229111615"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊中的 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "mark",
-									"TextMarkTextContent": "標記"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 元素會被視作挖空的答案"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221223221502-8vhk110",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221223221502-8vhk110",
-						"updated": "20221223221526"
-					},
-					"Children": [
-						{
-							"ID": "20221223221502-3asr889",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221223221502-3asr889",
-								"updated": "20221223221526"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "在塊標菜單中選擇  "
+									"Data": "在塊標菜單中選擇 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "闪卡"
+									"TextMarkTextContent": "閃卡"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "​，然後選擇將該內容塊添加到一個卡包中"
 								}
 							]
+						},
+						{
+							"ID": "20221229111606-jsk0whs",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20221229111606-jsk0whs",
+								"updated": "20221229111606"
+							},
+							"Children": [
+								{
+									"ID": "20221229111606-ir6cz09",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221229111606-ir6cz09",
+										"updated": "20221229111606"
+									},
+									"Children": [
+										{
+											"ID": "20221229111606-51p41j7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20221229111606-51p41j7",
+												"updated": "20221229111606"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "內容塊中的 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "mark",
+													"TextMarkTextContent": "標記"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " 元素會被視作挖空的答案"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20221229111606-qq7gaqu",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20221229111606-qq7gaqu",
+										"updated": "20221229111606"
+									},
+									"Children": [
+										{
+											"ID": "20221229111606-o45nneg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20221229111606-o45nneg",
+												"updated": "20221229111606"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "如果將超級塊設置為閃卡，則該超級塊的第一個子塊會被視作問題，其餘子塊會被視作答案"
+												}
+											]
+										}
+									]
+								}
+							]
 						}
 					]
 				},
 				{
-					"ID": "20221223221502-7e3upud",
+					"ID": "20221229111606-e13cee3",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221223221502-7e3upud",
-						"updated": "20221223221530"
+						"id": "20221229111606-e13cee3",
+						"updated": "20221229111623"
 					},
 					"Children": [
 						{
-							"ID": "20221223221502-168jv05",
+							"ID": "20221229111606-9v3d8sc",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20221223221502-168jv05",
-								"updated": "20221223221530"
+								"id": "20221229111606-9v3d8sc",
+								"updated": "20221229111623"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通過點擊頂欄菜單中的  "
+									"Data": "通過點擊頂欄菜單中的 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "闪卡"
+									"TextMarkTextContent": "閃卡"
 								},
 								{
 									"Type": "NodeText",

@@ -124,7 +124,7 @@ export const makeCard = (nodeElement: Element[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "view") {
-                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.querySelector(".b3-list-item__text").textContent)
+                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.querySelector(".b3-list-item__text").textContent);
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -195,7 +195,7 @@ const viewCards = (deckID: string, title: string) => {
             width: isMobile() ? "90vw" : "80vw",
             height: "80vh",
             destroyCallback() {
-                edit.destroy()
+                edit.destroy();
             }
         });
         if (response.data.blocks.length === 0) {
@@ -208,17 +208,17 @@ const viewCards = (deckID: string, title: string) => {
                 breadcrumbDocName: true
             },
         });
-        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"))
+        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"));
         const previousElement = dialog.element.querySelector('[data-type="previous"]');
         const nextElement = dialog.element.querySelector('[data-type="next"]');
-        const listElement = dialog.element.querySelector(".b3-list--background")
+        const listElement = dialog.element.querySelector(".b3-list--background");
         if (response.data.pageCount > 1) {
             nextElement.removeAttribute("disabled");
         }
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !dialog.element.isSameNode(target)) {
-                const type = target.getAttribute("data-type")
+                const type = target.getAttribute("data-type");
                 if (type === "previous") {
                     pageIndex--;
                     if (pageIndex <= 1) {
@@ -230,10 +230,10 @@ const viewCards = (deckID: string, title: string) => {
                         } else if (cardsResponse.data.pageCount > 1) {
                             nextElement.removeAttribute("disabled");
                         }
-                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`
-                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks)
-                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"))
-                    })
+                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`;
+                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"));
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -246,19 +246,19 @@ const viewCards = (deckID: string, title: string) => {
                         } else if (cardsResponse.data.pageCount > 1) {
                             nextElement.removeAttribute("disabled");
                         }
-                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`
-                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks)
-                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"))
-                    })
+                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`;
+                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"));
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
                 } else if (type === "card-item") {
                     const id = target.getAttribute("data-id");
                     if (id) {
-                        listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus")
-                        target.classList.add("b3-list-item--focus")
-                        getArticle(edit, id)
+                        listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                        target.classList.add("b3-list-item--focus");
+                        getArticle(edit, id);
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -274,11 +274,11 @@ const viewCards = (deckID: string, title: string) => {
                     event.preventDefault();
                     break;
                 }
-                target = target.parentElement
+                target = target.parentElement;
             }
-        })
+        });
     });
-}
+};
 
 const getArticle = (edit: Protyle, id: string) => {
     if (!id) {
@@ -293,11 +293,11 @@ const getArticle = (edit: Protyle, id: string) => {
     }, getResponse => {
         onGet(getResponse, edit.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
     });
-}
+};
 
 const renderViewItem = (blocks: IBlock[]) => {
-    let listHTML = ""
-    let isFirst = true
+    let listHTML = "";
+    let isFirst = true;
     blocks.forEach((item: IBlock) => {
         if (item.type) {
             const hPath = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
@@ -324,4 +324,4 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
         listHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
     }
     return listHTML;
-}
+};

@@ -153,7 +153,7 @@ export const openCard = () => {
                     actionElements[0].classList.add("fn__none");
                     actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
                         element.previousElementSibling.textContent = blocks[index].nextDues[btnIndex];
-                    })
+                    });
                     actionElements[1].classList.remove("fn__none");
                     return;
                 }

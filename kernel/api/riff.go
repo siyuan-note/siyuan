@@ -27,7 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func renderRiffCard(c *gin.Context) {
+func searchRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -36,16 +36,10 @@ func renderRiffCard(c *gin.Context) {
 		return
 	}
 
-	blockID := arg["blockID"].(string)
-	content, err := model.RenderFlashcard(blockID)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
+	deckID := arg["deckID"].(string)
+	blockIDs := model.SearchFlashcard(deckID)
 	ret.Data = map[string]interface{}{
-		"content": content,
+		"blockIDs": blockIDs,
 	}
 }
 

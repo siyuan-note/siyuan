@@ -20,6 +20,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -38,7 +39,27 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
-func SearchFlashcard(deckID string) (blockIDs []string) {
+func GetFlashcards(deckID string, page int) (blockIDs []string) {
+	deck := Decks[deckID]
+	if nil == deck {
+		return
+	}
+
+	var allBlockIDs []string
+	for bID, _ := range deck.BlockCard {
+		allBlockIDs = append(allBlockIDs, bID)
+	}
+	sort.Strings(allBlockIDs)
+
+	start := (page - 1) * 20
+	end := page * 20
+	if start > len(allBlockIDs) {
+		return
+	}
+	if end > len(allBlockIDs) {
+		end = len(allBlockIDs)
+	}
+	blockIDs = allBlockIDs[start:end]
 	return
 }
 

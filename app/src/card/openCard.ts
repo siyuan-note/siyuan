@@ -38,19 +38,31 @@ export const openCard = () => {
     <div class="fn__hr--b"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="b3-dialog__cardblock b3-dialog__cardblock--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
     <div class="b3-dialog__cardempty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">${window.siyuan.languages.noDueCard}</div>
-    <div class="fn__flex b3-dialog__cardaction${blocks.length === 0 ? " fn__none" : ""}" data-type="action">
+    <div class="fn__flex b3-dialog__cardaction${blocks.length === 0 ? " fn__none" : ""}">
         <span class="fn__flex-1"></span>
-        <button data-type="-1" class="b3-button">Show (S)</button>
+        <button data-type="-1" class="b3-button" style="margin-top: 16px">Show (S)</button>
         <span class="fn__flex-1"></span>
     </div>
-    <div class="fn__flex b3-dialog__cardaction fn__none" data-type="action">
-        <button data-type="0" class="b3-button b3-button--error">Again (A)</button>
+    <div class="fn__flex b3-dialog__cardaction fn__none">
+        <div>
+            <span>${blocks[index].nextDues[0]}</span>
+            <button data-type="0" class="b3-button b3-button--error">Again (A)</button>
+        </div>
         <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
-        <button data-type="1" class="b3-button b3-button--warning">Hard (H)</button>
+        <div>
+            <span>${blocks[index].nextDues[1]}</span>
+            <button data-type="1" class="b3-button b3-button--warning">Hard (H)</button>
+        </div>
         <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
-        <button data-type="2" class="b3-button b3-button--info">Good (G)</button>
+        <div>
+            <span>${blocks[index].nextDues[2]}</span>
+            <button data-type="2" class="b3-button b3-button--info">Good (G)</button>
+        </div>
         <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
-        <button data-type="3" class="b3-button b3-button--success">Easy (E)</button>
+        <div>
+            <span>${blocks[index].nextDues[3]}</span>
+            <button data-type="3" class="b3-button b3-button--success">Easy (E)</button>
+        </div>
     </div>
 </div>`,
                 width: isMobile() ? "80vw" : "50vw",
@@ -80,7 +92,7 @@ export const openCard = () => {
             (dialog.element.firstElementChild as HTMLElement).style.zIndex = "200";
             dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
             const countElement = dialog.element.querySelector('[data-type="count"]');
-            const actionElements = dialog.element.querySelectorAll('[data-type="action"]');
+            const actionElements = dialog.element.querySelectorAll(".b3-dialog__cardaction");
             const selectElement = dialog.element.querySelector("select");
             selectElement.addEventListener("change", () => {
                 fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {

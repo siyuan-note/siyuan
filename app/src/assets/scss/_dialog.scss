@@ -121,8 +121,12 @@
     font-size: 16px;
   }
 
-  &__cardaction .b3-button {
-    margin-top: 16px;
+  &__cardaction > div > span {
+    display: block;
+    color: var(--b3-theme-on-surface);
+    text-align: center;
+    line-height: 15px;
+    font-size: 10px;
   }
 
   &__cardblock {

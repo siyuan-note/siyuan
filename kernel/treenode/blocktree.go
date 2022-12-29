@@ -259,7 +259,7 @@ func IndexBlockTree(tree *parse.Tree) {
 
 func AutoFlushBlockTree() {
 	for {
-		SaveBlockTree()
+		SaveBlockTree(false)
 		time.Sleep(7 * time.Second)
 	}
 }
@@ -307,8 +307,8 @@ func InitBlockTree(force bool) {
 	return
 }
 
-func SaveBlockTree() {
-	if !blockTreesChanged {
+func SaveBlockTree(force bool) {
+	if !force && !blockTreesChanged {
 		return
 	}
 

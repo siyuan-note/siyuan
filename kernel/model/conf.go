@@ -424,7 +424,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 
 	Conf.Close()
 	sql.CloseDatabase()
-	treenode.SaveBlockTree()
+	treenode.SaveBlockTree(false)
 	clearWorkspaceTemp()
 	clearPortJSON()
 	util.UnlockWorkspace()
@@ -601,7 +601,7 @@ func InitBoxes() {
 	}
 
 	if !initialized {
-		treenode.SaveBlockTree()
+		treenode.SaveBlockTree(true)
 	}
 
 	var dbSize string

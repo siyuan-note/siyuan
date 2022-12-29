@@ -562,7 +562,7 @@ func FullReindex() {
 		openedBox.Index(true)
 	}
 	IndexRefs()
-	treenode.SaveBlockTree()
+	treenode.SaveBlockTree(true)
 	InitFlashcards()
 
 	util.PushEndlessProgress(Conf.Language(58))

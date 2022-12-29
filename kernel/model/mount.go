@@ -199,7 +199,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	IndexRefs()
 	// 缓存根一级的文档树展开
 	ListDocTree(box.ID, "/", Conf.FileTree.Sort)
-	treenode.SaveBlockTree()
+	treenode.SaveBlockTree(false)
 	util.ClearPushProgress(100)
 	if reMountGuide {
 		return true, nil

@@ -130,7 +130,7 @@
       box-shadow: none;
     }
 
-    &--show span[data-type~=mark] {
+    &--hide span[data-type~=mark] {
       transition: var(--b3-transition);
       color: var(--b3-protyle-inline-mark-background) !important;
     }

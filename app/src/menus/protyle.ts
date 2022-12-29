@@ -1063,12 +1063,13 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     const thMatchElement = nodeElement.querySelectorAll("col")[colIndex];
-    if (thMatchElement.style.width) {
+    if (thMatchElement.style.width || thMatchElement.style.minWidth) {
         menus.push({
             label: window.siyuan.languages.useDefaultWidth,
             click: () => {
                 const html = nodeElement.outerHTML;
                 thMatchElement.style.width = "";
+                thMatchElement.style.minWidth = "";
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
             }
         });

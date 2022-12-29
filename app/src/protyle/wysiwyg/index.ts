@@ -389,6 +389,11 @@ export class WYSIWYG {
                 const id = nodeElement.getAttribute("data-node-id");
                 const x = event.clientX;
                 const colElement = nodeElement.querySelectorAll("table col")[parseInt(target.getAttribute("data-col-index"))] as HTMLElement;
+                // 清空初始化 table 时的最小宽度
+                if (colElement.style.minWidth) {
+                    colElement.style.width = colElement.style.minWidth;
+                    colElement.style.minWidth = "";
+                }
                 // 兼容 1.8.2
                 (nodeElement.querySelectorAll("table th")[parseInt(target.getAttribute("data-col-index"))] as HTMLElement).style.width = "";
                 const oldWidth = colElement.clientWidth;

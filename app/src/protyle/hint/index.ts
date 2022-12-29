@@ -593,7 +593,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     // https://github.com/siyuan-note/siyuan/issues/6864
                     if (nodeElement.getAttribute("data-type") === "NodeTable") {
                         nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
-                            item.style.width = "80px";
+                            item.style.minWidth = "60px";
                         });
                         newHTML = nodeElement.outerHTML;
                     }
@@ -610,7 +610,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     // https://github.com/siyuan-note/siyuan/issues/6864
                     if (nodeElement.getAttribute("data-type") === "NodeTable") {
                         nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
-                            item.style.width = "80px";
+                            item.style.minWidth = "60px";
                         });
                     }
                     transaction(protyle, [{

@@ -17,14 +17,17 @@
   &__hr {
     height: 8px;
     display: block;
+    flex-shrink: 0;
 
     &--b {
       display: block;
       height: 16px;
+      flex-shrink: 0;
     }
 
     &--small {
       height: 4px;
+      flex-shrink: 0;
     }
   }
 

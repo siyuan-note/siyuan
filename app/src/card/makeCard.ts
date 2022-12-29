@@ -4,11 +4,19 @@ import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {hideMessage, showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {Protyle} from "../protyle";
+import {getIconByType} from "../editor/getIcon";
+import {unicode2Emoji} from "../emoji";
+import {Constants} from "../constants";
+import {onGet} from "../protyle/util/onGet";
+import {addLoading} from "../protyle/ui/initUI";
+import {escapeHtml} from "../util/escape";
+import {getDisplayName, getNotebookName} from "../util/pathName";
 
 const genCardItem = (item: ICard) => {
     return `<li style="margin: 0 !important;" data-id="${item.id}" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">${item.name}</span>
-<span class="counter b3-tooltips b3-tooltips__w${isMobile()?"": " fn__none"}" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
+<span class="counter b3-tooltips b3-tooltips__w${isMobile() ? "" : " fn__none"}" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
 <span data-type="add" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addDeck}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </span>
@@ -21,8 +29,11 @@ const genCardItem = (item: ICard) => {
 <span data-type="delete" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
-<span class="counter b3-tooltips b3-tooltips__w${isMobile()?" fn__none": ""}" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
-<span class="b3-list-item__meta${isMobile()?" fn__none": ""}">${item.updated}</span>
+<span data-type="view" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.riffCard}">
+    <svg><use xlink:href="#iconEye"></use></svg>
+</span>
+<span class="counter b3-tooltips b3-tooltips__w${isMobile() ? " fn__none" : ""}" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
+<span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${item.updated}</span>
 </li>`;
 };
 
@@ -112,6 +123,11 @@ export const makeCard = (nodeElement: Element[]) => {
                     event.stopPropagation();
                     event.preventDefault();
                     break;
+                } else if (type === "view") {
+                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.querySelector(".b3-list-item__text").textContent)
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
                 } else if (type === "rename") {
                     const renameDialog = new Dialog({
                         title: window.siyuan.languages.rename,
@@ -151,3 +167,161 @@ export const makeCard = (nodeElement: Element[]) => {
         });
     });
 };
+
+const viewCards = (deckID: string, title: string) => {
+    let pageIndex = 1;
+    fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (response) => {
+        const dialog = new Dialog({
+            title,
+            content: `<div class="fn__flex-column" style="height: 100%">
+    <div class="fn__hr"></div>
+    <div class="fn__flex">
+        <span class="fn__space"></span>
+        <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+        <span class="fn__space"></span>
+        <span class="fn__flex-center ft__on-surface">${pageIndex}/${response.data.pageCount}</span>
+        <div class="fn__flex-1"></div>
+    </div>
+    <div class="fn__hr"></div>
+    <div class="fn__flex fn__flex-1">
+        <ul class="fn__flex-1 b3-list b3-list--background">
+            ${renderViewItem(response.data.blocks)}
+        </ul>
+        <div id="cardPreview" class="fn__flex-1"></div>
+    </div>
+</div>`,
+            width: "80vw",
+            height: "80vh",
+            destroyCallback() {
+                edit.destroy()
+            }
+        });
+        if (response.data.blocks.length === 0) {
+            return;
+        }
+        const edit = new Protyle(dialog.element.querySelector("#cardPreview") as HTMLElement, {
+            blockId: "",
+            render: {
+                gutter: true,
+                breadcrumbDocName: true
+            },
+        });
+        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"))
+        const previousElement = dialog.element.querySelector('[data-type="previous"]');
+        const nextElement = dialog.element.querySelector('[data-type="next"]');
+        const listElement = dialog.element.querySelector(".b3-list--background")
+        if (response.data.pageCount > 1) {
+            nextElement.removeAttribute("disabled");
+        }
+        dialog.element.addEventListener("click", (event) => {
+            let target = event.target as HTMLElement;
+            while (target && !dialog.element.isSameNode(target)) {
+                const type = target.getAttribute("data-type")
+                if (type === "previous") {
+                    pageIndex--;
+                    if (pageIndex <= 1) {
+                        previousElement.setAttribute("disabled", "disabled");
+                    }
+                    fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (cardsResponse) => {
+                        if (pageIndex === cardsResponse.data.pageCount) {
+                            nextElement.setAttribute("disabled", "disabled");
+                        } else if (cardsResponse.data.pageCount > 1) {
+                            nextElement.removeAttribute("disabled");
+                        }
+                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`
+                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks)
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"))
+                    })
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "next") {
+                    pageIndex++;
+                    previousElement.removeAttribute("disabled");
+                    fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (cardsResponse) => {
+                        if (pageIndex === cardsResponse.data.pageCount) {
+                            nextElement.setAttribute("disabled", "disabled");
+                        } else if (cardsResponse.data.pageCount > 1) {
+                            nextElement.removeAttribute("disabled");
+                        }
+                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`
+                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks)
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"))
+                    })
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "card-item") {
+                    const id = target.getAttribute("data-id");
+                    if (id) {
+                        listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus")
+                        target.classList.add("b3-list-item--focus")
+                        getArticle(edit, id)
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "remove") {
+                    fetchPost("/api/riff/removeRiffCards", {
+                        deckID,
+                        blockIDs: [target.getAttribute("data-id")]
+                    }, () => {
+                        target.parentElement.remove();
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                }
+                target = target.parentElement
+            }
+        })
+    });
+}
+
+const getArticle = (edit: Protyle, id: string) => {
+    if (!id) {
+        return;
+    }
+    edit.protyle.scroll.lastScrollTop = 0;
+    addLoading(edit.protyle);
+    fetchPost("/api/filetree/getDoc", {
+        id,
+        mode: 0,
+        size: Constants.SIZE_GET_MAX,
+    }, getResponse => {
+        onGet(getResponse, edit.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
+    });
+}
+
+const renderViewItem = (blocks: IBlock[]) => {
+    let listHTML = ""
+    let isFirst = true
+    blocks.forEach((item: IBlock) => {
+        if (item.type) {
+            const hPath = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
+            listHTML += `<div data-type="card-item" class="b3-list-item${isFirst ? " b3-list-item--focus" : ""}${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${item.id}">
+<svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
+${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
+<span class="b3-list-item__text">${item.content}</span>
+<span data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
+    <svg><use xlink:href="#iconMin"></use></svg>
+</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${hPath}">${hPath}</span>
+</div>`;
+            isFirst = false;
+        } else {
+            listHTML += `<div data-type="card-item" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
+<span class="b3-list-item__text">${item.content}</span>
+<span data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
+    <svg><use xlink:href="#iconMin"></use></svg>
+</span>
+</div>`;
+        }
+    });
+    if (blocks.length === 0) {
+        listHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
+    }
+    return listHTML;
+}

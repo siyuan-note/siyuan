@@ -39,11 +39,11 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.22.11
-	github.com/siyuan-note/dejavu v0.0.0-20221229113641-896a1a87254c
+	github.com/siyuan-note/dejavu v0.0.0-20221229164238-fe7ae8875bba
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
-	github.com/siyuan-note/httpclient v0.0.0-20221213030227-fa8d21fd9cf8
+	github.com/siyuan-note/httpclient v0.0.0-20221229163944-6ebc8088b1ff
 	github.com/siyuan-note/logging v0.0.0-20221031125421-9b7234d79d8a
 	github.com/siyuan-note/riff v0.0.0-20221228031102-17d458a1217b
 	github.com/steambap/captcha v1.4.1

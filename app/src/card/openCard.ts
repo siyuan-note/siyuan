@@ -48,24 +48,24 @@ export const openCard = () => {
             <span>${blocks[index].nextDues[0]}</span>
             <button data-type="0" class="b3-button b3-button--error">Again (A)</button>
         </div>
-        <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
+        <span class="fn__flex-1"></span>
         <div>
             <span>${blocks[index].nextDues[1]}</span>
             <button data-type="1" class="b3-button b3-button--warning">Hard (H)</button>
         </div>
-        <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
+        <span class="fn__flex-1"></span>
         <div>
             <span>${blocks[index].nextDues[2]}</span>
             <button data-type="2" class="b3-button b3-button--info">Good (G)</button>
         </div>
-        <span class="${isMobile() ? "fn__space" : "fn__flex-1"}"></span>
+        <span class="fn__flex-1"></span>
         <div>
             <span>${blocks[index].nextDues[3]}</span>
             <button data-type="3" class="b3-button b3-button--success">Easy (E)</button>
         </div>
     </div>
 </div>`,
-                width: isMobile() ? "80vw" : "50vw",
+                width: isMobile() ? "96vw" : "50vw",
                 height: "70vh",
             });
             dialog.element.querySelector("input").focus();

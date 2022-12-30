@@ -17,7 +17,7 @@ export const removeEmbed = (element: Element, type: "outerHTML" | "innerHTML" = 
 export const getEnableHTML = (html: string) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
-    tempElement.content.querySelectorAll('[contenteditable="false"][spellcheck="false"]').forEach(item => {
+    tempElement.content.querySelectorAll('[contenteditable="false"][spellcheck]').forEach(item => {
         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
             item.setAttribute("contenteditable", "true");
         }

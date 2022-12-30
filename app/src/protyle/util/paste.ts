@@ -237,7 +237,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     isBlock = false;
                 }
                 // 从历史中复制后粘贴
-                tempElement.querySelectorAll('[spellcheck="false"][contenteditable="false"]').forEach((e) => {
+                tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
                     e.setAttribute("contenteditable", "true");
                 });
                 const tempInnerHTML = tempElement.innerHTML;

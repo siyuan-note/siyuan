@@ -9,10 +9,16 @@ import {hasClosestByClassName} from "./hasClosest";
 export const reloadProtyle = (protyle: IProtyle) => {
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         protyle.wysiwyg.element.classList.add("protyle-wysiwyg--attr");
-        protyle.title?.element.classList.add("protyle-wysiwyg--attr");
     } else {
         protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--attr");
-        protyle.title?.element.classList.remove("protyle-wysiwyg--attr");
+    }
+    if (protyle.title) {
+        protyle.title.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
+        if (window.siyuan.config.editor.displayBookmarkIcon) {
+            protyle.title.element.classList.add("protyle-wysiwyg--attr");
+        } else {
+            protyle.title.element.classList.remove("protyle-wysiwyg--attr");
+        }
     }
     protyle.lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     addLoading(protyle);

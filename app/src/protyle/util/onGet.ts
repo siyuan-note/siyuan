@@ -336,7 +336,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     });
     protyle.wysiwyg.element.style.userSelect = "text";
     protyle.wysiwyg.element.setAttribute("contenteditable", "false");
-    protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck="false"]').forEach(item => {
+    protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
         item.setAttribute("contenteditable", "false");
     });
 };
@@ -361,7 +361,7 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (protyle.background) {
         protyle.background.element.classList.add("protyle-background--enable");
     }
-    protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck="false"]').forEach(item => {
+    protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck]').forEach(item => {
         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
             item.setAttribute("contenteditable", "true");
         }

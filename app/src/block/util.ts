@@ -147,7 +147,7 @@ export const genEmptyBlock = (zwsp = true, wbr = true, string?: string) => {
     if (string) {
         html += string;
     }
-    return `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="false">${html}</div><div contenteditable="false" class="protyle-attr">${Constants.ZWSP}</div></div>`;
+    return `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}">${html}</div><div contenteditable="false" class="protyle-attr">${Constants.ZWSP}</div></div>`;
 };
 
 export const genEmptyElement = (zwsp = true, wbr = true, id?: string) => {
@@ -155,6 +155,6 @@ export const genEmptyElement = (zwsp = true, wbr = true, id?: string) => {
     element.setAttribute("data-node-id", id || Lute.NewNodeID());
     element.setAttribute("data-type", "NodeParagraph");
     element.classList.add("p");
-    element.innerHTML = `<div contenteditable="true" spellcheck="false">${zwsp ? Constants.ZWSP : ""}${wbr ? "<wbr>" : ""}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
+    element.innerHTML = `<div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}">${zwsp ? Constants.ZWSP : ""}${wbr ? "<wbr>" : ""}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     return element;
 };

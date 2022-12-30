@@ -63,10 +63,14 @@
     text-align: left;
     border: 0;
     color: var(--b3-theme-on-background);
-    margin: 0 8px !important;
+    margin: 0 8px;
 
     &[draggable="true"]:active {
       cursor: grabbing;
+    }
+
+    &--narrow {
+      margin: 0;
     }
 
     &--big {

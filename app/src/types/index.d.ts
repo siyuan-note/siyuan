@@ -283,6 +283,7 @@ declare interface IEditor {
     rtl: boolean;
     readOnly: boolean;
     listLogicalOutdent: boolean;
+    spellcheck: boolean;
     katexMacros: string;
     fullWidth: boolean;
     floatWindowMode: number;

@@ -806,6 +806,8 @@
   "outdent": "列表反向缩进",
   "outlineOutdent": "列表大纲反向缩进",
   "outlineOutdentTip": "启用后将使用列表大纲式逻辑反向缩进，即将列表项移动到父级下方",
+  "spellcheck": "拼写检查",
+  "spellcheckTip": "启用后将使用浏览器内置的拼写检查功能，目前仅支持英文拼写检查",
   "over": "超过",
   "preview": "导出预览",
   "quote": "引述",

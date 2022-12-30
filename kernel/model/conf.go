@@ -451,6 +451,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetCodeSyntaxHighlightLineNum(Conf.Editor.CodeSyntaxHighlightLineNum)
 	ret.SetChineseParagraphBeginningSpace(Conf.Export.ParagraphBeginningSpace)
 	ret.SetProtyleMarkNetImg(Conf.Editor.DisplayNetImgMark)
+	ret.SetSpellcheck(Conf.Editor.Spellcheck)
 
 	customEmojiMap := map[string]string{}
 	CustomEmojis.Range(func(key, value interface{}) bool {

@@ -806,6 +806,8 @@
   "outdent": "Outdent",
   "outlineOutdent": "Liste des retraits excessifs du contour",
   "outlineOutdentTip": "Après l'activation, le retrait négatif utilisera la logique de contour de la liste, c'est-à-dire en déplaçant les éléments de la liste sous le parent",
+  "spellcheck": "Vérification orthographique",
+  "spellcheckTip": "Après l'activation, la fonction de vérification orthographique intégrée du navigateur sera utilisée. Actuellement, seule la vérification orthographique en anglais est prise en charge",
   "over": "over",
   "preview": "Aperçu de l'exportation",
   "quote": "Citation de bloc",

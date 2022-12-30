@@ -199,6 +199,8 @@ const boot = () => {
   mainWindow.webContents.userAgent = 'SiYuan/' + appVer +
     ' https://b3log.org/siyuan Electron'
 
+  mainWindow.webContents.session.setSpellCheckerLanguages(['en-US'])
+
   // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders(
     (details, cb) => {

@@ -135,6 +135,14 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.spellcheck}
+        <div class="b3-label__text">${window.siyuan.languages.spellcheckTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="spellcheck" type="checkbox"${window.siyuan.config.editor.spellcheck ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.md31}
         <div class="b3-label__text">${window.siyuan.languages.md32}</div>
     </div>
@@ -298,6 +306,7 @@ export const editor = {
                 codeSyntaxHighlightLineNum: (editor.element.querySelector("#codeSyntaxHighlightLineNum") as HTMLInputElement).checked,
                 embedBlockBreadcrumb: (editor.element.querySelector("#embedBlockBreadcrumb") as HTMLInputElement).checked,
                 listLogicalOutdent: (editor.element.querySelector("#listLogicalOutdent") as HTMLInputElement).checked,
+                spellcheck: (editor.element.querySelector("#spellcheck") as HTMLInputElement).checked,
                 floatWindowMode: (editor.element.querySelector("#floatWindowMode") as HTMLInputElement).checked ? 0 : 1,
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
                 katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,

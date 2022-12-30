@@ -806,6 +806,8 @@
   "outdent": "列表反向縮進",
   "outlineOutdent": "列表大綱反向縮進",
   "outlineOutdentTip": "啟用後將使用列表大綱式邏輯反向縮進，即將列表項移動到父級下方",
+  "spellcheck": "拼寫檢查",
+  "spellcheckTip": "啟用後將使用瀏覽器內置的拼寫檢查功能，目前僅支持英文拼寫檢查",
   "over": "超過",
   "preview": "匯出預覽",
   "quote": "引述",

@@ -806,6 +806,8 @@
   "outdent": "Outdent",
   "outlineOutdent": "List outline outdent",
   "outlineOutdentTip": "After enabling, the outdent will be using the list outline logic, i.e. moving the list items below the parent",
+  "spellcheck": "Spell Check",
+  "spellcheckTip": "After enabling, the browser's built-in spell check function will be used. Currently, only English spell check is supported",
   "over": "over",
   "preview": "Export Preview",
   "quote": "Blockquote",

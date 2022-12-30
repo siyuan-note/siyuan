@@ -42,6 +42,7 @@ type Editor struct {
 	DynamicLoadBlocks               int      `json:"dynamicLoadBlocks"`               // 块动态数，可配置区间 [48, 1024]
 	Justify                         bool     `json:"justify"`                         // 是否两端对齐
 	RTL                             bool     `json:"rtl"`                             // 是否从右到左显示
+	Spellcheck                      bool     `json:"spellcheck"`                      // 是否启用拼写检查
 }
 
 func NewEditor() *Editor {

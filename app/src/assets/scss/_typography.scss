@@ -211,7 +211,8 @@
     display: inline-block;
     width: max-content;
 
-    tr {
+    tr td,
+    tr th {
       background-color: var(--b3-theme-surface);
       border-top: 1px solid var(--b3-theme-surface-lighter);
     }
@@ -239,7 +240,7 @@
       font-weight: normal;
     }
 
-    tbody tr:nth-child(2n) {
+    tbody tr:nth-child(2n) td {
       background-color: var(--b3-theme-background);
     }
   }

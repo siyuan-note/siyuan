@@ -1,5 +1,6 @@
 export const setLute = (options: ILuteOptions) => {
     const lute: Lute = Lute.New();
+    lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
     lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     lute.SetFileAnnotationRef(true);
     lute.SetTextMark(true);

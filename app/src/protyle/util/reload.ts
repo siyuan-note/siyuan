@@ -21,6 +21,7 @@ export const reloadProtyle = (protyle: IProtyle) => {
         }
     }
     protyle.lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
+    protyle.lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
     addLoading(protyle);
     if (protyle.options.backlinkData) {
         const isMention = protyle.element.getAttribute("data-ismention") === "true";

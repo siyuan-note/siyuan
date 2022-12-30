@@ -153,6 +153,8 @@ declare class Lute {
 
     public SetProtyleMarkNetImg(enable: boolean): void;
 
+    public SetSpellcheck(enable: boolean): void;
+
     public SetFileAnnotationRef(enable: boolean): void;
 
     public SetSetext(enable: boolean): void;

@@ -233,7 +233,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
         if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
-        } else {
+        } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
             const oldHTML = blockElement.outerHTML;
             let replaceInnerHTML = editableElement.innerHTML.replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();
             if (!replaceInnerHTML.endsWith("\n```")) {

@@ -768,6 +768,8 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 saveDialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
+                config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
+                config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
                 const criterion = config;
                 criterion.name = saveDialog.element.querySelector("input").value;
                 fetchPost("/api/storage/setCriterion", {criterion}, () => {
@@ -1152,7 +1154,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
         loadingElement.classList.remove("fn__none");
         const inputValue = searchInputElement.value;
         element.querySelector("#searchList").scrollTo(0, 0);
-        if (inputValue === "") {
+        if (inputValue === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                 onSearch(response.data, edit, element);
                 loadingElement.classList.add("fn__none");

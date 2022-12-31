@@ -1162,7 +1162,7 @@ export class Toolbar {
             if (event.key === "Enter") {
                 const activeText = this.subElement.querySelector(".b3-list-item--focus").textContent;
                 languageElement.textContent = activeText === window.siyuan.languages.clear ? "" : activeText;
-                localStorage.setItem(Constants.LOCAL_CODELANG, languageElement.textContent);
+                window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
                 const editElement = getContenteditableElement(nodeElement);
                 const lineNumber = nodeElement.getAttribute("linenumber");
                 if (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum)) {
@@ -1226,7 +1226,7 @@ export class Toolbar {
                 return;
             }
             languageElement.textContent = listElement.textContent === window.siyuan.languages.clear ? "" : listElement.textContent;
-            localStorage.setItem(Constants.LOCAL_CODELANG, languageElement.textContent);
+            window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
             const nodeElement = hasClosestBlock(languageElement);
             if (nodeElement) {
                 const editElement = getContenteditableElement(nodeElement);

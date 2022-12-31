@@ -78,8 +78,8 @@ export const makeCard = (nodeElement: Element[]) => {
                 focusByRange(range);
             }
         });
-        dialog.element.setAttribute("data-key", "makeCard")
-        dialog.element.style.zIndex = "199"
+        dialog.element.setAttribute("data-key", "makeCard");
+        dialog.element.style.zIndex = "199";
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {
@@ -224,7 +224,7 @@ const viewCards = (deckID: string, title: string) => {
         if (response.data.pageCount > 1) {
             nextElement.removeAttribute("disabled");
         }
-        dialog.element.style.zIndex = "200"
+        dialog.element.style.zIndex = "200";
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !dialog.element.isSameNode(target)) {

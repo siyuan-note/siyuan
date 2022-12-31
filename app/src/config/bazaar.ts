@@ -15,19 +15,7 @@ import {isBrowser} from "../util/functions";
 export const bazaar = {
     element: undefined as Element,
     genHTML() {
-        const localSortString = localStorage.getItem(Constants.LOCAL_BAZAAR);
-        let localSort;
-        if (!localSortString) {
-            localSort = {
-                theme: "0",
-                template: "0",
-                icon: "0",
-                widget: "0",
-            };
-            localStorage.setItem(Constants.LOCAL_BAZAAR, JSON.stringify(localSort));
-        } else {
-            localSort = JSON.parse(localSortString);
-        }
+        const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
         const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 72}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
         return `<div class="fn__flex-column" style="height: 100%">
 <div class="layout-tab-bar fn__flex">
@@ -609,7 +597,7 @@ export const bazaar = {
                     });
                 } else {
                     // sort
-                    const localSort = JSON.parse(localStorage.getItem(Constants.LOCAL_BAZAAR));
+                    const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
                     const panelElement = selectElement.parentElement.parentElement;
                     let html = "";
                     if (selectElement.value === "0") { // 更新时间降序
@@ -638,7 +626,6 @@ export const bazaar = {
                         });
                     }
                     localSort[selectElement.parentElement.parentElement.getAttribute("data-type")] = selectElement.value;
-                    localStorage.setItem(Constants.LOCAL_BAZAAR, JSON.stringify(localSort));
                     panelElement.querySelector(".b3-cards").innerHTML = html;
                 }
             });
@@ -667,7 +654,7 @@ export const bazaar = {
         bazaar.data[bazaarType] = response.data.packages;
         element.innerHTML = `<div class="b3-cards">${html}</div>`;
 
-        const localSort = JSON.parse(localStorage.getItem(Constants.LOCAL_BAZAAR));
+        const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
         if (localSort[bazaarType.replace("s", "")] === "1") {
             html = "";
             Array.from(element.querySelectorAll(".b3-card")).sort((a, b) => {

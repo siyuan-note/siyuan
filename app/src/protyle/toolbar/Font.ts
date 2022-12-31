@@ -46,7 +46,7 @@ export const fontMenu = (protyle: IProtyle) => {
     const element = document.createElement("div");
     element.classList.add("protyle-font");
     let lastColorHTML = "";
-    const lastFonts = JSON.parse(localStorage.getItem(Constants.LOCAL_FONTSTYLES) || "[]");
+    const lastFonts = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (lastFonts.length > 0) {
         lastColorHTML = `<div style="margin-bottom: 2px" class="fn__flex">
     ${window.siyuan.languages.lastUsed}<span class="fn__space"></span>
@@ -136,14 +136,13 @@ export const fontMenu = (protyle: IProtyle) => {
 };
 
 export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
-    let localFontStyles = JSON.parse(localStorage.getItem(Constants.LOCAL_FONTSTYLES) || "[]");
+    let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
         localFontStyles.splice(0, 0, `${type}${Constants.ZWSP}${color}`);
         localFontStyles = [...new Set(localFontStyles)];
         if (localFontStyles.length > 8) {
             localFontStyles.splice(7, 1);
         }
-        localStorage.setItem(Constants.LOCAL_FONTSTYLES, JSON.stringify(localFontStyles));
     } else {
         if (localFontStyles.length === 0) {
             type = "color";

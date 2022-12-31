@@ -34,7 +34,7 @@ export const newDailyNote = () => {
         });
         return;
     }
-    const localNotebookId = localStorage.getItem(Constants.LOCAL_DAILYNOTEID);
+    const localNotebookId = window.siyuan.storage[Constants.LOCAL_DAILYNOTEID];
     if (localNotebookId && getNotebookName(localNotebookId) && !isMobile()) {
         fetchPost("/api/filetree/createDailyNote", {
             notebook: localNotebookId,
@@ -66,7 +66,7 @@ export const newDailyNote = () => {
         });
         btnsElement[1].addEventListener("click", () => {
             const notebook = selectElement.value;
-            localStorage.setItem(Constants.LOCAL_DAILYNOTEID, notebook);
+            window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = notebook;
             fetchPost("/api/filetree/createDailyNote", {
                 notebook,
                 app: Constants.SIYUAN_APPID,

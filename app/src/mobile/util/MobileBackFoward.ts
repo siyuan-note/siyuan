@@ -12,10 +12,10 @@ const forwardStack: IBackStack[] = [];
 
 const focusStack = (backStack: IBackStack) => {
     const protyle = window.siyuan.mobileEditor.protyle;
-    localStorage.setItem(Constants.LOCAL_DOCINFO, JSON.stringify({
+    window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
         id: backStack.id,
         action: backStack.callback,
-    }));
+    };
     hideElements(["toolbar", "hint", "util"], window.siyuan.mobileEditor.protyle);
     if (protyle.contentElement.classList.contains("fn__none")) {
         setEditMode(protyle, "wysiwyg");

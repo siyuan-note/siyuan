@@ -1,5 +1,5 @@
 import {fetchPost} from "../../util/fetch";
-import {getEventName, openByMobile, writeText} from "../../protyle/util/compatibility";
+import {exportLocalStorage, getEventName, openByMobile, writeText} from "../../protyle/util/compatibility";
 import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
 import {closePanel} from "./closePanel";
@@ -172,7 +172,9 @@ ${accountHTML}
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuSafeQuit") {
-                    exitSiYuan();
+                    exportLocalStorage(() => {
+                        exitSiYuan();
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -439,8 +441,10 @@ ${accountHTML}
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuLock") {
-                    fetchPost("/api/system/logoutAuth", {}, () => {
-                        window.location.href = "/";
+                    exportLocalStorage(() => {
+                        fetchPost("/api/system/logoutAuth", {}, () => {
+                            window.location.href = "/";
+                        });
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -457,6 +461,7 @@ ${accountHTML}
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuSyncNow") {
+                    exportLocalStorage();
                     syncGuide();
                     event.preventDefault();
                     event.stopPropagation();

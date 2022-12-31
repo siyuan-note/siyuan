@@ -591,7 +591,7 @@ export class Gutter {
                 click() {
                     let html = "";
                     selectsElement.forEach(item => {
-                        item.querySelectorAll('[spellcheck]').forEach(editItem => {
+                        item.querySelectorAll("[spellcheck]").forEach(editItem => {
                             const cloneNode = editItem.cloneNode(true) as HTMLElement;
                             cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
                                 slashItem.firstElementChild.remove();
@@ -980,7 +980,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
                 click() {
                     let text = "";
-                    nodeElement.querySelectorAll('[spellcheck]').forEach(item => {
+                    nodeElement.querySelectorAll("[spellcheck]").forEach(item => {
                         const cloneNode = item.cloneNode(true) as HTMLElement;
                         cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
                             slashItem.firstElementChild.remove();

@@ -424,13 +424,8 @@ export class Asset extends Model {
       </div>
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;
-            const localPDF = JSON.parse(localStorage.getItem(Constants.LOCAL_PDFTHEME) || "{}");
-            let pdfTheme;
-            if (window.siyuan.config.appearance.mode === 0) {
-                pdfTheme = localPDF.light || "light";
-            } else {
-                pdfTheme = localPDF.dark || "dark";
-            }
+            const localPDF = window.siyuan.storage[Constants.LOCAL_PDFTHEME]
+            const pdfTheme = window.siyuan.config.appearance.mode === 0 ? localPDF.light : localPDF.dark;
             const darkElement = this.element.querySelector("#pdfDark");
             const lightElement = this.element.querySelector("#pdfLight");
             if (pdfTheme === "dark") {
@@ -448,7 +443,6 @@ export class Asset extends Model {
                     localPDF.dark = "light";
                 }
                 this.element.firstElementChild.classList.remove("pdf__outer--dark");
-                localStorage.setItem(Constants.LOCAL_PDFTHEME, JSON.stringify(localPDF));
                 lightElement.classList.add("toggled");
                 darkElement.classList.remove("toggled");
             });
@@ -459,7 +453,6 @@ export class Asset extends Model {
                     localPDF.dark = "dark";
                 }
                 this.element.firstElementChild.classList.add("pdf__outer--dark");
-                localStorage.setItem(Constants.LOCAL_PDFTHEME, JSON.stringify(localPDF));
                 lightElement.classList.remove("toggled");
                 darkElement.classList.add("toggled");
             });

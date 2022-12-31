@@ -244,10 +244,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${blockElement.getAttribute("data-node-id")}"]`);
             const languageElement = blockElement.querySelector(".protyle-action__language");
             if (languageElement) {
-                if (localStorage.getItem(Constants.LOCAL_CODELANG) && languageElement.textContent === "") {
-                    languageElement.textContent = localStorage.getItem(Constants.LOCAL_CODELANG);
+                if (window.siyuan.storage[Constants.LOCAL_CODELANG] && languageElement.textContent === "") {
+                    languageElement.textContent = window.siyuan.storage[Constants.LOCAL_CODELANG];
                 } else {
-                    localStorage.setItem(Constants.LOCAL_CODELANG, languageElement.textContent);
+                    window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
                 }
                 highlightRender(blockElement);
             } else {

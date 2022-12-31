@@ -556,7 +556,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 let textContent = value;
                 if (value === "```") {
-                    textContent = value + (localStorage.getItem(Constants.LOCAL_CODELANG) || "") + Lute.Caret + "\n```";
+                    textContent = value + window.siyuan.storage[Constants.LOCAL_CODELANG] + Lute.Caret + "\n```";
                 }
                 const editableElement = getContenteditableElement(nodeElement);
                 if (value === "![]()") { // https://github.com/siyuan-note/siyuan/issues/4586 1

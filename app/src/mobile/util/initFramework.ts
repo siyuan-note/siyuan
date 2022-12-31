@@ -127,7 +127,7 @@ export const initFramework = () => {
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {
-        const localDoc = JSON.parse(localStorage.getItem(Constants.LOCAL_DOCINFO) || '{"id": ""}');
+        const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
         fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
             if (existResponse.data) {
                 openMobileFileById(localDoc.id, localDoc.action);

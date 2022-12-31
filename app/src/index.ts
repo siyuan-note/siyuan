@@ -122,9 +122,9 @@ class App {
             }),
             menus: new Menus()
         };
-        setLocalStorage();
         fetchPost("/api/system/getConf", {}, response => {
             window.siyuan.config = response.data.conf;
+            setLocalStorage();
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                 window.siyuan.languages = lauguages;
                 bootSync();

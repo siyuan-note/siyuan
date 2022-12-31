@@ -26,7 +26,7 @@ export const saveExport = (option: { type: string, id: string }) => {
             renderPDF(option.id);
         }
     } else if (option.type === "word") {
-        const localData = localStorage.getItem(Constants.LOCAL_EXPORTWORD);
+        const localData = window.siyuan.storage[Constants.LOCAL_EXPORTWORD];
         const wordDialog = new Dialog({
             title: "Word " + window.siyuan.languages.config,
             content: `<div class="b3-dialog__content">
@@ -35,14 +35,14 @@ export const saveExport = (option: { type: string, id: string }) => {
             ${window.siyuan.languages.exportPDF4}
         </div>
         <span class="fn__space"></span>
-        <input id="removeAssets" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
+        <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <div class="fn__flex-1">
             ${window.siyuan.languages.exportPDF6}
         </div>
         <span class="fn__space"></span>
-        <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData === "true" ? "checked" : ""}>
+        <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
     </label>
 </div>
 <div class="b3-dialog__action">
@@ -58,7 +58,6 @@ export const saveExport = (option: { type: string, id: string }) => {
         btnsElement[1].addEventListener("click", () => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
             const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
-            localStorage.setItem(Constants.LOCAL_EXPORTWORD, JSON.stringify({removeAssets, mergeSubdocs}));
             getExportPath(option, removeAssets, mergeSubdocs);
             wordDialog.destroy();
         });
@@ -71,15 +70,7 @@ export const saveExport = (option: { type: string, id: string }) => {
 /// #if !BROWSER
 let originalZoomFactor = 1;
 const renderPDF = (id: string) => {
-    const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_EXPORTPDF) || JSON.stringify({
-        landscape: false,
-        marginType: "0",
-        scale: 1,
-        pageSize: "A4",
-        removeAssets: true,
-        keepFold: false,
-        mergeSubdocs: false,
-    }));
+    const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     const servePath = window.location.protocol + "//" + window.location.host;
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
     let themeStyle = "";

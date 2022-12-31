@@ -170,8 +170,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             if (realType === "NodeCodeBlock") {
                 const languageElement = realElement.querySelector(".protyle-action__language");
                 if (languageElement) {
-                    if (localStorage.getItem(Constants.LOCAL_CODELANG) && languageElement.textContent === "") {
-                        languageElement.textContent = localStorage.getItem(Constants.LOCAL_CODELANG);
+                    if (window.siyuan.storage[Constants.LOCAL_CODELANG] && languageElement.textContent === "") {
+                        languageElement.textContent = window.siyuan.storage[Constants.LOCAL_CODELANG];
                     }
                     highlightRender(realElement);
                 } else if (tempElement.content.childElementCount === 1) {

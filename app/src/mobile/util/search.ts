@@ -37,17 +37,14 @@ export const toolbarSearchEvent = () => {
                 onRecentBlocks(response.data.blocks, response.data.matchedRootCount,response.data.matchedBlockCount);
             });
         }
-        const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
-        localData.k = inputElement.value;
-        localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(localData));
+        window.siyuan.storage[Constants.LOCAL_SEARCHEDATA].k = inputElement.value;
     }, Constants.TIMEOUT_SEARCH);
 };
 
 const initToolbarSearch = () => {
     const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     inputElement.focus();
-    const localData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
-    inputElement.value = localData.k || "";
+    inputElement.value = window.siyuan.storage[Constants.LOCAL_SEARCHEDATA].k;
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;

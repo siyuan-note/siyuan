@@ -44,10 +44,10 @@ class App {
                 window.siyuan.menus.menu.remove();
             }
         });
-        setLocalStorage();
         fetchPost("/api/system/getConf", {}, confResponse => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;
+            setLocalStorage();
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                 window.siyuan.languages = lauguages;
                 document.title = window.siyuan.languages.siyuanNote;

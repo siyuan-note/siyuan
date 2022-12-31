@@ -292,7 +292,7 @@ const initBar = () => {
                                         notebook: item.id,
                                         app: Constants.SIYUAN_APPID,
                                     });
-                                    localStorage.setItem(Constants.LOCAL_DAILYNOTEID, item.id);
+                                    window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = item.id;
                                 }
                             }).element);
                         }
@@ -380,11 +380,15 @@ const initWindow = () => {
                 return;
             }
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
-            localStorage.setItem(Constants.LOCAL_EXPORTPDF, JSON.stringify(Object.assign(ipcData.pdfOptions, {
+            window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
                 removeAssets: ipcData.removeAssets,
                 keepFold: ipcData.keepFold,
                 mergeSubdocs: ipcData.mergeSubdocs,
-            })));
+                landscape: ipcData.pdfOptions.landscape,
+                marginType: ipcData.pdfOptions.marginType,
+                pageSize: ipcData.pdfOptions.pageSize,
+                scale: ipcData.pdfOptions.scale,
+            };
             try {
                 if (window.siyuan.config.export.addFooter) {
                     ipcData.pdfOptions.displayHeaderFooter = true;

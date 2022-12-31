@@ -240,7 +240,7 @@ func CeilSize(size int64) int64 {
 
 	for i := int64(1); i < 40; i++ {
 		if 1024*1024*200*i > size {
-			return 1024 * 1024 * int64(i)
+			return 1024 * 1024 * 200 * i
 		}
 	}
 	return 1024*1024*200*40 + 1

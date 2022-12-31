@@ -242,12 +242,6 @@ export const about = {
             fetchPost("/api/system/setWorkspaceDir", {
                 path: workspace
             }, () => {
-                const searchData = JSON.parse(localStorage.getItem(Constants.LOCAL_SEARCHEDATA) || "{}");
-                if (searchData.hPath) {
-                    searchData.hPath = "";
-                    searchData.idPath = "";
-                    localStorage.setItem(Constants.LOCAL_SEARCHEDATA, JSON.stringify(searchData));
-                }
                 exportLayout(false, () => {
                     exitSiYuan();
                 });

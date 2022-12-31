@@ -603,7 +603,7 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy stri
 	exp = regexp.QuoteMeta(exp)
 
 	fieldFilter := fieldRegexp(exp)
-	stmt := "SELECT * FROM `blocks` WHERE (" + fieldFilter + ") AND type IN " + typeFilter
+	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
@@ -808,6 +808,7 @@ func maxContent(content string, maxLen int) string {
 
 func fieldRegexp(regexp string) string {
 	buf := bytes.Buffer{}
+	buf.WriteString("(")
 	buf.WriteString("content REGEXP '")
 	buf.WriteString(regexp)
 	buf.WriteString("'")
@@ -833,7 +834,7 @@ func fieldRegexp(regexp string) string {
 	}
 	buf.WriteString(" OR tag REGEXP '")
 	buf.WriteString(regexp)
-	buf.WriteString("'")
+	buf.WriteString("')")
 	return buf.String()
 }
 

@@ -125,25 +125,30 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
-	WaitForWritingFiles()
-
-	exportFolder = filepath.Join(exportFolder, util.CurrentTimeSecondsStr())
-	zipPath, err := exportData(exportFolder)
+	zipPath, err := ExportData()
 	if nil != err {
 		return
 	}
 	name = filepath.Base(zipPath)
+	targetZipPath := filepath.Join(exportFolder, name)
+	zipAbsPath := filepath.Join(util.TempDir, "export", name)
+	err = filelock.RoboCopy(zipAbsPath, targetZipPath)
+	if nil != err {
+		logging.LogErrorf("copy export zip from [%s] to [%s] failed: %s", zipAbsPath, targetZipPath, err)
+		return
+	}
+	if removeErr := os.Remove(zipAbsPath); nil != removeErr {
+		logging.LogErrorf("remove export zip failed: %s", removeErr)
+	}
 	return
 }
 
-func ExportData() (zipPath string) {
+func ExportData() (zipPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
-	WaitForWritingFiles()
-
 	exportFolder := filepath.Join(util.TempDir, "export", util.CurrentTimeSecondsStr())
-	zipPath, err := exportData(exportFolder)
+	zipPath, err = exportData(exportFolder)
 	if nil != err {
 		return
 	}
@@ -152,6 +157,8 @@ func ExportData() (zipPath string) {
 }
 
 func exportData(exportFolder string) (zipPath string, err error) {
+	WaitForWritingFiles()
+
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
 	if err = os.MkdirAll(exportFolder, 0755); nil != err {
 		logging.LogErrorf("create export temp folder failed: %s", err)

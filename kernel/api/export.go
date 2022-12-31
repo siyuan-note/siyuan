@@ -57,7 +57,13 @@ func exportData(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	zipPath := model.ExportData()
+	zipPath, err := model.ExportData()
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
 	ret.Data = map[string]interface{}{
 		"zip": zipPath,
 	}

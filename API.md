@@ -47,7 +47,6 @@
     * [Get boot progress](#Get-boot-progress)
     * [Get system version](#Get-system-version)
     * [Get the current time of the system](#Get-the-current-time-of-the-system)
-* [Webhook](#Webhook)
 
 ---
 
@@ -951,6 +950,47 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   ```
     * `id`：Message ID
 
+## Storage
+
+### Set localStorage
+
+This API is similar to the browser's `localStorage.setItem`, but the setting parameter is the entire JSON-formatted data instead of a single key-value pair.
+
+When developing front-end extensions, you should avoid using the browser's `localStorage`, because using the browser's `localStorage` directly will cause data to be incorrectly overwritten or lost when switching between multiple workspaces.
+
+* `/api/storage/setLocalStorage`
+* Parameters
+
+  ```json
+  {
+    "val": {}
+  }
+  ```
+
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### Get localStorage
+
+* `/api/storage/getLocalStorage`
+* No parameters
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {}
+  }
+  ```
+  
 ## System
 
 ### Get boot progress

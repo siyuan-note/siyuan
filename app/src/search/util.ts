@@ -26,6 +26,8 @@ const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     if (list.length > window.siyuan.config.search.limit) {
         list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
     }
+    // new Set 后需重新赋值
+    window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][type] = list;
 };
 
 export const openGlobalSearch = (text: string, replace: boolean) => {
@@ -867,7 +869,8 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     }
     (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
     (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
-    window.siyuan.storage[Constants.LOCAL_SEARCHEDATA] = Object.assign({}, config, item);
+    Object.assign(config, item);
+    window.siyuan.storage[Constants.LOCAL_SEARCHEDATA] = Object.assign({}, config);
     inputEvent(element, config, undefined, edit);
     window.siyuan.menus.menu.remove();
 };

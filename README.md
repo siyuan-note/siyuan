@@ -196,11 +196,9 @@ In addition, you can also consider manually exporting and importing data to achi
 SiYuan is completely open source, and contributions are welcome:
 
 * [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
-* [User Guide](https://github.com/siyuan-note/user-guide-en_US) and [Appearance](https://github.com/siyuan-note/appearance)
-* [Editor Engine](https://github.com/88250/lute)
-* [End-to-end encryption](https://github.com/siyuan-note/encryption) and [Data repo](https://github.com/siyuan-note/dejavu)
+* [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
-* [Android](https://github.com/siyuan-note/siyuan-android) and [iOS](https://github.com/siyuan-note/siyuan-ios)
 
 For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
@@ -241,10 +239,6 @@ Ambiguity may occur when using Markdown markers to insert, please refer to [here
 ### What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
 
 The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
-
-### Why can't some online pictures be viewed?
-
-In order to avoid some potential security problems, SiYuan will not bypass the security header verification (such as security policy header and anti-leech verification) of the target site when initiating Internet service requests. You can try the `Convert network images to local images` function in the `...` in the upper right corner of the editor to pull the network image to the local, so that even if the target site changes the security policy or the local image is unavailable later, it will not be affected.
 
 ### How to share notes?
 

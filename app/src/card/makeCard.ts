@@ -71,6 +71,7 @@ export const makeCard = (nodeElement: Element[]) => {
                 focusByRange(range);
             }
         });
+        dialog.element.style.zIndex = "199"
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {
@@ -186,7 +187,7 @@ const viewCards = (deckID: string, title: string) => {
     </div>
     <div class="fn__hr"></div>
     <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1">
-        <ul class="fn__flex-1 b3-list b3-list--background">
+        <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
             ${renderViewItem(response.data.blocks)}
         </ul>
         <div id="cardPreview" class="fn__flex-1"></div>
@@ -215,6 +216,7 @@ const viewCards = (deckID: string, title: string) => {
         if (response.data.pageCount > 1) {
             nextElement.removeAttribute("disabled");
         }
+        dialog.element.style.zIndex = "200"
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !dialog.element.isSameNode(target)) {

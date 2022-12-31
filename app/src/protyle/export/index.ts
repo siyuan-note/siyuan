@@ -58,6 +58,7 @@ export const saveExport = (option: { type: string, id: string }) => {
         btnsElement[1].addEventListener("click", () => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
             const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
+            window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = {removeAssets, mergeSubdocs};
             getExportPath(option, removeAssets, mergeSubdocs);
             wordDialog.destroy();
         });

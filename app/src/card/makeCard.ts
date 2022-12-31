@@ -12,6 +12,7 @@ import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {escapeHtml} from "../util/escape";
 import {getDisplayName, getNotebookName} from "../util/pathName";
+import {hideElements} from "../protyle/ui/hideElements";
 
 const genCardItem = (item: ICard) => {
     return `<li data-id="${item.id}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
@@ -38,6 +39,12 @@ const genCardItem = (item: ICard) => {
 };
 
 export const makeCard = (nodeElement: Element[]) => {
+    window.siyuan.dialogs.find(item => {
+        if (item.element.getAttribute("data-key") === "makeCard") {
+            hideElements(["dialog"]);
+            return true;
+        }
+    });
     const range = getEditorRange(nodeElement[0]);
     fetchPost("/api/riff/getRiffDecks", {}, (response) => {
         let html = "";
@@ -71,6 +78,7 @@ export const makeCard = (nodeElement: Element[]) => {
                 focusByRange(range);
             }
         });
+        dialog.element.setAttribute("data-key", "makeCard")
         dialog.element.style.zIndex = "199"
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

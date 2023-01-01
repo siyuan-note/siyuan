@@ -43,9 +43,6 @@
 * [通知](#通知)
     * [推送消息](#推送消息)
     * [推送报错消息](#推送报错消息)
-* [存储](#存储)
-    * [设置 localStorage](#设置-localStorage)
-    * [获取 localStorage](#获取-localStorage)
 * [系统](#系统)
     * [获取启动进度](#获取启动进度)
     * [获取系统版本](#获取系统版本)
@@ -947,47 +944,6 @@
   ```
     * `id`：消息 ID
 
-## 存储
-
-### 设置 localStorage
-
-该 API 类似浏览器的 `localStorage.setItem`，但是设置参数是整个 JSON 格式的数据，而不是单个键值对。
-
-前端开发扩展时应该避免使用浏览器的 `localStorage`，因为直接使用浏览器的 `localStorage` 会导致多工作空间切换时数据错误覆盖或丢失。
-
-* `/api/storage/setLocalStorage`
-* 参数
-
-  ```json
-  {
-    "val": {}
-  }
-  ```
-  
-* 返回值
-
-  ```json
-  {
-    "code": 0,
-    "msg": "",
-    "data": null
-  }
-  ```
-
-### 获取 localStorage
-
-* `/api/storage/getLocalStorage`
-* 无参数
-* 返回值
-
-  ```json
-  {
-    "code": 0,
-    "msg": "",
-    "data": {}
-  }
-  ```
-  
 ## 系统
 
 ### 获取启动进度

@@ -221,7 +221,10 @@ const setDefaultStorage = (response: IWebSocketData) => {
 };
 
 export const exportLocalStorage = (cb?: () => void) => {
-    fetchPost("/api/storage/setLocalStorage", {val: window.siyuan.storage}, () => {
+    fetchPost("/api/storage/setLocalStorage", {
+        app: Constants.SIYUAN_APPID,
+        val: window.siyuan.storage,
+    }, () => {
         if (cb) {
             cb();
         }

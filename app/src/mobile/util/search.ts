@@ -4,6 +4,7 @@ import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
+import {setStorageVal} from "../../protyle/util/compatibility";
 
 const onRecentBlocks = (data: IBlock[], matchedRootCount?:number, matchedBlockCount?:number) => {
     let resultHTML = "";
@@ -37,14 +38,15 @@ export const toolbarSearchEvent = () => {
                 onRecentBlocks(response.data.blocks, response.data.matchedRootCount,response.data.matchedBlockCount);
             });
         }
-        window.siyuan.storage[Constants.LOCAL_SEARCHEDATA].k = inputElement.value;
+        window.siyuan.storage[Constants.LOCAL_SEARCHEKEY] = inputElement.value;
+        setStorageVal(Constants.LOCAL_SEARCHEKEY, window.siyuan.storage[Constants.LOCAL_SEARCHEKEY]);
     }, Constants.TIMEOUT_SEARCH);
 };
 
 const initToolbarSearch = () => {
     const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     inputElement.focus();
-    inputElement.value = window.siyuan.storage[Constants.LOCAL_SEARCHEDATA].k;
+    inputElement.value = window.siyuan.storage[Constants.LOCAL_SEARCHEKEY];
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;

@@ -18,6 +18,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][type];
@@ -28,6 +29,7 @@ const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     }
     // new Set 后需重新赋值
     window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][type] = list;
+    setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
 };
 
 export const openGlobalSearch = (text: string, replace: boolean) => {
@@ -235,6 +237,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
             window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][direction === "lr" ? "col" : "row"] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
+            setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
             if (direction === "lr") {
                 setPadding(edit.protyle);
             }
@@ -704,6 +707,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 }
                 setPadding(edit.protyle);
                 localData.layout = 0;
+                setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
             }
         }, {
             label: window.siyuan.languages.leftRightLayout,
@@ -719,6 +723,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 }
                 setPadding(edit.protyle);
                 localData.layout = 1;
+                setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
             }
         }]
     }).element);
@@ -871,6 +876,7 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
     Object.assign(config, item);
     window.siyuan.storage[Constants.LOCAL_SEARCHEDATA] = Object.assign({}, config);
+    setStorageVal(Constants.LOCAL_SEARCHEDATA, window.siyuan.storage[Constants.LOCAL_SEARCHEDATA]);
     inputEvent(element, config, undefined, edit);
     window.siyuan.menus.menu.remove();
 };

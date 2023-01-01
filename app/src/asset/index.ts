@@ -9,6 +9,7 @@ import {webViewerLoad} from "./pdf/viewer";
 import {webViewerPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
+import { setStorageVal } from "../protyle/util/compatibility";
 
 export class Asset extends Model {
     public path: string;
@@ -445,6 +446,7 @@ export class Asset extends Model {
                 this.element.firstElementChild.classList.remove("pdf__outer--dark");
                 lightElement.classList.add("toggled");
                 darkElement.classList.remove("toggled");
+                setStorageVal(Constants.LOCAL_PDFTHEME, window.siyuan.storage[Constants.LOCAL_PDFTHEME]);
             });
             darkElement.addEventListener("click", () => {
                 if (window.siyuan.config.appearance.mode === 0) {
@@ -455,6 +457,7 @@ export class Asset extends Model {
                 this.element.firstElementChild.classList.add("pdf__outer--dark");
                 lightElement.classList.remove("toggled");
                 darkElement.classList.add("toggled");
+                setStorageVal(Constants.LOCAL_PDFTHEME, window.siyuan.storage[Constants.LOCAL_PDFTHEME]);
             });
             // 初始化完成后需等待页签是否显示设置完成，才可以判断 pdf 是否能进行渲染
             setTimeout(() => {

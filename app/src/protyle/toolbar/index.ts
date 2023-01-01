@@ -15,7 +15,7 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {getEventName, openByMobile} from "../util/compatibility";
+import {getEventName, openByMobile, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../markdown/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -1163,6 +1163,7 @@ export class Toolbar {
                 const activeText = this.subElement.querySelector(".b3-list-item--focus").textContent;
                 languageElement.textContent = activeText === window.siyuan.languages.clear ? "" : activeText;
                 window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
+                setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
                 const editElement = getContenteditableElement(nodeElement);
                 const lineNumber = nodeElement.getAttribute("linenumber");
                 if (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum)) {
@@ -1227,6 +1228,7 @@ export class Toolbar {
             }
             languageElement.textContent = listElement.textContent === window.siyuan.languages.clear ? "" : listElement.textContent;
             window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
+            setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
             const nodeElement = hasClosestBlock(languageElement);
             if (nodeElement) {
                 const editElement = getContenteditableElement(nodeElement);

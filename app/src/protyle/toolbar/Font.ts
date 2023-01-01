@@ -1,4 +1,4 @@
-import {getEventName, updateHotkeyTip} from "../util/compatibility";
+import {getEventName, setStorageVal, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
 import {setPosition} from "../../util/setPosition";
 import {getSelectionPosition} from "../util/selection";
@@ -143,6 +143,7 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
         if (localFontStyles.length > 8) {
             localFontStyles.splice(7, 1);
         }
+        setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     } else {
         if (localFontStyles.length === 0) {
             type = "color";

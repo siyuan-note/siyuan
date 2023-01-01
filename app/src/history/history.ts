@@ -10,6 +10,7 @@ import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {showDiff} from "./diff";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
@@ -26,6 +27,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     const typeElement = element.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
     const notebookElement = element.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement;
     window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] = notebookElement.value;
+    setStorageVal(Constants.LOCAL_HISTORYNOTEID, window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID]);
     const docElement = element.querySelector('.history__text[data-type="docPanel"]');
     const assetElement = element.querySelector('.history__text[data-type="assetPanel"]');
     const mdElement = element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;

@@ -5,6 +5,7 @@ import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {getNotebookName, getOpenNotebookCount} from "./pathName";
 import {validateName} from "../editor/rename";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const newDailyNote = () => {
     const exit = window.siyuan.dialogs.find(item => {
@@ -67,6 +68,7 @@ export const newDailyNote = () => {
         btnsElement[1].addEventListener("click", () => {
             const notebook = selectElement.value;
             window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = notebook;
+            setStorageVal(Constants.LOCAL_DAILYNOTEID, window.siyuan.storage[Constants.LOCAL_DAILYNOTEID]);
             fetchPost("/api/filetree/createDailyNote", {
                 notebook,
                 app: Constants.SIYUAN_APPID,

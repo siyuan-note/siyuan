@@ -14,6 +14,7 @@ import {Dialog} from "../../dialog";
 import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
+import {setStorageVal} from "../util/compatibility";
 
 export const saveExport = (option: { type: string, id: string }) => {
     /// #if !BROWSER
@@ -59,6 +60,7 @@ export const saveExport = (option: { type: string, id: string }) => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
             const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
             window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = {removeAssets, mergeSubdocs};
+            setStorageVal(Constants.LOCAL_EXPORTWORD, window.siyuan.storage[Constants.LOCAL_EXPORTWORD]);
             getExportPath(option, removeAssets, mergeSubdocs);
             wordDialog.destroy();
         });

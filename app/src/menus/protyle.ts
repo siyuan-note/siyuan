@@ -25,7 +25,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, readText, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, readText, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
@@ -459,6 +459,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
             id,
             action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
         };
+        setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
         if (isPushBack) {
             pushBack();
         }

@@ -11,6 +11,7 @@ import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {isBrowser} from "../util/functions";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const bazaar = {
     element: undefined as Element,
@@ -626,6 +627,7 @@ export const bazaar = {
                         });
                     }
                     localSort[selectElement.parentElement.parentElement.getAttribute("data-type")] = selectElement.value;
+                    setStorageVal(Constants.LOCAL_BAZAAR, window.siyuan.storage[Constants.LOCAL_BAZAAR]);
                     panelElement.querySelector(".b3-cards").innerHTML = html;
                 }
             });

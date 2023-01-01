@@ -13,6 +13,7 @@ import {highlightRender} from "../markdown/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
+import {setStorageVal} from "../util/compatibility";
 
 const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
@@ -248,6 +249,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                     languageElement.textContent = window.siyuan.storage[Constants.LOCAL_CODELANG];
                 } else {
                     window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
+                    setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
                 }
                 highlightRender(blockElement);
             } else {

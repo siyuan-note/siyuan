@@ -12,9 +12,11 @@ import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {hideElements} from "../protyle/ui/hideElements";
 import {pushBack} from "./util/MobileBackFoward";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id, action};
+    setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     if (window.siyuan.mobileEditor) {
         hideElements(["toolbar", "hint", "util"], window.siyuan.mobileEditor.protyle);
         if (window.siyuan.mobileEditor.protyle.contentElement.classList.contains("fn__none")) {

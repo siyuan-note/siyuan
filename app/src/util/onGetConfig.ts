@@ -1,6 +1,6 @@
 import {openSearch} from "../search/spread";
 import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
-import {hotKey2Electron, updateHotkeyTip} from "../protyle/util/compatibility";
+import {hotKey2Electron, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
 import {ipcRenderer, OpenDialogReturnValue} from "electron";
@@ -293,6 +293,7 @@ const initBar = () => {
                                         app: Constants.SIYUAN_APPID,
                                     });
                                     window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = item.id;
+                                    setStorageVal(Constants.LOCAL_DAILYNOTEID, window.siyuan.storage[Constants.LOCAL_DAILYNOTEID]);
                                 }
                             }).element);
                         }
@@ -389,6 +390,7 @@ const initWindow = () => {
                 pageSize: ipcData.pdfOptions.pageSize,
                 scale: ipcData.pdfOptions.scale,
             };
+            setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
             try {
                 if (window.siyuan.config.export.addFooter) {
                     ipcData.pdfOptions.displayHeaderFooter = true;

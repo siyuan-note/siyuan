@@ -16,7 +16,7 @@ import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/showKeyboardToolbar";
-import {setLocalStorage} from "../protyle/util/compatibility";
+import {getLocalStorage} from "../protyle/util/compatibility";
 
 class App {
     constructor() {
@@ -47,7 +47,7 @@ class App {
         fetchPost("/api/system/getConf", {}, confResponse => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;
-            setLocalStorage();
+            getLocalStorage();
             fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                 window.siyuan.languages = lauguages;
                 document.title = window.siyuan.languages.siyuanNote;

@@ -141,14 +141,14 @@ export const hotKey2Electron = (key: string) => {
 
 export const setLocalStorage = (data?: IWebSocketData) => {
     if (data) {
-        setDefaultStorage(data)
+        setDefaultStorage(data);
     } else {
         fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
-            setDefaultStorage(response)
+            setDefaultStorage(response);
         });
     }
-
 };
+
 const setDefaultStorage = (response: IWebSocketData) => {
     window.siyuan.storage = response.data;
     // 历史数据迁移
@@ -218,7 +218,7 @@ const setDefaultStorage = (response: IWebSocketData) => {
             window.siyuan.storage[key] = defaultStorage[key];
         }
     });
-}
+};
 
 export const exportLocalStorage = (cb?: () => void) => {
     fetchPost("/api/storage/setLocalStorage", {val: window.siyuan.storage}, () => {

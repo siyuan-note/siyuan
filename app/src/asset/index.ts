@@ -424,7 +424,7 @@ export class Asset extends Model {
       </div>
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;
-            const localPDF = window.siyuan.storage[Constants.LOCAL_PDFTHEME]
+            const localPDF = window.siyuan.storage[Constants.LOCAL_PDFTHEME];
             const pdfTheme = window.siyuan.config.appearance.mode === 0 ? localPDF.light : localPDF.dark;
             const darkElement = this.element.querySelector("#pdfDark");
             const lightElement = this.element.querySelector("#pdfLight");

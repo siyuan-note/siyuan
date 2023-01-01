@@ -39,7 +39,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.22.11
-	github.com/siyuan-note/dejavu v0.0.0-20221231091617-c76bbed8303e
+	github.com/siyuan-note/dejavu v0.0.0-20230101033600-8b9f3e6befc0
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e

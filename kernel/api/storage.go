@@ -188,11 +188,16 @@ func setLocalStorage(c *gin.Context) {
 	}
 
 	val := arg["val"].(interface{})
-
 	err := model.SetLocalStorage(val)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+
+	app := arg["app"].(string)
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcastMainExcludeSelfApp, util.PushModeBroadcastMainExcludeSelfApp)
+	evt.AppId = app
+	evt.Data = val
+	util.PushEvent(evt)
 }

@@ -233,6 +233,8 @@ func PushEvent(event *Result) {
 		broadcastOtherApps(msg, event.AppId)
 	case PushModeBroadcastApp:
 		broadcastApp(msg, event.AppId)
+	case PushModeBroadcastMainExcludeSelfApp:
+		broadcastOtherAppMains(msg, event.AppId)
 	case PushModeNone:
 	}
 }
@@ -275,6 +277,26 @@ func broadcastOtherApps(msg []byte, excludeApp string) {
 			if app, _ := session.Get("app"); app == excludeApp {
 				return true
 			}
+			session.Write(msg)
+			return true
+		})
+		return true
+	})
+}
+
+func broadcastOtherAppMains(msg []byte, excludeApp string) {
+	sessions.Range(func(key, value interface{}) bool {
+		appSessions := value.(*sync.Map)
+		appSessions.Range(func(key, value interface{}) bool {
+			session := value.(*melody.Session)
+			if app, _ := session.Get("app"); app == excludeApp {
+				return true
+			}
+
+			if t, ok := session.Get("type"); ok && "main" != t {
+				return true
+			}
+
 			session.Write(msg)
 			return true
 		})

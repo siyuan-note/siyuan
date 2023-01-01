@@ -76,7 +76,7 @@ func renameNotebook(c *gin.Context) {
 		return
 	}
 
-	evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":  notebook,
 		"name": name,
@@ -101,7 +101,7 @@ func removeNotebook(c *gin.Context) {
 		return
 	}
 
-	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast, 0)
+	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box": notebook,
 	}
@@ -137,7 +137,7 @@ func createNotebook(c *gin.Context) {
 		"notebook": model.Conf.Box(id),
 	}
 
-	evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":     model.Conf.Box(id),
 		"existed": existed,
@@ -164,7 +164,7 @@ func openNotebook(c *gin.Context) {
 		return
 	}
 
-	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":     model.Conf.Box(notebook),
 		"existed": existed,

@@ -64,11 +64,7 @@ func NewCommand(cmdStr string, cmdId float64, param map[string]interface{}, sess
 	if pushModeParam := param["pushMode"]; nil != pushModeParam {
 		pushMode = util.PushMode(pushModeParam.(float64))
 	}
-	reloadPushMode := util.PushModeSingleSelf
-	if reloadPushModeParam := param["reloadPushMode"]; nil != reloadPushModeParam {
-		reloadPushMode = util.PushMode(reloadPushModeParam.(float64))
-	}
-	baseCmd.PushPayload = util.NewCmdResult(ret.Name(), cmdId, pushMode, reloadPushMode)
+	baseCmd.PushPayload = util.NewCmdResult(ret.Name(), cmdId, pushMode)
 	appId, _ := baseCmd.session.Get("app")
 	baseCmd.PushPayload.AppId = appId.(string)
 	sid, _ := baseCmd.session.Get("id")

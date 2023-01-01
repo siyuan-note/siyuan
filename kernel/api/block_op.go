@@ -288,7 +288,7 @@ func deleteBlock(c *gin.Context) {
 }
 
 func broadcastTransactions(transactions []*model.Transaction) {
-	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast, util.PushModeBroadcast)
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
 	evt.Data = transactions
 	util.PushEvent(evt)
 }

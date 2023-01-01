@@ -148,7 +148,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 }
 
 func pushBroadcastAttrTransactions(transactions []*Transaction) {
-	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast, util.PushModeBroadcast)
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
 	evt.Data = transactions
 	util.PushEvent(evt)
 }

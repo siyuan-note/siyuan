@@ -121,7 +121,7 @@ func ClosePushChan(id string) {
 }
 
 func ReloadUI() {
-	evt := NewCmdResult("reloadui", 0, PushModeBroadcast, 0)
+	evt := NewCmdResult("reloadui", 0, PushModeBroadcast)
 	PushEvent(evt)
 }
 
@@ -208,7 +208,7 @@ func PushClearProgress() {
 }
 
 func PushDownloadProgress(id string, percent float32) {
-	evt := NewCmdResult("downloadProgress", 0, PushModeBroadcast, 0)
+	evt := NewCmdResult("downloadProgress", 0, PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"id":      id,
 		"percent": percent,
@@ -219,9 +219,6 @@ func PushDownloadProgress(id string, percent float32) {
 func PushEvent(event *Result) {
 	msg := event.Bytes()
 	mode := event.PushMode
-	if "reload" == event.Cmd {
-		mode = event.ReloadPushMode
-	}
 	switch mode {
 	case PushModeBroadcast:
 		Broadcast(msg)
@@ -235,7 +232,6 @@ func PushEvent(event *Result) {
 		broadcastApp(msg, event.AppId)
 	case PushModeBroadcastMainExcludeSelfApp:
 		broadcastOtherAppMains(msg, event.AppId)
-	case PushModeNone:
 	}
 }
 

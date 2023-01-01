@@ -115,7 +115,7 @@ func Unmount(boxID string) {
 	WaitForWritingFiles()
 
 	unmount0(boxID)
-	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast, 0)
+	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box": boxID,
 	}

@@ -14,6 +14,7 @@ export class Model {
     /// #else
     // @ts-ignore
     public parent: any;
+
     /// #endif
 
     constructor(options: { id: string, type?: TWS, callback?: () => void, msgCallback?: (data: IWebSocketData) => void }) {
@@ -79,8 +80,13 @@ export class Model {
             cmd,
             reqId: this.reqId,
             param,
-            // pushMode  0: 广播，1：单播(默认)，2：广播（不包含自己）
-            // reloadPushMode 是否需要 reload  0: 广播，1：单播(默认)，2：广播（不包含自己），3：不推送
+            // pushMode
+            // 0: 所有应用所有会话广播
+            // 1：自我应用会话单播
+            // 2：非自我会话广播
+            // 4：非自我应用所有会话广播
+            // 5：单个应用内所有会话广播
+            // 6：非自我应用主会话广播
         }));
     }
 }

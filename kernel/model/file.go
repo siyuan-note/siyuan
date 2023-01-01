@@ -1172,7 +1172,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 		moveSorts(tree.ID, fromBox.ID, toBox.ID)
 	}
 
-	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"fromNotebook": fromBox.ID,
 		"fromPath":     fromPath,
@@ -1275,7 +1275,7 @@ func removeDoc(box *Box, p string) (err error) {
 
 	cache.RemoveDocIAL(p)
 
-	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"ids": removeIDs,
 	}
@@ -1321,7 +1321,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 
 	refText := getNodeRefText(tree.Root)
-	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast, util.PushModeNone)
+	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":     boxID,
 		"id":      tree.Root.ID,

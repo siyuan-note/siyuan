@@ -93,7 +93,7 @@ func performTransactions(c *gin.Context) {
 }
 
 func pushTransactions(app, session string, transactions []*model.Transaction) {
-	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcastExcludeSelf, util.PushModeBroadcastExcludeSelf)
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcastExcludeSelf)
 	evt.AppId = app
 	evt.SessionId = session
 	evt.Data = transactions

@@ -196,7 +196,7 @@ func setLocalStorage(c *gin.Context) {
 	}
 
 	app := arg["app"].(string)
-	evt := util.NewCmdResult("setLocalStorage", 0, util.PushModeBroadcastMainExcludeSelfApp, util.PushModeBroadcastMainExcludeSelfApp)
+	evt := util.NewCmdResult("setLocalStorage", 0, util.PushModeBroadcastMainExcludeSelfApp)
 	evt.AppId = app
 	evt.Data = val
 	util.PushEvent(evt)

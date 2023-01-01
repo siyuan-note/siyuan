@@ -139,78 +139,86 @@ export const hotKey2Electron = (key: string) => {
     return electronKey + key.substr(key.length - 1);
 };
 
-export const setLocalStorage = () => {
-    fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
-        window.siyuan.storage = response.data;
-        // 历史数据迁移
-        const defaultStorage: any = {};
-        defaultStorage[Constants.LOCAL_SEARCHEKEYS] = {
-            keys: [],
-            replaceKeys: [],
-            col: "",
-            row: "",
-            layout: 0
-        };
-        defaultStorage[Constants.LOCAL_PDFTHEME] = {light: "light", dark: "dark"};
-        defaultStorage[Constants.LOCAL_BAZAAR] = {
-            theme: "0",
-            template: "0",
-            icon: "0",
-            widget: "0",
-        };
-        defaultStorage[Constants.LOCAL_EXPORTWORD] = {removeAssets: false, mergeSubdocs: false};
-        defaultStorage[Constants.LOCAL_EXPORTPDF] = {
-            landscape: false,
-            marginType: "0",
-            scale: 1,
-            pageSize: "A4",
-            removeAssets: true,
-            keepFold: false,
-            mergeSubdocs: false,
-        };
-        defaultStorage[Constants.LOCAL_DOCINFO] = {
-            id: "",
-            action: []
-        };
-        defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
-        defaultStorage[Constants.LOCAL_SEARCHEDATA] = {
-            sort: 0,
-            group: 0,
-            hasReplace: false,
-            method: 0,
-            hPath: "",
-            idPath: [],
-            k: "",
-            r: "",
-            types: {
-                document: window.siyuan.config.search.document,
-                heading: window.siyuan.config.search.heading,
-                list: window.siyuan.config.search.list,
-                listItem: window.siyuan.config.search.listItem,
-                codeBlock: window.siyuan.config.search.codeBlock,
-                htmlBlock: window.siyuan.config.search.htmlBlock,
-                mathBlock: window.siyuan.config.search.mathBlock,
-                table: window.siyuan.config.search.table,
-                blockquote: window.siyuan.config.search.blockquote,
-                superBlock: window.siyuan.config.search.superBlock,
-                paragraph: window.siyuan.config.search.paragraph,
-            }
-        };
+export const setLocalStorage = (data?: IWebSocketData) => {
+    if (data) {
+        setDefaultStorage(data)
+    } else {
+        fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
+            setDefaultStorage(response)
+        });
+    }
 
-        [Constants.LOCAL_SEARCHEKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
-            Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHEDATA].forEach((key) => {
-            if (typeof response.data[key] === "string") {
-                try {
-                    window.siyuan.storage[key] = Object.assign(defaultStorage[key], JSON.parse(response.data[key]));
-                } catch (e) {
-                    window.siyuan.storage[key] = defaultStorage[key];
-                }
-            } else if (typeof response.data[key] === "undefined") {
+};
+const setDefaultStorage = (response: IWebSocketData) => {
+    window.siyuan.storage = response.data;
+    // 历史数据迁移
+    const defaultStorage: any = {};
+    defaultStorage[Constants.LOCAL_SEARCHEKEYS] = {
+        keys: [],
+        replaceKeys: [],
+        col: "",
+        row: "",
+        layout: 0
+    };
+    defaultStorage[Constants.LOCAL_PDFTHEME] = {light: "light", dark: "dark"};
+    defaultStorage[Constants.LOCAL_BAZAAR] = {
+        theme: "0",
+        template: "0",
+        icon: "0",
+        widget: "0",
+    };
+    defaultStorage[Constants.LOCAL_EXPORTWORD] = {removeAssets: false, mergeSubdocs: false};
+    defaultStorage[Constants.LOCAL_EXPORTPDF] = {
+        landscape: false,
+        marginType: "0",
+        scale: 1,
+        pageSize: "A4",
+        removeAssets: true,
+        keepFold: false,
+        mergeSubdocs: false,
+    };
+    defaultStorage[Constants.LOCAL_DOCINFO] = {
+        id: "",
+        action: []
+    };
+    defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
+    defaultStorage[Constants.LOCAL_SEARCHEDATA] = {
+        sort: 0,
+        group: 0,
+        hasReplace: false,
+        method: 0,
+        hPath: "",
+        idPath: [],
+        k: "",
+        r: "",
+        types: {
+            document: window.siyuan.config.search.document,
+            heading: window.siyuan.config.search.heading,
+            list: window.siyuan.config.search.list,
+            listItem: window.siyuan.config.search.listItem,
+            codeBlock: window.siyuan.config.search.codeBlock,
+            htmlBlock: window.siyuan.config.search.htmlBlock,
+            mathBlock: window.siyuan.config.search.mathBlock,
+            table: window.siyuan.config.search.table,
+            blockquote: window.siyuan.config.search.blockquote,
+            superBlock: window.siyuan.config.search.superBlock,
+            paragraph: window.siyuan.config.search.paragraph,
+        }
+    };
+
+    [Constants.LOCAL_SEARCHEKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
+        Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHEDATA].forEach((key) => {
+        if (typeof response.data[key] === "string") {
+            try {
+                window.siyuan.storage[key] = Object.assign(defaultStorage[key], JSON.parse(response.data[key]));
+            } catch (e) {
                 window.siyuan.storage[key] = defaultStorage[key];
             }
-        });
+        } else if (typeof response.data[key] === "undefined") {
+            window.siyuan.storage[key] = defaultStorage[key];
+        }
     });
-};
+}
 
 export const exportLocalStorage = (cb?: () => void) => {
     fetchPost("/api/storage/setLocalStorage", {val: window.siyuan.storage}, () => {

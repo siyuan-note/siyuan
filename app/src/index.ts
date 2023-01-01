@@ -47,6 +47,9 @@ class App {
                             case"progress":
                                 progressLoading(data);
                                 break;
+                            case"setLocalStorage":
+                                setLocalStorage(data);
+                                break;
                             case "rename":
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {

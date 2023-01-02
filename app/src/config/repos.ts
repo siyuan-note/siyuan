@@ -1,6 +1,5 @@
 import {needSubscribe} from "../util/needSubscribe";
 import {fetchPost} from "../util/fetch";
-import {isMobile} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";

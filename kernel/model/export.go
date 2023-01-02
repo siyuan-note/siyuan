@@ -61,6 +61,8 @@ func Export2Liandi(id string) (err error) {
 	sqlAssets := sql.QueryRootBlockAssets(id)
 	err = uploadCloud(sqlAssets)
 
+	msgId := util.PushMsg(Conf.Language(182), 15000)
+
 	// 判断帖子是否已经存在，存在则使用更新接口
 	foundArticle := false
 	articleId := tree.Root.IALAttr("liandiArticleId")
@@ -135,7 +137,7 @@ func Export2Liandi(id string) (err error) {
 	}
 
 	msg := fmt.Sprintf(Conf.Language(181), util.LiandiServer+"/article/"+articleId)
-	util.PushMsg(msg, 7000)
+	util.PushUpdateMsg(msgId, msg, 7000)
 	return
 }
 

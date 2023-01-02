@@ -100,9 +100,9 @@ func Export2Liandi(id string) (err error) {
 		SetResult(result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		SetBody(map[string]interface{}{
-			"title":   title,
-			"tags":    tags,
-			"content": content})
+			"articleTitle":   title,
+			"articleTags":    tags,
+			"articleContent": content})
 	var resp *req.Response
 	var sendErr error
 	if foundArticle {
@@ -116,6 +116,12 @@ func Export2Liandi(id string) (err error) {
 	}
 	if 200 != resp.StatusCode {
 		msg := fmt.Sprintf("send article to liandi failed [sc=%d]", resp.StatusCode)
+		logging.LogErrorf(msg)
+		return errors.New(msg)
+	}
+
+	if 0 != result.Code {
+		msg := fmt.Sprintf("send article to liandi failed [code=%d, msg=%s]", result.Code, result.Msg)
 		logging.LogErrorf(msg)
 		return errors.New(msg)
 	}

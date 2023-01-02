@@ -68,8 +68,9 @@ func Export2Liandi(id string) (err error) {
 	defer util.PushClearMsg(msgId)
 
 	// 判断帖子是否已经存在，存在则使用更新接口
+	const liandiArticleIdAttrName = "custom-liandi-articleId"
 	foundArticle := false
-	articleId := tree.Root.IALAttr("liandiArticleId")
+	articleId := tree.Root.IALAttr(liandiArticleIdAttrName)
 	if "" != articleId {
 		request := httpclient.NewCloudRequest30s()
 		resp, getErr := request.
@@ -140,7 +141,7 @@ func Export2Liandi(id string) (err error) {
 	if !foundArticle {
 		articleId = result.Data.(string)
 		tree, _ = loadTreeByBlockID(id) // 这里必须重新加载，因为前面导出时已经修改了树结构
-		tree.Root.SetIALAttr("liandiArticleId", articleId)
+		tree.Root.SetIALAttr(liandiArticleIdAttrName, articleId)
 		if err = writeJSONQueue(tree); nil != err {
 			return
 		}

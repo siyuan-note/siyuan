@@ -60,8 +60,12 @@ func Export2Liandi(id string) (err error) {
 
 	sqlAssets := sql.QueryRootBlockAssets(id)
 	err = uploadCloud(sqlAssets)
+	if nil != err {
+		return
+	}
 
 	msgId := util.PushMsg(Conf.Language(182), 15000)
+	defer util.PushClearMsg(msgId)
 
 	// 判断帖子是否已经存在，存在则使用更新接口
 	foundArticle := false
@@ -95,7 +99,11 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree, "https://b3logfile.com/siyuan/")
+	content := exportMarkdownContent0(tree, "https://b3logfile.com/siyuan/",
+		4, 1, 0,
+		"#", "#",
+		"", "",
+		false)
 	var result = gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	request = request.
@@ -125,6 +133,7 @@ func Export2Liandi(id string) (err error) {
 	if 0 != result.Code {
 		msg := fmt.Sprintf("send article to liandi failed [code=%d, msg=%s]", result.Code, result.Msg)
 		logging.LogErrorf(msg)
+		util.PushClearMsg(msgId)
 		return errors.New(result.Msg)
 	}
 
@@ -138,7 +147,7 @@ func Export2Liandi(id string) (err error) {
 	}
 
 	msg := fmt.Sprintf(Conf.Language(181), util.LiandiServer+"/article/"+articleId)
-	util.PushUpdateMsg(msgId, msg, 7000)
+	util.PushMsg(msg, 7000)
 	return
 }
 
@@ -288,7 +297,11 @@ func exportData(exportFolder string) (zipPath string, err error) {
 
 func Preview(id string) string {
 	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false, false, false)
+	tree = exportTree(tree, false, false, false,
+		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
+		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
+		Conf.Export.AddTitle)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
@@ -351,7 +364,11 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
-	tree = exportTree(tree, true, true, false)
+	tree = exportTree(tree, true, true, false,
+		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
+		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
+		Conf.Export.AddTitle)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 	savePath = strings.TrimSpace(savePath)
@@ -475,7 +492,11 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 	}
 
-	tree = exportTree(tree, true, true, keepFold)
+	tree = exportTree(tree, true, true, keepFold,
+		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
+		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
+		Conf.Export.AddTitle)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -708,7 +729,11 @@ func ExportStdMarkdown(id string) string {
 	if IsSubscriber() {
 		cloudAssetsBase = "https://assets.b3logfile.com/siyuan/"
 	}
-	return exportMarkdownContent0(tree, cloudAssetsBase)
+	return exportMarkdownContent0(tree, cloudAssetsBase,
+		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
+		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
+		Conf.Export.AddTitle)
 }
 
 func ExportMarkdown(id string) (name, zipPath string) {
@@ -1142,12 +1167,24 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 		return
 	}
 	hPath = tree.HPath
-	exportedMd = exportMarkdownContent0(tree, "")
+	exportedMd = exportMarkdownContent0(tree, "",
+		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
+		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
+		Conf.Export.AddTitle)
 	return
 }
 
-func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string) (ret string) {
-	tree = exportTree(tree, false, true, false)
+func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string,
+	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
+	tagOpenMarker, tagCloseMarker string,
+	blockRefTextLeft, blockRefTextRight string,
+	addTitle bool) (ret string) {
+	tree = exportTree(tree, false, true, false,
+		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
+		tagOpenMarker, tagCloseMarker,
+		blockRefTextLeft, blockRefTextRight,
+		addTitle)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -1215,7 +1252,11 @@ func processKaTexMacros(n *ast.Node) {
 	}
 }
 
-func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (ret *parse.Tree) {
+func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
+	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
+	tagOpenMarker, tagCloseMarker string,
+	blockRefTextLeft, blockRefTextRight string,
+	addTitle bool) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
@@ -1245,7 +1286,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		buf := &bytes.Buffer{}
 		lines := strings.Split(defMd, "\n")
 		for i, line := range lines {
-			if 0 == Conf.Export.BlockEmbedMode { // 原始文本
+			if 0 == blockEmbedMode { // 原始文本
 				buf.WriteString(line)
 			} else { // Blockquote
 				buf.WriteString("> " + line)
@@ -1277,7 +1318,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 
 	// 收集引用转脚注
 	var refFootnotes []*refAsFootnotes
-	if 4 == Conf.Export.BlockRefMode { // 块引转脚注
+	if 4 == blockRefMode { // 块引转脚注
 		treeCache := map[string]*parse.Tree{}
 		treeCache[id] = ret
 		depth := 0
@@ -1307,13 +1348,13 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 				return ast.WalkContinue
 			} else if n.IsTextMarkType("file-annotation-ref") {
 				refID := n.TextMarkFileAnnotationRefID
-				status := processFileAnnotationRef(refID, n)
+				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode)
 				unlinks = append(unlinks, n)
 				return status
 			} else if n.IsTextMarkType("tag") {
 				if !wysiwyg {
 					n.Type = ast.NodeText
-					n.Tokens = []byte(Conf.Export.TagOpenMarker + n.TextMarkTextContent + Conf.Export.TagCloseMarker)
+					n.Tokens = []byte(tagOpenMarker + n.TextMarkTextContent + tagCloseMarker)
 					return ast.WalkContinue
 				}
 			}
@@ -1332,14 +1373,14 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(linkText) {
 			linkText = gulu.Str.SubStr(linkText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 		}
-		linkText = Conf.Export.BlockRefTextLeft + linkText + Conf.Export.BlockRefTextRight
+		linkText = blockRefTextLeft + linkText + blockRefTextRight
 
 		defTree, _ := loadTreeByBlockID(defID)
 		if nil == defTree {
 			return ast.WalkContinue
 		}
 
-		switch Conf.Export.BlockRefMode {
+		switch blockRefMode {
 		case 2: // 锚文本块链
 			var blockRefLink *ast.Node
 			blockRefLink = &ast.Node{Type: ast.NodeLink}
@@ -1368,13 +1409,13 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 		n.Unlink()
 	}
 
-	if 4 == Conf.Export.BlockRefMode { // 块引转脚注
-		if footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret.Root.ID); nil != footnotesDefBlock {
+	if 4 == blockRefMode { // 块引转脚注
+		if footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret.Root.ID, blockRefTextLeft, blockRefTextRight); nil != footnotesDefBlock {
 			ret.Root.AppendChild(footnotesDefBlock)
 		}
 	}
 
-	if Conf.Export.AddTitle {
+	if addTitle {
 		if root, _ := getBlock(id); nil != root {
 			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, KramdownIAL: parse.Map2IAL(root.IAL)}
 			content := html.UnescapeString(root.Content)
@@ -1483,7 +1524,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool) (re
 	return ret
 }
 
-func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footnotesDefBlock *ast.Node) {
+func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockRefTextLeft, blockRefTextRight string) (footnotesDefBlock *ast.Node) {
 	if 1 > len(*refFootnotes) {
 		return nil
 	}
@@ -1528,7 +1569,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string) (footn
 				if treenode.IsBlockRef(n) {
 					defID, _, _ := treenode.GetBlockRef(n)
 					if f := getRefAsFootnotes(defID, refFootnotes); nil != f {
-						n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(Conf.Export.BlockRefTextLeft + f.refAnchorText + Conf.Export.BlockRefTextRight)})
+						n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(blockRefTextLeft + f.refAnchorText + blockRefTextRight)})
 						n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + f.refNum), FootnotesRefId: f.refNum, FootnotesRefLabel: []byte("^" + f.refNum)})
 						unlinks = append(unlinks, n)
 					}
@@ -1714,7 +1755,7 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 	})
 }
 
-func processFileAnnotationRef(refID string, n *ast.Node) ast.WalkStatus {
+func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int) ast.WalkStatus {
 	p := refID[:strings.LastIndex(refID, "/")]
 	absPath, err := GetAssetAbsPath(p)
 	if nil != err {
@@ -1747,7 +1788,7 @@ func processFileAnnotationRef(refID string, n *ast.Node) ast.WalkStatus {
 	file := p[7:len(p)-23-len(ext)] + ext
 	fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-	if 0 == Conf.Export.FileAnnotationRefMode {
+	if 0 == fileAnnotationRefMode {
 		fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(file + " - p" + pageStr + " - " + refText)})
 	} else {
 		fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(refText)})

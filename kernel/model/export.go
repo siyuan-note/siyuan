@@ -58,6 +58,9 @@ func Export2Liandi(id string) (err error) {
 		return
 	}
 
+	sqlAssets := sql.QueryRootBlockAssets(id)
+	err = uploadCloud(sqlAssets)
+
 	// 判断帖子是否已经存在，存在则使用更新接口
 	foundArticle := false
 	articleId := tree.Root.IALAttr("liandiArticleId")

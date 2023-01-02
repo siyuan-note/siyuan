@@ -20,6 +20,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/imroc/req/v3"
+	"github.com/siyuan-note/httpclient"
+	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -47,6 +50,87 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func Export2Liandi(id string) (err error) {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
+		return
+	}
+
+	// 判断帖子是否已经存在，存在则使用更新接口
+	foundArticle := false
+	articleId := tree.Root.IALAttr("liandiArticleId")
+	if "" != articleId {
+		var result = map[string]interface{}{}
+		request := httpclient.NewCloudRequest30s()
+		resp, getErr := request.
+			SetResult(result).
+			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+			Get(util.LiandiServer + "/api/v2/article/update/" + articleId)
+		if nil != getErr {
+			logging.LogErrorf("get liandi article info failed: %s", getErr)
+			return getErr
+		}
+
+		switch resp.StatusCode {
+		case 200:
+			foundArticle = true
+		case 404:
+			foundArticle = false
+		default:
+			msg := fmt.Sprintf("get liandi article info failed [sc=%d]", resp.StatusCode)
+			err = errors.New(msg)
+			return
+		}
+	}
+
+	apiURL := util.LiandiServer + "/api/v2/article"
+	if foundArticle {
+		apiURL += "/" + articleId
+	}
+
+	title := path.Base(tree.HPath)
+	tags := tree.Root.IALAttr("tags")
+	content := exportMarkdownContent0(tree)
+	var result = map[string]interface{}{}
+	request := httpclient.NewCloudRequest30s()
+	request = request.
+		SetResult(result).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetBody(map[string]interface{}{
+			"title":   title,
+			"tags":    tags,
+			"content": content})
+	var resp *req.Response
+	var sendErr error
+	if foundArticle {
+		resp, sendErr = request.Put(apiURL)
+	} else {
+		resp, sendErr = request.Post(apiURL)
+	}
+	if nil != sendErr {
+		logging.LogErrorf("send article to liandi failed: %s", err)
+		return err
+	}
+	if 200 != resp.StatusCode {
+		msg := fmt.Sprintf("send article to liandi failed [sc=%d]", resp.StatusCode)
+		logging.LogErrorf(msg)
+		return errors.New(msg)
+	}
+
+	if !foundArticle {
+		articleId = result["data"].(string)
+		tree.Root.SetIALAttr("liandiArticleId", articleId)
+		if err = writeJSONQueue(tree); nil != err {
+			return
+		}
+	}
+
+	msg := fmt.Sprintf(Conf.Language(181), util.LiandiServer+"/article/"+articleId)
+	util.PushMsg(msg, 7000)
+	return
+}
 
 func ExportSystemLog() (zipPath string) {
 	exportFolder := filepath.Join(util.TempDir, "export", "system-log")
@@ -1043,12 +1127,17 @@ func ExportMarkdownContent(id string) (hPath, exportedMd string) {
 func exportMarkdownContent(id string) (hPath, exportedMd string) {
 	tree, _ := loadTreeByBlockID(id)
 	hPath = tree.HPath
+	exportedMd = exportMarkdownContent0(tree)
+	return
+}
+
+func exportMarkdownContent0(tree *parse.Tree) (ret string) {
 	tree = exportTree(tree, false, true, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
-	exportedMd = gulu.Str.FromBytes(renderer.Render())
+	ret = gulu.Str.FromBytes(renderer.Render())
 	return
 }
 

@@ -1043,6 +1043,7 @@
     "177": "Exit application",
     "178": "Access Authorization - SiYuan",
     "179": "The disk space may be insufficient. It is recommended to keep the free space of the disk where the workspace is located at more than twice the size of data",
-    "180": "Search content block does not exist"
+    "180": "Search content block does not exist",
+    "181": "The document has been shared to Liandi, <a href=\"%s\" target=\"_blank\">click to view</a>"
   }
 }

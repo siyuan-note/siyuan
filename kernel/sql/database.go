@@ -514,6 +514,40 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			IAL:      treenode.IALStr(n),
 		}
 		spans = append(spans, span)
+
+		if n.IsTextMarkType("a") {
+			dest := n.TextMarkAHref
+			if util.IsAssetLinkDest([]byte(dest)) {
+				var title string
+				if titleNode := n.ChildByType(ast.NodeLinkTitle); nil != titleNode {
+					title = gulu.Str.FromBytes(titleNode.Tokens)
+				}
+
+				var hash string
+				var hashErr error
+				if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
+					if !gulu.File.IsDir(lp) {
+						hash, hashErr = util.GetEtag(lp)
+						if nil != hashErr {
+							logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
+						}
+					}
+				}
+				name, _ := util.LastID(dest)
+				asset := &Asset{
+					ID:      ast.NewNodeID(),
+					BlockID: parentBlock.ID,
+					RootID:  rootID,
+					Box:     boxID,
+					DocPath: p,
+					Path:    dest,
+					Name:    name,
+					Title:   title,
+					Hash:    hash,
+				}
+				assets = append(assets, asset)
+			}
+		}
 		walkStatus = ast.WalkSkipChildren
 		return
 	case ast.NodeDocument:

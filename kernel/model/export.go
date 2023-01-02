@@ -99,7 +99,7 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree, "https://b3logfile.com/siyuan/",
+	content := exportMarkdownContent0(tree, "https://b3logfile.com/siyuan/", true,
 		4, 1, 0,
 		"#", "#",
 		"", "",
@@ -729,7 +729,7 @@ func ExportStdMarkdown(id string) string {
 	if IsSubscriber() {
 		cloudAssetsBase = "https://assets.b3logfile.com/siyuan/"
 	}
-	return exportMarkdownContent0(tree, cloudAssetsBase,
+	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -1167,7 +1167,7 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 		return
 	}
 	hPath = tree.HPath
-	exportedMd = exportMarkdownContent0(tree, "",
+	exportedMd = exportMarkdownContent0(tree, "", false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -1175,7 +1175,7 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 	return
 }
 
-func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string,
+func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
@@ -1191,6 +1191,26 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string,
 	if "" != cloudAssetsBase {
 		luteEngine.RenderOptions.LinkBase = cloudAssetsBase + Conf.User.UserId + "/"
 	}
+	if assetsDestSpace2Underscore { // 上传到社区图床的资源文件会将空格转为下划线，所以这里也需要将文档内容做相应的转换
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			if ast.NodeLinkDest == n.Type {
+				if util.IsAssetLinkDest(n.Tokens) {
+					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(" "), []byte("_"))
+				}
+			} else if n.IsTextMarkType("a") {
+				href := n.TextMarkAHref
+				if util.IsAssetLinkDest([]byte(href)) {
+					n.TextMarkAHref = strings.ReplaceAll(href, " ", "_")
+				}
+			}
+			return ast.WalkContinue
+		})
+	}
+
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return

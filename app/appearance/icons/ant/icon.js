@@ -1,5 +1,10 @@
 document.body.insertAdjacentHTML('afterBegin', `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
 <defs>
+  <symbol id="iconLiandi" viewBox="0 0 32 32">
+    <path fill="#d23f31" d="M5.787 17.226h17.033l5.954 9.528c0.47 0.752 0.003 1.361-1.042 1.361h-15.141z"></path>
+    <path fill="#3b3e43" d="M10.74 3.927h17.033c1.045 0 1.512 0.609 1.042 1.361l-5.954 9.528h-19.872l6.379-10.209c0.235-0.376 0.849-0.681 1.372-0.681z"></path>
+    <path fill="#3b3e43" d="M2.953 17.226h2.839l6.804 10.889h-1.892c-0.523 0-1.137-0.305-1.372-0.681z"></path>
+  </symbol>
   <symbol id="iconRiffCard" viewBox="0 0 32 32">
     <path d="M12.472 31.5l1.765-12.142h-6.286q-0.474 0-0.689-0.431t0-0.818l10.549-17.61h1.765l-1.765 12.099h6.2q0.474 0 0.71 0.431t0.022 0.818l-10.506 17.653z"></path>
   </symbol>

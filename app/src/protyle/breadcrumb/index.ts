@@ -247,6 +247,15 @@ export class Breadcrumb {
                         netImg2LocalAssets(protyle);
                     }
                 }).element);
+                if (!needSubscribe()) {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        label: window.siyuan.languages.share2Liandi,
+                        icon: "iconLiandi",
+                        click() {
+                            fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
+                        }
+                    }).element);
+                }
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.optimizeTypography,
                     icon: "iconFormat",

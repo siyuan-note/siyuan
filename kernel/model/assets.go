@@ -34,6 +34,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
@@ -327,13 +328,20 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 		return
 	}
 
+	limitSize := uint64(3 * 1024 * 1024) // 3MB
+	if IsSubscriber() {
+		limitSize = 10 * 1024 * 1024 // 10MB
+	}
 	var completedUploadAssets []string
 	for _, absAsset := range uploadAbsAssets {
-		if fi, statErr := os.Stat(absAsset); nil != statErr {
+		fi, statErr := os.Stat(absAsset)
+		if nil != statErr {
 			logging.LogErrorf("stat file [%s] failed: %s", absAsset, statErr)
 			return statErr
-		} else if 10*1024*1024 <= fi.Size() {
-			logging.LogWarnf("file [%s] larger than 10MB, ignore uploading it", absAsset)
+		}
+
+		if limitSize < uint64(fi.Size()) {
+			logging.LogWarnf("file [%s] larger than limit size [%s], ignore uploading it", humanize.IBytes(limitSize), absAsset)
 			continue
 		}
 

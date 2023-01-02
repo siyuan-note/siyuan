@@ -65,10 +65,8 @@ func Export2Liandi(id string) (err error) {
 	foundArticle := false
 	articleId := tree.Root.IALAttr("liandiArticleId")
 	if "" != articleId {
-		var result = map[string]interface{}{}
 		request := httpclient.NewCloudRequest30s()
 		resp, getErr := request.
-			SetResult(result).
 			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 			Get(util.LiandiServer + "/api/v2/article/update/" + articleId)
 		if nil != getErr {
@@ -96,7 +94,7 @@ func Export2Liandi(id string) (err error) {
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
 	content := exportMarkdownContent0(tree)
-	var result = map[string]interface{}{}
+	var result = gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	request = request.
 		SetResult(result).
@@ -123,7 +121,7 @@ func Export2Liandi(id string) (err error) {
 	}
 
 	if !foundArticle {
-		articleId = result["data"].(string)
+		articleId = result.Data.(string)
 		tree.Root.SetIALAttr("liandiArticleId", articleId)
 		if err = writeJSONQueue(tree); nil != err {
 			return

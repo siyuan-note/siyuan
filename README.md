@@ -220,22 +220,6 @@ After deletion, the doc will not appear in the operating system's recycle bin, b
 
 Please use <kbd>Shift+Enter</kbd>.
 
-### How to move the heading and blocks below it?
-
-Fold the heading and move it later. Please note that it is a move, not a cut, and a folded heading cut will not move the blocks below it.
-
-### How to select multiple blocks across pages?
-
-Click at the beginning, hold down <kbd>Shift</kbd> and click at the end after scrolling the page.
-
-### How to do find and replace?
-
-Press <kbd>Ctrl+R</kbd> after selecting the keyword in the editor.
-
-### How to insert the same inline element to the left of an existing inline element?
-
-Ambiguity may occur when using Markdown markers to insert, please refer to [here](https://github.com/siyuan-note/siyuan/issues/5372) for details. Please use `/` or the corresponding shortcut key for inline elements to insert.
-
 ### What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
 
 The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .

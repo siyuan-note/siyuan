@@ -42,7 +42,7 @@ func copyStdMarkdown(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	ret.Data = model.CopyStdMarkdown(id)
+	ret.Data = model.ExportStdMarkdown(id)
 }
 
 func html2BlockDOM(c *gin.Context) {

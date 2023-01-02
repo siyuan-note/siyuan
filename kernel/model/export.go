@@ -93,7 +93,7 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree)
+	content := exportMarkdownContent0(tree, "https://b3logfile.com/siyuan/")
 	var result = gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	request = request.
@@ -123,7 +123,7 @@ func Export2Liandi(id string) (err error) {
 	if 0 != result.Code {
 		msg := fmt.Sprintf("send article to liandi failed [code=%d, msg=%s]", result.Code, result.Msg)
 		logging.LogErrorf(msg)
-		return errors.New(msg)
+		return errors.New(result.Msg)
 	}
 
 	if !foundArticle {
@@ -694,17 +694,18 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 	return
 }
 
-func CopyStdMarkdown(id string) string {
-	tree, _ := loadTreeByBlockID(id)
-	tree = exportTree(tree, false, false, false)
-	luteEngine := NewLute()
-	luteEngine.SetFootnotes(true)
-	luteEngine.SetKramdownIAL(false)
-	if IsSubscriber() {
-		// 订阅用户使用云端图床服务
-		luteEngine.RenderOptions.LinkBase = "https://assets.b3logfile.com/siyuan/" + Conf.User.UserId + "/"
+func ExportStdMarkdown(id string) string {
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
+		return ""
 	}
-	return treenode.ExportNodeStdMd(tree.Root, luteEngine)
+
+	cloudAssetsBase := ""
+	if IsSubscriber() {
+		cloudAssetsBase = "https://assets.b3logfile.com/siyuan/"
+	}
+	return exportMarkdownContent0(tree, cloudAssetsBase)
 }
 
 func ExportMarkdown(id string) (name, zipPath string) {
@@ -1132,17 +1133,24 @@ func ExportMarkdownContent(id string) (hPath, exportedMd string) {
 }
 
 func exportMarkdownContent(id string) (hPath, exportedMd string) {
-	tree, _ := loadTreeByBlockID(id)
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
+		return
+	}
 	hPath = tree.HPath
-	exportedMd = exportMarkdownContent0(tree)
+	exportedMd = exportMarkdownContent0(tree, "")
 	return
 }
 
-func exportMarkdownContent0(tree *parse.Tree) (ret string) {
+func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string) (ret string) {
 	tree = exportTree(tree, false, true, false)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
+	if "" != cloudAssetsBase {
+		luteEngine.RenderOptions.LinkBase = cloudAssetsBase + Conf.User.UserId + "/"
+	}
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return

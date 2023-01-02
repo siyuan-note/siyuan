@@ -43,7 +43,7 @@ export const fileTree = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="removeDocWithoutConfirm" type="checkbox"${window.siyuan.config.fileTree.removeDocWithoutConfirm ? " checked" : ""}/>
 </label>
-<label class="fn__flex b3-label">
+<label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree12}
         <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
@@ -51,7 +51,7 @@ export const fileTree = {
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="createDocNameTemplate" value="">
 </label>
-<label class="b3-label fn__flex">
+<label class="b3-label fn__flex config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree5}
         <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
@@ -59,7 +59,7 @@ export const fileTree = {
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="refCreateSavePath" value="${window.siyuan.config.fileTree.refCreateSavePath}">
 </label>
-<label class="fn__flex b3-label">
+<label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree16}
         <div class="b3-label__text">${window.siyuan.languages.fileTree17}</div>
@@ -67,7 +67,7 @@ export const fileTree = {
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="maxListCount" type="number" min="1" max="10240" value="${window.siyuan.config.fileTree.maxListCount}">
 </label>
-<label class="fn__flex b3-label">
+<label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.tabLimit}
         <div class="b3-label__text">${window.siyuan.languages.tabLimit1}</div>

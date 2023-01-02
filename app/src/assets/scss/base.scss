@@ -22,6 +22,7 @@
 @import "card";
 @import "menu";
 @import "color";
+@import "responsive";
 // un refactor
 @import "protyle";
 @import "typography";
@@ -285,6 +286,16 @@ progressLoading: 400
 }
 
 .config {
+  &__panel {
+    & > .b3-tab-bar {
+      user-select: none;
+      width: 180px;
+      overflow: auto;
+      padding: 8px 0;
+      box-sizing: border-box
+    }
+  }
+
   &-query {
     display: flex;
     flex-wrap: wrap;
@@ -335,6 +346,7 @@ progressLoading: 400
       margin-bottom: 82px;
       width: 100%;
       flex: 1;
+      min-height: 128px;
     }
 
     &__info {
@@ -378,6 +390,7 @@ progressLoading: 400
   &-about__logo {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 
     img {
       height: 24px;

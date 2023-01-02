@@ -198,7 +198,7 @@ export const query = {
         </label>
     </div>
 </div>
-<label class="fn__flex b3-label">
+<label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.searchLimit}
          <div class="b3-label__text">${window.siyuan.languages.searchLimit1}</div>

@@ -178,6 +178,8 @@ const boot = () => {
     backgroundColor: '#FFF', // 桌面端主窗体背景色设置为 `#FFF` Fix https://github.com/siyuan-note/siyuan/issues/4544
     width: windowState.width,
     height: windowState.height,
+    minWidth: 493,
+    minHeight: 376,
     x,
     y,
     fullscreenable: true,

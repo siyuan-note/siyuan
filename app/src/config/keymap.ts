@@ -15,7 +15,7 @@ export const keymap = {
                 html += `<label class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span class="fn__space fn__flex-1"></span>
-    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field" value="${updateHotkeyTip(keymap[key].custom)}" spellcheck="false">
+    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field fn__size96" value="${updateHotkeyTip(keymap[key].custom)}" spellcheck="false">
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
@@ -28,7 +28,7 @@ export const keymap = {
         return html;
     },
     genHTML() {
-        return `<label class="fn__flex b3-label">
+        return `<label class="fn__flex b3-label config__item">
     <span class="fn__flex-center">${window.siyuan.languages.keymapTip}</span>
     <span class="fn__flex-1"></span>
     <button id="keymapRefreshBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">
@@ -36,7 +36,7 @@ export const keymap = {
         ${window.siyuan.languages.refresh}
     </button>
 </label>
-<label class="fn__flex b3-label">
+<label class="fn__flex b3-label config__item">
     <span class="fn__flex-center">${window.siyuan.languages.keymapTip2}</span>
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
@@ -46,7 +46,7 @@ export const keymap = {
     </button>
 </label>
 <div class="b3-label file-tree config-keymap" id="keymapList">
-    <div class="fn__flex fn__flex-wrap">
+    <div class="fn__flex config__item">
         <label class="b3-form__icon fn__flex-1">
             <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
             <input id="keymapInput" class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">

@@ -90,6 +90,10 @@
     flex-shrink: 0;
   }
 
+  &__size96 {
+    width: 96px;
+  }
+
   &__rotate {
     animation: rotate 2s infinite linear;
   }

@@ -1,0 +1,45 @@
+@media (max-width: 750px) {
+  .config {
+    &__panel {
+      & > .b3-tab-bar {
+        width: auto;
+
+        .b3-list-item__text {
+          display: none;
+        }
+
+        .b3-list-item--big .b3-list-item__graphic {
+          margin-right: 0;
+        }
+      }
+
+      .config-query label {
+        width: 100%;
+        margin-top: 8px;
+      }
+
+      .config-account {
+        flex-direction: column;
+        min-height: 100%;
+      }
+
+      .b3-form__icona {
+        margin-top: 8px;
+      }
+    }
+
+    &__item {
+      flex-wrap: wrap;
+
+      & > .b3-text-field,
+      & > .b3-select,
+      .b3-slider,
+      & > .b3-button,
+      & > .b3-tooltips,
+      &-line {
+        width: 100%;
+        margin-top: 8px;
+      }
+    }
+  }
+}

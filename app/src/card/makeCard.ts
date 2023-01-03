@@ -179,7 +179,7 @@ export const makeCard = (nodeElement: Element[]) => {
 
 const viewCards = (deckID: string, title: string, sourceElement: HTMLElement) => {
     let pageIndex = 1;
-    let edit:Protyle
+    let edit:Protyle;
     fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (response) => {
         const dialog = new Dialog({
             title,

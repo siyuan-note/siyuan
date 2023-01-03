@@ -470,6 +470,11 @@ func createDeck(name string) (deck *riff.Deck, err error) {
 	}
 	deck.Name = name
 	Decks[deckID] = deck
+	err = deck.Save()
+	if nil != err {
+		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
+		return
+	}
 	return
 }
 

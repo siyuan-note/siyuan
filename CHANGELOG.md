@@ -1,3 +1,16 @@
+## v2.6.2 / 2023-01-03
+
+### 改进功能
+
+* [卡包浏览时移除闪卡后更新右侧编辑器](https://github.com/siyuan-note/siyuan/issues/6981)
+
+### 修复缺陷
+
+* [图标全部消失](https://github.com/siyuan-note/siyuan/issues/6974)
+* [点击编辑器 `...` 菜单不应该弹出订阅提示](https://github.com/siyuan-note/siyuan/issues/6976)
+* [浏览卡包界面无法移除闪卡](https://github.com/siyuan-note/siyuan/issues/6977)
+* [新建卡包没有持久化](https://github.com/siyuan-note/siyuan/issues/6980)
+
 ## v2.6.1 / 2023-01-03
 
 ### 改进功能

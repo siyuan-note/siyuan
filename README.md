@@ -170,7 +170,7 @@ The data is saved in the workspace folder (the default is in the user's home dir
 * `assets` is used to save all inserted assets
 * `emojis` is used to save emoji images
 * `snippets` is used to save code snippets
-* `storage` is used to save browser localStorage and flashcards, etc.
+* `storage` is used to save named criteria and flashcards, etc.
 * `templates` is used to save template snippets
 * `widgets` is used to save widgets
 * The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON

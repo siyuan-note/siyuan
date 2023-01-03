@@ -656,10 +656,20 @@ func GetContainerText(container *ast.Node) string {
 			return ast.WalkContinue
 		}
 		switch n.Type {
-		case ast.NodeText, ast.NodeLinkText, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
+		case ast.NodeText, ast.NodeLinkText, ast.NodeFileAnnotationRefText, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			buf.Write(n.Tokens)
 		case ast.NodeTextMark:
 			buf.WriteString(n.Content())
+		case ast.NodeBlockRef:
+			if anchor := n.ChildByType(ast.NodeBlockRefText); nil != anchor {
+				buf.WriteString(anchor.Text())
+			} else if anchor = n.ChildByType(ast.NodeBlockRefDynamicText); nil != anchor {
+				buf.WriteString(anchor.Text())
+			} else {
+				text := GetRefText(n.TokensStr())
+				buf.WriteString(text)
+			}
+			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
 	})

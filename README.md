@@ -76,7 +76,7 @@ Cloud services require a paid subscription.
 ## 🗺️ Roadmap
 
 * [SiYuan development plan and progress](https://github.com/orgs/siyuan-note/projects/1)
-* [SiYuan Change logs](CHANGELOG.md)
+* [SiYuan changelog](CHANGELOG.md)
 
 ## 🛠️ Download Setup
 

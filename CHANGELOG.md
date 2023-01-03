@@ -1,3 +1,42 @@
+## v2.6.1 / 2023-01-03
+
+### 改进功能
+
+* [支持英文拼写检查](https://github.com/siyuan-note/siyuan/issues/597)
+* [PDF 侧边栏大小调整](https://github.com/siyuan-note/siyuan/issues/3005)
+* [搜索结果高亮支持大部分行级元素](https://github.com/siyuan-note/siyuan/issues/6745)
+* [改进闪卡复习交互](https://github.com/siyuan-note/siyuan/issues/6928)
+* [折叠的标题块拖动后未显示折叠状态](https://github.com/siyuan-note/siyuan/issues/6930)
+* [浮窗和公式图表编辑窗移动后自动钉住](https://github.com/siyuan-note/siyuan/issues/6934)
+* [重复使用闪卡/日记快捷键优化](https://github.com/siyuan-note/siyuan/issues/6937)
+* [设置窗口最小尺寸并对设置界面进行自适应](https://github.com/siyuan-note/siyuan/issues/6938)
+* [文档标题粘贴后无法撤销](https://github.com/siyuan-note/siyuan/issues/6939)
+* [支持超级块制作闪卡](https://github.com/siyuan-note/siyuan/issues/6941)
+* [支持浏览卡包内的闪卡](https://github.com/siyuan-note/siyuan/issues/6943)
+* [新版本更新安装提示 15s 后自动消失](https://github.com/siyuan-note/siyuan/issues/6944)
+* [改进数据同步算法](https://github.com/siyuan-note/siyuan/issues/6945)
+* [为闪卡中的块添加块标](https://github.com/siyuan-note/siyuan/issues/6947)
+* [避免启动时重复全量重建索引](https://github.com/siyuan-note/siyuan/issues/6950)
+* [闪卡复习中有背景色的高亮答案不应该显示](https://github.com/siyuan-note/siyuan/issues/6954)
+* [不再覆写浏览器 localStorage 存取数据](https://github.com/siyuan-note/siyuan/issues/6956)
+* [卡包预览中继续制卡需关闭原有制卡窗口](https://github.com/siyuan-note/siyuan/issues/6957)
+* [改进搜索指定路径后不指定关键字的行为](https://github.com/siyuan-note/siyuan/issues/6959)
+* [改进导出 Data 压缩包过程](https://github.com/siyuan-note/siyuan/issues/6961)
+* [改进数据同步网络请求重试](https://github.com/siyuan-note/siyuan/issues/6963)
+* [localStorage 不再支持数据同步](https://github.com/siyuan-note/siyuan/issues/6964)
+* [localStorage 支持在多界面实例间同步](https://github.com/siyuan-note/siyuan/issues/6965)
+* [`最近使用过的字体` 鼠标悬浮提示背景色/字体颜色](https://github.com/siyuan-note/siyuan/issues/6972)
+
+### 修复缺陷
+
+* [移动端点击闪卡右侧栏没有隐藏](https://github.com/siyuan-note/siyuan/issues/6935)
+* [默认闪卡包移除后卡住](https://github.com/siyuan-note/siyuan/issues/6946)
+* [数据同步报错 `400 Bad Request openresty/1.17.8.2`](https://github.com/siyuan-note/siyuan/issues/6948)
+* [复习闪卡编辑器弹出的输入框中无法输入"s","a", "h", "g", "e"](https://github.com/siyuan-note/siyuan/issues/6949)
+* [合并单元格导出图片异常](https://github.com/siyuan-note/siyuan/issues/6951)
+* [空标题中输入 ``` 回车后异常](https://github.com/siyuan-note/siyuan/issues/6953)
+* [引用嵌套容器块触发状态异常](https://github.com/siyuan-note/siyuan/issues/6967)
+
 ## v2.6.0 / 2022-12-27
 
 ### 引入特性

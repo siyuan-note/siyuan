@@ -247,7 +247,7 @@ export class Breadcrumb {
                         netImg2LocalAssets(protyle);
                     }
                 }).element);
-                if (!needSubscribe()) {
+                if (!needSubscribe("")) {
                     window.siyuan.menus.menu.append(new MenuItem({
                         label: window.siyuan.languages.share2Liandi,
                         icon: "iconLiandi",

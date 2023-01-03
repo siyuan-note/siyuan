@@ -56,10 +56,10 @@ export const fontMenu = (protyle: IProtyle) => {
             const lastFontStatus = item.split(Constants.ZWSP);
             switch (lastFontStatus[0]) {
                 case "color":
-                    lastColorHTML += `<button class="b3-color__square" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
+                    lastColorHTML += `<button class="b3-color__square b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.colorFont}" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
                     break;
                 case "backgroundColor":
-                    lastColorHTML += `<button class="b3-color__square" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
+                    lastColorHTML += `<button class="b3-color__square b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages["--b3-theme-background"]}" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
                     break;
                 case "style2":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;

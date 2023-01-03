@@ -201,10 +201,14 @@ func fullTextSearchBlock(c *gin.Context) {
 	if nil != pathsArg {
 		for _, p := range pathsArg.([]interface{}) {
 			path := p.(string)
-			box := strings.Split(path, "/")[0]
-			boxes = append(boxes, box)
-			path = strings.TrimPrefix(path, box)
-			paths = append(paths, path)
+			box := strings.TrimSpace(strings.Split(path, "/")[0])
+			if "" != box {
+				boxes = append(boxes, box)
+			}
+			path = strings.TrimSpace(strings.TrimPrefix(path, box))
+			if "" != path {
+				paths = append(paths, path)
+			}
 		}
 		paths = gulu.Str.RemoveDuplicatedElem(paths)
 		boxes = gulu.Str.RemoveDuplicatedElem(boxes)

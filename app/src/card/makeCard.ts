@@ -217,7 +217,7 @@ const viewCards = (deckID: string, title: string) => {
                 breadcrumbDocName: true
             },
         });
-        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"));
+        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         const previousElement = dialog.element.querySelector('[data-type="previous"]');
         const nextElement = dialog.element.querySelector('[data-type="next"]');
         const listElement = dialog.element.querySelector(".b3-list--background");
@@ -242,7 +242,7 @@ const viewCards = (deckID: string, title: string) => {
                         }
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
-                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"));
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -258,7 +258,7 @@ const viewCards = (deckID: string, title: string) => {
                         }
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
-                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus").getAttribute("data-id"));
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();
                     event.preventDefault();

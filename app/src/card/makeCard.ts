@@ -133,7 +133,7 @@ export const makeCard = (nodeElement: Element[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "view") {
-                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.querySelector(".b3-list-item__text").textContent);
+                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.querySelector(".b3-list-item__text").textContent, target.parentElement);
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -177,8 +177,9 @@ export const makeCard = (nodeElement: Element[]) => {
     });
 };
 
-const viewCards = (deckID: string, title: string) => {
+const viewCards = (deckID: string, title: string, sourceElement: HTMLElement) => {
     let pageIndex = 1;
+    let edit:Protyle
     fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (response) => {
         const dialog = new Dialog({
             title,
@@ -190,7 +191,7 @@ const viewCards = (deckID: string, title: string) => {
         <span class="fn__space"></span>
         <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
         <span class="fn__space"></span>
-        <span class="fn__flex-center ft__on-surface">${pageIndex}/${response.data.pageCount}</span>
+        <span class="fn__flex-center ft__on-surface">${pageIndex}/${response.data.pageCount || 1}</span>
         <div class="fn__flex-1"></div>
     </div>
     <div class="fn__hr"></div>
@@ -198,19 +199,22 @@ const viewCards = (deckID: string, title: string) => {
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
             ${renderViewItem(response.data.blocks)}
         </ul>
-        <div id="cardPreview" class="fn__flex-1"></div>
+        <div id="cardPreview" class="fn__flex-1 fn__none"></div>
+        <div class="fn__flex-1 b3-dialog__cardempty">${window.siyuan.languages.emptyContent}</div>
     </div>
 </div>`,
             width: isMobile() ? "90vw" : "80vw",
             height: "80vh",
             destroyCallback() {
-                edit.destroy();
+                if (edit) {
+                    edit.destroy();
+                }
             }
         });
         if (response.data.blocks.length === 0) {
             return;
         }
-        const edit = new Protyle(dialog.element.querySelector("#cardPreview") as HTMLElement, {
+        edit = new Protyle(dialog.element.querySelector("#cardPreview") as HTMLElement, {
             blockId: "",
             render: {
                 gutter: true,
@@ -240,7 +244,7 @@ const viewCards = (deckID: string, title: string) => {
                         } else if (cardsResponse.data.pageCount > 1) {
                             nextElement.removeAttribute("disabled");
                         }
-                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`;
+                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
                         getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
@@ -256,7 +260,7 @@ const viewCards = (deckID: string, title: string) => {
                         } else if (cardsResponse.data.pageCount > 1) {
                             nextElement.removeAttribute("disabled");
                         }
-                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount}`;
+                        nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
                         getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
@@ -264,12 +268,9 @@ const viewCards = (deckID: string, title: string) => {
                     event.preventDefault();
                     break;
                 } else if (type === "card-item") {
-                    const id = target.getAttribute("data-id");
-                    if (id) {
-                        listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
-                        target.classList.add("b3-list-item--focus");
-                        getArticle(edit, id);
-                    }
+                    getArticle(edit, target.getAttribute("data-id"));
+                    listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                    target.classList.add("b3-list-item--focus");
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -277,8 +278,23 @@ const viewCards = (deckID: string, title: string) => {
                     fetchPost("/api/riff/removeRiffCards", {
                         deckID,
                         blockIDs: [target.getAttribute("data-id")]
-                    }, () => {
+                    }, (removeResponse) => {
+                        let nextElment = target.parentElement.nextElementSibling;
+                        if (!nextElment) {
+                            nextElment = target.parentElement.previousElementSibling;
+                        }
+                        if (!nextElment && target.parentElement.parentElement.childElementCount > 1) {
+                            nextElment = target.parentElement.parentElement.firstElementChild;
+                        }
+                        if (!nextElment) {
+                            getArticle(edit, "");
+                        } else {
+                            getArticle(edit, nextElment.getAttribute("data-id"));
+                            listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                            nextElment.classList.add("b3-list-item--focus");
+                        }
                         target.parentElement.remove();
+                        sourceElement.outerHTML = genCardItem(removeResponse.data);
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -292,8 +308,12 @@ const viewCards = (deckID: string, title: string) => {
 
 const getArticle = (edit: Protyle, id: string) => {
     if (!id) {
+        edit.protyle.element.classList.add("fn__none");
+        edit.protyle.element.nextElementSibling.classList.remove("fn__none");
         return;
     }
+    edit.protyle.element.classList.remove("fn__none");
+    edit.protyle.element.nextElementSibling.classList.add("fn__none");
     edit.protyle.scroll.lastScrollTop = 0;
     addLoading(edit.protyle);
     fetchPost("/api/filetree/getDoc", {

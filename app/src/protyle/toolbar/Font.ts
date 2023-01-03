@@ -143,6 +143,7 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
         if (localFontStyles.length > 8) {
             localFontStyles.splice(7, 1);
         }
+        window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
         setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     } else {
         if (localFontStyles.length === 0) {

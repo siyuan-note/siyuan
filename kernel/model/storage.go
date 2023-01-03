@@ -342,6 +342,7 @@ func setLocalStorage(val interface{}) (err error) {
 }
 
 func getLocalStorage() (ret map[string]interface{}, err error) {
+	ret = map[string]interface{}{}
 	lsPath := filepath.Join(util.DataDir, "storage/local.json")
 	if !gulu.File.IsExist(lsPath) {
 		return
@@ -353,7 +354,6 @@ func getLocalStorage() (ret map[string]interface{}, err error) {
 		return
 	}
 
-	ret = map[string]interface{}{}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
 		logging.LogErrorf("unmarshal storage [local] failed: %s", err)
 		return

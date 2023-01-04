@@ -226,12 +226,11 @@ The first sub-block under the list item is the block icon omitted. You can move 
 
 ### How to share notes?
 
+* Share document to Liandi
 * Export and import `.sy.zip` package
 * Via network hosting
 * Export and import Markdown
 * <kbd>Export Preview</kbd> to copy to third-party online services
-
-The first two methods can guarantee the original semantics of the data.
 
 ### What should I do if the data repo key is lost?
 

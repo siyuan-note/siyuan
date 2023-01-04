@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230103223700"
+		"updated": "20230104152515"
 	},
 	"Children": [
 		{
@@ -1484,9 +1484,40 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220615153446-zufy5mm",
-				"updated": "20220615153525"
+				"updated": "20230104152515"
 			},
 			"Children": [
+				{
+					"ID": "20230104152308-nwfyw9q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152308-nwfyw9q",
+						"updated": "20230104152515"
+					},
+					"Children": [
+						{
+							"ID": "20230104152308-v9kzfgg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152308-v9kzfgg",
+								"updated": "20230104152515"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230104152135-1iei0xa",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Share document to Liandi"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20220615153446-j8izdpx",
 					"Type": "NodeListItem",
@@ -1518,7 +1549,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " package"
+									"Data": "​ package"
 								}
 							]
 						}
@@ -1574,11 +1605,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export and i"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "mport Markdown"
+									"Data": "Export and import Markdown"
 								}
 							]
 						}
@@ -1605,31 +1632,21 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Export Preview"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " to copy to third-party online services"
+									"Data": "​​ to copy to third-party online services"
 								}
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20220615153446-qqqtcoj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220615153446-qqqtcoj",
-				"updated": "20220615153446"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The first two methods can guarantee the original semantics of the data."
 				}
 			]
 		},

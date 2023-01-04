@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230104134309"
+		"updated": "20230104152617"
 	},
 	"Children": [
 		{
@@ -1573,9 +1573,40 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220615152536-f4nlbj7",
-				"updated": "20220615152536"
+				"updated": "20230104152617"
 			},
 			"Children": [
+				{
+					"ID": "20230104151724-x91g23n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151724-x91g23n",
+						"updated": "20230104152617"
+					},
+					"Children": [
+						{
+							"ID": "20230104151724-3iih56y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151724-3iih56y",
+								"updated": "20230104152617"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230104144904-39br4c6",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "分享文档到链滴"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20220615152536-96hx986",
 					"Type": "NodeListItem",
@@ -1585,7 +1616,7 @@
 					},
 					"Properties": {
 						"id": "20220615152536-96hx986",
-						"updated": "20220615152536"
+						"updated": "20230104151817"
 					},
 					"Children": [
 						{
@@ -1607,7 +1638,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 数据包"
+									"Data": "​ 数据包"
 								}
 							]
 						}
@@ -1621,7 +1652,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220615152554-2ql7au9"
+						"id": "20220615152554-2ql7au9",
+						"updated": "20230104151817"
 					},
 					"Children": [
 						{
@@ -1648,7 +1680,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220615152700-addn4x1"
+						"id": "20220615152700-addn4x1",
+						"updated": "20230104151817"
 					},
 					"Children": [
 						{
@@ -1675,7 +1708,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220615152929-r71jyer"
+						"id": "20220615152929-r71jyer",
+						"updated": "20230104151816"
 					},
 					"Children": [
 						{
@@ -1687,31 +1721,21 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "导出预览"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中复制到第三方在线服务"
+									"Data": "​ 中复制到第三方在线服务"
 								}
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20220615153019-ltjaf2w",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220615153019-ltjaf2w",
-				"updated": "20220615153332"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "前两种方式可以保证数据原始语义。"
 				}
 			]
 		},

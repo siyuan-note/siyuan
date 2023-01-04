@@ -358,8 +358,10 @@
           if (!fs.existsSync(initPath)) {
             fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
           }
-          const lang = document.querySelector('.lang').value
-          ipcRenderer.send('siyuan-first-init', `${initPath}-${lang}`)
+          ipcRenderer.send('siyuan-first-init', {
+            workspace: initPath,
+            lang: document.querySelector('.lang').value
+          })
         }
       })
     })

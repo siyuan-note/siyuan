@@ -274,7 +274,6 @@ export const appearance = {
         }
         /// #if !BROWSER
         ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, data.modeOS ? "system" : (data.mode === 1 ? "dark" : "light"));
-        ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, data.closeButtonBehavior);
         /// #endif
         if (needLoadAsset) {
             loadAssets(data);

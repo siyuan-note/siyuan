@@ -2,8 +2,11 @@ import {hotKey2Electron, isCtrl, isMac, updateHotkeyTip} from "../protyle/util/c
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
-import {ipcRenderer} from "electron";
 import {exportLayout} from "../layout/util";
+/// #if !BROWSER
+import {getCurrentWindow} from "@electron/remote";
+import {ipcRenderer} from "electron";
+/// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
 
 export const keymap = {
@@ -132,7 +135,11 @@ export const keymap = {
             data
         }, () => {
             /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
+            ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
+                languages: window.siyuan.languages["_trayMenu"],
+                id: getCurrentWindow().id,
+                hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
+            });
             /// #endif
         });
     },
@@ -219,7 +226,11 @@ export const keymap = {
                 }, () => {
                     window.location.reload();
                     /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
+                    ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
+                        languages: window.siyuan.languages["_trayMenu"],
+                        id: getCurrentWindow().id,
+                        hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
+                    });
                     /// #endif
                 });
             });

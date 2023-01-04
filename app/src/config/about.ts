@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 /// #if !BROWSER
-import {app, shell} from "electron";
+import {app, ipcRenderer, shell} from "electron";
 import {dialog} from "@electron/remote";
 /// #endif
 import {isBrowser} from "../util/functions";
@@ -242,8 +242,9 @@ export const about = {
             fetchPost("/api/system/setWorkspaceDir", {
                 path: workspace
             }, () => {
-                exportLayout(false, () => {
-                    exitSiYuan();
+                ipcRenderer.send(Constants.SIYUAN_OPEN_WORKSPACE, {
+                    workspace,
+                    lang: window.siyuan.config.appearance.lang
                 });
             });
         });

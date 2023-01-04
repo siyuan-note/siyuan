@@ -126,14 +126,25 @@ export const onGetConfig = (isStart: boolean) => {
             data: window.siyuan.config.keymap
         }, () => {
             /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
+            ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
+                languages: window.siyuan.languages["_trayMenu"],
+                id: getCurrentWindow().id,
+                hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
+            });
             /// #endif
         });
     }
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_CONFIG_CLOSE, window.siyuan.config.appearance.closeButtonBehavior);
-    ipcRenderer.send(Constants.SIYUAN_INIT, window.siyuan.languages);
-    ipcRenderer.send(Constants.SIYUAN_HOTKEY, hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom));
+    ipcRenderer.send(Constants.SIYUAN_INIT, {
+        languages: window.siyuan.languages["_trayMenu"],
+        workspaceDir: window.siyuan.config.system.workspaceDir,
+        id: getCurrentWindow().id,
+    });
+    ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
+        languages: window.siyuan.languages["_trayMenu"],
+        id: getCurrentWindow().id,
+        hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
+    });
     /// #endif
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
         window.siyuan.config.uiLayout = Constants.SIYUAN_EMPTY_LAYOUT;
@@ -332,7 +343,7 @@ const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
         if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
             // 最小化
             if ("windows" === window.siyuan.config.system.os) {
-                ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY);
+                ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, getCurrentWindow().id);
             } else {
                 if (currentWindow.isFullScreen()) {
                     currentWindow.once("leave-full-screen", () => currentWindow.hide());
@@ -359,10 +370,16 @@ const initWindow = () => {
         if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
             return;
         }
-        openFileById({
-            id: url.substr(16, 22),
-            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-            zoomIn: getSearch("focus", url) === "1"
+        const id = url.substr(16, 22);
+        fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
+            if (existResponse.data) {
+                openFileById({
+                    id,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                    zoomIn: getSearch("focus", url) === "1"
+                });
+                ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
+            }
         });
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {

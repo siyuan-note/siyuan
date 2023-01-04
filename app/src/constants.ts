@@ -20,10 +20,10 @@ export abstract class Constants {
     public static readonly SIYUAN_DROP_EDITOR: string = "application/siyuan-editor";
 
     // 渲染进程调主进程
+    public static readonly SIYUAN_SHOW: string = "siyuan-show";
     public static readonly SIYUAN_CONFIG_THEME: string = "siyuan-config-theme";
-    public static readonly SIYUAN_CONFIG_CLOSE: string = "siyuan-config-close";
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
-    public static readonly SIYUAN_CONFIG_CLOSETRAY: string = "siyuan-config-closetray";
+    public static readonly SIYUAN_OPEN_WORKSPACE: string = "siyuan-open-workspace";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
     public static readonly SIYUAN_INIT: string = "siyuan-init";

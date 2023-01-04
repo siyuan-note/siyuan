@@ -416,11 +416,12 @@ const renderPDF = (id: string) => {
         });
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
-            ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}")
+            ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}", getCurrentWindow().id)
         });
         actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", {
+              id: getCurrentWindow().id,
               pdfOptions:{
                 printBackground: true,
                 landscape: actionElement.querySelector("#landscape").checked,

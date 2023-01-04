@@ -432,8 +432,8 @@
   const exitApp = () => {
     try {
       const {ipcRenderer} = require('electron')
-      ipcRenderer.send('siyuan-config-closetray')
-      ipcRenderer.send('siyuan-quit')
+      const {getCurrentWindow} = require('@electron/remote');
+      ipcRenderer.send('siyuan-quit', getCurrentWindow().id)
     } catch (e) {
       if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid) {
         window.location.href = 'siyuan://api/system/exit'

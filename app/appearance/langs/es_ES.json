@@ -356,6 +356,7 @@
   "moveToRight": "Mover a la derecha",
   "copyProtocol": "Copiar hipervínculo de bloque",
   "uploadAssets2CDN": "Subir archivos de activos a la nube",
+  "uploadAssets2CDNConfirmTip": "¿Está seguro de cargar los recursos de este documento en la nube?",
   "notSupport1": "No admite la función de arrastrar y soltar en los cuadernos",
   "keymapTip": "Después de modificar algunas teclas de acceso directo, es necesario hacer clic en el botón de actualización para que surta efecto",
   "keymapTip2": "Usar teclas de acceso directo por defecto",

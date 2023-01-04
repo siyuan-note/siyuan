@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230103223819"
+		"updated": "20230104152557"
 	},
 	"Children": [
 		{
@@ -1474,9 +1474,40 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220615153430-3fw6dhu",
-				"updated": "20220615153430"
+				"updated": "20230104152557"
 			},
 			"Children": [
+				{
+					"ID": "20230104152325-x1e0cld",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152325-x1e0cld",
+						"updated": "20230104152557"
+					},
+					"Children": [
+						{
+							"ID": "20230104152325-2c2ub2s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152325-2c2ub2s",
+								"updated": "20230104152557"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230104151953-48hwkwf",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "分享文檔到鏈滴"
+								}
+							]
+						}
+					]
+				},
 				{
 					"ID": "20220615153430-jw52uvw",
 					"Type": "NodeListItem",
@@ -1508,7 +1539,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 數據包"
+									"Data": "​ 數據包"
 								}
 							]
 						}
@@ -1591,31 +1622,21 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "導出預覽"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中復製到第三方在線服務"
+									"Data": "​ 中復製到第三方在線服務"
 								}
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20220615153430-15kn96y",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220615153430-15kn96y",
-				"updated": "20220615153430"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "前兩種方式可以保證數據原始語義。"
 				}
 			]
 		},

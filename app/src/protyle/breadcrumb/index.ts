@@ -232,36 +232,6 @@ export class Breadcrumb {
             }
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.uploadAssets2CDN,
-                    icon: "iconCloud",
-                    click() {
-                        if (!needSubscribe()) {
-                            confirmDialog("🚀 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
-                                fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
-                            });
-                        }
-                    }
-                }).element);
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.netImg2LocalAsset,
-                    icon: "iconTransform",
-                    accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
-                    click() {
-                        netImg2LocalAssets(protyle);
-                    }
-                }).element);
-                if (!needSubscribe("")) {
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.share2Liandi,
-                        icon: "iconLiandi",
-                        click() {
-                            confirmDialog("🚀 " + window.siyuan.languages.share2Liandi, window.siyuan.languages.share2LiandiConfirmTip, () => {
-                                fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
-                            });
-                        }
-                    }).element);
-                }
-                window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.optimizeTypography,
                     icon: "iconFormat",
                     click: () => {
@@ -293,6 +263,36 @@ export class Breadcrumb {
                         });
                     }
                 }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.netImg2LocalAsset,
+                    icon: "iconTransform",
+                    accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
+                    click() {
+                        netImg2LocalAssets(protyle);
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.uploadAssets2CDN,
+                    icon: "iconCloud",
+                    click() {
+                        if (!needSubscribe()) {
+                            confirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
+                                fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+                            });
+                        }
+                    }
+                }).element);
+                if (!needSubscribe("")) {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        label: window.siyuan.languages.share2Liandi,
+                        icon: "iconLiandi",
+                        click() {
+                            confirmDialog("🚀 " + window.siyuan.languages.share2Liandi, window.siyuan.languages.share2LiandiConfirmTip, () => {
+                                fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
+                            });
+                        }
+                    }).element);
+                }
             }
             if (!protyle.scroll?.element.classList.contains("fn__none")) {
                 window.siyuan.menus.menu.append(new MenuItem({

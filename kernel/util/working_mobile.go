@@ -28,13 +28,14 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, lang string) {
+func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	IncBootProgress(3, "Booting...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
 	initHttpClient()
 
-	HomeDir = filepath.Join(workspaceDir, "home")
+	workspaceDir := filepath.Join(workspaceBaseDir, "siyuan")
+	HomeDir = filepath.Join(workspaceBaseDir, "home")
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
 	if !gulu.File.IsExist(userHomeConfDir) {
 		os.MkdirAll(userHomeConfDir, 0755)
@@ -54,8 +55,6 @@ func BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, l
 	DBPath = filepath.Join(TempDir, DBName)
 	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
-	AndroidNativeLibDir = nativeLibDir
-	AndroidPrivateDataDir = privateDataDir
 	LogPath = filepath.Join(TempDir, "siyuan.log")
 	logging.SetLogPath(LogPath)
 	AppearancePath = filepath.Join(ConfDir, "appearance")

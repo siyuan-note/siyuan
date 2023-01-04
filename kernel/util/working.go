@@ -217,7 +217,7 @@ func initWorkspaceDir(workspaceArg string) {
 			log.Printf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
 		}
 
-		tmp := workspacePaths[:0]
+		var tmp []string
 		for _, d := range workspacePaths {
 			d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
 			if gulu.File.IsDir(d) {

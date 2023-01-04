@@ -47,19 +47,20 @@ class App {
         fetchPost("/api/system/getConf", {}, confResponse => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;
-            getLocalStorage();
-            fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
-                window.siyuan.languages = lauguages;
-                document.title = window.siyuan.languages.siyuanNote;
-                bootSync();
-                loadAssets(confResponse.data.conf.appearance);
-                initMessage();
-                initAssets();
-                fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
-                    window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                    initFramework();
+            getLocalStorage(() => {
+                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
+                    window.siyuan.languages = lauguages;
+                    document.title = window.siyuan.languages.siyuanNote;
+                    bootSync();
+                    loadAssets(confResponse.data.conf.appearance);
+                    initMessage();
+                    initAssets();
+                    fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
+                        window.siyuan.emojis = emojiResponse.data as IEmoji[];
+                        initFramework();
+                    });
+                    addGA();
                 });
-                addGA();
             });
             if (navigator.userAgent.indexOf("iPhone") > -1) {
                 document.addEventListener("touchstart", handleTouchStart, false);

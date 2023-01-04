@@ -127,17 +127,18 @@ class App {
         };
         fetchPost("/api/system/getConf", {}, response => {
             window.siyuan.config = response.data.conf;
-            getLocalStorage();
-            fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
-                window.siyuan.languages = lauguages;
-                bootSync();
-                fetchPost("/api/setting/getCloudUser", {}, userResponse => {
-                    window.siyuan.user = userResponse.data;
-                    onGetConfig(response.data.start);
-                    account.onSetaccount();
-                    resizeDrag();
-                    setTitle(window.siyuan.languages.siyuanNote);
-                    initMessage();
+            getLocalStorage(() => {
+                fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
+                    window.siyuan.languages = lauguages;
+                    bootSync();
+                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                        window.siyuan.user = userResponse.data;
+                        onGetConfig(response.data.start);
+                        account.onSetaccount();
+                        resizeDrag();
+                        setTitle(window.siyuan.languages.siyuanNote);
+                        initMessage();
+                    });
                 });
             });
         });

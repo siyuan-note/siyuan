@@ -281,11 +281,16 @@ func UploadAssets2Cloud(rootID string) (err error) {
 	}
 
 	sqlAssets := sql.QueryRootBlockAssets(rootID)
-	err = uploadCloud(sqlAssets)
+	err = uploadAssets2Cloud(sqlAssets, "5")
 	return
 }
 
-func uploadCloud(sqlAssets []*sql.Asset) (err error) {
+// uploadAssets2Cloud 将资源文件上传到云端图床。
+// metaType 为服务端 Filemeta.FILEMETA_TYPE，这里只有两个值：
+//
+//	5: SiYuan，表示为 SiYuan 上传图床
+//	4: Client，表示作为客户端分享发布帖子时上传的文件
+func uploadAssets2Cloud(sqlAssets []*sql.Asset, metaType string) (err error) {
 	syncedAssets := readWorkspaceAssets()
 	var unSyncAssets []string
 	for _, sqlAsset := range sqlAssets {
@@ -355,6 +360,7 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 			SetResult(requestResult).
 			SetFile("file[]", absAsset).
 			SetCookies(&http.Cookie{Name: "symphony", Value: uploadToken}).
+			SetHeader("meta-type", metaType).
 			Post(util.AliyunServer + "/apis/siyuan/upload?ver=" + util.Ver)
 		if nil != reqErr {
 			logging.LogErrorf("upload assets failed: %s", reqErr)

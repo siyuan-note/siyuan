@@ -293,41 +293,25 @@ const (
 // uploadAssets2Cloud 将资源文件上传到云端图床。
 func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
 	var uploadAbsAssets []string
-	if bizTypeUploadAssets == bizType { // 只有上传资源文件到图床时才需要判断是否已经上传过
-		syncedAssets := readWorkspaceAssets()
-		var unSyncAssets []string
-		for _, sqlAsset := range sqlAssets {
-			if !gulu.Str.Contains(sqlAsset.Path, syncedAssets) && strings.Contains(sqlAsset.Path, "assets/") {
-				unSyncAssets = append(unSyncAssets, sqlAsset.Path)
-			}
-		}
-
-		if 1 > len(unSyncAssets) {
+	for _, asset := range sqlAssets {
+		var absPath string
+		absPath, err = GetAssetAbsPath(asset.Path)
+		if nil != err {
+			logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
 			return
 		}
-
-		for _, asset := range unSyncAssets {
-			var absPath string
-			absPath, err = GetAssetAbsPath(asset)
-			if nil != err {
-				logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
-				return
-			}
-			if "" == absPath {
-				logging.LogErrorf("not found asset [%s]", asset)
-				err = errors.New(fmt.Sprintf(Conf.Language(12), asset))
-				return
-			}
-
-			uploadAbsAssets = append(uploadAbsAssets, absPath)
+		if "" == absPath {
+			logging.LogErrorf("not found asset [%s]", asset)
+			continue
 		}
 
-		if 1 > len(uploadAbsAssets) {
-			return
-		}
+		uploadAbsAssets = append(uploadAbsAssets, absPath)
 	}
 
 	uploadAbsAssets = gulu.Str.RemoveDuplicatedElem(uploadAbsAssets)
+	if 1 > len(uploadAbsAssets) {
+		return
+	}
 
 	logging.LogInfof("uploading [%d] assets", len(uploadAbsAssets))
 	msgId := util.PushMsg(fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
@@ -401,60 +385,10 @@ func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
 	}
 	util.PushClearMsg(msgId)
 
-	if bizTypeUploadAssets == bizType && 0 < len(completedUploadAssets) {
-		syncedAssets := readWorkspaceAssets()
+	if 0 < len(completedUploadAssets) {
 		logging.LogInfof("uploaded [%d] assets", len(completedUploadAssets))
-		for _, completedSyncAsset := range completedUploadAssets {
-			syncedAssets = append(syncedAssets, completedSyncAsset)
-		}
-		saveWorkspaceAssets(syncedAssets)
 	}
 	return
-}
-
-func readWorkspaceAssets() (ret []string) {
-	ret = []string{}
-	confDir := filepath.Join(util.DataDir, "assets", ".siyuan")
-	if err := os.MkdirAll(confDir, 0755); nil != err {
-		logging.LogErrorf("create assets conf dir [%s] failed: %s", confDir, err)
-		return
-	}
-	confPath := filepath.Join(confDir, "assets.json")
-	if !gulu.File.IsExist(confPath) {
-		return
-	}
-
-	data, err := os.ReadFile(confPath)
-	if nil != err {
-		logging.LogErrorf("read assets conf failed: %s", err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("parse assets conf failed: %s, re-init it", err)
-		return
-	}
-	return
-}
-
-func saveWorkspaceAssets(assets []string) {
-	confDir := filepath.Join(util.DataDir, "assets", ".siyuan")
-	if err := os.MkdirAll(confDir, 0755); nil != err {
-		logging.LogErrorf("create assets conf dir [%s] failed: %s", confDir, err)
-		return
-	}
-	confPath := filepath.Join(confDir, "assets.json")
-
-	assets = gulu.Str.RemoveDuplicatedElem(assets)
-	sort.Strings(assets)
-	data, err := gulu.JSON.MarshalIndentJSON(assets, "", "  ")
-	if nil != err {
-		logging.LogErrorf("create assets conf failed: %s", err)
-		return
-	}
-	if err = filelock.WriteFile(confPath, data); nil != err {
-		logging.LogErrorf("write assets conf failed: %s", err)
-		return
-	}
 }
 
 func RemoveUnusedAssets() (ret []string) {

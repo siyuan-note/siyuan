@@ -17,6 +17,7 @@
 package model
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"sync"
@@ -206,6 +207,10 @@ func RemoveCriterion(name string) (err error) {
 }
 
 func SetCriterion(criterion *Criterion) (err error) {
+	if "" == criterion.Name {
+		return errors.New(Conf.Language(142))
+	}
+
 	criteriaLock.Lock()
 	defer criteriaLock.Unlock()
 

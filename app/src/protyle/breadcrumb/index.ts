@@ -253,7 +253,7 @@ export class Breadcrumb {
                         label: window.siyuan.languages.share2Liandi,
                         icon: "iconLiandi",
                         click() {
-                            confirmDialog(window.siyuan.languages.share2Liandi, "", () => {
+                            confirmDialog(window.siyuan.languages.share2Liandi, window.siyuan.languages.share2LiandiConfirmTip, () => {
                                 fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
                             })
                         }

@@ -773,10 +773,15 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 saveDialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
+                const value = saveDialog.element.querySelector("input").value
+                if (!value) {
+                    showMessage(window.siyuan.languages.value);
+                    return;
+                }
                 config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
                 config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
                 const criterion = config;
-                criterion.name = saveDialog.element.querySelector("input").value;
+                criterion.name = value;
                 fetchPost("/api/storage/setCriterion", {criterion}, () => {
                     saveDialog.destroy();
                 });

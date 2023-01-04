@@ -24,6 +24,7 @@ import {getCurrentWindow, systemPreferences} from "@electron/remote";
 import {onGet} from "../util/onGet";
 import {saveScroll} from "../scroll/saveScroll";
 import {hideElements} from "../ui/hideElements";
+import {confirmDialog} from "../../dialog/confirmDialog";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -252,7 +253,9 @@ export class Breadcrumb {
                         label: window.siyuan.languages.share2Liandi,
                         icon: "iconLiandi",
                         click() {
-                            fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
+                            confirmDialog(window.siyuan.languages.share2Liandi, "", () => {
+                                fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
+                            })
                         }
                     }).element);
                 }

@@ -75,7 +75,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
     wnd.split("lr").addTab(tab);
     setPanelFocus(tab.panelElement);
 };
-
+// closeCB 不存在为页签搜索
 export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {
     let methodText = window.siyuan.languages.keyword;
     if (config.method === 1) {
@@ -167,7 +167,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             </span>
         </div>
     </div>
-    <div class="search__layout${data.layout === 1 ? " search__layout--row" : ""}">
+    <div class="search__layout${(closeCB ? data.layout === 1 : data.layoutTab === 1) ? " search__layout--row" : ""}">
         <div id="searchList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
         <div class="search__drag"></div>
         <div id="searchPreview" class="fn__flex-1 search__preview"></div>
@@ -188,15 +188,29 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             breadcrumbDocName: true
         },
     });
-    if (data.layout === 1) {
-        if (data.col) {
-            edit.protyle.element.style.width = data.col;
-            edit.protyle.element.classList.remove("fn__flex-1");
+    if (closeCB) {
+        if (data.layout === 1) {
+            if (data.col) {
+                edit.protyle.element.style.width = data.col;
+                edit.protyle.element.classList.remove("fn__flex-1");
+            }
+        } else {
+            if (data.row) {
+                edit.protyle.element.classList.remove("fn__flex-1");
+                edit.protyle.element.style.height = data.row;
+            }
         }
     } else {
-        if (data.row) {
-            edit.protyle.element.classList.remove("fn__flex-1");
-            edit.protyle.element.style.height = data.row;
+        if (data.layoutTab === 1) {
+            if (data.colTab) {
+                edit.protyle.element.style.width = data.colTab;
+                edit.protyle.element.classList.remove("fn__flex-1");
+            }
+        } else {
+            if (data.rowTab) {
+                edit.protyle.element.classList.remove("fn__flex-1");
+                edit.protyle.element.style.height = data.rowTab;
+            }
         }
     }
     let clickTimeout: number;
@@ -211,7 +225,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         const documentSelf = document;
         const nextElement = dragElement.nextElementSibling as HTMLElement;
         const previousElement = dragElement.previousElementSibling as HTMLElement;
-        const direction = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS].layout === 1 ? "lr" : "tb";
+        const direction = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][closeCB ? "layout" : "layoutTab"] === 1 ? "lr" : "tb";
         const x = event[direction === "lr" ? "clientX" : "clientY"];
         const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
         const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
@@ -236,7 +250,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             documentSelf.ondragstart = null;
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
-            window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][direction === "lr" ? "col" : "row"] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
+            window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][direction === "lr" ? (closeCB ? "col" : "colTab") : (closeCB ? "row" : "rowTab")] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
             setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
             if (direction === "lr") {
                 setPadding(edit.protyle);
@@ -690,39 +704,48 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
         }]
     }).element);
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS];
+    const isPopover = hasClosestByClassName(element, "b3-dialog__container")
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.layout,
         type: "submenu",
         submenu: [{
             label: window.siyuan.languages.topBottomLayout,
-            current: localData.layout === 0,
+            current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
             click() {
                 element.querySelector(".search__layout").classList.remove("search__layout--row");
                 edit.protyle.element.style.width = "";
-                if (localData.row) {
-                    edit.protyle.element.style.height = localData.row;
+                if ((isPopover && localData.row) || (!isPopover && localData.rowTab)) {
+                    edit.protyle.element.style.height = isPopover ? localData.row : localData.rowTab;
                     edit.protyle.element.classList.remove("fn__flex-1");
                 } else {
                     edit.protyle.element.classList.add("fn__flex-1");
                 }
                 setPadding(edit.protyle);
-                localData.layout = 0;
+                if (isPopover) {
+                    localData.layout = 0;
+                } else {
+                    localData.layoutTab = 0;
+                }
                 setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
             }
         }, {
             label: window.siyuan.languages.leftRightLayout,
-            current: localData.layout === 1,
+            current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
             click() {
                 element.querySelector(".search__layout").classList.add("search__layout--row");
                 edit.protyle.element.style.height = "";
-                if (localData.col) {
-                    edit.protyle.element.style.width = localData.col;
+                if ((isPopover && localData.col) || (!isPopover && localData.colTab)) {
+                    edit.protyle.element.style.width = isPopover ? localData.col : localData.colTab;
                     edit.protyle.element.classList.remove("fn__flex-1");
                 } else {
                     edit.protyle.element.classList.add("fn__flex-1");
                 }
                 setPadding(edit.protyle);
-                localData.layout = 1;
+                if (isPopover) {
+                    localData.layout = 1;
+                } else {
+                    localData.layoutTab = 1;
+                }
                 setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
             }
         }]

@@ -149,7 +149,10 @@ export const getLocalStorage = () => {
             replaceKeys: [],
             col: "",
             row: "",
-            layout: 0
+            layout: 0,
+            colTab: "",
+            rowTab: "",
+            layoutTab: 0
         };
         defaultStorage[Constants.LOCAL_PDFTHEME] = {light: "light", dark: "dark"};
         defaultStorage[Constants.LOCAL_BAZAAR] = {

@@ -93,7 +93,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		if 0 < len(workspacePaths) {
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
 			if !gulu.File.IsDir(WorkspaceDir) {
-				log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
+				log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", defaultWorkspaceDir, WorkspaceDir)
 				WorkspaceDir = defaultWorkspaceDir
 			}
 			workspacePaths[len(workspacePaths)-1] = WorkspaceDir

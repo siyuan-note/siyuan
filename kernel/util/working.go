@@ -207,7 +207,7 @@ func initWorkspaceDir(workspaceArg string) {
 			WorkspaceDir = workspaceArg
 		}
 		if !gulu.File.IsDir(WorkspaceDir) {
-			log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
+			log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", defaultWorkspaceDir, WorkspaceDir)
 			WorkspaceDir = defaultWorkspaceDir
 		}
 		workspacePaths = append(workspacePaths, WorkspaceDir)

@@ -76,10 +76,6 @@ func Serve(fastMode bool) {
 	serveTemplates(ginServer)
 	api.ServeAPI(ginServer)
 
-	if !fastMode && "prod" == util.Mode && util.ContainerStd == util.Container {
-		killRunningKernel()
-	}
-
 	var host string
 	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
 		host = "0.0.0.0"

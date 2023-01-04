@@ -292,37 +292,39 @@ const (
 
 // uploadAssets2Cloud 将资源文件上传到云端图床。
 func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
-	syncedAssets := readWorkspaceAssets()
-	var unSyncAssets []string
-	for _, sqlAsset := range sqlAssets {
-		if !gulu.Str.Contains(sqlAsset.Path, syncedAssets) && strings.Contains(sqlAsset.Path, "assets/") {
-			unSyncAssets = append(unSyncAssets, sqlAsset.Path)
-		}
-	}
-
-	if 1 > len(unSyncAssets) {
-		return
-	}
-
 	var uploadAbsAssets []string
-	for _, asset := range unSyncAssets {
-		var absPath string
-		absPath, err = GetAssetAbsPath(asset)
-		if nil != err {
-			logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
-			return
+	if bizTypeUploadAssets == bizType { // 只有上传资源文件到图床时才需要判断是否已经上传过
+		syncedAssets := readWorkspaceAssets()
+		var unSyncAssets []string
+		for _, sqlAsset := range sqlAssets {
+			if !gulu.Str.Contains(sqlAsset.Path, syncedAssets) && strings.Contains(sqlAsset.Path, "assets/") {
+				unSyncAssets = append(unSyncAssets, sqlAsset.Path)
+			}
 		}
-		if "" == absPath {
-			logging.LogErrorf("not found asset [%s]", asset)
-			err = errors.New(fmt.Sprintf(Conf.Language(12), asset))
+
+		if 1 > len(unSyncAssets) {
 			return
 		}
 
-		uploadAbsAssets = append(uploadAbsAssets, absPath)
-	}
+		for _, asset := range unSyncAssets {
+			var absPath string
+			absPath, err = GetAssetAbsPath(asset)
+			if nil != err {
+				logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
+				return
+			}
+			if "" == absPath {
+				logging.LogErrorf("not found asset [%s]", asset)
+				err = errors.New(fmt.Sprintf(Conf.Language(12), asset))
+				return
+			}
 
-	if 1 > len(uploadAbsAssets) {
-		return
+			uploadAbsAssets = append(uploadAbsAssets, absPath)
+		}
+
+		if 1 > len(uploadAbsAssets) {
+			return
+		}
 	}
 
 	uploadAbsAssets = gulu.Str.RemoveDuplicatedElem(uploadAbsAssets)
@@ -399,8 +401,8 @@ func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
 	}
 	util.PushClearMsg(msgId)
 
-	if 0 < len(completedUploadAssets) {
-		syncedAssets = readWorkspaceAssets()
+	if bizTypeUploadAssets == bizType && 0 < len(completedUploadAssets) {
+		syncedAssets := readWorkspaceAssets()
 		logging.LogInfof("uploaded [%d] assets", len(completedUploadAssets))
 		for _, completedSyncAsset := range completedUploadAssets {
 			syncedAssets = append(syncedAssets, completedSyncAsset)

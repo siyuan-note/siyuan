@@ -704,7 +704,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
         }]
     }).element);
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS];
-    const isPopover = hasClosestByClassName(element, "b3-dialog__container")
+    const isPopover = hasClosestByClassName(element, "b3-dialog__container");
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.layout,
         type: "submenu",
@@ -773,9 +773,9 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 saveDialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
-                const value = saveDialog.element.querySelector("input").value
+                const value = saveDialog.element.querySelector("input").value;
                 if (!value) {
-                    showMessage(window.siyuan.languages.value);
+                    showMessage(window.siyuan.languages["_kernel"]["142"]);
                     return;
                 }
                 config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;

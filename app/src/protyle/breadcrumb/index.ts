@@ -255,7 +255,7 @@ export class Breadcrumb {
                         click() {
                             confirmDialog(window.siyuan.languages.share2Liandi, window.siyuan.languages.share2LiandiConfirmTip, () => {
                                 fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
-                            })
+                            });
                         }
                     }).element);
                 }

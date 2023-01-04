@@ -363,18 +363,20 @@ export class Wnd {
                 }
             }
         });
-        const initData = currentTab.headElement.getAttribute("data-initdata");
-        if (initData) {
-            const json = JSON.parse(initData);
-            currentTab.addModel(new Editor({
-                tab: currentTab,
-                blockId: json.blockId,
-                mode: json.mode,
-                action: typeof json.action === "string" ? [json.action] : json.action,
-                scrollAttr: json.scrollAttr,
-            }));
-            currentTab.headElement.removeAttribute("data-initdata");
-            return;
+        if (currentTab) {
+            const initData = currentTab.headElement.getAttribute("data-initdata");
+            if (initData) {
+                const json = JSON.parse(initData);
+                currentTab.addModel(new Editor({
+                    tab: currentTab,
+                    blockId: json.blockId,
+                    mode: json.mode,
+                    action: typeof json.action === "string" ? [json.action] : json.action,
+                    scrollAttr: json.scrollAttr,
+                }));
+                currentTab.headElement.removeAttribute("data-initdata");
+                return;
+            }
         }
 
         if (currentTab && target === currentTab.headElement) {

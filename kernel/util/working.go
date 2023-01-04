@@ -176,9 +176,6 @@ var (
 	IconsPath      string        // 配置目录下的外观目录下的 icons/ 路径
 	SnippetsPath   string        // 数据目录下的 snippets/ 路径
 
-	AndroidNativeLibDir   string // Android 库路径
-	AndroidPrivateDataDir string // Android 私有数据路径
-
 	UIProcessIDs = sync.Map{} // UI 进程 ID
 
 	IsNewbie bool // 是否是第一次安装
@@ -210,7 +207,7 @@ func initWorkspaceDir(workspaceArg string) {
 			WorkspaceDir = workspaceArg
 		}
 		if !gulu.File.IsDir(WorkspaceDir) {
-			log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
+			log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", defaultWorkspaceDir, WorkspaceDir)
 			WorkspaceDir = defaultWorkspaceDir
 		}
 		workspacePaths = append(workspacePaths, WorkspaceDir)
@@ -220,7 +217,7 @@ func initWorkspaceDir(workspaceArg string) {
 			log.Printf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
 		}
 
-		tmp := workspacePaths[:0]
+		var tmp []string
 		for _, d := range workspacePaths {
 			d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
 			if gulu.File.IsDir(d) {

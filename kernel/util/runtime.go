@@ -36,7 +36,7 @@ const (
 	ExitCodeUnavailablePort  = 21 // 端口不可用
 	ExitCodeCreateConfDirErr = 22 // 创建配置目录失败
 	ExitCodeBlockTreeErr     = 23 // 无法读写 blocktree.msgpack 文件
-	ExitCodeWorkspaceLocked  = 24 // 工作区已被锁定
+	ExitCodeWorkspaceLocked  = 24 // 工作空间已被锁定
 	ExitCodeOk               = 0  // 正常退出
 	ExitCodeFatal            = 1  // 致命错误
 )

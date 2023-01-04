@@ -32,16 +32,16 @@ import (
 	_ "golang.org/x/mobile/bind"
 )
 
-func StartKernelFast(container, appDir, workspaceDir, nativeLibDir, privateDataDir, localIP string) {
+func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
 	go server.Serve(true)
 }
 
-func StartKernel(container, appDir, workspaceDir, nativeLibDir, privateDataDir, timezoneID, localIPs, lang string) {
+func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang string) {
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 
 	util.LocalIPs = strings.Split(localIPs, ",")
-	util.BootMobile(container, appDir, workspaceDir, nativeLibDir, privateDataDir, lang)
+	util.BootMobile(container, appDir, workspaceBaseDir, lang)
 
 	model.InitConf()
 	go server.Serve(false)

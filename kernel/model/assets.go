@@ -281,11 +281,17 @@ func UploadAssets2Cloud(rootID string) (err error) {
 	}
 
 	sqlAssets := sql.QueryRootBlockAssets(rootID)
-	err = uploadCloud(sqlAssets)
+	err = uploadAssets2Cloud(sqlAssets, bizTypeUploadAssets)
 	return
 }
 
-func uploadCloud(sqlAssets []*sql.Asset) (err error) {
+const (
+	bizTypeUploadAssets  = "upload-assets"
+	bizTypeExport2Liandi = "export-liandi"
+)
+
+// uploadAssets2Cloud 将资源文件上传到云端图床。
+func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
 	syncedAssets := readWorkspaceAssets()
 	var unSyncAssets []string
 	for _, sqlAsset := range sqlAssets {
@@ -332,6 +338,18 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 	if IsSubscriber() {
 		limitSize = 10 * 1024 * 1024 // 10MB
 	}
+
+	// metaType 为服务端 Filemeta.FILEMETA_TYPE，这里只有两个值：
+	//
+	//	5: SiYuan，表示为 SiYuan 上传图床
+	//	4: Client，表示作为客户端分享发布帖子时上传的文件
+	var metaType = "5"
+	if bizTypeUploadAssets == bizType {
+		metaType = "5"
+	} else if bizTypeExport2Liandi == bizType {
+		metaType = "4"
+	}
+
 	var completedUploadAssets []string
 	for _, absAsset := range uploadAbsAssets {
 		fi, statErr := os.Stat(absAsset)
@@ -355,6 +373,8 @@ func uploadCloud(sqlAssets []*sql.Asset) (err error) {
 			SetResult(requestResult).
 			SetFile("file[]", absAsset).
 			SetCookies(&http.Cookie{Name: "symphony", Value: uploadToken}).
+			SetHeader("meta-type", metaType).
+			SetHeader("biz-type", bizType).
 			Post(util.AliyunServer + "/apis/siyuan/upload?ver=" + util.Ver)
 		if nil != reqErr {
 			logging.LogErrorf("upload assets failed: %s", reqErr)

@@ -59,7 +59,7 @@ func Export2Liandi(id string) (err error) {
 	}
 
 	sqlAssets := sql.QueryRootBlockAssets(id)
-	err = uploadCloud(sqlAssets)
+	err = uploadAssets2Cloud(sqlAssets, bizTypeExport2Liandi)
 	if nil != err {
 		return
 	}
@@ -100,7 +100,7 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree, "https://b3logfile.com/siyuan/", true,
+	content := exportMarkdownContent0(tree, "https://b3logfile.com/file/"+time.Now().Format("2006/01")+"/siyuan/"+Conf.User.UserId+"/", true,
 		4, 1, 0,
 		"#", "#",
 		"", "",
@@ -728,7 +728,7 @@ func ExportStdMarkdown(id string) string {
 
 	cloudAssetsBase := ""
 	if IsSubscriber() {
-		cloudAssetsBase = "https://assets.b3logfile.com/siyuan/"
+		cloudAssetsBase = "https://assets.b3logfile.com/siyuan/" + Conf.User.UserId + "/"
 	}
 	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
@@ -1190,7 +1190,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
 	if "" != cloudAssetsBase {
-		luteEngine.RenderOptions.LinkBase = cloudAssetsBase + Conf.User.UserId + "/"
+		luteEngine.RenderOptions.LinkBase = cloudAssetsBase
 	}
 	if assetsDestSpace2Underscore { // 上传到社区图床的资源文件会将空格转为下划线，所以这里也需要将文档内容做相应的转换
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

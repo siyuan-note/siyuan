@@ -236,7 +236,9 @@ export class Breadcrumb {
                     icon: "iconCloud",
                     click() {
                         if (!needSubscribe()) {
-                            fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+                            confirmDialog("🚀 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
+                                fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+                            });
                         }
                     }
                 }).element);

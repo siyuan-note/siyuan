@@ -59,7 +59,7 @@ func Export2Liandi(id string) (err error) {
 	}
 
 	sqlAssets := sql.QueryRootBlockAssets(id)
-	err = uploadAssets2Cloud(sqlAssets, "4")
+	err = uploadAssets2Cloud(sqlAssets, bizTypeExport2Liandi)
 	if nil != err {
 		return
 	}

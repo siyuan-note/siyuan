@@ -98,6 +98,10 @@ func removeWorkspaceDir(c *gin.Context) {
 		ret.Msg = msg
 		return
 	}
+
+	if util.WorkspaceDir == path {
+		os.Exit(util.ExitCodeOk)
+	}
 }
 
 func listWorkspaceDirs(c *gin.Context) {

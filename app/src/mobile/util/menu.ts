@@ -470,6 +470,7 @@ ${accountHTML}
                                         path: pathPosix().join(pathPosix().dirname(window.siyuan.config.system.workspaceDir), inputElement.value)
                                     }, () => {
                                         genWorkspace(workspaceDirElement);
+                                        createWorkspaceDialog.destroy();
                                     });
                                 });
                                 event.preventDefault();

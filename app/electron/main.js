@@ -35,12 +35,9 @@ const isDevEnv = process.env.NODE_ENV === 'development'
 const appVer = app.getVersion()
 const confDir = path.join(app.getPath('home'), '.config', 'siyuan')
 const windowStatePath = path.join(confDir, 'windowState.json')
-let firstOpenWindow, bootWindow
-let siyuanOpenURL
+let bootWindow
 let firstOpen = false
-let resetWindowStateOnRestart = false
 let workspaces = [] // workspaceDir, id, browserWindow, tray
-const localhost = '127.0.0.1'
 let kernelPort = 6806
 require('@electron/remote/main').initialize()
 
@@ -62,7 +59,7 @@ try {
 }
 
 const getServer = () => {
-  return 'http://' + localhost + ':' + kernelPort
+  return 'http://127.0.0.1:' + kernelPort
 }
 
 const sleep = (ms) => {
@@ -240,6 +237,7 @@ const boot = () => {
     })
 
   currentWindow.webContents.on('did-finish-load', () => {
+    let siyuanOpenURL
     if ('win32' === process.platform || 'linux' === process.platform) {
       siyuanOpenURL = process.argv.find((arg) => arg.startsWith('siyuan://'))
     }
@@ -254,7 +252,6 @@ const boot = () => {
       setTimeout(() => { // 等待界面js执行完毕
         writeLog(siyuanOpenURL)
         currentWindow.webContents.send('siyuan-openurl', siyuanOpenURL)
-        siyuanOpenURL = null
       }, 2000)
     }
   })
@@ -570,6 +567,8 @@ app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport')
 app.setPath('userData', app.getPath('userData') + '-Electron') // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
 
 app.whenReady().then(() => {
+
+  let resetWindowStateOnRestart = false
   const resetTrayMenu = (tray, lang, mainWindow) => {
     const trayMenuTemplate = [
       {
@@ -782,7 +781,7 @@ app.whenReady().then(() => {
   })
 
   if (firstOpen) {
-    firstOpenWindow = new BrowserWindow({
+    const firstOpenWindow = new BrowserWindow({
       width: screen.getPrimaryDisplay().size.width / 2,
       height: screen.getPrimaryDisplay().workAreaSize.height / 2,
       frame: false,
@@ -836,7 +835,6 @@ app.whenReady().then(() => {
 
 app.on('open-url', (event, url) => { // for macOS
   if (url.startsWith('siyuan://')) {
-    siyuanOpenURL = url
     workspaces.forEach(item => {
       if (item.browserWindow && !item.browserWindow.isDestroyed()) {
         item.browserWindow.webContents.send('siyuan-openurl', url)

@@ -438,7 +438,7 @@ const initKernel = (workspace, lang) => {
 
       kernelProcess.on('close', (code) => {
         writeLog(
-          `kernel [pid=${kernelProcessPid}, port=${kernelPort}] exited with code [${code}]`)
+          `kernel [pid=${kernelProcessPid}] exited with code [${code}]`)
         if (0 !== code) {
           switch (code) {
             case 20:

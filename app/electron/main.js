@@ -394,13 +394,13 @@ const initKernel = (workspace, lang) => {
           const server = net.createServer()
           server.on('error', error => {
             writeLog(error)
-            kernelPort = ""
+            kernelPort = ''
             portReject()
           })
           server.listen(0, () => {
             kernelPort = server.address().port
             server.close(() => portResolve(kernelPort))
-          });
+          })
         })
       }
       await getAvailablePort()
@@ -754,31 +754,24 @@ app.whenReady().then(() => {
       return
     }
     globalShortcut.register(data.hotkey, () => {
-      const mainWindow = BrowserWindow.fromId(data.id)
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore()
-        if (!mainWindow.isVisible()) {
-          mainWindow.show()
-        }
-      } else {
-        if (mainWindow.isVisible()) {
-          if (!mainWindow.isFocused()) {
+      workspaces.forEach(item => {
+        const mainWindow = item.browserWindow
+        if (mainWindow.isMinimized()) {
+          mainWindow.restore()
+          if (!mainWindow.isVisible()) {
             mainWindow.show()
-          } else {
-            mainWindow.hide()
           }
         } else {
-          mainWindow.show()
-        }
-      }
-      if ('win32' === process.platform || 'linux' === process.platform) {
-        workspaces.find(item => {
-          if (item.id === data.id) {
-            resetTrayMenu(item.tray, data.languages, mainWindow)
-            return true
+          if (mainWindow.isVisible()) {
+            mainWindow.hide()
+          } else {
+            mainWindow.show()
           }
-        })
-      }
+        }
+        if ('win32' === process.platform || 'linux' === process.platform) {
+          resetTrayMenu(item.tray, data.languages, mainWindow)
+        }
+      })
     })
   })
 

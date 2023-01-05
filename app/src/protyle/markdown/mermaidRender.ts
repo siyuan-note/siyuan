@@ -33,7 +33,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 diagramMarginX: 8,
                 diagramMarginY: 8,
                 boxMargin: 8,
-                showSequenceNumbers: true // https://mermaid.js.org/syntax/sequenceDiagram.html#sequencenumbers
+                showSequenceNumbers: true // Mermaid 时序图增加序号 https://github.com/siyuan-note/siyuan/pull/6992 https://mermaid.js.org/syntax/sequenceDiagram.html#sequencenumbers
             },
             gantt: {
                 leftPadding: 75,

@@ -443,7 +443,7 @@ const initKernel = (workspace, lang) => {
       writeLog('booted kernel process [pid=' + kernelProcessPid + ']')
 
       kernelProcess.on('close', (code) => {
-        writeLog(`kernel exited with code [${code}]`)
+        writeLog(`kernel [pid=${kernelProcessPid}, port=${availablePort}] exited with code [${code}]`)
         if (0 !== code) {
           switch (code) {
             case 20:

@@ -662,7 +662,7 @@ app.whenReady().then(() => {
     BrowserWindow.fromId(data.id).webContents.send('siyuan-export-pdf', data)
   })
   ipcMain.on('siyuan-export-close', (event, id) => {
-    BrowserWindow.fromId(id).webContents.send('siyuan-export-close', data)
+    BrowserWindow.fromId(id).webContents.send('siyuan-export-close', id)
   })
   ipcMain.on('siyuan-quit', (event, id) => {
     const mainWindow = BrowserWindow.fromId(id)
@@ -771,12 +771,14 @@ app.whenReady().then(() => {
           mainWindow.show()
         }
       }
-      workspaces.find(item => {
-        if (item.id === data.id) {
-          resetTrayMenu(item.tray, data.languages, mainWindow)
-          return true
-        }
-      })
+      if ('win32' === process.platform || 'linux' === process.platform) {
+        workspaces.find(item => {
+          if (item.id === data.id) {
+            resetTrayMenu(item.tray, data.languages, mainWindow)
+            return true
+          }
+        })
+      }
     })
   })
 

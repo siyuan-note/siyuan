@@ -655,8 +655,16 @@ app.whenReady().then(() => {
   ipcMain.on('siyuan-config-theme', (event, theme) => {
     nativeTheme.themeSource = theme
   })
-  ipcMain.on('siyuan-config-tray', (event, id) => {
-    BrowserWindow.fromId(id).hide()
+  ipcMain.on('siyuan-config-tray', (event, data) => {
+    workspaces.find(item => {
+      if (item.id === data.id) {
+        item.browserWindow.hide()
+        if ('win32' === process.platform || 'linux' === process.platform) {
+          resetTrayMenu(item.tray, data.languages, item.browserWindow)
+        }
+        return true
+      }
+    })
   })
   ipcMain.on('siyuan-export-pdf', (event, data) => {
     BrowserWindow.fromId(data.id).webContents.send('siyuan-export-pdf', data)

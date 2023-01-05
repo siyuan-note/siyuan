@@ -343,7 +343,10 @@ const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
         if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
             // 最小化
             if ("windows" === window.siyuan.config.system.os) {
-                ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, getCurrentWindow().id);
+                ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, {
+                    id: getCurrentWindow().id,
+                    languages: window.siyuan.languages["_trayMenu"],
+                });
             } else {
                 if (currentWindow.isFullScreen()) {
                     currentWindow.once("leave-full-screen", () => currentWindow.hide());

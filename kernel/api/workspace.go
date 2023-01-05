@@ -41,16 +41,23 @@ func createWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	path := arg["path"].(string)
-	if gulu.File.IsExist(path) {
+	absPath := arg["path"].(string)
+	absPath = gulu.Str.RemoveInvisible(absPath)
+	absPath = strings.TrimSpace(absPath)
+	if gulu.File.IsExist(absPath) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(78)
 		return
 	}
-
-	if err := os.MkdirAll(path, 0755); nil != err {
+	if isInvalidWorkspacePath(absPath) {
 		ret.Code = -1
-		ret.Msg = fmt.Sprintf("create workspace dir [%s] failed: %s", path, err)
+		ret.Msg = "This workspace name is not allowed, please use another name"
+		return
+	}
+
+	if err := os.MkdirAll(absPath, 0755); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("create workspace dir [%s] failed: %s", absPath, err)
 		return
 	}
 
@@ -61,7 +68,7 @@ func createWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	workspacePaths = append(workspacePaths, path)
+	workspacePaths = append(workspacePaths, absPath)
 
 	if err = writeWorkspacePaths(workspacePaths); nil != err {
 		ret.Code = -1
@@ -210,4 +217,15 @@ func writeWorkspacePaths(workspacePaths []string) (err error) {
 		return
 	}
 	return
+}
+
+func isInvalidWorkspacePath(absPath string) bool {
+	if "" == absPath {
+		return true
+	}
+	name := filepath.Base(absPath)
+	if "" == name {
+		return true
+	}
+	return "siyuan" == name || "conf" == name || "home" == name || "data" == name || "temp" == name
 }

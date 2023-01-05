@@ -227,5 +227,8 @@ func isInvalidWorkspacePath(absPath string) bool {
 	if "" == name {
 		return true
 	}
+	if !gulu.File.IsValidFilename(name) {
+		return true
+	}
 	return "siyuan" == name || "conf" == name || "home" == name || "data" == name || "temp" == name
 }

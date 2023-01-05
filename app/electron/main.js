@@ -406,8 +406,8 @@ const initKernel = (workspace, lang) => {
         server.close(() => resolve(port))
       }).listen(port, '127.0.0.1'))
     }
-
-    if (isDevEnv) {
+    // TODO
+    if (!isDevEnv) {
       writeLog('got kernel port [' + kernelPort + ']')
     } else {
       kernelPort = await getAvailablePort(kernelPort)

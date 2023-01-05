@@ -32,7 +32,8 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 useMaxWidth: true,
                 diagramMarginX: 8,
                 diagramMarginY: 8,
-                boxMargin: 8
+                boxMargin: 8,
+                showSequenceNumbers: true // https://mermaid.js.org/syntax/sequenceDiagram.html#sequencenumbers
             },
             gantt: {
                 leftPadding: 75,

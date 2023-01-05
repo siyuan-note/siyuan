@@ -45,14 +45,15 @@ func createWorkspaceDir(c *gin.Context) {
 	absPath := arg["path"].(string)
 	absPath = gulu.Str.RemoveInvisible(absPath)
 	absPath = strings.TrimSpace(absPath)
-	if gulu.File.IsExist(absPath) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(78)
-		return
-	}
 	if isInvalidWorkspacePath(absPath) {
 		ret.Code = -1
 		ret.Msg = "This workspace name is not allowed, please use another name"
+		return
+	}
+
+	if gulu.File.IsExist(absPath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(78)
 		return
 	}
 

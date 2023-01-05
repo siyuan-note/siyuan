@@ -199,6 +199,10 @@ func initWorkspaceDir(workspaceArg string) {
 			defaultWorkspaceDir = filepath.Join(userProfile, "Documents", "SiYuan")
 		}
 	}
+	if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
+		log.Printf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
+		os.Exit(ExitCodeCreateWorkspaceDirErr)
+	}
 
 	var workspacePaths []string
 	if !gulu.File.IsExist(workspaceConf) {

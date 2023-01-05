@@ -384,8 +384,7 @@ const initKernel = (workspace, lang) => {
       resolve(false)
       return
     }
-    // TODO
-    if (!isDevEnv) {
+    if (isDevEnv) {
       writeLog('got kernel port [' + kernelPort + ']')
     } else {
       const getAvailablePort = () => {
@@ -412,9 +411,9 @@ const initKernel = (workspace, lang) => {
       return
     }
     const cmds = ['--port', kernelPort, '--wd', appDir]
-    // TODO if (isDevEnv) {
-    //   cmds.push('--mode', 'dev')
-    // }
+    if (isDevEnv) {
+      cmds.push('--mode', 'dev')
+    }
     if (workspace) {
       cmds.push('--workspace', workspace)
       cmds.push('--lang', lang)
@@ -423,8 +422,7 @@ const initKernel = (workspace, lang) => {
       ' ')}]`
     writeLog(cmd)
     let kernelProcessPid = ''
-    // TODO
-    if (isDevEnv) {
+    if (!isDevEnv) {
       const cp = require('child_process')
       const kernelProcess = cp.spawn(kernelPath,
         cmds, {

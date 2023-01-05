@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -176,5 +177,9 @@ func setWorkspaceDir(c *gin.Context) {
 		}
 	}
 
-	util.PushMsg(model.Conf.Language(42), 1000*15)
+	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+		util.PushMsg(model.Conf.Language(42), 1000*15)
+		time.Sleep(time.Second * 2)
+		model.Close(false, 1)
+	}
 }

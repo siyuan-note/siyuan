@@ -746,7 +746,7 @@
   "about5": "Access Authorization Code",
   "about6": "After configuration, it will be used as the access authentication password, leave it blank to close the authentication",
   "about7": "Workspace dir",
-  "about8": "After the workspace is switched, the data in the current workspace will not be copied to the target workspace<br>The application will be closed automatically after modification, please restart manually",
+  "about8": "After the workspace is switched, the data in the current workspace will not be copied to the target workspace",
   "about9": "Automatically upload error messages and diagnostic data",
   "about10": "After enabling, it will automatically upload error information and diagnostic data through the <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, which does not involve personal privacy data so that developers can fix bugs. The application will be closed automatically after modification, please restart manually",
   "about11": "Network serving",

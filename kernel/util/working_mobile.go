@@ -90,7 +90,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 			}
 			if oldConf && oldData && oldTemp {
 				for _, entry := range entries {
-					if "home" == entry.Name() {
+					if "home" == entry.Name() || "siyuan" == entry.Name() {
 						continue
 					}
 

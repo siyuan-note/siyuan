@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -231,6 +232,9 @@ func isInvalidWorkspacePath(absPath string) bool {
 		return true
 	}
 	if !gulu.File.IsValidFilename(name) {
+		return true
+	}
+	if 16 < utf8.RuneCountInString(name) {
 		return true
 	}
 	return "siyuan" == name || "conf" == name || "home" == name || "data" == name || "temp" == name

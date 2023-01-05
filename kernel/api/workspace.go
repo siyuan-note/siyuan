@@ -30,6 +30,75 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func createWorkspaceDir(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	if gulu.File.IsExist(path) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(78)
+		return
+	}
+
+	if err := os.MkdirAll(path, 0755); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("create workspace dir [%s] failed: %s", path, err)
+		return
+	}
+
+}
+
+func removeWorkspaceDir(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+
+	var workspacePaths []string
+	workspaceConf := filepath.Join(util.HomeDir, ".config", "siyuan", "workspace.json")
+	data, err := os.ReadFile(workspaceConf)
+	if nil != err {
+		logging.LogErrorf("read workspace conf failed: %s", err)
+	} else {
+		if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
+			logging.LogErrorf("unmarshal workspace conf failed: %s", err)
+		}
+	}
+
+	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
+	if data, err = gulu.JSON.MarshalJSON(workspacePaths); nil != err {
+		msg := fmt.Sprintf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
+		ret.Code = -1
+		ret.Msg = msg
+		return
+	}
+
+	if err = gulu.File.WriteFileSafer(workspaceConf, data, 0644); nil != err {
+		msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
+		ret.Code = -1
+		ret.Msg = msg
+		return
+	}
+
+	if err = os.RemoveAll(path); nil != err {
+		msg := fmt.Sprintf("remove workspace dir [%s] failed: %s", path, err)
+		ret.Code = -1
+		ret.Msg = msg
+		return
+	}
+}
+
 func listWorkspaceDirs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -59,6 +59,10 @@ export const pathPosix = () => {
     return path;
 };
 
+export const originalPath = () => {
+    return path;
+};
+
 export const getTopPaths = (liElements: Element[]) => {
     const fromPaths: string[] = [];
     liElements.forEach((item: HTMLElement) => {

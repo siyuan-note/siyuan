@@ -227,6 +227,9 @@ func isInvalidWorkspacePath(absPath string) bool {
 	if "" == name {
 		return true
 	}
+	if strings.HasPrefix(name, ".") {
+		return true
+	}
 	if !gulu.File.IsValidFilename(name) {
 		return true
 	}

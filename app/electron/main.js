@@ -39,7 +39,7 @@ let firstOpenWindow, bootWindow
 let siyuanOpenURL
 let firstOpen = false
 let resetWindowStateOnRestart = false
-let workspaces = []
+let workspaces = [] // workspaceDir, id, browserWindow, tray
 const localhost = '127.0.0.1'
 let kernelPort = 6806
 require('@electron/remote/main').initialize()
@@ -698,11 +698,26 @@ app.whenReady().then(() => {
     }
   })
   ipcMain.on('siyuan-open-workspace', (event, data) => {
-    initKernel(data.workspace, data.lang).then((isSucc) => {
-      if (isSucc) {
-        boot()
+    const exitWorkspace = workspaces.find((item, index) => {
+      if (item.workspaceDir === data.workspace) {
+        const mainWindow = item.browserWindow
+        if (mainWindow.isMinimized()) {
+          mainWindow.restore()
+        }
+        if (!mainWindow.isVisible()) {
+          mainWindow.show()
+        }
+        mainWindow.focus()
+        return true
       }
     })
+    if (!exitWorkspace) {
+      initKernel(data.workspace, data.lang).then((isSucc) => {
+        if (isSucc) {
+          boot()
+        }
+      })
+    }
   })
   ipcMain.on('siyuan-init', async (event, data) => {
     let tray

@@ -393,22 +393,29 @@ const initKernel = (workspace, lang) => {
           port = 6806
         }
         // https://gist.github.com/mikeal/1840641
-        let tryGetPortCount = 0
-        const server = net.createServer()
-        return new Promise((resolve, reject) => server.on('error', error => {
-          writeLog(error)
-          if (2048 < ++tryGetPortCount) {
-            writeLog(
-              `failed to get available port [tryCount=${tryGetPortCount}, port=${port}]`)
-            reject()
-            return
-          }
-          server.listen(++port, '127.0.0.1')
-        }).on('listening', () => {
-          server.close(() => resolve(port))
-        }).listen(port, '127.0.0.1'))
+        return new Promise((resolve, reject) => {
+          let tryGetPortCount = 0
+          const server = net.createServer()
+          server.on('error', error => {
+            writeLog(error)
+            if (2048 < ++tryGetPortCount) {
+              writeLog(
+                `failed to get available port [tryCount=${tryGetPortCount}, port=${port}]`)
+              reject()
+              return
+            }
+            console.log("getAvailablePort error", port)
+            server.listen(++port, "127.0.0.1")
+          }).on('listening', () => {
+            console.log("getAvailablePort listening", port)
+            server.close(() => resolve(port))
+          }).listen(port, "127.0.0.1")
+          console.log("getAvailablePort", port)
+        })
       }
+      console.log("before", kernelPort)
       kernelPort = await getAvailablePort(kernelPort)
+      console.log("after", kernelPort)
     }
     writeLog('got kernel port [' + kernelPort + ']')
     if (!kernelPort) {

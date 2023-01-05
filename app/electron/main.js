@@ -468,6 +468,16 @@ const initKernel = (workspace, lang) => {
                 '⚠️ 无法读写块树文件 Failed to access blocktree file',
                 `<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is corrupted, please delete the workspace/temp/ folder and restart.</div>`)
               break
+            case 24:
+              showErrorWindow(
+                '⚠️ 工作空间已被锁定 The workspace is locked',
+                `<div>该工作空间正在被使用。</div><div>The workspace is in use.</div>`)
+              break
+            case 25:
+              showErrorWindow(
+                '⚠️ 创建工作空间目录失败 Failed to create workspace directory',
+                `<div>创建工作空间目录失败。</div><div>Failed to create workspace directory.</div>`)
+              break
             case 0:
             case 1: // Fatal error
               break

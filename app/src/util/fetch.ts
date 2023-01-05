@@ -1,6 +1,7 @@
 import {Constants} from "../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {processMessage} from "./processMessage";
 import {kernelError} from "../dialog/processSystem";
@@ -48,7 +49,7 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
         if (url === "/api/system/exit" || url === "/api/system/setWorkspaceDir" || (
             ["/api/system/setUILayout"].includes(url) && data.exit // 内核中断，点关闭处理
         )) {
-            ipcRenderer.send(Constants.SIYUAN_QUIT);
+            ipcRenderer.send(Constants.SIYUAN_QUIT, getCurrentWindow().id);
         }
         /// #endif
     });

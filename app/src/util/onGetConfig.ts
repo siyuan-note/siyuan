@@ -367,6 +367,7 @@ const initWindow = () => {
         document.body.classList.add("body--blur");
     });
     ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
+        console.log(event, url)
         if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
             return;
         }

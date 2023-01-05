@@ -93,7 +93,7 @@ export const exitSiYuan = () => {
                 buttonElement.addEventListener("click", () => {
                     fetchPost("/api/system/exit", {force: true}, () => {
                         /// #if !BROWSER
-                        ipcRenderer.send(Constants.SIYUAN_QUIT);
+                        ipcRenderer.send(Constants.SIYUAN_QUIT, getCurrentWindow().id);
                         /// #else
                         if (["ios", "android"].includes(window.siyuan.config.system.container) && (window.webkit?.messageHandlers || window.JSAndroid)) {
                             window.location.href = "siyuan://api/system/exit";
@@ -117,7 +117,7 @@ export const exitSiYuan = () => {
                     }, 2000);
                     // 然后等待一段时间后再退出，避免界面主进程退出以后内核子进程被杀死
                     setTimeout(() => {
-                        ipcRenderer.send(Constants.SIYUAN_QUIT);
+                        ipcRenderer.send(Constants.SIYUAN_QUIT, getCurrentWindow().id);
                     }, 4000);
                     /// #endif
                 });
@@ -127,13 +127,13 @@ export const exitSiYuan = () => {
                     execInstallPkg: 1 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
                 }, () => {
                     /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_QUIT);
+                    ipcRenderer.send(Constants.SIYUAN_QUIT, getCurrentWindow().id);
                     /// #endif
                 });
             });
         } else { // 正常退出
             /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_QUIT);
+            ipcRenderer.send(Constants.SIYUAN_QUIT, getCurrentWindow().id);
             /// #else
             if (["ios", "android"].includes(window.siyuan.config.system.container) && (window.webkit?.messageHandlers || window.JSAndroid)) {
                 window.location.href = "siyuan://api/system/exit";

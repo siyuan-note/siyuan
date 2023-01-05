@@ -56,10 +56,8 @@ try {
   }
 } catch (e) {
   console.error(e)
-  require('electron').
-    dialog.
-    showErrorBox('创建配置目录失败 Failed to create config directory',
-      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
+    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -439,7 +437,7 @@ const initKernel = (workspace, lang) => {
         },
       )
       kernelProcessPid = kernelProcess.pid
-      writeLog('booted kernel process [pid=' + kernelProcessPid + ']')
+      writeLog('booted kernel process [pid=' + kernelProcessPid + ', port=' + kernelPort + ']')
 
       kernelProcess.on('close', (code) => {
         writeLog(

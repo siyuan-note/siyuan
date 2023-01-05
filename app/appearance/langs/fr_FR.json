@@ -746,7 +746,7 @@
   "about5": "Accès Code d'autorisation",
   "about6": "Configuré comme mot de passe d'authentification d'accès, laisser vide pour désactiver l'authentification.",
   "about7": "Répertoire de l'espace de travail",
-  "about8": "Une fois l'espace de travail basculé, les données de l'espace de travail actuel ne seront pas copiées dans l'espace de travail cible<br>Si vous devez copier des données, veuillez copier manuellement le dossier <code class='fn__code'>data</code> de l'espace de travail actuel sur le système de fichiers vers l'espace de travail cible<br>L'application se fermera automatiquement après modification, merci de redémarrer manuellement",
+  "about8": "Une fois l'espace de travail basculé, les données de l'espace de travail actuel ne seront pas copiées dans l'espace de travail cible",
   "about9": "Télécharger automatiquement les messages d'erreur et les données de diagnostic",
   "about10": "Après l'activation, il télécharge automatiquement les informations d'erreur et les données de diagnostic via le SDK <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a>, qui n'implique pas de données de confidentialité personnelles afin que les développeurs peut corriger des bogues.  L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "about11": "Service de réseau",

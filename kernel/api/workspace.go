@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -53,6 +54,20 @@ func createWorkspaceDir(c *gin.Context) {
 		return
 	}
 
+	workspacePaths, err := readWorkspacePaths()
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	workspacePaths = append(workspacePaths, path)
+
+	if err = writeWorkspacePaths(workspacePaths); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 }
 
 func removeWorkspaceDir(c *gin.Context) {
@@ -66,29 +81,18 @@ func removeWorkspaceDir(c *gin.Context) {
 
 	path := arg["path"].(string)
 
-	var workspacePaths []string
-	workspaceConf := filepath.Join(util.HomeDir, ".config", "siyuan", "workspace.json")
-	data, err := os.ReadFile(workspaceConf)
+	workspacePaths, err := readWorkspacePaths()
 	if nil != err {
-		logging.LogErrorf("read workspace conf failed: %s", err)
-	} else {
-		if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
-			logging.LogErrorf("unmarshal workspace conf failed: %s", err)
-		}
-	}
-
-	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
-	if data, err = gulu.JSON.MarshalJSON(workspacePaths); nil != err {
-		msg := fmt.Sprintf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
 		ret.Code = -1
-		ret.Msg = msg
+		ret.Msg = err.Error()
 		return
 	}
 
-	if err = gulu.File.WriteFileSafer(workspaceConf, data, 0644); nil != err {
-		msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
+	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
+
+	if err = writeWorkspacePaths(workspacePaths); nil != err {
 		ret.Code = -1
-		ret.Msg = msg
+		ret.Msg = err.Error()
 		return
 	}
 
@@ -108,17 +112,10 @@ func listWorkspaceDirs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	userHomeConfDir := filepath.Join(util.HomeDir, ".config", "siyuan")
-	workspaceConf := filepath.Join(userHomeConfDir, "workspace.json")
-	data, err := os.ReadFile(workspaceConf)
+	workspacePaths, err := readWorkspacePaths()
 	if nil != err {
-		logging.LogErrorf("read workspace conf [%s] failed: %s", workspaceConf, err)
-		return
-	}
-
-	var workspacePaths []string
-	if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
-		logging.LogErrorf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = workspacePaths
@@ -151,15 +148,11 @@ func setWorkspaceDir(c *gin.Context) {
 		}
 	}
 
-	var workspacePaths []string
-	workspaceConf := filepath.Join(util.HomeDir, ".config", "siyuan", "workspace.json")
-	data, err := os.ReadFile(workspaceConf)
+	workspacePaths, err := readWorkspacePaths()
 	if nil != err {
-		logging.LogErrorf("read workspace conf failed: %s", err)
-	} else {
-		if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
-			logging.LogErrorf("unmarshal workspace conf failed: %s", err)
-		}
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 
 	workspacePaths = append(workspacePaths, path)
@@ -167,18 +160,10 @@ func setWorkspaceDir(c *gin.Context) {
 	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
 	workspacePaths = append(workspacePaths, path) // 切换的工作空间固定放在最后一个
 
-	if data, err = gulu.JSON.MarshalJSON(workspacePaths); nil != err {
-		msg := fmt.Sprintf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
+	if err = writeWorkspacePaths(workspacePaths); nil != err {
 		ret.Code = -1
-		ret.Msg = msg
+		ret.Msg = err.Error()
 		return
-	} else {
-		if err = gulu.File.WriteFileSafer(workspaceConf, data, 0644); nil != err {
-			msg := fmt.Sprintf("create workspace conf [%s] failed: %s", workspaceConf, err)
-			ret.Code = -1
-			ret.Msg = msg
-			return
-		}
 	}
 
 	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
@@ -186,4 +171,43 @@ func setWorkspaceDir(c *gin.Context) {
 		time.Sleep(time.Second * 2)
 		model.Close(false, 1)
 	}
+}
+
+func readWorkspacePaths() (ret []string, err error) {
+	ret = []string{}
+	workspaceConf := filepath.Join(util.HomeDir, ".config", "siyuan", "workspace.json")
+	data, err := os.ReadFile(workspaceConf)
+	if nil != err {
+		msg := fmt.Sprintf("read workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		msg := fmt.Sprintf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	return
+}
+
+func writeWorkspacePaths(workspacePaths []string) (err error) {
+	workspaceConf := filepath.Join(util.HomeDir, ".config", "siyuan", "workspace.json")
+	data, err := gulu.JSON.MarshalJSON(workspacePaths)
+	if nil != err {
+		msg := fmt.Sprintf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	if err = os.WriteFile(workspaceConf, data, 0644); nil != err {
+		msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	return
 }

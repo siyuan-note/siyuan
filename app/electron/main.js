@@ -364,36 +364,6 @@ const boot = () => {
 }
 
 const initKernel = (workspace, lang) => {
-  const getKernelPort = async () => {
-    // TODO if (isDevEnv) {
-    //   writeLog("got kernel port [" + kernelPort + "]")
-    //   return kernelPort
-    // }
-
-    // 改进桌面端拉起内核 https://github.com/siyuan-note/siyuan/issues/6894
-    const getAvailablePort = (port = kernelPort) => {
-      // https://gist.github.com/mikeal/1840641
-      let tryGetPortCount = 0
-      const server = net.createServer()
-      return new Promise((resolve, reject) => server.on('error', error => {
-        writeLog(error)
-        if (2048 < ++tryGetPortCount) {
-          writeLog('failed to get available port [tryCount=' + tryGetPortCount +
-            ', port=' + port + ']')
-          reject(error)
-          return
-        }
-        server.listen(++port)
-      }).on('listening', () => {
-        writeLog('found an available port [' + port + ']')
-        server.close(() => resolve(port))
-      }).listen(port, '127.0.0.1'))
-    }
-
-    kernelPort = await getAvailablePort()
-    writeLog('got kernel available port [' + kernelPort + ']')
-    return kernelPort
-  }
   return new Promise(async (resolve) => {
     bootWindow = new BrowserWindow({
       width: screen.getPrimaryDisplay().size.width / 2,
@@ -417,9 +387,37 @@ const initKernel = (workspace, lang) => {
       resolve(false)
       return
     }
+    // 改进桌面端拉起内核 https://github.com/siyuan-note/siyuan/issues/6894
+    const getAvailablePort = (port) => {
+      // https://gist.github.com/mikeal/1840641
+      let tryGetPortCount = 0
+      const server = net.createServer()
+      return new Promise((resolve, reject) => server.on('error', error => {
+        writeLog(error)
+        if (2048 < ++tryGetPortCount) {
+          writeLog('failed to get available port [tryCount=' + tryGetPortCount +
+            ', port=' + port + ']')
+          reject()
+          return
+        }
+        server.listen(++port)
+      }).on('listening', () => {
+        writeLog('got kernel port [' + port + ']')
+        server.close(() => resolve(port))
+      }).listen(port, '127.0.0.1'))
+    }
 
-    const availablePort = await getKernelPort()
-    const cmds = ['--port', availablePort, '--wd', appDir]
+    if (isDevEnv) {
+      writeLog('got kernel port [' + kernelPort + ']')
+    } else {
+      kernelPort = await getAvailablePort(kernelPort)
+    }
+    if (!kernelPort) {
+      bootWindow.destroy()
+      resolve(false)
+      return
+    }
+    const cmds = ['--port', kernelPort, '--wd', appDir]
     // TODO if (isDevEnv) {
     //   cmds.push('--mode', 'dev')
     // }
@@ -444,7 +442,8 @@ const initKernel = (workspace, lang) => {
       writeLog('booted kernel process [pid=' + kernelProcessPid + ']')
 
       kernelProcess.on('close', (code) => {
-        writeLog(`kernel [pid=${kernelProcessPid}, port=${availablePort}] exited with code [${code}]`)
+        writeLog(
+          `kernel [pid=${kernelProcessPid}, port=${kernelPort}] exited with code [${code}]`)
         if (0 !== code) {
           switch (code) {
             case 20:

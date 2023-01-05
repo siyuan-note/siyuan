@@ -1,4 +1,5 @@
 {
+  "removeWorkspaceTip": "删除工作空间后无法恢复，确定删除吗？",
   "new": "新建",
   "share2LiandiConfirmTip": "确定将该文档分享到链滴吗？",
   "share2Liandi": "分享到链滴",

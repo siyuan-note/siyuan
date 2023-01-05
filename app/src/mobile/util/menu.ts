@@ -477,8 +477,9 @@ ${accountHTML}
                                 event.stopPropagation();
                                 break;
                             } else if (target.getAttribute("data-type") === "remove") {
-                                confirmDialog("⚠️ " + window.siyuan.languages.remove, window.siyuan.languages.about8, () => {
-                                    fetchPost("/api/system/removeWorkspaceDir", {path: target.parentElement.getAttribute("data-path")});
+                                const p = target.parentElement.getAttribute("data-path");
+                                confirmDialog("⚠️ " + window.siyuan.languages.remove + " " + pathPosix().basename(p), window.siyuan.languages.removeWorkspaceTip, () => {
+                                    fetchPost("/api/system/removeWorkspaceDir", {path: p});
                                 });
                                 event.preventDefault();
                                 event.stopPropagation();

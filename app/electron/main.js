@@ -731,7 +731,7 @@ app.whenReady().then(() => {
     if ('win32' === process.platform || 'linux' === process.platform) {
       // 系统托盘
       tray = new Tray(path.join(appDir, 'stage', 'icon-large.png'))
-      tray.setToolTip('SiYuan v' + appVer)
+      tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`)
       const mainWindow = BrowserWindow.fromId(data.id)
       resetTrayMenu(tray, data.languages, mainWindow)
       tray.on('click', () => {

@@ -10,7 +10,7 @@ import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {getCurrentWindow} from "@electron/remote";
-import {pathPosix} from "../util/pathName";
+import {originalPath} from "../util/pathName";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -263,15 +263,15 @@ export const bootSync = () => {
 
 export const setTitle = (title: string) => {
     const dragElement = document.getElementById("drag");
-    const workspaceName = pathPosix().basename(window.siyuan.config.system.workspaceDir)
+    const workspaceName = originalPath().basename(window.siyuan.config.system.workspaceDir)
     if (title === window.siyuan.languages.siyuanNote) {
-        const versionTitle =`${workspaceName} - ${title} v${Constants.SIYUAN_VERSION}`;
+        const versionTitle = `${title} - ${workspaceName} - v${Constants.SIYUAN_VERSION}`;
         document.title = versionTitle;
         dragElement.textContent = versionTitle;
         dragElement.setAttribute("title", versionTitle);
     } else {
         title = title || "Untitled";
-        document.title =`${workspaceName} - ${title} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
+        document.title = `${title} - ${workspaceName}  - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         dragElement.textContent = title;
         dragElement.setAttribute("title", title);
     }

@@ -389,6 +389,7 @@ const initKernel = (workspace, lang) => {
         server.close(() => resolve(port))
       }).listen(port, '127.0.0.1'))
     }
+
     kernelPort = await getAvailablePort()
     writeLog('got kernel available port [' + kernelPort + ']')
     return kernelPort

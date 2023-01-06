@@ -35,8 +35,11 @@ export const pdfResize = () => {
         const pdfViewerElement = item.element.querySelector("#viewerContainer");
         if (pdfViewerElement) {
             // https://github.com/siyuan-note/siyuan/issues/6890
-            pdfViewerElement.scrollTo(0, parseInt(pdfViewerElement.getAttribute("data-scrolltop")));
-            pdfViewerElement.removeAttribute("data-scrolltop");
+            const scrollTop = pdfViewerElement.getAttribute("data-scrolltop");
+            if (scrollTop) {
+                pdfViewerElement.scrollTo(0, parseInt(scrollTop));
+                pdfViewerElement.removeAttribute("data-scrolltop");
+            }
         }
         const currentScaleValue = pdfViewer.currentScaleValue;
         if (

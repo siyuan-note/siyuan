@@ -1,0 +1,455 @@
+{
+	"ID": "20230106104645-o838uew",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230106104645-o838uew",
+		"title": "工作空間",
+		"updated": "20230106104750"
+	},
+	"Children": [
+		{
+			"ID": "20230106104714-um1pzdl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230106104714-um1pzdl",
+				"updated": "20230106104714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230106104714-n8953p0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230106104714-n8953p0",
+				"updated": "20230106104714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "工作空間用於保存數據、歷史、配置和運行時所需要的文件。"
+				}
+			]
+		},
+		{
+			"ID": "20230106104714-8d97m2z",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230106104714-8d97m2z",
+				"updated": "20230106104714"
+			},
+			"Children": [
+				{
+					"ID": "20230106104714-yhbnstl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-yhbnstl",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-4qcoopt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-4qcoopt",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不同工作空間通過文件系統文件夾相互隔離"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104714-kzgy9vb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-kzgy9vb",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-4r3sws0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-4r3sws0",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "一個工作空間只能被一個內核進程伺服"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230106104714-rujbhlc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230106104714-rujbhlc",
+				"updated": "20230106104735"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我們可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關於"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "工作空間"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中切換工作空間，桌面端支持同時打開多個工作空間，移動端只能切換不同的工作空間。"
+				}
+			]
+		},
+		{
+			"ID": "20230106104714-4snblro",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230106104714-4snblro",
+				"updated": "20230106104714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件系統結構"
+				}
+			]
+		},
+		{
+			"ID": "20230106104714-foziz16",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230106104714-foziz16",
+				"updated": "20230106104714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件系統上工作空間下的結構："
+				}
+			]
+		},
+		{
+			"ID": "20230106104714-yyezfpg",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230106104714-yyezfpg",
+				"updated": "20230106104750"
+			},
+			"Children": [
+				{
+					"ID": "20230106104714-8hqlqm6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-8hqlqm6",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-d4on2tp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-d4on2tp",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "conf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存工作空間配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104714-ujf3xj7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-ujf3xj7",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-tzuyrck",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-tzuyrck",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "corrupted"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存已經損壞的數據文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104714-5qqki16",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-5qqki16",
+						"updated": "20230106104750"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-znd5d4f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-znd5d4f",
+								"updated": "20230106104750"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存數據，具體結構請參考"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226115356-i1v42hf",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "這裡"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104714-itghjab",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-itghjab",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-zb4j1g4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-zb4j1g4",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "history"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存文件歷史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104714-5ck4c0d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-5ck4c0d",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-fdmry3k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-fdmry3k",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "repo"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存數據倉庫數據"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104714-2zcy67l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-2zcy67l",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-qqed0vk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-qqed0vk",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "temp"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存運行時所需的臨時文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104714-s2nrsma",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104714-s2nrsma",
+						"updated": "20230106104714"
+					},
+					"Children": [
+						{
+							"ID": "20230106104714-2fqtvep",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104714-2fqtvep",
+								"updated": "20230106104714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".lock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 內核進程啟動後會創建該文件，用於鎖定工作空間"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

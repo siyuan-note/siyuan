@@ -42,7 +42,6 @@ func HookDesktopUIProc() {
 		return
 	}
 
-	time.Sleep(30 * time.Second)
 	uiProcNames := []string{"siyuan", "electron"}
 	existUIProc := false
 	for range time.Tick(7 * time.Second) {

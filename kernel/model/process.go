@@ -42,12 +42,7 @@ func HookDesktopUIProc() {
 		return
 	}
 
-	uiProcName := "siyuan"
-	if "dev" == util.Mode {
-		uiProcName = "electron"
-	}
-
-	time.Sleep(30 * time.Second)
+	uiProcNames := []string{"siyuan", "electron"}
 	existUIProc := false
 	for range time.Tick(7 * time.Second) {
 		util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
@@ -63,11 +58,13 @@ func HookDesktopUIProc() {
 				return true
 			}
 
-			if strings.Contains(strings.ToLower(proc.Executable()), uiProcName) {
-				existUIProc = true
-				return false
+			procName := strings.ToLower(proc.Executable())
+			for _, name := range uiProcNames {
+				if strings.Contains(procName, name) {
+					existUIProc = true
+					return false
+				}
 			}
-
 			return true
 		})
 

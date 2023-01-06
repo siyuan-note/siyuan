@@ -188,18 +188,22 @@ export const appearance = {
             nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
-            if ((
-                    window.siyuan.config.appearance.themeJS &&
-                    (
-                        response.data.mode !== window.siyuan.config.appearance.mode ||
-                        window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
-                        window.siyuan.config.appearance.themeDark !== response.data.themeDark
-                    )
-                ) ||
-                (response.data.modeOS && !window.siyuan.config.appearance.modeOS)
-            ) {
-                exportLayout(true);
-                return;
+            if (window.siyuan.config.appearance.themeJS) {
+                if (!response.data.modeOS && (
+                    response.data.mode !== window.siyuan.config.appearance.mode ||
+                    window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
+                    window.siyuan.config.appearance.themeDark !== response.data.themeDark
+                )) {
+                    exportLayout(true);
+                    return;
+                }
+                const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                if (response.data.modeOS && (
+                    (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
+                )) {
+                    exportLayout(true);
+                    return;
+                }
             }
             appearance.onSetappearance(response.data);
             if (response.data.hideStatusBar) {
@@ -244,7 +248,7 @@ export const appearance = {
             });
         });
     },
-    onSetappearance(data: IAppearance, needLoadAsset = true) {
+    onSetappearance(data: IAppearance) {
         if (data.lang !== window.siyuan.config.appearance.lang || data.nativeEmoji !== window.siyuan.config.appearance.nativeEmoji) {
             exportLayout(true);
             return;
@@ -272,12 +276,7 @@ export const appearance = {
                 iconElement.innerHTML = genOptions(window.siyuan.config.appearance.icons, window.siyuan.config.appearance.icon);
             }
         }
-        /// #if !BROWSER
-        ipcRenderer.send(Constants.SIYUAN_CONFIG_THEME, data.modeOS ? "system" : (data.mode === 1 ? "dark" : "light"));
-        /// #endif
-        if (needLoadAsset) {
-            loadAssets(data);
-        }
+        loadAssets(data);
         document.querySelector("#barMode use").setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
     }
 };

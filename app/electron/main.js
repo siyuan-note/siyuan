@@ -20,7 +20,6 @@ const {
   shell,
   Menu,
   screen,
-  nativeTheme,
   ipcMain,
   globalShortcut,
   Tray,
@@ -641,9 +640,6 @@ app.whenReady().then(() => {
       mainWindow.show()
     }
     mainWindow.focus()
-  })
-  ipcMain.on('siyuan-config-theme', (event, theme) => {
-    nativeTheme.themeSource = theme
   })
   ipcMain.on('siyuan-config-tray', (event, data) => {
     workspaces.find(item => {

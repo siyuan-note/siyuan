@@ -19,9 +19,14 @@ package model
 import (
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
+	"time"
 
+	goPS "github.com/mitchellh/go-ps"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func HandleSignal() {
@@ -30,4 +35,47 @@ func HandleSignal() {
 	s := <-c
 	logging.LogInfof("received os signal [%s], exit kernel process now", s)
 	Close(false, 1)
+}
+
+func HookDesktopUIProc() {
+	if util.ContainerStd != util.Container || "dev" == util.Mode {
+		return
+	}
+
+	time.Sleep(30 * time.Second)
+	uiProcNames := []string{"siyuan", "electron"}
+	existUIProc := false
+	for range time.Tick(7 * time.Second) {
+		util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
+			uiProcID, err := strconv.Atoi(uiProcIDArg.(string))
+			if nil != err {
+				logging.LogErrorf("invalid UI proc ID [%s]: %s", uiProcIDArg, err)
+				return true
+			}
+
+			proc, err := goPS.FindProcess(uiProcID)
+			if nil != err {
+				logging.LogErrorf("find UI proc [%d] failed: %s", uiProcID, err)
+				return true
+			}
+
+			if nil == proc {
+				return true
+			}
+
+			procName := strings.ToLower(proc.Executable())
+			for _, name := range uiProcNames {
+				if strings.Contains(procName, name) {
+					existUIProc = true
+					return false
+				}
+			}
+			return true
+		})
+
+		if !existUIProc {
+			logging.LogInfof("no active UI proc, exit kernel process now")
+			Close(false, 1)
+		}
+	}
 }

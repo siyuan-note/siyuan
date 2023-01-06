@@ -675,7 +675,6 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
-	os.RemoveAll(filepath.Join(util.DataDir, "assets", ".siyuan", "assets.json"))
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")
@@ -719,6 +718,11 @@ func clearWorkspaceTemp() {
 			logging.LogInfof("removed temp file [%s]", tmp)
 		}
 	}
+
+	// 老版本遗留文件清理
+	os.RemoveAll(filepath.Join(util.DataDir, "assets", ".siyuan", "assets.json"))
+	os.RemoveAll(filepath.Join(util.WorkspaceDir, "backup"))
+	os.RemoveAll(filepath.Join(util.WorkspaceDir, "sync"))
 
 	logging.LogInfof("cleared workspace temp")
 }

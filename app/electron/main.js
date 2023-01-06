@@ -53,10 +53,8 @@ try {
   }
 } catch (e) {
   console.error(e)
-  require('electron').
-    dialog.
-    showErrorBox('创建配置目录失败 Failed to create config directory',
-      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
+    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -889,6 +887,7 @@ app.on('before-quit', (event) => {
 })
 
 const {powerMonitor} = require('electron')
+const {write} = require("fs");
 
 powerMonitor.on('suspend', () => {
   writeLog('system suspend')
@@ -926,11 +925,11 @@ powerMonitor.on('resume', async () => {
     return
   }
 
-  writeLog('sync after system resume')
   workspaces.forEach(item => {
     const currentURL = new URL(item.browserWindow.getURL())
-    fetch(getServer(currentURL.port) + '/api/sync/performSync',
-      {method: 'POST'})
+    const server = getServer(currentURL.port)
+    writeLog('sync after system resume [' + server + '/api/sync/performSync' + ']')
+    fetch(server + '/api/sync/performSync', {method: 'POST'})
   })
 })
 
@@ -938,6 +937,6 @@ powerMonitor.on('shutdown', () => {
   writeLog('system shutdown')
   workspaces.forEach(item => {
     const currentURL = new URL(item.browserWindow.getURL())
-    fetch(getServer(currentURL.port)  + '/api/system/exit', {method: 'POST'})
+    fetch(getServer(currentURL.port) + '/api/system/exit', {method: 'POST'})
   })
 })

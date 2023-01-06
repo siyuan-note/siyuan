@@ -38,8 +38,13 @@ func HandleSignal() {
 }
 
 func HookDesktopUIProc() {
-	if util.ContainerStd != util.Container || "dev" == util.Mode {
+	if util.ContainerStd != util.Container {
 		return
+	}
+
+	uiProcName := "siyuan"
+	if "dev" == util.Mode {
+		uiProcName = "electron"
 	}
 
 	time.Sleep(30 * time.Second)
@@ -58,7 +63,7 @@ func HookDesktopUIProc() {
 				return true
 			}
 
-			if strings.Contains(strings.ToLower(proc.Executable()), "siyuan") {
+			if strings.Contains(strings.ToLower(proc.Executable()), uiProcName) {
 				existUIProc = true
 				return false
 			}

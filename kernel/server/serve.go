@@ -108,16 +108,17 @@ func Serve(fastMode bool) {
 		rewritePortJSON(pid, port)
 	}
 
-	logging.LogInfof("kernel [pid=%s] is booting [%s]", pid, "http://"+util.LocalHost+":"+port)
+	logging.LogInfof("kernel [pid=%s] http server is booting [%s]", pid, "http://"+util.LocalHost+":"+port)
 	util.HttpServing = true
 
 	go func() {
+		time.Sleep(1 * time.Second)
 		if util.FixedPort != port {
 			// 启动一个 6806 端口的反向代理服务器，这样浏览器扩展才能直接使用 127.0.0.1:6806，不用配置端口
-			serverURL, _ := url.Parse("http://" + host + ":" + port)
+			serverURL, _ := url.Parse("http://127.0.0.1:" + port)
 			proxy := httputil.NewSingleHostReverseProxy(serverURL)
-			logging.LogInfof("reverse proxy server [%s] is booting", util.FixedPort)
-			if proxyErr := http.ListenAndServe(host+":"+util.FixedPort, proxy); nil != proxyErr {
+			logging.LogInfof("reverse proxy server is booting [%s]", "http://127.0.0.1:"+util.FixedPort)
+			if proxyErr := http.ListenAndServe("127.0.0.1:"+util.FixedPort, proxy); nil != proxyErr {
 				logging.LogWarnf("boot reverse proxy server [%s] failed: %s", serverURL, proxyErr)
 			}
 			// 反代服务器启动失败不影响核心服务器启动

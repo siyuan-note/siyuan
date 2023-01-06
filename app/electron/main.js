@@ -900,6 +900,7 @@ powerMonitor.on('suspend', () => {
 })
 
 powerMonitor.on('resume', async () => {
+  // 桌面端系统休眠唤醒后判断网络连通性后再执行数据同步 https://github.com/siyuan-note/siyuan/issues/6687
   writeLog('system resume')
   const isOnline = async () => {
     try {
@@ -931,7 +932,6 @@ powerMonitor.on('resume', async () => {
   }
 
   writeLog('sync after system resume')
-  // 桌面端系统休眠唤醒后同步延时 7s 后再执行 https://github.com/siyuan-note/siyuan/issues/6687
   fetch(getServer() + '/api/sync/performSync', {method: 'POST'})
 })
 

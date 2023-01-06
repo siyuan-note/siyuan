@@ -51,6 +51,7 @@ func main() {
 	go sql.AutoFlushTreeQueue()
 	go treenode.AutoFlushBlockTree()
 	go cache.LoadAssets()
+	go model.HookDesktopUIProc()
 	model.WatchAssets()
 	model.HandleSignal()
 }

@@ -382,9 +382,8 @@ const initKernel = (workspace, lang) => {
       resolve(false)
       return
     }
-    if (isDevEnv && workspaces.length === 0) {
-      writeLog('got kernel port [' + kernelPort + ']')
-    } else {
+
+    if (!isDevEnv || workspaces.length > 0) {
       const getAvailablePort = () => {
         // https://gist.github.com/mikeal/1840641
         return new Promise((portResolve, portReject) => {

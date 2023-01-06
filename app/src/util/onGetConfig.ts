@@ -139,6 +139,7 @@ export const onGetConfig = (isStart: boolean) => {
         languages: window.siyuan.languages["_trayMenu"],
         workspaceDir: window.siyuan.config.system.workspaceDir,
         id: getCurrentWindow().id,
+        port: location.port
     });
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
         languages: window.siyuan.languages["_trayMenu"],

@@ -58,8 +58,8 @@ try {
   app.exit()
 }
 
-const getServer = () => {
-  return 'http://127.0.0.1:' + kernelPort
+const getServer = (port = kernelPort) => {
+  return 'http://127.0.0.1:' + port
 }
 
 const sleep = (ms) => {
@@ -338,7 +338,8 @@ const boot = () => {
   Menu.setApplicationMenu(menu)
   // 当前页面链接使用浏览器打开
   currentWindow.webContents.on('will-navigate', (event, url) => {
-    if (url.startsWith(getServer())) {
+    const currentURL = new URL(event.sender.getURL())
+    if (url.startsWith(getServer(currentURL.port))) {
       return
     }
 
@@ -750,7 +751,7 @@ app.whenReady().then(() => {
         return true
       }
     })
-    await fetch(getServer() + '/api/system/uiproc?pid=' + process.pid,
+    await fetch(getServer(data.port) + '/api/system/uiproc?pid=' + process.pid,
       {method: 'POST'})
   })
   ipcMain.on('siyuan-hotkey', (event, data) => {
@@ -932,10 +933,12 @@ powerMonitor.on('resume', async () => {
   }
 
   writeLog('sync after system resume')
+  // TODO
   fetch(getServer() + '/api/sync/performSync', {method: 'POST'})
 })
 
 powerMonitor.on('shutdown', () => {
   writeLog('system shutdown')
+  // TODO
   fetch(getServer() + '/api/system/exit', {method: 'POST'})
 })

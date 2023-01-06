@@ -58,6 +58,10 @@ func HookDesktopUIProc() {
 				return true
 			}
 
+			if nil == proc {
+				return true
+			}
+
 			procName := strings.ToLower(proc.Executable())
 			for _, name := range uiProcNames {
 				if strings.Contains(procName, name) {

@@ -114,6 +114,10 @@ func Serve(fastMode bool) {
 	go func() {
 		time.Sleep(1 * time.Second)
 		if util.FixedPort != port {
+			if isPortOpen(util.FixedPort) {
+				return
+			}
+
 			// 启动一个 6806 端口的反向代理服务器，这样浏览器扩展才能直接使用 127.0.0.1:6806，不用配置端口
 			serverURL, _ := url.Parse("http://127.0.0.1:" + port)
 			proxy := httputil.NewSingleHostReverseProxy(serverURL)

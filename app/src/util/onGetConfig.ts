@@ -3,11 +3,10 @@ import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from ".
 import {hotKey2Electron, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
-import {ipcRenderer, OpenDialogReturnValue} from "electron";
+import {webFrame, ipcRenderer, OpenDialogReturnValue} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
-import {destroyPrintWindow} from "../protyle/export";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
@@ -146,6 +145,7 @@ export const onGetConfig = (isStart: boolean) => {
         id: getCurrentWindow().id,
         hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
     });
+    webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     /// #endif
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
         window.siyuan.config.uiLayout = Constants.SIYUAN_EMPTY_LAYOUT;
@@ -391,7 +391,7 @@ const initWindow = () => {
         winOnClose(currentWindow, close);
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
-        destroyPrintWindow();
+        window.siyuan.printWin.destroy();
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
         dialog.showOpenDialog({
@@ -399,7 +399,7 @@ const initWindow = () => {
             properties: ["createDirectory", "openDirectory"],
         }).then((result: OpenDialogReturnValue) => {
             if (result.canceled) {
-                destroyPrintWindow();
+                window.siyuan.printWin.destroy();
                 return;
             }
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -438,7 +438,7 @@ const initWindow = () => {
                     }, () => {
                         const pdfFilePath = path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
                         fs.writeFileSync(pdfFilePath, pdfData);
-                        destroyPrintWindow();
+                        window.siyuan.printWin.destroy();
                         fetchPost("/api/export/addPDFOutline", {
                             id: ipcData.rootId,
                             merge: ipcData.mergeSubdocs,
@@ -471,11 +471,11 @@ const initWindow = () => {
                     });
                 }).catch((error: string) => {
                     showMessage("Export PDF error:" + error, 0, "error", msgId);
-                    destroyPrintWindow();
+                    window.siyuan.printWin.destroy();
                 });
             } catch (e) {
                 showMessage("Export PDF failed: " + e, 0, "error", msgId);
-                destroyPrintWindow();
+                window.siyuan.printWin.destroy();
             }
             window.siyuan.printWin.hide();
         });

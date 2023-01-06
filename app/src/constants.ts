@@ -38,6 +38,7 @@ export abstract class Constants {
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;
     public static readonly SIZE_EDITOR_WIDTH = 760;
+    public static readonly SIZE_ZOOM = [0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 
     // ws callback
     public static readonly CB_MOUNT_HELP = "cb-mount-help";
@@ -58,6 +59,7 @@ export abstract class Constants {
     public static readonly CB_GET_HISTORY = "cb-get-history"; // 历史渲染
 
     // localstorage
+    public static readonly LOCAL_ZOOM = "local-zoom";
     public static readonly LOCAL_SEARCHEDATA = "local-searchedata";
     public static readonly LOCAL_SEARCHEKEYS = "local-searchekeys";
     public static readonly LOCAL_DOCINFO = "local-docinfo"; // only mobile

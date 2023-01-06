@@ -71,7 +71,6 @@ export const saveExport = (option: { type: string, id: string }) => {
 };
 
 /// #if !BROWSER
-let originalZoomFactor = 1;
 const renderPDF = (id: string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     const servePath = window.location.protocol + "//" + window.location.host;
@@ -453,7 +452,6 @@ const renderPDF = (id: string) => {
     });
 </script></body></html>`;
     const mainWindow = getCurrentWindow();
-    originalZoomFactor = mainWindow.webContents.zoomFactor;
     window.siyuan.printWin = new BrowserWindow({
         parent: mainWindow,
         modal: true,
@@ -472,18 +470,9 @@ const renderPDF = (id: string) => {
         },
     });
     window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`;
-    window.siyuan.printWin.once("ready-to-show", () => {
-        // 导出 PDF 预览界面不受主界面缩放影响 https://github.com/siyuan-note/siyuan/issues/6262
-        window.siyuan.printWin.webContents.setZoomFactor(1);
-    });
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);
     });
-};
-
-export const destroyPrintWindow = () => {
-    getCurrentWindow().webContents.setZoomFactor(originalZoomFactor);
-    window.siyuan.printWin.destroy();
 };
 
 const getExportPath = (option: { type: string, id: string }, removeAssets?: boolean, mergeSubdocs?: boolean) => {

@@ -199,9 +199,11 @@ export const getLocalStorage = (cb:()=>void) => {
                 paragraph: window.siyuan.config.search.paragraph,
             }
         };
+        defaultStorage[Constants.LOCAL_ZOOM] = 1;
 
         [Constants.LOCAL_SEARCHEKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
-            Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHEDATA].forEach((key) => {
+            Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHEDATA,
+            Constants.LOCAL_ZOOM,].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     window.siyuan.storage[key] = Object.assign(defaultStorage[key], JSON.parse(response.data[key]));

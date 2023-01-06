@@ -81,7 +81,7 @@ func Boot() {
 	if isRunningInDockerContainer() {
 		Container = ContainerDocker
 	}
-	if ContainerStd != Container || "dev" == Mode {
+	if ContainerStd != Container {
 		ServerPort = FixedPort
 	}
 

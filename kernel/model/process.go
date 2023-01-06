@@ -38,7 +38,7 @@ func HandleSignal() {
 }
 
 func HookDesktopUIProc() {
-	if util.ContainerStd != util.Container {
+	if util.ContainerStd != util.Container || "dev" == util.Mode {
 		return
 	}
 

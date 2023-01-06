@@ -316,14 +316,6 @@ const boot = () => {
       ],
     },
     {
-      role: 'viewMenu',
-      submenu: [
-        {role: 'resetZoom'},
-        {role: 'zoomIn', accelerator: 'CommandOrControl+='},
-        {role: 'zoomOut'},
-      ],
-    },
-    {
       role: 'windowMenu',
       submenu: [
         {role: 'minimize'},

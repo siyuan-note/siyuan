@@ -4,7 +4,12 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasC
 import * as dayjs from "dayjs";
 import {writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
+/// #if !BROWSER
+import {NativeImage} from "electron";
+import {getCurrentWindow} from "@electron/remote";
+/// #endif
 import {focusByRange} from "../protyle/util/selection";
+import {Constants} from "../constants";
 
 const rectAnno = (config: any, pdf: any, element: HTMLElement) => {
     const rectAnnoElement = config.toolbar.rectAnno;
@@ -161,8 +166,35 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
                 processed = true;
                 break;
             } else if (type === "copy") {
-                writeText(`<<${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute(
-                    "data-node-id")} "${rectElement.getAttribute("data-content")}">>`);
+                const id = rectElement.getAttribute("data-node-id");
+                const text = rectElement.getAttribute("data-content")
+                if (rectElement.childElementCount === 1) {
+                    /// #if !BROWSER
+                    const rect = rectElement.firstElementChild.getBoundingClientRect();
+                    getCurrentWindow().webContents.capturePage({
+                        x: Math.floor(rect.x),
+                        y: Math.floor(rect.y),
+                        width: Math.floor(rect.width) + 2,
+                        height: Math.floor(rect.height) + 2
+                    }).then((image: NativeImage) => {
+                        fetch(image.toDataURL()).then((response) => {
+                            return response.blob()
+                        }).then((blob) => {
+                            const formData = new FormData();
+                            const imageName = text + ".png";
+                            formData.append("file[]", blob, imageName);
+                            fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
+                                writeText(`<<${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${id} "${text}">>
+![](${response.data.succMap[imageName]})`);
+                            });
+                        });
+                    });
+                    /// #else
+                    writeText(`<<${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${id} "${text}">>`);
+                    /// #endif
+                } else {
+                    writeText(`<<${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${id} "${text}">>`);
+                }
                 hideToolbar(element);
                 event.preventDefault();
                 event.stopPropagation();

@@ -113,8 +113,9 @@ interface IPdfAnno {
     }[]
     index?: number,
     color: string,
-    type: string,
-    content: string,
+    type: string,   // border, text
+    content: string,    // rect, text
+    mode: string,
     id?: string,
     coords?: number[]
 }

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
-		"updated": "20230106104112"
+		"updated": "20230107212338"
 	},
 	"Children": [
 		{
@@ -122,7 +122,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -131,7 +131,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -140,7 +140,39 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中切换工作空间，桌面端支持同时打开多个工作空间，移动端只能切换不同的工作空间。"
+					"Data": "​​ 中切换工作空间，桌面端支持同时打开多个工作空间，移动端只能切换不同的工作空间。"
+				}
+			]
+		},
+		{
+			"ID": "20230107211904-ucohfsb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230107211904-ucohfsb",
+				"updated": "20230107212338"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你的多个工作空间需要经常启动，可以考虑为每个工作空间创建不同的启动入口并指定启动参数 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace 工作空间绝对路径"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。比如 Windows 系统上可以复制多个快捷方式，并在每个快捷方式 - 属性 - 目标后跟随工作空间路径参数，例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace F:\\SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
 				}
 			]
 		},

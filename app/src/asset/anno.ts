@@ -109,7 +109,6 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
             rectResizeElement.setAttribute("data-render", "true");
             const utilElement = element.querySelector(".pdf__util") as HTMLElement;
             utilElement.classList.remove("pdf__util--hide", "fn__none");
-            utilElement.setAttribute("data-mode", "rect");
             const targetRect = rectResizeElement.getBoundingClientRect();
             setPosition(utilElement, targetRect.left,
                 targetRect.top + targetRect.height + 4);
@@ -155,7 +154,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
                             if (index === 0) {
                                 rectElement = newElement;
                                 copyAnno(`${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute("data-node-id")}`,
-                                    pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""))
+                                    pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""));
                             }
                         });
                     }
@@ -189,7 +188,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
             } else if (type === "copy") {
                 hideToolbar(element);
                 copyAnno(`${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute("data-node-id")}`,
-                    pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""))
+                    pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""));
                 event.preventDefault();
                 event.stopPropagation();
                 processed = true;
@@ -264,9 +263,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
 };
 
 const hideToolbar = (element: HTMLElement) => {
-    const utilElement = element.querySelector(".pdf__util")
-    utilElement.classList.add("fn__none");
-    utilElement.removeAttribute("data-mode");
+    element.querySelector(".pdf__util").classList.add("fn__none");
 };
 
 let rectElement: HTMLElement;
@@ -283,7 +280,6 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
     utilElement.classList.remove("fn__none");
 
     if (range) {
-        utilElement.setAttribute("data-mode", "text");
         utilElement.classList.add("pdf__util--hide");
         const rects = range.getClientRects();
         const rect = rects[rects.length - 1];
@@ -609,8 +605,8 @@ export const hlPDFRect = (element: HTMLElement, id: string) => {
 };
 
 const copyAnno = (idPath: string, fileName: string) => {
-    const mode = rectElement.getAttribute("data-mode")
-    const content = rectElement.getAttribute("data-content")
+    const mode = rectElement.getAttribute("data-mode");
+    const content = rectElement.getAttribute("data-content");
     setTimeout(() => {
         /// #if !BROWSER
         if (mode === "rect" ||
@@ -642,7 +638,7 @@ const copyAnno = (idPath: string, fileName: string) => {
         writeText(`<<${idPath} "${content}">>`);
         /// #endif
     }, Constants.TIMEOUT_DBLCLICK);
-}
+};
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {
     const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);

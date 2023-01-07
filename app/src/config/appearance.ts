@@ -1,5 +1,5 @@
 /// #if !BROWSER
-import {ipcRenderer, shell} from "electron";
+import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";

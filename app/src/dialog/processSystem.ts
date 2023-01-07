@@ -263,7 +263,7 @@ export const bootSync = () => {
 
 export const setTitle = (title: string) => {
     const dragElement = document.getElementById("drag");
-    const workspaceName = originalPath().basename(window.siyuan.config.system.workspaceDir)
+    const workspaceName = originalPath().basename(window.siyuan.config.system.workspaceDir);
     if (title === window.siyuan.languages.siyuanNote) {
         const versionTitle = `${title} - ${workspaceName} - v${Constants.SIYUAN_VERSION}`;
         document.title = versionTitle;

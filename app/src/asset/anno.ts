@@ -167,7 +167,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
                 break;
             } else if (type === "copy") {
                 const id = rectElement.getAttribute("data-node-id");
-                const text = rectElement.getAttribute("data-content")
+                const text = rectElement.getAttribute("data-content");
                 if (rectElement.childElementCount === 1) {
                     /// #if !BROWSER
                     const rect = rectElement.firstElementChild.getBoundingClientRect();
@@ -178,7 +178,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
                         height: Math.floor(rect.height) + 2
                     }).then((image: NativeImage) => {
                         fetch(image.toDataURL()).then((response) => {
-                            return response.blob()
+                            return response.blob();
                         }).then((blob) => {
                             const formData = new FormData();
                             const imageName = text + ".png";

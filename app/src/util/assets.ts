@@ -126,7 +126,7 @@ export const initAssets = () => {
     }
     updateMobileTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
-        const OSTheme = event.matches ? "dark" : "light"
+        const OSTheme = event.matches ? "dark" : "light";
         updateMobileTheme(OSTheme);
         if (!window.siyuan.config.appearance.modeOS) {
             return;

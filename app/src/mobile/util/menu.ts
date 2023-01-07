@@ -109,7 +109,7 @@ const genWorkspace = (workspaceDirElement: Element) => {
         });
         workspaceDirElement.innerHTML = html;
     });
-}
+};
 export const popMenu = () => {
     const modelElement = document.getElementById("model");
     const modelMainElement = document.getElementById("modelMain");
@@ -493,14 +493,14 @@ ${accountHTML}
                                     }, () => {
                                         exitSiYuan();
                                     });
-                                })
+                                });
                                 event.preventDefault();
                                 event.stopPropagation();
                                 break;
                             }
                             target = target.parentElement;
                         }
-                    })
+                    });
                     modelMainElement.querySelector("#importData").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                         const formData = new FormData();
                         formData.append("file", event.target.files[0]);

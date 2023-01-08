@@ -1227,7 +1227,16 @@ func AutoFixIndex() {
 	}
 }
 
+var autoFixLock = sync.Mutex{}
+
 func autoFixIndex() {
+	if util.IsMutexLocked(&autoFixLock) {
+		return
+	}
+
+	autoFixLock.Lock()
+	defer autoFixLock.Unlock()
+
 	rootUpdated := treenode.GetRootUpdated()
 	for rootID, updated := range rootUpdated {
 		root := sql.GetBlock(rootID)

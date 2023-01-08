@@ -1293,6 +1293,12 @@ func reindexTree(rootID string, i, size int) {
 		return
 	}
 
+	updated := tree.Root.IALAttr("updated")
+	if "" == updated {
+		updated = util.TimeFromID(tree.Root.ID)
+		tree.Root.SetIALAttr("updated", updated)
+		writeJSONQueue(tree)
+	}
 	treenode.ReindexBlockTree(tree)
 	sql.UpsertTreeQueue(tree)
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, path.Base(tree.HPath)))

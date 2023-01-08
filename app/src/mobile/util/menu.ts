@@ -97,11 +97,11 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
 };
 
 const genWorkspace = (workspaceDirElement: Element) => {
-    fetchPost("/api/system/listWorkspaceDirs", {}, (response) => {
+    fetchPost("/api/system/getWorkspaces", {}, (response) => {
         let html = "";
-        response.data.forEach((item: string) => {
-            html += `<li data-path="${item}" class="b3-list-item b3-list-item--narrow${window.siyuan.config.system.workspaceDir === item ? " b3-list-item--focus" : ""}">
-    <span class="b3-list-item__text">${pathPosix().basename(item)}</span>
+        response.data.forEach((item: IWorkspace) => {
+            html += `<li data-path="${item.path}" class="b3-list-item b3-list-item--narrow${window.siyuan.config.system.workspaceDir === item.path ? " b3-list-item--focus" : ""}">
+    <span class="b3-list-item__text">${pathPosix().basename(item.path)}</span>
     <span data-type="remove" class="b3-list-item__action">
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>
@@ -296,8 +296,6 @@ ${accountHTML}
     <ul id="workspaceDir" class="b3-list b3-list--background"></ul>
     <div class="fn__hr"></div>
     <button id="creatWorkspace" class="b3-button fn__block">${window.siyuan.languages.new}</button>
-    <div class="fn__hr"></div>
-    <div class="b3-label__text">${window.siyuan.languages.about8}</div>
 </div>
 <div class="b3-label">
     <div class="config-about__logo">
@@ -487,7 +485,7 @@ ${accountHTML}
                                 event.stopPropagation();
                                 break;
                             } else if (target.classList.contains("b3-list-item") && !target.classList.contains("b3-list-item--focus")) {
-                                confirmDialog(`${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(target.getAttribute("data-path"))}?`, window.siyuan.languages.about8, () => {
+                                confirmDialog(window.siyuan.languages.confirm,`${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(target.getAttribute("data-path"))}?`, () => {
                                     fetchPost("/api/system/setWorkspaceDir", {
                                         path: target.getAttribute("data-path")
                                     }, () => {

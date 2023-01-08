@@ -51,6 +51,11 @@ interface Window {
     hideKeyboardToolbar(): void
 }
 
+interface IWorkspace {
+    path:string
+    closed:boolean
+}
+
 interface ICard {
     id: string
     updated: string

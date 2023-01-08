@@ -92,7 +92,7 @@ export const workspaceMenu = (rect: DOMRect) => {
             label: window.siyuan.languages.opendWorkspace,
             type: "readonly"
         }).element);
-        response.data.forEach((item: { path: string, closed: boolean }) => {
+        response.data.forEach((item: IWorkspace) => {
             if (item.closed) {
                 return;
             }
@@ -108,7 +108,7 @@ export const workspaceMenu = (rect: DOMRect) => {
             label: window.siyuan.languages.about7,
             type: "readonly"
         }).element);
-        response.data.forEach((item: { path: string, closed: boolean }) => {
+        response.data.forEach((item: IWorkspace) => {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: pathPosix().basename(item.path),
                 click: () => {

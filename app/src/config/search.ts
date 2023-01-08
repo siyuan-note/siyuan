@@ -69,7 +69,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             "twoFactorCaptcha", "account1", "account2", "account5"]),
 
         // 关于
-        getLang(["about", "about1", "about2", "about3", "about4", "about5", "about6", "about7", "about8",
+        getLang(["about", "about1", "about2", "about3", "about4", "about5", "about6",
             "about9", "about10", "about11", "about12", "about13", "about14", "about17", "config", "dataRepoKey",
             "dataRepoKeyTip1", "dataRepoKeyTip2", "slogan", "currentVer", "checkUpdate", "updatePath", "systemLog",
             "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export", "visitAnnouncements",

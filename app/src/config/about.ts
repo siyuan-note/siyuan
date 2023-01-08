@@ -135,18 +135,6 @@ export const about = {
         </button>
     </div>
 </label>
-<label class="fn__flex config__item b3-label${isBrowser() ? " fn__none" : ""}">
-    <div class="fn__flex-1">
-        <div class="fn__flex">
-            ${window.siyuan.languages.about7}
-            <span class="fn__space"></span>
-            <a href="javascript:void(0)" data-type="open" data-url="${window.siyuan.config.system.workspaceDir}">${window.siyuan.config.system.workspaceDir}</a>
-        </div>
-        <div class="b3-label__text">${window.siyuan.languages.about8}</div>
-    </div>
-    <div class="fn__space"></div>
-    <select id="workspaceDir" class="fn__flex-center b3-select fn__size200"></select>
-</label>
 <label class="fn__flex config__item  b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about13}
@@ -223,39 +211,6 @@ export const about = {
                     shell.openPath(url);
                 }
             });
-        });
-
-        const workspaceDirElement = about.element.querySelector("#workspaceDir") as HTMLInputElement;
-        workspaceDirElement.addEventListener("change", async () => {
-            let workspace = workspaceDirElement.value;
-            if (workspaceDirElement.value === "0") {
-                const localPath = await dialog.showOpenDialog({
-                    defaultPath: window.siyuan.config.system.homeDir,
-                    properties: ["openDirectory", "createDirectory"],
-                });
-                if (localPath.filePaths.length === 0) {
-                    workspaceDirElement.value = window.siyuan.config.system.workspaceDir;
-                    return;
-                }
-                workspace = localPath.filePaths[0];
-            }
-            fetchPost("/api/system/setWorkspaceDir", {
-                path: workspace
-            }, () => {
-                ipcRenderer.send(Constants.SIYUAN_OPEN_WORKSPACE, {
-                    workspace,
-                    lang: window.siyuan.config.appearance.lang
-                });
-            });
-        });
-
-        fetchPost("/api/system/listWorkspaceDirs", {}, (response) => {
-            let optionsHTML = "";
-            response.data.forEach((item: string) => {
-                optionsHTML += `<option value="${item}">${item}</option>`;
-            });
-            workspaceDirElement.innerHTML = optionsHTML + `<option value="0">${window.siyuan.languages.updatePath}</option>`;
-            workspaceDirElement.value = window.siyuan.config.system.workspaceDir;
         });
         /// #endif
         about.element.querySelector("#authCode").addEventListener("click", () => {

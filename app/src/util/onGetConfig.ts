@@ -12,11 +12,11 @@ import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
 import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
-import {mountHelp, newDailyNote} from "./mount";
+import {mountHelp} from "./mount";
 import {MenuItem} from "../menus/Menu";
 import {addGA, initAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
-import {getOpenNotebookCount} from "./pathName";
+import {pathPosix} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
@@ -28,8 +28,7 @@ import {showMessage} from "../dialog/message";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
-import {openHistory} from "../history/history";
-import {openCard} from "../card/openCard";
+import {workspaceMenu} from "../menus/workspace";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -181,18 +180,13 @@ export const onGetConfig = (isStart: boolean) => {
 };
 
 const initBar = () => {
-    document.querySelector(".toolbar").innerHTML = `<div id="toolbarVIP" class="fn__flex"></div>
+    document.querySelector(".toolbar").innerHTML = `
+<div id="barWorkspace" class="toolbar__item">
+    ${pathPosix().basename(window.siyuan.config.system.workspaceDir)}
+    <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
+</div>
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">
     <svg><use xlink:href="#iconCloud"></use></svg>
-</div>
-<div id="barHistory" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.dataHistory} ${updateHotkeyTip(window.siyuan.config.keymap.general.dataHistory.custom)}">
-    <svg><use xlink:href="#iconHistory"></use></svg>
-</div>
-<div id="barDailyNote" data-menu="true" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <svg><use xlink:href="#iconCalendar"></use></svg>
-</div>
-<div id="barRiffCard" data-menu="true" aria-label="${window.siyuan.languages.riffCard} ${updateHotkeyTip(window.siyuan.config.keymap.general.riffCard.custom)}" class="toolbar__item b3-tooltips b3-tooltips__se${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <svg><use xlink:href="#iconRiffCard"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg><use xlink:href="#iconBack"></use></svg>
@@ -201,20 +195,18 @@ const initBar = () => {
     <svg><use xlink:href="#iconForward"></use></svg>
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
+<div id="toolbarVIP" class="fn__flex"></div>
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>
+</div>
+<div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">
+    <svg><use xlink:href="#iconSettings"></use></svg>
 </div>
 <div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}">
     <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
 <div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.appearanceMode}">
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
-</div>
-<div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">
-    <svg><use xlink:href="#iconSettings"></use></svg>
-</div>
-<div id="barTopHelp" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openBy} ${window.siyuan.languages.help}">
-    <svg><use xlink:href="#iconHelp"></use></svg>
 </div>
 <div class="fn__flex" id="windowControls"></div>`;
     document.querySelector(".toolbar").addEventListener("click", (event: MouseEvent) => {
@@ -230,6 +222,10 @@ const initBar = () => {
                 break;
             } else if (target.id === "barSync") {
                 syncGuide(target);
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barWorkspace") {
+                workspaceMenu(target.getBoundingClientRect())
                 event.stopPropagation();
                 break;
             } else if (target.id === "barReadonly") {
@@ -262,19 +258,12 @@ const initBar = () => {
                         setMode(2);
                     }
                 }).element);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 18});
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barHistory") {
-                openHistory();
+                const rect = target.getBoundingClientRect()
+                window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSetting") {
                 openSetting();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barTopHelp") {
-                mountHelp();
                 event.stopPropagation();
                 break;
             } else if (target.id === "toolbarVIP") {
@@ -284,34 +273,6 @@ const initBar = () => {
                 break;
             } else if (target.id === "barSearch") {
                 openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barRiffCard") {
-                openCard();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barDailyNote") {
-                if (getOpenNotebookCount() < 2) {
-                    newDailyNote();
-                } else {
-                    window.siyuan.menus.menu.remove();
-                    window.siyuan.notebooks.forEach(item => {
-                        if (!item.closed) {
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                label: item.name,
-                                click: () => {
-                                    fetchPost("/api/filetree/createDailyNote", {
-                                        notebook: item.id,
-                                        app: Constants.SIYUAN_APPID,
-                                    });
-                                    window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = item.id;
-                                    setStorageVal(Constants.LOCAL_DAILYNOTEID, window.siyuan.storage[Constants.LOCAL_DAILYNOTEID]);
-                                }
-                            }).element);
-                        }
-                    });
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 18});
-                }
                 event.stopPropagation();
                 break;
             }

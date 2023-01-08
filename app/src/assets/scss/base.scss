@@ -214,6 +214,7 @@ progressLoading: 400
     align-self: center;
     background-color: transparent;
     border: 0;
+    line-height: 14px;
 
     &:not(.toolbar__item--disabled):not(.toolbar__item--close):hover,
     &--active {
@@ -224,6 +225,12 @@ progressLoading: 400
     svg {
       height: 14px;
       width: 14px;
+    }
+
+    svg.toolbar__svg {
+      width: 8px;
+      height: 14px;
+      margin-left: 4px;
     }
 
     &--disabled {

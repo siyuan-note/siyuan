@@ -1051,6 +1051,7 @@
     "179": "L'espace disque peut être insuffisant. Il est recommandé de conserver l'espace libre du disque où se trouve l'espace de travail à plus de deux fois la taille des données",
     "180": "Le bloc de contenu de recherche n'existe pas",
     "181": "Le document a été partagé avec Liandi, <a href=\"%s\" target=\"_blank\">cliquez pour afficher</a>",
-    "182": "Partage du document, veuillez patienter..."
+    "182": "Partage du document, veuillez patienter...",
+    "183": "Validation de l'arborescence du document d'index [%s]"
   }
 }

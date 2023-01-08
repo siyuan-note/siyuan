@@ -1,7 +1,6 @@
 import {Constants} from "../constants";
 /// #if !BROWSER
-import {app, ipcRenderer, shell} from "electron";
-import {dialog} from "@electron/remote";
+import {app, shell} from "electron";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";

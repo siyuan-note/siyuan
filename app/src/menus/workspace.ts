@@ -4,7 +4,7 @@ import {dialog} from "@electron/remote";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
-import {getOpenNotebookCount, pathPosix} from "../util/pathName";
+import {getOpenNotebookCount} from "../util/pathName";
 import {mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
@@ -33,7 +33,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                     }
                 }).element);
             } else {
-                const submenu: IMenu[] = []
+                const submenu: IMenu[] = [];
                 window.siyuan.notebooks.forEach(item => {
                     if (!item.closed) {
                         submenu.push({
@@ -84,7 +84,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                 if (localPath.filePaths.length === 0) {
                     return;
                 }
-                openWorkspace(localPath.filePaths[0])
+                openWorkspace(localPath.filePaths[0]);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -97,9 +97,9 @@ export const workspaceMenu = (rect: DOMRect) => {
                 return;
             }
             window.siyuan.menus.menu.append(new MenuItem({
-                label: pathPosix().basename(item.path),
+                label: item.path,
                 click: () => {
-                    openWorkspace(item.path)
+                    openWorkspace(item.path);
                 }
             }).element);
         });
@@ -110,16 +110,16 @@ export const workspaceMenu = (rect: DOMRect) => {
         }).element);
         response.data.forEach((item: IWorkspace) => {
             window.siyuan.menus.menu.append(new MenuItem({
-                label: pathPosix().basename(item.path),
+                label: item.path,
                 click: () => {
-                    openWorkspace(item.path)
+                    openWorkspace(item.path);
                 }
             }).element);
         });
         /// #endif
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
     });
-}
+};
 
 const openWorkspace = (workspace: string) => {
     fetchPost("/api/system/setWorkspaceDir", {
@@ -130,4 +130,4 @@ const openWorkspace = (workspace: string) => {
             lang: window.siyuan.config.appearance.lang
         });
     });
-}
+};

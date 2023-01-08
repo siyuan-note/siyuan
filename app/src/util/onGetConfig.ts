@@ -16,7 +16,7 @@ import {mountHelp} from "./mount";
 import {MenuItem} from "../menus/Menu";
 import {addGA, initAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
-import {pathPosix} from "./pathName";
+import {originalPath} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
@@ -182,7 +182,7 @@ export const onGetConfig = (isStart: boolean) => {
 const initBar = () => {
     document.querySelector(".toolbar").innerHTML = `
 <div id="barWorkspace" class="toolbar__item">
-    ${pathPosix().basename(window.siyuan.config.system.workspaceDir)}
+    ${originalPath().basename(window.siyuan.config.system.workspaceDir)}
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
 </div>
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">
@@ -225,7 +225,7 @@ const initBar = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barWorkspace") {
-                workspaceMenu(target.getBoundingClientRect())
+                workspaceMenu(target.getBoundingClientRect());
                 event.stopPropagation();
                 break;
             } else if (target.id === "barReadonly") {
@@ -258,7 +258,7 @@ const initBar = () => {
                         setMode(2);
                     }
                 }).element);
-                const rect = target.getBoundingClientRect()
+                const rect = target.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
                 event.stopPropagation();
                 break;

@@ -1238,17 +1238,28 @@ func autoFixIndex() {
 	defer autoFixLock.Unlock()
 
 	rootUpdated := treenode.GetRootUpdated()
+	i := -1
+	size := len(rootUpdated)
 	for rootID, updated := range rootUpdated {
+		if isFullReindexing {
+			break
+		}
+
+		i++
+		if 0 < i && 0 == i%32 {
+			treenode.SaveBlockTree(true)
+		}
+
 		root := sql.GetBlock(rootID)
 		if nil == root {
 			logging.LogWarnf("not found tree [%s] in database, reindex it", rootID)
-			reindexTree(rootID)
+			reindexTree(rootID, i, size)
 			continue
 		}
 
 		if "" == updated {
 			// BlockTree 迁移，v2.6.3 之前没有 updated 字段
-			reindexTree(rootID)
+			reindexTree(rootID, i, size)
 			continue
 		}
 
@@ -1256,7 +1267,7 @@ func autoFixIndex() {
 		dbUpdated, _ := time.Parse("20060102150405", root.Updated)
 		if dbUpdated.Before(btUpdated.Add(-1 * time.Minute)) {
 			logging.LogWarnf("tree [%s] is not up to date, reindex it", rootID)
-			reindexTree(rootID)
+			reindexTree(rootID, i, size)
 			continue
 		}
 
@@ -1264,13 +1275,13 @@ func autoFixIndex() {
 		if 1 < len(roots) {
 			logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
 			sql.RemoveTreeQueue(root.Box, rootID)
-			reindexTree(rootID)
+			reindexTree(rootID, i, size)
 			continue
 		}
 	}
 }
 
-func reindexTree(rootID string) {
+func reindexTree(rootID string, i, size int) {
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
 		logging.LogWarnf("root block not found", rootID)
@@ -1284,5 +1295,5 @@ func reindexTree(rootID string) {
 
 	treenode.ReindexBlockTree(tree)
 	sql.UpsertTreeQueue(tree)
-	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), path.Base(tree.HPath)))
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, path.Base(tree.HPath)))
 }

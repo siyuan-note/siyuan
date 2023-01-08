@@ -85,6 +85,12 @@ func IsEmptyQueue() bool {
 	return 1 > len(operationQueue) && !util.IsMutexLocked(&txLock)
 }
 
+func ClearQueue() {
+	upsertTreeQueueLock.Lock()
+	defer upsertTreeQueueLock.Unlock()
+	operationQueue = nil
+}
+
 func flushTreeQueue() {
 	ops := mergeUpsertTrees()
 	if 1 > len(ops) {

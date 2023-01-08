@@ -1269,5 +1269,5 @@ func reindexTree(rootID string) {
 
 	treenode.ReindexBlockTree(tree)
 	sql.UpsertTreeQueue(tree)
-	logging.LogInfof("reindex tree [%s]", tree.ID)
+	util.PushStatusBar(fmt.Sprintf("Reindexing tree [%s]", tree.HPath))
 }

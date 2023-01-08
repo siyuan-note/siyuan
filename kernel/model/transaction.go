@@ -1230,7 +1230,7 @@ func AutoFixIndex() {
 var autoFixLock = sync.Mutex{}
 
 func autoFixIndex() {
-	if util.IsMutexLocked(&autoFixLock) {
+	if util.IsMutexLocked(&autoFixLock) || isFullReindexing {
 		return
 	}
 

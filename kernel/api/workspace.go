@@ -28,6 +28,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/flock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -117,7 +118,12 @@ func removeWorkspaceDir(c *gin.Context) {
 	}
 }
 
-func listWorkspaceDirs(c *gin.Context) {
+type Workspace struct {
+	Path   string `json:"path"`
+	Closed bool   `json:"closed"`
+}
+
+func getWorkspaces(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -127,7 +133,17 @@ func listWorkspaceDirs(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	ret.Data = workspacePaths
+
+	var workspaces []*Workspace
+	for _, p := range workspacePaths {
+		closed := true
+		if flock.New(filepath.Join(p, ".lock")).Locked() {
+			closed = false
+		}
+
+		workspaces = append(workspaces, &Workspace{Path: p, Closed: closed})
+	}
+	ret.Data = workspaces
 }
 
 func setWorkspaceDir(c *gin.Context) {

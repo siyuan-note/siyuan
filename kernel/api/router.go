@@ -45,7 +45,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, setNetworkProxy)
 	ginServer.Handle("POST", "/api/system/setWorkspaceDir", model.CheckAuth, setWorkspaceDir)
-	ginServer.Handle("POST", "/api/system/listWorkspaceDirs", model.CheckAuth, listWorkspaceDirs)
+	ginServer.Handle("POST", "/api/system/getWorkspaces", model.CheckAuth, getWorkspaces)
 	ginServer.Handle("POST", "/api/system/createWorkspaceDir", model.CheckAuth, createWorkspaceDir)
 	ginServer.Handle("POST", "/api/system/removeWorkspaceDir", model.CheckAuth, removeWorkspaceDir)
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)
@@ -106,7 +106,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/heading2Doc", model.CheckAuth, model.CheckReadonly, heading2Doc)
 	ginServer.Handle("POST", "/api/filetree/li2Doc", model.CheckAuth, model.CheckReadonly, li2Doc)
 	ginServer.Handle("POST", "/api/filetree/refreshFiletree", model.CheckAuth, model.CheckReadonly, refreshFiletree)
-	ginServer.Handle("POST", "/api/filetree/reindexTree", model.CheckAuth, model.CheckReadonly, reindexTree)
 
 	ginServer.Handle("POST", "/api/format/autoSpace", model.CheckAuth, model.CheckReadonly, autoSpace)
 	ginServer.Handle("POST", "/api/format/netImg2LocalAssets", model.CheckAuth, model.CheckReadonly, netImg2LocalAssets)

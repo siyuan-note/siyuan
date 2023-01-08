@@ -136,10 +136,13 @@ func getWorkspaces(c *gin.Context) {
 
 	var workspaces []*Workspace
 	for _, p := range workspacePaths {
-		closed := true
-		if flock.New(filepath.Join(p, ".lock")).Locked() {
-			closed = false
+		closed := false
+		f := flock.New(filepath.Join(p, ".lock"))
+		ok, _ := f.TryLock()
+		if ok {
+			closed = true
 		}
+		f.Unlock()
 
 		workspaces = append(workspaces, &Workspace{Path: p, Closed: closed})
 	}

@@ -32,25 +32,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func reindexTree(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	path := arg["path"].(string)
-	err := model.ReindexTree(path)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
-		return
-	}
-}
-
 func refreshFiletree(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

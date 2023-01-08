@@ -581,6 +581,21 @@ func GetBlock(id string) (ret *Block) {
 	return
 }
 
+func GetBlockRedundant(id string) (ret []*Block) {
+	rows, err := query("SELECT * FROM blocks WHERE id = ?", id)
+	if nil != err {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		if block := scanBlockRows(rows); nil != block {
+			ret = append(ret, block)
+		}
+	}
+	return
+}
+
 func GetAllRootBlocks() (ret []*Block) {
 	stmt := "SELECT * FROM blocks WHERE type = 'd'"
 	rows, err := query(stmt)

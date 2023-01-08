@@ -1217,3 +1217,57 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 	})
 	return
 }
+
+func AutoFixIndex() {
+	for {
+		autoFixIndex()
+		time.Sleep(30 * time.Second)
+	}
+}
+
+func autoFixIndex() {
+	rootUpdated := treenode.GetRootUpdated()
+	for rootID, updated := range rootUpdated {
+		root := sql.GetBlock(rootID)
+		if nil == root {
+			reindexTree(rootID)
+			continue
+		}
+
+		if "" == updated {
+			reindexTree(rootID)
+			continue
+		}
+
+		btUpdated, _ := time.Parse("20060102150405", updated)
+		dbUpdated, _ := time.Parse("20060102150405", root.Updated)
+		if dbUpdated.Before(btUpdated.Add(-1 * time.Minute)) {
+			reindexTree(rootID)
+			continue
+		}
+
+		roots := sql.GetBlockRedundant(rootID)
+		if 1 < len(roots) {
+			reindexTree(rootID)
+			continue
+		}
+	}
+
+}
+
+func reindexTree(rootID string) {
+	root := treenode.GetBlockTree(rootID)
+	if nil == root {
+		logging.LogWarnf("root block not found", rootID)
+		return
+	}
+
+	tree, err := LoadTree(root.BoxID, root.Path)
+	if nil != err {
+		return
+	}
+
+	treenode.ReindexBlockTree(tree)
+	sql.UpsertTreeQueue(tree)
+	logging.LogInfof("reindex tree [%s]", tree.ID)
+}

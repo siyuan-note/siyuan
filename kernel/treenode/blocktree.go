@@ -42,8 +42,22 @@ type BlockTree struct {
 	RootID   string // 根 ID
 	ParentID string // 父 ID
 	BoxID    string // 笔记本 ID
-	Path     string // 文档物理路径
-	HPath    string // 文档逻辑路径
+	Path     string // 文档数据路径
+	HPath    string // 文档可读路径
+	Updated  string // 更新时间
+}
+
+func GetRootUpdated() (ret map[string]string) {
+	blockTreesLock.Lock()
+	defer blockTreesLock.Unlock()
+
+	ret = map[string]string{}
+	for _, b := range blockTrees {
+		if b.RootID == b.ID {
+			ret[b.RootID] = b.Updated
+		}
+	}
+	return
 }
 
 func GetBlockTreeByPath(path string) *BlockTree {
@@ -142,7 +156,7 @@ func SetBlockTreePath(tree *parse.Tree) {
 
 	for _, b := range blockTrees {
 		if b.RootID == tree.ID {
-			b.BoxID, b.Path, b.HPath = tree.Box, tree.Path, tree.HPath
+			b.BoxID, b.Path, b.HPath, b.Updated = tree.Box, tree.Path, tree.HPath, tree.Root.IALAttr("updated")
 		}
 	}
 	blockTreesChanged = true
@@ -229,7 +243,7 @@ func ReindexBlockTree(tree *parse.Tree) {
 		if "" == n.ID {
 			return ast.WalkContinue
 		}
-		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath}
+		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: tree.Root.IALAttr("updated")}
 		return ast.WalkContinue
 	})
 	blockTreesChanged = true
@@ -250,7 +264,7 @@ func IndexBlockTree(tree *parse.Tree) {
 		if "" == n.ID {
 			return ast.WalkContinue
 		}
-		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath}
+		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: tree.Root.IALAttr("updated")}
 		return ast.WalkContinue
 	})
 

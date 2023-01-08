@@ -65,6 +65,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		go sql.AutoFlushTreeQueue()
 		go treenode.AutoFlushBlockTree()
 		go cache.LoadAssets()
+		go model.AutoFixIndex()
 	}()
 }
 

@@ -523,30 +523,6 @@ func genTreeID(tree *parse.Tree) {
 	return
 }
 
-func ReindexTree(path string) (err error) {
-	if !strings.HasPrefix(path, "/data/") {
-		return errors.New("path must start with /data/")
-	}
-
-	part := strings.TrimPrefix(path, "/data/")
-	idx := strings.Index(part, "/")
-	if 0 > idx {
-		return errors.New("parse box failed")
-	}
-	box := part[:idx]
-
-	p := strings.TrimPrefix(path, "/data/"+box)
-	tree, err := LoadTree(box, p)
-	if nil != err {
-		return
-	}
-
-	treenode.ReindexBlockTree(tree)
-	sql.UpsertTreeQueue(tree)
-	sql.WaitForWritingDatabase()
-	return
-}
-
 func FullReindex() {
 	util.PushEndlessProgress(Conf.Language(35))
 	WaitForWritingFiles()

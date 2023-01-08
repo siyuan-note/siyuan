@@ -1246,9 +1246,6 @@ func autoFixIndex() {
 		}
 
 		i++
-		if 0 < i && 0 == i%32 {
-			treenode.SaveBlockTree(true)
-		}
 
 		root := sql.GetBlock(rootID)
 		if nil == root {

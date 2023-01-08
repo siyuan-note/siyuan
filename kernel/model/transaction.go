@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -1218,6 +1219,7 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 	return
 }
 
+// AutoFixIndex 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016
 func AutoFixIndex() {
 	for {
 		autoFixIndex()
@@ -1257,7 +1259,6 @@ func autoFixIndex() {
 			continue
 		}
 	}
-
 }
 
 func reindexTree(rootID string) {
@@ -1274,5 +1275,5 @@ func reindexTree(rootID string) {
 
 	treenode.ReindexBlockTree(tree)
 	sql.UpsertTreeQueue(tree)
-	util.PushStatusBar(fmt.Sprintf("Reindexing tree [%s]", tree.HPath))
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), path.Base(tree.HPath)))
 }

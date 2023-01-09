@@ -193,11 +193,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             isHTML = true;
         } else if (textHTML.replace("<!--StartFragment--><!--EndFragment-->", "").trim() !== "") {
             textHTML = textHTML.replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "").trim();
-            // 浏览器上复制单个图片应拷贝到本地，excel 中的复制需粘贴
-            console.log(textHTML);
-            if (files && files.length === 1 && textHTML.indexOf("<img") > -1) {
+            if (files && files.length === 1 && (
+                textHTML.startsWith("<img") ||  // 浏览器上复制单个图片
+                (textHTML.startsWith("<table") && textHTML.split("<table").length === 2 && textHTML.indexOf("<img") > -1)  // excel 中的复制带有图片的表格
+            )) {
                 isHTML = false;
             } else {
+                // 需注意 Edge 中的画选不应识别为图片 https://github.com/siyuan-note/siyuan/issues/7021
                 isHTML = true;
             }
         }

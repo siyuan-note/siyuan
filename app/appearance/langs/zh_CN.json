@@ -1,5 +1,6 @@
 {
-  "opendWorkspace": "已打开的工作空间",
+  "openWorkspace": "打开工作空间",
+  "openedWorkspace": "已打开的工作空间",
   "removeWorkspaceTip": "删除工作空间后无法恢复，确定删除吗？",
   "new": "新建",
   "share2LiandiConfirmTip": "确定将该文档分享到链滴吗？",
@@ -14,6 +15,7 @@
   "recentDocs": "最近打开的文档",
   "autoLaunch": "开机自动启动",
   "autoLaunchTip": "启用后会在登录操作系统后自动启动应用",
+  "sortByContent": "按原文内容顺序",
   "sortByRankDesc": "按相关度降序",
   "sortByRankAsc": "按相关度升序",
   "saveCriterion": "保存命名查询",

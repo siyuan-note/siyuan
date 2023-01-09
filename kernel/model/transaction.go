@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -1295,6 +1296,10 @@ func reindexTree(rootID string, i, size int) {
 
 	tree, err := LoadTree(root.BoxID, root.Path)
 	if nil != err {
+		if os.IsNotExist(err) {
+			// 文件系统上没有找到该 .sy 文件，则订正块树
+			treenode.RemoveBlockTreesByRootID(rootID)
+		}
 		return
 	}
 

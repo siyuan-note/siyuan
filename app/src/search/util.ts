@@ -666,7 +666,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     }];
     if (config.group === 1) {
         sortMenu.push({
-            label: window.siyuan.languages.context,
+            label: window.siyuan.languages.sortByContent,
             current: config.sort === 5,
             click() {
                 config.sort = 5;

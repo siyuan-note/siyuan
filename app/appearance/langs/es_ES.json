@@ -1,5 +1,6 @@
 {
-  "opendWorkspace": "Espacio de trabajo abierto",
+  "openWorkspace": "Abrir espacio de trabajo",
+  "openedWorkspace": "Espacio de trabajo abierto",
   "removeWorkspaceTip": "El espacio de trabajo no se puede recuperar después de eliminarlo, ¿está seguro de eliminarlo?",
   "new": "Nuevo",
   "share2LiandiConfirmTip": "¿Estás seguro de compartir este documento con Liandi?",
@@ -14,6 +15,7 @@
   "recentDocs": "Documentos abiertos recientemente",
   "autoLaunch": "Inicio automático al arrancar",
   "autoLaunchTip": "Después de habilitar, la aplicación se iniciará automáticamente después de iniciar sesión en el sistema operativo",
+  "sortByContent": "Orden de contenido original",
   "sortByRankDesc": "Relevancia DESC",
   "sortByRankAsc": "Relevancia ASC",
   "saveCriterion": "Guardar criterio nombrado",

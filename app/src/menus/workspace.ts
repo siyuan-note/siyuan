@@ -89,7 +89,7 @@ export const workspaceMenu = (rect: DOMRect) => {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.opendWorkspace,
+            label: window.siyuan.languages.openedWorkspace,
             type: "readonly"
         }).element);
         response.data.forEach((item: IWorkspace) => {

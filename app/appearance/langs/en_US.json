@@ -1,5 +1,6 @@
 {
-  "opendWorkspace": "Opened Workspace",
+  "openWorkspace": "Open Workspace",
+  "openedWorkspace": "Opened Workspace",
   "removeWorkspaceTip": "The workspace cannot be recovered after being deleted, are you sure to delete it?",
   "new": "New",
   "share2LiandiConfirmTip": "Are you sure to share this document to Liandi?",
@@ -14,6 +15,7 @@
   "recentDocs": "Recently opened documents",
   "autoLaunch": "Automatic launch at boot",
   "autoLaunchTip": "After enabling, the application will be automatically launched after logging into the operating system",
+  "sortByContent": "Original content order",
   "sortByRankDesc": "Relevance DESC",
   "sortByRankAsc": "Relevance ASC",
   "saveCriterion": "Save named criterion",

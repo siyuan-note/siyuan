@@ -1264,7 +1264,7 @@ func autoFixIndex() {
 
 			btUpdated, _ := time.Parse("20060102150405", updated)
 			dbUpdated, _ := time.Parse("20060102150405", rootUpdated)
-			if dbUpdated.Before(btUpdated.Add(-1 * time.Minute)) {
+			if dbUpdated.Before(btUpdated.Add(-10 * time.Minute)) {
 				logging.LogWarnf("tree [%s] is not up to date, reindex it", rootID)
 				reindexTree(rootID, i, size)
 				continue

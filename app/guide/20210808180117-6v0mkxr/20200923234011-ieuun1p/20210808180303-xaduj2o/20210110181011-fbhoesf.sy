@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
-		"type": "doc"
+		"type": "doc",
+		"updated": "20210110181011"
 	},
 	"Children": [
 		{

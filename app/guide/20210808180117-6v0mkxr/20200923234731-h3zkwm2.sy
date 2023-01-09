@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230106105350"
+		"updated": "20230109113754"
 	},
 	"Children": [
 		{
@@ -242,7 +242,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428222603-g1752n7",
-				"updated": "20230106105350"
+				"updated": "20230109113754"
 			},
 			"Children": [
 				{
@@ -258,25 +258,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " folder (the default is in the user's home directory Documents/SiYuan, which can be modified in "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "About"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​), in the workspace/data/ folder:"
+					"Data": " folder (the default is in the user's home directory/Documents/SiYuan), in the workspace/data/ folder:"
 				}
 			]
 		},

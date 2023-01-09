@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230106104437"
+		"updated": "20230109113703"
 	},
 	"Children": [
 		{
@@ -339,7 +339,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428213320-fwferhb",
-				"updated": "20230106104437"
+				"updated": "20230109113703"
 			},
 			"Children": [
 				{
@@ -355,25 +355,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "文件夹下（默认位于用户家目录 Documents/SiYuan，可在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "关于"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中进行修改），在工作空间/data/ 文件夹下："
+					"Data": "文件夹下（默认位于用户家目录/Documents/SiYuan），在工作空间/data/ 文件夹下："
 				}
 			]
 		},

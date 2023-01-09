@@ -117,13 +117,12 @@ func CeilBlockCount(count int) int {
 }
 
 func GetNotExistPaths(boxID string, paths []string) (ret []string) {
-	tmp := blockTrees
-
 	pathsMap := map[string]bool{}
 	for _, path := range paths {
 		pathsMap[path] = true
 	}
 
+	tmp := blockTrees
 	for _, blockTree := range tmp {
 		if blockTree.BoxID != boxID {
 			continue

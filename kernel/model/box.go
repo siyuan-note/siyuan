@@ -523,7 +523,10 @@ func genTreeID(tree *parse.Tree) {
 	return
 }
 
+var isFullReindexing = false
+
 func FullReindex() {
+	isFullReindexing = true
 	util.PushEndlessProgress(Conf.Language(35))
 	WaitForWritingFiles()
 
@@ -542,6 +545,7 @@ func FullReindex() {
 	InitFlashcards()
 
 	util.PushEndlessProgress(Conf.Language(58))
+	isFullReindexing = false
 	go func() {
 		time.Sleep(1 * time.Second)
 		util.ReloadUI()

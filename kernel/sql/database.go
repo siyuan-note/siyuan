@@ -64,6 +64,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 	util.IncBootProgress(2, "Initializing database...")
 
 	if forceRebuild {
+		ClearQueue()
 		WaitForWritingDatabase()
 	}
 

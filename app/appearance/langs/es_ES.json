@@ -1051,6 +1051,6 @@
     "180": "El bloque de contenido de búsqueda no existe",
     "181": "El documento ha sido compartido con Liandi, <a href=\"%s\" target=\"_blank\">haga clic para ver</a>",
     "182": "Compartiendo documento, por favor espere...",
-    "183": "Validando el árbol del documento de índice [%s]"
+    "183": "Validando el árbol del documento de índice [%d/%d %s]"
   }
 }

@@ -78,6 +78,13 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 		}
 
 		docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
+		if "" == docIAL["updated"] {
+			updated := util.TimeFromID(tree.Root.ID)
+			tree.Root.SetIALAttr("updated", updated)
+			docIAL["updated"] = updated
+			writeJSONQueue(tree)
+		}
+
 		cache.PutDocIAL(p, docIAL)
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))

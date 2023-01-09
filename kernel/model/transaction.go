@@ -1231,6 +1231,8 @@ func AutoFixIndex() {
 var autoFixLock = sync.Mutex{}
 
 func autoFixIndex() {
+	defer logging.Recover()
+
 	if util.IsMutexLocked(&autoFixLock) || isFullReindexing {
 		return
 	}

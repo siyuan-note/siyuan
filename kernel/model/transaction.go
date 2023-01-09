@@ -1316,6 +1316,8 @@ func autoFixIndex() {
 		sql.RemoveTreeQueue(root.Box, rootID)
 		reindexTree(rootID, i, size)
 	}
+
+	util.PushStatusBar("")
 }
 
 func reindexTreeByPath(box, p string, i, size int) {

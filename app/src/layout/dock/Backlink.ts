@@ -91,6 +91,10 @@ export class Backlink extends Model {
     <span class="fn__space"></span>
     <span data-type="sort" data-sort="3" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
     <span class="fn__space"></span>
+    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expand} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
+        <svg><use xlink:href="#iconFullscreen"></use></svg>
+    </span>
+    <span class="fn__space"></span>
     <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
@@ -111,6 +115,10 @@ export class Backlink extends Model {
     </label>
     <span class="fn__space"></span>
     <span data-type="mSort" data-sort="3" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
+    <span class="fn__space"></span>
+    <span data-type="mExpand" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.expand}">
+        <svg><use xlink:href="#iconFullscreen"></use></svg>
+    </span>
     <span class="fn__space"></span>
     <span data-type="mCollapse" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.collapse}">
         <svg><use xlink:href="#iconContract"></use></svg>
@@ -240,6 +248,13 @@ export class Backlink extends Model {
                 item.classList.remove("b3-list-item__arrow--open");
             });
         });
+        this.element.querySelector('[data-type="expand"]').addEventListener("click", () => {
+            Array.from(this.tree.element.firstElementChild.children).forEach((item: HTMLElement) => {
+                if (item.tagName === "LI" && !item.querySelector(".b3-list-item__arrow--open")) {
+                    this.toggleItem(item, false);
+                }
+            })
+        });
         this.element.addEventListener("click", (event) => {
             this.setFocus();
             let target = event.target as HTMLElement;
@@ -249,6 +264,13 @@ export class Backlink extends Model {
                     switch (type) {
                         case "refresh":
                             this.refresh();
+                            break;
+                        case "mExpand":
+                            Array.from(this.mTree.element.firstElementChild.children).forEach((item: HTMLElement) => {
+                                if (item.tagName === "LI" && !item.querySelector(".b3-list-item__arrow--open")) {
+                                    this.toggleItem(item, true);
+                                }
+                            })
                             break;
                         case "mCollapse":
                             this.mTree.element.querySelectorAll(".protyle").forEach(item => {

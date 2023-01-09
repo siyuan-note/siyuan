@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -88,13 +89,13 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
-		parentTree, parseErr := parse.ParseJSONWithoutFix(parentData, luteEngine.ParseOptions)
-		if nil != parseErr {
-			logging.LogWarnf("parse parent tree [%s] failed: %s", parentAbsPath, parseErr)
-			hPathBuilder.WriteString("Untitled/")
-			continue
+
+		ial := ReadDocIAL(parentData)
+		title := ial["title"]
+		if "" == title {
+			title = "Untitled"
 		}
-		hPathBuilder.WriteString(parentTree.Root.IALAttr("title"))
+		hPathBuilder.WriteString(title)
 		hPathBuilder.WriteString("/")
 	}
 	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
@@ -260,5 +261,11 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 			logging.LogErrorf(msg)
 		}
 	}
+	return
+}
+
+func ReadDocIAL(data []byte) (ret map[string]string) {
+	ret = map[string]string{}
+	jsoniter.Get(data, "Properties").ToVal(&ret)
 	return
 }

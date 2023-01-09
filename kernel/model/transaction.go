@@ -1231,6 +1231,8 @@ func AutoFixIndex() {
 var autoFixLock = sync.Mutex{}
 
 func autoFixIndex() {
+	defer logging.Recover()
+
 	if util.IsMutexLocked(&autoFixLock) || isFullReindexing {
 		return
 	}
@@ -1238,6 +1240,28 @@ func autoFixIndex() {
 	autoFixLock.Lock()
 	defer autoFixLock.Unlock()
 
+	// 根据文件系统补全块树
+	boxes := Conf.GetOpenedBoxes()
+	for _, box := range boxes {
+		boxPath := filepath.Join(util.DataDir, box.ID)
+		var paths []string
+		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+			if !info.IsDir() && filepath.Ext(path) == ".sy" {
+				p := path[len(boxPath):]
+				p = filepath.ToSlash(p)
+				paths = append(paths, p)
+			}
+			return nil
+		})
+
+		size := len(paths)
+		missingPaths := treenode.GetNotExistPaths(box.ID, paths)
+		for i, p := range missingPaths {
+			reindexTreeByPath(box.ID, p, i, size)
+		}
+	}
+
+	// 对比块树和数据库并订正数据库
 	rootUpdatedMap := treenode.GetRootUpdated()
 	dbRootUpdatedMap, err := sql.GetRootUpdated()
 	if nil == err {
@@ -1273,6 +1297,7 @@ func autoFixIndex() {
 		}
 	}
 
+	// 去除重复的数据库块记录
 	duplicatedRootIDs := sql.GetDuplicatedRootIDs()
 	size := len(duplicatedRootIDs)
 	for i, rootID := range duplicatedRootIDs {
@@ -1285,6 +1310,15 @@ func autoFixIndex() {
 		sql.RemoveTreeQueue(root.Box, rootID)
 		reindexTree(rootID, i, size)
 	}
+}
+
+func reindexTreeByPath(box, p string, i, size int) {
+	tree, err := LoadTree(box, p)
+	if nil != err {
+		return
+	}
+
+	reindexTree0(tree, i, size)
 }
 
 func reindexTree(rootID string, i, size int) {
@@ -1303,6 +1337,10 @@ func reindexTree(rootID string, i, size int) {
 		return
 	}
 
+	reindexTree0(tree, i, size)
+}
+
+func reindexTree0(tree *parse.Tree, i, size int) {
 	updated := tree.Root.IALAttr("updated")
 	if "" == updated {
 		updated = util.TimeFromID(tree.Root.ID)

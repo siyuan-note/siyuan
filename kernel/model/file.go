@@ -37,7 +37,6 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
 	"github.com/gin-gonic/gin"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -143,7 +142,7 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 		logging.LogErrorf("read file [%s] failed: %s", p, err)
 		return nil
 	}
-	ret = readDocIAL(data)
+	ret = filesys.ReadDocIAL(data)
 	if 1 > len(ret) {
 		logging.LogWarnf("tree [%s] is corrupted", filePath)
 		box.moveCorruptedData(filePath)
@@ -165,12 +164,6 @@ func (box *Box) moveCorruptedData(filePath string) {
 		return
 	}
 	logging.LogWarnf("moved corrupted data file [%s] to [%s]", filePath, to)
-}
-
-func readDocIAL(data []byte) (ret map[string]string) {
-	ret = map[string]string{}
-	jsoniter.Get(data, "Properties").ToVal(&ret)
-	return
 }
 
 func SearchDocsByKeyword(keyword string) (ret []map[string]string) {

@@ -224,6 +224,23 @@ func RemoveBlockTreesByRootID(rootID string) {
 	blockTreesChanged = true
 }
 
+func RemoveBlockTreesByPath(path string) {
+	blockTreesLock.Lock()
+	defer blockTreesLock.Unlock()
+
+	var ids []string
+	for _, b := range blockTrees {
+		if b.Path == path {
+			ids = append(ids, b.ID)
+		}
+	}
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
+	for _, id := range ids {
+		delete(blockTrees, id)
+	}
+	blockTreesChanged = true
+}
+
 func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 	blockTreesLock.Lock()
 	defer blockTreesLock.Unlock()

@@ -1255,6 +1255,12 @@ func autoFixIndex() {
 		})
 
 		size := len(paths)
+
+		redundantPaths := treenode.GetRedundantPaths(box.ID, paths)
+		for _, p := range redundantPaths {
+			treenode.RemoveBlockTreesByPath(p)
+		}
+
 		missingPaths := treenode.GetNotExistPaths(box.ID, paths)
 		for i, p := range missingPaths {
 			reindexTreeByPath(box.ID, p, i, size)

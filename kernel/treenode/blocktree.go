@@ -148,13 +148,18 @@ func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 	}
 
 	tmp := blockTrees
+	btPathsMap := map[string]bool{}
 	for _, blockTree := range tmp {
 		if blockTree.BoxID != boxID {
 			continue
 		}
 
-		if !pathsMap[blockTree.Path] {
-			ret = append(ret, blockTree.Path)
+		btPathsMap[blockTree.Path] = true
+	}
+
+	for p, _ := range pathsMap {
+		if !btPathsMap[p] {
+			ret = append(ret, p)
 		}
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)

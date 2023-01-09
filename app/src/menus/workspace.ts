@@ -89,7 +89,8 @@ export const workspaceMenu = (rect: DOMRect) => {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.openedWorkspace,
+            iconHTML: window.siyuan.languages.openedWorkspace,
+            label:"",
             type: "readonly"
         }).element);
         response.data.forEach((item: IWorkspace) => {
@@ -107,7 +108,8 @@ export const workspaceMenu = (rect: DOMRect) => {
         });
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.about7,
+            iconHTML: window.siyuan.languages.about7,
+            label:"",
             type: "readonly"
         }).element);
         response.data.forEach((item: IWorkspace) => {

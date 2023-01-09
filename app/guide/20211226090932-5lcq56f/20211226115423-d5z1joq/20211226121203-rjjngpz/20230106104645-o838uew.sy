@@ -4,9 +4,8 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230106104645-o838uew",
-		"scroll": "{\u0026quot;startId\u0026quot;:\u0026quot;20230106104714-um1pzdl\u0026quot;,\u0026quot;endId\u0026quot;:\u0026quot;20230106104714-yyezfpg\u0026quot;,\u0026quot;scrollTop\u0026quot;:0,\u0026quot;focusId\u0026quot;:\u0026quot;20230107212432-mkgsqbz\u0026quot;,\u0026quot;focusStart\u0026quot;:150,\u0026quot;focusEnd\u0026quot;:150}",
 		"title": "工作空間",
-		"updated": "20230107212432"
+		"updated": "20230109113941"
 	},
 	"Children": [
 		{
@@ -106,75 +105,125 @@
 			]
 		},
 		{
-			"ID": "20230106104714-rujbhlc",
-			"Type": "NodeParagraph",
+			"ID": "20230109113932-sal9xjf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230106104714-rujbhlc",
-				"updated": "20230106104735"
+				"id": "20230109113932-sal9xjf",
+				"updated": "20230109113932"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我們可以在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "關於"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "工作空間"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​​ 中切換工作空間，桌面端支持同時打開多個工作空間，移動端只能切換不同的工作空間。"
+					"Data": "切換工作空間"
 				}
 			]
 		},
 		{
-			"ID": "20230107212432-mkgsqbz",
-			"Type": "NodeParagraph",
+			"ID": "20230109113932-3g0ywic",
+			"Type": "NodeList",
+			"ListData": {},
 			"Properties": {
-				"id": "20230107212432-mkgsqbz",
-				"updated": "20230107212432"
+				"id": "20230109113932-3g0ywic",
+				"updated": "20230109113941"
 			},
 			"Children": [
 				{
-					"Type": "NodeText",
-					"Data": "如果你的多個工作空間需要經常啟動，可以考慮為每個工作空間創建不同的啟動入口並指定啟動參數 "
+					"ID": "20230109113932-w8e5hz3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113932-w8e5hz3",
+						"updated": "20230109113932"
+					},
+					"Children": [
+						{
+							"ID": "20230109113932-id1bb5p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113932-id1bb5p",
+								"updated": "20230109113932"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端可以在頂欄左側下拉菜單中打開多個工作空間"
+								}
+							]
+						},
+						{
+							"ID": "20230109113932-8g1zoun",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113932-8g1zoun",
+								"updated": "20230109113932"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果你的多個工作空間需要經常啟動，可以考慮為每個工作空間創建不同的啟動入口並指定啟動參數 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace 工作空間絕對路徑"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​。比如 Windows 系統上可以復制多個快捷方式，並在每個快捷方式 - 屬性 - 目標後跟隨工作空間路徑參數，例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace F:\\SiYuan"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​。"
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--workspace 工作空間絕對路徑"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​。比如 Windows 系統上可以復制多個快捷方式，並在每個快捷方式 - 屬性 - 目標後跟隨工作空間路徑參數，例如 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--workspace F:\\SiYuan"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​。"
+					"ID": "20230109113932-81uif34",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113932-81uif34",
+						"updated": "20230109113941"
+					},
+					"Children": [
+						{
+							"ID": "20230109113932-y9uqtyl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113932-y9uqtyl",
+								"updated": "20230109113941"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移動端可以在右側欄 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "關於"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中切換不同的工作空間"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

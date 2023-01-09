@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
-		"updated": "20230107212528"
+		"updated": "20230109114122"
 	},
 	"Children": [
 		{
@@ -105,75 +105,125 @@
 			]
 		},
 		{
-			"ID": "20230106105213-6rjvwvf",
-			"Type": "NodeParagraph",
+			"ID": "20230109113955-ja8w7gp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230106105213-6rjvwvf",
-				"updated": "20230106105236"
+				"id": "20230109113955-ja8w7gp",
+				"updated": "20230109113959"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "We can switch workspaces in "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "About"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Workspace"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​​. The desktop side supports opening multiple workspaces at the same time, but the mobile side can only switch different workspaces."
+					"Data": "Switch workspace"
 				}
 			]
 		},
 		{
-			"ID": "20230107212451-h2phr5b",
-			"Type": "NodeParagraph",
+			"ID": "20230109113955-471odxk",
+			"Type": "NodeList",
+			"ListData": {},
 			"Properties": {
-				"id": "20230107212451-h2phr5b",
-				"updated": "20230107212528"
+				"id": "20230109113955-471odxk",
+				"updated": "20230109114122"
 			},
 			"Children": [
 				{
-					"Type": "NodeText",
-					"Data": "If your multiple workspaces need to be started frequently, you can consider creating a different startup entry for each workspace and specify the startup parameter "
+					"ID": "20230109113955-4p8sitz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113955-4p8sitz",
+						"updated": "20230109114122"
+					},
+					"Children": [
+						{
+							"ID": "20230109113955-25acju9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113955-25acju9",
+								"updated": "20230109114014"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "On the desktop, multiple workspaces can be opened in the drop-down menu on the left side of the top bar"
+								}
+							]
+						},
+						{
+							"ID": "20230109113955-f2iskk4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113955-f2iskk4",
+								"updated": "20230109114122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If your multiple workspaces need to be started frequently, you can consider creating a different startup entry for each workspace and specify the startup parameter "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace absolute path of the workspace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. For example, multiple shortcuts can be copied on a Windows system, and each Shortcut - Property - Target is followed by a workspace path parameter, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace F:\\SiYuan"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​."
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--workspace absolute path of the workspace"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​. For example, multiple shortcuts can be copied on a Windows system, and each Shortcut - Property - Target is followed by a workspace path parameter, such as "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "--workspace F:\\SiYuan"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​."
+					"ID": "20230109113955-gi1ao5j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113955-gi1ao5j",
+						"updated": "20230109114043"
+					},
+					"Children": [
+						{
+							"ID": "20230109113955-hpw3tsz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113955-hpw3tsz",
+								"updated": "20230109114043"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "On the mobile, we can switch between different workspaces in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "About"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the right column"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

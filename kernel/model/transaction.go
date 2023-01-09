@@ -1237,18 +1237,21 @@ func autoFixIndex() {
 	autoFixLock.Lock()
 	defer autoFixLock.Unlock()
 
-	rootUpdated := treenode.GetRootUpdated()
+	rootUpdatedMap := treenode.GetRootUpdated()
 	i := -1
-	size := len(rootUpdated)
-	for rootID, updated := range rootUpdated {
+	size := len(rootUpdatedMap)
+	for rootID, updated := range rootUpdatedMap {
 		if isFullReindexing {
 			break
 		}
 
 		i++
 
-		root := sql.GetBlock(rootID)
-		if nil == root {
+		rootUpdated, err := sql.GetRootUpdated(rootID)
+		if nil != err {
+			continue
+		}
+		if "" == rootUpdated {
 			logging.LogWarnf("not found tree [%s] in database, reindex it", rootID)
 			reindexTree(rootID, i, size)
 			continue
@@ -1261,20 +1264,24 @@ func autoFixIndex() {
 		}
 
 		btUpdated, _ := time.Parse("20060102150405", updated)
-		dbUpdated, _ := time.Parse("20060102150405", root.Updated)
+		dbUpdated, _ := time.Parse("20060102150405", rootUpdated)
 		if dbUpdated.Before(btUpdated.Add(-1 * time.Minute)) {
 			logging.LogWarnf("tree [%s] is not up to date, reindex it", rootID)
 			reindexTree(rootID, i, size)
 			continue
 		}
+	}
 
-		roots := sql.GetBlockRedundant(rootID)
-		if 1 < len(roots) {
-			logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
-			sql.RemoveTreeQueue(root.Box, rootID)
-			reindexTree(rootID, i, size)
+	duplicatedRootIDs := sql.GetDuplicatedRootIDs()
+	for _, rootID := range duplicatedRootIDs {
+		root := sql.GetBlock(rootID)
+		if nil == root {
 			continue
 		}
+
+		logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
+		sql.RemoveTreeQueue(root.Box, rootID)
+		reindexTree(rootID, i, size)
 	}
 }
 

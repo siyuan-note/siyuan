@@ -116,6 +116,27 @@ func CeilBlockCount(count int) int {
 	return 10000*100 + 1
 }
 
+func GetNotExistPaths(boxID string, paths []string) (ret []string) {
+	blockTreesLock.Lock()
+	defer blockTreesLock.Unlock()
+
+	pathsMap := map[string]bool{}
+	for _, path := range paths {
+		pathsMap[path] = true
+	}
+
+	for _, blockTree := range blockTrees {
+		if blockTree.BoxID != boxID {
+			continue
+		}
+
+		if !pathsMap[blockTree.Path] {
+			ret = append(ret, blockTree.Path)
+		}
+	}
+	return
+}
+
 func GetBlockTreeRootByPath(boxID, path string) *BlockTree {
 	blockTreesLock.Lock()
 	defer blockTreesLock.Unlock()

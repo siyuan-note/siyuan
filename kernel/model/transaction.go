@@ -1253,10 +1253,9 @@ func autoFixIndex() {
 		})
 
 		size := len(paths)
-		for i, p := range paths {
-			if nil == treenode.GetBlockTreeRootByPath(box.ID, p) {
-				reindexTreeByPath(box.ID, p, i, size)
-			}
+		missingPaths := treenode.GetNotExistPaths(box.ID, paths)
+		for i, p := range missingPaths {
+			reindexTreeByPath(box.ID, p, i, size)
 		}
 	}
 

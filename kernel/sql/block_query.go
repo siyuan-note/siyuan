@@ -581,15 +581,19 @@ func GetBlock(id string) (ret *Block) {
 	return
 }
 
-func GetRootUpdated(rootID string) (ret string, err error) {
-	rows, err := query("SELECT updated FROM blocks WHERE root_id = ? AND type = 'd'", rootID)
+func GetRootUpdated() (ret map[string]string, err error) {
+	rows, err := query("SELECT root_id, updated FROM blocks WHERE type = 'd'")
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
 	defer rows.Close()
+
+	ret = map[string]string{}
 	for rows.Next() {
-		rows.Scan(&ret)
+		var rootID, updated string
+		rows.Scan(&rootID, &updated)
+		ret[rootID] = updated
 	}
 	return
 }

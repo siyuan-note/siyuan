@@ -122,6 +122,7 @@ export const workspaceMenu = (rect: DOMRect) => {
 };
 
 const openWorkspace = (workspace: string) => {
+    /// #if !BROWSER
     fetchPost("/api/system/setWorkspaceDir", {
         path: workspace
     }, () => {
@@ -130,4 +131,5 @@ const openWorkspace = (workspace: string) => {
             lang: window.siyuan.config.appearance.lang
         });
     });
+    /// #endif
 };

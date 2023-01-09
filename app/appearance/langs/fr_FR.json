@@ -1,4 +1,5 @@
 {
+  "workspaceList": "Liste des espaces de travail",
   "openWorkspace": "Ouvrir l'espace de travail",
   "openedWorkspace": "Espace de travail ouvert",
   "removeWorkspaceTip": "L'espace de travail ne peut pas être récupéré après avoir été supprimé, êtes-vous sûr de le supprimer ?",
@@ -750,7 +751,6 @@
   "about4": "Ouvrir le navigateur",
   "about5": "Accès Code d'autorisation",
   "about6": "Configuré comme mot de passe d'authentification d'accès, laisser vide pour désactiver l'authentification.",
-  "about7": "Répertoire de l'espace de travail",
   "about9": "Télécharger automatiquement les messages d'erreur et les données de diagnostic",
   "about10": "Après l'activation, il télécharge automatiquement les informations d'erreur et les données de diagnostic via le SDK <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a>, qui n'implique pas de données de confidentialité personnelles afin que les développeurs peut corriger des bogues.  L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "about11": "Service de réseau",

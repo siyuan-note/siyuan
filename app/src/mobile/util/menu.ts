@@ -291,7 +291,7 @@ ${accountHTML}
     <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
 </div>
 <div class="b3-label">
-    ${window.siyuan.languages.about7}
+    ${window.siyuan.languages.workspaceList}
     <div class="fn__hr"></div>
     <ul id="workspaceDir" class="b3-list b3-list--background"></ul>
     <div class="fn__hr"></div>

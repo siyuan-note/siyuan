@@ -251,6 +251,12 @@ progressLoading: 400
       }
     }
   }
+
+  &__text {
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .status {

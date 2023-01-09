@@ -4,7 +4,7 @@ import {dialog} from "@electron/remote";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
-import {getOpenNotebookCount} from "../util/pathName";
+import {getOpenNotebookCount, originalPath} from "../util/pathName";
 import {mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
@@ -38,6 +38,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                     if (!item.closed) {
                         submenu.push({
                             label: item.name,
+                            accelerator: window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] === item.id ? window.siyuan.config.keymap.general.dailyNote.custom : "",
                             click: () => {
                                 fetchPost("/api/filetree/createDailyNote", {
                                     notebook: item.id,
@@ -52,7 +53,6 @@ export const workspaceMenu = (rect: DOMRect) => {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.dailyNote,
                     icon: "iconCalendar",
-                    accelerator: window.siyuan.config.keymap.general.dailyNote.custom,
                     type: "submenu",
                     submenu
                 }).element);
@@ -75,7 +75,7 @@ export const workspaceMenu = (rect: DOMRect) => {
         }).element);
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.openBy + "...",
+            label: window.siyuan.languages.openWorkspace,
             click: async () => {
                 const localPath = await dialog.showOpenDialog({
                     defaultPath: window.siyuan.config.system.homeDir,
@@ -97,7 +97,9 @@ export const workspaceMenu = (rect: DOMRect) => {
                 return;
             }
             window.siyuan.menus.menu.append(new MenuItem({
-                label: item.path,
+                label: `<div class="b3-tooltips b3-tooltips__e" aria-label="${item.path}">
+    <div class="fn__ellipsis" style="max-width: 256px">${originalPath().basename(item.path)}</div>
+</div>`,
                 click: () => {
                     openWorkspace(item.path);
                 }
@@ -110,7 +112,9 @@ export const workspaceMenu = (rect: DOMRect) => {
         }).element);
         response.data.forEach((item: IWorkspace) => {
             window.siyuan.menus.menu.append(new MenuItem({
-                label: item.path,
+                label: `<div class="b3-tooltips b3-tooltips__e" aria-label="${item.path}">
+    <div class="fn__ellipsis" style="max-width: 256px">${originalPath().basename(item.path)}</div>
+</div>`,
                 click: () => {
                     openWorkspace(item.path);
                 }

@@ -116,6 +116,31 @@ func CeilBlockCount(count int) int {
 	return 10000*100 + 1
 }
 
+func GetRedundantPaths(boxID string, paths []string) (ret []string) {
+	pathsMap := map[string]bool{}
+	for _, path := range paths {
+		pathsMap[path] = true
+	}
+
+	tmp := blockTrees
+	btPathsMap := map[string]bool{}
+	for _, blockTree := range tmp {
+		if blockTree.BoxID != boxID {
+			continue
+		}
+
+		btPathsMap[blockTree.Path] = true
+	}
+
+	for p, _ := range btPathsMap {
+		if !pathsMap[p] {
+			ret = append(ret, p)
+		}
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
 func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 	pathsMap := map[string]bool{}
 	for _, path := range paths {
@@ -132,6 +157,7 @@ func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 			ret = append(ret, blockTree.Path)
 		}
 	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
 
@@ -191,6 +217,7 @@ func RemoveBlockTreesByRootID(rootID string) {
 			ids = append(ids, b.RootID)
 		}
 	}
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}
@@ -207,6 +234,7 @@ func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 			ids = append(ids, b.ID)
 		}
 	}
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}
@@ -222,6 +250,7 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 			ids = append(ids, b.ID)
 		}
 	}
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}
@@ -247,6 +276,7 @@ func ReindexBlockTree(tree *parse.Tree) {
 			ids = append(ids, b.ID)
 		}
 	}
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}

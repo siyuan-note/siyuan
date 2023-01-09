@@ -1,5 +1,6 @@
 {
-  "opendWorkspace": "已打開的工作空間",
+  "openWorkspace": "打開工作空間",
+  "openedWorkspace": "已打開的工作空間",
   "removeWorkspaceTip": "刪除工作空間後無法恢復，確定刪除嗎？",
   "new": "新建",
   "share2LiandiConfirmTip": "確定將該文檔分享到鏈滴嗎？",

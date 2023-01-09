@@ -1,5 +1,6 @@
 {
-  "opendWorkspace": "Opened Workspace",
+  "openWorkspace": "Open Workspace",
+  "openedWorkspace": "Opened Workspace",
   "removeWorkspaceTip": "The workspace cannot be recovered after being deleted, are you sure to delete it?",
   "new": "New",
   "share2LiandiConfirmTip": "Are you sure to share this document to Liandi?",

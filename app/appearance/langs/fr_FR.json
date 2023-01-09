@@ -1,5 +1,6 @@
 {
-  "opendWorkspace": "Espace de travail ouvert",
+  "openWorkspace": "Ouvrir l'espace de travail",
+  "openedWorkspace": "Espace de travail ouvert",
   "removeWorkspaceTip": "L'espace de travail ne peut pas être récupéré après avoir été supprimé, êtes-vous sûr de le supprimer ?",
   "new": "Nouveau",
   "share2LiandiConfirmTip": "Êtes-vous sûr de partager ce document avec Liandi ?",

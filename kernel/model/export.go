@@ -72,8 +72,10 @@ func Export2Liandi(id string) (err error) {
 	foundArticle := false
 	articleId := tree.Root.IALAttr(liandiArticleIdAttrName)
 	if "" != articleId {
+		result := gulu.Ret.NewResult()
 		request := httpclient.NewCloudRequest30s()
 		resp, getErr := request.
+			SetResult(result).
 			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 			Get(util.LiandiServer + "/api/v2/article/update/" + articleId)
 		if nil != getErr {
@@ -83,7 +85,11 @@ func Export2Liandi(id string) (err error) {
 
 		switch resp.StatusCode {
 		case 200:
-			foundArticle = true
+			if 0 == result.Code {
+				foundArticle = true
+			} else if 1 == result.Code {
+				foundArticle = false
+			}
 		case 404:
 			foundArticle = false
 		default:
@@ -105,7 +111,7 @@ func Export2Liandi(id string) (err error) {
 		"#", "#",
 		"", "",
 		false)
-	var result = gulu.Ret.NewResult()
+	result := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	request = request.
 		SetResult(result).

@@ -541,7 +541,11 @@ export class Backlink extends Model {
             if (data.mentionsCount === 0) {
                 this.status[this.blockId].backlinkMStatus = 3;
             } else {
-                this.status[this.blockId].backlinkMOpenIds = [data.backmentions[0].id];
+                Array.from({length: window.siyuan.config.editor.backlinkExpandCount}).forEach((item, index) => {
+                    if (data.backmentions[index]) {
+                        this.status[this.blockId].backlinkMOpenIds.push(data.backmentions[index].id);
+                    }
+                });
                 if (data.linkRefsCount === 0) {
                     this.status[this.blockId].backlinkMStatus = 0;
                 } else {
@@ -549,7 +553,11 @@ export class Backlink extends Model {
                 }
             }
             if (data.linkRefsCount > 0) {
-                this.status[this.blockId].backlinkOpenIds = [data.backlinks[0].id];
+                Array.from({length: window.siyuan.config.editor.backlinkExpandCount}).forEach((item, index) => {
+                    if (data.backlinks[index]) {
+                        this.status[this.blockId].backlinkOpenIds.push(data.backlinks[index].id);
+                    }
+                });
             }
         }
 

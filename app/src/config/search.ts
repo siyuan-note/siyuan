@@ -17,7 +17,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip",
             "editReadonly", "editReadonlyTip", "embedBlockBreadcrumb", "embedBlockBreadcrumbTip", "outdentTip",
             "outdent", "floatWindowMode", "floatWindowModeTip", "justify", "justifyTip", "rtl", "rtlTip", "spellcheck",
-            "spellcheckTip"
+            "spellcheckTip", "backlinkExpand", "backlinkExpandTip"
         ]),
 
         // 文档树

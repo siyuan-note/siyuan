@@ -14,6 +14,7 @@
   "recentDocs": "最近打开的文档",
   "autoLaunch": "开机自动启动",
   "autoLaunchTip": "启用后会在登录操作系统后自动启动应用",
+  "sortByContent": "按原文内容顺序",
   "sortByRankDesc": "按相关度降序",
   "sortByRankAsc": "按相关度升序",
   "saveCriterion": "保存命名查询",

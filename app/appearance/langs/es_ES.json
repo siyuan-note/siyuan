@@ -14,6 +14,7 @@
   "recentDocs": "Documentos abiertos recientemente",
   "autoLaunch": "Inicio automático al arrancar",
   "autoLaunchTip": "Después de habilitar, la aplicación se iniciará automáticamente después de iniciar sesión en el sistema operativo",
+  "sortByContent": "Orden de contenido original",
   "sortByRankDesc": "Relevancia DESC",
   "sortByRankAsc": "Relevancia ASC",
   "saveCriterion": "Guardar criterio nombrado",

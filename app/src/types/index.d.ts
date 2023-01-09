@@ -312,6 +312,7 @@ declare interface IEditor {
     virtualBlockRefExclude: string;
     virtualBlockRefInclude: string;
     blockRefDynamicAnchorTextMaxLen: number;
+    backlinkExpandCount: number;
 
     emoji: string[];
 }

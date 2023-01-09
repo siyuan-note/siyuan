@@ -43,6 +43,7 @@ type Editor struct {
 	Justify                         bool     `json:"justify"`                         // 是否两端对齐
 	RTL                             bool     `json:"rtl"`                             // 是否从右到左显示
 	Spellcheck                      bool     `json:"spellcheck"`                      // 是否启用拼写检查
+	BacklinkExpandCount             int      `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 }
 
 func NewEditor() *Editor {
@@ -69,5 +70,6 @@ func NewEditor() *Editor {
 		DynamicLoadBlocks:               128,
 		Justify:                         false,
 		RTL:                             false,
+		BacklinkExpandCount:             8,
 	}
 }

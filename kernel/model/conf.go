@@ -273,6 +273,9 @@ func InitConf() {
 	if 1024 < Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = 1024
 	}
+	if 0 > Conf.Editor.BacklinkExpandCount {
+		Conf.Editor.BacklinkExpandCount = 0
+	}
 
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()

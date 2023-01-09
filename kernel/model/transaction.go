@@ -1223,7 +1223,7 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 func AutoFixIndex() {
 	for {
 		autoFixIndex()
-		time.Sleep(30 * time.Second)
+		time.Sleep(10 * time.Minute)
 	}
 }
 

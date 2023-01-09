@@ -51,6 +51,34 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func HTML2Markdown(htmlStr string) (markdown string, err error) {
+	assetDirPath := filepath.Join(util.DataDir, "assets")
+	luteEngine := NewLute()
+	luteEngine.SetProtyleWYSIWYG(false)
+	tree := luteEngine.HTML2Tree(htmlStr)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeLinkDest != n.Type {
+			return ast.WalkContinue
+		}
+
+		dest := n.TokensStr()
+		if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
+			processBase64Img(n, dest, assetDirPath, err)
+			return ast.WalkContinue
+		}
+		return ast.WalkContinue
+	})
+
+	var formatted []byte
+	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
+		renderer.ExtRendererFuncs[nodeType] = rendererFunc
+	}
+	formatted = renderer.Render()
+	markdown = gulu.Str.FromBytes(formatted)
+	return
+}
+
 func ImportSY(zipPath, boxID, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
@@ -402,9 +430,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	}
 	boxLocalPath = filepath.Join(util.DataDir, boxID)
 
-	base64TmpDir := filepath.Join(util.TempDir, "base64")
-	os.MkdirAll(base64TmpDir, 0755)
-
 	if gulu.File.IsDir(localPath) {
 		// 收集所有资源文件
 		assets := map[string]string{}
@@ -508,7 +533,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 				dest := n.TokensStr()
 				if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-					processBase64Img(n, dest, base64TmpDir, assetDirPath, err)
+					processBase64Img(n, dest, assetDirPath, err)
 					return ast.WalkContinue
 				}
 
@@ -608,7 +633,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			dest := n.TokensStr()
 			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-				processBase64Img(n, dest, base64TmpDir, assetDirPath, err)
+				processBase64Img(n, dest, assetDirPath, err)
 				return ast.WalkContinue
 			}
 
@@ -660,7 +685,10 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	return
 }
 
-func processBase64Img(n *ast.Node, dest string, base64TmpDir string, assetDirPath string, err error) {
+func processBase64Img(n *ast.Node, dest string, assetDirPath string, err error) {
+	base64TmpDir := filepath.Join(util.TempDir, "base64")
+	os.MkdirAll(base64TmpDir, 0755)
+
 	sep := strings.Index(dest, ";base64,")
 	var decodeErr error
 	unbased, decodeErr := base64.StdEncoding.DecodeString(dest[sep+8:])

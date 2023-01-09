@@ -195,7 +195,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             textHTML = textHTML.replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "").trim();
             if (files && files.length === 1 && (
                 textHTML.startsWith("<img") ||  // 浏览器上复制单个图片
-                (textHTML.startsWith("<table") && textHTML.split("<table").length === 2 && textHTML.indexOf("<img") > -1)  // excel 中的复制带有图片的表格
+                (textHTML.startsWith("<table") && textHTML.indexOf("<img") > -1)  // Excel 或者浏览器中复制带有图片的表格
             )) {
                 isHTML = false;
             } else {

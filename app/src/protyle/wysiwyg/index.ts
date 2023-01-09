@@ -1483,6 +1483,10 @@ export class WYSIWYG {
                     /// #if MOBILE
                     openMobileFileById(refBlockId, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     /// #else
+                    if (aElement) {
+                        window.open(aElement.getAttribute("data-href"))
+                        return;
+                    }
                     if (window.siyuan.shiftIsPressed) {
                         openFileById({
                             id: refBlockId,

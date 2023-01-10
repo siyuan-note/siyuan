@@ -1,15 +1,16 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
 import {dialog} from "@electron/remote";
-import {ipcRenderer} from "electron";
+import {ipcRenderer, shell} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
 import {getOpenNotebookCount, originalPath} from "../util/pathName";
 import {mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
+import {showMessage} from "../dialog/message";
 
 export const workspaceMenu = (rect: DOMRect) => {
     window.siyuan.menus.menu.remove();
@@ -90,37 +91,23 @@ export const workspaceMenu = (rect: DOMRect) => {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: window.siyuan.languages.openedWorkspace,
-            label:"",
+            label: "",
             type: "readonly"
         }).element);
         response.data.forEach((item: IWorkspace) => {
             if (item.closed) {
                 return;
             }
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: `<div class="b3-tooltips b3-tooltips__e" aria-label="${item.path}">
-    <div class="fn__ellipsis" style="max-width: 256px">${originalPath().basename(item.path)}</div>
-</div>`,
-                click: () => {
-                    openWorkspace(item.path);
-                }
-            }).element);
+            workspaceItem(item)
         });
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: window.siyuan.languages.workspaceList,
-            label:"",
+            label: "",
             type: "readonly"
         }).element);
         response.data.forEach((item: IWorkspace) => {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: `<div class="b3-tooltips b3-tooltips__e" aria-label="${item.path}">
-    <div class="fn__ellipsis" style="max-width: 256px">${originalPath().basename(item.path)}</div>
-</div>`,
-                click: () => {
-                    openWorkspace(item.path);
-                }
-            }).element);
+            workspaceItem(item)
         });
         /// #endif
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
@@ -139,3 +126,38 @@ const openWorkspace = (workspace: string) => {
     });
     /// #endif
 };
+
+const workspaceItem = (item: IWorkspace) => {
+    /// #if !BROWSER
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: `<div class="b3-tooltips b3-tooltips__ne" aria-label="${item.path}">
+    <div class="fn__ellipsis" style="max-width: 256px">${originalPath().basename(item.path)}</div>
+</div>`,
+        click() {
+            openWorkspace(item.path);
+        },
+        submenu: [{
+            label: window.siyuan.languages.openBy,
+            click() {
+                openWorkspace(item.path);
+            }
+        }, {
+            label: window.siyuan.languages.showInFolder,
+            click() {
+                shell.showItemInFolder(item.path);
+            }
+        }, {
+            label: window.siyuan.languages.copy,
+            click() {
+                writeText(item.path);
+                showMessage(window.siyuan.languages.copied);
+            }
+        }, {
+            label: window.siyuan.languages.removeWorkspaceTip,
+            click() {
+                fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
+            }
+        }]
+    }).element);
+    /// #endif
+}

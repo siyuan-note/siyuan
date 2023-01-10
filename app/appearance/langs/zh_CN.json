@@ -2,7 +2,7 @@
   "workspaceList": "工作空间列表",
   "openWorkspace": "打开工作空间",
   "openedWorkspace": "已打开的工作空间",
-  "removeWorkspaceTip": "删除工作空间后无法恢复，确定删除吗？",
+  "removeWorkspaceTip": "从工作空间列表中移除",
   "new": "新建",
   "share2LiandiConfirmTip": "确定将该文档分享到链滴吗？",
   "share2Liandi": "分享到链滴",

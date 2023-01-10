@@ -476,16 +476,14 @@ ${accountHTML}
                                 break;
                             } else if (target.getAttribute("data-type") === "remove") {
                                 const p = target.parentElement.getAttribute("data-path");
-                                confirmDialog("⚠️ " + window.siyuan.languages.remove + " " + pathPosix().basename(p), window.siyuan.languages.removeWorkspaceTip, () => {
-                                    fetchPost("/api/system/removeWorkspaceDir", {path: p}, () => {
-                                        genWorkspace(workspaceDirElement);
-                                    });
+                                fetchPost("/api/system/removeWorkspaceDir", {path: p}, () => {
+                                    genWorkspace(workspaceDirElement);
                                 });
                                 event.preventDefault();
                                 event.stopPropagation();
                                 break;
                             } else if (target.classList.contains("b3-list-item") && !target.classList.contains("b3-list-item--focus")) {
-                                confirmDialog(window.siyuan.languages.confirm,`${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(target.getAttribute("data-path"))}?`, () => {
+                                confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(target.getAttribute("data-path"))}?`, () => {
                                     fetchPost("/api/system/setWorkspaceDir", {
                                         path: target.getAttribute("data-path")
                                     }, () => {

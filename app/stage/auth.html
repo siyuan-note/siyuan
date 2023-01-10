@@ -184,7 +184,7 @@
 <body>
 <div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;"></div>
 <div style="position: relative;z-index: 2;text-align: center">
-    <h1 style="margin-bottom: 48px;color:var(--b3-theme-on-background)">{{.l4}}</h1>
+    <h1 style="margin-bottom: 48px;color:var(--b3-theme-on-background)">{{.workspace}}</h1>
     <input class="b3-text-filed" id="authCode" type="password" placeholder="{{.l0}}"/><br>
     <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
         <img id="captchaImg" style="top: 1px;position: absolute;height: 28px;right: 1px;cursor: pointer">
@@ -195,6 +195,9 @@
         {{.l2}}
     </div>
     <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
+    <div class="ft__on-surface">
+        {{.l7}}
+    </div>
 </div>
 <div style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
     <svg style="top: 50%;left: 50%;width: 200%;transform: translate(-50%, -50%);position: absolute;z-index: 1;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" height="1602"

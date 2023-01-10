@@ -286,8 +286,11 @@ func serveCheckAuth(c *gin.Context) {
 		"l4":               model.Conf.Language(176),
 		"l5":               model.Conf.Language(177),
 		"l6":               model.Conf.Language(178),
+		"l7":               template.HTML(model.Conf.Language(184)),
 		"appearanceMode":   model.Conf.Appearance.Mode,
 		"appearanceModeOS": model.Conf.Appearance.ModeOS,
+		"workspace":        filepath.Base(util.WorkspaceDir),
+		"workspacePath":    util.WorkspaceDir,
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); nil != err {

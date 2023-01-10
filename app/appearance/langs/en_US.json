@@ -1055,6 +1055,7 @@
     "180": "Search content block does not exist",
     "181": "The document has been shared to Liandi, <a href=\"%s\" target=\"_blank\">click to view</a>",
     "182": "Sharing document, please wait...",
-    "183": "Validating index document tree [%d/%d %s]"
+    "183": "Validating index document tree [%d/%d %s]",
+    "184": "Powered by <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>"
   }
 }

@@ -106,13 +106,6 @@ func removeWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	if err = os.RemoveAll(path); nil != err {
-		msg := fmt.Sprintf("remove workspace dir [%s] failed: %s", path, err)
-		ret.Code = -1
-		ret.Msg = msg
-		return
-	}
-
 	if util.WorkspaceDir == path {
 		os.Exit(util.ExitCodeOk)
 	}

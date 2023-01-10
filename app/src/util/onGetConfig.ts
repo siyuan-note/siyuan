@@ -19,7 +19,7 @@ import {renderSnippet} from "../config/util/snippets";
 import {originalPath} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
-import {exitSiYuan} from "../dialog/processSystem";
+import {exitSiYuan, getWorkspaceName} from "../dialog/processSystem";
 import {openSetting} from "../config";
 import {getSearch} from "./functions";
 import {initStatus} from "../layout/status";
@@ -182,7 +182,7 @@ export const onGetConfig = (isStart: boolean) => {
 const initBar = () => {
     document.querySelector(".toolbar").innerHTML = `
 <div id="barWorkspace" class="toolbar__item">
-    <span class="toolbar__text">${originalPath().basename(window.siyuan.config.system.workspaceDir)}</span>
+    <span class="toolbar__text">${getWorkspaceName()}</span>
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
 </div>
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">

@@ -263,7 +263,7 @@ export const bootSync = () => {
 
 export const setTitle = (title: string) => {
     const dragElement = document.getElementById("drag");
-    const workspaceName = originalPath().basename(window.siyuan.config.system.workspaceDir);
+    const workspaceName = getWorkspaceName();
     if (title === window.siyuan.languages.siyuanNote) {
         const versionTitle = `${title} - ${workspaceName} - v${Constants.SIYUAN_VERSION}`;
         document.title = versionTitle;
@@ -292,3 +292,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
         }
     }
 };
+
+export const getWorkspaceName = () => {
+    return window.siyuan.config.system.workspaceDir;
+}

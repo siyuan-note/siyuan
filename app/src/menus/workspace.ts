@@ -116,6 +116,9 @@ export const workspaceMenu = (rect: DOMRect) => {
 
 const openWorkspace = (workspace: string) => {
     /// #if !BROWSER
+    if (workspace === window.siyuan.config.system.workspaceDir) {
+        return;
+    }
     fetchPost("/api/system/setWorkspaceDir", {
         path: workspace
     }, () => {

@@ -1,4 +1,5 @@
 {
+  "copyPath": "Copy Path",
   "workspaceList": "Workspaces",
   "openWorkspace": "Open Workspace",
   "openedWorkspace": "Opened Workspaces",

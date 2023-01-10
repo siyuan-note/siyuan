@@ -147,7 +147,7 @@ const workspaceItem = (item: IWorkspace) => {
                 shell.showItemInFolder(item.path);
             }
         }, {
-            label: window.siyuan.languages.copy,
+            label: window.siyuan.languages.copyPath,
             click() {
                 writeText(item.path);
                 showMessage(window.siyuan.languages.copied);

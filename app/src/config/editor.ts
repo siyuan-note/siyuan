@@ -12,14 +12,14 @@ export const editor = {
     setMode: (readOnly?: boolean) => {
         const target = document.querySelector("#barReadonly");
         if (typeof readOnly === "undefined") {
-            readOnly = target.getAttribute("aria-label") === `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly}`;
+            readOnly = target.getAttribute("aria-label") === `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`;
         }
         window.siyuan.config.editor.readOnly = readOnly;
         if (readOnly) {
-            target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editMode}`);
+            target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editMode} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
             target.querySelector("use").setAttribute("xlink:href", "#iconPreview");
         } else {
-            target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly}`);
+            target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
             target.querySelector("use").setAttribute("xlink:href", "#iconEdit");
         }
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {

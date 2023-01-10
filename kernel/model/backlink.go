@@ -69,6 +69,7 @@ type Backlink struct {
 }
 
 func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
+	keyword = strings.TrimSpace(keyword)
 	ret = []*Backlink{}
 	beforeLen := 12
 	sqlBlock := sql.GetBlock(defID)
@@ -90,6 +91,11 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 			mentions = append(mentions, mention)
 		}
 	}
+
+	if "" != keyword {
+		mentionKeywords = append(mentionKeywords, keyword)
+	}
+	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
 	for _, mention := range mentions {
 		refTree := treeCache[mention.RootID]
 		if nil == refTree {

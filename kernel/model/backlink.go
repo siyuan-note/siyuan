@@ -27,7 +27,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/facette/natsort"
@@ -110,6 +109,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 }
 
 func GetBacklinkDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
+	keyword = strings.TrimSpace(keyword)
 	ret = []*Backlink{}
 	sqlBlock := sql.GetBlock(defID)
 	if nil == sqlBlock {
@@ -135,13 +135,17 @@ func GetBacklinkDoc(defID, refTreeID, keyword string) (ret []*Backlink) {
 
 	luteEngine := NewLute()
 	for _, linkRef := range linkRefs {
-		backlink := buildBacklink(linkRef.ID, refTree, nil, luteEngine)
+		var keywords []string
+		if "" != keyword {
+			keywords = append(keywords, keyword)
+		}
+		backlink := buildBacklink(linkRef.ID, refTree, keywords, luteEngine)
 		ret = append(ret, backlink)
 	}
 	return
 }
 
-func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, luteEngine *lute.Lute) (ret *Backlink) {
+func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEngine *lute.Lute) (ret *Backlink) {
 	n := treenode.GetNodeInTree(refTree, refID)
 	if nil == n {
 		return
@@ -149,37 +153,23 @@ func buildBacklink(refID string, refTree *parse.Tree, mentionKeywords []string, 
 
 	renderNodes, expand := getBacklinkRenderNodes(n)
 
-	if 0 < len(mentionKeywords) {
+	if 0 < len(keywords) {
 		for _, renderNode := range renderNodes {
 			var unlinks []*ast.Node
+
 			ast.Walk(renderNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering {
 					return ast.WalkContinue
 				}
-				if ast.NodeText == n.Type {
-					text := string(n.Tokens)
-					newText := markReplaceSpanWithSplit(text, mentionKeywords, getMarkSpanStart(searchMarkDataType), getMarkSpanEnd())
-					if text == newText {
-						return ast.WalkContinue
-					}
 
-					n.Tokens = gulu.Str.ToBytes(newText)
-					if bytes.Contains(n.Tokens, []byte("search-mark")) {
-						n.Tokens = lex.EscapeMarkers(n.Tokens)
-						linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
-						var children []*ast.Node
-						for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-							children = append(children, c)
-						}
-						for _, c := range children {
-							n.InsertBefore(c)
-						}
-						unlinks = append(unlinks, n)
-						return ast.WalkContinue
-					}
+				if n.IsBlock() {
+					return ast.WalkContinue
 				}
+
+				markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine)
 				return ast.WalkContinue
 			})
+
 			for _, unlink := range unlinks {
 				unlink.Unlink()
 			}

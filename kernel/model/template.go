@@ -61,33 +61,66 @@ func SearchTemplate(keyword string) (ret []*Block) {
 	ret = []*Block{}
 
 	templates := filepath.Join(util.DataDir, "templates")
+	groups, err := os.ReadDir(templates)
+	if nil != err {
+		logging.LogErrorf("read templates failed: %s", err)
+		return
+	}
+
+	sort.Slice(ret, func(i, j int) bool {
+		return util.PinYinCompare(filepath.Base(groups[i].Name()), filepath.Base(groups[j].Name()))
+	})
+
 	k := strings.ToLower(keyword)
-	filepath.Walk(templates, func(path string, info fs.FileInfo, err error) error {
-		name := strings.ToLower(info.Name())
-		if !strings.HasSuffix(name, ".md") {
-			return nil
+	for _, group := range groups {
+		if strings.HasPrefix(group.Name(), ".") {
+			continue
 		}
 
-		if strings.HasPrefix(name, ".") || "readme.md" == name {
-			if info.IsDir() {
-				return filepath.SkipDir
+		if group.IsDir() {
+			var templateBlocks []*Block
+			templateDir := filepath.Join(templates, group.Name())
+			filepath.Walk(templateDir, func(path string, info fs.FileInfo, err error) error {
+				name := strings.ToLower(info.Name())
+				if strings.HasPrefix(name, ".") {
+					if info.IsDir() {
+						return filepath.SkipDir
+					}
+					return nil
+				}
+
+				if !strings.HasSuffix(name, ".md") || "readme.md" == name || !strings.Contains(name, k) {
+					return nil
+				}
+
+				content := strings.TrimPrefix(path, templates)
+				content = strings.TrimSuffix(content, ".md")
+				content = filepath.ToSlash(content)
+				content = content[1:]
+				_, content = search.MarkText(content, keyword, 32, Conf.Search.CaseSensitive)
+				b := &Block{Path: path, Content: content}
+				templateBlocks = append(templateBlocks, b)
+				return nil
+			})
+			sort.Slice(templateBlocks, func(i, j int) bool {
+				return util.PinYinCompare(filepath.Base(templateBlocks[i].Path), filepath.Base(templateBlocks[j].Path))
+			})
+			ret = append(ret, templateBlocks...)
+		} else {
+			name := strings.ToLower(group.Name())
+			if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") || "readme.md" == name || !strings.Contains(name, k) {
+				continue
 			}
-			return nil
-		}
 
-		if strings.Contains(name, k) {
-			content := strings.TrimPrefix(path, templates)
-			content = strings.ReplaceAll(content, "templates"+string(os.PathSeparator), "")
+			content := group.Name()
 			content = strings.TrimSuffix(content, ".md")
 			content = filepath.ToSlash(content)
 			content = content[1:]
 			_, content = search.MarkText(content, keyword, 32, Conf.Search.CaseSensitive)
-			b := &Block{Path: path, Content: content}
+			b := &Block{Path: filepath.Join(templates, group.Name()), Content: content}
 			ret = append(ret, b)
 		}
-		return nil
-	})
-	sort.Slice(ret, func(i, j int) bool { return util.PinYinCompare(filepath.Base(ret[i].Path), filepath.Base(ret[j].Path)) })
+	}
 	return
 }
 

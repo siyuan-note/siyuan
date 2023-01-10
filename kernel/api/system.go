@@ -208,7 +208,8 @@ func setAccessAuthCode(c *gin.Context) {
 	model.Conf.Save()
 
 	session := util.GetSession(c)
-	session.AccessAuthCode = aac
+	workspaceSession := util.GetWorkspaceSession(session)
+	workspaceSession.AccessAuthCode = aac
 	session.Save(c)
 	go func() {
 		time.Sleep(200 * time.Millisecond)

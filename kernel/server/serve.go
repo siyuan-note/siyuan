@@ -364,13 +364,14 @@ func serveWebSocket(ginServer *gin.Engine) {
 				if nil == val {
 					authOk = false
 				} else {
-					sess := map[string]interface{}{}
-					err = gulu.JSON.UnmarshalJSON([]byte(val.(string)), &sess)
+					sess := &util.SessionData{}
+					err = gulu.JSON.UnmarshalJSON([]byte(val.(string)), sess)
 					if nil != err {
 						authOk = false
 						logging.LogErrorf("unmarshal cookie failed: %s", err)
 					} else {
-						authOk = sess["AccessAuthCode"].(string) == model.Conf.AccessAuthCode
+						workspaceSess := util.GetWorkspaceSession(sess)
+						authOk = workspaceSess.AccessAuthCode == model.Conf.AccessAuthCode
 					}
 				}
 			}

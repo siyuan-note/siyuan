@@ -30,6 +30,10 @@ func NeedCaptcha() bool {
 
 // SessionData represents the session.
 type SessionData struct {
+	Workspaces map[string]*WorkspaceSession // <WorkspacePath, WorkspaceSession>
+}
+
+type WorkspaceSession struct {
 	AccessAuthCode string
 	Captcha        string
 }
@@ -62,4 +66,17 @@ func GetSession(c *gin.Context) *SessionData {
 
 	c.Set("session", ret)
 	return ret
+}
+
+func GetWorkspaceSession(session *SessionData) (ret *WorkspaceSession) {
+	ret = &WorkspaceSession{}
+	if nil == session.Workspaces {
+		session.Workspaces = map[string]*WorkspaceSession{}
+	}
+	ret = session.Workspaces[WorkspaceDir]
+	if nil == ret {
+		ret = &WorkspaceSession{}
+		session.Workspaces[WorkspaceDir] = ret
+	}
+	return
 }

@@ -63,6 +63,7 @@ func LoginAuth(c *gin.Context) {
 
 	var inputCaptcha string
 	session := util.GetSession(c)
+	workspaceSession := util.GetWorkspaceSession(session)
 	if util.NeedCaptcha() {
 		captchaArg := arg["captcha"]
 		if nil == captchaArg {
@@ -77,7 +78,7 @@ func LoginAuth(c *gin.Context) {
 			return
 		}
 
-		if strings.ToLower(session.Captcha) != strings.ToLower(inputCaptcha) {
+		if strings.ToLower(workspaceSession.Captcha) != strings.ToLower(inputCaptcha) {
 			ret.Code = 1
 			ret.Msg = Conf.Language(22)
 			return
@@ -90,7 +91,7 @@ func LoginAuth(c *gin.Context) {
 		ret.Msg = Conf.Language(83)
 
 		util.WrongAuthCount++
-		session.Captcha = gulu.Rand.String(7)
+		workspaceSession.Captcha = gulu.Rand.String(7)
 		if util.NeedCaptcha() {
 			ret.Code = 1 // 需要渲染验证码
 		}
@@ -103,9 +104,9 @@ func LoginAuth(c *gin.Context) {
 		return
 	}
 
-	session.AccessAuthCode = authCode
+	workspaceSession.AccessAuthCode = authCode
 	util.WrongAuthCount = 0
-	session.Captcha = gulu.Rand.String(7)
+	workspaceSession.Captcha = gulu.Rand.String(7)
 	if err := session.Save(c); nil != err {
 		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(500)
@@ -126,7 +127,8 @@ func GetCaptcha(c *gin.Context) {
 	}
 
 	session := util.GetSession(c)
-	session.Captcha = img.Text
+	workspaceSession := util.GetWorkspaceSession(session)
+	workspaceSession.Captcha = img.Text
 	if err = session.Save(c); nil != err {
 		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(500)
@@ -186,7 +188,8 @@ func CheckAuth(c *gin.Context) {
 
 	// 通过 Cookie
 	session := util.GetSession(c)
-	if session.AccessAuthCode == Conf.AccessAuthCode {
+	workspaceSession := util.GetWorkspaceSession(session)
+	if workspaceSession.AccessAuthCode == Conf.AccessAuthCode {
 		c.Next()
 		return
 	}
@@ -211,7 +214,7 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	if session.AccessAuthCode != Conf.AccessAuthCode {
+	if workspaceSession.AccessAuthCode != Conf.AccessAuthCode {
 		userAgentHeader := c.GetHeader("User-Agent")
 		if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
 			if "GET" != c.Request.Method {

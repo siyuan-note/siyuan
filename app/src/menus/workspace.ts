@@ -161,6 +161,7 @@ const workspaceItem = (item: IWorkspace) => {
     }).element);
     /// #endif
 };
+
 export const getWorkspaceName = () => {
     return window.siyuan.config.system.workspaceDir;
 };

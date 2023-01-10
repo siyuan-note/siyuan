@@ -10,7 +10,7 @@ import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {getCurrentWindow} from "@electron/remote";
-import {originalPath} from "../util/pathName";
+import { getWorkspaceName } from "../menus/workspace";
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>
@@ -292,7 +292,3 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
         }
     }
 };
-
-export const getWorkspaceName = () => {
-    return window.siyuan.config.system.workspaceDir;
-}

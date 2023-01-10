@@ -98,7 +98,7 @@ export const workspaceMenu = (rect: DOMRect) => {
             if (item.closed) {
                 return;
             }
-            workspaceItem(item)
+            workspaceItem(item);
         });
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -107,7 +107,7 @@ export const workspaceMenu = (rect: DOMRect) => {
             type: "readonly"
         }).element);
         response.data.forEach((item: IWorkspace) => {
-            workspaceItem(item)
+            workspaceItem(item);
         });
         /// #endif
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
@@ -160,4 +160,7 @@ const workspaceItem = (item: IWorkspace) => {
         }]
     }).element);
     /// #endif
-}
+};
+export const getWorkspaceName = () => {
+    return window.siyuan.config.system.workspaceDir;
+};

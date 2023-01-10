@@ -16,10 +16,9 @@ import {mountHelp} from "./mount";
 import {MenuItem} from "../menus/Menu";
 import {addGA, initAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
-import {originalPath} from "./pathName";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
-import {exitSiYuan, getWorkspaceName} from "../dialog/processSystem";
+import {exitSiYuan} from "../dialog/processSystem";
 import {openSetting} from "../config";
 import {getSearch} from "./functions";
 import {initStatus} from "../layout/status";
@@ -28,7 +27,7 @@ import {showMessage} from "../dialog/message";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
-import {workspaceMenu} from "../menus/workspace";
+import {getWorkspaceName, workspaceMenu} from "../menus/workspace";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {

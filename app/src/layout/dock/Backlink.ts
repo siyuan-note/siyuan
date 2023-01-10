@@ -253,7 +253,7 @@ export class Backlink extends Model {
                 if (item.tagName === "LI" && !item.querySelector(".b3-list-item__arrow--open")) {
                     this.toggleItem(item, false);
                 }
-            })
+            });
         });
         this.element.addEventListener("click", (event) => {
             this.setFocus();
@@ -270,7 +270,7 @@ export class Backlink extends Model {
                                 if (item.tagName === "LI" && !item.querySelector(".b3-list-item__arrow--open")) {
                                     this.toggleItem(item, true);
                                 }
-                            })
+                            });
                             break;
                         case "mCollapse":
                             this.mTree.element.querySelectorAll(".protyle").forEach(item => {

@@ -1,3 +1,35 @@
+## v2.6.3 / 2023-01-11
+
+### 改进功能
+
+* [PDF 画框复制标注带截图](https://github.com/siyuan-note/siyuan/issues/2952)
+* [桌面端支持工作空间多开](https://github.com/siyuan-note/siyuan/issues/4567)
+* [移动端支持切换工作空间](https://github.com/siyuan-note/siyuan/issues/4642)
+* [反链面板默认展开](https://github.com/siyuan-note/siyuan/issues/6083)
+* [搜索框和搜索页签布局分开保存](https://github.com/siyuan-note/siyuan/issues/6984)
+* [`上传资源文件到图床` 每次都全量上传刷新 CDN](https://github.com/siyuan-note/siyuan/issues/6985)
+* [Mermaid 时序图增加序号](https://github.com/siyuan-note/siyuan/pull/6992)
+* [改进桌面端拉起内核](https://github.com/siyuan-note/siyuan/issues/6996)
+* [拖拽 PDF 到页签上无法保存滚动位置](https://github.com/siyuan-note/siyuan/issues/7000)
+* [桌面端内核进程根据 Electron 主进程判断是否自动退出](https://github.com/siyuan-note/siyuan/issues/7002)
+* [改进界面缩放](https://github.com/siyuan-note/siyuan/issues/7003)
+* [剪藏支持知乎链接卡片](https://github.com/siyuan-note/siyuan/issues/7011)
+* [自动校验数据库索引](https://github.com/siyuan-note/siyuan/issues/7016)
+* [桌面端工作空间切换从 设置 - 关于 中移动到顶栏](https://github.com/siyuan-note/siyuan/issues/7017)
+* [改进重建索引](https://github.com/siyuan-note/siyuan/issues/7018)
+* [改进 Edge 浏览器 `Web 选择` 复制](https://github.com/siyuan-note/siyuan/issues/7021)
+* [升级 Mermaid 到 9.3.0](https://github.com/siyuan-note/siyuan/issues/7024)
+* [统一块超链接点击和右键打开行为](https://github.com/siyuan-note/siyuan/issues/7026)
+* [改进 `/模板` 搜索排序](https://github.com/siyuan-note/siyuan/issues/7027)
+* [反链面板支持过滤关键字高亮](https://github.com/siyuan-note/siyuan/issues/7028)
+
+### 修复缺陷
+
+* [搜索高亮超链接锚文本后预览窗口修改导致地址失效](https://github.com/siyuan-note/siyuan/issues/6982)
+* [搜索指定路径参数解析异常](https://github.com/siyuan-note/siyuan/issues/6983)
+* [localStorage 请求顺序异常导致图标无法加载](https://github.com/siyuan-note/siyuan/issues/6986)
+* [图片元素解析错误触发状态异常](https://github.com/siyuan-note/siyuan/issues/6989)
+
 ## v2.6.2 / 2023-01-03
 
 ### 改进功能

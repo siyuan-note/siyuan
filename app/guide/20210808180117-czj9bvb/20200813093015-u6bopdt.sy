@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230109113703"
+		"updated": "20230112002504"
 	},
 	"Children": [
 		{
@@ -339,7 +339,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428213320-fwferhb",
-				"updated": "20230109113703"
+				"updated": "20230112002504"
 			},
 			"Children": [
 				{
@@ -355,7 +355,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "文件夹下（默认位于用户家目录/Documents/SiYuan），在工作空间/data/ 文件夹下："
+					"Data": "文件夹下，在工作空间/data/ 文件夹下："
 				}
 			]
 		},

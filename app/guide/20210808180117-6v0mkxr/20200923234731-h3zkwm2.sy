@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230109113754"
+		"updated": "20230112002556"
 	},
 	"Children": [
 		{
@@ -242,7 +242,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428222603-g1752n7",
-				"updated": "20230109113754"
+				"updated": "20230112002556"
 			},
 			"Children": [
 				{
@@ -258,7 +258,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " folder (the default is in the user's home directory/Documents/SiYuan), in the workspace/data/ folder:"
+					"Data": " folder, in the workspace/data/ folder:"
 				}
 			]
 		},

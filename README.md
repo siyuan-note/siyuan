@@ -165,7 +165,7 @@ This question varies from person to person and is difficult to answer uniformly.
 
 ### How does SiYuan store data?
 
-The data is saved in the workspace folder (the default is in the user's home directory Documents/SiYuan, which can be modified in <kbd>Settings</kbd> - <kbd>About</kbd>), in the workspace data folder:
+The data is saved in the workspace folder, in the workspace data folder:
 
 * `assets` is used to save all inserted assets
 * `emojis` is used to save emoji images

@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230109113806"
+		"updated": "20230112002617"
 	},
 	"Children": [
 		{
@@ -237,7 +237,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226115356-fcwiy36",
-				"updated": "20230109113806"
+				"updated": "20230112002617"
 			},
 			"Children": [
 				{
@@ -253,7 +253,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "文件夾下（預設位於用戶家目錄/Documents/SiYuan），在工作空間/data/ 文件夾下："
+					"Data": "文件夾下，在工作空間/data/ 文件夾下："
 				}
 			]
 		},

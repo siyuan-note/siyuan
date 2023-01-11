@@ -106,7 +106,7 @@ func removeWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	if util.WorkspaceDir == path {
+	if util.WorkspaceDir == path && (util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container) {
 		os.Exit(util.ExitCodeOk)
 	}
 }

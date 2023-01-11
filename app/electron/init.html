@@ -354,7 +354,7 @@
         if (!result.canceled) {
           const {ipcRenderer} = require('electron')
           const fs = require('fs')
-          const initPath = path.join(result.filePaths[0], 'SiYuan')
+          const initPath = result.filePaths[0]
           if (!fs.existsSync(initPath)) {
             fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
           }

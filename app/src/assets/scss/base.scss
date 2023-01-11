@@ -184,6 +184,9 @@ progressLoading: 400
 
   #windowAppIcon {
     -webkit-app-region: drag;
+    width: 42px;
+    margin-left: 1px;
+    justify-content: center;
   }
 
   #windowControls {

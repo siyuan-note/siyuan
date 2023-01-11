@@ -468,7 +468,7 @@ const initWindow = () => {
 
     //添加应用图标
     const toolbar = document.querySelector(".toolbar");
-    toolbar.insertAdjacentHTML("afterbegin", `<div class="toolbar__item b3-tooltips" id="windowAppIcon">
+    toolbar.insertAdjacentHTML("afterbegin", `<div class="toolbar__item" id="windowAppIcon">
     <svg>
         <use xlink:href="#iconSiYuan"></use>
     </svg>

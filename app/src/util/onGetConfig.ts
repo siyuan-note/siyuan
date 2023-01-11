@@ -179,7 +179,7 @@ export const onGetConfig = (isStart: boolean) => {
 };
 
 const initBar = () => {
-    const toolbar = document.querySelector(".toolbar");
+    const toolbar = document.getElementById("toolbar");
     toolbar.innerHTML = `
 <div id="barWorkspace" class="toolbar__item">
     <span class="toolbar__text">${getWorkspaceName()}</span>
@@ -467,7 +467,7 @@ const initWindow = () => {
     document.body.classList.add("body--win32");
 
     //添加应用图标
-    const toolbar = document.querySelector(".toolbar");
+    const toolbar = document.getElementById("toolbar");
     toolbar.insertAdjacentHTML("afterbegin", `<div class="toolbar__item" id="windowAppIcon">
     <svg>
         <use xlink:href="#iconSiYuan"></use>
@@ -475,7 +475,7 @@ const initWindow = () => {
 </div>`);
 
     //添加窗口控件
-    const controlsElement = document.querySelector("#windowControls");
+    const controlsElement = document.getElementById("windowControls");
     controlsElement.innerHTML = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg>
         <use xlink:href="#iconMin"></use>

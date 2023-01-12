@@ -1289,7 +1289,7 @@ export class Toolbar {
     </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
-<div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "display:none" : ""};overflow: auto;"></div>
+<div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none" : ""};overflow: auto;"></div>
 </div>`;
             const listElement = this.subElement.querySelector(".b3-list");
             const previewElement = this.subElement.firstElementChild.lastElementChild;
@@ -1469,7 +1469,7 @@ export class Toolbar {
     </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>
-<div style="width: 260px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
+<div style="width: 260px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
 </div>`;
             const listElement = this.subElement.querySelector(".b3-list");
             listElement.addEventListener("mouseover", (event) => {

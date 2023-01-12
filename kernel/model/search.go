@@ -879,7 +879,6 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 		text = search.EncloseHighlighting(text, keywords, getMarkSpanStart(markSpanDataType), getMarkSpanEnd(), Conf.Search.CaseSensitive)
 		n.Tokens = gulu.Str.ToBytes(text)
 		if bytes.Contains(n.Tokens, []byte(searchMarkDataType)) {
-			n.Tokens = lex.EscapeMarkers(n.Tokens)
 			linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 			var children []*ast.Node
 			for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {

@@ -24,7 +24,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -65,7 +64,6 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 		}
 
 		n.Tokens = []byte(newContent)
-		n.Tokens = lex.EscapeMarkers(n.Tokens)
 		linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 		var children []*ast.Node
 		for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {

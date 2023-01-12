@@ -22,7 +22,6 @@
 @import "card";
 @import "menu";
 @import "color";
-@import "responsive";
 // un refactor
 @import "protyle";
 @import "typography";
@@ -593,3 +592,6 @@ progressLoading: 400
     margin-top: 7px;
   }
 }
+
+// 需放置最后，否则 https://github.com/siyuan-note/siyuan/issues/7056
+@import "responsive";

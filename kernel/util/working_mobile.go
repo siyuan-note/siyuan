@@ -21,7 +21,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -122,20 +121,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		}
 		workspacePaths = append(workspacePaths, WorkspaceDir)
 	} else {
-		data, err := os.ReadFile(workspaceConf)
-		if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
-			log.Printf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
-		}
-
-		var tmp []string
-		for _, d := range workspacePaths {
-			d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
-			if gulu.File.IsDir(d) {
-				tmp = append(tmp, d)
-			}
-		}
-		workspacePaths = tmp
-
+		workspacePaths, _ = ReadWorkspacePaths()
 		if 0 < len(workspacePaths) {
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
 			if !gulu.File.IsDir(WorkspaceDir) {
@@ -149,12 +135,8 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		}
 	}
 
-	if data, err := gulu.JSON.MarshalJSON(workspacePaths); nil == err {
-		if err = os.WriteFile(workspaceConf, data, 0644); nil != err {
-			log.Fatalf("write workspace conf [%s] failed: %s", workspaceConf, err)
-		}
-	} else {
-		log.Fatalf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
+	if err := WriteWorkspacePaths(workspacePaths); nil != err {
+		log.Fatalf("write workspace conf [%s] failed: %s", workspaceConf, err)
 	}
 
 	ConfDir = filepath.Join(WorkspaceDir, "conf")

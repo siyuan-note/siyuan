@@ -18,7 +18,9 @@ package util
 
 import (
 	"bytes"
+	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"mime"
@@ -216,20 +218,7 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 		workspacePaths = append(workspacePaths, WorkspaceDir)
 	} else {
-		data, err := os.ReadFile(workspaceConf)
-		if err = gulu.JSON.UnmarshalJSON(data, &workspacePaths); nil != err {
-			log.Printf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
-		}
-
-		var tmp []string
-		for _, d := range workspacePaths {
-			d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
-			if gulu.File.IsDir(d) {
-				tmp = append(tmp, d)
-			}
-		}
-		workspacePaths = tmp
-
+		workspacePaths, _ = ReadWorkspacePaths()
 		if 0 < len(workspacePaths) {
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
 			if "" != workspaceArg {
@@ -253,12 +242,8 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 	}
 
-	if data, err := gulu.JSON.MarshalJSON(workspacePaths); nil == err {
-		if err = os.WriteFile(workspaceConf, data, 0644); nil != err {
-			log.Fatalf("write workspace conf [%s] failed: %s", workspaceConf, err)
-		}
-	} else {
-		log.Fatalf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
+	if err := WriteWorkspacePaths(workspacePaths); nil != err {
+		log.Fatalf("write workspace conf [%s] failed: %s", workspaceConf, err)
 	}
 
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
@@ -279,6 +264,57 @@ func initWorkspaceDir(workspaceArg string) {
 	HistoryDBPath = filepath.Join(TempDir, "history.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree.msgpack")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
+}
+
+func ReadWorkspacePaths() (ret []string, err error) {
+	ret = []string{}
+	workspaceConf := filepath.Join(HomeDir, ".config", "siyuan", "workspace.json")
+	data, err := os.ReadFile(workspaceConf)
+	if nil != err {
+		msg := fmt.Sprintf("read workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		msg := fmt.Sprintf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+
+	var tmp []string
+	for _, d := range ret {
+		d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
+		if gulu.File.IsDir(d) {
+			tmp = append(tmp, d)
+		}
+	}
+	ret = tmp
+	return
+}
+
+func WriteWorkspacePaths(workspacePaths []string) (err error) {
+	workspacePaths = gulu.Str.RemoveDuplicatedElem(workspacePaths)
+	workspaceConf := filepath.Join(HomeDir, ".config", "siyuan", "workspace.json")
+	data, err := gulu.JSON.MarshalJSON(workspacePaths)
+	if nil != err {
+		msg := fmt.Sprintf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	if err = os.WriteFile(workspaceConf, data, 0644); nil != err {
+		msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	return
 }
 
 var (

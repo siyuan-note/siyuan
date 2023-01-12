@@ -182,6 +182,13 @@ progressLoading: 400
     padding-left: 0;
   }
 
+  #windowAppIcon {
+    -webkit-app-region: drag;
+    width: 42px;
+    margin-left: 1px;
+    justify-content: center;
+  }
+
   #windowControls {
     top: 0;
     z-index: 502;

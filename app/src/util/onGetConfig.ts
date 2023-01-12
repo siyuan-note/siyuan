@@ -179,7 +179,8 @@ export const onGetConfig = (isStart: boolean) => {
 };
 
 const initBar = () => {
-    document.querySelector(".toolbar").innerHTML = `
+    const toolbar = document.getElementById("toolbar");
+    toolbar.innerHTML = `
 <div id="barWorkspace" class="toolbar__item">
     <span class="toolbar__text">${getWorkspaceName()}</span>
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
@@ -208,7 +209,7 @@ const initBar = () => {
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
 </div>
 <div class="fn__flex" id="windowControls"></div>`;
-    document.querySelector(".toolbar").addEventListener("click", (event: MouseEvent) => {
+    toolbar.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         while (!target.classList.contains("toolbar")) {
             if (target.id === "barBack") {
@@ -463,8 +464,18 @@ const initWindow = () => {
         }
         return;
     }
-    const controlsElement = document.querySelector("#windowControls");
     document.body.classList.add("body--win32");
+
+    //添加应用图标
+    const toolbar = document.getElementById("toolbar");
+    toolbar.insertAdjacentHTML("afterbegin", `<div class="toolbar__item" id="windowAppIcon">
+    <svg>
+        <use xlink:href="#iconSiYuan"></use>
+    </svg>
+</div>`);
+
+    //添加窗口控件
+    const controlsElement = document.getElementById("windowControls");
     controlsElement.innerHTML = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg>
         <use xlink:href="#iconMin"></use>

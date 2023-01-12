@@ -46,7 +46,7 @@ func LogoutAuth(c *gin.Context) {
 		ret.Msg = "save session failed"
 	}
 
-	//util.ReloadUI()
+	util.ReloadUI()
 }
 
 func LoginAuth(c *gin.Context) {

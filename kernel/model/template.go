@@ -96,7 +96,7 @@ func SearchTemplate(keyword string) (ret []*Block) {
 				content := strings.TrimPrefix(path, templates)
 				content = strings.TrimSuffix(content, ".md")
 				content = filepath.ToSlash(content)
-				content = content[1:]
+				content = strings.TrimPrefix(content, "/")
 				_, content = search.MarkText(content, keyword, 32, Conf.Search.CaseSensitive)
 				b := &Block{Path: path, Content: content}
 				templateBlocks = append(templateBlocks, b)
@@ -115,7 +115,6 @@ func SearchTemplate(keyword string) (ret []*Block) {
 			content := group.Name()
 			content = strings.TrimSuffix(content, ".md")
 			content = filepath.ToSlash(content)
-			content = content[1:]
 			_, content = search.MarkText(content, keyword, 32, Conf.Search.CaseSensitive)
 			b := &Block{Path: filepath.Join(templates, group.Name()), Content: content}
 			ret = append(ret, b)

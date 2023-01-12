@@ -660,6 +660,17 @@ app.whenReady().then(() => {
   ipcMain.on('siyuan-export-close', (event, id) => {
     BrowserWindow.fromId(id).webContents.send('siyuan-export-close', id)
   })
+  ipcMain.on('siyuan-export-prevent', (event, id) => {
+    BrowserWindow.fromId(id).webContents.on('will-navigate', (event, url) => {
+      const currentURL = new URL(event.sender.getURL())
+      if (url.startsWith(getServer(currentURL.port))) {
+        return
+      }
+
+      event.preventDefault()
+      shell.openExternal(url)
+    })
+  })
   ipcMain.on('siyuan-quit', (event, id) => {
     const mainWindow = BrowserWindow.fromId(id)
     let tray

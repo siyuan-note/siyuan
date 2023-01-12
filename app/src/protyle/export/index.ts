@@ -1,7 +1,7 @@
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {OpenDialogReturnValue, shell} from "electron";
+import {OpenDialogReturnValue, ipcRenderer} from "electron";
 import {app, BrowserWindow, dialog, getCurrentWindow} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
@@ -451,9 +451,8 @@ const renderPDF = (id: string) => {
         renderPreview(response.data.content);
     });
 </script></body></html>`;
-    const mainWindow = getCurrentWindow();
     window.siyuan.printWin = new BrowserWindow({
-        parent: mainWindow,
+        parent: getCurrentWindow(),
         modal: true,
         show: true,
         width: 1032,
@@ -469,13 +468,7 @@ const renderPDF = (id: string) => {
             webSecurity: false,
         },
     });
-    window.siyuan.printWin.webContents.on('will-navigate', (event, url) => {
-        if (url.indexOf(location.host) > -1) {
-            return
-        }
-        event.preventDefault()
-        shell.openExternal(url)
-    })
+    ipcRenderer.send(Constants.SIYUAN_EXPORT_PREVENT, window.siyuan.printWin.id);
     window.siyuan.printWin.webContents.userAgent = `SiYuan/${app.getVersion()} https://b3log.org/siyuan Electron`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         window.siyuan.printWin.loadURL(response.data.url);

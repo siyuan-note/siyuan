@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -39,19 +38,15 @@ func LogoutAuth(c *gin.Context) {
 		return
 	}
 
-	session := ginSessions.Default(c)
-	session.Options(ginSessions.Options{
-		Path:   "/",
-		MaxAge: -1,
-	})
-	session.Clear()
-	if err := session.Save(); nil != err {
+	session := util.GetSession(c)
+	util.RemoveWorkspaceSession(session)
+	if err := session.Save(c); nil != err {
 		logging.LogErrorf("saves session failed: " + err.Error())
 		ret.Code = -1
 		ret.Msg = "save session failed"
 	}
 
-	util.ReloadUI()
+	//util.ReloadUI()
 }
 
 func LoginAuth(c *gin.Context) {

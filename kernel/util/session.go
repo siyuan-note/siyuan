@@ -80,3 +80,7 @@ func GetWorkspaceSession(session *SessionData) (ret *WorkspaceSession) {
 	}
 	return
 }
+
+func RemoveWorkspaceSession(session *SessionData) {
+	delete(session.Workspaces, WorkspaceDir)
+}

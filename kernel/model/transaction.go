@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -1246,6 +1247,10 @@ func autoFixIndex() {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+			if isFullReindexing {
+				return io.EOF
+			}
+
 			if !info.IsDir() && filepath.Ext(path) == ".sy" {
 				p := path[len(boxPath):]
 				p = filepath.ToSlash(p)
@@ -1258,11 +1263,19 @@ func autoFixIndex() {
 
 		redundantPaths := treenode.GetRedundantPaths(box.ID, paths)
 		for _, p := range redundantPaths {
+			if isFullReindexing {
+				break
+			}
+
 			treenode.RemoveBlockTreesByPath(p)
 		}
 
 		missingPaths := treenode.GetNotExistPaths(box.ID, paths)
 		for i, p := range missingPaths {
+			if isFullReindexing {
+				break
+			}
+
 			reindexTreeByPath(box.ID, p, i, size)
 		}
 	}
@@ -1307,6 +1320,10 @@ func autoFixIndex() {
 	duplicatedRootIDs := sql.GetDuplicatedRootIDs()
 	size := len(duplicatedRootIDs)
 	for i, rootID := range duplicatedRootIDs {
+		if isFullReindexing {
+			break
+		}
+
 		root := sql.GetBlock(rootID)
 		if nil == root {
 			continue
@@ -1321,6 +1338,10 @@ func autoFixIndex() {
 }
 
 func reindexTreeByPath(box, p string, i, size int) {
+	if isFullReindexing {
+		return
+	}
+
 	tree, err := LoadTree(box, p)
 	if nil != err {
 		return
@@ -1330,6 +1351,10 @@ func reindexTreeByPath(box, p string, i, size int) {
 }
 
 func reindexTree(rootID string, i, size int) {
+	if isFullReindexing {
+		return
+	}
+
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
 		logging.LogWarnf("root block not found", rootID)

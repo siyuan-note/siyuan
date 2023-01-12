@@ -460,7 +460,7 @@ export const resizeTabs = () => {
         // https://github.com/siyuan-note/siyuan/issues/6250
         models.backlink.forEach(item => {
             const mTreeElement = item.element.querySelector(".backlinkMList") as HTMLElement;
-            if (mTreeElement.style.height && mTreeElement.style.height !== "0px") {
+            if (mTreeElement.style.height && mTreeElement.style.height !== "0px" && item.element.clientHeight !== 0) {
                 mTreeElement.style.height = (item.element.clientHeight - mTreeElement.previousElementSibling.clientHeight * 2) + "px";
             }
             item.editors.forEach(editorItem => {

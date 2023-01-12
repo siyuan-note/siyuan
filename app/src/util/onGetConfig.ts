@@ -233,7 +233,13 @@ const initBar = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barMode") {
+                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === "barmode") {
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
                 window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.element.setAttribute("data-name", "barmode");
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.themeLight,
                     icon: "iconLight",

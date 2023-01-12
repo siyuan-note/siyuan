@@ -77,6 +77,7 @@ export class Menu {
         this.element.classList.add("fn__none");
         this.element.classList.remove("b3-menu--list");
         this.element.removeAttribute("style");  // zIndex
+        window.siyuan.menus.menu.element.removeAttribute("data-name");    // 标识再次点击不消失
     }
 
     public append(element?: HTMLElement) {

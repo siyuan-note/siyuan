@@ -20,7 +20,7 @@ export const lockScreen = () => {
     /// #else
     ipcRenderer.send(Constants.SIYUAN_LOCK_SCREEN);
     /// #endif
-}
+};
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>

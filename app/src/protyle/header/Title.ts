@@ -214,7 +214,7 @@ export class Title {
                 click: async () => {
                     focusByRange(getEditorRange(this.editElement));
                     // 不能使用 execCommand https://github.com/siyuan-note/siyuan/issues/7045
-                    const text = await readText()
+                    const text = await readText();
                     document.execCommand("insertText", false, replaceFileName(text));
                     this.rename(protyle);
                 }

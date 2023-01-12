@@ -1,7 +1,7 @@
 /// #if !MOBILE
 import {getAllDocks} from "./getAll";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
-import {exportLayout, getDockByType, resizeTabs} from "./util";
+import {getDockByType, resizeTabs} from "./util";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
@@ -84,7 +84,7 @@ export const initStatus = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barLock") {
-                lockScreen()
+                lockScreen();
                 event.stopPropagation();
                 break;
             } else if (target.id === "barHelp") {

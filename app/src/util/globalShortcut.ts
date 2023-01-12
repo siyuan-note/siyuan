@@ -11,7 +11,7 @@ import {
 import {newFile} from "./newFile";
 import {Constants} from "../constants";
 import {openSetting} from "../config";
-import {exportLayout, getDockByType, getInstanceById} from "../layout/util";
+import {getDockByType, getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {Editor} from "../editor";
 import {setEditMode} from "../protyle/util/setEditMode";
@@ -535,7 +535,7 @@ export const globalShortcut = () => {
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
-            lockScreen()
+            lockScreen();
             event.preventDefault();
             return;
         }

@@ -18,7 +18,7 @@ import {getCurrentWindow} from "@electron/remote";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {matchHotKey} from "../util/hotKey";
-import {updateHotkeyTip, writeText} from "../util/compatibility";
+import {readText, updateHotkeyTip, writeText} from "../util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import * as dayjs from "dayjs";
 import {setPanelFocus} from "../../layout/util";
@@ -211,12 +211,12 @@ export class Title {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.paste,
                 accelerator: "⌘V",
-                click: () => {
+                click: async () => {
                     focusByRange(getEditorRange(this.editElement));
-                    document.execCommand("paste");
-                    setTimeout(() => {
-                        this.rename(protyle);
-                    }, Constants.TIMEOUT_INPUT);
+                    // 不能使用 execCommand https://github.com/siyuan-note/siyuan/issues/7045
+                    const text = await readText()
+                    document.execCommand("insertText", false, replaceFileName(text));
+                    this.rename(protyle);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

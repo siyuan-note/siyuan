@@ -14,7 +14,9 @@ import {getWorkspaceName} from "../menus/workspace";
 
 export const lockScreen = () => {
     /// #if BROWSER
-    fetchPost("/api/system/logoutAuth", {});
+    fetchPost("/api/system/logoutAuth", {}, () => {
+        window.location.href = "/";
+    });
     /// #else
     ipcRenderer.send(Constants.SIYUAN_LOCK_SCREEN);
     /// #endif

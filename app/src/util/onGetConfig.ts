@@ -348,7 +348,11 @@ const initWindow = () => {
         });
     });
     ipcRenderer.on(Constants.SIYUAN_LOCK_SCREEN, () => {
-        fetchPost("/api/system/logoutAuth", {});
+        exportLayout(false, () => {
+            fetchPost("/api/system/logoutAuth", {}, () => {
+                window.location.reload();
+            });
+        });
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
         winOnClose(currentWindow, close);

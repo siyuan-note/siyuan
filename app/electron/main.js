@@ -779,6 +779,14 @@ app.whenReady().then(() => {
     })
   })
 
+  ipcMain.on('siyuan-lock-screen', () => {
+    workspaces.forEach(item => {
+      const currentURL = new URL(item.browserWindow.getURL())
+      const server = getServer(currentURL.port)
+      fetch(server + '/api/system/logoutAuth', {method: 'POST'})
+    })
+  })
+
   if (firstOpen) {
     const firstOpenWindow = new BrowserWindow({
       width: screen.getPrimaryDisplay().size.width / 2,

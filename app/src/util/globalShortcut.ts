@@ -47,6 +47,7 @@ import {webFrame} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
 import {openCard} from "../card/openCard";
+import {lockScreen} from "../dialog/processSystem";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -534,11 +535,7 @@ export const globalShortcut = () => {
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
-            exportLayout(false, () => {
-                fetchPost("/api/system/logoutAuth", {}, () => {
-                    window.location.href = "/";
-                });
-            });
+            lockScreen()
             event.preventDefault();
             return;
         }

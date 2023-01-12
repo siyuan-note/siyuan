@@ -10,6 +10,7 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 /// #endif
 import {isBrowser} from "../util/functions";
+import {lockScreen} from "../dialog/processSystem";
 
 export const initStatus = () => {
     /// #if !MOBILE
@@ -83,11 +84,7 @@ export const initStatus = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barLock") {
-                exportLayout(false, () => {
-                    fetchPost("/api/system/logoutAuth", {}, () => {
-                        window.location.href = "/";
-                    });
-                });
+                lockScreen()
                 event.stopPropagation();
                 break;
             } else if (target.id === "barHelp") {

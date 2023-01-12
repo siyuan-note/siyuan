@@ -10,7 +10,17 @@ import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {getCurrentWindow} from "@electron/remote";
-import { getWorkspaceName } from "../menus/workspace";
+import {getWorkspaceName} from "../menus/workspace";
+
+export const lockScreen = () => {
+    /// #if BROWSER
+    fetchPost("/api/system/logoutAuth", {}, () => {
+        window.location.href = "/";
+    });
+    /// #else
+    ipcRenderer.send(Constants.SIYUAN_LOCK_SCREEN);
+    /// #endif
+}
 
 export const lockFile = (id: string) => {
     const html = `<div class="b3-dialog__scrim"></div>

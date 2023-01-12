@@ -9,7 +9,7 @@ import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {repos} from "../../config/repos";
 import * as md5 from "blueimp-md5";
 import {showMessage} from "../../dialog/message";
-import {exitSiYuan} from "../../dialog/processSystem";
+import {exitSiYuan, lockScreen} from "../../dialog/processSystem";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {openHistory} from "../../history/history";
 import {Dialog} from "../../dialog";
@@ -535,9 +535,7 @@ ${accountHTML}
                     event.stopPropagation();
                     break;
                 } else if (target.id === "menuLock") {
-                    fetchPost("/api/system/logoutAuth", {}, () => {
-                        window.location.href = "/";
-                    });
+                    lockScreen();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

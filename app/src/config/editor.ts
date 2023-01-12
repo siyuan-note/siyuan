@@ -6,6 +6,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {reloadProtyle} from "../protyle/util/reload";
 import {disabledProtyle, enableProtyle} from "../protyle/util/onGet";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {updateTitle} from "../dialog/processSystem";
 
 export const editor = {
     element: undefined as Element,
@@ -22,6 +23,7 @@ export const editor = {
             target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
             target.querySelector("use").setAttribute("xlink:href", "#iconEdit");
         }
+        updateTitle(readOnly);
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
             const allModels = getAllModels();
             allModels.editor.forEach(editor => {

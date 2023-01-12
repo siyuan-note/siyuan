@@ -45,6 +45,7 @@ import {exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {getEnableHTML} from "../protyle/wysiwyg/removeEmbed";
+import {updateTitle} from "../dialog/processSystem";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -473,6 +474,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         } else {
             onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]);
         }
+        updateTitle(undefined, id !== protyle.block.rootID);
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (focusId) {
             const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId}"]`);

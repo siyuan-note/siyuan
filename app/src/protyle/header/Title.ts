@@ -282,7 +282,7 @@ export class Title {
                 title: fileName,
             });
             this.setTitle(fileName);
-            setTitle(fileName);
+            setTitle(fileName, protyle);
         }, Constants.TIMEOUT_INPUT);
     }
 
@@ -368,7 +368,6 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         if (this.editElement.getAttribute("data-render") === "true" && !refresh) {
             return false;
         }
-        setTitle(response.data.ial.title);
         protyle.background.render(response.data.ial, protyle.block.rootID);
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.editElement.setAttribute("data-render", "true");

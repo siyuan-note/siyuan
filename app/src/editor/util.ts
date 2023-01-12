@@ -357,7 +357,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
     const models = getAllModels();
     updateOutline(models, protyle, reload);
     updateBacklinkGraph(models, protyle);
-    setTitle(title);
+    setTitle(title, protyle);
 };
 
 export const isCurrentEditor = (blockId: string) => {

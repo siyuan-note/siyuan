@@ -1,4 +1,4 @@
-import {lockFile} from "../../dialog/processSystem";
+import {lockFile, setTitle} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {genEmptyElement} from "../../block/util";
@@ -121,7 +121,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
             unScroll: (scrollObj && scrollObj.focusId) ? true : false,
             isSyncing: data.data.isSyncing,
         }, protyle);
-
+        setTitle(response.data.ial.title, protyle);
         if (scrollObj && protyle.options.mode !== "preview") {
             restoreScroll(protyle, scrollObj);
         }

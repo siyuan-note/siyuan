@@ -271,7 +271,7 @@ export const bootSync = () => {
     });
 };
 
-export const setTitle = (title: string) => {
+export const setTitle = (title: string, protyle?: IProtyle) => {
     const dragElement = document.getElementById("drag");
     const workspaceName = getWorkspaceName();
     if (title === window.siyuan.languages.siyuanNote) {
@@ -281,11 +281,39 @@ export const setTitle = (title: string) => {
         dragElement.setAttribute("title", versionTitle);
     } else {
         title = title || "Untitled";
+        if (protyle && protyle.disabled) {
+            title = `[${window.siyuan.languages.editReadonly}] ${title}`
+        }
+        if (protyle && protyle.block.showAll) {
+            title = `[${window.siyuan.languages.enter}] ${title}`
+        }
         document.title = `${title} - ${workspaceName}  - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         dragElement.textContent = title;
         dragElement.setAttribute("title", title);
     }
 };
+
+export const updateTitle = (readonly?: boolean, zoomIn?: boolean) => {
+    const title = document.getElementById("drag").textContent;
+    if (typeof readonly === "boolean") {
+        if (readonly) {
+            if (title.indexOf(window.siyuan.languages.editReadonly) === -1) {
+                setTitle(`[${window.siyuan.languages.editReadonly}] ${title}`)
+            }
+        } else {
+            setTitle(title.replace(`[${window.siyuan.languages.editReadonly}] `, ""))
+        }
+    }
+    if (typeof zoomIn === "boolean") {
+        if (zoomIn) {
+            if (title.indexOf(window.siyuan.languages.enter) === -1) {
+                setTitle(`[${window.siyuan.languages.enter}] ${title}`);
+            }
+        } else {
+            setTitle(title.replace(`[${window.siyuan.languages.enter}] `, ""))
+        }
+    }
+}
 
 export const downloadProgress = (data: { id: string, percent: number }) => {
     const bazzarElement = document.getElementById("configBazaarReadme");

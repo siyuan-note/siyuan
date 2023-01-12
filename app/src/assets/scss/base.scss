@@ -186,6 +186,11 @@ progressLoading: 400
     width: 42px;
     margin-left: 1px;
     justify-content: center;
+    color: #fff;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+    }
   }
 
   #windowControls {

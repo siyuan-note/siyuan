@@ -27,7 +27,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
-	"github.com/gofrs/flock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -89,6 +89,11 @@ func removeWorkspaceDir(c *gin.Context) {
 
 	path := arg["path"].(string)
 
+	if util.IsWorkspaceLocked(path) {
+		logging.LogWarnf("skip remove workspace [%s] because it is locked", path)
+		return
+	}
+
 	workspacePaths, err := util.ReadWorkspacePaths()
 	if nil != err {
 		ret.Code = -1
@@ -127,14 +132,7 @@ func getWorkspaces(c *gin.Context) {
 
 	var workspaces []*Workspace
 	for _, p := range workspacePaths {
-		closed := false
-		f := flock.New(filepath.Join(p, ".lock"))
-		ok, _ := f.TryLock()
-		if ok {
-			closed = true
-		}
-		f.Unlock()
-
+		closed := !util.IsWorkspaceLocked(p)
 		workspaces = append(workspaces, &Workspace{Path: p, Closed: closed})
 	}
 	ret.Data = workspaces

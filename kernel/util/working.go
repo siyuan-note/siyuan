@@ -495,6 +495,25 @@ func tryLockWorkspace() {
 	os.Exit(ExitCodeWorkspaceLocked)
 }
 
+func IsWorkspaceLocked(workspacePath string) bool {
+	if !gulu.File.IsDir(workspacePath) {
+		return false
+	}
+
+	lockFilePath := filepath.Join(workspacePath, ".lock")
+	if !gulu.File.IsExist(lockFilePath) {
+		return false
+	}
+
+	f := flock.New(lockFilePath)
+	defer f.Unlock()
+	ok, _ := f.TryLock()
+	if ok {
+		return false
+	}
+	return true
+}
+
 func UnlockWorkspace() {
 	if nil == WorkspaceLock {
 		return

@@ -255,6 +255,14 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
+        const endElement = hasClosestBlock(this.range.endContainer);
+        if (!endElement) {
+            return;
+        }
+        // 三击后还没有重新纠正 range 时使用快捷键标记会导致异常 https://github.com/siyuan-note/siyuan/issues/7068
+        if (!nodeElement.isSameNode(endElement)) {
+            this.range = setLastNodeRange(getContenteditableElement(nodeElement), this.range, false);
+        }
         const rangeTypes = this.getCurrentType(this.range);
         const selectText = this.range.toString();
         fixTableRange(this.range);

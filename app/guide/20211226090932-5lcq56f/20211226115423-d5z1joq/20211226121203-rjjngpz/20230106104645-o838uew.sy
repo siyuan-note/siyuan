@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230106104645-o838uew",
 		"title": "工作空間",
-		"updated": "20230109113941"
+		"updated": "20230113230938"
 	},
 	"Children": [
 		{
@@ -125,7 +125,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230109113932-3g0ywic",
-				"updated": "20230109113941"
+				"updated": "20230113230938"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 					},
 					"Properties": {
 						"id": "20230109113932-w8e5hz3",
-						"updated": "20230109113932"
+						"updated": "20230113230938"
 					},
 					"Children": [
 						{
@@ -159,7 +159,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113932-8g1zoun",
-								"updated": "20230109113932"
+								"updated": "20230113230938"
 							},
 							"Children": [
 								{
@@ -169,7 +169,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace 工作空間絕對路徑"
+									"TextMarkTextContent": "--workspace=工作空間絕對路徑"
 								},
 								{
 									"Type": "NodeText",
@@ -178,7 +178,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace F:\\SiYuan"
+									"TextMarkTextContent": "--workspace=F:\\SiYuan"
 								},
 								{
 									"Type": "NodeText",

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
-		"updated": "20230109114122"
+		"updated": "20230113231033"
 	},
 	"Children": [
 		{
@@ -125,7 +125,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230109113955-471odxk",
-				"updated": "20230109114122"
+				"updated": "20230113231033"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 					},
 					"Properties": {
 						"id": "20230109113955-4p8sitz",
-						"updated": "20230109114122"
+						"updated": "20230113231033"
 					},
 					"Children": [
 						{
@@ -159,7 +159,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113955-f2iskk4",
-								"updated": "20230109114122"
+								"updated": "20230113231033"
 							},
 							"Children": [
 								{
@@ -169,7 +169,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace absolute path of the workspace"
+									"TextMarkTextContent": "--workspace=absolute-path-of-the-workspace"
 								},
 								{
 									"Type": "NodeText",
@@ -178,7 +178,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace F:\\SiYuan"
+									"TextMarkTextContent": "--workspace=F:\\SiYuan"
 								},
 								{
 									"Type": "NodeText",

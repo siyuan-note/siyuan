@@ -448,7 +448,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
             // 非空块
             range.setEndAfter(editableElement.lastChild);
             // 数学公式会车后再删除 https://github.com/siyuan-note/siyuan/issues/3850
-            if (previousLastEditElement?.lastElementChild?.getAttribute("data-type").indexOf("inline-math") > -1) {
+            if ((previousLastEditElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1) {
                 const lastSibling = hasNextSibling(previousLastEditElement?.lastElementChild);
                 if (lastSibling && lastSibling.textContent === "\n") {
                     lastSibling.remove();

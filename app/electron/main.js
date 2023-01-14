@@ -52,8 +52,10 @@ try {
   }
 } catch (e) {
   console.error(e)
-  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
-    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').
+    dialog.
+    showErrorBox('创建配置目录失败 Failed to create config directory',
+      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -468,7 +470,6 @@ const initKernel = (workspace, lang) => {
             case 24: // 工作空间已被锁定，尝试切换到第一个打开的工作空间
               if (workspaces && 0 < workspaces.length) {
                 showWindow(workspaces[0].browserWindow)
-                return
               }
 
               showErrorWindow(
@@ -876,34 +877,36 @@ app.on('open-url', (event, url) => { // for macOS
 
 app.on('second-instance', (event, argv) => {
   writeLog('second-instance [' + argv + ']')
-  const siyuanURL = argv.find((arg) => arg.startsWith('siyuan://'))
   let workspace = argv.find((arg) => arg.startsWith('--workspace='))
   if (workspace) {
     workspace = workspace.split('=')[1]
     writeLog('got second-instance arg [--workspace=' + workspace + ']')
   }
-
-  let foundWorkspace = false
-  workspaces.forEach(item => {
+  const foundWorkspace = workspaces.find(item => {
     if (item.browserWindow && !item.browserWindow.isDestroyed()) {
-      if (siyuanURL) {
-        item.browserWindow.webContents.send('siyuan-openurl', siyuanURL)
-        return
-      }
-
       if (workspace && workspace === item.workspaceDir) {
         showWindow(item.browserWindow)
-        foundWorkspace = true
+        return true
       }
     }
   })
-  if (!foundWorkspace) {
+  if (foundWorkspace) {
+    return
+  }
+  if (workspace) {
     initKernel(workspace).then((isSucc) => {
       if (isSucc) {
         boot()
       }
     })
+    return
   }
+  const siyuanURL = argv.find((arg) => arg.startsWith('siyuan://'))
+  workspaces.forEach(item => {
+    if (item.browserWindow && !item.browserWindow.isDestroyed() && siyuanURL) {
+      item.browserWindow.webContents.send('siyuan-openurl', siyuanURL)
+    }
+  })
 })
 
 app.on('activate', () => {

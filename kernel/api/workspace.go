@@ -21,11 +21,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
+	"github.com/facette/natsort"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -130,11 +132,23 @@ func getWorkspaces(c *gin.Context) {
 		return
 	}
 
-	var workspaces []*Workspace
+	var workspaces, openedWorkspaces, closedWorkspaces []*Workspace
 	for _, p := range workspacePaths {
 		closed := !util.IsWorkspaceLocked(p)
-		workspaces = append(workspaces, &Workspace{Path: p, Closed: closed})
+		if closed {
+			closedWorkspaces = append(closedWorkspaces, &Workspace{Path: p, Closed: closed})
+		} else {
+			openedWorkspaces = append(openedWorkspaces, &Workspace{Path: p, Closed: closed})
+		}
 	}
+	sort.Slice(openedWorkspaces, func(i, j int) bool {
+		return natsort.Compare(util.RemoveEmoji(filepath.Base(openedWorkspaces[i].Path)), util.RemoveEmoji(filepath.Base(openedWorkspaces[j].Path)))
+	})
+	sort.Slice(closedWorkspaces, func(i, j int) bool {
+		return natsort.Compare(util.RemoveEmoji(filepath.Base(closedWorkspaces[i].Path)), util.RemoveEmoji(filepath.Base(closedWorkspaces[j].Path)))
+	})
+	workspaces = append(workspaces, openedWorkspaces...)
+	workspaces = append(workspaces, closedWorkspaces...)
 	ret.Data = workspaces
 }
 

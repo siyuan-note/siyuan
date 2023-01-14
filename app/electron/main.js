@@ -52,10 +52,8 @@ try {
   }
 } catch (e) {
   console.error(e)
-  require('electron').
-    dialog.
-    showErrorBox('创建配置目录失败 Failed to create config directory',
-      '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
+  require('electron').dialog.showErrorBox('创建配置目录失败 Failed to create config directory',
+    '思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.')
   app.exit()
 }
 
@@ -901,12 +899,17 @@ app.on('second-instance', (event, argv) => {
     })
     return
   }
+
   const siyuanURL = argv.find((arg) => arg.startsWith('siyuan://'))
   workspaces.forEach(item => {
     if (item.browserWindow && !item.browserWindow.isDestroyed() && siyuanURL) {
       item.browserWindow.webContents.send('siyuan-openurl', siyuanURL)
     }
   })
+
+  if (!siyuanURL && 0 < workspaces.length) {
+    showWindow(workspaces[0].browserWindow)
+  }
 })
 
 app.on('activate', () => {

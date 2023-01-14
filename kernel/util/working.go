@@ -212,35 +212,25 @@ func initWorkspaceDir(workspaceArg string) {
 		if "" != workspaceArg {
 			WorkspaceDir = workspaceArg
 		}
-		if !gulu.File.IsDir(WorkspaceDir) {
-			log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", defaultWorkspaceDir, WorkspaceDir)
-			WorkspaceDir = defaultWorkspaceDir
-		}
-		workspacePaths = append(workspacePaths, WorkspaceDir)
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
 		if 0 < len(workspacePaths) {
+			// 取最后一个（也就是最近打开的）工作空间
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
-			if "" != workspaceArg {
-				WorkspaceDir = workspaceArg
-			}
-			if !gulu.File.IsDir(WorkspaceDir) {
-				log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
-				WorkspaceDir = defaultWorkspaceDir
-			}
-			workspacePaths[len(workspacePaths)-1] = WorkspaceDir
 		} else {
 			WorkspaceDir = defaultWorkspaceDir
-			if "" != workspaceArg {
-				WorkspaceDir = workspaceArg
-			}
-			if !gulu.File.IsDir(WorkspaceDir) {
-				log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
-				WorkspaceDir = defaultWorkspaceDir
-			}
-			workspacePaths = append(workspacePaths, WorkspaceDir)
+		}
+
+		if "" != workspaceArg {
+			WorkspaceDir = workspaceArg
 		}
 	}
+
+	if !gulu.File.IsDir(WorkspaceDir) {
+		log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
+		WorkspaceDir = defaultWorkspaceDir
+	}
+	workspacePaths = append(workspacePaths, WorkspaceDir)
 
 	if err := WriteWorkspacePaths(workspacePaths); nil != err {
 		log.Fatalf("write workspace conf [%s] failed: %s", workspaceConf, err)
@@ -284,8 +274,6 @@ func ReadWorkspacePaths() (ret []string, err error) {
 		return
 	}
 
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
-
 	var tmp []string
 	for _, d := range ret {
 		d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
@@ -294,6 +282,7 @@ func ReadWorkspacePaths() (ret []string, err error) {
 		}
 	}
 	ret = tmp
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
 

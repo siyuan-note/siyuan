@@ -1403,7 +1403,7 @@ type Sync struct {
 	SaveDir   string `json:"saveDir"`   // 本地同步数据存放目录路径
 }
 
-func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTrafficUploadSize, hTrafficDownloadSize string, err error) {
+func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchangeSize, hTrafficUploadSize, hTrafficDownloadSize string, err error) {
 	stat, err := getCloudSpaceOSS()
 	if nil != err {
 		err = errors.New(Conf.Language(30) + " " + err.Error())
@@ -1431,6 +1431,7 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 	hAssetSize = "-"
 	hSize = "-"
 	hTotalSize = "-"
+	hExchangeSize = "-"
 	hTrafficUploadSize = "-"
 	hTrafficDownloadSize = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
@@ -1439,6 +1440,7 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hTraffi
 		hAssetSize = humanize.Bytes(uint64(assetSize))
 		hSize = humanize.Bytes(uint64(totalSize))
 		hTotalSize = humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize))
+		hExchangeSize = humanize.Bytes(uint64(Conf.User.UserSiYuanPointExchangeRepoSize))
 		hTrafficUploadSize = humanize.Bytes(uint64(Conf.User.UserTrafficUpload))
 		hTrafficDownloadSize = humanize.Bytes(uint64(Conf.User.UserTrafficDownload))
 	}

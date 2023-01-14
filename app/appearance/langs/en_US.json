@@ -1,4 +1,5 @@
 {
+  "pointExchangeSize": "Point Exchange {size}",
   "panel": "Panel",
   "copyPath": "Copy Path",
   "workspaceList": "Workspaces",

@@ -83,7 +83,7 @@ func getCloudSpace(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	sync, backup, size, assetSize, totalSize, hTrafficUploadSize, hTrafficDownloadSize, err := model.GetCloudSpace()
+	sync, backup, hSize, hAssetSize, hTotalSize, exchangeSize, hTrafficUploadSize, hTrafficDownloadSize, err := model.GetCloudSpace()
 	if nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -94,9 +94,10 @@ func getCloudSpace(c *gin.Context) {
 	ret.Data = map[string]interface{}{
 		"sync":                 sync,
 		"backup":               backup,
-		"hAssetSize":           assetSize,
-		"hSize":                size,
-		"hTotalSize":           totalSize,
+		"hAssetSize":           hAssetSize,
+		"hSize":                hSize,
+		"hTotalSize":           hTotalSize,
+		"hExchangeSize":        exchangeSize,
 		"hTrafficUploadSize":   hTrafficUploadSize,
 		"hTrafficDownloadSize": hTrafficDownloadSize,
 	}

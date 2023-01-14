@@ -67,7 +67,9 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 });
             }, Constants.TIMEOUT_BLOCKLOAD);
         }
-        if (protyle.wysiwyg.element.getAttribute("data-top") || protyle.block.showAll || protyle.scroll.lastScrollTop === element.scrollTop || protyle.scroll.lastScrollTop === -1) {
+        if (protyle.wysiwyg.element.getAttribute("data-top") || protyle.block.showAll ||
+            (protyle.scroll && protyle.scroll.element.classList.contains("fn__none")) || !protyle.scroll ||
+            protyle.scroll.lastScrollTop === element.scrollTop || protyle.scroll.lastScrollTop === -1) {
             return;
         }
         if (protyle.scroll.lastScrollTop - element.scrollTop > 0) {

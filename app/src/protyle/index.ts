@@ -170,7 +170,8 @@ export class Protyle {
                 id: options.blockId,
                 k: options.key || "",
                 isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
-                mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0, // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
+                // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
+                mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
                 size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
             }, getResponse => {
                 onGet(getResponse, this.protyle, mergedOptions.action, options.scrollAttr);

@@ -199,9 +199,6 @@ const initBar = () => {
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>
 </div>
-<div id="barSetting" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.config} ${updateHotkeyTip(window.siyuan.config.keymap.general.config.custom)}">
-    <svg><use xlink:href="#iconSettings"></use></svg>
-</div>
 <div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}">
     <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
@@ -266,10 +263,6 @@ const initBar = () => {
                 }).element);
                 const rect = target.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barSetting") {
-                openSetting();
                 event.stopPropagation();
                 break;
             } else if (target.id === "toolbarVIP") {

@@ -1,8 +1,8 @@
 {
+  "panel": "Panneau",
   "copyPath": "Copier le chemin",
   "workspaceList": "Espaces de travail",
   "openWorkspace": "Ouvrir l'espace de travail",
-  "openedWorkspace": "Espace de travail ouvert",
   "removeWorkspaceTip": "Supprimer des espaces de travail",
   "new": "Nouveau",
   "share2LiandiConfirmTip": "Êtes-vous sûr de partager ce document avec Liandi ?",

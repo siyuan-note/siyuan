@@ -30,11 +30,13 @@ export const initStatus = () => {
 <div class="status__msg"></div>
 <div class="fn__flex-1"></div>
 <div class="status__counter"></div>
-<div id="barHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.openBy} ${window.siyuan.languages.help}">
+<div id="statusHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
     <div class="b3-menu fn__none" style="bottom: 32px;right: 5px">
+        <button id="barHelp" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.help}</span></button>
         <button id="barFeedback" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHeart"></use></svg><span class="b3-menu__label">${window.siyuan.languages.feedback}</span></button>
-        <button id="barLock" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconLock"></use></svg><span class="b3-menu__label">${window.siyuan.languages.lockScreen}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.lockScreen.custom)}</span></button>
+        <a href="https://b3log.org/siyuan" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconSiYuan"></use></svg><span class="b3-menu__label">${window.siyuan.languages["_trayMenu"].officialWebsite}</span></a>
+        <a href="https://github.com/siyuan-note/siyuan" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconGithub"></use></svg><span class="b3-menu__label">${window.siyuan.languages["_trayMenu"].openSource}</span></a>
         <button id="barDebug" class="b3-menu__item${isBrowser() ? " fn__none" : ""}"><svg class="b3-menu__icon""><use xlink:href="#iconBug"></use></svg><span class="b3-menu__label">${window.siyuan.languages.debug}</span></button>
     </div>
 </div>`;
@@ -45,7 +47,7 @@ export const initStatus = () => {
     dockElement.addEventListener("mouseleave", () => {
         dockElement.querySelector(".b3-menu").classList.add("fn__none");
     });
-    const helpElement = document.getElementById("barHelp");
+    const helpElement = document.getElementById("statusHelp");
     helpElement.addEventListener("mousemove", () => {
         helpElement.querySelector(".b3-menu").classList.remove("fn__none");
     });
@@ -83,10 +85,6 @@ export const initStatus = () => {
                 target.querySelector(".b3-menu").classList.add("fn__none");
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barLock") {
-                lockScreen();
-                event.stopPropagation();
-                break;
             } else if (target.id === "barHelp") {
                 mountHelp();
                 event.stopPropagation();
@@ -105,7 +103,7 @@ export const initStatus = () => {
                 }
                 event.stopPropagation();
                 break;
-            } else if (target.classList.contains("b3-menu__item")) {
+            } else if (target.classList.contains("b3-menu__item") && target.tagName !== "A") {
                 const type = target.getAttribute("data-type") as TDockType;
                 getDockByType(type).toggleModel(type);
                 if (type === "file" && getSelection().rangeCount > 0) {

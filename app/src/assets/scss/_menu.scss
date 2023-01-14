@@ -35,6 +35,10 @@
     position: relative;
     box-sizing: border-box;
 
+    &:hover {
+      text-decoration: none;
+    }
+
     &[disabled="disabled"] {
       cursor: not-allowed;
       opacity: 0.38;

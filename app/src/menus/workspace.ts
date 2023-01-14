@@ -1,16 +1,19 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
-import {dialog} from "@electron/remote";
-import {ipcRenderer, shell} from "electron";
+import {dialog, getCurrentWindow} from "@electron/remote";
+import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
 import {getOpenNotebookCount, originalPath} from "../util/pathName";
 import {mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {setStorageVal, writeText} from "../protyle/util/compatibility";
+import {setStorageVal} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
-import {showMessage} from "../dialog/message";
+import {openSetting} from "../config";
+import {getAllDocks} from "../layout/getAll";
+import {getDockByType} from "../layout/util";
+import {lockScreen} from "../dialog/processSystem";
 
 export const workspaceMenu = (rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
@@ -21,6 +24,57 @@ export const workspaceMenu = (rect: DOMRect) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", "barWorkspace");
     fetchPost("/api/system/getWorkspaces", {}, (response) => {
+        if (!window.siyuan.config.readonly) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.config,
+                icon: "iconSettings",
+                accelerator: window.siyuan.config.keymap.general.config.custom,
+                click: () => {
+                    openSetting();
+                }
+            }).element);
+        }
+        const dockMenu: IMenu[] = []
+        getAllDocks().forEach(item => {
+            dockMenu.push({
+                icon: item.icon,
+                accelerator: window.siyuan.config.keymap.general[item.hotkeyLangId].custom,
+                label: window.siyuan.languages[item.hotkeyLangId],
+                click() {
+                    getDockByType(item.type).toggleModel(item.type);
+                }
+            });
+        });
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.panel,
+            icon: "iconDock",
+            type: "submenu",
+            submenu: dockMenu
+        }).element);
+        /// #if !BROWSER
+        const workspaceMenu: IMenu[] = [{
+            label: window.siyuan.languages.openWorkspace,
+            click: async () => {
+                const localPath = await dialog.showOpenDialog({
+                    defaultPath: window.siyuan.config.system.homeDir,
+                    properties: ["openDirectory", "createDirectory"],
+                });
+                if (localPath.filePaths.length === 0) {
+                    return;
+                }
+                openWorkspace(localPath.filePaths[0]);
+            }
+        }]
+        response.data.forEach((item: IWorkspace) => {
+            workspaceMenu.push(workspaceItem(item));
+        });
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.workspaceList,
+            type: "submenu",
+            submenu: workspaceMenu,
+        }).element);
+        /// #endif
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.dataHistory,
             icon: "iconHistory",
@@ -74,47 +128,40 @@ export const workspaceMenu = (rect: DOMRect) => {
             }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.lockScreen,
+            icon: "iconLock",
+            accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
+            click: () => {
+                lockScreen();
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.help,
             icon: "iconHelp",
             click: () => {
                 mountHelp();
             }
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.feedback,
+            icon: "iconHeart",
+            click: () => {
+                if ("zh_CN" === window.siyuan.config.lang) {
+                    window.open("https://ld246.com/article/1649901726096");
+                } else {
+                    window.open("https://github.com/siyuan-note/siyuan/issues");
+                }
+            }
+        }).element);
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.openWorkspace,
-            click: async () => {
-                const localPath = await dialog.showOpenDialog({
-                    defaultPath: window.siyuan.config.system.homeDir,
-                    properties: ["openDirectory", "createDirectory"],
-                });
-                if (localPath.filePaths.length === 0) {
-                    return;
-                }
-                openWorkspace(localPath.filePaths[0]);
+            label: window.siyuan.languages.debug,
+            icon: "iconBug",
+            click: () => {
+                getCurrentWindow().webContents.openDevTools({mode: "bottom"});
             }
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            iconHTML: window.siyuan.languages.openedWorkspace,
-            label: "",
-            type: "readonly"
-        }).element);
-        response.data.forEach((item: IWorkspace) => {
-            if (item.closed) {
-                return;
-            }
-            workspaceItem(item);
-        });
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            iconHTML: window.siyuan.languages.workspaceList,
-            label: "",
-            type: "readonly"
-        }).element);
-        response.data.forEach((item: IWorkspace) => {
-            workspaceItem(item);
-        });
         /// #endif
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
     });
@@ -138,36 +185,36 @@ const openWorkspace = (workspace: string) => {
 
 const workspaceItem = (item: IWorkspace) => {
     /// #if !BROWSER
-    window.siyuan.menus.menu.append(new MenuItem({
+    return {
         label: `<div class="b3-tooltips b3-tooltips__ne" aria-label="${item.path}">
     <div class="fn__ellipsis" style="max-width: 256px">${originalPath().basename(item.path)}</div>
 </div>`,
-        click() {
+        click(element: HTMLElement) {
             openWorkspace(item.path);
         },
-        submenu: [{
-            label: window.siyuan.languages.openBy,
-            click() {
-                openWorkspace(item.path);
-            }
-        }, {
-            label: window.siyuan.languages.showInFolder,
-            click() {
-                shell.showItemInFolder(item.path);
-            }
-        }, {
-            label: window.siyuan.languages.copyPath,
-            click() {
-                writeText(item.path);
-                showMessage(window.siyuan.languages.copied);
-            }
-        }, {
-            label: window.siyuan.languages.removeWorkspaceTip,
-            click() {
-                fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
-            }
-        }]
-    }).element);
+        // submenu: [{
+        //     label: window.siyuan.languages.openBy,
+        //     click() {
+        //         openWorkspace(item.path);
+        //     }
+        // }, {
+        //     label: window.siyuan.languages.showInFolder,
+        //     click() {
+        //         shell.showItemInFolder(item.path);
+        //     }
+        // }, {
+        //     label: window.siyuan.languages.copyPath,
+        //     click() {
+        //         writeText(item.path);
+        //         showMessage(window.siyuan.languages.copied);
+        //     }
+        // }, {
+        //     label: window.siyuan.languages.removeWorkspaceTip,
+        //     click() {
+        //         fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
+        //     }
+        // }]
+    };
     /// #endif
 };
 

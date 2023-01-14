@@ -1,8 +1,8 @@
 {
+  "panel": "面板",
   "copyPath": "复制路径",
   "workspaceList": "工作空间列表",
   "openWorkspace": "打开工作空间",
-  "openedWorkspace": "已打开的工作空间",
   "removeWorkspaceTip": "从工作空间列表中移除",
   "new": "新建",
   "share2LiandiConfirmTip": "确定将该文档分享到链滴吗？",

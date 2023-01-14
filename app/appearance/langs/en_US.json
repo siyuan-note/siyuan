@@ -1,8 +1,8 @@
 {
+  "panel": "Panel",
   "copyPath": "Copy Path",
   "workspaceList": "Workspaces",
   "openWorkspace": "Open Workspace",
-  "openedWorkspace": "Opened Workspaces",
   "removeWorkspaceTip": "Remove from Workspaces",
   "new": "New",
   "share2LiandiConfirmTip": "Are you sure to share this document to Liandi?",

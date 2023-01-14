@@ -73,7 +73,7 @@ export const workspaceMenu = (rect: DOMRect) => {
         });
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.workspaceList,
-            icon: "iconFiles",
+            icon: "iconWorkspace",
             type: "submenu",
             submenu: workspaceSubMenu,
         }).element);

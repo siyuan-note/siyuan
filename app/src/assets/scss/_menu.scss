@@ -5,6 +5,12 @@
   background-color: var(--b3-menu-background);
   padding: 8px;
   z-index: 210;
+  max-height: 80vh;
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &--list {
     overflow: auto;
@@ -20,7 +26,7 @@
   }
 
   &__item {
-    padding: 0 16px 0 8px;
+    padding: 0 8px;
     border-radius: 4px;
     user-select: none;
     display: flex;
@@ -43,18 +49,8 @@
     &--show {
       background-color: var(--b3-list-hover);
 
-      .b3-menu__submenu {
+      & > .b3-menu__submenu {
         display: block;
-        border: 1px solid var(--b3-theme-surface-lighter);
-        border-radius: 4px;
-        background-color: var(--b3-menu-background);
-        padding: 8px;
-        position: absolute;
-        left: calc(100% + 8px);
-        top: -8px;
-        box-shadow: var(--b3-dialog-shadow);
-        mix-blend-mode: difference;
-
 
         &--row {
           display: flex;
@@ -91,7 +87,7 @@
     &--current {
       background-color: var(--b3-list-hover);
 
-      .b3-menu__action {
+      & > .b3-menu__action {
         opacity: 1;
       }
     }
@@ -170,6 +166,18 @@
   &__submenu {
     overflow: auto;
     display: none;
+    max-height: 80vh;
+    border: 1px solid var(--b3-theme-surface-lighter);
+    border-radius: 4px;
+    background-color: var(--b3-menu-background);
+    padding: 8px;
+    position: fixed;
+    box-shadow: var(--b3-dialog-shadow);
+    z-index: 1;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__accelerator {

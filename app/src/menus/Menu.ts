@@ -20,9 +20,9 @@ export class Menu {
             if (itemElement.classList.contains("b3-menu__item--readonly")) {
                 return;
             }
-            const subMenuElement = itemElement.querySelector(".b3-menu__submenu");
+            const subMenuElement = itemElement.querySelector(".b3-menu__submenu") as HTMLElement;
             this.element.querySelectorAll(".b3-menu__item--show").forEach((item) => {
-                if (!item.contains(itemElement)) {
+                if (!item.contains(itemElement) && !item.isSameNode(itemElement) && !itemElement.contains(item)) {
                     item.classList.remove("b3-menu__item--show");
                 }
             });
@@ -38,25 +38,22 @@ export class Menu {
         });
     }
 
-    public showSubMenu(subMenuElement: Element) {
+    public showSubMenu(subMenuElement: HTMLElement) {
+        const parentRect = subMenuElement.parentElement.getBoundingClientRect();
+        subMenuElement.style.top = (parentRect.top - 8) + "px";
+        subMenuElement.style.left = (parentRect.right + 8) + "px";
+        subMenuElement.style.bottom = "auto";
         const rect = subMenuElement.getBoundingClientRect();
-        let style = "";
-        const leftPosition = rect.left - this.element.clientWidth - rect.width;
-        if (rect.right > window.innerWidth && (
-            leftPosition > 0 || Math.abs(leftPosition) < (rect.right - window.innerWidth))) {
-            if (leftPosition >= 0) {
-                style = "left:auto;right:calc(100% + 8px);";
+        if (rect.right > window.innerWidth) {
+            if (parentRect.left - 8 > rect.width) {
+                subMenuElement.style.left = (parentRect.left - 8 - rect.width) + "px";
             } else {
-                style = `z-index:1;mix-blend-mode: normal;left:-${this.element.style.left};`;
+                subMenuElement.style.left = (window.innerWidth - rect.width) + "px";
             }
-        } else if (rect.right > window.innerWidth) {
-            style = `z-index:1;mix-blend-mode: normal;left:${window.innerWidth - rect.width - this.element.offsetLeft}px;`;
         }
         if (rect.bottom > window.innerHeight) {
-            style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;
-        }
-        if (style) {
-            subMenuElement.setAttribute("style", style);
+            subMenuElement.style.top = "auto";
+            subMenuElement.style.bottom = "8px";
         }
     }
 
@@ -87,7 +84,7 @@ export class Menu {
         this.element.append(element);
     }
 
-    public popup(options: { x: number, y: number, h?: number , w?: number }, isLeft = false) {
+    public popup(options: { x: number, y: number, h?: number, w?: number }, isLeft = false) {
         if (this.element.innerHTML === "") {
             return;
         }
@@ -183,44 +180,46 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
     if (window.siyuan.menus.menu.element.classList.contains("fn__none") || event.altKey || event.shiftKey || isCtrl(event)) {
         return false;
     }
-    if (event.code === "ArrowDown") {
+    if (event.code === "ArrowDown" || event.code === "ArrowUp") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
         let actionMenuElement;
         if (!currentElement) {
-            actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.firstElementChild, true);
+            if (event.code === "ArrowUp") {
+                actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.lastElementChild, false);
+            } else {
+                actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.firstElementChild, true);
+            }
         } else {
             currentElement.classList.remove("b3-menu__item--current", "b3-menu__item--show");
-            actionMenuElement = getActionMenu(currentElement.nextElementSibling, true);
-            if (!actionMenuElement) {
-                actionMenuElement = getActionMenu(currentElement.parentElement.firstElementChild, true);
+            if (event.code === "ArrowUp") {
+                actionMenuElement = getActionMenu(currentElement.previousElementSibling, false);
+                if (!actionMenuElement) {
+                    actionMenuElement = getActionMenu(currentElement.parentElement.lastElementChild, false);
+                }
+            } else {
+                actionMenuElement = getActionMenu(currentElement.nextElementSibling, true);
+                if (!actionMenuElement) {
+                    actionMenuElement = getActionMenu(currentElement.parentElement.firstElementChild, true);
+                }
             }
         }
         if (actionMenuElement) {
             actionMenuElement.classList.add("b3-menu__item--current");
             actionMenuElement.classList.remove("b3-menu__item--show");
-        }
-    } else if (event.code === "ArrowUp") {
-        const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
-        let actionMenuElement;
-        if (!currentElement) {
-            actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.lastElementChild, false);
-        } else {
-            currentElement.classList.remove("b3-menu__item--current", "b3-menu__item--show");
-            actionMenuElement = getActionMenu(currentElement.previousElementSibling, false);
-            if (!actionMenuElement) {
-                actionMenuElement = getActionMenu(currentElement.parentElement.lastElementChild, false);
+
+            const parentRect = actionMenuElement.parentElement.getBoundingClientRect();
+            const actionMenuRect = actionMenuElement.getBoundingClientRect();
+            if (parentRect.top > actionMenuRect.top || parentRect.bottom < actionMenuRect.bottom) {
+                actionMenuElement.scrollIntoView(parentRect.top > actionMenuRect.top);
             }
         }
-        if (actionMenuElement) {
-            actionMenuElement.classList.add("b3-menu__item--current");
-            actionMenuElement.classList.remove("b3-menu__item--show");
-        }
+        return true;
     } else if (event.code === "ArrowRight") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");
         if (!currentElement) {
             return true;
         }
-        const subMenuElement = currentElement.querySelector(".b3-menu__submenu");
+        const subMenuElement = currentElement.querySelector(".b3-menu__submenu") as HTMLElement;
         if (!subMenuElement) {
             return true;
         }
@@ -231,19 +230,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (actionMenuElement) {
             actionMenuElement.classList.add("b3-menu__item--current");
         }
-
-        const rect = subMenuElement.getBoundingClientRect();
-        let style = "";
-        if (rect.right > window.innerWidth && (rect.left - subMenuElement.clientWidth - rect.width > 0 ||
-            Math.abs(rect.left - subMenuElement.clientWidth - rect.width) < (rect.right - window.innerWidth))) {
-            style = "left:auto;right:calc(100% + 8px);";
-        }
-        if (rect.bottom > window.innerHeight) {
-            style += `top: auto;bottom:-5px;max-height:${Math.min(rect.top, window.innerHeight * 0.4)}px`;
-        }
-        if (style) {
-            subMenuElement.setAttribute("style", style);
-        }
+        window.siyuan.menus.menu.showSubMenu(subMenuElement);
         return true;
     } else if (event.code === "ArrowLeft") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__submenu .b3-menu__item--current");
@@ -270,20 +257,6 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
                 currentElement.dispatchEvent(new CustomEvent(getEventName()));
             }
             window.siyuan.menus.menu.remove();
-        }
-        return true;
-    }
-
-    // submenu scroll
-    if (event.code === "ArrowUp" || event.code === "ArrowDown") {
-        const currentMenuElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current") as HTMLElement;
-        const currentParentElement = currentMenuElement.parentElement;
-        if (currentParentElement.classList.contains("b3-menu__submenu")) {
-            if (currentMenuElement.offsetTop + currentMenuElement.clientHeight > currentParentElement.scrollTop + currentParentElement.clientHeight) {
-                currentParentElement.scrollTop = currentMenuElement.offsetTop + currentMenuElement.clientHeight - currentParentElement.clientHeight;
-            } else if (currentMenuElement.offsetTop < currentParentElement.scrollTop) {
-                currentParentElement.scrollTop = currentMenuElement.offsetTop;
-            }
         }
         return true;
     }

@@ -1,19 +1,20 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
-import {ipcRenderer} from "electron";
+import {ipcRenderer, shell} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
 import {getOpenNotebookCount, originalPath} from "../util/pathName";
 import {mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
 import {getDockByType} from "../layout/util";
 import {lockScreen} from "../dialog/processSystem";
+import {showMessage} from "../dialog/message";
 
 export const workspaceMenu = (rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
@@ -52,8 +53,9 @@ export const workspaceMenu = (rect: DOMRect) => {
             submenu: dockMenu
         }).element);
         /// #if !BROWSER
-        const workspaceMenu: IMenu[] = [{
+        const workspaceSubMenu: IMenu[] = [{
             label: window.siyuan.languages.openWorkspace,
+            iconHTML: Constants.ZWSP,
             click: async () => {
                 const localPath = await dialog.showOpenDialog({
                     defaultPath: window.siyuan.config.system.homeDir,
@@ -65,13 +67,14 @@ export const workspaceMenu = (rect: DOMRect) => {
                 openWorkspace(localPath.filePaths[0]);
             }
         }]
+        workspaceSubMenu.push({type: "separator"});
         response.data.forEach((item: IWorkspace) => {
-            workspaceMenu.push(workspaceItem(item));
+            workspaceSubMenu.push(workspaceItem(item) as IMenu);
         });
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.workspaceList,
             type: "submenu",
-            submenu: workspaceMenu,
+            submenu: workspaceSubMenu,
         }).element);
         /// #endif
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -186,34 +189,36 @@ const openWorkspace = (workspace: string) => {
 const workspaceItem = (item: IWorkspace) => {
     /// #if !BROWSER
     return {
-        label: `<div class="b3-tooltips b3-tooltips__ne" aria-label="${item.path}">
-    <div class="fn__ellipsis" style="max-width: 256px">${originalPath().basename(item.path)}</div>
+        label: `<div data-type="a" aria-label="${item.path}" class="fn__ellipsis" style="max-width: 256px">
+    ${originalPath().basename(item.path)}
 </div>`,
-        click(element: HTMLElement) {
+        iconHTML: Constants.ZWSP,
+        type: "submenu",
+        submenu: [{
+            label: window.siyuan.languages.openBy,
+            click() {
+                openWorkspace(item.path);
+            }
+        }, {
+            label: window.siyuan.languages.showInFolder,
+            click() {
+                shell.showItemInFolder(item.path);
+            }
+        }, {
+            label: window.siyuan.languages.copyPath,
+            click() {
+                writeText(item.path);
+                showMessage(window.siyuan.languages.copied);
+            }
+        }, {
+            label: window.siyuan.languages.removeWorkspaceTip,
+            click() {
+                fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
+            }
+        }],
+        click() {
             openWorkspace(item.path);
         },
-        // submenu: [{
-        //     label: window.siyuan.languages.openBy,
-        //     click() {
-        //         openWorkspace(item.path);
-        //     }
-        // }, {
-        //     label: window.siyuan.languages.showInFolder,
-        //     click() {
-        //         shell.showItemInFolder(item.path);
-        //     }
-        // }, {
-        //     label: window.siyuan.languages.copyPath,
-        //     click() {
-        //         writeText(item.path);
-        //         showMessage(window.siyuan.languages.copied);
-        //     }
-        // }, {
-        //     label: window.siyuan.languages.removeWorkspaceTip,
-        //     click() {
-        //         fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
-        //     }
-        // }]
     };
     /// #endif
 };

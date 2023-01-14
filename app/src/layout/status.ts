@@ -34,7 +34,7 @@ export const initStatus = () => {
     <svg><use xlink:href="#iconHelp"></use></svg>
     <div class="b3-menu fn__none" style="bottom: 32px;right: 5px">
         <button id="barHelp" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.help}</span></button>
-        <button id="barFeedback" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHeart"></use></svg><span class="b3-menu__label">${window.siyuan.languages.feedback}</span></button>
+        <a href="${"zh_CN" === window.siyuan.config.lang ? "https://ld246.com/article/1649901726096" : "https://github.com/siyuan-note/siyuan/issues"}" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHeart"></use></svg><span class="b3-menu__label">${window.siyuan.languages.feedback}</span></a>
         <a href="https://b3log.org/siyuan" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconSiYuan"></use></svg><span class="b3-menu__label">${window.siyuan.languages["_trayMenu"].officialWebsite}</span></a>
         <a href="https://github.com/siyuan-note/siyuan" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconGithub"></use></svg><span class="b3-menu__label">${window.siyuan.languages["_trayMenu"].openSource}</span></a>
         <button id="barDebug" class="b3-menu__item${isBrowser() ? " fn__none" : ""}"><svg class="b3-menu__icon""><use xlink:href="#iconBug"></use></svg><span class="b3-menu__label">${window.siyuan.languages.debug}</span></button>
@@ -93,14 +93,6 @@ export const initStatus = () => {
                 /// #if !BROWSER
                 getCurrentWindow().webContents.openDevTools({mode: "bottom"});
                 /// #endif
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barFeedback") {
-                if ("zh_CN" === window.siyuan.config.lang) {
-                    window.open("https://ld246.com/article/1649901726096");
-                } else {
-                    window.open("https://github.com/siyuan-note/siyuan/issues");
-                }
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-menu__item") && target.tagName !== "A") {

@@ -54,7 +54,7 @@ export const workspaceMenu = (rect: DOMRect) => {
         }).element);
         /// #if !BROWSER
         const workspaceSubMenu: IMenu[] = [{
-            label: window.siyuan.languages.openWorkspace,
+            label: window.siyuan.languages.openBy + "...",
             iconHTML: Constants.ZWSP,
             click: async () => {
                 const localPath = await dialog.showOpenDialog({
@@ -73,19 +73,12 @@ export const workspaceMenu = (rect: DOMRect) => {
         });
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.workspaceList,
+            icon: "iconFiles",
             type: "submenu",
             submenu: workspaceSubMenu,
         }).element);
         /// #endif
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.dataHistory,
-            icon: "iconHistory",
-            accelerator: window.siyuan.config.keymap.general.dataHistory.custom,
-            click: () => {
-                openHistory();
-            }
-        }).element);
         if (!window.siyuan.config.readonly) {
             if (getOpenNotebookCount() < 2) {
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -136,6 +129,14 @@ export const workspaceMenu = (rect: DOMRect) => {
             accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
             click: () => {
                 lockScreen();
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.dataHistory,
+            icon: "iconHistory",
+            accelerator: window.siyuan.config.keymap.general.dataHistory.custom,
+            click: () => {
+                openHistory();
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -192,6 +193,7 @@ const workspaceItem = (item: IWorkspace) => {
         label: `<div data-type="a" aria-label="${item.path}" class="fn__ellipsis" style="max-width: 256px">
     ${originalPath().basename(item.path)}
 </div>`,
+        current: !item.closed,
         iconHTML: Constants.ZWSP,
         type: "submenu",
         submenu: [{

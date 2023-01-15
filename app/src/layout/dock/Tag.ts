@@ -6,9 +6,9 @@ import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import {MenuItem} from "../../menus/Menu";
-import {Dialog} from "../../dialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
+import {renameTag} from "./util";
 
 export class Tag extends Model {
     private openNodes: string[];
@@ -86,28 +86,7 @@ export class Tag extends Model {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.rename,
                     click() {
-                        const dialog = new Dialog({
-                            title: window.siyuan.languages.rename,
-                            content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="${labelName}"></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                            width: "520px",
-                        });
-                        const btnsElement = dialog.element.querySelectorAll(".b3-button");
-                        btnsElement[0].addEventListener("click", () => {
-                            dialog.destroy();
-                        });
-                        const inputElement = dialog.element.querySelector("input");
-                        dialog.bindInput(inputElement, () => {
-                            (btnsElement[1] as HTMLButtonElement).click();
-                        });
-                        inputElement.focus();
-                        inputElement.select();
-                        btnsElement[1].addEventListener("click", () => {
-                            fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
-                        });
+                        renameTag(labelName);
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({

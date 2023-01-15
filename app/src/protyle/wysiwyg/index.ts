@@ -19,7 +19,7 @@ import {getSearch, isMobile} from "../../util/functions";
 import {isLocalPath, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {previewImage} from "../preview/image";
-import {contentMenu, imgMenu, linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
+import {contentMenu, imgMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
 import * as dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
 import {input} from "./input";
@@ -1158,13 +1158,18 @@ export class WYSIWYG {
                     protyle.toolbar.showFileAnnotationRef(protyle, target);
                     return false;
                 }
+                if (types.includes("tag")) {
+                    tagMenu(protyle, target);
+                    return false;
+                }
                 if (types.includes("inline-memo")) {
                     protyle.toolbar.showRender(protyle, target);
                     return false;
                 }
                 if (types.includes("a")) {
                     linkMenu(protyle, target);
-                    if (target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
+                    if (window.siyuan.config.editor.floatWindowMode === 0 &&
+                        target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
                         // 阻止 popover
                         target.setAttribute("prevent-popover", "true");
                         setTimeout(() => {

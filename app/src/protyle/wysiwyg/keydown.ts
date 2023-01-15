@@ -52,7 +52,7 @@ import {
     goHome,
     upSelect
 } from "./commonHotkey";
-import {linkMenu, refMenu, setFold, zoomOut} from "../../menus/protyle";
+import {linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -533,6 +533,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     } else if (types.includes("a")) {
                         linkMenu(protyle, inlineElement);
+                        return;
+                    } else if (types.includes("tag")) {
+                        tagMenu(protyle, inlineElement);
                         return;
                     }
                 }

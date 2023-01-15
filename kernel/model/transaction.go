@@ -1344,7 +1344,7 @@ func autoFixIndex() {
 		reindexTree(rootID, i, size)
 	}
 
-	util.PushStatusBar("")
+	util.PushStatusBar(Conf.Language(185))
 }
 
 func reindexTreeByPath(box, p string, i, size int) {

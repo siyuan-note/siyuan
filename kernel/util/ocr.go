@@ -21,7 +21,6 @@ import (
 	"context"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 	"time"
 
@@ -97,8 +96,8 @@ func Tesseract(imgAbsPath string) string {
 	}
 
 	ret := string(output)
-	reg := regexp.MustCompile("\\s+")
-	ret = reg.ReplaceAllString(ret, "")
+	ret = strings.ReplaceAll(ret, "\r", "")
+	ret = strings.ReplaceAll(ret, "\n", "")
 	logging.LogInfof("tesseract [path=%s, size=%d]: %s", imgAbsPath, info.Size(), ret)
 	ocrResultCache.Set(imgAbsPath, ret, info.Size())
 	return ret

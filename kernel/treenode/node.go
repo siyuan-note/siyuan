@@ -113,8 +113,7 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 			if nil != n.Parent && ast.NodeImage == n.Parent.Type {
 				destNode := n.Parent.ChildByType(ast.NodeLinkDest)
 				if nil != destNode {
-					// 桌面端支持搜索图片中的文本 https://github.com/siyuan-note/siyuan/issues/3470
-					// 尝试 OCR 识别图片中的文字并作为图片的 alt
+					// 桌面端支持搜索图片 OCR 文本 https://github.com/siyuan-note/siyuan/issues/3470
 					if text := util2.Tesseract(filepath.Join(util2.DataDir, destNode.TokensStr())); "" != text {
 						buf.WriteByte(' ')
 						buf.WriteString(text)

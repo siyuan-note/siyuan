@@ -1057,6 +1057,7 @@
     "181": "El documento ha sido compartido con Liandi, <a href=\"%s\" target=\"_blank\">haga clic para ver</a>",
     "182": "Compartiendo documento, por favor espere...",
     "183": "Validando el árbol del documento de índice [%d/%d %s]",
-    "184": "Con la tecnología de <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>"
+    "184": "Con la tecnología de <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
+    "185": "Verificación de índice completada"
   }
 }

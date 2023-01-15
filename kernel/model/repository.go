@@ -1203,7 +1203,7 @@ func subscribeEvents() {
 	indexUpsertFileCount := 0
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(160), filepath.Base(path))
-		if 0 == indexUpsertFileCount%128 {
+		if 0 == indexUpsertFileCount%64 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
@@ -1235,7 +1235,7 @@ func subscribeEvents() {
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(162), filepath.Base(path))
 		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == coUpsertFileCount%128 {
+		if 0 == coUpsertFileCount%64 {
 			util.ContextPushMsg(context, msg)
 		}
 		coUpsertFileCount++

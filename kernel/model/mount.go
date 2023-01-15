@@ -123,16 +123,16 @@ func Unmount(boxID string) {
 }
 
 func unmount0(boxID string) {
-	for _, box := range Conf.GetOpenedBoxes() {
-		if box.ID == boxID {
-			boxConf := box.GetConf()
-			boxConf.Closed = true
-			box.SaveConf(boxConf)
-			box.Unindex()
-			debug.FreeOSMemory()
-			return
-		}
+	box := Conf.Box(boxID)
+	if nil == box {
+		return
 	}
+
+	boxConf := box.GetConf()
+	boxConf.Closed = true
+	box.SaveConf(boxConf)
+	box.Unindex()
+	debug.FreeOSMemory()
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {

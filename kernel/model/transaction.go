@@ -1234,7 +1234,17 @@ var autoFixLock = sync.Mutex{}
 func autoFixIndex() {
 	defer logging.Recover()
 
-	if util.IsMutexLocked(&autoFixLock) || isFullReindexing {
+	if isFullReindexing {
+		logging.LogInfof("skip check index caused by full reindexing")
+		return
+	}
+
+	if util.IsMutexLocked(&syncLock) {
+		logging.LogInfof("skip check index caused by sync lock")
+		return
+	}
+
+	if util.IsMutexLocked(&autoFixLock) {
 		return
 	}
 
@@ -1334,7 +1344,7 @@ func autoFixIndex() {
 		reindexTree(rootID, i, size)
 	}
 
-	util.PushStatusBar("")
+	util.PushStatusBar(Conf.Language(185))
 }
 
 func reindexTreeByPath(box, p string, i, size int) {

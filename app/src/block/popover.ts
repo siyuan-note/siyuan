@@ -8,7 +8,7 @@ export const initBlockPopover = () => {
     let timeout: number;
     let timeoutHide: number;
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
-    document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement }) => {
+    document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
         if (!window.siyuan.config) {
             return;
         }
@@ -74,7 +74,7 @@ export const initBlockPopover = () => {
     });
 };
 
-const hidePopover = (event: MouseEvent & { target: HTMLElement }) => {
+const hidePopover = (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
     if (hasClosestByClassName(event.target, "b3-menu") ||
         (event.target.id && event.target.tagName !== "svg" && (event.target.id.startsWith("minder_node") || event.target.id.startsWith("kity_") || event.target.id.startsWith("node_")))
         || event.target.classList.contains("counter")
@@ -97,7 +97,13 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement }) => {
         popoverTargetElement = linkElement;
     }
     if (!popoverTargetElement) {
-        const blockElement = hasClosestByClassName(event.target, "block__popover", true);
+        // 移动到弹窗的 loading 元素上，但经过 settimeout 后 loading 已经被移除了
+        // https://ld246.com/article/1673596577519/comment/1673767749885#comments
+        let targetElement = event.target
+        if (!targetElement.parentElement) {
+            targetElement = event.path[1]
+        }
+        const blockElement = hasClosestByClassName(targetElement, "block__popover", true);
         const maxEditLevels: { [key: string]: number } = {oid: 0};
         window.siyuan.blockPanels.forEach((item) => {
             if (item.targetElement && item.element.getAttribute("data-pin") === "true") {

@@ -10,7 +10,6 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 /// #endif
 import {isBrowser} from "../util/functions";
-import {lockScreen} from "../dialog/processSystem";
 
 export const initStatus = () => {
     /// #if !MOBILE

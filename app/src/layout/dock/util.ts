@@ -111,4 +111,4 @@ export const renameTag = (labelName: string) => {
     btnsElement[1].addEventListener("click", () => {
         fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
     });
-}
+};

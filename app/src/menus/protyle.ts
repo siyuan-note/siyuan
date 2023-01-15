@@ -968,7 +968,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.rename,
         click() {
-            renameTag(tagElement.textContent.replace(Constants.ZWSP, ""))
+            renameTag(tagElement.textContent.replace(Constants.ZWSP, ""));
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({

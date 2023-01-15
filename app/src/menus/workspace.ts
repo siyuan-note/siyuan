@@ -35,7 +35,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                 }
             }).element);
         }
-        const dockMenu: IMenu[] = []
+        const dockMenu: IMenu[] = [];
         getAllDocks().forEach(item => {
             dockMenu.push({
                 icon: item.icon,
@@ -66,7 +66,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                 }
                 openWorkspace(localPath.filePaths[0]);
             }
-        }]
+        }];
         workspaceSubMenu.push({type: "separator"});
         response.data.forEach((item: IWorkspace) => {
             workspaceSubMenu.push(workspaceItem(item) as IMenu);

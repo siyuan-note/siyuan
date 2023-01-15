@@ -18,10 +18,11 @@ package treenode
 
 import (
 	"bytes"
-	"github.com/88250/gulu"
+	"path/filepath"
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
@@ -31,6 +32,7 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/88250/lute/util"
 	"github.com/siyuan-note/logging"
+	util2 "github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func GetBlockRef(n *ast.Node) (blockRefID, blockRefText, blockRefSubtype string) {
@@ -107,6 +109,18 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 		switch n.Type {
 		case ast.NodeLinkText:
 			buf.Write(n.Tokens)
+
+			if nil != n.Parent && ast.NodeImage == n.Parent.Type {
+				destNode := n.Parent.ChildByType(ast.NodeLinkDest)
+				if nil != destNode {
+					// 桌面端支持搜索图片 OCR 文本 https://github.com/siyuan-note/siyuan/issues/3470
+					if text := util2.Tesseract(filepath.Join(util2.DataDir, destNode.TokensStr())); "" != text {
+						buf.WriteByte(' ')
+						buf.WriteString(text)
+					}
+				}
+			}
+
 			buf.WriteByte(' ')
 		case ast.NodeLinkDest:
 			buf.Write(n.Tokens)

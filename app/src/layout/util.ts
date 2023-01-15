@@ -157,11 +157,11 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
     fetchPost("/api/system/setUILayout", {layout: layoutJSON, exit: typeof cb !== "undefined"}, () => {
-            if (reload) {
-                window.location.reload();
-            } else if (cb) {
-                cb();
-            }
+        if (reload) {
+            window.location.reload();
+        } else if (cb) {
+            cb();
+        }
     });
 };
 
@@ -454,6 +454,14 @@ export const resizeTabs = () => {
                             chartInstance.resize();
                         }
                     });
+                }
+                // 保持光标位置不变 https://ld246.com/article/1673704873983/comment/1673765814595#comments
+                if (!item.element.classList.contains("fn__none") && item.editor.protyle.toolbar.range) {
+                    const wysiwygRect = item.editor.protyle.wysiwyg.element.getBoundingClientRect()
+                    const rangeRect = item.editor.protyle.toolbar.range.getBoundingClientRect()
+                    if (wysiwygRect.top > rangeRect.top || wysiwygRect.bottom < rangeRect.bottom) {
+                        item.editor.protyle.toolbar.range.startContainer.parentElement.scrollIntoView(wysiwygRect.top > rangeRect.top);
+                    }
                 }
             }
         });

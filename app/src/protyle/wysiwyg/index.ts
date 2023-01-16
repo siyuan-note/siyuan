@@ -1578,7 +1578,7 @@ export class WYSIWYG {
                             openBy(linkAddress, "app");
                         } else {
                             const page = getSearch("page", linkAddress);
-                            openAsset(linkPathname, page === "" ? undefined : parseInt(page), "right");
+                            openAsset(linkPathname, page === null ? undefined : parseInt(page), "right");
                         }
                     } else {
                         /// #if !BROWSER

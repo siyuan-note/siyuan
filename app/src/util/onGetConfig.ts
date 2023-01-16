@@ -262,7 +262,7 @@ const initBar = () => {
                     }
                 }).element);
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
                 event.stopPropagation();
                 break;
             } else if (target.id === "toolbarVIP") {

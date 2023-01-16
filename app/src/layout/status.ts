@@ -118,7 +118,7 @@ export const initStatus = () => {
                     }
                 }).element);
                 const rect = target.getBoundingClientRect()
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, w: rect.width});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height}, true);
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-menu__item")) {

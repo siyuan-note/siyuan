@@ -476,7 +476,6 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         } else {
             onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]);
         }
-        updateTitle(undefined, id !== protyle.block.rootID);
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (focusId) {
             const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId}"]`);
@@ -497,6 +496,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         /// #if !MOBILE
         if (protyle.model) {
             updateBacklinkGraph(getAllModels(), protyle);
+            updateTitle(undefined, id !== protyle.block.rootID, protyle.model.parent.headElement.getAttribute("data-id"));
         }
         /// #endif
         if (callback) {

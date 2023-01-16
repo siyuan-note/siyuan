@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, getInstanceById, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
@@ -28,6 +28,9 @@ import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
 import {getWorkspaceName, workspaceMenu} from "../menus/workspace";
+import {Tab} from "../layout/Tab";
+import {Editor} from "../editor";
+import {zoomOut} from "../menus/protyle";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -211,6 +214,17 @@ const initBar = () => {
         while (!target.classList.contains("toolbar")) {
             if (target.id === "barBack") {
                 goBack();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barExitReadOnly") {
+                editor.setMode();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "barExitFocus") {
+                const editor = (getInstanceById(target.getAttribute("data-id")) as Tab)?.model;
+                if (editor instanceof Editor) {
+                    zoomOut(editor.editor.protyle, editor.editor.protyle.block.rootID);
+                }
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {

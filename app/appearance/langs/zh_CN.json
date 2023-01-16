@@ -1,4 +1,6 @@
 {
+  "exitFocus": "退出聚焦",
+  "exitReadOnly": "退出只读",
   "pointExchangeSize": "积分兑换",
   "panel": "面板",
   "copyPath": "复制路径",

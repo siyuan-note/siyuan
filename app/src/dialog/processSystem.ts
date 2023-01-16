@@ -11,6 +11,7 @@ import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {getCurrentWindow} from "@electron/remote";
 import {getWorkspaceName} from "../menus/workspace";
+import {escapeHtml} from "../util/escape";
 
 export const lockScreen = () => {
     /// #if BROWSER
@@ -281,36 +282,38 @@ export const setTitle = (title: string, protyle?: IProtyle) => {
         dragElement.setAttribute("title", versionTitle);
     } else {
         title = title || "Untitled";
+        document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
+        dragElement.setAttribute("title", title);
+        title = escapeHtml(title)
         if (protyle && protyle.disabled) {
-            title = `[${window.siyuan.languages.editReadonly}] ${title}`;
+            title = `${title}<span class="fn__space"></span><button id="barExitReadOnly" class="b3-button b3-button--small b3-button--success">${window.siyuan.languages.exitReadOnly}</button>`;
         }
         if (protyle && protyle.block.showAll) {
-            title = `[${window.siyuan.languages.enter}] ${title}`;
+            title = `${title}<span class="fn__space"></span><button data-id="${protyle.model.headElement.getAttribute("data-id")}" id="barExitFocus" class="b3-button b3-button--small b3-button--info">${window.siyuan.languages.exitFocus}</button>`;
         }
-        document.title = `${title} - ${workspaceName}  - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        dragElement.textContent = title;
-        dragElement.setAttribute("title", title);
+        dragElement.innerHTML = title;
     }
 };
 
-export const updateTitle = (readonly?: boolean, zoomIn?: boolean) => {
-    const title = document.getElementById("drag").textContent;
+export const updateTitle = (readonly?: boolean, zoomIn?: boolean, zoomInId?: string) => {
+    const dragElement = document.getElementById("drag");
+    const title = dragElement.textContent;
     if (typeof readonly === "boolean") {
-        if (readonly) {
-            if (title.indexOf(window.siyuan.languages.editReadonly) === -1) {
-                setTitle(`[${window.siyuan.languages.editReadonly}] ${title}`);
-            }
-        } else {
-            setTitle(title.replace(`[${window.siyuan.languages.editReadonly}] `, ""));
+        const barExitReadOnlyElement = dragElement.querySelector("#barExitReadOnly")
+        if (readonly && !barExitReadOnlyElement) {
+            dragElement.insertAdjacentHTML("beforeend", `<span class="fn__space"></span><button id="barExitReadOnly" class="b3-button b3-button--small b3-button--success">${window.siyuan.languages.exitReadOnly}</button>`)
+        } else if (!readonly && barExitReadOnlyElement) {
+            barExitReadOnlyElement.previousElementSibling.remove();
+            barExitReadOnlyElement.remove();
         }
     }
     if (typeof zoomIn === "boolean") {
-        if (zoomIn) {
-            if (title.indexOf(window.siyuan.languages.enter) === -1) {
-                setTitle(`[${window.siyuan.languages.enter}] ${title}`);
-            }
-        } else {
-            setTitle(title.replace(`[${window.siyuan.languages.enter}] `, ""));
+        const barExitFocusElement = dragElement.querySelector("#barExitFocus")
+        if (zoomIn && !barExitFocusElement) {
+            dragElement.insertAdjacentHTML("beforeend", `<span class="fn__space"></span><button data-id="${zoomInId}" id="barExitFocus" class="b3-button b3-button--small b3-button--info">${window.siyuan.languages.exitFocus}</button>`)
+        } else if (!zoomIn && barExitFocusElement) {
+            barExitFocusElement.previousElementSibling.remove();
+            barExitFocusElement.remove();
         }
     }
 };

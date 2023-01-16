@@ -1,4 +1,6 @@
 {
+  "exitFocus": "Exit focus",
+  "exitReadOnly": "Exit read-only",
   "pointExchangeSize": "Point Exchange",
   "panel": "Panel",
   "copyPath": "Copy Path",

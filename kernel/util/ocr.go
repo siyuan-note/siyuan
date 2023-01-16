@@ -29,7 +29,10 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-var tesseractEnabled bool
+var (
+	tesseractEnabled bool
+	tesseractErrCnt  int
+)
 
 func initTesseract() {
 	ver := getTesseractVer()
@@ -87,12 +90,19 @@ func Tesseract(imgAbsPath string) string {
 	output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
 		logging.LogWarnf("tesseract [path=%s, size=%d] timeout", imgAbsPath, info.Size())
+		tesseractErrCnt++
 		return ""
 	}
 
 	if nil != err {
 		logging.LogWarnf("tesseract [path=%s, size=%d] failed: %s", imgAbsPath, info.Size(), err)
+		tesseractErrCnt++
 		return ""
+	}
+
+	if 16 < tesseractErrCnt {
+		tesseractEnabled = false
+		logging.LogWarnf("disable tesseract-ocr caused by too many errors")
 	}
 
 	ret := string(output)

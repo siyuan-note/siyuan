@@ -428,6 +428,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	Conf.Close()
 	sql.CloseDatabase()
 	treenode.SaveBlockTree(false)
+	util.SaveAssetsTexts()
 	clearWorkspaceTemp()
 	clearPortJSON()
 	util.UnlockWorkspace()

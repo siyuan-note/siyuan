@@ -116,13 +116,13 @@ func initTesseract() {
 		logging.LogWarnf("no eng tesseract lang found")
 		return
 	}
-	if !gulu.Str.Contains("chi_sim", langs) {
-		logging.LogWarnf("no chi_sim tesseract lang found")
+	if !gulu.Str.Contains("chi_*", langs) {
+		logging.LogWarnf("no chi_* tesseract lang found")
 		return
 	}
 
 	for _, lang := range langs {
-		if "eng" == lang || "chi_sim" == lang {
+		if "eng" == lang || strings.HasPrefix(lang, "chi") {
 			TesseractLangs = append(TesseractLangs, lang)
 		}
 	}

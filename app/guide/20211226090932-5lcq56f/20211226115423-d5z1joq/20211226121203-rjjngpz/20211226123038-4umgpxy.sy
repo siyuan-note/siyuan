@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20220905215759"
+		"updated": "20230117003908"
 	},
 	"Children": [
 		{
@@ -658,6 +658,109 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230117003901-ze4mbzz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230117003901-ze4mbzz",
+				"updated": "20230117003901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "圖片 OCR 提取文本"
+				}
+			]
+		},
+		{
+			"ID": "20230117003901-5pfzttc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117003901-5pfzttc",
+				"updated": "20230117003908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "該特性僅在桌面端支持，並且需要先手動安裝 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/tesseract-ocr/tesseract",
+					"TextMarkTextContent": "Tesseract OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 程序。​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​在安裝 Tesseract OCR 時需要勾選中文語言包，並將安裝後的 Tesseract-OCR 目錄路徑添加到環境變量 PATH 中，這樣思源才能直接調用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tesseract"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 命令進行圖片 OCR 提取文本。如果安裝正常的話，在內核啟動日誌中可以搜索到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tesseract-ocr enabled"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20230117003901-j7r2o7f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117003901-j7r2o7f",
+				"updated": "20230117003901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "圖片 OCR 提取文本過程是自動在後台進行的，目前僅支持 PNG、JPG 圖片。提取的文本會被用於搜索功能，這樣就能通過文本關鍵字來定位圖片。"
+				}
+			]
+		},
+		{
+			"ID": "20230117003901-ds4ok9s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117003901-ds4ok9s",
+				"updated": "20230117003901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OCR 的結果保存在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/data/assets/ocr-texts.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中，如果需要重新 OCR 或者調整提取結果，可以在關閉思源的情況下刪除或修改該文件，啟動思源以後手動重建索引。"
 				}
 			]
 		}

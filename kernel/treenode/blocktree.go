@@ -386,6 +386,7 @@ func InitBlockTree(force bool) {
 	}
 	blockTreesLock.Unlock()
 	debug.FreeOSMemory()
+
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
 	}
@@ -414,6 +415,7 @@ func SaveBlockTree(force bool) {
 		return
 	}
 	debug.FreeOSMemory()
+
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
 	}

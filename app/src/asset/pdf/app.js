@@ -1210,7 +1210,6 @@ class PDFViewerApplication {
         let sidebarView = AppOptions.get('sidebarViewOnLoad')
         let scrollMode = AppOptions.get('scrollModeOnLoad')
         let spreadMode = AppOptions.get('spreadModeOnLoad')
-
         if (stored.page && viewOnLoad !== ViewOnLoad.INITIAL) {
           hash =
             `page=${stored.page}&zoom=${zoom || stored.zoom},` +
@@ -1268,6 +1267,11 @@ class PDFViewerApplication {
             setTimeout(resolve, FORCE_PAGES_LOADED_TIMEOUT)
           }),
         ])
+        // NOTE 通过引用打开
+        if (this.annoId && this.pdfId) {
+          webViewerPageNumberChanged(
+            {value: this.pdfId, pdfInstance: this, id: this.annoId})
+        }
         if (!initialBookmark && !hash) {
           return
         }
@@ -1280,11 +1284,6 @@ class PDFViewerApplication {
         pdfViewer.currentScaleValue = pdfViewer.currentScaleValue
         // Re-apply the initial document location.
         this.setInitialView(hash)
-        // NOTE 通过引用打开
-        if (this.annoId && this.pdfId) {
-          webViewerPageNumberChanged(
-            {value: this.pdfId, pdfInstance: this, id: this.annoId})
-        }
       }).catch(() => {
         // Ensure that the document is always completely initialized,
         // even if there are any errors thrown above.

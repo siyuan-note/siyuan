@@ -364,7 +364,7 @@ const showWindow = (wnd) => {
   wnd.focus()
 }
 
-const initKernel = (workspace, lang) => {
+const initKernel = (workspace, port, lang) => {
   return new Promise(async (resolve) => {
     bootWindow = new BrowserWindow({
       width: screen.getPrimaryDisplay().size.width / 2,
@@ -390,22 +390,26 @@ const initKernel = (workspace, lang) => {
     }
 
     if (!isDevEnv || workspaces.length > 0) {
-      const getAvailablePort = () => {
-        // https://gist.github.com/mikeal/1840641
-        return new Promise((portResolve, portReject) => {
-          const server = net.createServer()
-          server.on('error', error => {
-            writeLog(error)
-            kernelPort = ''
-            portReject()
+      if (port && "" !== port) {
+        kernelPort = port
+      } else {
+        const getAvailablePort = () => {
+          // https://gist.github.com/mikeal/1840641
+          return new Promise((portResolve, portReject) => {
+            const server = net.createServer()
+            server.on('error', error => {
+              writeLog(error)
+              kernelPort = ''
+              portReject()
+            })
+            server.listen(0, () => {
+              kernelPort = server.address().port
+              server.close(() => portResolve(kernelPort))
+            })
           })
-          server.listen(0, () => {
-            kernelPort = server.address().port
-            server.close(() => portResolve(kernelPort))
-          })
-        })
+        }
+        await getAvailablePort()
       }
-      await getAvailablePort()
     }
     writeLog('got kernel port [' + kernelPort + ']')
     if (!kernelPort) {
@@ -417,10 +421,13 @@ const initKernel = (workspace, lang) => {
     if (isDevEnv && workspaces.length === 0) {
       cmds.push('--mode', 'dev')
     }
-    if (workspace) {
+    if (workspace && "" !== workspace) {
       cmds.push('--workspace', workspace)
     }
-    if (lang) {
+    if (port && "" !== port) {
+      cmds.push('--port', port)
+    }
+    if (lang && "" !== lang) {
       cmds.push('--lang', lang)
     }
     let cmd = `ui version [${appVer}], booting kernel [${kernelPath} ${cmds.join(
@@ -728,7 +735,7 @@ app.whenReady().then(() => {
       }
     })
     if (!foundWorkspace) {
-      initKernel(data.workspace, data.lang).then((isSucc) => {
+      initKernel(data.workspace, "", data.lang).then((isSucc) => {
         if (isSucc) {
           boot()
         }
@@ -835,7 +842,7 @@ app.whenReady().then(() => {
     firstOpenWindow.show()
     // 初始化启动
     ipcMain.on('siyuan-first-init', (event, data) => {
-      initKernel(data.workspace, data.lang).then((isSucc) => {
+      initKernel(data.workspace, "", data.lang).then((isSucc) => {
         if (isSucc) {
           boot()
         }
@@ -855,7 +862,11 @@ app.whenReady().then(() => {
     if (workspace) {
       writeLog('got arg [--workspace=' + workspace + ']')
     }
-    initKernel(workspace).then((isSucc) => {
+    const port = getArg('--port')
+    if (port) {
+      writeLog('got arg [--port=' + port + ']')
+    }
+    initKernel(workspace, port, "").then((isSucc) => {
       if (isSucc) {
         boot()
       }
@@ -880,6 +891,13 @@ app.on('second-instance', (event, argv) => {
     workspace = workspace.split('=')[1]
     writeLog('got second-instance arg [--workspace=' + workspace + ']')
   }
+  let port = argv.find((arg) => arg.startsWith('--port='))
+  if (port) {
+    port = port.split('=')[1]
+    writeLog('got second-instance arg [--port=' + port + ']')
+  } else {
+    port = 0
+  }
   const foundWorkspace = workspaces.find(item => {
     if (item.browserWindow && !item.browserWindow.isDestroyed()) {
       if (workspace && workspace === item.workspaceDir) {
@@ -892,7 +910,7 @@ app.on('second-instance', (event, argv) => {
     return
   }
   if (workspace) {
-    initKernel(workspace).then((isSucc) => {
+    initKernel(workspace, port, "").then((isSucc) => {
       if (isSucc) {
         boot()
       }

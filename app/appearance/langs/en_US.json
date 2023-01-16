@@ -1060,6 +1060,7 @@
     "182": "Sharing document, please wait...",
     "183": "Validating index document tree [%d/%d %s]",
     "184": "Powered by <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
-    "185": "Index verification complete"
+    "185": "Index verification complete",
+    "186": "Extracted text [%s] from asset [%s]"
   }
 }

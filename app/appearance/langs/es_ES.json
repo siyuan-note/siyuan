@@ -1060,6 +1060,7 @@
     "182": "Compartiendo documento, por favor espere...",
     "183": "Validando el árbol del documento de índice [%d/%d %s]",
     "184": "Con la tecnología de <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
-    "185": "Verificación de índice completada"
+    "185": "Verificación de índice completada",
+    "186": "Texto extraído [%s] del recurso [%s]"
   }
 }

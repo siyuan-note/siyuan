@@ -1060,6 +1060,7 @@
     "182": "Partage du document, veuillez patienter...",
     "183": "Validation de l'arborescence du document d'index [%d/%d %s]",
     "184": "Propulsé par <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
-    "185": "Vérification de l'index terminée"
+    "185": "Vérification de l'index terminée",
+    "186": "Texte extrait [%s] de l'actif [%s]"
   }
 }

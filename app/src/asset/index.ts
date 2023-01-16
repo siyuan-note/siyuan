@@ -9,7 +9,7 @@ import {webViewerLoad} from "./pdf/viewer";
 import {webViewerPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
-import { setStorageVal } from "../protyle/util/compatibility";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export class Asset extends Model {
     public path: string;
@@ -57,7 +57,7 @@ export class Asset extends Model {
     }
 
     public goToPage(pdfId: string | number) {
-        if (typeof pdfId === "undefined") {
+        if (typeof pdfId === "undefined" || pdfId === null) {
             return;
         }
         this.pdfId = pdfId;
@@ -68,7 +68,9 @@ export class Asset extends Model {
             });
             return;
         }
-        webViewerPageNumberChanged({value: this.pdfId, pdfInstance: this.pdfObject});
+        if (typeof pdfId === "number" && !isNaN(pdfId)) {
+            webViewerPageNumberChanged({value: this.pdfId, pdfInstance: this.pdfObject});
+        }
         /// #endif
     }
 

@@ -299,12 +299,12 @@ export const JSONToLayout = (isStart: boolean) => {
         });
     }
     // https://github.com/siyuan-note/siyuan/pull/7086
-    const openId = getSearch("id", window.location.href);
+    const openId = getSearch("id");
     if (openId !== null) {
         openFileById({
             id: openId,
             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-            zoomIn: getSearch("focus", window.location.href) === "1"
+            zoomIn: getSearch("focus") === "1"
         });
     }
 };

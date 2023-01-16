@@ -27,10 +27,11 @@ import {showMessage} from "../dialog/message";
 import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
-import {getWorkspaceName, workspaceMenu} from "../menus/workspace";
+import {workspaceMenu} from "../menus/workspace";
 import {Tab} from "../layout/Tab";
 import {Editor} from "../editor";
 import {zoomOut} from "../menus/protyle";
+import { getWorkspaceName } from "./noRelyPCFunction";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -105,16 +106,7 @@ export const setProxy = () => {
     });
     /// #endif
 };
-// 获取 location.search 里特定参数,失败返回false
-function getUrlArg(arg_name: string) {
-    var query = window.location.search.substring(1);
-    var vars = query.split("&");
-    for (var i=0;i<vars.length;i++) {
-        var pair = vars[i].split("=");
-        if(pair[0] == arg_name){return pair[1];}
-    }
-    return false;
-}
+
 export const onGetConfig = (isStart: boolean) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
@@ -188,18 +180,6 @@ export const onGetConfig = (isStart: boolean) => {
         mountHelp();
     }
     addGA();
-    //根据url里的id参数打开相应的块,用于浏览器访问
-    let url_doc_id=getUrlArg("id")
-    if (url_doc_id) {
-        fetchPost("/api/block/getBlockInfo", {id: url_doc_id}, response => {
-            if (response.code === 0 && typeof url_doc_id === "string") {
-                openFileById({
-                    id: url_doc_id,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT,]
-                })
-            }
-        })
-    }
 };
 
 const initBar = () => {

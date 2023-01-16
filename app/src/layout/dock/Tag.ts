@@ -8,7 +8,7 @@ import {openGlobalSearch} from "../../search/util";
 import {MenuItem} from "../../menus/Menu";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
-import {renameTag} from "./util";
+import {renameTag} from "../../util/noRelyPCFunction";
 
 export class Tag extends Model {
     private openNodes: string[];

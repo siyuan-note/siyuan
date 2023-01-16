@@ -224,7 +224,3 @@ const workspaceItem = (item: IWorkspace) => {
     };
     /// #endif
 };
-
-export const getWorkspaceName = () => {
-    return window.siyuan.config.system.workspaceDir.replace(/^.*[\\\/]/, "");
-};

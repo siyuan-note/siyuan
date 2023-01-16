@@ -32,8 +32,9 @@ import {getAllModels} from "../layout/getAll";
 import {pasteAsPlainText, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
+import {openGlobalSearch} from "../search/util";
 /// #endif
-import {isMobile} from "../util/functions";
+import {getSearch, isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
 import {lineNumberRender} from "../protyle/markdown/highlightRender";
 import * as dayjs from "dayjs";
@@ -46,8 +47,7 @@ import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {getEnableHTML} from "../protyle/wysiwyg/removeEmbed";
 import {updateTitle} from "../dialog/processSystem";
-import {renameTag} from "../layout/dock/util";
-import {openGlobalSearch} from "../search/util";
+import {renameTag} from "../util/noRelyPCFunction";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -948,6 +948,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
             });
         }
     }).element);
+    /// #if !MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.search,
         accelerator: "Click",
@@ -956,6 +957,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
             openGlobalSearch(`#${tagElement.textContent}#`, false);
         }
     }).element);
+    /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
         icon: "iconRefresh",
@@ -1018,7 +1020,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
                 const biliMatch = value.match(/(?:www\.|\/\/)bilibili\.com\/video\/(\w+)/);
                 if (value.indexOf("bilibili.com") > -1 && (value.indexOf("bvid=") > -1 || (biliMatch && biliMatch[1]))) {
                     const params: IObject = {
-                        bvid: value.indexOf("bvid=") > -1 ? value.split("bvid=")[1].split("&")[0] : (biliMatch && biliMatch[1]),
+                        bvid: getSearch("bvid", value) || (biliMatch && biliMatch[1]),
                         page: "1",
                         high_quality: "1",
                         as_wide: "1",

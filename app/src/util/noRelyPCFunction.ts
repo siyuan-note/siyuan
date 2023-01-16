@@ -1,0 +1,33 @@
+import {Dialog} from "../dialog";
+import {fetchPost} from "./fetch";
+import {isMobile} from "./functions";
+
+// 需独立出来，否则移动端引用的时候会引入 pc 端大量无用代码
+export const renameTag = (labelName: string) => {
+    const dialog = new Dialog({
+        title: window.siyuan.languages.rename,
+        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="${labelName}"></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "80vw": "520px",
+    });
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    const inputElement = dialog.element.querySelector("input");
+    dialog.bindInput(inputElement, () => {
+        (btnsElement[1] as HTMLButtonElement).click();
+    });
+    inputElement.focus();
+    inputElement.select();
+    btnsElement[1].addEventListener("click", () => {
+        fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
+    });
+};
+
+export const getWorkspaceName = () => {
+    return window.siyuan.config.system.workspaceDir.replace(/^.*[\\\/]/, "");
+};

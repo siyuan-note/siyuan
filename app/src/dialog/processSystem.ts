@@ -10,8 +10,8 @@ import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {getCurrentWindow} from "@electron/remote";
-import {getWorkspaceName} from "../menus/workspace";
 import {escapeHtml} from "../util/escape";
+import {getWorkspaceName} from "../util/noRelyPCFunction";
 
 export const lockScreen = () => {
     /// #if BROWSER
@@ -278,13 +278,18 @@ export const setTitle = (title: string, protyle?: IProtyle) => {
     if (title === window.siyuan.languages.siyuanNote) {
         const versionTitle = `${title} - ${workspaceName} - v${Constants.SIYUAN_VERSION}`;
         document.title = versionTitle;
-        dragElement.textContent = versionTitle;
-        dragElement.setAttribute("title", versionTitle);
+        if (dragElement) {
+            dragElement.textContent = versionTitle;
+            dragElement.setAttribute("title", versionTitle);
+        }
     } else {
         title = title || "Untitled";
         document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
+        if (!dragElement) {
+            return;
+        }
         dragElement.setAttribute("title", title);
-        title = escapeHtml(title)
+        title = escapeHtml(title);
         if (protyle && protyle.disabled) {
             title = `${title}<span class="fn__space"></span><button id="barExitReadOnly" class="b3-button b3-button--small b3-button--success">${window.siyuan.languages.exitReadOnly}</button>`;
         }
@@ -297,7 +302,6 @@ export const setTitle = (title: string, protyle?: IProtyle) => {
 
 export const updateTitle = (readonly?: boolean, zoomIn?: boolean, zoomInId?: string) => {
     const dragElement = document.getElementById("drag");
-    const title = dragElement.textContent;
     if (typeof readonly === "boolean") {
         const barExitReadOnlyElement = dragElement.querySelector("#barExitReadOnly")
         if (readonly && !barExitReadOnlyElement) {

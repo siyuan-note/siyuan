@@ -380,6 +380,8 @@ github.com/shurcooL/users v0.0.0-20180125191416-49c67e49c537/go.mod h1:QJTqeLYED
 github.com/shurcooL/webdavfs v0.0.0-20170829043945-18c3829fa133/go.mod h1:hKmq5kWdCj2z2KEozexVbfEZIWiTjhE0+UjmZgPqehw=
 github.com/siyuan-note/dejavu v0.0.0-20230107020403-092626cc8fed h1:yUHKELxCy4zh6SLVw9wBEYoxRY4rHbd5N0Lcag9qj3M=
 github.com/siyuan-note/dejavu v0.0.0-20230107020403-092626cc8fed/go.mod h1:k9X5g05t+d5eS1o7PhuZCmGJyyNL/7pb6xiqMoEKEEo=
+github.com/siyuan-note/dejavu v0.0.0-20230116083837-b4badace9af1 h1:GQVKsYf49LmxMfXI7QYdJxGYNqPVHV43TEMiR10k7HM=
+github.com/siyuan-note/dejavu v0.0.0-20230116083837-b4badace9af1/go.mod h1:5LbmFNnDo8TZZZcu+vkeW/Gi+yBdVn0v64x0ztoqyfg=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da h1:/jNhl7LC+9BhkWvNxuJDdsNfA/2wvfuj9mqWx4CbV90=
@@ -466,6 +468,8 @@ golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL
 golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56/go.mod h1:JhuoJpWY28nO4Vef9tZUw9qufEGTyX1+7lmHxV5q5G4=
 golang.org/x/exp v0.0.0-20230113213754-f9f960f08ad4 h1:CNkDRtCj8otM5CFz5jYvbr8ioXX8flVsLfDWEj0M5kk=
 golang.org/x/exp v0.0.0-20230113213754-f9f960f08ad4/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
+golang.org/x/exp v0.0.0-20230116083435-1de6713980de h1:DBWn//IJw30uYCgERoxCg84hWtA97F4wMiKOIh00Uf0=
+golang.org/x/exp v0.0.0-20230116083435-1de6713980de/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/image v0.0.0-20190802002840-cff245a6509b/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/image v0.0.0-20190823064033-3a9bac650e44/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=

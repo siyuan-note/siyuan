@@ -39,7 +39,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.22.12
-	github.com/siyuan-note/dejavu v0.0.0-20230107020403-092626cc8fed
+	github.com/siyuan-note/dejavu v0.0.0-20230116083837-b4badace9af1
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20220916025349-3ac6e75522da
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
@@ -121,7 +121,7 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/exp v0.0.0-20230113213754-f9f960f08ad4 // indirect
+	golang.org/x/exp v0.0.0-20230116083435-1de6713980de // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect

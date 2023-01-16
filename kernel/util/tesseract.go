@@ -122,7 +122,7 @@ func initTesseract() {
 	}
 
 	for _, lang := range langs {
-		if "eng" == lang || "chi_sim" == lang {
+		if "eng" == lang || strings.HasPrefix(lang, "chi") {
 			TesseractLangs = append(TesseractLangs, lang)
 		}
 	}

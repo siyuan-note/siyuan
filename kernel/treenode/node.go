@@ -18,6 +18,7 @@ package treenode
 
 import (
 	"bytes"
+	util2 "github.com/siyuan-note/siyuan/kernel/util"
 	"strings"
 	"sync"
 
@@ -31,7 +32,6 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/88250/lute/util"
 	"github.com/siyuan-note/logging"
-	util2 "github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func GetBlockRef(n *ast.Node) (blockRefID, blockRefText, blockRefSubtype string) {

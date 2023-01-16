@@ -26,6 +26,8 @@ import {openSearch} from "../search/spread";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
+import {openFileById} from "../editor/util";
+import {getSearch} from "../util/functions";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -294,6 +296,15 @@ export const JSONToLayout = (isStart: boolean) => {
             if (item.headElement && !item.headElement.classList.contains("item--pin")) {
                 item.parent.removeTab(item.id);
             }
+        });
+    }
+    // https://github.com/siyuan-note/siyuan/pull/7086
+    const openId = getSearch("id", window.location.href)
+    if (openId) {
+        openFileById({
+            id: getSearch("id", window.location.href),
+            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+            zoomIn: getSearch("focus", window.location.href) === "1"
         });
     }
 };

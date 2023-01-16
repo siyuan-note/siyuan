@@ -18,6 +18,8 @@ import {MobileBacklinks} from "./MobileBacklinks";
 import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
 import {hideKeyboardToolbar, initKeyboardToolbar} from "./showKeyboardToolbar";
+import {getSearch} from "../../util/functions";
+import {openFileById} from "../../editor/util";
 
 export const initFramework = () => {
     setInlineStyle();
@@ -127,20 +129,26 @@ export const initFramework = () => {
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {
-        const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
-        fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
-            if (existResponse.data) {
-                openMobileFileById(localDoc.id, localDoc.action);
-            } else {
-                fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                    if (response.data.length !== 0) {
-                        openMobileFileById(response.data[0].id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
-                    } else {
-                        setEmpty();
-                    }
-                });
-            }
-        });
+        const openId = getSearch("id", window.location.href);
+        if (openId) {
+            openMobileFileById(getSearch("id", window.location.href),
+                getSearch("focus", window.location.href) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
+        } else {
+            const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
+            fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
+                if (existResponse.data) {
+                    openMobileFileById(localDoc.id, localDoc.action);
+                } else {
+                    fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
+                        if (response.data.length !== 0) {
+                            openMobileFileById(response.data[0].id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                        } else {
+                            setEmpty();
+                        }
+                    });
+                }
+            });
+        }
     } else {
         setEmpty();
     }

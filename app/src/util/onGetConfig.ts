@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, getInstanceById, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
@@ -28,9 +28,6 @@ import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
 import {workspaceMenu} from "../menus/workspace";
-import {Tab} from "../layout/Tab";
-import {Editor} from "../editor";
-import {zoomOut} from "../menus/protyle";
 import { getWorkspaceName } from "./noRelyPCFunction";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {

@@ -272,7 +272,7 @@ export const bootSync = () => {
     });
 };
 
-export const setTitle = (title: string, protyle?: IProtyle) => {
+export const setTitle = (title: string) => {
     const dragElement = document.getElementById("drag");
     const workspaceName = getWorkspaceName();
     if (title === window.siyuan.languages.siyuanNote) {

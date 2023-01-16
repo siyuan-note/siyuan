@@ -300,7 +300,7 @@ export const JSONToLayout = (isStart: boolean) => {
     }
     // https://github.com/siyuan-note/siyuan/pull/7086
     const openId = getSearch("id");
-    if (openId !== null) {
+    if (openId) {
         openFileById({
             id: openId,
             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],

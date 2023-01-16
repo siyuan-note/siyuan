@@ -128,10 +128,10 @@ export const initFramework = () => {
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {
-        const openId = getSearch("id", window.location.href);
+        const openId = getSearch("id");
         if (openId !== null) {
             openMobileFileById(openId,
-                getSearch("focus", window.location.href) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
+                getSearch("focus") === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
         } else {
             const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
             fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {

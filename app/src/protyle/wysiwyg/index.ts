@@ -1577,8 +1577,7 @@ export class WYSIWYG {
                         } else if (window.siyuan.shiftIsPressed) {
                             openBy(linkAddress, "app");
                         } else {
-                            const page = getSearch("page", linkAddress);
-                            openAsset(linkPathname, page === null ? undefined : parseInt(page), "right");
+                            openAsset(linkPathname, parseInt(getSearch("page", linkAddress)), "right");
                         }
                     } else {
                         /// #if !BROWSER

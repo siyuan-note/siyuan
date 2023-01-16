@@ -129,8 +129,8 @@ export const initFramework = () => {
     initEditorName();
     if (getOpenNotebookCount() > 0) {
         const openId = getSearch("id", window.location.href);
-        if (openId) {
-            openMobileFileById(getSearch("id", window.location.href),
+        if (openId !== null) {
+            openMobileFileById(openId,
                 getSearch("focus", window.location.href) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
         } else {
             const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];

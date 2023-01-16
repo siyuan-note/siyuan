@@ -116,8 +116,8 @@ func initTesseract() {
 		logging.LogWarnf("no eng tesseract lang found")
 		return
 	}
-	if !gulu.Str.Contains("chi_sim", langs) {
-		logging.LogWarnf("no chi_sim tesseract lang found")
+	if !gulu.Str.Contains("chi_*", langs) {
+		logging.LogWarnf("no chi_* tesseract lang found")
 		return
 	}
 

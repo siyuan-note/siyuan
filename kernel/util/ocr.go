@@ -105,32 +105,61 @@ func AutoOCRAssets() {
 	}
 
 	for {
-		assetsPath := GetDataAssetsAbsPath()
-		assets := getUnOCRAssetsAbsPaths()
-
-		waitGroup := &sync.WaitGroup{}
-		lock := &sync.Mutex{}
-		p, _ := ants.NewPoolWithFunc(4, func(arg interface{}) {
-			defer waitGroup.Done()
-
-			assetAbsPath := arg.(string)
-			text := Tesseract(assetAbsPath)
-			p := strings.TrimPrefix(assetAbsPath, assetsPath)
-			p = "assets" + filepath.ToSlash(p)
-			lock.Lock()
-			assetsTexts[p] = text
-			lock.Unlock()
-			assetsTextsChanged = true
-		})
-		for _, assetAbsPath := range assets {
-			waitGroup.Add(1)
-			p.Invoke(assetAbsPath)
-		}
-		waitGroup.Wait()
-		p.Release()
+		autoOCRAssets()
 
 		time.Sleep(7 * time.Second)
 	}
+}
+
+func autoOCRAssets() {
+	defer logging.Recover()
+
+	assetsPath := GetDataAssetsAbsPath()
+	assets := getUnOCRAssetsAbsPaths()
+
+	waitGroup := &sync.WaitGroup{}
+	p, _ := ants.NewPoolWithFunc(4, func(arg interface{}) {
+		defer waitGroup.Done()
+
+		assetAbsPath := arg.(string)
+		text := Tesseract(assetAbsPath)
+		p := strings.TrimPrefix(assetAbsPath, assetsPath)
+		p = "assets" + filepath.ToSlash(p)
+		assetsTextsLock.Lock()
+		assetsTexts[p] = text
+		assetsTextsLock.Unlock()
+		assetsTextsChanged = true
+	})
+	for _, assetAbsPath := range assets {
+		waitGroup.Add(1)
+		p.Invoke(assetAbsPath)
+	}
+	waitGroup.Wait()
+	p.Release()
+
+	cleanNotFoundAssetsTexts()
+}
+
+func cleanNotFoundAssetsTexts() {
+	tmp := assetsTexts
+
+	assetsPath := GetDataAssetsAbsPath()
+	var toRemoves []string
+	for asset, _ := range tmp {
+		assetAbsPath := strings.TrimPrefix(asset, "assets")
+		assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
+		if !gulu.File.IsExist(assetAbsPath) {
+			toRemoves = append(toRemoves, asset)
+		}
+	}
+
+	assetsTextsLock.Lock()
+	for _, asset := range toRemoves {
+		delete(assetsTexts, asset)
+		assetsTextsChanged = true
+	}
+	assetsTextsLock.Unlock()
+	return
 }
 
 func getUnOCRAssetsAbsPaths() (ret []string) {

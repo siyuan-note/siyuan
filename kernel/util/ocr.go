@@ -107,7 +107,6 @@ func AutoOCRAssets() {
 
 	for {
 		autoOCRAssets()
-
 		time.Sleep(7 * time.Second)
 	}
 }

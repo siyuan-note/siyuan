@@ -106,20 +106,34 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 		}
 
 		switch n.Type {
-		case ast.NodeLinkText:
-			buf.Write(n.Tokens)
-
-			if nil != n.Parent && ast.NodeImage == n.Parent.Type {
-				destNode := n.Parent.ChildByType(ast.NodeLinkDest)
-				if nil != destNode {
-					// 桌面端支持搜索图片 OCR 文本 https://github.com/siyuan-note/siyuan/issues/3470
-					if text := util2.GetAssetText(destNode.TokensStr()); "" != text {
-						buf.WriteByte(' ')
-						buf.WriteString(text)
-					}
-				}
+		case ast.NodeImage:
+			linkDest := n.ChildByType(ast.NodeLinkDest)
+			var linkDestStr, ocrText string
+			if nil != linkDest {
+				linkDestStr = linkDest.TokensStr()
+				ocrText = util2.GetAssetText(linkDestStr)
 			}
 
+			linkText := n.ChildByType(ast.NodeLinkText)
+			if nil != linkText {
+				buf.Write(linkText.Tokens)
+				buf.WriteByte(' ')
+			}
+			if "" != ocrText {
+				buf.WriteString(ocrText)
+				buf.WriteByte(' ')
+			}
+			if nil != linkDest {
+				buf.Write(n.Tokens)
+				buf.WriteByte(' ')
+
+			}
+			if linkTitle := n.ChildByType(ast.NodeLinkTitle); nil != linkTitle {
+				buf.Write(linkTitle.Tokens)
+			}
+			return ast.WalkSkipChildren
+		case ast.NodeLinkText:
+			buf.Write(n.Tokens)
 			buf.WriteByte(' ')
 		case ast.NodeLinkDest:
 			buf.Write(n.Tokens)

@@ -35,12 +35,15 @@ export class Breadcrumb {
     constructor(protyle: IProtyle) {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
+        const isFocus = protyle.options.action.includes(Constants.CB_GET_ALL)
         let html = `<div class="protyle-breadcrumb__bar"></div>
 <span class="protyle-breadcrumb__space"></span>
-<button class="b3-tooltips b3-tooltips__w block__icon fn__flex-center" style="opacity: 1;" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
+<button class="block__icon block__icon--show ft__smaller fn__flex-center${isFocus ? "" : " fn__none"}" style="line-height: 14px" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
+<span class="fn__space${isFocus ? "" : " fn__none"}"></span>
+<button class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
         if (protyle.options.render.breadcrumbContext) {
             html += `<span class="fn__space"></span>
-<div class="b3-tooltips b3-tooltips__w block__icon fn__flex-center" style="opacity: 1;" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></div>`;
+<div class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></div>`;
         }
         element.innerHTML = html;
         this.element = element.firstElementChild as HTMLElement;
@@ -65,6 +68,10 @@ export class Breadcrumb {
                     });
                     event.preventDefault();
                     break;
+                } else if (target.getAttribute("data-type") === "exit-focus") {
+                    zoomOut(protyle, protyle.block.rootID);
+                    event.preventDefault();
+                    break
                 } else if (target.getAttribute("data-type") === "context") {
                     if (target.classList.contains("block__icon--active")) {
                         fetchPost("/api/filetree/getDoc", {

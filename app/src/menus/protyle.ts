@@ -46,7 +46,6 @@ import {exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {getEnableHTML} from "../protyle/wysiwyg/removeEmbed";
-import {updateTitle} from "../dialog/processSystem";
 import {renameTag} from "../util/noRelyPCFunction";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
@@ -466,6 +465,15 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         if (isPushBack) {
             pushBack();
         }
+    } else {
+        const exitFocusElement =  protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]')
+        if (id === protyle.block.rootID) {
+            exitFocusElement.classList.add("fn__none")
+            exitFocusElement.nextElementSibling.classList.add("fn__none")
+        } else {
+            exitFocusElement.classList.remove("fn__none")
+            exitFocusElement.nextElementSibling.classList.remove("fn__none")
+        }
     }
     fetchPost("/api/filetree/getDoc", {
         id,
@@ -496,7 +504,6 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         /// #if !MOBILE
         if (protyle.model) {
             updateBacklinkGraph(getAllModels(), protyle);
-            updateTitle(undefined, id !== protyle.block.rootID, protyle.model.parent.headElement.getAttribute("data-id"));
         }
         /// #endif
         if (callback) {

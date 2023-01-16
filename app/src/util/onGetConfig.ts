@@ -203,7 +203,7 @@ const initBar = () => {
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>
 </div>
-<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}">
+<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.editor.readOnly ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}">
     <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
 <div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.appearanceMode}">
@@ -215,17 +215,6 @@ const initBar = () => {
         while (!target.classList.contains("toolbar")) {
             if (target.id === "barBack") {
                 goBack();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barExitReadOnly") {
-                editor.setMode();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barExitFocus") {
-                const editor = (getInstanceById(target.getAttribute("data-id")) as Tab)?.model;
-                if (editor instanceof Editor) {
-                    zoomOut(editor.editor.protyle, editor.editor.protyle.block.rootID);
-                }
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {

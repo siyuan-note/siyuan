@@ -289,36 +289,7 @@ export const setTitle = (title: string, protyle?: IProtyle) => {
             return;
         }
         dragElement.setAttribute("title", title);
-        title = escapeHtml(title);
-        if (protyle && protyle.disabled) {
-            title = `${title}<span class="fn__space"></span><button id="barExitReadOnly" class="b3-button b3-button--small b3-button--success">${window.siyuan.languages.exitReadOnly}</button>`;
-        }
-        if (protyle && protyle.block.showAll) {
-            title = `${title}<span class="fn__space"></span><button data-id="${protyle.model.headElement.getAttribute("data-id")}" id="barExitFocus" class="b3-button b3-button--small b3-button--info">${window.siyuan.languages.exitFocus}</button>`;
-        }
-        dragElement.innerHTML = title;
-    }
-};
-
-export const updateTitle = (readonly?: boolean, zoomIn?: boolean, zoomInId?: string) => {
-    const dragElement = document.getElementById("drag");
-    if (typeof readonly === "boolean") {
-        const barExitReadOnlyElement = dragElement.querySelector("#barExitReadOnly")
-        if (readonly && !barExitReadOnlyElement) {
-            dragElement.insertAdjacentHTML("beforeend", `<span class="fn__space"></span><button id="barExitReadOnly" class="b3-button b3-button--small b3-button--success">${window.siyuan.languages.exitReadOnly}</button>`)
-        } else if (!readonly && barExitReadOnlyElement) {
-            barExitReadOnlyElement.previousElementSibling.remove();
-            barExitReadOnlyElement.remove();
-        }
-    }
-    if (typeof zoomIn === "boolean") {
-        const barExitFocusElement = dragElement.querySelector("#barExitFocus")
-        if (zoomIn && !barExitFocusElement) {
-            dragElement.insertAdjacentHTML("beforeend", `<span class="fn__space"></span><button data-id="${zoomInId}" id="barExitFocus" class="b3-button b3-button--small b3-button--info">${window.siyuan.languages.exitFocus}</button>`)
-        } else if (!zoomIn && barExitFocusElement) {
-            barExitFocusElement.previousElementSibling.remove();
-            barExitFocusElement.remove();
-        }
+        dragElement.innerHTML = escapeHtml(title);
     }
 };
 

@@ -42,10 +42,22 @@ var (
 	assetsTextsChanged = false
 )
 
-func GetAssetText(assets string) string {
+func GetAssetText(asset string) string {
 	assetsTextsLock.Lock()
-	defer assetsTextsLock.Unlock()
-	return assetsTexts[assets]
+	ret, ok := assetsTexts[asset]
+	assetsTextsLock.Unlock()
+	if ok {
+		return ret
+	}
+
+	assetsPath := GetDataAssetsAbsPath()
+	assetAbsPath := strings.TrimPrefix(asset, "assets")
+	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
+	ret = Tesseract(assetAbsPath)
+	assetsTextsLock.Lock()
+	assetsTexts[asset] = ret
+	assetsTextsLock.Unlock()
+	return ret
 }
 
 func Tesseract(imgAbsPath string) string {

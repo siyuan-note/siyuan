@@ -4,8 +4,6 @@ import {Graph} from "./Graph";
 import {Outline} from "./Outline";
 import {switchWnd} from "../util";
 import {Backlink} from "./Backlink";
-import {Dialog} from "../../dialog";
-import {fetchPost} from "../../util/fetch";
 
 export const openBacklink = (protyle: IProtyle) => {
     const backlink = getAllModels().backlink.find(item => {

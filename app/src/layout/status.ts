@@ -9,7 +9,6 @@ import {mountHelp} from "../util/mount";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
 /// #endif
-import {isBrowser} from "../util/functions";
 import {MenuItem} from "../menus/Menu";
 
 export const initStatus = () => {
@@ -117,7 +116,7 @@ export const initStatus = () => {
                         window.open("https://github.com/siyuan-note/siyuan");
                     }
                 }).element);
-                const rect = target.getBoundingClientRect()
+                const rect = target.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height}, true);
                 event.stopPropagation();
                 break;

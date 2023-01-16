@@ -299,7 +299,7 @@ export const JSONToLayout = (isStart: boolean) => {
         });
     }
     // https://github.com/siyuan-note/siyuan/pull/7086
-    const openId = getSearch("id", window.location.href)
+    const openId = getSearch("id", window.location.href);
     if (openId) {
         openFileById({
             id: getSearch("id", window.location.href),

@@ -19,7 +19,6 @@ import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
 import {hideKeyboardToolbar, initKeyboardToolbar} from "./showKeyboardToolbar";
 import {getSearch} from "../../util/functions";
-import {openFileById} from "../../editor/util";
 
 export const initFramework = () => {
     setInlineStyle();

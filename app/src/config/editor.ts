@@ -16,11 +16,11 @@ export const editor = {
         }
         window.siyuan.config.editor.readOnly = readOnly;
         if (readOnly) {
-            target.classList.add("toolbar__item--active")
+            target.classList.add("toolbar__item--active");
             target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editMode} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
             target.querySelector("use").setAttribute("xlink:href", "#iconPreview");
         } else {
-            target.classList.remove("toolbar__item--active")
+            target.classList.remove("toolbar__item--active");
             target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
             target.querySelector("use").setAttribute("xlink:href", "#iconEdit");
         }

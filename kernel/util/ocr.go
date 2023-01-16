@@ -288,7 +288,7 @@ func initTesseract() {
 		tesseractEnabled = false
 		return
 	}
-	logging.LogInfof("tesseract-ocr enabled [ver=%s]", ver)
+	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(tesseractLangs, "+"))
 }
 
 func getTesseractVer() (ret string) {

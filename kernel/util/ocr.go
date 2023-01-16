@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -117,8 +118,12 @@ func autoOCRAssets() {
 	assetsPath := GetDataAssetsAbsPath()
 	assets := getUnOCRAssetsAbsPaths()
 
+	poolSize := runtime.NumCPU()
+	if 4 < poolSize {
+		poolSize = 4
+	}
 	waitGroup := &sync.WaitGroup{}
-	p, _ := ants.NewPoolWithFunc(4, func(arg interface{}) {
+	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
 		defer waitGroup.Done()
 
 		assetAbsPath := arg.(string)

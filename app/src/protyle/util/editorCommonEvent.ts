@@ -182,8 +182,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 action: "insert",
                 id: copyId,
                 data: copyElement.outerHTML,
-                previousID: position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
-                parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
+                previousID: position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
+                parentID: copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
             });
         } else {
             tempTargetElement.insertAdjacentElement(position, item);

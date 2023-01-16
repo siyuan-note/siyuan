@@ -281,7 +281,6 @@ progressLoading: 400
   line-height: 32px;
   border-top: .5px solid var(--b3-border-color);
   padding: 0 5px;
-  font-size: 12px;
 
   .toolbar__item {
     color: var(--b3-theme-on-surface);
@@ -293,19 +292,17 @@ progressLoading: 400
     text-overflow: ellipsis;
     overflow: hidden;
     padding-left: 5px;
+    font-size: 12px;
   }
 
   &__counter {
     display: flex;
     flex-shrink: 0;
+    font-size: 12px;
   }
 
-  #barDock,
-  #statusHelp {
-    .b3-menu__item:hover {
-      background-color: var(--b3-list-hover);
-      text-decoration: none;
-    }
+  #barDock .b3-menu__item:hover {
+    background-color: var(--b3-list-hover);
   }
 
   .fn__space:last-child {

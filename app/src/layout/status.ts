@@ -10,6 +10,7 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 /// #endif
 import {isBrowser} from "../util/functions";
+import {MenuItem} from "../menus/Menu";
 
 export const initStatus = () => {
     /// #if !MOBILE
@@ -31,13 +32,6 @@ export const initStatus = () => {
 <div class="status__counter"></div>
 <div id="statusHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
-    <div class="b3-menu fn__none" style="bottom: 32px;right: 5px">
-        <button id="barHelp" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.help}</span></button>
-        <a href="${"zh_CN" === window.siyuan.config.lang ? "https://ld246.com/article/1649901726096" : "https://github.com/siyuan-note/siyuan/issues"}" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconHeart"></use></svg><span class="b3-menu__label">${window.siyuan.languages.feedback}</span></a>
-        <button id="barDebug" class="b3-menu__item${isBrowser() ? " fn__none" : ""}"><svg class="b3-menu__icon""><use xlink:href="#iconBug"></use></svg><span class="b3-menu__label">${window.siyuan.languages.debug}</span></button>
-        <a href="https://b3log.org/siyuan" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconSiYuan"></use></svg><span class="b3-menu__label">${window.siyuan.languages["_trayMenu"].officialWebsite}</span></a>
-        <a href="https://github.com/siyuan-note/siyuan" class="b3-menu__item"><svg class="b3-menu__icon""><use xlink:href="#iconGithub"></use></svg><span class="b3-menu__label">${window.siyuan.languages["_trayMenu"].openSource}</span></a>
-    </div>
 </div>`;
     const dockElement = document.getElementById("barDock");
     dockElement.addEventListener("mousemove", () => {
@@ -46,16 +40,6 @@ export const initStatus = () => {
     dockElement.addEventListener("mouseleave", () => {
         dockElement.querySelector(".b3-menu").classList.add("fn__none");
     });
-    const helpElement = document.getElementById("statusHelp");
-    helpElement.addEventListener("mousemove", () => {
-        helpElement.querySelector(".b3-menu").classList.remove("fn__none");
-    });
-    helpElement.addEventListener("mouseleave", () => {
-        helpElement.querySelector(".b3-menu").classList.add("fn__none");
-    });
-    /// #if !BROWSER
-    document.querySelector("#barDebug").classList.remove("fn__none");
-    /// #endif
     document.querySelector("#status").addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target.id !== "status") {
@@ -84,17 +68,60 @@ export const initStatus = () => {
                 target.querySelector(".b3-menu").classList.add("fn__none");
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barHelp") {
-                mountHelp();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "barDebug") {
+            } else if (target.id === "statusHelp") {
+                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === "statusHelp") {
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
+                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.element.setAttribute("data-name", "statusHelp");
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.help,
+                    icon: "iconHelp",
+                    click: () => {
+                        mountHelp();
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.feedback,
+                    icon: "iconHeart",
+                    click: () => {
+                        if ("zh_CN" === window.siyuan.config.lang) {
+                            window.open("https://ld246.com/article/1649901726096");
+                        } else {
+                            window.open("https://github.com/siyuan-note/siyuan/issues");
+                        }
+                    }
+                }).element);
                 /// #if !BROWSER
-                getCurrentWindow().webContents.openDevTools({mode: "bottom"});
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.debug,
+                    icon: "iconBug",
+                    click: () => {
+                        getCurrentWindow().webContents.openDevTools({mode: "bottom"});
+                    }
+                }).element);
                 /// #endif
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages["_trayMenu"].officialWebsite,
+                    icon: "iconSiYuan",
+                    click: () => {
+                        window.open("https://b3log.org/siyuan");
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages["_trayMenu"].openSource,
+                    icon: "iconGithub",
+                    click: () => {
+                        window.open("https://github.com/siyuan-note/siyuan");
+                    }
+                }).element);
+                const rect = target.getBoundingClientRect()
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, w: rect.width});
                 event.stopPropagation();
                 break;
-            } else if (target.classList.contains("b3-menu__item") && target.tagName !== "A") {
+            } else if (target.classList.contains("b3-menu__item")) {
                 const type = target.getAttribute("data-type") as TDockType;
                 getDockByType(type).toggleModel(type);
                 if (type === "file" && getSelection().rangeCount > 0) {

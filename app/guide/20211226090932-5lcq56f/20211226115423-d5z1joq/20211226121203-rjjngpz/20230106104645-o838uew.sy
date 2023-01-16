@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230106104645-o838uew",
 		"title": "工作空間",
-		"updated": "20230113230938"
+		"updated": "20230117000552"
 	},
 	"Children": [
 		{
@@ -125,7 +125,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230109113932-3g0ywic",
-				"updated": "20230113230938"
+				"updated": "20230117000552"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 					},
 					"Properties": {
 						"id": "20230109113932-w8e5hz3",
-						"updated": "20230113230938"
+						"updated": "20230117000552"
 					},
 					"Children": [
 						{
@@ -159,7 +159,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113932-8g1zoun",
-								"updated": "20230113230938"
+								"updated": "20230117000552"
 							},
 							"Children": [
 								{
@@ -182,7 +182,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​。"
+									"Data": "​。除此以外，還可以通過 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--port=12345"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 來指定內核監聽的端口。"
 								}
 							]
 						}

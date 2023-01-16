@@ -38,6 +38,7 @@ import (
 
 var (
 	tesseractEnabled   bool
+	tesseractLangs     []string
 	assetsTexts        = map[string]string{}
 	assetsTextsLock    = sync.Mutex{}
 	assetsTextsChanged = false
@@ -77,7 +78,7 @@ func Tesseract(imgAbsPath string) string {
 	defer cancel()
 
 	now := time.Now()
-	cmd := exec.CommandContext(ctx, "tesseract", "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", "chi_sim+eng")
+	cmd := exec.CommandContext(ctx, "tesseract", "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(tesseractLangs, "+"))
 	gulu.CmdAttr(cmd)
 	output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
@@ -281,7 +282,13 @@ func initTesseract() {
 		return
 	}
 
-	logging.LogInfof("tesseract-ocr enabled [ver=%s]", ver)
+	tesseractLangs = getTesseractLangs()
+	if 1 > len(tesseractLangs) {
+		logging.LogWarnf("no tesseract langs found")
+		tesseractEnabled = false
+		return
+	}
+	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(tesseractLangs, "+"))
 }
 
 func getTesseractVer() (ret string) {
@@ -300,6 +307,32 @@ func getTesseractVer() (ret string) {
 			tesseractEnabled = true
 		}
 		return
+	}
+	return
+}
+
+func getTesseractLangs() (ret []string) {
+	if !tesseractEnabled {
+		return nil
+	}
+
+	cmd := exec.Command("tesseract", "--list-langs")
+	gulu.CmdAttr(cmd)
+	data, err := cmd.CombinedOutput()
+	if nil != err {
+		return nil
+	}
+
+	parts := bytes.Split(data, []byte("\n"))
+	if 0 < len(parts) {
+		parts = parts[1:]
+	}
+	for _, part := range parts {
+		part = bytes.TrimSpace(part)
+		if 0 == len(part) {
+			continue
+		}
+		ret = append(ret, string(part))
 	}
 	return
 }

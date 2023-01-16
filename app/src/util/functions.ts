@@ -15,13 +15,9 @@ export const getRandom = (min: number, max: number) => {
 };
 
 export const getSearch: (key: string, link?: string) => string | null = (key: string, link = window.location.search) => {
-    try {
-        // REF https://developer.mozilla.org/zh-CN/docs/Web/API/URLSearchParams
-        const urlSearchParams = new URLSearchParams(link);
-        return urlSearchParams.get(key);
-    } catch (error) {
-        return null;
-    }
+    // REF https://developer.mozilla.org/zh-CN/docs/Web/API/URLSearchParams
+    const urlSearchParams = new URLSearchParams(link);
+    return urlSearchParams.get(key);
 };
 
 export const isBrowser = () => {

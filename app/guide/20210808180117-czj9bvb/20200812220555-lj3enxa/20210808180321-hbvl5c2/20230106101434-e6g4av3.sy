@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
-		"updated": "20230113230911"
+		"updated": "20230117000600"
 	},
 	"Children": [
 		{
@@ -124,7 +124,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230106104300-j6nj9t2",
-				"updated": "20230113230911"
+				"updated": "20230117000600"
 			},
 			"Children": [
 				{
@@ -136,7 +136,7 @@
 					},
 					"Properties": {
 						"id": "20230109113554-izjti9n",
-						"updated": "20230113230911"
+						"updated": "20230117000600"
 					},
 					"Children": [
 						{
@@ -158,7 +158,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113909-5dp3vml",
-								"updated": "20230113230911"
+								"updated": "20230117000600"
 							},
 							"Children": [
 								{
@@ -181,7 +181,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​。"
+									"Data": "​。除此以外，还可以通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--port=12345"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 来指定内核监听的端口。"
 								}
 							]
 						}

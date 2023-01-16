@@ -31,6 +31,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
+	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/logging"
 )
 
@@ -41,10 +42,22 @@ var (
 	assetsTextsChanged = false
 )
 
-func GetAssetText(assets string) string {
+func GetAssetText(asset string) string {
 	assetsTextsLock.Lock()
-	defer assetsTextsLock.Unlock()
-	return assetsTexts[assets]
+	ret, ok := assetsTexts[asset]
+	assetsTextsLock.Unlock()
+	if ok {
+		return ret
+	}
+
+	assetsPath := GetDataAssetsAbsPath()
+	assetAbsPath := strings.TrimPrefix(asset, "assets")
+	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
+	ret = Tesseract(assetAbsPath)
+	assetsTextsLock.Lock()
+	assetsTexts[asset] = ret
+	assetsTextsLock.Unlock()
+	return ret
 }
 
 func Tesseract(imgAbsPath string) string {
@@ -68,15 +81,11 @@ func Tesseract(imgAbsPath string) string {
 	output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
 		logging.LogWarnf("tesseract [path=%s, size=%d] timeout", imgAbsPath, info.Size())
-		assetsTexts[imgAbsPath] = ""
-		assetsTextsChanged = true
 		return ""
 	}
 
 	if nil != err {
 		logging.LogWarnf("tesseract [path=%s, size=%d] failed: %s", imgAbsPath, info.Size(), err)
-		assetsTexts[imgAbsPath] = ""
-		assetsTextsChanged = true
 		return ""
 	}
 
@@ -87,8 +96,6 @@ func Tesseract(imgAbsPath string) string {
 	reg := regexp.MustCompile("\\s{2,}")
 	ret = reg.ReplaceAllString(ret, " ")
 	logging.LogInfof("tesseract [path=%s, size=%d, text=%s, elapsed=%dms]", imgAbsPath, info.Size(), ret, time.Since(now).Milliseconds())
-	assetsTexts[imgAbsPath] = ret
-	assetsTextsChanged = true
 	return ret
 }
 
@@ -98,10 +105,30 @@ func AutoOCRAssets() {
 	}
 
 	for {
+		assetsPath := GetDataAssetsAbsPath()
 		assets := getUnOCRAssetsAbsPaths()
-		for _, p := range assets {
-			Tesseract(p)
+
+		waitGroup := &sync.WaitGroup{}
+		lock := &sync.Mutex{}
+		p, _ := ants.NewPoolWithFunc(4, func(arg interface{}) {
+			defer waitGroup.Done()
+
+			assetAbsPath := arg.(string)
+			text := Tesseract(assetAbsPath)
+			p := strings.TrimPrefix(assetAbsPath, assetsPath)
+			p = "assets" + filepath.ToSlash(p)
+			lock.Lock()
+			assetsTexts[p] = text
+			lock.Unlock()
+			assetsTextsChanged = true
+		})
+		for _, assetAbsPath := range assets {
+			waitGroup.Add(1)
+			p.Invoke(assetAbsPath)
 		}
+		waitGroup.Wait()
+		p.Release()
+
 		time.Sleep(7 * time.Second)
 	}
 }

@@ -94,7 +94,7 @@ func Tesseract(imgAbsPath string) string {
 	ret = strings.ReplaceAll(ret, "\t", " ")
 	reg := regexp.MustCompile("\\s{2,}")
 	ret = reg.ReplaceAllString(ret, " ")
-	logging.LogInfof("tesseract [path=%s, size=%d, text=%s, elapsed=%dms]", imgAbsPath, info.Size(), ret, time.Since(now).Milliseconds())
+	//logging.LogInfof("tesseract [path=%s, size=%d, text=%s, elapsed=%dms]", imgAbsPath, info.Size(), ret, time.Since(now).Milliseconds())
 	msg := fmt.Sprintf("OCR [%s] [%s]", info.Name(), ret)
 	PushStatusBar(msg)
 	return ret

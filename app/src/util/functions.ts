@@ -15,8 +15,11 @@ export const getRandom = (min: number, max: number) => {
 };
 
 export const getSearch: (key: string, link?: string) => string | null = (key: string, link = window.location.search) => {
+    const params = link.substring(link.indexOf('?'));
+    const hashIndex = params.indexOf('#');
+    const searchParams = params.substring(0, hashIndex >= 0 ? hashIndex : undefined);
     // REF https://developer.mozilla.org/zh-CN/docs/Web/API/URLSearchParams
-    const urlSearchParams = new URLSearchParams(link.substring(link.indexOf('?')));
+    const urlSearchParams = new URLSearchParams(searchParams);
     return urlSearchParams.get(key);
 };
 

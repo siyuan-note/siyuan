@@ -19,20 +19,201 @@ package util
 import (
 	"bytes"
 	"context"
+	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime/debug"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/dgraph-io/ristretto"
+	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/logging"
 )
 
 var (
-	tesseractEnabled bool
-	tesseractErrCnt  int
+	tesseractEnabled   bool
+	assetsTexts        = map[string]string{}
+	assetsTextsLock    = sync.Mutex{}
+	assetsTextsChanged = false
 )
+
+func GetAssetText(assets string) string {
+	assetsTextsLock.Lock()
+	defer assetsTextsLock.Unlock()
+	return assetsTexts[assets]
+}
+
+func Tesseract(imgAbsPath string) string {
+	if ContainerStd != Container || !tesseractEnabled {
+		return ""
+	}
+
+	info, err := os.Stat(imgAbsPath)
+	if nil != err {
+		return ""
+	}
+
+	defer logging.Recover()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+	defer cancel()
+
+	now := time.Now()
+	cmd := exec.CommandContext(ctx, "tesseract", "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", "chi_sim+eng")
+	gulu.CmdAttr(cmd)
+	output, err := cmd.CombinedOutput()
+	if ctx.Err() == context.DeadlineExceeded {
+		logging.LogWarnf("tesseract [path=%s, size=%d] timeout", imgAbsPath, info.Size())
+		assetsTexts[imgAbsPath] = ""
+		assetsTextsChanged = true
+		return ""
+	}
+
+	if nil != err {
+		logging.LogWarnf("tesseract [path=%s, size=%d] failed: %s", imgAbsPath, info.Size(), err)
+		assetsTexts[imgAbsPath] = ""
+		assetsTextsChanged = true
+		return ""
+	}
+
+	ret := string(output)
+	ret = strings.ReplaceAll(ret, "\r", "")
+	ret = strings.ReplaceAll(ret, "\n", "")
+	ret = strings.ReplaceAll(ret, "\t", " ")
+	reg := regexp.MustCompile("\\s{2,}")
+	ret = reg.ReplaceAllString(ret, " ")
+	logging.LogInfof("tesseract [path=%s, size=%d, text=%s, elapsed=%dms]", imgAbsPath, info.Size(), ret, time.Since(now).Milliseconds())
+	assetsTexts[imgAbsPath] = ret
+	assetsTextsChanged = true
+	return ret
+}
+
+func AutoOCRAssets() {
+	if !tesseractEnabled {
+		return
+	}
+
+	for {
+		assets := getUnOCRAssetsAbsPaths()
+		for _, p := range assets {
+			Tesseract(p)
+		}
+		time.Sleep(7 * time.Second)
+	}
+}
+
+func getUnOCRAssetsAbsPaths() (ret []string) {
+	assetsPath := GetDataAssetsAbsPath()
+	var assetsPaths []string
+	filepath.Walk(assetsPath, func(path string, info os.FileInfo, err error) error {
+		name := info.Name()
+		if info.IsDir() {
+			if strings.HasPrefix(name, ".") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		lowerName := strings.ToLower(name)
+		if !strings.HasSuffix(lowerName, ".png") && !strings.HasSuffix(lowerName, ".jpg") && !strings.HasSuffix(lowerName, ".jpeg") {
+			return nil
+		}
+
+		assetsPaths = append(assetsPaths, path)
+		return nil
+	})
+
+	assetsTextsTmp := assetsTexts
+	for _, absPath := range assetsPaths {
+		p := strings.TrimPrefix(absPath, assetsPath)
+		p = "assets" + filepath.ToSlash(p)
+		if _, ok := assetsTextsTmp[p]; ok {
+			continue
+		}
+		ret = append(ret, absPath)
+	}
+	return
+}
+
+func AutoFlushAssetsTexts() {
+	for {
+		SaveAssetsTexts()
+		time.Sleep(7 * time.Second)
+	}
+}
+
+func LoadAssetsTexts() {
+	assetsPath := GetDataAssetsAbsPath()
+	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
+	if !gulu.File.IsExist(assetsTextsPath) {
+		return
+	}
+
+	start := time.Now()
+	var err error
+	fh, err := os.OpenFile(assetsTextsPath, os.O_RDWR, 0644)
+	if nil != err {
+		logging.LogErrorf("open assets texts failed: %s", err)
+		return
+	}
+	defer fh.Close()
+
+	data, err := io.ReadAll(fh)
+	if nil != err {
+		logging.LogErrorf("read assets texts failed: %s", err)
+		return
+	}
+
+	assetsTextsLock.Lock()
+	if err = gulu.JSON.UnmarshalJSON(data, &assetsTexts); nil != err {
+		logging.LogErrorf("unmarshal assets texts failed: %s", err)
+		if err = os.RemoveAll(assetsTextsPath); nil != err {
+			logging.LogErrorf("removed corrupted assets texts failed: %s", err)
+		}
+		return
+	}
+	assetsTextsLock.Unlock()
+	debug.FreeOSMemory()
+
+	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
+		logging.LogWarnf("read assets texts [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), assetsTextsPath, elapsed)
+	}
+	return
+}
+
+func SaveAssetsTexts() {
+	if !assetsTextsChanged {
+		return
+	}
+
+	start := time.Now()
+
+	assetsTextsLock.Lock()
+	data, err := gulu.JSON.MarshalIndentJSON(assetsTexts, "", "  ")
+	if nil != err {
+		logging.LogErrorf("marshal assets texts failed: %s", err)
+		return
+	}
+	assetsTextsLock.Unlock()
+
+	assetsPath := GetDataAssetsAbsPath()
+	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
+	if err = gulu.File.WriteFileSafer(assetsTextsPath, data, 0644); nil != err {
+		logging.LogErrorf("write assets texts failed: %s", err)
+		return
+	}
+	debug.FreeOSMemory()
+
+	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
+		logging.LogWarnf("save assets texts [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), assetsTextsPath, elapsed)
+	}
+
+	assetsTextsChanged = false
+}
 
 func initTesseract() {
 	ver := getTesseractVer()
@@ -44,6 +225,10 @@ func initTesseract() {
 }
 
 func getTesseractVer() (ret string) {
+	if ContainerStd != Container {
+		return
+	}
+
 	cmd := exec.Command("tesseract", "--version")
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
@@ -57,59 +242,4 @@ func getTesseractVer() (ret string) {
 		return
 	}
 	return
-}
-
-var ocrResultCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 100000,
-	MaxCost:     1000 * 1000 * 64,
-	BufferItems: 64,
-})
-
-func Tesseract(imgAbsPath string) string {
-	if ContainerStd != Container || !tesseractEnabled {
-		return ""
-	}
-
-	info, err := os.Stat(imgAbsPath)
-	if nil != err {
-		return ""
-	}
-
-	cached, ok := ocrResultCache.Get(imgAbsPath)
-	if ok {
-		return cached.(string)
-	}
-
-	defer logging.Recover()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	now := time.Now()
-	cmd := exec.CommandContext(ctx, "tesseract", "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", "chi_sim+eng")
-	gulu.CmdAttr(cmd)
-	output, err := cmd.CombinedOutput()
-	if ctx.Err() == context.DeadlineExceeded {
-		logging.LogWarnf("tesseract [path=%s, size=%d] timeout", imgAbsPath, info.Size())
-		tesseractErrCnt++
-		return ""
-	}
-
-	if nil != err {
-		logging.LogWarnf("tesseract [path=%s, size=%d] failed: %s", imgAbsPath, info.Size(), err)
-		tesseractErrCnt++
-		return ""
-	}
-
-	if 16 < tesseractErrCnt {
-		tesseractEnabled = false
-		logging.LogWarnf("disable tesseract-ocr caused by too many errors")
-	}
-
-	ret := string(output)
-	ret = strings.ReplaceAll(ret, "\r", "")
-	ret = strings.ReplaceAll(ret, "\n", "")
-	logging.LogInfof("tesseract [path=%s, size=%d, text=%s, elapsed=%dms]", imgAbsPath, info.Size(), ret, time.Since(now).Milliseconds())
-	ocrResultCache.Set(imgAbsPath, ret, info.Size())
-	return ret
 }

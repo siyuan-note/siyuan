@@ -18,7 +18,6 @@ package treenode
 
 import (
 	"bytes"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -114,7 +113,7 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 				destNode := n.Parent.ChildByType(ast.NodeLinkDest)
 				if nil != destNode {
 					// 桌面端支持搜索图片 OCR 文本 https://github.com/siyuan-note/siyuan/issues/3470
-					if text := util2.Tesseract(filepath.Join(util2.DataDir, destNode.TokensStr())); "" != text {
+					if text := util2.GetAssetText(destNode.TokensStr()); "" != text {
 						buf.WriteByte(' ')
 						buf.WriteString(text)
 					}

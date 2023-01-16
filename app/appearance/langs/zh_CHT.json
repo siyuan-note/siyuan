@@ -31,8 +31,8 @@
   "leftRightLayout": "左右佈局",
   "topBottomLayout": "上下佈局",
   "keyword": "關鍵字",
-  "searchMethod":"搜索方式",
-  "regex":"正則表達式",
+  "searchMethod": "搜索方式",
+  "regex": "正則表達式",
   "keywordsLimit": "關鍵字數量限制",
   "exportAsImage": "導出為圖片",
   "exportBySiYuan": "由思源筆記導出",
@@ -1060,7 +1060,6 @@
     "182": "正在分享文檔，請稍等...",
     "183": "正在校驗索引文檔樹 [%d/%d %s]",
     "184": "由<a href=\"https://b3log.org/siyuan\" target=\"_blank\">思源筆記</a>強力驅動",
-    "185": "索引校驗完畢",
-    "186": "已提取資源文件 [%s] 圖片中的文本 [%s]"
+    "185": "索引校驗完畢"
   }
 }

@@ -197,7 +197,6 @@ func NetImg2LocalAssets(rootID string) (err error) {
 		if err = writeJSONQueue(tree); nil != err {
 			return
 		}
-		sql.WaitForWritingDatabase()
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)
 	} else {
 		util.PushUpdateMsg(msgId, Conf.Language(121), 3000)

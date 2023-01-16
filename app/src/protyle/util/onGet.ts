@@ -121,7 +121,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
             unScroll: (scrollObj && scrollObj.focusId) ? true : false,
             isSyncing: data.data.isSyncing,
         }, protyle);
-        setTitle(response.data.ial.title, protyle);
+        setTitle(response.data.ial.title);
         if (scrollObj && protyle.options.mode !== "preview") {
             restoreScroll(protyle, scrollObj);
         }

@@ -282,7 +282,7 @@ export class Title {
                 title: fileName,
             });
             this.setTitle(fileName);
-            setTitle(fileName, protyle);
+            setTitle(fileName);
         }, Constants.TIMEOUT_INPUT);
     }
 

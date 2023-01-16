@@ -259,6 +259,10 @@ func getTesseractVer() (ret string) {
 	cmd := exec.Command("tesseract", "--version")
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
+	if nil != err {
+		logging.LogWarnf("tesseract-ocr not found: %s", err)
+	}
+	logging.LogWarnf("tesseract --version: %s", string(data))
 	if nil == err && strings.HasPrefix(string(data), "tesseract v") {
 		parts := bytes.Split(data, []byte("\n"))
 		if 0 < len(parts) {

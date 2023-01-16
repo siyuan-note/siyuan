@@ -636,11 +636,18 @@ func UnusedAssets() (ret []string) {
 		}
 	}
 
-	// 排除文件注解和对应文件
 	var toRemoves []string
 	for asset, _ := range assetsPathMap {
 		if strings.HasSuffix(asset, ".sya") {
+			// 排除文件注解和对应文件
 			toRemoves = append(toRemoves, asset, strings.TrimSuffix(asset, ".sya"))
+			continue
+		}
+
+		if strings.HasSuffix(asset, "ocr-texts.json") {
+			// 排除 OCR 结果文本
+			toRemoves = append(toRemoves, asset)
+			continue
 		}
 	}
 	for _, toRemove := range toRemoves {

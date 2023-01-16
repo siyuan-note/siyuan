@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20220905215650"
+		"updated": "20230117003750"
 	},
 	"Children": [
 		{
@@ -679,6 +679,109 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230117002036-vmc0mx4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230117002036-vmc0mx4",
+				"updated": "20230117002509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "图片 OCR 提取文本"
+				}
+			]
+		},
+		{
+			"ID": "20230117002059-ssmlejt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117002059-ssmlejt",
+				"updated": "20230117003750"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "该特性仅在桌面端支持，并且需要先手动安装 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/tesseract-ocr/tesseract",
+					"TextMarkTextContent": "Tesseract OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 程序。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​在安装 Tesseract OCR 时需要勾选中文语言包，并将安装后的 Tesseract-OCR 目录路径添加到环境变量 PATH 中，这样思源才能直接调用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tesseract"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 命令进行图片 OCR 提取文本。如果安装正常的话，在内核启动日志中可以搜索到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tesseract-ocr enabled"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20230117002511-ex9qrjy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117002511-ex9qrjy",
+				"updated": "20230117003207"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "图片 OCR 提取文本过程是自动在后台进行的，目前仅支持 PNG、JPG 图片。提取的文本会被用于搜索功能，这样就能通过文本关键字来定位图片。"
+				}
+			]
+		},
+		{
+			"ID": "20230117003118-da7wjvx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117003118-da7wjvx",
+				"updated": "20230117003434"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OCR 的结果保存在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/data/assets/ocr-texts.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中，如果需要重新 OCR 或者调整提取结果，可以在关闭思源的情况下删除或修改该文件，启动思源以后手动重建索引。"
 				}
 			]
 		}

@@ -33,6 +33,7 @@ import (
 )
 
 var (
+	TesseractBin       = "tesseract"
 	TesseractEnabled   bool
 	AssetsTexts        = map[string]string{}
 	AssetsTextsLock    = sync.Mutex{}
@@ -74,7 +75,7 @@ func Tesseract(imgAbsPath string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "tesseract", "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"))
+	cmd := exec.CommandContext(ctx, TesseractBin, "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"))
 	gulu.CmdAttr(cmd)
 	output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
@@ -141,14 +142,18 @@ func getTesseractVer() (ret string) {
 		return
 	}
 
-	cmd := exec.Command("tesseract", "--version")
+	cmd := exec.Command(TesseractBin, "--version")
 	gulu.CmdAttr(cmd)
-	logging.LogInfof("os env [%s]", os.Environ())
-	logging.LogInfof("cmd env [%s]", cmd.Environ())
-	cmd.Env = os.Environ()
 	data, err := cmd.CombinedOutput()
 	if nil != err {
-		logging.LogErrorf("get tesseract version failed: %s", err)
+		if strings.Contains(err.Error(), "executable file not found") {
+			TesseractBin = "/usr/local/bin/tesseract"
+			cmd = exec.Command(TesseractBin, "--version")
+			gulu.CmdAttr(cmd)
+			data, err = cmd.CombinedOutput()
+		}
+	}
+	if nil != err {
 		return
 	}
 	logging.LogInfof("tesseract version output [%s]", string(data))
@@ -169,7 +174,7 @@ func getTesseractLangs() (ret []string) {
 		return nil
 	}
 
-	cmd := exec.Command("tesseract", "--list-langs")
+	cmd := exec.Command(TesseractBin, "--list-langs")
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
 	if nil != err {

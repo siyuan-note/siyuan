@@ -137,10 +137,12 @@ func initTesseract() {
 }
 
 func getTesseractVer() (ret string) {
+	logging.LogInfof("checking tesseract-ocr [Container=%s]", Container)
 	if ContainerStd != Container {
 		return
 	}
 
+	logging.LogInfof("exec [tesseract --version]")
 	cmd := exec.Command("tesseract", "--version")
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
@@ -148,7 +150,7 @@ func getTesseractVer() (ret string) {
 		logging.LogErrorf("get tesseract version failed: %s", err)
 		return
 	}
-	logging.LogInfof("tesseract version: %s", string(data))
+	logging.LogInfof("tesseract version output [%s]", string(data))
 	if nil == err && strings.HasPrefix(string(data), "tesseract ") {
 		parts := bytes.Split(data, []byte("\n"))
 		if 0 < len(parts) {

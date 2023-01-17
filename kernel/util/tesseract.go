@@ -144,6 +144,11 @@ func getTesseractVer() (ret string) {
 	cmd := exec.Command("tesseract", "--version")
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
+	if nil != err {
+		logging.LogErrorf("get tesseract version failed: %s", err)
+		return
+	}
+	logging.LogInfof("tesseract version: %s", string(data))
 	if nil == err && strings.HasPrefix(string(data), "tesseract ") {
 		parts := bytes.Split(data, []byte("\n"))
 		if 0 < len(parts) {

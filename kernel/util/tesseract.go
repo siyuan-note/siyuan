@@ -74,7 +74,6 @@ func Tesseract(imgAbsPath string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
 	defer cancel()
 
-	now := time.Now()
 	cmd := exec.CommandContext(ctx, "tesseract", "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"))
 	gulu.CmdAttr(cmd)
 	output, err := cmd.CombinedOutput()
@@ -94,7 +93,6 @@ func Tesseract(imgAbsPath string) string {
 	ret = strings.ReplaceAll(ret, "\t", " ")
 	reg := regexp.MustCompile("\\s{2,}")
 	ret = reg.ReplaceAllString(ret, " ")
-	logging.LogInfof("tesseract [path=%s, size=%d, text=%s, elapsed=%dms]", imgAbsPath, info.Size(), ret, time.Since(now).Milliseconds())
 	msg := fmt.Sprintf("OCR [%s] [%s]", info.Name(), ret)
 	PushStatusBar(msg)
 	return ret

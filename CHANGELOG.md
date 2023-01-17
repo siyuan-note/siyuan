@@ -1,3 +1,50 @@
+## v2.7.0 / 2023-01-17
+
+### 引入特性
+
+* [分享文档到链滴](https://github.com/siyuan-note/siyuan/issues/2004)
+* [桌面端支持搜索图片 OCR 文本](https://github.com/siyuan-note/siyuan/issues/3470)
+* [支持链滴积分兑换扩容云端存储](https://github.com/siyuan-note/siyuan/issues/7055)
+
+### 改进功能
+
+* [为桌面端窗口标题栏添加应用图标](https://github.com/siyuan-note/siyuan/pull/7032)
+* [顶栏工作空间、外观模式和状态栏帮助菜单二次点击收回](https://github.com/siyuan-note/siyuan/issues/7036)
+* [`Alt+N` 锁屏调整为全局快捷键](https://github.com/siyuan-note/siyuan/issues/7042)
+* [初次启动选择工作空间后不再创建 `SiYuan` 这一层文件夹](https://github.com/siyuan-note/siyuan/issues/7044)
+* [改进块聚焦和只读模式情况下的提示](https://github.com/siyuan-note/siyuan/issues/7047)
+* [PDF 预览页面点击链接后应打开浏览器](https://github.com/siyuan-note/siyuan/issues/7054)
+* [优化窗口最小时设置、模版和资源的界面](https://github.com/siyuan-note/siyuan/issues/7056)
+* [桌面端快捷方式工作空间参数 `--workspace` 变更](https://github.com/siyuan-note/siyuan/issues/7070)
+* [改进主界面菜单和功能入口布局](https://github.com/siyuan-note/siyuan/issues/7071)
+* [无动态滚动时应保持编辑器滚动的流畅性](https://github.com/siyuan-note/siyuan/issues/7072)
+* [支持多级菜单及菜单滚动](https://github.com/siyuan-note/siyuan/issues/7075)
+* [标签右键增加操作菜单](https://github.com/siyuan-note/siyuan/issues/7078)
+* [初次安装完浏览器剪藏扩展后提示刷新页面](https://github.com/siyuan-note/siyuan/issues/7079)
+* [编辑器宽度改变后需保持光标位置在可视区域内](https://github.com/siyuan-note/siyuan/issues/7080)
+* [支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块](https://github.com/siyuan-note/siyuan/pull/7086)
+* [数据仓库迁出时忽略 `.tmp` 临时文件](https://github.com/siyuan-note/siyuan/issues/7087)
+* [桌面端快捷方式支持 `--port` 启动参数](https://github.com/siyuan-note/siyuan/issues/7092)
+
+### 开发重构
+
+* [改进 `getSearch` 函数实现](https://github.com/siyuan-note/siyuan/pull/7089)
+
+### 修复缺陷
+
+* [反链面板 `链接` 子面板收起后 `提及` 子面板未显示内容](https://github.com/siyuan-note/siyuan/issues/7029)
+* [桌面端删除当前工作空间后报错](https://github.com/siyuan-note/siyuan/issues/7035)
+* [多开工作空间 `锁屏` 后访问鉴权失败](https://github.com/siyuan-note/siyuan/issues/7038)
+* [文档标题输入时右键粘贴无效](https://github.com/siyuan-note/siyuan/issues/7045)
+* [调用模板时模板名首字符乱码](https://github.com/siyuan-note/siyuan/issues/7049)
+* [搜索高亮和虚拟引用不需要转义 Markdown 标记符](https://github.com/siyuan-note/siyuan/issues/7051)
+* [多个桌面端快捷方式指定不同的 `--workspace` 参数后无法启动多个工作空间](https://github.com/siyuan-note/siyuan/issues/7059)
+* [工作空间列表中出现多个相同的路径](https://github.com/siyuan-note/siyuan/issues/7061)
+* [特定情况下块首删除会移除整个块](https://github.com/siyuan-note/siyuan/issues/7066)
+* [三击后快速 `Alt+D` 可能导致块显示异常](https://github.com/siyuan-note/siyuan/issues/7068)
+* [特殊情况下浮窗会消失](https://github.com/siyuan-note/siyuan/issues/7081)
+* [按住 Ctrl 拖拽反链的块到文档中触发状态异常](https://github.com/siyuan-note/siyuan/issues/7088)
+
 ## v2.6.3 / 2023-01-11
 
 ### 改进功能

@@ -52,40 +52,6 @@ func ShortPathForBootingDisplay(p string) string {
 	return p
 }
 
-func IsIDPattern(str string) bool {
-	if len("20060102150405-1a2b3c4") != len(str) {
-		return false
-	}
-
-	if 1 != strings.Count(str, "-") {
-		return false
-	}
-
-	parts := strings.Split(str, "-")
-	idPart := parts[0]
-	if 14 != len(idPart) {
-		return false
-	}
-
-	for _, c := range idPart {
-		if !('0' <= c && '9' >= c) {
-			return false
-		}
-	}
-
-	randPart := parts[1]
-	if 7 != len(randPart) {
-		return false
-	}
-
-	for _, c := range randPart {
-		if !('a' <= c && 'z' >= c) && !('0' <= c && '9' >= c) {
-			return false
-		}
-	}
-	return true
-}
-
 var LocalIPs []string
 
 func GetLocalIPs() (ret []string) {

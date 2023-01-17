@@ -277,7 +277,7 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 		if treenode.IsBlockRef(n) {
 			ref := buildRef(tree, n)
 			refs = append(refs, ref)
-		} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("file-annotation-ref") {
+		} else if treenode.IsFileAnnotationRef(n) {
 			pathID := n.TextMarkFileAnnotationRefID
 			idx := strings.LastIndex(pathID, "/")
 			if -1 == idx {
@@ -305,6 +305,9 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 				Type:         treenode.TypeAbbr(n.Type.String()),
 			}
 			fileAnnotationRefs = append(fileAnnotationRefs, ref)
+		} else if treenode.IsEmbedBlockRef(n) {
+			ref := buildEmbedRef(tree, n)
+			refs = append(refs, ref)
 		}
 		return ast.WalkContinue
 	})
@@ -336,6 +339,43 @@ func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
 		Markdown:         markdown,
 		Type:             treenode.TypeAbbr(refNode.Type.String()),
 	}
+}
+
+func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node) *Ref {
+	markdown := treenode.ExportNodeStdMd(embedNode, luteEngine)
+	defBlockID, text := getEmbedRef(embedNode)
+	var defBlockParentID, defBlockRootID, defBlockPath string
+	defBlock := treenode.GetBlockTree(defBlockID)
+	if nil != defBlock {
+		defBlockParentID = defBlock.ParentID
+		defBlockRootID = defBlock.RootID
+		defBlockPath = defBlock.Path
+	}
+
+	return &Ref{
+		ID:               ast.NewNodeID(),
+		DefBlockID:       defBlockID,
+		DefBlockParentID: defBlockParentID,
+		DefBlockRootID:   defBlockRootID,
+		DefBlockPath:     defBlockPath,
+		BlockID:          embedNode.ID,
+		RootID:           tree.ID,
+		Box:              tree.Box,
+		Path:             tree.Path,
+		Content:          text,
+		Markdown:         markdown,
+		Type:             treenode.TypeAbbr(embedNode.Type.String()),
+	}
+}
+
+func getEmbedRef(embedNode *ast.Node) (queryBlockID, refText string) {
+	queryBlockID = treenode.GetEmbedBlockRef(embedNode)
+	if "" == queryBlockID {
+		return
+	}
+
+	refText = getRefText(queryBlockID)
+	return
 }
 
 func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute) {

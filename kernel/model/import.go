@@ -253,7 +253,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			return err
 		}
 
-		if info.IsDir() && util.IsIDPattern(info.Name()) {
+		if info.IsDir() && ast.IsNodeIDPattern(info.Name()) {
 			renamePaths[path] = path
 		}
 		return nil

@@ -105,7 +105,7 @@ func ListNotebooks() (ret []*Box, err error) {
 			continue
 		}
 
-		if !util.IsIDPattern(dir.Name()) {
+		if !ast.IsNodeIDPattern(dir.Name()) {
 			continue
 		}
 
@@ -329,7 +329,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 		return errors.New(msg)
 	}
 
-	if oldDir := path.Dir(oldPath); util.IsIDPattern(path.Base(oldDir)) {
+	if oldDir := path.Dir(oldPath); ast.IsNodeIDPattern(path.Base(oldDir)) {
 		fromDir := filepath.Join(boxLocalPath, oldDir)
 		if util.IsEmptyDir(fromDir) {
 			filelock.Remove(fromDir)

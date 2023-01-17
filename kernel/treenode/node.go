@@ -18,7 +18,6 @@ package treenode
 
 import (
 	"bytes"
-	util2 "github.com/siyuan-note/siyuan/kernel/util"
 	"strings"
 	"sync"
 
@@ -30,9 +29,61 @@ import (
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/88250/lute/util"
+	"github.com/88250/vitess-sqlparser/sqlparser"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func GetEmbedBlockRef(embedNode *ast.Node) (blockRefID string) {
+	if nil == embedNode || ast.NodeBlockQueryEmbed != embedNode.Type {
+		return
+	}
+
+	scriptNode := embedNode.ChildByType(ast.NodeBlockQueryEmbedScript)
+	if nil == scriptNode {
+		return
+	}
+
+	stmt := scriptNode.TokensStr()
+	parsedStmt, err := sqlparser.Parse(stmt)
+	if nil != err {
+		return
+	}
+
+	switch parsedStmt.(type) {
+	case *sqlparser.Select:
+		slct := parsedStmt.(*sqlparser.Select)
+		if nil == slct.Where || nil == slct.Where.Expr {
+			return
+		}
+
+		switch slct.Where.Expr.(type) {
+		case *sqlparser.ComparisonExpr: // WHERE id = '20060102150405-1a2b3c4'
+			comp := slct.Where.Expr.(*sqlparser.ComparisonExpr)
+			switch comp.Left.(type) {
+			case *sqlparser.ColName:
+				col := comp.Left.(*sqlparser.ColName)
+				if nil == col || "id" != col.Name.Lowered() {
+					return
+				}
+			}
+			switch comp.Right.(type) {
+			case *sqlparser.SQLVal:
+				val := comp.Right.(*sqlparser.SQLVal)
+				if nil == val || sqlparser.StrVal != val.Type {
+					return
+				}
+
+				idVal := string(val.Val)
+				if !ast.IsNodeIDPattern(idVal) {
+					return
+				}
+				blockRefID = idVal
+			}
+		}
+	}
+	return
+}
 
 func GetBlockRef(n *ast.Node) (blockRefID, blockRefText, blockRefSubtype string) {
 	if !IsBlockRef(n) {
@@ -50,6 +101,17 @@ func IsBlockRef(n *ast.Node) bool {
 		return false
 	}
 	return ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref")
+}
+
+func IsFileAnnotationRef(n *ast.Node) bool {
+	if nil == n {
+		return false
+	}
+	return ast.NodeTextMark == n.Type && n.IsTextMarkType("file-annotation-ref")
+}
+
+func IsEmbedBlockRef(n *ast.Node) bool {
+	return "" != GetEmbedBlockRef(n)
 }
 
 func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
@@ -111,7 +173,7 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 			var linkDestStr, ocrText string
 			if nil != linkDest {
 				linkDestStr = linkDest.TokensStr()
-				ocrText = util2.GetAssetText(linkDestStr)
+				ocrText = util.GetAssetText(linkDestStr)
 			}
 
 			linkText := n.ChildByType(ast.NodeLinkText)
@@ -370,7 +432,7 @@ func IsChartCodeBlockCode(code *ast.Node) bool {
 		return false
 	}
 
-	language := util.BytesToStr(code.Previous.CodeBlockInfo)
+	language := gulu.Str.FromBytes(code.Previous.CodeBlockInfo)
 	language = strings.ReplaceAll(language, editor.Caret, "")
 	return render.NoHighlight(language)
 }

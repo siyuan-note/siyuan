@@ -248,7 +248,7 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 	var docs []*File
 	for _, file := range files {
 		if file.isdir {
-			if !util.IsIDPattern(file.name) {
+			if !ast.IsNodeIDPattern(file.name) {
 				continue
 			}
 

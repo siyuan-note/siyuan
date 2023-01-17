@@ -89,9 +89,7 @@ func Tesseract(imgAbsPath string) string {
 	}
 
 	ret := string(output)
-	ret = strings.ReplaceAll(ret, "\r", "")
-	ret = strings.ReplaceAll(ret, "\n", "")
-	ret = strings.ReplaceAll(ret, "\t", " ")
+	ret = gulu.Str.RemoveInvisible(ret)
 	reg := regexp.MustCompile("\\s{2,}")
 	ret = reg.ReplaceAllString(ret, " ")
 	msg := fmt.Sprintf("OCR [%s] [%s]", info.Name(), ret)

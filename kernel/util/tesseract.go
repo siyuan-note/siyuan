@@ -156,8 +156,8 @@ func getTesseractVer() (ret string) {
 	if nil != err {
 		return
 	}
-	logging.LogInfof("tesseract version output [%s]", string(data))
-	if nil == err && strings.HasPrefix(string(data), "tesseract ") {
+
+	if strings.HasPrefix(string(data), "tesseract ") {
 		parts := bytes.Split(data, []byte("\n"))
 		if 0 < len(parts) {
 			ret = strings.TrimPrefix(string(parts[0]), "tesseract ")

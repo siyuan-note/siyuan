@@ -54,11 +54,11 @@ func AssetName(name string) string {
 	_, id := LastID(name)
 	ext := path.Ext(name)
 	name = name[0 : len(name)-len(ext)]
-	if !IsIDPattern(id) {
+	if !ast.IsNodeIDPattern(id) {
 		id = ast.NewNodeID()
 		name = name + "-" + id + ext
 	} else {
-		if !IsIDPattern(name) {
+		if !ast.IsNodeIDPattern(name) {
 			name = name[:len(name)-len(id)-1] + "-" + id + ext
 		} else {
 			name = name + ext
@@ -141,6 +141,8 @@ func FilterUploadFileName(name string) string {
 	ret = strings.ReplaceAll(ret, "#", "")
 	ret = strings.ReplaceAll(ret, "%", "")
 	ret = strings.ReplaceAll(ret, "$", "")
+	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
+	ret = gulu.Str.SubStr(ret, 63)
 	return ret
 }
 

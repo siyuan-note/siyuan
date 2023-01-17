@@ -110,13 +110,21 @@ func initTesseract() {
 		TesseractEnabled = false
 		return
 	}
-	if !gulu.Str.Contains("eng", langs) {
+
+	for _, lang := range langs {
+		if "eng" == lang || strings.HasPrefix(lang, "chi") {
+			TesseractLangs = append(TesseractLangs, lang)
+		}
+	}
+	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(TesseractLangs, "+"))
+
+	if !gulu.Str.Contains("eng", TesseractLangs) {
 		logging.LogWarnf("no eng tesseract lang found")
 		return
 	}
 
 	foundChi := false
-	for _, lang := range langs {
+	for _, lang := range TesseractLangs {
 		if strings.Contains(lang, "chi") {
 			foundChi = true
 			break
@@ -126,13 +134,6 @@ func initTesseract() {
 		logging.LogWarnf("no chi_* tesseract lang found")
 		return
 	}
-
-	for _, lang := range langs {
-		if "eng" == lang || strings.HasPrefix(lang, "chi") {
-			TesseractLangs = append(TesseractLangs, lang)
-		}
-	}
-	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(TesseractLangs, "+"))
 }
 
 func getTesseractVer() (ret string) {

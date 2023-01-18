@@ -49,6 +49,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/studio-b12/gowebdav"
@@ -501,16 +502,21 @@ func InitRepoKey() (err error) {
 	return
 }
 
-var isCheckoutRepo bool
+func CheckoutRepo(id string) {
+	task.PrependTask(task.RepoCheckout, checkoutRepo, id)
+}
 
-func CheckoutRepo(id string) (err error) {
+func checkoutRepo(id string) {
+	var err error
 	if 1 > len(Conf.Repo.Key) {
-		err = errors.New(Conf.Language(26))
+		util.PushErrMsg(Conf.Language(26), 7000)
 		return
 	}
 
 	repo, err := newRepository()
 	if nil != err {
+		logging.LogErrorf("new repository failed: %s", err)
+		util.PushErrMsg(Conf.Language(141), 7000)
 		return
 	}
 
@@ -525,23 +531,16 @@ func CheckoutRepo(id string) (err error) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
-	if util.IsMutexLocked(&syncLock) {
-		err = errors.New("sync is running, please try again later")
-		return
-	}
-
-	isCheckoutRepo = true
-	defer func() {
-		isCheckoutRepo = false
-	}()
-
 	_, _, err = repo.Checkout(id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
+		logging.LogErrorf("checkout repository failed: %s", err)
 		util.PushClearProgress()
+		util.PushErrMsg(Conf.Language(141), 7000)
 		return
 	}
 
 	FullReindex()
+
 	if syncEnabled {
 		func() {
 			time.Sleep(5 * time.Second)

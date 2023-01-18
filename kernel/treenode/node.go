@@ -186,7 +186,7 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 				buf.WriteByte(' ')
 			}
 			if nil != linkDest {
-				buf.Write(n.Tokens)
+				buf.Write(linkDest.Tokens)
 				buf.WriteByte(' ')
 
 			}

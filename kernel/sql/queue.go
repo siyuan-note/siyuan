@@ -29,6 +29,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -50,10 +51,10 @@ type treeQueueOperation struct {
 	renameTreeOldHPath            string      // rename
 }
 
-func AutoFlushTreeQueue() {
+func AutoFlushTx() {
 	for {
-		flushTreeQueue()
 		time.Sleep(util.SQLFlushInterval)
+		task.PrependTask(task.DatabaseIndex, FlushQueue)
 	}
 }
 
@@ -91,7 +92,7 @@ func ClearQueue() {
 	operationQueue = nil
 }
 
-func flushTreeQueue() {
+func FlushQueue() {
 	ops := mergeUpsertTrees()
 	if 1 > len(ops) {
 		return

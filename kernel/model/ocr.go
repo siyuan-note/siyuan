@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/dustin/go-humanize"
 	"io"
 	"os"
 	"path/filepath"
@@ -12,9 +11,11 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -24,7 +25,7 @@ func AutoOCRAssets() {
 	}
 
 	for {
-		autoOCRAssets()
+		task.AppendTask(task.OCRImage, autoOCRAssets)
 		time.Sleep(7 * time.Second)
 	}
 }
@@ -52,17 +53,21 @@ func autoOCRAssets() {
 		util.AssetsTextsLock.Unlock()
 		util.AssetsTextsChanged = true
 	})
-	for _, assetAbsPath := range assets {
+	for i, assetAbsPath := range assets {
 		waitGroup.Add(1)
 		p.Invoke(assetAbsPath)
+
+		if 63 <= i { // 一次最多处理 64 张图片，防止卡顿
+			break
+		}
 	}
 	waitGroup.Wait()
 	p.Release()
 
-	cleanNotFoundAssetsTexts()
+	cleanNotExistAssetsTexts()
 }
 
-func cleanNotFoundAssetsTexts() {
+func cleanNotExistAssetsTexts() {
 	tmp := util.AssetsTexts
 
 	assetsPath := util.GetDataAssetsAbsPath()

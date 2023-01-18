@@ -37,6 +37,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/text/language"
@@ -425,6 +426,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		}
 	}
 
+	task.CloseWait()
 	Conf.Close()
 	sql.CloseDatabase()
 	treenode.SaveBlockTree(false)

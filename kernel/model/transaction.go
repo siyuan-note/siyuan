@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -38,6 +37,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -106,12 +106,7 @@ func AutoFlushTx() {
 	}
 }
 
-var txLock = sync.Mutex{}
-
 func flushTx() {
-	txLock.Lock()
-	defer txLock.Unlock()
-
 	defer logging.Recover()
 
 	currentTx = mergeTx()
@@ -1224,7 +1219,7 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 // AutoFixIndex 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016
 func AutoFixIndex() {
 	for {
-		autoFixIndex()
+		task.AppendTask(task.DatabaseIndexFix, autoFixIndex)
 		time.Sleep(10 * time.Minute)
 	}
 }
@@ -1233,21 +1228,6 @@ var autoFixLock = sync.Mutex{}
 
 func autoFixIndex() {
 	defer logging.Recover()
-
-	if isFullReindexing {
-		logging.LogInfof("skip check index caused by full reindexing")
-		return
-	}
-
-	if util.IsMutexLocked(&syncLock) {
-		logging.LogInfof("skip check index caused by sync lock")
-		return
-	}
-
-	if isCheckoutRepo {
-		logging.LogInfof("skip check index caused by checkout repo")
-		return
-	}
 
 	if util.IsMutexLocked(&autoFixLock) {
 		return
@@ -1262,10 +1242,6 @@ func autoFixIndex() {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
-			if isFullReindexing {
-				return io.EOF
-			}
-
 			if !info.IsDir() && filepath.Ext(path) == ".sy" {
 				p := path[len(boxPath):]
 				p = filepath.ToSlash(p)
@@ -1278,19 +1254,11 @@ func autoFixIndex() {
 
 		redundantPaths := treenode.GetRedundantPaths(box.ID, paths)
 		for _, p := range redundantPaths {
-			if isFullReindexing {
-				break
-			}
-
 			treenode.RemoveBlockTreesByPath(p)
 		}
 
 		missingPaths := treenode.GetNotExistPaths(box.ID, paths)
 		for i, p := range missingPaths {
-			if isFullReindexing {
-				break
-			}
-
 			id := path.Base(p)
 			id = strings.TrimSuffix(id, ".sy")
 			if !ast.IsNodeIDPattern(id) {
@@ -1308,10 +1276,6 @@ func autoFixIndex() {
 		i := -1
 		size := len(rootUpdatedMap)
 		for rootID, updated := range rootUpdatedMap {
-			if isFullReindexing {
-				break
-			}
-
 			i++
 
 			rootUpdated := dbRootUpdatedMap[rootID]
@@ -1341,10 +1305,6 @@ func autoFixIndex() {
 	duplicatedRootIDs := sql.GetDuplicatedRootIDs()
 	size := len(duplicatedRootIDs)
 	for i, rootID := range duplicatedRootIDs {
-		if isFullReindexing {
-			break
-		}
-
 		root := sql.GetBlock(rootID)
 		if nil == root {
 			continue
@@ -1359,10 +1319,6 @@ func autoFixIndex() {
 }
 
 func reindexTreeByPath(box, p string, i, size int) {
-	if isFullReindexing {
-		return
-	}
-
 	tree, err := LoadTree(box, p)
 	if nil != err {
 		return
@@ -1372,10 +1328,6 @@ func reindexTreeByPath(box, p string, i, size int) {
 }
 
 func reindexTree(rootID string, i, size int) {
-	if isFullReindexing {
-		return
-	}
-
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
 		logging.LogWarnf("root block not found", rootID)

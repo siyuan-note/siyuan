@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -504,10 +505,11 @@ func genTreeID(tree *parse.Tree) {
 	return
 }
 
-var isFullReindexing = false
-
 func FullReindex() {
-	isFullReindexing = true
+	task.PrependTask(task.DatabaseIndexFull, fullReindex)
+}
+
+func fullReindex() {
 	util.PushEndlessProgress(Conf.Language(35))
 	WaitForWritingFiles()
 
@@ -526,7 +528,6 @@ func FullReindex() {
 	LoadFlashcards()
 
 	util.PushEndlessProgress(Conf.Language(58))
-	isFullReindexing = false
 	go func() {
 		time.Sleep(1 * time.Second)
 		util.ReloadUI()

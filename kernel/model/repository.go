@@ -526,7 +526,7 @@ func CheckoutRepo(id string) (err error) {
 	Conf.Save()
 
 	if util.IsMutexLocked(&syncLock) {
-		err = errors.New("Sync is running, please try again later")
+		err = errors.New("sync is running, please try again later")
 		return
 	}
 

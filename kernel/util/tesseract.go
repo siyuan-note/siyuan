@@ -23,7 +23,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -90,8 +89,7 @@ func Tesseract(imgAbsPath string) string {
 
 	ret := string(output)
 	ret = gulu.Str.RemoveInvisible(ret)
-	reg := regexp.MustCompile("\\s{2,}")
-	ret = reg.ReplaceAllString(ret, " ")
+	ret = RemoveRedundantSpace(ret)
 	msg := fmt.Sprintf("OCR [%s] [%s]", info.Name(), ret)
 	PushStatusBar(msg)
 	return ret

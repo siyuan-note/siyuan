@@ -141,7 +141,7 @@ func FilterUploadFileName(name string) string {
 	ret = strings.ReplaceAll(ret, "#", "")
 	ret = strings.ReplaceAll(ret, "%", "")
 	ret = strings.ReplaceAll(ret, "$", "")
-	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
+	// 插入资源文件时文件名长度最大限制 63 个字 https://github.com/siyuan-note/siyuan/issues/7099
 	ret = gulu.Str.SubStr(ret, 63)
 	return ret
 }

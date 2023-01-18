@@ -359,7 +359,7 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	return
 }
 
-func InitFlashcards() {
+func LoadFlashcards() {
 	riffSavePath := getRiffDir()
 	if err := os.MkdirAll(riffSavePath, 0755); nil != err {
 		logging.LogErrorf("create riff dir [%s] failed: %s", riffSavePath, err)
@@ -445,7 +445,7 @@ func RemoveDeck(deckID string) (err error) {
 		}
 	}
 
-	InitFlashcards()
+	LoadFlashcards()
 	return
 }
 

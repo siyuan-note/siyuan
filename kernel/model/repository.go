@@ -501,6 +501,8 @@ func InitRepoKey() (err error) {
 	return
 }
 
+var isCheckoutRepo bool
+
 func CheckoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
@@ -522,6 +524,16 @@ func CheckoutRepo(id string) (err error) {
 	syncEnabled := Conf.Sync.Enabled
 	Conf.Sync.Enabled = false
 	Conf.Save()
+
+	if util.IsMutexLocked(&syncLock) {
+		err = errors.New("sync is running, please try again later")
+		return
+	}
+
+	isCheckoutRepo = true
+	defer func() {
+		isCheckoutRepo = false
+	}()
 
 	_, _, err = repo.Checkout(id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {
@@ -977,11 +989,15 @@ func syncRepo(exit, byHand bool) (err error) {
 	// 有数据变更，需要重建索引
 	var upserts, removes []string
 	var upsertTrees int
-	var needReloadFlashcard bool
+	var needReloadFlashcard, needReloadOcrTexts bool
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
 			needReloadFlashcard = true
+		}
+
+		if strings.HasPrefix(file.Path, "/data/assets/ocr-texts.json") {
+			needReloadOcrTexts = true
 		}
 
 		if strings.HasSuffix(file.Path, ".sy") {
@@ -993,10 +1009,18 @@ func syncRepo(exit, byHand bool) (err error) {
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
 			needReloadFlashcard = true
 		}
+
+		if strings.HasPrefix(file.Path, "/data/assets/ocr-texts.json") {
+			needReloadOcrTexts = true
+		}
 	}
 
 	if needReloadFlashcard {
-		InitFlashcards()
+		LoadFlashcards()
+	}
+
+	if needReloadOcrTexts {
+		LoadAssetsTexts()
 	}
 
 	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939

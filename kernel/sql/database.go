@@ -361,7 +361,7 @@ func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node) *Ref {
 		RootID:           tree.ID,
 		Box:              tree.Box,
 		Path:             tree.Path,
-		Content:          "",
+		Content:          "", // 通过嵌入块构建引用时定义块可能还没有入库，所以这里统一不填充内容
 		Markdown:         "",
 		Type:             treenode.TypeAbbr(embedNode.Type.String()),
 	}

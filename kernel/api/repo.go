@@ -113,11 +113,7 @@ func checkoutRepo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	if err := model.CheckoutRepo(id); nil != err {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(141)
-		return
-	}
+	model.CheckoutRepo(id)
 }
 
 func downloadCloudSnapshot(c *gin.Context) {

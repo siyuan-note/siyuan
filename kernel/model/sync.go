@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -106,6 +107,10 @@ func BootSyncData() {
 }
 
 func SyncData(boot, exit, byHand bool) {
+	task.PrependTask(task.CloudSync, syncData, boot, exit, byHand)
+}
+
+func syncData(boot, exit, byHand bool) {
 	defer logging.Recover()
 
 	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
@@ -267,53 +272,35 @@ func SetCloudSyncDir(name string) {
 		return
 	}
 
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	Conf.Sync.CloudName = name
 	Conf.Save()
 }
 
 func SetSyncGenerateConflictDoc(b bool) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	Conf.Sync.GenerateConflictDoc = b
 	Conf.Save()
 	return
 }
 
 func SetSyncEnable(b bool) (err error) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	Conf.Sync.Enabled = b
 	Conf.Save()
 	return
 }
 
 func SetSyncMode(mode int) (err error) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	Conf.Sync.Mode = mode
 	Conf.Save()
 	return
 }
 
 func SetSyncProvider(provider int) (err error) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	Conf.Sync.Provider = provider
 	Conf.Save()
 	return
 }
 
 func SetSyncProviderS3(s3 *conf.S3) (err error) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	s3.Endpoint = strings.TrimSpace(s3.Endpoint)
 	s3.Endpoint = util.NormalizeEndpoint(s3.Endpoint)
 	s3.AccessKey = strings.TrimSpace(s3.AccessKey)
@@ -328,9 +315,6 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 }
 
 func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
-	syncLock.Lock()
-	defer syncLock.Unlock()
-
 	webdav.Endpoint = strings.TrimSpace(webdav.Endpoint)
 	webdav.Endpoint = util.NormalizeEndpoint(webdav.Endpoint)
 	webdav.Username = strings.TrimSpace(webdav.Username)
@@ -349,9 +333,6 @@ func CreateCloudSyncDir(name string) (err error) {
 		err = errors.New(Conf.Language(131))
 		return
 	}
-
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	name = strings.TrimSpace(name)
 	name = gulu.Str.RemoveInvisible(name)
@@ -379,9 +360,6 @@ func RemoveCloudSyncDir(name string) (err error) {
 	}
 
 	msgId := util.PushMsg(Conf.Language(116), 15000)
-
-	syncLock.Lock()
-	defer syncLock.Unlock()
 
 	if "" == name {
 		return

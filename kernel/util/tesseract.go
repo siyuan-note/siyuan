@@ -89,9 +89,7 @@ func Tesseract(imgAbsPath string) string {
 	}
 
 	ret := string(output)
-	ret = strings.ReplaceAll(ret, "\r", "")
-	ret = strings.ReplaceAll(ret, "\n", "")
-	ret = strings.ReplaceAll(ret, "\t", " ")
+	ret = gulu.Str.RemoveInvisible(ret)
 	reg := regexp.MustCompile("\\s{2,}")
 	ret = reg.ReplaceAllString(ret, " ")
 	msg := fmt.Sprintf("OCR [%s] [%s]", info.Name(), ret)
@@ -147,6 +145,7 @@ func getTesseractVer() (ret string) {
 	data, err := cmd.CombinedOutput()
 	if nil != err {
 		if strings.Contains(err.Error(), "executable file not found") {
+			// macOS 端 Tesseract OCR 安装后不识别 https://github.com/siyuan-note/siyuan/issues/7107
 			TesseractBin = "/usr/local/bin/tesseract"
 			cmd = exec.Command(TesseractBin, "--version")
 			gulu.CmdAttr(cmd)
@@ -156,8 +155,8 @@ func getTesseractVer() (ret string) {
 	if nil != err {
 		return
 	}
-	logging.LogInfof("tesseract version output [%s]", string(data))
-	if nil == err && strings.HasPrefix(string(data), "tesseract ") {
+
+	if strings.HasPrefix(string(data), "tesseract ") {
 		parts := bytes.Split(data, []byte("\n"))
 		if 0 < len(parts) {
 			ret = strings.TrimPrefix(string(parts[0]), "tesseract ")

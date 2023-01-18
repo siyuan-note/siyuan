@@ -53,17 +53,21 @@ func autoOCRAssets() {
 		util.AssetsTextsLock.Unlock()
 		util.AssetsTextsChanged = true
 	})
-	for _, assetAbsPath := range assets {
+	for i, assetAbsPath := range assets {
 		waitGroup.Add(1)
 		p.Invoke(assetAbsPath)
+
+		if 63 <= i { // 一次最多处理 64 张图片，防止卡顿
+			break
+		}
 	}
 	waitGroup.Wait()
 	p.Release()
 
-	cleanNotFoundAssetsTexts()
+	cleanNotExistAssetsTexts()
 }
 
-func cleanNotFoundAssetsTexts() {
+func cleanNotExistAssetsTexts() {
 	tmp := util.AssetsTexts
 
 	assetsPath := util.GetDataAssetsAbsPath()

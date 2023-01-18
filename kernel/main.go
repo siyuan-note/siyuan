@@ -52,7 +52,7 @@ func main() {
 	util.PushClearAllMsg()
 	go model.AutoRefreshCheck()
 	go model.AutoFlushTx()
-	go sql.AutoFlushQueue()
+	go sql.AutoFlushTx()
 	go treenode.AutoFlushBlockTree()
 	go cache.LoadAssets()
 	go model.AutoFixIndex()

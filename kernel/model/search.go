@@ -58,6 +58,11 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	var tmp []*sql.Block
 	for _, b := range sqlBlocks {
+		if "query_embed" == b.Type { // 嵌入块不再嵌入
+			// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+			// 这里会导致上面的 limit 限制不准确，导致结果变少，暂时没有解决方案，只能靠用户自己调整 SQL，加上 type != 'query_embed' 的条件
+			continue
+		}
 		if !gulu.Str.Contains(b.ID, excludeIDs) {
 			tmp = append(tmp, b)
 		}
@@ -494,6 +499,7 @@ func buildTypeFilter(types map[string]bool) string {
 		s.SuperBlock = types["superBlock"]
 		s.Paragraph = types["paragraph"]
 		s.HTMLBlock = types["htmlBlock"]
+		s.EmbedBlock = types["embedBlock"]
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -506,6 +512,7 @@ func buildTypeFilter(types map[string]bool) string {
 		s.SuperBlock = Conf.Search.SuperBlock
 		s.Paragraph = Conf.Search.Paragraph
 		s.HTMLBlock = Conf.Search.HTMLBlock
+		s.EmbedBlock = Conf.Search.EmbedBlock
 	}
 	return s.TypeFilter()
 }

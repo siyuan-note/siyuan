@@ -300,7 +300,7 @@ export const JSONToLayout = (isStart: boolean) => {
     }
     // https://github.com/siyuan-note/siyuan/pull/7086
     const openId = getSearch("id");
-    if (openId !== null) {
+    if (openId) {
         // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟
         setTimeout(() => {
             openFileById({

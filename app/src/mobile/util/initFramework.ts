@@ -129,7 +129,7 @@ export const initFramework = () => {
     initEditorName();
     if (getOpenNotebookCount() > 0) {
         const openId = getSearch("id");
-        if (openId !== null) {
+        if (openId) {
             openMobileFileById(openId,
                 getSearch("focus") === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
         } else {

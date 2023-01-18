@@ -22,9 +22,9 @@ export const workspaceMenu = (rect: DOMRect) => {
         window.siyuan.menus.menu.remove();
         return;
     }
-    window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.setAttribute("data-name", "barWorkspace");
     fetchPost("/api/system/getWorkspaces", {}, (response) => {
+        window.siyuan.menus.menu.remove();
+        window.siyuan.menus.menu.element.setAttribute("data-name", "barWorkspace");
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.config,

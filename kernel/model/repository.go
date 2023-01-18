@@ -501,6 +501,8 @@ func InitRepoKey() (err error) {
 	return
 }
 
+var isCheckoutRepo bool
+
 func CheckoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
@@ -522,6 +524,16 @@ func CheckoutRepo(id string) (err error) {
 	syncEnabled := Conf.Sync.Enabled
 	Conf.Sync.Enabled = false
 	Conf.Save()
+
+	if util.IsMutexLocked(&syncLock) {
+		err = errors.New("Sync is running, please try again later")
+		return
+	}
+
+	isCheckoutRepo = true
+	defer func() {
+		isCheckoutRepo = false
+	}()
 
 	_, _, err = repo.Checkout(id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if nil != err {

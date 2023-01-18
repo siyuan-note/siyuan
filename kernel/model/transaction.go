@@ -1244,6 +1244,11 @@ func autoFixIndex() {
 		return
 	}
 
+	if isCheckoutRepo {
+		logging.LogInfof("skip check index caused by checkout repo")
+		return
+	}
+
 	if util.IsMutexLocked(&autoFixLock) {
 		return
 	}
@@ -1284,6 +1289,12 @@ func autoFixIndex() {
 		for i, p := range missingPaths {
 			if isFullReindexing {
 				break
+			}
+
+			id := path.Base(p)
+			id = strings.TrimSuffix(id, ".sy")
+			if !ast.IsNodeIDPattern(id) {
+				continue
 			}
 
 			reindexTreeByPath(box.ID, p, i, size)

@@ -342,8 +342,7 @@ func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
 }
 
 func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node) *Ref {
-	markdown := treenode.ExportNodeStdMd(embedNode, luteEngine)
-	defBlockID, text := getEmbedRef(embedNode)
+	defBlockID := getEmbedRef(embedNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
 	defBlock := treenode.GetBlockTree(defBlockID)
 	if nil != defBlock {
@@ -362,19 +361,14 @@ func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node) *Ref {
 		RootID:           tree.ID,
 		Box:              tree.Box,
 		Path:             tree.Path,
-		Content:          text,
-		Markdown:         markdown,
+		Content:          "",
+		Markdown:         "",
 		Type:             treenode.TypeAbbr(embedNode.Type.String()),
 	}
 }
 
-func getEmbedRef(embedNode *ast.Node) (queryBlockID, refText string) {
+func getEmbedRef(embedNode *ast.Node) (queryBlockID string) {
 	queryBlockID = treenode.GetEmbedBlockRef(embedNode)
-	if "" == queryBlockID {
-		return
-	}
-
-	refText = getRefText(queryBlockID)
 	return
 }
 

@@ -55,9 +55,11 @@ func updateRootContent(tx *sql.Tx, content, updated, id string) {
 	if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
 		return
 	}
-	stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-	if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
-		return
+	if !caseSensitive {
+		stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
+		if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
+			return
+		}
 	}
 	removeBlockCache(id)
 	cache.RemoveBlockIAL(id)
@@ -65,4 +67,31 @@ func updateRootContent(tx *sql.Tx, content, updated, id string) {
 
 func InsertBlock(tx *sql.Tx, block *Block, context map[string]interface{}) (err error) {
 	return insertBlocks(tx, []*Block{block}, context)
+}
+
+func UpdateBlockContent(block *Block) {
+	tx, err := BeginTx()
+	if nil != err {
+		return
+	}
+
+	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, block.Content, block.ID); nil != err {
+		tx.Rollback()
+		return
+	}
+	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, block.Content, block.ID); nil != err {
+		tx.Rollback()
+		return
+	}
+	if !caseSensitive {
+		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
+		if err = execStmtTx(tx, stmt, block.Content, block.ID); nil != err {
+			tx.Rollback()
+			return
+		}
+	}
+	tx.Commit()
+	putBlockCache(block)
 }

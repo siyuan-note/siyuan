@@ -56,6 +56,7 @@ func main() {
 	go treenode.AutoFlushBlockTree()
 	go cache.LoadAssets()
 	go model.AutoFixIndex()
+	go model.AutoIndexEmbedBlock()
 	go model.AutoOCRAssets()
 	go model.AutoFlushAssetsTexts()
 	go model.HookDesktopUIProc()

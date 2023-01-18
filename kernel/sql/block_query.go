@@ -31,7 +31,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func QueryEmbedBlocks() (ret []*Block) {
+func QueryEmptyContentEmbedBlocks() (ret []*Block) {
 	stmt := "SELECT * FROM blocks WHERE type = 'query_embed' AND content = ''"
 	rows, err := query(stmt)
 	if nil != err {

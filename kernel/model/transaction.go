@@ -1225,14 +1225,18 @@ func AutoIndexEmbedBlock() {
 }
 
 func autoIndexEmbedBlock() {
-	embedBlocks := sql.QueryEmbedBlocks()
-	for _, embedBlock := range embedBlocks {
+	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+	for i, embedBlock := range embedBlocks {
 		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
 		stmt = strings.TrimSuffix(stmt, "}}")
 		blocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
 		for _, block := range blocks {
 			embedBlock.Content = block.Content
 			sql.UpdateBlockContent(embedBlock)
+		}
+
+		if 63 <= i { // 一次任务中最多处理 64 个嵌入块，防止卡顿
+			break
 		}
 	}
 }

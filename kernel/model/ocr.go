@@ -57,7 +57,7 @@ func autoOCRAssets() {
 		waitGroup.Add(1)
 		p.Invoke(assetAbsPath)
 
-		if 63 <= i { // 一次最多处理 64 张图片，防止卡顿
+		if 63 <= i { // 一次任务中最多处理 64 张图片，防止卡顿
 			break
 		}
 	}

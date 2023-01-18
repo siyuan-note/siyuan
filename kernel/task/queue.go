@@ -104,7 +104,8 @@ const (
 	DatabaseIndex           = "task.database.index"            // 数据库所以队列
 	DatabaseIndexFix        = "task.database.index.fix"        // 数据库索引订正
 	OCRImage                = "task.ocr.image"                 // 图片 OCR 提取文本
-	DatabaseIndexEmbedBlock = "task.database.index.embedblock" // 数据库索引嵌入块
+	HistoryGenerateDoc      = "task.history.generateDoc"       // 生成文件历史
+	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块
 )
 
 func Loop() {

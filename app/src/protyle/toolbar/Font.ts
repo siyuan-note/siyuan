@@ -33,7 +33,7 @@ export const fontMenu = (protyle: IProtyle) => {
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
         "var(--b3-font-color9)", "var(--b3-font-color10)", "var(--b3-font-color11)", "var(--b3-font-color12)",
         "var(--b3-font-color13)"].forEach((item) => {
-        colorHTML += `<button class="b3-color__square" data-type="color" style="background-color:${item}"></button>`;
+        colorHTML += `<button class="b3-color__square" data-type="color" style="color:${item}">A</button>`;
     });
     let bgHTML = "";
     ["var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
@@ -56,10 +56,10 @@ export const fontMenu = (protyle: IProtyle) => {
             const lastFontStatus = item.split(Constants.ZWSP);
             switch (lastFontStatus[0]) {
                 case "color":
-                    lastColorHTML += `<button class="b3-color__square b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.colorFont}" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
+                    lastColorHTML += `<button class="b3-color__square" data-type="${lastFontStatus[0]}" style="color:${lastFontStatus[1]}">A</button>`;
                     break;
                 case "backgroundColor":
-                    lastColorHTML += `<button class="b3-color__square b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages["--b3-theme-background"]}" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
+                    lastColorHTML += `<button class="b3-color__square" data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]}"></button>`;
                     break;
                 case "style2":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;
@@ -122,7 +122,7 @@ export const fontMenu = (protyle: IProtyle) => {
                 if (dataType === "clear") {
                     protyle.toolbar.setInlineMark(protyle, "clear", "range", {type:"text"});
                 } else {
-                    fontEvent(protyle, dataType, target.style.backgroundColor || target.textContent);
+                    fontEvent(protyle, dataType, target.style.backgroundColor || target.style.color || target.textContent);
                 }
                 break;
             }

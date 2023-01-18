@@ -1566,7 +1566,7 @@ export class Gutter {
             "var(--b3-font-background13)"].forEach((item, index) => {
             styles.push({
                 label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.colorPrimary} ${index + 1}">
-    <span style="background-color:${item};" class="b3-color__square fn__flex-center">A</span>
+    <span style="background-color:${item};" class="b3-color__square fn__flex-center"></span>
 </div>`,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {

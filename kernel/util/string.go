@@ -17,7 +17,9 @@
 package util
 
 import (
+	"bytes"
 	"strings"
+	"unicode"
 
 	"github.com/88250/lute/html"
 )
@@ -38,4 +40,31 @@ func Reverse(s string) string {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
 	return string(runes)
+}
+
+func RemoveRedundantSpace(str string) string {
+	buf := bytes.Buffer{}
+	lastIsChinese := false
+	lastIsSpace := false
+	for _, r := range str {
+		if unicode.IsSpace(r) {
+			if lastIsChinese || lastIsSpace {
+				continue
+			}
+			buf.WriteRune(' ')
+			lastIsChinese = false
+			lastIsSpace = true
+			continue
+		}
+
+		lastIsSpace = false
+		buf.WriteRune(r)
+		if unicode.Is(unicode.Han, r) {
+			lastIsChinese = true
+			continue
+		} else {
+			lastIsChinese = false
+		}
+	}
+	return buf.String()
 }

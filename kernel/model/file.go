@@ -43,6 +43,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -1177,23 +1178,19 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 	return
 }
 
-func RemoveDoc(boxID, p string) (err error) {
+func RemoveDoc(boxID, p string) {
 	box := Conf.Box(boxID)
 	if nil == box {
-		err = errors.New(Conf.Language(0))
 		return
 	}
 
 	WaitForWritingFiles()
-	err = removeDoc(box, p)
-	if nil != err {
-		return
-	}
+	removeDoc(box, p)
 	IncSync()
 	return
 }
 
-func RemoveDocs(paths []string) (err error) {
+func RemoveDocs(paths []string) {
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
 
@@ -1201,17 +1198,14 @@ func RemoveDocs(paths []string) (err error) {
 	pathsBoxes := getBoxesByPaths(paths)
 	WaitForWritingFiles()
 	for p, box := range pathsBoxes {
-		err = removeDoc(box, p)
-		if nil != err {
-			return
-		}
+		removeDoc(box, p)
 	}
 	return
 }
 
-func removeDoc(box *Box, p string) (err error) {
-	tree, err := LoadTree(box.ID, p)
-	if nil != err {
+func removeDoc(box *Box, p string) {
+	tree, _ := LoadTree(box.ID, p)
+	if nil == tree {
 		return
 	}
 
@@ -1224,15 +1218,13 @@ func removeDoc(box *Box, p string) (err error) {
 	historyPath := filepath.Join(historyDir, box.ID, p)
 	absPath := filepath.Join(util.DataDir, box.ID, p)
 	if err = filelock.Copy(absPath, historyPath); nil != err {
-		return errors.New(fmt.Sprintf(Conf.Language(70), box.Name, absPath, err))
+		logging.LogErrorf("backup [path=%s] to history [%s] failed: %s", absPath, historyPath, err)
+		return
 	}
 
 	copyDocAssetsToDataAssets(box.ID, p)
 
-	var removeIDs []string
-	ids := treenode.RootChildIDs(tree.ID)
-	removeIDs = append(removeIDs, ids...)
-
+	removeIDs := treenode.RootChildIDs(tree.ID)
 	dir := path.Dir(p)
 	childrenDir := path.Join(dir, tree.ID)
 	existChildren := box.Exist(childrenDir)
@@ -1240,6 +1232,7 @@ func removeDoc(box *Box, p string) (err error) {
 		absChildrenDir := filepath.Join(util.DataDir, tree.Box, childrenDir)
 		historyPath = filepath.Join(historyDir, tree.Box, childrenDir)
 		if err = filelock.Copy(absChildrenDir, historyPath); nil != err {
+			logging.LogErrorf("backup [path=%s] to history [%s] failed: %s", absChildrenDir, historyPath, err)
 			return
 		}
 	}
@@ -1254,11 +1247,7 @@ func removeDoc(box *Box, p string) (err error) {
 		return
 	}
 	box.removeSort(removeIDs)
-
-	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
-	sql.RemoveTreePathQueue(box.ID, childrenDir)
 	RemoveRecentDoc(removeIDs)
-
 	if "/" != dir {
 		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
 		if nil == err && 1 > len(others) {
@@ -1266,13 +1255,19 @@ func removeDoc(box *Box, p string) (err error) {
 		}
 	}
 
-	cache.RemoveDocIAL(p)
-
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"ids": removeIDs,
 	}
 	util.PushEvent(evt)
+
+	task.PrependTask(task.DatabaseIndex, removeDoc0, box, p, childrenDir)
+}
+
+func removeDoc0(box *Box, p, childrenDir string) {
+	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
+	sql.RemoveTreePathQueue(box.ID, childrenDir)
+	cache.RemoveDocIAL(p)
 	return
 }
 

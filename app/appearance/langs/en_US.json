@@ -945,7 +945,7 @@
     "67": "Uploaded at %s, downloaded at %s",
     "68": "The local data has exceeded the maximum storage capacity of cloud space [%s] during the trial period, and cannot continue to sync data. After the subscription, the cloud storage capacity will be upgraded to [8 GB]",
     "69": "Download completed",
-    "70": "Copy notebook [%s] file [%s] failed: %s",
+    "70": "TODO",
     "71": "Failed to insert asset file, please reopen the document",
     "72": "Content has been copied to the system clipboard, please go to SiYuan to paste",
     "73": "Importing, please wait...",

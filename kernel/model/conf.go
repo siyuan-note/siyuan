@@ -406,12 +406,6 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		}
 	}
 
-	//util.UIProcessIDs.Range(func(key, _ interface{}) bool {
-	//	pid := key.(string)
-	//	util.Kill(pid)
-	//	return true
-	//})
-
 	waitSecondForExecInstallPkg := false
 	if !skipNewVerInstallPkg() {
 		newVerInstallPkgPath := getNewVerInstallPkgPath()

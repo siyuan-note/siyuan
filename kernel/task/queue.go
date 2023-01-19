@@ -111,6 +111,11 @@ const (
 func Loop() {
 	for {
 		time.Sleep(10 * time.Millisecond)
+		if QueueStatusClosing == taskQueueStatus {
+			clearQueue()
+			break
+		}
+
 		task := popTask()
 		if nil == task {
 			continue
@@ -121,9 +126,6 @@ func Loop() {
 }
 
 func CloseWait() {
-	queueLock.Lock()
-	defer queueLock.Unlock()
-
 	taskQueueStatus = QueueStatusClosing
 	for {
 		time.Sleep(10 * time.Millisecond)
@@ -131,6 +133,13 @@ func CloseWait() {
 			break
 		}
 	}
+}
+
+func clearQueue() {
+	queueLock.Lock()
+	defer queueLock.Unlock()
+
+	taskQueue = []*Task{}
 }
 
 func popTask() (ret *Task) {

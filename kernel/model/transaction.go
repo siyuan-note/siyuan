@@ -1307,38 +1307,29 @@ func autoFixIndex() {
 
 	// 对比块树和数据库并订正数据库
 	rootUpdatedMap := treenode.GetRootUpdated()
-	dbRootUpdatedMap, err := sql.GetRootUpdated()
+	dbRootUpdatedMap, err := sql.GetRootUpdated("blocks")
 	if nil == err {
-		i := -1
-		size := len(rootUpdatedMap)
-		for rootID, updated := range rootUpdatedMap {
-			i++
-
-			rootUpdated := dbRootUpdatedMap[rootID]
-			if "" == rootUpdated {
-				logging.LogWarnf("not found tree [%s] in database, reindex it", rootID)
-				reindexTree(rootID, i, size)
-				continue
-			}
-
-			if "" == updated {
-				// BlockTree 迁移，v2.6.3 之前没有 updated 字段
-				reindexTree(rootID, i, size)
-				continue
-			}
-
-			btUpdated, _ := time.Parse("20060102150405", updated)
-			dbUpdated, _ := time.Parse("20060102150405", rootUpdated)
-			if dbUpdated.Before(btUpdated.Add(-10 * time.Minute)) {
-				logging.LogWarnf("tree [%s] is not up to date, reindex it", rootID)
-				reindexTree(rootID, i, size)
-				continue
-			}
+		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap)
+	}
+	dbFtsRootUpdatedMap, err := sql.GetRootUpdated("blocks_fts")
+	if nil == err {
+		reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap)
+	}
+	if !Conf.Search.CaseSensitive {
+		dbFtsRootUpdatedMap, err := sql.GetRootUpdated("blocks_fts_case_insensitive")
+		if nil == err {
+			reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap)
 		}
 	}
 
 	// 去除重复的数据库块记录
-	duplicatedRootIDs := sql.GetDuplicatedRootIDs()
+	duplicatedRootIDs := sql.GetDuplicatedRootIDs("blocks")
+	if 1 > len(duplicatedRootIDs) {
+		duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts")
+		if 1 > len(duplicatedRootIDs) && !Conf.Search.CaseSensitive {
+			duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts_case_insensitive")
+		}
+	}
 	size := len(duplicatedRootIDs)
 	for i, rootID := range duplicatedRootIDs {
 		root := sql.GetBlock(rootID)
@@ -1352,6 +1343,35 @@ func autoFixIndex() {
 	}
 
 	util.PushStatusBar(Conf.Language(185))
+}
+
+func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
+	i := -1
+	size := len(rootUpdatedMap)
+	for rootID, updated := range rootUpdatedMap {
+		i++
+
+		rootUpdated := dbRootUpdatedMap[rootID]
+		if "" == rootUpdated {
+			logging.LogWarnf("not found tree [%s] in database, reindex it", rootID)
+			reindexTree(rootID, i, size)
+			continue
+		}
+
+		if "" == updated {
+			// BlockTree 迁移，v2.6.3 之前没有 updated 字段
+			reindexTree(rootID, i, size)
+			continue
+		}
+
+		btUpdated, _ := time.Parse("20060102150405", updated)
+		dbUpdated, _ := time.Parse("20060102150405", rootUpdated)
+		if dbUpdated.Before(btUpdated.Add(-10 * time.Minute)) {
+			logging.LogWarnf("tree [%s] is not up to date, reindex it", rootID)
+			reindexTree(rootID, i, size)
+			continue
+		}
+	}
 }
 
 func reindexTreeByPath(box, p string, i, size int) {

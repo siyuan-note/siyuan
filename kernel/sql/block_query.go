@@ -597,8 +597,8 @@ func GetBlock(id string) (ret *Block) {
 	return
 }
 
-func GetRootUpdated() (ret map[string]string, err error) {
-	rows, err := query("SELECT root_id, updated FROM blocks WHERE type = 'd'")
+func GetRootUpdated(blocksTable string) (ret map[string]string, err error) {
+	rows, err := query("SELECT root_id, updated FROM `" + blocksTable + "` WHERE type = 'd'")
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
@@ -614,8 +614,8 @@ func GetRootUpdated() (ret map[string]string, err error) {
 	return
 }
 
-func GetDuplicatedRootIDs() (ret []string) {
-	rows, err := query("SELECT DISTINCT root_id FROM blocks GROUP BY id HAVING COUNT(*) > 1")
+func GetDuplicatedRootIDs(blocksTable string) (ret []string) {
+	rows, err := query("SELECT DISTINCT root_id FROM `" + blocksTable + "` GROUP BY id HAVING COUNT(*) > 1")
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

@@ -48,6 +48,9 @@ ctrl+p 搜索: 199
 // 需大于 .block__popover
 .b3-menu: 210
 
+// 需小于 .side-panel
+#transactionTip & #keyboardToolbar: 212
+
 // 需小于 .b3-dialog 关于中的锁屏密码设置
 .side-panel: 220
 

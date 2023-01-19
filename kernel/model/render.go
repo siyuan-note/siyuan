@@ -118,6 +118,25 @@ func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	return h
 }
 
+func renderBlockContentByNodes(nodes []*ast.Node) string {
+	var subNodes []*ast.Node
+	for _, n := range nodes {
+		if ast.NodeDocument == n.Type {
+			for c := n.FirstChild; nil != c; c = c.Next {
+				subNodes = append(subNodes, c)
+			}
+		} else {
+			subNodes = append(subNodes, n)
+		}
+	}
+
+	buf := bytes.Buffer{}
+	for _, n := range subNodes {
+		buf.WriteString(treenode.NodeStaticContent(n, nil))
+	}
+	return buf.String()
+}
+
 func renderBlockMarkdownR(id string) string {
 	var rendered []string
 	nodes := renderBlockMarkdownR0(id, &rendered)

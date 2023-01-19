@@ -70,9 +70,6 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 	}
 	sqlBlocks = tmp
 
-	// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
-	task.AppendTask(task.DatabaseIndexEmbedBlock, updateEmbedBlockContent, embedBlockID, sqlBlocks)
-
 	// 缓存最多 128 棵语法树
 	trees := map[string]*parse.Tree{}
 	count := 0
@@ -100,6 +97,9 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 			BlockPaths: blockPaths,
 		})
 	}
+
+	// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+	task.AppendTask(task.DatabaseIndexEmbedBlock, updateEmbedBlockContent, embedBlockID, ret)
 
 	// 添加笔记本名称
 	var boxIDs []string

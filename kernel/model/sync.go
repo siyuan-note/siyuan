@@ -107,6 +107,7 @@ func BootSyncData() {
 }
 
 func SyncData(boot, exit, byHand bool) {
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	task.PrependTask(task.CloudSync, syncData, boot, exit, byHand)
 }
 

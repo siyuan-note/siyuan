@@ -573,6 +573,7 @@
   "--b3-protyle-inline-blockref-color": "Bloque Ref",
   "sync": "Sincronización",
   "syncNow": "Sincronizar ahora",
+  "waitSync": "Los datos de edición no se han sincronizado con la nube",
   "cloudBook": "Cuaderno de notas en la nube",
   "paymentSum": "Pagado acumulativamente",
   "refresh": "Actualizar",

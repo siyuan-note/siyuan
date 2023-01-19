@@ -13,7 +13,11 @@ export const onMessage = (data: IWebSocketData) => {
                         document.querySelector("#menuSyncNow svg").classList.add("fn__rotate");
                     } else {
                         document.querySelector("#menuSyncNow svg").classList.remove("fn__rotate");
+
                     }
+                }
+                if (data.code !== 0) {
+                    document.getElementById("transactionTip").classList.add("fn__none")
                 }
                 break;
             case "create":

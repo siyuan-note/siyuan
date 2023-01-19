@@ -55,9 +55,12 @@ class App {
                     loadAssets(confResponse.data.conf.appearance);
                     initMessage();
                     initAssets();
-                    fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
-                        window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                        initFramework();
+                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                        window.siyuan.user = userResponse.data;
+                        fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
+                            window.siyuan.emojis = emojiResponse.data as IEmoji[];
+                            initFramework();
+                        });
                     });
                     addGA();
                 });

@@ -72,5 +72,6 @@
     <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
     <span class="fn__flex-1"></span>
 </div>
+<div id="transactionTip" class="fn__none"></div>
 </body>
 </html>

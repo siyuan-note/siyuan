@@ -573,6 +573,7 @@
   "--b3-protyle-inline-blockref-color": "引用块",
   "sync": "同步",
   "syncNow": "立即同步",
+  "waitSync": "编辑数据尚未同步到云端",
   "cloudBook": "云端笔记本",
   "paymentSum": "累计已支付",
   "refresh": "刷新",

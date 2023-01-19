@@ -17,6 +17,7 @@ import {genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
+import {needSubscribe} from "../../util/needSubscribe";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -73,6 +74,12 @@ const promiseTransaction = () => {
             return;
         }
         countBlockWord([], protyle.block.rootID, true);
+        /// #if MOBILE
+        if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
+            window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
+            document.getElementById("transactionTip").classList.remove("fn__none")
+        }
+        /// #endif
         if (response.data[0].doOperations[0].action === "setAttrs") {
             const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
             if (gutterFoldElement) {

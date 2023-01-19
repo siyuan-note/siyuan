@@ -19,6 +19,7 @@ import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
 import {hideKeyboardToolbar, initKeyboardToolbar} from "./showKeyboardToolbar";
 import {getSearch} from "../../util/functions";
+import {syncGuide} from "../../sync/syncGuide";
 
 export const initFramework = () => {
     setInlineStyle();
@@ -154,6 +155,11 @@ export const initFramework = () => {
     if (window.siyuan.config.newbie) {
         mountHelp();
     }
+    const transactionTipElement = document.getElementById("transactionTip");
+    transactionTipElement.innerHTML = `${window.siyuan.languages.waitSync} <button class="b3-button">${window.siyuan.languages.syncNow}</button>`
+    transactionTipElement.querySelector(".b3-button").addEventListener(getEventName(), () => {
+        syncGuide();
+    });
 };
 
 const initEditorName = () => {

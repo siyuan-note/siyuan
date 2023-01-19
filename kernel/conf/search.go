@@ -189,7 +189,7 @@ func (s *Search) TypeFilter() string {
 		buf.WriteString(",")
 	}
 	// 无法搜索到 iframe 块、视频块和音频块 https://github.com/siyuan-note/siyuan/issues/3604
-	buf.WriteString("'iframe','query_embed','video','audio',")
+	buf.WriteString("'iframe','video','audio',")
 	// 挂件块支持内置属性搜索 https://github.com/siyuan-note/siyuan/issues/4497
 	buf.WriteString("'widget',")
 

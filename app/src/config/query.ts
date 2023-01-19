@@ -83,6 +83,13 @@ export const query = {
             <span class="fn__space"></span>
             <input class="b3-switch fn__flex-center" id="htmlBlock" type="checkbox"${window.siyuan.config.search.htmlBlock ? " checked" : ""}/>
         </label>
+        <label class="fn__flex">
+            <div class="fn__flex-1 b3-label__text">
+                ${window.siyuan.languages.embedBlock}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch fn__flex-center" id="embedBlock" type="checkbox"${window.siyuan.config.search.embedBlock ? " checked" : ""}/>
+        </label>
     </div>
 </div>
 <div class="b3-label">
@@ -226,6 +233,7 @@ export const query = {
                     listItem: (query.element.querySelector("#listItem") as HTMLInputElement).checked,
                     codeBlock: (query.element.querySelector("#codeBlock") as HTMLInputElement).checked,
                     htmlBlock: (query.element.querySelector("#htmlBlock") as HTMLInputElement).checked,
+                    embedBlock: (query.element.querySelector("#embedBlock") as HTMLInputElement).checked,
                     mathBlock: (query.element.querySelector("#mathBlock") as HTMLInputElement).checked,
                     table: (query.element.querySelector("#table") as HTMLInputElement).checked,
                     blockquote: (query.element.querySelector("#blockquote") as HTMLInputElement).checked,

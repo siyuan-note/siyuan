@@ -846,6 +846,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                     blockquote: window.siyuan.config.search.blockquote,
                     superBlock: window.siyuan.config.search.superBlock,
                     paragraph: window.siyuan.config.search.paragraph,
+                    embedBlock: window.siyuan.config.search.embedBlock,
                 }
             }, config, edit);
         }
@@ -989,6 +990,13 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         </div>
         <span class="fn__space"></span>
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="htmlBlock" type="checkbox"${config.types.htmlBlock ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.embedBlock}
+        </div>
+        <span class="fn__space"></span>
+        <input id="removeAssets" class="b3-switch fn__flex-center" data-type="embedBlock" type="checkbox"${config.types.embedBlock ? " checked" : ""}>
     </label>
 </div>
 <div class="b3-dialog__action">

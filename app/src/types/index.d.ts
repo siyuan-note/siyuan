@@ -85,6 +85,7 @@ interface ISearchOption {
         listItem: boolean
         codeBlock: boolean
         htmlBlock: boolean
+        embedBlock: boolean
     }
 }
 
@@ -442,6 +443,7 @@ declare interface IConfig {
         sort: number
     }
     search: {
+        embedBlock: boolean
         htmlBlock: boolean
         document: boolean
         heading: boolean

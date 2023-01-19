@@ -1220,7 +1220,7 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 func AutoIndexEmbedBlock() {
 	for {
 		task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock)
-		time.Sleep(30 * time.Second)
+		time.Sleep(10 * time.Minute)
 	}
 }
 

@@ -197,6 +197,7 @@ export const getLocalStorage = (cb:()=>void) => {
                 blockquote: window.siyuan.config.search.blockquote,
                 superBlock: window.siyuan.config.search.superBlock,
                 paragraph: window.siyuan.config.search.paragraph,
+                embedBlock: window.siyuan.config.search.embedBlock,
             }
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;

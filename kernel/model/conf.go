@@ -398,7 +398,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	WaitForWritingFiles()
 
 	if !force {
-		SyncData(false, true, false)
+		syncData(false, true, false)
 		if 0 != ExitSyncSucc {
 			exitCode = 1
 			return

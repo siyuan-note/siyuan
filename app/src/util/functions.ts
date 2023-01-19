@@ -14,12 +14,11 @@ export const getRandom = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min; //含最大值，含最小值
 };
 
-export const getSearch: (key: string, link?: string) => string | null = (key: string, link = window.location.search) => {
-    const params = link.substring(link.indexOf('?'));
-    const hashIndex = params.indexOf('#');
-    const searchParams = params.substring(0, hashIndex >= 0 ? hashIndex : undefined);
+export const getSearch = (key: string, link = window.location.search) => {
+    const params = link.substring(link.indexOf("?"));
+    const hashIndex = params.indexOf("#");
     // REF https://developer.mozilla.org/zh-CN/docs/Web/API/URLSearchParams
-    const urlSearchParams = new URLSearchParams(searchParams);
+    const urlSearchParams = new URLSearchParams(params.substring(0, hashIndex >= 0 ? hashIndex : undefined));
     return urlSearchParams.get(key);
 };
 

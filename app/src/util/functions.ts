@@ -14,20 +14,13 @@ export const getRandom = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min; //含最大值，含最小值
 };
 
-export const getSearch = (key: string, link = window.location.search) => {
-    if (link.indexOf("?") === -1) {
-        return "";
-    }
-    let value = "";
-    const data = link.split("?")[1].split("&");
-    data.find(item => {
-        const keyValue = item.split("=");
-        if (keyValue[0] === key) {
-            value = keyValue[1];
-            return true;
-        }
-    });
-    return value;
+export const getSearch: (key: string, link?: string) => string | null = (key: string, link = window.location.search) => {
+    const params = link.substring(link.indexOf('?'));
+    const hashIndex = params.indexOf('#');
+    const searchParams = params.substring(0, hashIndex >= 0 ? hashIndex : undefined);
+    // REF https://developer.mozilla.org/zh-CN/docs/Web/API/URLSearchParams
+    const urlSearchParams = new URLSearchParams(searchParams);
+    return urlSearchParams.get(key);
 };
 
 export const isBrowser = () => {

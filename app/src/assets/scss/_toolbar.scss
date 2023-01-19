@@ -58,7 +58,12 @@
   }
 
   &-util {
-    @extend .b3-menu;
+    position: fixed;
+    border-radius: 4px;
+    box-shadow: var(--b3-dialog-shadow);
+    background-color: var(--b3-menu-background);
+    padding: 8px;
+    max-height: 80vh;
     z-index: 200;
   }
 

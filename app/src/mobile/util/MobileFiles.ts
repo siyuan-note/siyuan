@@ -99,8 +99,8 @@ export class MobileFiles extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "focus") {
-                    if (window.siyuan.mobileEditor) {
-                        this.selectItem(window.siyuan.mobileEditor.protyle.notebookId, window.siyuan.mobileEditor.protyle.path);
+                    if (window.siyuan.mobile.editor) {
+                        this.selectItem(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path);
                     }
                     event.preventDefault();
                     break;

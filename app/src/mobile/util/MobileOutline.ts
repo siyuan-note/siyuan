@@ -49,7 +49,7 @@ export class MobileOutline {
 
     public update() {
         fetchPost("/api/outline/getDocOutline", {
-            id: window.siyuan.mobileEditor.protyle.block.rootID,
+            id: window.siyuan.mobile.editor.protyle.block.rootID,
         }, response => {
             let currentId;
             let currentElement = this.element.querySelector(".b3-list-item--focus");
@@ -57,7 +57,7 @@ export class MobileOutline {
                 currentId = currentElement.getAttribute("data-node-id");
             }
 
-            const blockId = window.siyuan.mobileEditor.protyle.block.rootID;
+            const blockId = window.siyuan.mobile.editor.protyle.block.rootID;
             if (this.openNodes[blockId]) {
                 this.openNodes[blockId] = this.tree.getExpandIds();
             }

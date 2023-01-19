@@ -73,7 +73,7 @@ export const initFramework = () => {
             }
         });
     });
-    new MobileFiles();
+    window.siyuan.mobile.files = new MobileFiles();
     document.getElementById("toolbarFile").addEventListener("click", () => {
         sidebarElement.style.left = "0";
         document.querySelector(".scrim").classList.remove("fn__none");
@@ -110,11 +110,11 @@ export const initFramework = () => {
         window.siyuan.config.editor.readOnly = isReadonly;
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
             if (!isReadonly) {
-                enableProtyle(window.siyuan.mobileEditor.protyle);
+                enableProtyle(window.siyuan.mobile.editor.protyle);
                 inputElement.readOnly = false;
                 editIconElement.setAttribute("xlink:href", "#iconEdit");
             } else {
-                disabledProtyle(window.siyuan.mobileEditor.protyle);
+                disabledProtyle(window.siyuan.mobile.editor.protyle);
                 inputElement.readOnly = true;
                 editIconElement.setAttribute("xlink:href", "#iconPreview");
             }
@@ -169,7 +169,7 @@ const initEditorName = () => {
         hideKeyboardToolbar();
     });
     inputElement.addEventListener("blur", () => {
-        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || window.siyuan.mobileEditor.protyle.disabled) {
+        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || window.siyuan.mobile.editor.protyle.disabled) {
             return;
         }
         if (!validateName(inputElement.value)) {
@@ -178,8 +178,8 @@ const initEditorName = () => {
         }
 
         fetchPost("/api/filetree/renameDoc", {
-            notebook: window.siyuan.mobileEditor.protyle.notebookId,
-            path: window.siyuan.mobileEditor.protyle.path,
+            notebook: window.siyuan.mobile.editor.protyle.notebookId,
+            path: window.siyuan.mobile.editor.protyle.path,
             title: inputElement.value,
         });
     });

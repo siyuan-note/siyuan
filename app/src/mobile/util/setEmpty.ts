@@ -20,8 +20,8 @@ export const setEmpty = () => {
     <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.help}</span>
 </div>`;
     document.getElementById("emptyNewFile").addEventListener(getEventName(), () => {
-        if (window.siyuan.mobileEditor) {
-            newFile(window.siyuan.mobileEditor.protyle.notebookId, window.siyuan.mobileEditor.protyle.path, true);
+        if (window.siyuan.mobile.editor) {
+            newFile(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path, true);
         } else {
             window.siyuan.notebooks.find(item => {
                 if (item.closed) {

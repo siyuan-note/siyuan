@@ -75,8 +75,8 @@ export const popSearch = (modelElement: HTMLElement, modelMainElement: HTMLEleme
         while (target && !target.isEqualNode(searchElement)) {
             if (target.classList.contains("b3-list-item")) {
                 const id = target.getAttribute("data-id");
-                if (window.siyuan.mobileEditor.protyle) {
-                    preventScroll(window.siyuan.mobileEditor.protyle);
+                if (window.siyuan.mobile.editor.protyle) {
+                    preventScroll(window.siyuan.mobile.editor.protyle);
                 }
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openMobileFileById(id,foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);

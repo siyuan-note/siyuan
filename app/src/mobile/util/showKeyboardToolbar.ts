@@ -8,8 +8,8 @@ import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 export const showKeyboardToolbar = (bottom = 0) => {
     if (getSelection().rangeCount > 0) {
         const range = getSelection().getRangeAt(0);
-        if (!window.siyuan.mobileEditor ||
-            !window.siyuan.mobileEditor.protyle.wysiwyg.element.contains(range.startContainer)) {
+        if (!window.siyuan.mobile.editor ||
+            !window.siyuan.mobile.editor.protyle.wysiwyg.element.contains(range.startContainer)) {
             return;
         }
     } else {
@@ -23,7 +23,7 @@ export const showKeyboardToolbar = (bottom = 0) => {
     toolbarElement.style.bottom = bottom + "px";
 
     setTimeout(() => {
-        const contentElement = window.siyuan.mobileEditor.protyle.contentElement;
+        const contentElement = window.siyuan.mobile.editor.protyle.contentElement;
         const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
         if (cursorTop < window.innerHeight - 96) {
             return;
@@ -46,16 +46,16 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
-        if (!buttonElement || !window.siyuan.mobileEditor) {
+        if (!buttonElement || !window.siyuan.mobile.editor) {
             return;
         }
-        if (window.siyuan.mobileEditor.protyle.disabled) {
+        if (window.siyuan.mobile.editor.protyle.disabled) {
             return;
         }
         event.preventDefault();
         event.stopPropagation();
         const type = buttonElement.getAttribute("data-type");
-        const protyle = window.siyuan.mobileEditor.protyle;
+        const protyle = window.siyuan.mobile.editor.protyle;
         if (type === "undo") {
             protyle.undo.undo(protyle);
             return;

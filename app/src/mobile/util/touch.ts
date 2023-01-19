@@ -6,7 +6,7 @@ let xDiff: number;
 let yDiff: number;
 
 export const handleTouchEnd = () => {
-    if (window.siyuan.mobileEditor) {
+    if (window.siyuan.mobile.editor) {
         document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
             item.classList.remove("protyle-breadcrumb__bar--hide");
         });

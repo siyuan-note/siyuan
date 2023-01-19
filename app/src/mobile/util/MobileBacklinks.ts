@@ -106,7 +106,7 @@ export class MobileBacklinks {
 
     public update() {
         fetchPost("/api/ref/getBacklink", {
-            id: window.siyuan.mobileEditor.protyle.block.id,
+            id: window.siyuan.mobile.editor.protyle.block.id,
             beforeLen: this.beforeLen,
             k: "",
             mk: "",

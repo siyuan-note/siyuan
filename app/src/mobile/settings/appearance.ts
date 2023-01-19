@@ -57,7 +57,7 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
         window.siyuan.config.editor.fontSize = parseInt(event.target.value);
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
             window.siyuan.config.editor = response.data;
-            reloadProtyle(window.siyuan.mobileEditor.protyle);
+            reloadProtyle(window.siyuan.mobile.editor.protyle);
             setInlineStyle();
         });
     });

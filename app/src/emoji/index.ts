@@ -430,9 +430,9 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
 
 const updateFileEmoji = (unicode: string, id: string) => {
     /// #if MOBILE
-    if (window.siyuan.mobileEditor.protyle.block.rootID === id) {
-        window.siyuan.mobileEditor.protyle.background.ial.icon = unicode;
-        window.siyuan.mobileEditor.protyle.background.render(window.siyuan.mobileEditor.protyle.background.ial, window.siyuan.mobileEditor.protyle.block.rootID);
+    if (window.siyuan.mobile.editor.protyle.block.rootID === id) {
+        window.siyuan.mobile.editor.protyle.background.ial.icon = unicode;
+        window.siyuan.mobile.editor.protyle.background.render(window.siyuan.mobile.editor.protyle.background.ial, window.siyuan.mobile.editor.protyle.block.rootID);
     }
     /// #else
     getAllModels().editor.find(item => {

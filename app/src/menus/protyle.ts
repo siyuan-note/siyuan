@@ -456,7 +456,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
             return;
         }
     }
-    if (window.siyuan.mobileEditor) {
+    if (window.siyuan.mobile.editor) {
         window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
             id,
             action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]

@@ -29,6 +29,7 @@ class App {
             backStack: [],
             dialogs: [],
             blockPanels: [],
+            mobile: {},
             menus: new Menus(),
             ws: new Model({
                 id: genUUID(),

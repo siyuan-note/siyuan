@@ -52,8 +52,8 @@ interface Window {
 }
 
 interface IWorkspace {
-    path:string
-    closed:boolean
+    path: string
+    closed: boolean
 }
 
 interface ICard {
@@ -171,7 +171,10 @@ interface ISiyuan {
     notebooks?: INotebook[],
     emojis?: IEmoji[],
     backStack?: IBackStack[],
-    mobileEditor?: import("../protyle").Protyle, // mobile
+    mobile?: {
+        editor?: import("../protyle").Protyle
+        files?: import("../mobile/util/MobileFiles").MobileFiles
+    },
     user?: {
         userId: string
         userName: string

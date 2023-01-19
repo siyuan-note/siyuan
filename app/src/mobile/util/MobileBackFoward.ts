@@ -12,13 +12,13 @@ import {setStorageVal} from "../../protyle/util/compatibility";
 const forwardStack: IBackStack[] = [];
 
 const focusStack = (backStack: IBackStack) => {
-    const protyle = window.siyuan.mobileEditor.protyle;
+    const protyle = window.siyuan.mobile.editor.protyle;
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
         id: backStack.id,
         action: backStack.callback,
     };
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
-    hideElements(["toolbar", "hint", "util"], window.siyuan.mobileEditor.protyle);
+    hideElements(["toolbar", "hint", "util"], window.siyuan.mobile.editor.protyle);
     if (protyle.contentElement.classList.contains("fn__none")) {
         setEditMode(protyle, "wysiwyg");
     }
@@ -26,7 +26,7 @@ const focusStack = (backStack: IBackStack) => {
     const startEndId = backStack.endId.split(Constants.ZWSP);
     if (startEndId[0] === protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") &&
         startEndId[1] === protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id")) {
-        window.siyuan.mobileEditor.protyle.contentElement.scrollTo({
+        window.siyuan.mobile.editor.protyle.contentElement.scrollTo({
             top: backStack.scrollTop,
             behavior: "smooth"
         });
@@ -81,12 +81,12 @@ const focusStack = (backStack: IBackStack) => {
             }
         }
         protyle.contentElement.scrollTop = backStack.scrollTop;
-        window.siyuan.mobileEditor.protyle.breadcrumb?.render(protyle);
+        window.siyuan.mobile.editor.protyle.breadcrumb?.render(protyle);
     });
 };
 
 export const pushBack = () => {
-    const protyle = window.siyuan.mobileEditor.protyle;
+    const protyle = window.siyuan.mobile.editor.protyle;
     window.siyuan.backStack.push({
         id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
         endId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") + Constants.ZWSP + protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
@@ -116,7 +116,7 @@ export const goBack = () => {
     if (window.siyuan.backStack.length < 1) {
         return;
     }
-    const protyle = window.siyuan.mobileEditor.protyle;
+    const protyle = window.siyuan.mobile.editor.protyle;
     if (forwardStack.length === 0) {
         forwardStack.push({
             id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,

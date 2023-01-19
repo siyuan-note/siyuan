@@ -23,6 +23,8 @@ import {Constants} from "../constants";
 import {newFile} from "../util/newFile";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
+import {getDockByType} from "../layout/util";
+import {Files} from "../layout/dock/Files";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -172,7 +174,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
     window.siyuan.menus.menu.remove();
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
-        return  window.siyuan.menus.menu;
+        return window.siyuan.menus.menu;
     }
     if (!liElement.classList.contains("b3-list-item--focus")) {
         fileElement.querySelectorAll(".b3-list-item--focus").forEach(item => {
@@ -385,7 +387,14 @@ const genImportMenu = (notebookId: string, pathString: string) => {
                         formData.append("file", event.target.files[0]);
                         formData.append("notebook", notebookId);
                         formData.append("toPath", pathString);
-                        fetchPost("/api/import/importSY", formData);
+                        fetchPost("/api/import/importSY", formData, () => {
+                            /// #if MOBILE
+                            window.siyuan.mobile.files.selectItem(notebookId, pathString);
+                            /// #else
+                            (getDockByType("file").data["file"] as Files).selectItem(notebookId, pathString)
+                            /// #endif
+                            window.siyuan.menus.menu.remove();
+                        });
                     });
                 }
             },

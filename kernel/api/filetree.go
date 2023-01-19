@@ -275,13 +275,7 @@ func removeDoc(c *gin.Context) {
 
 	notebook := arg["notebook"].(string)
 	p := arg["path"].(string)
-
-	err := model.RemoveDoc(notebook, p)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	model.RemoveDoc(notebook, p)
 }
 
 func removeDocs(c *gin.Context) {
@@ -298,12 +292,7 @@ func removeDocs(c *gin.Context) {
 	for _, path := range pathsArg {
 		paths = append(paths, path.(string))
 	}
-	err := model.RemoveDocs(paths)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	model.RemoveDocs(paths)
 }
 
 func renameDoc(c *gin.Context) {

@@ -353,14 +353,18 @@ func (box *Box) Remove(path string) error {
 }
 
 func (box *Box) Unindex() {
+	task.PrependTask(task.DatabaseIndex, unindex, box.ID)
+}
+
+func unindex(boxID string) {
 	tx, err := sql.BeginTx()
 	if nil != err {
 		return
 	}
-	sql.RemoveBoxHash(tx, box.ID)
-	sql.DeleteByBoxTx(tx, box.ID)
+	sql.RemoveBoxHash(tx, boxID)
+	sql.DeleteByBoxTx(tx, boxID)
 	sql.CommitTx(tx)
-	ids := treenode.RemoveBlockTreesByBoxID(box.ID)
+	ids := treenode.RemoveBlockTreesByBoxID(boxID)
 	RemoveRecentDoc(ids)
 }
 

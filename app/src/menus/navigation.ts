@@ -388,11 +388,19 @@ const genImportMenu = (notebookId: string, pathString: string) => {
                         formData.append("notebook", notebookId);
                         formData.append("toPath", pathString);
                         fetchPost("/api/import/importSY", formData, () => {
+                            let files
                             /// #if MOBILE
-                            window.siyuan.mobile.files.selectItem(notebookId, pathString);
+                            files = window.siyuan.mobile.files
                             /// #else
-                            (getDockByType("file").data["file"] as Files).selectItem(notebookId, pathString)
+                            files = (getDockByType("file").data["file"] as Files);
                             /// #endif
+                            const liElement = files.element.querySelector(`[data-path="${pathString}"]`)
+                            const toggleElement = liElement.querySelector(".b3-list-item__arrow--open");
+                            if (toggleElement) {
+                                toggleElement.classList.remove("b3-list-item__arrow--open");
+                                liElement.nextElementSibling?.remove();
+                            }
+                            files.getLeaf(liElement, notebookId);
                             window.siyuan.menus.menu.remove();
                         });
                     });

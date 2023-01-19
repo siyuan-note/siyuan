@@ -649,7 +649,7 @@ export class MobileFiles extends Model {
         }
     }
 
-    private getLeaf(liElement: Element, notebookId: string) {
+    public getLeaf(liElement: Element, notebookId: string) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
         if (toggleElement.classList.contains("b3-list-item__arrow--open")) {
             toggleElement.classList.remove("b3-list-item__arrow--open");

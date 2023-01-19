@@ -1244,14 +1244,14 @@ func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	}
 }
 
-func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*sql.Block) {
+func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBlock) {
 	embedBlock := sql.GetBlock(embedBlockID)
 	if nil == embedBlock {
 		return
 	}
 
 	for _, block := range queryResultBlocks {
-		embedBlock.Content += block.Content
+		embedBlock.Content += block.Block.Markdown
 	}
 	if "" == embedBlock.Content {
 		embedBlock.Content = "no query result"

@@ -457,7 +457,8 @@ func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBloc
 	luteEngine := NewLute()
 	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑
 	dom := renderBlockDOMByNodes(nodes, luteEngine)
-	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom}
+	content := renderBlockContentByNodes(nodes)
+	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom, Markdown: content /* 这里使用 Markdown 字段来临时存储 content */}
 
 	// 位于超级块中的嵌入块不显示面包屑 https://github.com/siyuan-note/siyuan/issues/6258
 	inSuperBlock := false

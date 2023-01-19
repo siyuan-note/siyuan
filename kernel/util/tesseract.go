@@ -59,8 +59,17 @@ func GetAssetText(asset string) string {
 	return ret
 }
 
+func IsTesseractExtractable(p string) bool {
+	lowerName := strings.ToLower(p)
+	return strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg")
+}
+
 func Tesseract(imgAbsPath string) string {
 	if ContainerStd != Container || !TesseractEnabled {
+		return ""
+	}
+
+	if !IsTesseractExtractable(imgAbsPath) {
 		return ""
 	}
 

@@ -93,8 +93,7 @@ func getUnOCRAssetsAbsPaths() (ret []string) {
 	var assetsPaths []string
 	assets := cache.GetAssets()
 	for _, asset := range assets {
-		lowerName := strings.ToLower(asset.Path)
-		if !strings.HasSuffix(lowerName, ".png") && !strings.HasSuffix(lowerName, ".jpg") && !strings.HasSuffix(lowerName, ".jpeg") {
+		if !util.IsTesseractExtractable(asset.Path) {
 			continue
 		}
 		assetsPaths = append(assetsPaths, asset.Path)

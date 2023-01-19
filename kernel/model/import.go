@@ -321,6 +321,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
+	// 将包含的资源文件统一移动到 data/assets/ 下
 	var assetsDirs []string
 	filepath.Walk(unzipRootPath, func(path string, info fs.FileInfo, err error) error {
 		if strings.Contains(path, "assets") && info.IsDir() {
@@ -328,9 +329,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 		return nil
 	})
+	dataAssets := filepath.Join(util.DataDir, "assets")
 	for _, assets := range assetsDirs {
 		if gulu.File.IsDir(assets) {
-			dataAssets := filepath.Join(util.DataDir, "assets")
 			if err = filelock.Copy(assets, dataAssets); nil != err {
 				logging.LogErrorf("copy assets from [%s] to [%s] failed: %s", assets, dataAssets, err)
 				return
@@ -356,14 +357,47 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		return
 	}
 
+	var treePaths []string
+	filepath.Walk(unzipRootPath, func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() {
+			if strings.HasPrefix(info.Name(), ".") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		if !strings.HasSuffix(info.Name(), ".sy") {
+			return nil
+		}
+
+		p := strings.TrimPrefix(path, unzipRootPath)
+		p = filepath.ToSlash(p)
+		treePaths = append(treePaths, p)
+		return nil
+	})
+
 	if err = filelock.RoboCopy(unzipRootPath, targetDir); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", unzipRootPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
 	}
 
+	boxAbsPath := filepath.Join(util.DataDir, boxID)
+	for _, treePath := range treePaths {
+		absPath := filepath.Join(targetDir, treePath)
+		p := strings.TrimPrefix(absPath, boxAbsPath)
+		p = filepath.ToSlash(p)
+		tree, err := LoadTree(boxID, p)
+		if nil != err {
+			logging.LogErrorf("load tree [%s] failed: %s", treePath, err)
+			continue
+		}
+
+		treenode.IndexBlockTree(tree)
+		sql.UpsertTreeQueue(tree)
+	}
+
 	IncSync()
-	FullReindex()
 	return
 }
 

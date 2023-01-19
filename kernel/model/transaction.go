@@ -30,6 +30,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
@@ -1316,7 +1317,7 @@ func autoFixIndex() {
 		reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap, "blocks_fts")
 	}
 	if !Conf.Search.CaseSensitive {
-		dbFtsRootUpdatedMap, err := sql.GetRootUpdated("blocks_fts_case_insensitive")
+		dbFtsRootUpdatedMap, err = sql.GetRootUpdated("blocks_fts_case_insensitive")
 		if nil == err {
 			reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap, "blocks_fts_case_insensitive")
 		}
@@ -1419,5 +1420,5 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 		treenode.ReindexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 	}
-	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, path.Base(tree.HPath)))
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, html.EscapeHTMLStr(path.Base(tree.HPath))))
 }

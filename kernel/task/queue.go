@@ -48,7 +48,7 @@ func PrependTask(action string, handler interface{}, args ...interface{}) {
 	defer queueLock.Unlock()
 
 	if QueueStatusRunning != taskQueueStatus {
-		logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
+		//logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
 		return
 	}
 
@@ -61,7 +61,7 @@ func AppendTask(action string, handler interface{}, args ...interface{}) {
 	defer queueLock.Unlock()
 
 	if QueueStatusRunning != taskQueueStatus {
-		logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
+		//logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
 		return
 	}
 

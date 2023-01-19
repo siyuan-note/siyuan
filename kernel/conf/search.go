@@ -36,6 +36,7 @@ type Search struct {
 	SuperBlock bool `json:"superBlock"`
 	Paragraph  bool `json:"paragraph"`
 	HTMLBlock  bool `json:"htmlBlock"`
+	EmbedBlock bool `json:"embedBlock"`
 
 	Limit         int  `json:"limit"`
 	CaseSensitive bool `json:"caseSensitive"`
@@ -71,6 +72,7 @@ func NewSearch() *Search {
 		SuperBlock: true,
 		Paragraph:  true,
 		HTMLBlock:  true,
+		EmbedBlock: false,
 
 		Limit:         64,
 		CaseSensitive: true,
@@ -177,6 +179,12 @@ func (s *Search) TypeFilter() string {
 	if s.HTMLBlock {
 		buf.WriteByte('\'')
 		buf.WriteString(treenode.TypeAbbr(ast.NodeHTMLBlock.String()))
+		buf.WriteByte('\'')
+		buf.WriteString(",")
+	}
+	if s.EmbedBlock {
+		buf.WriteByte('\'')
+		buf.WriteString(treenode.TypeAbbr(ast.NodeBlockQueryEmbed.String()))
 		buf.WriteByte('\'')
 		buf.WriteString(",")
 	}

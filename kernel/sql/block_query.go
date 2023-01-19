@@ -31,6 +31,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func QueryEmptyContentEmbedBlocks() (ret []*Block) {
+	stmt := "SELECT * FROM blocks WHERE type = 'query_embed' AND content = ''"
+	rows, err := query(stmt)
+	if nil != err {
+		logging.LogErrorf("sql query [%s] failed: %s", stmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		if block := scanBlockRows(rows); nil != block {
+			ret = append(ret, block)
+		}
+	}
+	return
+}
+
 func queryBlockHashes(rootID string) (ret map[string]string) {
 	stmt := "SELECT id, hash FROM blocks WHERE root_id = ?"
 	rows, err := query(stmt, rootID)

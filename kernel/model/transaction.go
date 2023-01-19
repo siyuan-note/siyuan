@@ -1216,6 +1216,31 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 	return
 }
 
+// AutoIndexEmbedBlock 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+func AutoIndexEmbedBlock() {
+	for {
+		task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock)
+		time.Sleep(30 * time.Second)
+	}
+}
+
+func autoIndexEmbedBlock() {
+	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+	for i, embedBlock := range embedBlocks {
+		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
+		stmt = strings.TrimSuffix(stmt, "}}")
+		blocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		for _, block := range blocks {
+			embedBlock.Content = block.Content
+			sql.UpdateBlockContent(embedBlock)
+		}
+
+		if 63 <= i { // 一次任务中最多处理 64 个嵌入块，防止卡顿
+			break
+		}
+	}
+}
+
 // AutoFixIndex 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016
 func AutoFixIndex() {
 	for {
@@ -1228,13 +1253,6 @@ var autoFixLock = sync.Mutex{}
 
 func autoFixIndex() {
 	defer logging.Recover()
-
-	if util.IsMutexLocked(&autoFixLock) {
-		return
-	}
-
-	autoFixLock.Lock()
-	defer autoFixLock.Unlock()
 
 	// 根据文件系统补全块树
 	boxes := Conf.GetOpenedBoxes()

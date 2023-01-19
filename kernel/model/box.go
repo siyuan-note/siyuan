@@ -114,31 +114,18 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxDirPath := filepath.Join(util.DataDir, dir.Name())
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		if !gulu.File.IsExist(boxConfPath) {
-			if IsUserGuide(dir.Name()) {
-				filelock.Remove(boxDirPath)
-				continue
-			}
-			to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), dir.Name())
-			if copyErr := filelock.Copy(boxDirPath, to); nil != copyErr {
-				logging.LogErrorf("copy corrupted box [%s] failed: %s", boxDirPath, copyErr)
-				continue
-			}
-			if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
-				logging.LogErrorf("remove corrupted box [%s] failed: %s", boxDirPath, removeErr)
-				continue
-			}
-			logging.LogWarnf("moved corrupted box [%s] to [%s]", boxDirPath, to)
+			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
 			continue
-		} else {
-			data, readErr := filelock.ReadFile(boxConfPath)
-			if nil != readErr {
-				logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
-				continue
-			}
-			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
-				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
-				continue
-			}
+		}
+
+		data, readErr := filelock.ReadFile(boxConfPath)
+		if nil != readErr {
+			logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
+			continue
+		}
+		if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
+			logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
+			continue
 		}
 
 		id := dir.Name()

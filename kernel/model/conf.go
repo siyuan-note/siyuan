@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"github.com/88250/lute/ast"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -432,6 +433,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	treenode.SaveBlockTree(false)
 	SaveAssetsTexts()
 	clearWorkspaceTemp()
+	clearCorruptedNotebooks()
 	clearPortJSON()
 	util.UnlockWorkspace()
 
@@ -671,6 +673,49 @@ func clearPortJSON() {
 	} else {
 		if err = os.WriteFile(portJSON, data, 0644); nil != err {
 			logging.LogWarnf("write port.json failed: %s", err)
+		}
+	}
+}
+
+func clearCorruptedNotebooks() {
+	// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
+
+	dirs, err := os.ReadDir(util.DataDir)
+	if nil != err {
+		logging.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
+		return
+	}
+	for _, dir := range dirs {
+		if util.IsReservedFilename(dir.Name()) {
+			continue
+		}
+
+		if !dir.IsDir() {
+			continue
+		}
+
+		if !ast.IsNodeIDPattern(dir.Name()) {
+			continue
+		}
+
+		boxDirPath := filepath.Join(util.DataDir, dir.Name())
+		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
+		if !gulu.File.IsExist(boxConfPath) {
+			if IsUserGuide(dir.Name()) {
+				filelock.Remove(boxDirPath)
+				continue
+			}
+			to := filepath.Join(util.WorkspaceDir, "corrupted", time.Now().Format("2006-01-02-150405"), dir.Name())
+			if copyErr := filelock.Copy(boxDirPath, to); nil != copyErr {
+				logging.LogErrorf("copy corrupted box [%s] failed: %s", boxDirPath, copyErr)
+				continue
+			}
+			if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
+				logging.LogErrorf("remove corrupted box [%s] failed: %s", boxDirPath, removeErr)
+				continue
+			}
+			logging.LogWarnf("moved corrupted box [%s] to [%s]", boxDirPath, to)
+			continue
 		}
 	}
 }

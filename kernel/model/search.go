@@ -38,6 +38,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/xrash/smetrics"
@@ -68,6 +69,9 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 		}
 	}
 	sqlBlocks = tmp
+
+	// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+	task.AppendTask(task.DatabaseIndexEmbedBlock, updateEmbedBlockContent, embedBlockID, sqlBlocks)
 
 	// 缓存最多 128 棵语法树
 	trees := map[string]*parse.Tree{}

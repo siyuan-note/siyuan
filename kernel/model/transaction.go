@@ -1219,26 +1219,44 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 // AutoIndexEmbedBlock 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
 func AutoIndexEmbedBlock() {
 	for {
-		task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock)
+		embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+		task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock, embedBlocks)
 		time.Sleep(10 * time.Minute)
 	}
 }
 
-func autoIndexEmbedBlock() {
-	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	for i, embedBlock := range embedBlocks {
 		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
 		stmt = strings.TrimSuffix(stmt, "}}")
-		blocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
-		for _, block := range blocks {
-			embedBlock.Content = block.Content
-			sql.UpdateBlockContent(embedBlock)
+		queryResultBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		for _, block := range queryResultBlocks {
+			embedBlock.Content += block.Content
 		}
+		if "" == embedBlock.Content {
+			embedBlock.Content = "no query result"
+		}
+		sql.UpdateBlockContent(embedBlock)
 
 		if 63 <= i { // 一次任务中最多处理 64 个嵌入块，防止卡顿
 			break
 		}
 	}
+}
+
+func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*sql.Block) {
+	embedBlock := sql.GetBlock(embedBlockID)
+	if nil == embedBlock {
+		return
+	}
+
+	for _, block := range queryResultBlocks {
+		embedBlock.Content += block.Content
+	}
+	if "" == embedBlock.Content {
+		embedBlock.Content = "no query result"
+	}
+	sql.UpdateBlockContent(embedBlock)
 }
 
 // AutoFixIndex 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016

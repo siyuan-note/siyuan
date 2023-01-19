@@ -1309,16 +1309,16 @@ func autoFixIndex() {
 	rootUpdatedMap := treenode.GetRootUpdated()
 	dbRootUpdatedMap, err := sql.GetRootUpdated("blocks")
 	if nil == err {
-		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap)
+		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap, "blocks")
 	}
 	dbFtsRootUpdatedMap, err := sql.GetRootUpdated("blocks_fts")
 	if nil == err {
-		reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap)
+		reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap, "blocks_fts")
 	}
 	if !Conf.Search.CaseSensitive {
 		dbFtsRootUpdatedMap, err := sql.GetRootUpdated("blocks_fts_case_insensitive")
 		if nil == err {
-			reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap)
+			reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap, "blocks_fts_case_insensitive")
 		}
 	}
 
@@ -1345,7 +1345,7 @@ func autoFixIndex() {
 	util.PushStatusBar(Conf.Language(185))
 }
 
-func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
+func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string, blocksTable string) {
 	i := -1
 	size := len(rootUpdatedMap)
 	for rootID, updated := range rootUpdatedMap {
@@ -1370,6 +1370,13 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 			logging.LogWarnf("tree [%s] is not up to date, reindex it", rootID)
 			reindexTree(rootID, i, size)
 			continue
+		}
+	}
+
+	for rootID, _ := range dbRootUpdatedMap {
+		if _, ok := rootUpdatedMap[rootID]; !ok {
+			logging.LogWarnf("tree [%s] is not in block tree, remove it from [%s]", rootID, blocksTable)
+			sql.DeleteTree(blocksTable, rootID)
 		}
 	}
 }

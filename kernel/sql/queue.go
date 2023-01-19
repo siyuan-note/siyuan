@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/eventbus"
@@ -142,6 +143,9 @@ func FlushQueue() {
 		return
 	}
 	for _, box := range boxes.Values() {
+		if !ast.IsNodeIDPattern(box.(string)) {
+			continue
+		}
 		updateBoxHash(tx, box.(string))
 	}
 	CommitTx(tx)

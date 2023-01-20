@@ -191,9 +191,12 @@ export const transactionError = (data: { code: number, data: string }) => {
 
 let progressStatusTimeoutId: number;
 export const progressStatus = (data: IWebSocketData) => {
+    const statusElement = document.querySelector("#status") as HTMLElement;
+    if (!statusElement) {
+        return;
+    }
     if (isMobile()) {
         clearTimeout(progressStatusTimeoutId);
-        const statusElement = document.querySelector("#status") as HTMLElement;
         statusElement.innerHTML = data.msg;
         statusElement.classList.remove("status--hide");
         if (document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
@@ -206,7 +209,7 @@ export const progressStatus = (data: IWebSocketData) => {
         }, 6000);
         return;
     }
-    document.querySelector("#status .status__msg").innerHTML = data.msg;
+    statusElement.querySelector(".status__msg").innerHTML = data.msg;
 };
 
 export const progressLoading = (data: IWebSocketData) => {

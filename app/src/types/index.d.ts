@@ -42,6 +42,7 @@ interface Window {
         writeClipboard(text: string): void
         writeImageClipboard(uri: string): void
         readClipboard(): string
+        getBlockURL(): string
     }
 
     goBack(): void

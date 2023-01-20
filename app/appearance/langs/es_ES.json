@@ -945,7 +945,7 @@
     "67": "Cargado en %s, descargado en %s",
     "68": "Les données locales ont dépassé la capacité de stockage maximale de l'espace cloud [%s] pendant la période d'essai et ne peuvent pas continuer à synchroniser les données. Después de la suscripción, la capacidad de almacenamiento en la nube se actualizará a 8GB",
     "69": "Descarga completada",
-    "70": "TODO",
+    "70": "Procesando [%s], por favor espere...",
     "71": "Fallo en la inserción del archivo de activos, por favor reabra el documento",
     "72": "El contenido se ha copiado en el portapapeles del sistema, por favor vaya a SiYuan para pegar",
     "73": "Importando, por favor espere...",

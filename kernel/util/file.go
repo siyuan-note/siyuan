@@ -17,12 +17,14 @@
 package util
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -141,9 +143,23 @@ func FilterUploadFileName(name string) string {
 	ret = strings.ReplaceAll(ret, "#", "")
 	ret = strings.ReplaceAll(ret, "%", "")
 	ret = strings.ReplaceAll(ret, "$", "")
-	// 插入资源文件时文件名长度最大限制 63 个字 https://github.com/siyuan-note/siyuan/issues/7099
-	ret = gulu.Str.SubStr(ret, 63)
+	ret = TruncateLenFileName(ret)
 	return ret
+}
+
+func TruncateLenFileName(name string) (ret string) {
+	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
+	var byteCount int
+	buf := bytes.Buffer{}
+	for _, r := range name {
+		byteCount += utf8.RuneLen(r)
+		if 189 < byteCount {
+			break
+		}
+		buf.WriteRune(r)
+	}
+	ret = buf.String()
+	return
 }
 
 func FilterFilePath(p string) (ret string) {

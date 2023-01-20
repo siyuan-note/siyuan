@@ -176,8 +176,8 @@ func NetImg2LocalAssets(rootID string) (err error) {
 					}
 				}
 				name = strings.TrimSuffix(name, ext)
-				name = gulu.Str.SubStr(name, 63) // 插入资源文件时文件名长度最大限制 63 个字 https://github.com/siyuan-note/siyuan/issues/7099
 				name = util.FilterFileName(name)
+				name = util.TruncateLenFileName(name)
 				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); nil != err {

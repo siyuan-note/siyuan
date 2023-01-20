@@ -298,7 +298,8 @@ export const JSONToLayout = (isStart: boolean) => {
             }
         });
     }
-    // https://github.com/siyuan-note/siyuan/pull/7086
+
+    // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
     const openId = getSearch("id");
     if (openId) {
         // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟

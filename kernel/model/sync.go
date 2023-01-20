@@ -107,19 +107,18 @@ func BootSyncData() {
 }
 
 func SyncData(boot, exit, byHand bool) {
+	if !checkSync(boot, exit, byHand) {
+		return
+	}
+
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	task.PrependTask(task.CloudSync, syncData, boot, exit, byHand)
 }
 
 func syncData(boot, exit, byHand bool) {
 	defer logging.Recover()
 
-	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
-		return
-	}
-
-	if util.IsMutexLocked(&syncLock) {
-		logging.LogWarnf("sync is in progress")
-		planSyncAfter(30 * time.Second)
+	if !checkSync(boot, exit, byHand) {
 		return
 	}
 
@@ -129,46 +128,12 @@ func syncData(boot, exit, byHand bool) {
 	if boot {
 		util.IncBootProgress(3, "Syncing data from the cloud...")
 		BootSyncSucc = 0
-	}
-	if exit {
-		ExitSyncSucc = 0
-	}
-
-	if !Conf.Sync.Enabled {
-		if byHand {
-			util.PushMsg(Conf.Language(124), 5000)
-		}
-		return
-	}
-
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
-		if byHand {
-			util.PushMsg(Conf.Language(123), 5000)
-		}
-		return
-	}
-
-	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
-		return
-	}
-
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
-		return
-	}
-
-	if boot {
 		logging.LogInfof("sync before boot")
 	}
 	if exit {
+		ExitSyncSucc = 0
 		logging.LogInfof("sync before exit")
 		util.PushMsg(Conf.Language(81), 1000*60*15)
-	}
-
-	if 7 < syncDownloadErrCount && !byHand {
-		logging.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
-		util.PushErrMsg(Conf.Language(125), 1000*60*60)
-		planSyncAfter(64 * time.Minute)
-		return
 	}
 
 	now := util.CurrentTimeMillis()
@@ -187,6 +152,48 @@ func syncData(boot, exit, byHand bool) {
 	Conf.Save()
 	util.BroadcastByType("main", "syncing", 1, msg, nil)
 	return
+}
+
+func checkSync(boot, exit, byHand bool) bool {
+	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
+		return false
+	}
+
+	if !Conf.Sync.Enabled {
+		if byHand {
+			util.PushMsg(Conf.Language(124), 5000)
+		}
+		return false
+	}
+
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		if byHand {
+			util.PushMsg(Conf.Language(123), 5000)
+		}
+		return false
+	}
+
+	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
+		return false
+	}
+
+	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+		return false
+	}
+
+	if util.IsMutexLocked(&syncLock) {
+		logging.LogWarnf("sync is in progress")
+		planSyncAfter(30 * time.Second)
+		return false
+	}
+
+	if 7 < syncDownloadErrCount && !byHand {
+		logging.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
+		util.PushErrMsg(Conf.Language(125), 1000*60*60)
+		planSyncAfter(64 * time.Minute)
+		return false
+	}
+	return true
 }
 
 // incReindex 增量重建索引。

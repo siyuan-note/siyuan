@@ -40,6 +40,23 @@ func getBootSync(c *gin.Context) {
 func performSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	// Android 端前后台切换时自动触发同步 https://github.com/siyuan-note/siyuan/issues/7122
+	var mobileSwitch bool
+	if mobileSwitchArg := arg["mobileSwitch"]; nil != mobileSwitchArg {
+		mobileSwitch = mobileSwitchArg.(bool)
+	}
+	if mobileSwitch {
+		if nil == model.Conf.User || !model.Conf.Sync.Enabled {
+			return
+		}
+	}
+
 	model.SyncData(false, false, true)
 }
 

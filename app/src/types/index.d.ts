@@ -50,6 +50,8 @@ interface Window {
     showKeyboardToolbar(bottom?: number): void
 
     hideKeyboardToolbar(): void
+
+    openFileByURL(URL: string): boolean
 }
 
 interface IWorkspace {

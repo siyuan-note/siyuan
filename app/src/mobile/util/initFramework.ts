@@ -138,11 +138,8 @@ export const initFramework = () => {
     });
     if (getOpenNotebookCount() > 0) {
         if (window.JSAndroid) {
-            const openURL = window.JSAndroid.getBlockURL();
-            if (openURL && !/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(openURL)) {
-                openMobileFileById(openURL.substr(16, 22),
-                    getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
-                return;
+           if (window.openFileByURL(window.JSAndroid.getBlockURL())) {
+               return;
             }
         }
         const openId = getSearch("id");

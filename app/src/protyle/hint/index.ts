@@ -740,6 +740,12 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             event.stopPropagation();
             return true;
         }
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            hideElements(["hint"], protyle);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
         return false;
     }
 

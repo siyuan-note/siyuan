@@ -146,4 +146,9 @@
       }
     }
   }
+
+  &__exportimg.protyle-wysiwyg [data-node-id].li[fold="1"] > .protyle-action:after {
+    background-color: transparent;
+    border: 1px solid var(--b3-list-hover);
+  }
 }

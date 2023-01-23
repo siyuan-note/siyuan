@@ -18,7 +18,6 @@ package model
 
 import (
 	"fmt"
-	"runtime/debug"
 	"strings"
 	"time"
 
@@ -50,25 +49,15 @@ func unindex(boxID string) {
 	RemoveRecentDoc(ids)
 }
 
-func (box *Box) Index(fullRebuildIndex bool) {
-	task.PrependTask(task.DatabaseIndex, index, box.ID, fullRebuildIndex)
+func (box *Box) Index() {
+	task.PrependTask(task.DatabaseIndex, index, box.ID)
 }
 
-func index(boxID string, fullRebuildIndex bool) {
+func index(boxID string) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		return
 	}
-
-	defer debug.FreeOSMemory()
-
-	sql.IndexMode()
-	defer sql.NormalMode()
-
-	//os.MkdirAll("pprof", 0755)
-	//cpuProfile, _ := os.Create("pprof/cpu_profile_index")
-	//pprof.StartCPUProfile(cpuProfile)
-	//defer pprof.StopCPUProfile()
 
 	util.SetBootDetails("Listing files...")
 	files := box.ListFiles("/")
@@ -76,25 +65,23 @@ func index(boxID string, fullRebuildIndex bool) {
 	if 1 > boxLen {
 		boxLen = 1
 	}
-	bootProgressPart := 10.0 / float64(boxLen) / float64(len(files))
+	bootProgressPart := 30.0 / float64(boxLen) / float64(len(files))
 
+	start := time.Now()
 	luteEngine := NewLute()
 	var treeCount int
 	var treeSize int64
-	util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
-
 	i := 0
-	// 读取并缓存路径映射
+
+	util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 			continue
 		}
 
-		p := file.path
-
-		tree, err := filesys.LoadTree(box.ID, p, luteEngine)
+		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if nil != err {
-			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, p, err)
+			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
 			continue
 		}
 
@@ -106,7 +93,8 @@ func index(boxID string, fullRebuildIndex bool) {
 			writeJSONQueue(tree)
 		}
 
-		cache.PutDocIAL(p, docIAL)
+		cache.PutDocIAL(file.path, docIAL)
+		sql.UpsertTreeQueue(tree)
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		treeSize += file.size
@@ -119,45 +107,9 @@ func index(boxID string, fullRebuildIndex bool) {
 	}
 
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
-
-	if !fullRebuildIndex {
-		return
-	}
-
-	// 开始重建库
-
-	sql.DisableCache()
-	defer sql.EnableCache()
-
-	start := time.Now()
-	bootProgressPart = 20.0 / float64(boxLen) / float64(treeCount)
-	i = 0
-	for _, file := range files {
-		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
-			continue
-		}
-
-		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
-		if nil != err {
-			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
-			continue
-		}
-
-		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(93), util.ShortPathForBootingDisplay(tree.Path)))
-		sql.UpsertTreeQueue(tree)
-		if 1 < i && 0 == i%64 {
-			util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(53), i, treeCount-i))
-		}
-		i++
-	}
-
-	sql.WaitForWritingDatabase()
-
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
 	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
-
-	util.PushEndlessProgress(fmt.Sprintf(Conf.Language(56), treeCount))
 	return
 }
 

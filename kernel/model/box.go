@@ -482,6 +482,7 @@ func genTreeID(tree *parse.Tree) {
 
 func FullReindex() {
 	task.PrependTask(task.DatabaseIndexFull, fullReindex)
+	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 }
 
 func fullReindex() {
@@ -501,7 +502,6 @@ func fullReindex() {
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)
 	}
-	IndexRefs()
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
 

@@ -39,18 +39,14 @@ func (box *Box) Unindex() {
 }
 
 func unindex(boxID string) {
-	tx, err := sql.BeginTx()
-	if nil != err {
-		return
-	}
-	sql.DeleteByBoxTx(tx, boxID)
-	sql.CommitTx(tx)
 	ids := treenode.RemoveBlockTreesByBoxID(boxID)
 	RemoveRecentDoc(ids)
+	sql.DeleteBoxQueue(boxID)
 }
 
 func (box *Box) Index() {
 	task.PrependTask(task.DatabaseIndex, index, box.ID)
+	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 }
 
 func index(boxID string) {
@@ -94,12 +90,12 @@ func index(boxID string) {
 		}
 
 		cache.PutDocIAL(file.path, docIAL)
+		treenode.IndexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		treeSize += file.size
 		treeCount++
-		treenode.IndexBlockTree(tree)
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
 		}
@@ -128,16 +124,12 @@ func IndexRefs() {
 	for _, refBlock := range refBlocks {
 		refTreeIDs.Add(refBlock.RootID)
 	}
+
 	if 0 < refTreeIDs.Size() {
 		luteEngine := NewLute()
 		bootProgressPart := 10.0 / float64(refTreeIDs.Size())
 		for _, box := range Conf.GetOpenedBoxes() {
-			tx, err := sql.BeginTx()
-			if nil != err {
-				return
-			}
-			sql.DeleteRefsByBoxTx(tx, box.ID)
-			sql.CommitTx(tx)
+			sql.DeleteBoxRefsQueue(box.ID)
 
 			files := box.ListFiles("/")
 			i := 0
@@ -163,14 +155,7 @@ func IndexRefs() {
 					continue
 				}
 
-				tx, err = sql.BeginTx()
-				if nil != err {
-					continue
-				}
-				sql.InsertRefs(tx, tree)
-				if err = sql.CommitTx(tx); nil != err {
-					continue
-				}
+				sql.InsertRefsTreeQueue(tree)
 				if 1 < i && 0 == i%64 {
 					util.PushEndlessProgress(fmt.Sprintf(Conf.Language(55), i))
 				}

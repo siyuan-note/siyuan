@@ -117,7 +117,7 @@ func IndexRefs() {
 
 	start := time.Now()
 	util.SetBootDetails("Resolving refs...")
-	util.PushEndlessProgress(Conf.Language(54))
+	util.PushStatusBar(Conf.Language(54))
 
 	// 引用入库
 	util.SetBootDetails("Indexing refs...")
@@ -159,7 +159,7 @@ func IndexRefs() {
 
 				sql.InsertRefsTreeQueue(tree)
 				if 1 < i && 0 == i%64 {
-					util.PushEndlessProgress(fmt.Sprintf(Conf.Language(55), i))
+					util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
 				}
 				i++
 			}

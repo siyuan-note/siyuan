@@ -86,11 +86,13 @@ func index(boxID string) {
 			updated := util.TimeFromID(tree.Root.ID)
 			tree.Root.SetIALAttr("updated", updated)
 			docIAL["updated"] = updated
-			writeJSONQueue(tree)
+			if writeErr := filesys.WriteTree(tree); nil != writeErr {
+				logging.LogErrorf("write tree [%s] failed: %s", tree.Path, writeErr)
+			}
 		}
 
 		cache.PutDocIAL(file.path, docIAL)
-		treenode.IndexBlockTree(tree)
+		treenode.ReindexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))

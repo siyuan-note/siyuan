@@ -320,28 +320,6 @@ func ReindexBlockTree(tree *parse.Tree) {
 	blockTreesChanged = true
 }
 
-func IndexBlockTree(tree *parse.Tree) {
-	blockTreesLock.Lock()
-	defer blockTreesLock.Unlock()
-
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() {
-			return ast.WalkContinue
-		}
-		var parentID string
-		if nil != n.Parent {
-			parentID = n.Parent.ID
-		}
-		if "" == n.ID {
-			return ast.WalkContinue
-		}
-		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: tree.Root.IALAttr("updated")}
-		return ast.WalkContinue
-	})
-
-	// 新建索引不变更持久化文件，调用处会负责调用 SaveBlockTree()
-}
-
 func AutoFlushBlockTree() {
 	for {
 		SaveBlockTree(false)

@@ -70,6 +70,8 @@ func index(boxID string) {
 	i := 0
 
 	util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
+	defer util.PushClearProgress()
+
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 			continue
@@ -127,6 +129,7 @@ func IndexRefs() {
 		refTreeIDs.Add(refBlock.RootID)
 	}
 
+	i := 0
 	if 0 < refTreeIDs.Size() {
 		luteEngine := NewLute()
 		bootProgressPart := 10.0 / float64(refTreeIDs.Size())
@@ -134,7 +137,6 @@ func IndexRefs() {
 			sql.DeleteBoxRefsQueue(box.ID)
 
 			files := box.ListFiles("/")
-			i := 0
 			for _, file := range files {
 				if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 					continue
@@ -166,6 +168,7 @@ func IndexRefs() {
 		}
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
 }
 
 func init() {

@@ -36,13 +36,6 @@ func init() {
 	luteEngine.RenderOptions.KramdownBlockIAL = false // 数据库 markdown 字段为标准 md，但是要保留 span block ial
 }
 
-func InsertBlocksSpans(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
-	if err = insertBlocksSpans(tx, tree, context); nil != err {
-		logging.LogErrorf("insert tree [%s] into database failed: %s", tree.Box+tree.Path, err)
-	}
-	return
-}
-
 func InsertRefs(tx *sql.Tx, tree *parse.Tree) {
 	if err := insertRef(tx, tree); nil != err {
 		logging.LogErrorf("insert refs tree [%s] into database failed: %s", tree.Box+tree.Path, err)
@@ -392,23 +385,6 @@ func insertFileAnnotationRefs0(tx *sql.Tx, bulk []*FileAnnotationRef) (err error
 	}
 	stmt := fmt.Sprintf("INSERT INTO file_annotation_refs (id, file_path, annotation_id, block_id, root_id, box, path, content, type) VALUES %s", strings.Join(valueStrings, ","))
 	err = prepareExecInsertTx(tx, stmt, valueArgs)
-	return
-}
-
-func insertBlocksSpans(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
-	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
-	if err = insertBlocks(tx, blocks, context); nil != err {
-		return
-	}
-	if err = insertSpans(tx, spans); nil != err {
-		return
-	}
-	if err = insertAssets(tx, assets); nil != err {
-		return
-	}
-	if err = insertAttributes(tx, attributes); nil != err {
-		return
-	}
 	return
 }
 

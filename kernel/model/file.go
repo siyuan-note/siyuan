@@ -912,15 +912,7 @@ func createTreeTx(tree *parse.Tree) {
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
 	err := PerformTransactions(&[]*Transaction{transaction})
 	if nil != err {
-		tx, txErr := sql.BeginTx()
-		if nil != txErr {
-			logging.LogFatalf("transaction failed: %s", txErr)
-			return
-		}
-		sql.ClearBoxHash(tx)
-		sql.CommitTx(tx)
 		logging.LogFatalf("transaction failed: %s", err)
-		return
 	}
 }
 
@@ -1472,7 +1464,6 @@ func createDoc(boxID, p, title, dom string) (err error) {
 			logging.LogFatalf("transaction failed: %s", txErr)
 			return
 		}
-		sql.ClearBoxHash(tx)
 		sql.CommitTx(tx)
 		logging.LogFatalf("transaction failed: %s", err)
 		return

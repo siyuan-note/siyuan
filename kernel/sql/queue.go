@@ -17,15 +17,10 @@
 package sql
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"database/sql"
-	"fmt"
 	"path"
 	"sync"
 	"time"
 
-	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/eventbus"
@@ -136,23 +131,6 @@ func FlushQueue() {
 	if 5000 < elapsed {
 		logging.LogInfof("op tx [%dms]", elapsed)
 	}
-
-	start = time.Now()
-	tx, err = BeginTx()
-	if nil != err {
-		return
-	}
-	for _, box := range boxes.Values() {
-		if !ast.IsNodeIDPattern(box.(string)) {
-			continue
-		}
-		updateBoxHash(tx, box.(string))
-	}
-	CommitTx(tx)
-	elapsed = time.Now().Sub(start).Milliseconds()
-	if 1000 < elapsed {
-		logging.LogInfof("hash tx [%dms]", elapsed)
-	}
 }
 
 func mergeUpsertTrees() (ops []*treeQueueOperation) {
@@ -228,29 +206,4 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 
 	newOp := &treeQueueOperation{removeTreeBox: treeBox, removeTreePath: treePathPrefix, inQueueTime: time.Now(), action: "delete"}
 	operationQueue = append(operationQueue, newOp)
-}
-
-func updateBoxHash(tx *sql.Tx, boxID string) {
-	sum := boxChecksum(boxID)
-	PutBoxHash(tx, boxID, sum)
-}
-
-func boxChecksum(box string) (ret string) {
-	rows, err := query("SELECT hash FROM blocks WHERE type = 'd' AND box = ? ORDER BY id DESC", box)
-	if nil != err {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	buf := bytes.Buffer{}
-	for rows.Next() {
-		var hash string
-		if err = rows.Scan(&hash); nil != err {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		buf.WriteString(hash)
-	}
-	ret = fmt.Sprintf("%x", sha256.Sum256(buf.Bytes()))
-	return
 }

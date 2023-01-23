@@ -17,12 +17,8 @@
 package model
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"runtime/debug"
-	"sort"
 	"strings"
 	"time"
 
@@ -34,6 +30,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -47,7 +44,6 @@ func unindex(boxID string) {
 	if nil != err {
 		return
 	}
-	sql.RemoveBoxHash(tx, boxID)
 	sql.DeleteByBoxTx(tx, boxID)
 	sql.CommitTx(tx)
 	ids := treenode.RemoveBlockTreesByBoxID(boxID)
@@ -83,8 +79,6 @@ func index(boxID string, fullRebuildIndex bool) {
 	bootProgressPart := 10.0 / float64(boxLen) / float64(len(files))
 
 	luteEngine := NewLute()
-	idTitleMap := map[string]string{}
-	idHashMap := map[string]string{}
 	var treeCount int
 	var treeSize int64
 	util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
@@ -105,7 +99,7 @@ func index(boxID string, fullRebuildIndex bool) {
 		}
 
 		docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
-		if "" == docIAL["updated"] {
+		if "" == docIAL["updated"] { // 早期的数据可能没有 updated 属性，这里进行订正
 			updated := util.TimeFromID(tree.Root.ID)
 			tree.Root.SetIALAttr("updated", updated)
 			docIAL["updated"] = updated
@@ -117,12 +111,7 @@ func index(boxID string, fullRebuildIndex bool) {
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		treeSize += file.size
 		treeCount++
-		// 缓存文档标题，后面做 Path -> HPath 路径映射时需要
-		idTitleMap[tree.ID] = tree.Root.IALAttr("title")
-		// 缓存块树
 		treenode.IndexBlockTree(tree)
-		// 缓存 ID-Hash，后面需要用于判断是否要重建库
-		idHashMap[tree.ID] = tree.Hash
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
 		}
@@ -131,25 +120,7 @@ func index(boxID string, fullRebuildIndex bool) {
 
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
-	// 检查是否需要重新建库
-	util.SetBootDetails("Checking data hashes...")
-	var ids []string
-	for id := range idTitleMap {
-		ids = append(ids, id)
-	}
-	sort.Slice(ids, func(i, j int) bool { return ids[i] >= ids[j] })
-	buf := bytes.Buffer{}
-	for _, id := range ids {
-		hash, _ := idHashMap[id]
-		buf.WriteString(hash)
-		util.SetBootDetails("Checking hash " + hash)
-	}
-	boxHash := fmt.Sprintf("%x", sha256.Sum256(buf.Bytes()))
-
-	dbBoxHash := sql.GetBoxHash(box.ID)
-	if boxHash == dbBoxHash {
-		//logging.LogInfof("use existing database for box [%s]", box.ID)
-		util.SetBootDetails("Use existing database for notebook " + box.ID)
+	if !fullRebuildIndex {
 		return
 	}
 
@@ -159,26 +130,8 @@ func index(boxID string, fullRebuildIndex bool) {
 	defer sql.EnableCache()
 
 	start := time.Now()
-	if !fullRebuildIndex {
-		tx, err := sql.BeginTx()
-		if nil != err {
-			return
-		}
-		sql.PutBoxHash(tx, box.ID, boxHash)
-		util.SetBootDetails("Cleaning obsolete indexes...")
-		util.PushEndlessProgress(Conf.Language(108))
-		sql.DeleteByBoxTx(tx, box.ID)
-		if err = sql.CommitTx(tx); nil != err {
-			return
-		}
-	}
-
 	bootProgressPart = 20.0 / float64(boxLen) / float64(treeCount)
-
-	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress}
 	i = 0
-	// 块级行级入库，缓存块
-	// 这里不能并行插入，因为 SQLite 不支持
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 			continue
@@ -191,22 +144,14 @@ func index(boxID string, fullRebuildIndex bool) {
 		}
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(93), util.ShortPathForBootingDisplay(tree.Path)))
-		tx, err := sql.BeginTx()
-		if nil != err {
-			continue
-		}
-		if err = sql.InsertBlocksSpans(tx, tree, context); nil != err {
-			sql.RollbackTx(tx)
-			continue
-		}
-		if err = sql.CommitTx(tx); nil != err {
-			continue
-		}
+		sql.UpsertTreeQueue(tree)
 		if 1 < i && 0 == i%64 {
 			util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(53), i, treeCount-i))
 		}
 		i++
 	}
+
+	sql.WaitForWritingDatabase()
 
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()

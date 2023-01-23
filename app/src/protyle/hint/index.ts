@@ -191,18 +191,11 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         } else {
             this.element.style.display = "";
         }
-        let hasFocus = false;
         data.forEach((hintData, i) => {
             // https://github.com/siyuan-note/siyuan/issues/1229 提示时，新建文件不应默认选中
             let focusClass = "";
-            if (i === 0) {
-                if (hintData.value.startsWith("((newFile ") && hintData.value.endsWith(`${Lute.Caret}'))`) && data.length > 1) {
-                    focusClass = "";
-                } else {
-                    focusClass = " b3-list-item--focus";
-                    hasFocus = true;
-                }
-            } else if (i === 1 && !hasFocus) {
+            if ((i === 1 && data[i].focus ) ||
+                (i === 0 && (data.length === 1 || !data[1].focus))) {
                 focusClass = " b3-list-item--focus";
             }
             if (hintData.html === "separator") {

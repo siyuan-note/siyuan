@@ -278,8 +278,11 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         if (response.data.k && !hasKey) {
             dataList.splice(0, 0, {
                 value: `#${response.data.k}#`,
-                html: `<mark>${escapeHtml(response.data.k)}</mark>`,
+                html: `${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark>`,
             });
+            if (dataList.length > 1) {
+                dataList[1].focus = true;
+            }
         }
         protyle.hint.genHTML(dataList, protyle, true);
     });
@@ -342,6 +345,8 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
                 value: "",
                 html: window.siyuan.languages.emptyContent,
             });
+        } else if (response.data.newDoc && dataList.length > 1) {
+            dataList[1].focus = true;
         }
         protyle.hint.genHTML(dataList, protyle, true, isQuick);
     });

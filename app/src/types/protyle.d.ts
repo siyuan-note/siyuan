@@ -337,6 +337,7 @@ interface IHintData {
     html: string;
     value: string;
     filter?: string[]
+    focus?: boolean
 }
 
 interface IHintExtend {

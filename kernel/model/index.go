@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -37,7 +38,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
+func (box *Box) Unindex() {
+	task.PrependTask(task.DatabaseIndex, unindex, box.ID)
+}
+
+func unindex(boxID string) {
+	tx, err := sql.BeginTx()
+	if nil != err {
+		return
+	}
+	sql.RemoveBoxHash(tx, boxID)
+	sql.DeleteByBoxTx(tx, boxID)
+	sql.CommitTx(tx)
+	ids := treenode.RemoveBlockTreesByBoxID(boxID)
+	RemoveRecentDoc(ids)
+}
+
+func (box *Box) Index(fullRebuildIndex bool) {
+	task.PrependTask(task.DatabaseIndex, index, box.ID, fullRebuildIndex)
+}
+
+func index(boxID string, fullRebuildIndex bool) {
+	box := Conf.Box(boxID)
+	if nil == box {
+		return
+	}
+
 	defer debug.FreeOSMemory()
 
 	sql.IndexMode()
@@ -59,7 +85,8 @@ func (box *Box) Index(fullRebuildIndex bool) (treeCount int, treeSize int64) {
 	luteEngine := NewLute()
 	idTitleMap := map[string]string{}
 	idHashMap := map[string]string{}
-
+	var treeCount int
+	var treeSize int64
 	util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
 
 	i := 0

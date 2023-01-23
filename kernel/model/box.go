@@ -339,22 +339,6 @@ func (box *Box) Remove(path string) error {
 	return nil
 }
 
-func (box *Box) Unindex() {
-	task.PrependTask(task.DatabaseIndex, unindex, box.ID)
-}
-
-func unindex(boxID string) {
-	tx, err := sql.BeginTx()
-	if nil != err {
-		return
-	}
-	sql.RemoveBoxHash(tx, boxID)
-	sql.DeleteByBoxTx(tx, boxID)
-	sql.CommitTx(tx)
-	ids := treenode.RemoveBlockTreesByBoxID(boxID)
-	RemoveRecentDoc(ids)
-}
-
 func (box *Box) ListFiles(path string) (ret []*FileInfo) {
 	fis, _, err := box.Ls(path)
 	if nil != err {
@@ -512,7 +496,7 @@ func fullReindex() {
 
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
-		openedBox.Index(true)
+		index(openedBox.ID, true)
 	}
 	IndexRefs()
 	treenode.SaveBlockTree(true)

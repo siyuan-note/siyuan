@@ -1,6 +1,5 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import * as dayjs from "dayjs";
-import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {focusBlock, getEditorRange, focusByWbr, fixTableRange} from "./selection";
@@ -76,9 +75,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         });
     }
     const tempElement = document.createElement("template");
-    tempElement.innerHTML = html;
+    // 老板说不论什么情况都需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
+    tempElement.innerHTML = protyle.lute.SpinBlockDOM(html);
     const editableElement = getContenteditableElement(blockElement);
-    let render = false;
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {
         if (tempElement.content.firstChild.nodeType === 3 ||
@@ -124,33 +123,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
                     editableElement.innerHTML = replaceInnerHTML;
                 }
             }
-            const spinHTML = protyle.lute.SpinBlockDOM(removeEmbed(blockElement));
-            const scrollLeft = blockElement.firstElementChild.scrollLeft;
-            const blockPreviousElement = blockElement.previousElementSibling;
-            blockElement.outerHTML = spinHTML;
-            render = true;
-            // spin 后变成多个块需后续处理 https://github.com/siyuan-note/insider/issues/451
-            tempElement.innerHTML = spinHTML;
-            if (protyle.options.backlinkData) {
-                // 反链面板
-                blockElement = blockPreviousElement.nextElementSibling;
-            } else {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find((item) => {
-                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
-                        blockElement = item;
-                        return true;
-                    }
-                });
-            }
-            if (tempElement.content.childElementCount === 1) {
-                if (blockElement.classList.contains("table") && scrollLeft > 0) {
-                    blockElement.firstElementChild.scrollLeft = scrollLeft;
-                }
-                mathRender(blockElement);
-                updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
-                focusByWbr(protyle.wysiwyg.element, range);
-                return;
-            }
+            mathRender(blockElement);
+            updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
+            focusByWbr(protyle.wysiwyg.element, range);
+            return;
         }
     }
     const cursorLiElement = hasClosestByClassName(blockElement, "li");
@@ -204,9 +180,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
                 id: addId,
             });
         }
-        if (!render) {
-            blockElement.after(item);
-        }
+        blockElement.after(item);
         if (!lastElement) {
             lastElement = item;
         }

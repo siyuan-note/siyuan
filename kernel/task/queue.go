@@ -29,7 +29,6 @@ var (
 	taskQueue       []*Task
 	taskQueueStatus int
 	queueLock       = sync.Mutex{}
-	taskLock        = sync.Mutex{}
 )
 
 const (
@@ -137,6 +136,8 @@ func StatusLoop() {
 	}
 }
 
+var taskWaitGroup = sync.WaitGroup{}
+
 func Loop() {
 	for {
 		time.Sleep(10 * time.Millisecond)
@@ -154,7 +155,9 @@ func Loop() {
 			break
 		}
 
-		execTask(task)
+		taskWaitGroup.Add(1)
+		go execTask(task)
+		taskWaitGroup.Wait()
 	}
 }
 
@@ -189,8 +192,6 @@ func popTask() (ret *Task) {
 }
 
 func execTask(task *Task) {
-	taskLock.Lock()
-	defer taskLock.Unlock()
 	defer logging.Recover()
 
 	args := make([]reflect.Value, len(task.Args))
@@ -201,5 +202,7 @@ func execTask(task *Task) {
 			args[i] = reflect.ValueOf(v)
 		}
 	}
+
 	task.Handler.Call(args)
+	taskWaitGroup.Done()
 }

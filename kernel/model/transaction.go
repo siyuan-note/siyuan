@@ -1306,6 +1306,12 @@ func autoFixIndex() {
 		}
 	}
 
+	// 清理已关闭的笔记本块树
+	boxes = Conf.GetClosedBoxes()
+	for _, box := range boxes {
+		treenode.RemoveBlockTreesByBoxID(box.ID)
+	}
+
 	// 对比块树和数据库并订正数据库
 	rootUpdatedMap := treenode.GetRootUpdated()
 	dbRootUpdatedMap, err := sql.GetRootUpdated("blocks")

@@ -391,6 +391,8 @@ func getBlock(id string) (ret *Block, err error) {
 		return
 	}
 
+	waitForIndexing()
+
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
 		return

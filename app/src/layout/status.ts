@@ -10,6 +10,7 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 /// #endif
 import {MenuItem} from "../menus/Menu";
+import {Constants} from "../constants";
 
 export const initStatus = () => {
     /// #if !MOBILE
@@ -28,6 +29,7 @@ export const initStatus = () => {
 </div>
 <div class="status__msg"></div>
 <div class="fn__flex-1"></div>
+<div class="status__backgroundtask fn__none"></div>
 <div class="status__counter"></div>
 <div id="statusHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
@@ -65,6 +67,25 @@ export const initStatus = () => {
                 });
                 resizeTabs();
                 target.querySelector(".b3-menu").classList.add("fn__none");
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("status__backgroundtask")) {
+                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === "statusBackgroundTask") {
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
+                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.element.setAttribute("data-name", "statusBackgroundTask");
+                JSON.parse(target.getAttribute("data-tasks")).forEach((item: { action: string }) => {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        type: "readonly",
+                        iconHTML: Constants.ZWSP,
+                        label: item.action
+                    }).element);
+                })
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.top}, true);
                 event.stopPropagation();
                 break;
             } else if (target.id === "statusHelp") {

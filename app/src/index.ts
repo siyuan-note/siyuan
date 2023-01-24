@@ -13,7 +13,7 @@ import {openFileById} from "./editor/util";
 import {
     bootSync,
     downloadProgress,
-    processSync,
+    processSync, progressBackgroundTask,
     progressLoading,
     progressStatus,
     setTitle,
@@ -100,7 +100,10 @@ class App {
                                 transactionError(data);
                                 break;
                             case "syncing":
-                                processSync(data)
+                                processSync(data);
+                                break;
+                            case "backgroundtask":
+                                progressBackgroundTask(data.data.tasks);
                                 break;
                             case "refreshtheme":
                                 if (!window.siyuan.config.appearance.customCSS && data.data.theme.indexOf("custom.css") > -1) {

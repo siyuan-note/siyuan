@@ -247,6 +247,24 @@ export const progressLoading = (data: IWebSocketData) => {
     }
 };
 
+export const progressBackgroundTask = (tasks:{action:string}[]) => {
+    const backgroundTaskElement = document.querySelector(".status__backgroundtask");
+    if (!backgroundTaskElement) {
+        return;
+    }
+    if (tasks.length === 0) {
+        backgroundTaskElement.classList.add("fn__none");
+        if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+            window.siyuan.menus.menu.element.getAttribute("data-name") === "statusBackgroundTask") {
+            window.siyuan.menus.menu.remove();
+        }
+    } else {
+        backgroundTaskElement.classList.remove("fn__none");
+        backgroundTaskElement.setAttribute("data-tasks", JSON.stringify(tasks));
+        backgroundTaskElement.innerHTML = tasks[0].action + "<div><div></div></div>";
+    }
+}
+
 export const bootSync = () => {
     fetchPost("/api/sync/getBootSync", {}, response => {
         if (response.code === 1) {

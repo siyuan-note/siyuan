@@ -18,7 +18,7 @@ import {addGA, initAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
-import {exitSiYuan, processSync} from "../dialog/processSystem";
+import {exitSiYuan, processSync, progressLoading} from "../dialog/processSystem";
 import {openSetting} from "../config";
 import {getSearch} from "./functions";
 import {initStatus} from "../layout/status";
@@ -28,7 +28,7 @@ import {editor} from "../config/editor";
 import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
 import {workspaceMenu} from "../menus/workspace";
-import { getWorkspaceName } from "./noRelyPCFunction";
+import {getWorkspaceName} from "./noRelyPCFunction";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {

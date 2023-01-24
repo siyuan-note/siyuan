@@ -70,8 +70,6 @@ func RemoveBookmark(bookmark string) (err error) {
 		util.RandomSleep(50, 150)
 	}
 
-	util.PushEndlessProgress(Conf.Language(113))
-	sql.WaitForWritingDatabase()
 	util.ReloadUI()
 	return
 }
@@ -130,8 +128,6 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 		util.RandomSleep(50, 150)
 	}
 
-	util.PushEndlessProgress(Conf.Language(113))
-	sql.WaitForWritingDatabase()
 	util.ReloadUI()
 	return
 }

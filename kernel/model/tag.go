@@ -101,8 +101,6 @@ func RemoveTag(label string) (err error) {
 		util.RandomSleep(50, 150)
 	}
 
-	util.PushEndlessProgress(Conf.Language(113))
-	sql.WaitForWritingDatabase()
 	util.ReloadUI()
 	return
 }
@@ -187,8 +185,6 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 		util.RandomSleep(50, 150)
 	}
 
-	util.PushEndlessProgress(Conf.Language(113))
-	sql.WaitForWritingDatabase()
 	util.ReloadUI()
 	return
 }

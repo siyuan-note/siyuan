@@ -467,6 +467,23 @@ func genTreeID(tree *parse.Tree) {
 			n.ID = n.IALAttr("id")
 		}
 
+		if ast.NodeHTMLBlock == n.Type {
+			tokens := bytes.TrimSpace(n.Tokens)
+			if !bytes.HasPrefix(tokens, []byte("<div>")) {
+				tokens = []byte("<div>\n" + string(tokens))
+			}
+			if !bytes.HasSuffix(tokens, []byte("</div>")) {
+				tokens = append(tokens, []byte("\n</div>")...)
+			}
+			n.Tokens = tokens
+			return ast.WalkContinue
+		}
+
+		if ast.NodeInlineHTML == n.Type {
+			n.Type = ast.NodeText
+			return ast.WalkContinue
+		}
+
 		if ast.NodeParagraph == n.Type && nil != n.FirstChild && ast.NodeTaskListItemMarker == n.FirstChild.Type {
 			// 踢掉任务列表的第一个子节点左侧空格
 			n.FirstChild.Next.Tokens = bytes.TrimLeft(n.FirstChild.Next.Tokens, " ")

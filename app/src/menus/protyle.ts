@@ -1,12 +1,6 @@
 import {hasClosestBlock, hasClosestByMatchTag} from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
-import {
-    focusBlock,
-    focusByRange,
-    focusByWbr,
-    getEditorRange,
-    selectAll,
-} from "../protyle/util/selection";
+import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
 import {
     deleteColumn,
     deleteRow,
@@ -456,7 +450,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
             return;
         }
     }
-    if (window.siyuan.mobile.editor) {
+    if (window.siyuan.mobile?.editor) {
         window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
             id,
             action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]

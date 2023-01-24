@@ -110,6 +110,29 @@ const (
 	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块
 )
 
+func StatusLoop() {
+	for {
+		time.Sleep(1000 * time.Millisecond)
+		tasks := taskQueue
+		data := map[string]interface{}{}
+		var items []map[string]interface{}
+		for _, task := range tasks {
+			if OCRImage == task.Action || DatabaseIndexEmbedBlock == task.Action {
+				continue
+			}
+
+			item := map[string]interface{}{
+				"action": task.Action,
+			}
+			items = append(items, item)
+		}
+		util.PushBackgroundTask(data)
+		if 0 < len(tasks) {
+			time.Sleep(1000 * time.Millisecond)
+		}
+	}
+}
+
 func Loop() {
 	for {
 		time.Sleep(10 * time.Millisecond)

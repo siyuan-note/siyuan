@@ -150,7 +150,11 @@ func syncData(boot, exit, byHand bool) {
 	msg := fmt.Sprintf(Conf.Language(82), synced)
 	Conf.Sync.Stat = msg
 	Conf.Save()
-	util.BroadcastByType("main", "syncing", 1, msg, nil)
+	code := 1
+	if nil != err {
+		code = 2
+	}
+	util.BroadcastByType("main", "syncing", code, msg, nil)
 	return
 }
 

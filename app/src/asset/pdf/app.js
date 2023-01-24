@@ -1304,7 +1304,8 @@ class PDFViewerApplication {
         this._initializeAutoPrint(pdfDocument, openActionPromise)
       },
       reason => {
-        this._documentError(window.siyuan.languages.loadingError, {message: reason?.message})
+        this._documentError(window.siyuan.languages.loadingError,
+          {message: reason?.message})
       },
     )
 
@@ -1619,7 +1620,7 @@ class PDFViewerApplication {
       }
     }
     annotationStorage.onResetModified = () => {
-     // NOTE window.removeEventListener('beforeunload', beforeUnload)
+      // NOTE window.removeEventListener('beforeunload', beforeUnload)
 
       if (typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')) {
         delete this._annotationStorageModified
@@ -1940,6 +1941,7 @@ class PDFViewerApplication {
     })
     window.addEventListener('click', webViewerClick)
     window.addEventListener('keydown', webViewerKeyDown)
+    window.addEventListener('keyup', webViewerKeyUp)
     window.addEventListener('resize', _boundEvents.windowResize)
     window.addEventListener('hashchange', _boundEvents.windowHashChange)
     window.addEventListener('beforeprint', _boundEvents.windowBeforePrint)
@@ -2021,6 +2023,7 @@ class PDFViewerApplication {
     })
     window.removeEventListener('click', webViewerClick)
     window.removeEventListener('keydown', webViewerKeyDown)
+    window.removeEventListener('keyup', webViewerKeyUp)
     window.removeEventListener('resize', _boundEvents.windowResize)
     window.removeEventListener('hashchange', _boundEvents.windowHashChange)
     window.removeEventListener('beforeprint', _boundEvents.windowBeforePrint)
@@ -2221,7 +2224,8 @@ function webViewerInitialized (pdf) {
 
   if (!pdf.supportsFullscreen) {
     // NOTE
-    appConfig.secondaryToolbar.presentationModeButton?.classList.add('fn__hidden')
+    appConfig.secondaryToolbar.presentationModeButton?.classList.add(
+      'fn__hidden')
   }
 
   if (pdf.supportsIntegratedFind) {
@@ -2433,7 +2437,8 @@ function webViewerSpreadModeChanged (evt) {
   if (!pdfInstance) {
     return
   }
-  if (pdfInstance.isInitialViewSet && !pdfInstance.pdfViewer.isInPresentationMode) {
+  if (pdfInstance.isInitialViewSet &&
+    !pdfInstance.pdfViewer.isInPresentationMode) {
     // Only update the storage when the document has been loaded *and* rendered.
     pdfInstance.store?.set('spreadMode', evt.mode).catch(() => {
       // Unable to write to storage.
@@ -2949,6 +2954,20 @@ function webViewerClick (evt) {
 }
 
 // NOTE
+function webViewerKeyUp (evt) {
+  const pdfInstance = getPdfInstance(evt.target)
+  if (!pdfInstance || pdfInstance.overlayManager.active) {
+    return
+  }
+  if (pdfInstance.overlayManager.active) {
+    return
+  }
+  if (pdfInstance.appConfig.toolbar.rectAnno.classList.contains('toggled')) {
+    pdfInstance.appConfig.toolbar.rectAnno.dispatchEvent(
+      new MouseEvent('click'))
+  }
+}
+
 function webViewerKeyDown (evt) {
   const pdfInstance = getPdfInstance(evt.target)
   if (!pdfInstance || pdfInstance.overlayManager.active) {
@@ -2967,6 +2986,12 @@ function webViewerKeyDown (evt) {
     (evt.altKey ? 2 : 0) |
     (evt.shiftKey ? 4 : 0) |
     (evt.metaKey ? 8 : 0)
+
+  if ((cmd === 8 || cmd === 1 || cmd === 2) &&
+    !pdfInstance.appConfig.toolbar.rectAnno.classList.contains('toggled')) {
+    pdfInstance.appConfig.toolbar.rectAnno.dispatchEvent(
+      new MouseEvent('click'))
+  }
 
   // First, handle the key bindings that are independent whether an input
   // control is selected or not.

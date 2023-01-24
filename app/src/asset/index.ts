@@ -9,7 +9,7 @@ import {webViewerLoad} from "./pdf/viewer";
 import {webViewerPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 
 export class Asset extends Model {
     public path: string;
@@ -241,7 +241,7 @@ export class Asset extends Model {
                 <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search}">
                   <svg><use xlink:href="#iconSearch"></use></svg>
                 </button>
-                <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation}">
+                <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation} ${updateHotkeyTip("⌘/⌥")}">
                   <svg><use xlink:href="#iconTopLeft"></use></svg>
                 </button>
                 <button class="toolbarButton pageUp b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.previousLabel}" id="previous" tabindex="13">

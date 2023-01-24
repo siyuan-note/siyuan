@@ -96,7 +96,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
                 newHeight = y - newTop;
             }
             rectResizeElement.setAttribute("style",
-                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;`);
+                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey?"var(--b3-pdf-background1)":""}`);
         };
         documentSelf.onmouseup = () => {
             documentSelf.onmousemove = null;
@@ -145,7 +145,8 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
                     if (pdfConfig.mainContainer.lastElementChild.classList.contains("fn__none")) {
                         coords = getHightlightCoordsByRange(pdf, color);
                     } else {
-                        coords = getHightlightCoordsByRect(pdf, color, pdfConfig.mainContainer.lastElementChild);
+                        coords = getHightlightCoordsByRect(pdf, color, pdfConfig.mainContainer.lastElementChild,
+                            pdfConfig.mainContainer.lastElementChild.style.backgroundColor ? "text" : "border");
                         pdfConfig.mainContainer.lastElementChild.classList.add("fn__none");
                     }
                     if (coords) {
@@ -400,7 +401,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
     return results;
 };
 
-const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: HTMLElement) => {
+const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: HTMLElement, type:string) => {
     const rect = rectResizeElement.getBoundingClientRect();
 
     const startPageElement = hasClosestByClassName(document.elementFromPoint(rect.left, rect.top - 1), "page");
@@ -437,7 +438,7 @@ const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: H
         id,
         color,
         content,
-        type: "border",
+        type,
         mode: "rect",
     }];
 
@@ -465,7 +466,7 @@ const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: H
                 id,
                 color,
                 content,
-                type: "border",
+                type,
                 mode: "rect",
             });
         }
@@ -475,7 +476,7 @@ const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: H
         pages,
         content,
         color,
-        type: "border",
+        type,
         mode: "rect",
     });
     return result;

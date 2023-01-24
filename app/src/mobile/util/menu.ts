@@ -148,7 +148,7 @@ export const popMenu = () => {
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
 </div>
 <div class="b3-list-item b3-list-item--big" id="menuSyncNow">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconRefresh"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.syncNow}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconCloudSucc"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.syncNow}</span>
 </div>
 <div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconVideo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>

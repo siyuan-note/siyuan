@@ -280,7 +280,7 @@ export class Breadcrumb {
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.uploadAssets2CDN,
-                    icon: "iconCloud",
+                    icon: "iconCloudSucc",
                     click() {
                         if (!needSubscribe()) {
                             confirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {

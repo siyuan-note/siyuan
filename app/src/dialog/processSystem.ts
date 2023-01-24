@@ -317,7 +317,10 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
 };
 
 export const processSync = (data?: IWebSocketData) => {
-    const iconElement = document.querySelector("#barSync")
+    const iconElement = document.querySelector(isMobile()?"#menuSyncNow" : "#barSync")
+    if (!iconElement) {
+        return;
+    }
     const useElement = iconElement.querySelector("use")
     if (!data) {
         if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
@@ -326,7 +329,7 @@ export const processSync = (data?: IWebSocketData) => {
             useElement.setAttribute("xlink:href", "#iconCloudOff")
         } else {
             iconElement.classList.remove("toolbar__item--active");
-            useElement.setAttribute("xlink:href", "#iconCloud")
+            useElement.setAttribute("xlink:href", "#iconCloudSucc")
         }
         return;
     }
@@ -338,7 +341,7 @@ export const processSync = (data?: IWebSocketData) => {
         useElement.setAttribute("xlink:href", "#iconCloudError")
     } else if (data.code === 1) {   // success
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", "#iconCloud")
+        useElement.setAttribute("xlink:href", "#iconCloudSucc")
     }
     iconElement.setAttribute("aria-label", data.msg);
 }

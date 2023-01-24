@@ -1,5 +1,7 @@
 import {openMobileFileById} from "../editor";
 import {progressLoading, progressStatus, transactionError} from "../../dialog/processSystem";
+import {openFileById} from "../../editor/util";
+import {Constants} from "../../constants";
 
 export const onMessage = (data: IWebSocketData) => {
     if (data) {
@@ -23,6 +25,9 @@ export const onMessage = (data: IWebSocketData) => {
             case "create":
             case "createdailynote":
                 openMobileFileById(data.data.id);
+                break;
+            case "openFileById":
+                openMobileFileById(data.data.id, [Constants.CB_GET_FOCUS]);
                 break;
             case"txerr":
                 transactionError(data);

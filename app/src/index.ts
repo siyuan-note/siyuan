@@ -12,7 +12,8 @@ import {addBaseURL, setNoteBook} from "./util/pathName";
 import {openFileById} from "./editor/util";
 import {
     bootSync,
-    downloadProgress, processSync,
+    downloadProgress,
+    processSync,
     progressLoading,
     progressStatus,
     setTitle,
@@ -112,6 +113,9 @@ class App {
                                 }
                                 break;
                             case "createdailynote":
+                                openFileById({id: data.data.id, action: [Constants.CB_GET_FOCUS]});
+                                break;
+                            case "openFileById":
                                 openFileById({id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
                         }

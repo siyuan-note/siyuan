@@ -34,7 +34,7 @@ export abstract class Constants {
     public static readonly SIYUAN_EXPORT_PREVENT: string = "siyuan-export-prevent";
 
     // size
-    public static readonly SIZE_TOOLBAR_HEIGHT: number = 42;
+    public static readonly SIZE_TOOLBAR_HEIGHT: number = 32;
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;

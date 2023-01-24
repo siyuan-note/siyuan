@@ -112,7 +112,7 @@ const (
 
 func StatusLoop() {
 	for {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(5 * time.Second)
 		tasks := taskQueue
 		data := map[string]interface{}{}
 		var items []map[string]interface{}
@@ -132,7 +132,7 @@ func StatusLoop() {
 		data["tasks"] = items
 		util.PushBackgroundTask(data)
 		if 0 < len(tasks) {
-			time.Sleep(1000 * time.Millisecond)
+			time.Sleep(5 * time.Second)
 		}
 	}
 }

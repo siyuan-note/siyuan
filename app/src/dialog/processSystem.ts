@@ -337,7 +337,7 @@ export const processSync = (data?: IWebSocketData) => {
         iconElement.classList.add("toolbar__item--active");
         useElement.setAttribute("xlink:href", "#iconCloudSync")
     } else if (data.code === 2) {    // error
-        iconElement.classList.add("toolbar__item--active");
+        iconElement.classList.remove("toolbar__item--active");
         useElement.setAttribute("xlink:href", "#iconCloudError")
     } else if (data.code === 1) {   // success
         iconElement.classList.remove("toolbar__item--active");

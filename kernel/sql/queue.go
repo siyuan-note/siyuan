@@ -104,6 +104,10 @@ func FlushQueue() {
 
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	for _, op := range ops {
+		if util.IsExiting {
+			break
+		}
+
 		switch op.action {
 		case "upsert":
 			tree := op.upsertTree

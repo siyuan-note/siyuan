@@ -486,7 +486,7 @@ func FullReindex() {
 }
 
 func fullReindex() {
-	util.PushEndlessProgress(Conf.Language(35))
+	util.PushMsg(Conf.Language(35), 60*1000*10)
 	WaitForWritingFiles()
 
 	if err := sql.InitDatabase(true); nil != err {
@@ -505,7 +505,7 @@ func fullReindex() {
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
 
-	util.PushEndlessProgress(Conf.Language(58))
+	util.PushMsg(Conf.Language(58), 7000)
 	go func() {
 		time.Sleep(1 * time.Second)
 		util.ReloadUI()

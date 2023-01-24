@@ -17,6 +17,7 @@
 package task
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"reflect"
 	"sync"
 	"time"
@@ -120,6 +121,10 @@ func Loop() {
 		task := popTask()
 		if nil == task {
 			continue
+		}
+
+		if util.IsExiting {
+			break
 		}
 
 		execTask(task)

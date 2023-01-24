@@ -569,9 +569,6 @@ export class MobileFiles extends Model {
                     this.element.insertAdjacentHTML("afterbegin", html);
                 }
             }
-            if (data.callback === Constants.CB_MOUNT_HELP) {
-                openMobileFileById(Constants.HELP_START_PATH[window.siyuan.config.appearance.lang as "zh_CN" | "en_US"]);
-            }
         });
 
     }

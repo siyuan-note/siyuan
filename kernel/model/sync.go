@@ -293,7 +293,7 @@ func SetSyncGenerateConflictDoc(b bool) {
 	return
 }
 
-func SetSyncEnable(b bool) (err error) {
+func SetSyncEnable(b bool) {
 	Conf.Sync.Enabled = b
 	Conf.Save()
 	return

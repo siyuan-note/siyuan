@@ -89,12 +89,6 @@ export abstract class Constants {
         en_US: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
     };
-    public static readonly HELP_START_PATH = {
-        zh_CN: "20200812220555-lj3enxa",
-        zh_CHT: "20211226115423-d5z1joq",
-        en_US: "20200923234011-ieuun1p",
-        fr_FR: "20200923234011-ieuun1p",
-    };
 
     public static readonly KEYCODE: { [key: string]: string[] } = {
         "186": [";", ":"],

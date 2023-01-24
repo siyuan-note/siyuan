@@ -149,13 +149,7 @@ func setSyncEnable(c *gin.Context) {
 	}
 
 	enabled := arg["enabled"].(bool)
-	err := model.SetSyncEnable(enabled)
-	if nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
-		return
-	}
+	model.SetSyncEnable(enabled)
 }
 
 func setSyncMode(c *gin.Context) {

@@ -495,9 +495,6 @@ func fullReindex() {
 	}
 	treenode.InitBlockTree(true)
 
-	sql.IndexMode()
-	defer sql.NormalMode()
-
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)

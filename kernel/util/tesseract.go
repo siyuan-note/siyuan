@@ -123,23 +123,6 @@ func initTesseract() {
 		}
 	}
 	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(TesseractLangs, "+"))
-
-	if !gulu.Str.Contains("eng", TesseractLangs) {
-		logging.LogWarnf("no eng tesseract lang found")
-		return
-	}
-
-	foundChi := false
-	for _, lang := range TesseractLangs {
-		if strings.Contains(lang, "chi") {
-			foundChi = true
-			break
-		}
-	}
-	if !foundChi {
-		logging.LogWarnf("no chi_* tesseract lang found")
-		return
-	}
 }
 
 func getTesseractVer() (ret string) {

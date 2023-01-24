@@ -904,7 +904,7 @@ func DuplicateDoc(rootID string) (ret *parse.Tree, err error) {
 
 	resetTree(ret, "Duplicated")
 	createTreeTx(ret)
-	sql.WaitForWritingDatabase()
+	WaitForWritingFiles()
 	return
 }
 

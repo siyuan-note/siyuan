@@ -393,7 +393,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			continue
 		}
 
-		treenode.IndexBlockTree(tree)
+		treenode.ReindexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 	}
 

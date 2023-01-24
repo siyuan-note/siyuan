@@ -65,10 +65,6 @@ func updateRootContent(tx *sql.Tx, content, updated, id string) {
 	cache.RemoveBlockIAL(id)
 }
 
-func InsertBlock(tx *sql.Tx, block *Block, context map[string]interface{}) (err error) {
-	return insertBlocks(tx, []*Block{block}, context)
-}
-
 func UpdateBlockContent(block *Block) {
 	tx, err := BeginTx()
 	if nil != err {

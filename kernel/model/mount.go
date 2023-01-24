@@ -195,8 +195,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	boxConf.Closed = false
 	box.SaveConf(boxConf)
 
-	box.Index(false)
-	IndexRefs()
+	box.Index()
 	// 缓存根一级的文档树展开
 	ListDocTree(box.ID, "/", Conf.FileTree.Sort)
 	treenode.SaveBlockTree(false)

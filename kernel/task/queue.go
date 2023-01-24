@@ -102,6 +102,7 @@ const (
 	RepoCheckout            = "task.repo.checkout"             // 从快照中检出
 	DatabaseIndexFull       = "task.database.index.full"       // 重建索引
 	DatabaseIndex           = "task.database.index"            // 数据库索引队列
+	DatabaseIndexRef        = "task.database.index.ref"        // 数据库索引引用
 	DatabaseIndexFix        = "task.database.index.fix"        // 数据库索引订正
 	OCRImage                = "task.ocr.image"                 // 图片 OCR 提取文本
 	HistoryGenerateDoc      = "task.history.generateDoc"       // 生成文件历史

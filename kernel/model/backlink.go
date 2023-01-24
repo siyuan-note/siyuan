@@ -40,24 +40,19 @@ import (
 func RefreshBacklink(id string) {
 	WaitForWritingFiles()
 
-	tx, err := sql.BeginTx()
-	if nil != err {
-		return
-	}
-	defer sql.CommitTx(tx)
-
 	refs := sql.QueryRefsByDefID(id, false)
 	trees := map[string]*parse.Tree{}
 	for _, ref := range refs {
 		tree := trees[ref.RootID]
 		if nil == tree {
-			tree, err = loadTreeByBlockID(ref.RootID)
-			if nil != err {
-				logging.LogErrorf("refresh tree refs failed: %s", err)
+			var loadErr error
+			tree, loadErr = loadTreeByBlockID(ref.RootID)
+			if nil != loadErr {
+				logging.LogErrorf("refresh tree refs failed: %s", loadErr)
 				continue
 			}
 			trees[ref.RootID] = tree
-			sql.UpsertRefs(tx, tree)
+			sql.UpdateRefsTreeQueue(tree)
 		}
 	}
 }

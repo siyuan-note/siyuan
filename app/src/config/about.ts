@@ -6,7 +6,7 @@ import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util/setAccessAuthCode";
 import {exportLayout} from "../layout/util";
-import {exitSiYuan} from "../dialog/processSystem";
+import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -297,6 +297,7 @@ export const about = {
                 fetchPost("/api/repo/resetRepo", {}, () => {
                     window.siyuan.config.repo.key = "";
                     window.siyuan.config.sync.enabled = false;
+                    processSync();
                     importKeyElement.parentElement.classList.remove("fn__none");
                     importKeyElement.parentElement.nextElementSibling.classList.add("fn__none");
                 });

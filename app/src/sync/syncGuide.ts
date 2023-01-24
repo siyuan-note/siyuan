@@ -5,6 +5,7 @@ import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
 import {account} from "../config/account";
+import {processSync} from "../dialog/processSystem";
 
 export const addCloudName = (cloudPanelElement: Element) => {
     const dialog = new Dialog({
@@ -176,14 +177,11 @@ const setSync = (key?: string, dialog?: Dialog) => {
         btnElement.addEventListener("click", () => {
             dialog.destroy();
             fetchPost("/api/sync/setSyncEnable", {enabled: true}, (response) => {
-                if (response.code === 1) {
-                    showMessage(response.msg);
-                } else {
-                    window.siyuan.config.sync.enabled = true;
-                    confirmDialog(window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
-                        fetchPost("/api/sync/performSync", {});
-                    });
-                }
+                window.siyuan.config.sync.enabled = true;
+                processSync();
+                confirmDialog(window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
+                    fetchPost("/api/sync/performSync", {});
+                });
             });
         });
     } else {

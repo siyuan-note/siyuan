@@ -9,7 +9,7 @@ import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {repos} from "../../config/repos";
 import * as md5 from "blueimp-md5";
 import {showMessage} from "../../dialog/message";
-import {exitSiYuan, lockScreen} from "../../dialog/processSystem";
+import {exitSiYuan, lockScreen, processSync} from "../../dialog/processSystem";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {openHistory} from "../../history/history";
 import {Dialog} from "../../dialog";
@@ -62,6 +62,7 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
             window.siyuan.user = null;
             closePanel();
             document.getElementById("menuAccount").innerHTML = `<svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>`;
+            processSync()
         });
     });
     modelMainElement.querySelector("#deactivateUser").addEventListener(getEventName(), () => {
@@ -70,6 +71,7 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
                 window.siyuan.user = null;
                 closePanel();
                 document.getElementById("menuAccount").innerHTML = `<svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>`;
+                processSync()
             });
         });
     });
@@ -92,6 +94,7 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
             } else {
                 menuAccountElement.innerHTML = `<svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>`;
             }
+            processSync()
         });
     });
 };
@@ -171,6 +174,7 @@ ${accountHTML}
     <svg class="b3-list-item__graphic"><use xlink:href="#iconQuit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
 </div>`;
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
+    processSync()
     menuElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(menuElement)) {
@@ -416,6 +420,7 @@ ${accountHTML}
                                 fetchPost("/api/repo/resetRepo", {}, () => {
                                     window.siyuan.config.repo.key = "";
                                     window.siyuan.config.sync.enabled = false;
+                                    processSync();
                                     importKeyElement.parentElement.classList.remove("fn__none");
                                     importKeyElement.parentElement.nextElementSibling.classList.add("fn__none");
                                 });
@@ -664,6 +669,7 @@ ${accountHTML}
                             closePanel();
                             document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
 <span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
+                            processSync()
                         });
                     });
                 });
@@ -680,6 +686,7 @@ ${accountHTML}
                             closePanel();
                             document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
 <span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
+                            processSync()
                         });
                     });
                 });

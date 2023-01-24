@@ -3,6 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {processSync} from "../dialog/processSystem";
 
 const renderProvider = (provider: number) => {
     if (provider === 0) {
@@ -328,12 +329,8 @@ export const repos = {
                 return;
             }
             fetchPost("/api/sync/setSyncEnable", {enabled: switchElement.checked}, (response) => {
-                if (response.code === 1) {
-                    showMessage(response.msg);
-                    switchElement.checked = false;
-                } else {
-                    window.siyuan.config.sync.enabled = switchElement.checked;
-                }
+                window.siyuan.config.sync.enabled = switchElement.checked;
+                processSync();
             });
         });
         const switchConflictElement = repos.element.querySelector("#generateConflictDoc") as HTMLInputElement;

@@ -12,6 +12,7 @@ import {confirmDialog} from "./confirmDialog";
 import {getCurrentWindow} from "@electron/remote";
 import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
+import {needSubscribe} from "../util/needSubscribe";
 
 export const lockScreen = () => {
     /// #if BROWSER
@@ -315,9 +316,20 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
-export const processSync = (data: IWebSocketData) => {
+export const processSync = (data?: IWebSocketData) => {
     const iconElement = document.querySelector("#barSync")
     const useElement = iconElement.querySelector("use")
+    if (!data) {
+        if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
+            iconElement.classList.add("toolbar__item--active");
+            iconElement.setAttribute("aria-label", window.siyuan.languages["_kernel"]["53"]);
+            useElement.setAttribute("xlink:href", "#iconCloudOff")
+        } else {
+            iconElement.classList.remove("toolbar__item--active");
+            useElement.setAttribute("xlink:href", "#iconCloud")
+        }
+        return;
+    }
     if (data.code === 0) {  // syncing
         iconElement.classList.add("toolbar__item--active");
         useElement.setAttribute("xlink:href", "#iconCloudSync")

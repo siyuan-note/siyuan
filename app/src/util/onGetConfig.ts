@@ -18,7 +18,7 @@ import {addGA, initAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
-import {exitSiYuan} from "../dialog/processSystem";
+import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {openSetting} from "../config";
 import {getSearch} from "./functions";
 import {initStatus} from "../layout/status";
@@ -187,7 +187,7 @@ const initBar = () => {
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
 </div>
 <div id="barSync" class="toolbar__item b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom))}">
-    <svg><use xlink:href="#iconCloud${window.siyuan.config.sync.enabled ? "" : "Off"}"></use></svg>
+    <svg><use xlink:href="#iconCloud"></use></svg>
 </div>
 <button id="barBack" data-menu="true" class="toolbar__item toolbar__item--disabled b3-tooltips b3-tooltips__se" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg><use xlink:href="#iconBack"></use></svg>
@@ -207,6 +207,7 @@ const initBar = () => {
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
 </div>
 <div class="fn__flex" id="windowControls"></div>`;
+    processSync();
     toolbar.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         while (!target.classList.contains("toolbar")) {

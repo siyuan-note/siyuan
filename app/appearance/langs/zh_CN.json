@@ -864,6 +864,16 @@
     "xy": "%d 年%s",
     "max": "很久%s"
   },
+  "_taskAction": {
+    "task.repo.checkout": "执行从快照中检出",
+    "task.database.index.full": "执行重建索引",
+    "task.database.index": "执行数据库索引队列",
+    "task.database.index.ref": "执行数据库索引引用",
+    "task.database.index.fix": "执行数据库索引订正",
+    "task.ocr.image": "执行图片 OCR 提取文本",
+    "task.history.generateDoc": "执行生成文件历史",
+    "task.database.index.embedBlock": "执行数据库索引嵌入块"
+  },
   "_trayMenu": {
     "showWindow": "显示主窗口",
     "hideWindow": "隐藏主窗口",

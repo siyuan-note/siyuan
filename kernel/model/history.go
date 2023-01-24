@@ -19,6 +19,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"io/fs"
 	"math"
 	"os"
@@ -38,7 +39,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )

@@ -271,6 +271,7 @@ func setAppearance(c *gin.Context) {
 
 	model.Conf.Appearance = appearance
 	model.Conf.Lang = appearance.Lang
+	util.Lang = model.Conf.Lang
 	model.Conf.Save()
 	model.InitAppearance()
 

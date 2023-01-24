@@ -32,7 +32,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -92,12 +91,8 @@ func BootSyncData() {
 }
 
 func SyncData(boot, exit, byHand bool) {
-	if !checkSync(boot, exit, byHand) {
-		return
-	}
-
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	task.PrependTask(task.CloudSync, syncData, boot, exit, byHand)
+	syncData(boot, exit, byHand)
 }
 
 func syncData(boot, exit, byHand bool) {

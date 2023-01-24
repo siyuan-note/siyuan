@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,7 +16,6 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 

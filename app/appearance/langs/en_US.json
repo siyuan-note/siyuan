@@ -864,6 +864,16 @@
     "xy": "%d years %s",
     "max": "a long while %s"
   },
+  "_taskAction": {
+    "task.repo.checkout": "Execute checkout from snapshot",
+    "task.database.index.full": "Execute rebuild index",
+    "task.database.index": "Execute database index queue",
+    "task.database.index.ref": "Execute database index reference",
+    "task.database.index.fix": "Execute database index fix",
+    "task.ocr.image": "Execute image OCR to extract text",
+    "task.history.generateDoc": "Execute GenerateDoc History",
+    "task.database.index.embedBlock": "Execute database index embed block"
+  },
   "_trayMenu": {
     "showWindow": "Show Window",
     "hideWindow": "Hide Window",

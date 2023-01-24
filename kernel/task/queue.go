@@ -98,7 +98,6 @@ func newTask(action string, handler interface{}, args ...interface{}) *Task {
 }
 
 const (
-	CloudSync               = "task.cloud.sync"                // 数据同步
 	RepoCheckout            = "task.repo.checkout"             // 从快照中检出
 	DatabaseIndexFull       = "task.database.index.full"       // 重建索引
 	DatabaseIndex           = "task.database.index"            // 数据库索引队列
@@ -120,8 +119,15 @@ func StatusLoop() {
 				continue
 			}
 
+			actionLangs := util.TaskActionLangs[util.Lang]
+			action := task.Action
+			if nil != actionLangs {
+				if label := actionLangs[task.Action]; nil != label {
+					action = label.(string)
+				}
+			}
 			item := map[string]interface{}{
-				"action": task.Action,
+				"action": action,
 			}
 			items = append(items, item)
 		}

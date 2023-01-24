@@ -263,7 +263,7 @@ export const progressBackgroundTask = (tasks:{action:string}[]) => {
         backgroundTaskElement.setAttribute("data-tasks", JSON.stringify(tasks));
         backgroundTaskElement.innerHTML = tasks[0].action + "<div><div></div></div>";
     }
-}
+};
 
 export const bootSync = () => {
     fetchPost("/api/sync/getBootSync", {}, response => {
@@ -335,31 +335,31 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
 };
 
 export const processSync = (data?: IWebSocketData) => {
-    const iconElement = document.querySelector(isMobile()?"#menuSyncNow" : "#barSync")
+    const iconElement = document.querySelector(isMobile()?"#menuSyncNow" : "#barSync");
     if (!iconElement) {
         return;
     }
-    const useElement = iconElement.querySelector("use")
+    const useElement = iconElement.querySelector("use");
     if (!data) {
         if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
             iconElement.classList.add("toolbar__item--active");
             iconElement.setAttribute("aria-label", window.siyuan.languages["_kernel"]["53"]);
-            useElement.setAttribute("xlink:href", "#iconCloudOff")
+            useElement.setAttribute("xlink:href", "#iconCloudOff");
         } else {
             iconElement.classList.remove("toolbar__item--active");
-            useElement.setAttribute("xlink:href", "#iconCloudSucc")
+            useElement.setAttribute("xlink:href", "#iconCloudSucc");
         }
         return;
     }
     if (data.code === 0) {  // syncing
         iconElement.classList.add("toolbar__item--active");
-        useElement.setAttribute("xlink:href", "#iconCloudSync")
+        useElement.setAttribute("xlink:href", "#iconCloudSync");
     } else if (data.code === 2) {    // error
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", "#iconCloudError")
+        useElement.setAttribute("xlink:href", "#iconCloudError");
     } else if (data.code === 1) {   // success
         iconElement.classList.remove("toolbar__item--active");
-        useElement.setAttribute("xlink:href", "#iconCloudSucc")
+        useElement.setAttribute("xlink:href", "#iconCloudSucc");
     }
     iconElement.setAttribute("aria-label", data.msg);
-}
+};

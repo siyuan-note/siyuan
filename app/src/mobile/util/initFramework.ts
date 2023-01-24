@@ -132,7 +132,7 @@ export const initFramework = () => {
         mountHelp();
     }
     const transactionTipElement = document.getElementById("transactionTip");
-    transactionTipElement.innerHTML = `${window.siyuan.languages.waitSync} <button class="b3-button">${window.siyuan.languages.syncNow}</button>`
+    transactionTipElement.innerHTML = `${window.siyuan.languages.waitSync} <button class="b3-button">${window.siyuan.languages.syncNow}</button>`;
     transactionTipElement.querySelector(".b3-button").addEventListener(getEventName(), () => {
         syncGuide();
     });
@@ -162,7 +162,7 @@ export const initFramework = () => {
                 });
             }
         });
-        return
+        return;
     }
     setEmpty();
 };

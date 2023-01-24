@@ -328,7 +328,7 @@ export const repos = {
                 showMessage(window.siyuan.languages._kernel[123]);
                 return;
             }
-            fetchPost("/api/sync/setSyncEnable", {enabled: switchElement.checked}, (response) => {
+            fetchPost("/api/sync/setSyncEnable", {enabled: switchElement.checked}, () => {
                 window.siyuan.config.sync.enabled = switchElement.checked;
                 processSync();
             });

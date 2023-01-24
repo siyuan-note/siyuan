@@ -18,7 +18,7 @@ import {addGA, initAssets, setInlineStyle, setMode} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
-import {exitSiYuan, processSync, progressLoading} from "../dialog/processSystem";
+import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {openSetting} from "../config";
 import {getSearch} from "./functions";
 import {initStatus} from "../layout/status";

@@ -76,11 +76,11 @@ export const exportImage = (id: string) => {
         }, Constants.TIMEOUT_TRANSITION);
     });
     const previewElement = exportDialog.element.querySelector("#preview") as HTMLElement;
-    const foldElement = (exportDialog.element.querySelector("#keepFold") as HTMLInputElement)
+    const foldElement = (exportDialog.element.querySelector("#keepFold") as HTMLInputElement);
     foldElement.addEventListener("change", () => {
         btnsElement[0].setAttribute("disabled", "disabled");
         btnsElement[1].setAttribute("disabled", "disabled");
-        btnsElement[1].parentElement.insertAdjacentHTML("afterend", `<div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>`)
+        btnsElement[1].parentElement.insertAdjacentHTML("afterend", "<div class=\"fn__loading\"><img height=\"128px\" width=\"128px\" src=\"stage/loading-pure.svg\"></div>");
         window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold = foldElement.checked;
         fetchPost("/api/export/exportPreviewHTML", {
             id,
@@ -88,7 +88,7 @@ export const exportImage = (id: string) => {
             image: true,
         }, (response) => {
             refreshPreview(response);
-        })
+        });
     });
     const refreshPreview = (response: IWebSocketData) => {
         previewElement.innerHTML = response.data.content;

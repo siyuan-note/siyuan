@@ -83,7 +83,7 @@ export const initStatus = () => {
                         iconHTML: Constants.ZWSP,
                         label: item.action
                     }).element);
-                })
+                });
                 const rect = target.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({x: rect.right, y: rect.top}, true);
                 event.stopPropagation();

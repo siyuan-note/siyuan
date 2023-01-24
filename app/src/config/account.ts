@@ -203,7 +203,7 @@ ${window.siyuan.languages.account8}`;
                     account.bindEvent(element);
                     showMessage(window.siyuan.languages.refreshUser, 3000);
                     account.onSetaccount();
-                    processSync()
+                    processSync();
                 });
             });
             element.querySelector("#logout").addEventListener("click", () => {
@@ -213,7 +213,7 @@ ${window.siyuan.languages.account8}`;
                         element.innerHTML = account.genHTML();
                         account.bindEvent(element);
                         account.onSetaccount();
-                        processSync()
+                        processSync();
                     });
                 });
             });
@@ -224,7 +224,7 @@ ${window.siyuan.languages.account8}`;
                         element.innerHTML = account.genHTML();
                         account.bindEvent(element);
                         account.onSetaccount();
-                        processSync()
+                        processSync();
                     });
                 });
             });
@@ -372,7 +372,7 @@ ${window.siyuan.languages.account8}`;
     },
     _afterLogin(userResponse: IWebSocketData, element: Element) {
         window.siyuan.user = userResponse.data;
-        processSync()
+        processSync();
         if (element.classList.contains("account") && !needSubscribe("")) {
             const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
             if (dialogElement) {

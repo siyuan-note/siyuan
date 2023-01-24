@@ -176,7 +176,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
         });
         btnElement.addEventListener("click", () => {
             dialog.destroy();
-            fetchPost("/api/sync/setSyncEnable", {enabled: true}, (response) => {
+            fetchPost("/api/sync/setSyncEnable", {enabled: true}, () => {
                 window.siyuan.config.sync.enabled = true;
                 processSync();
                 confirmDialog(window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {

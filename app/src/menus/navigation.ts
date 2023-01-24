@@ -388,13 +388,13 @@ const genImportMenu = (notebookId: string, pathString: string) => {
                         formData.append("notebook", notebookId);
                         formData.append("toPath", pathString);
                         fetchPost("/api/import/importSY", formData, () => {
-                            let files
+                            let files;
                             /// #if MOBILE
-                            files = window.siyuan.mobile.files
+                            files = window.siyuan.mobile.files;
                             /// #else
                             files = (getDockByType("file").data["file"] as Files);
                             /// #endif
-                            const liElement = files.element.querySelector(`[data-path="${pathString}"]`)
+                            const liElement = files.element.querySelector(`[data-path="${pathString}"]`);
                             const toggleElement = liElement.querySelector(".b3-list-item__arrow--open");
                             if (toggleElement) {
                                 toggleElement.classList.remove("b3-list-item__arrow--open");

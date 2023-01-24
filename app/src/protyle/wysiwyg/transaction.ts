@@ -77,7 +77,7 @@ const promiseTransaction = () => {
         /// #if MOBILE
         if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
             window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
-            document.getElementById("transactionTip").classList.remove("fn__none")
+            document.getElementById("transactionTip").classList.remove("fn__none");
         }
         /// #endif
         if (response.data[0].doOperations[0].action === "setAttrs") {

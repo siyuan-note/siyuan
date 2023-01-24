@@ -126,6 +126,10 @@ func StatusLoop() {
 			}
 			items = append(items, item)
 		}
+		if 1 > len(items) {
+			items = []map[string]interface{}{}
+		}
+		data["tasks"] = items
 		util.PushBackgroundTask(data)
 		if 0 < len(tasks) {
 			time.Sleep(1000 * time.Millisecond)

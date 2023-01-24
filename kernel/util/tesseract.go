@@ -118,9 +118,7 @@ func initTesseract() {
 	}
 
 	for _, lang := range langs {
-		if "eng" == lang || strings.HasPrefix(lang, "chi") {
-			TesseractLangs = append(TesseractLangs, lang)
-		}
+		TesseractLangs = append(TesseractLangs, lang)
 	}
 	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(TesseractLangs, "+"))
 }

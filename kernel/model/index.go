@@ -49,11 +49,24 @@ func (box *Box) Index() {
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 }
 
+var indexing = false
+
+func waitForIndexing() {
+	for indexing {
+		time.Sleep(time.Millisecond * 100)
+	}
+}
+
 func index(boxID string) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		return
 	}
+
+	indexing = true
+	defer func() {
+		indexing = false
+	}()
 
 	util.SetBootDetails("Listing files...")
 	files := box.ListFiles("/")
@@ -68,10 +81,7 @@ func index(boxID string) {
 	var treeCount int
 	var treeSize int64
 	i := 0
-
-	util.PushEndlessProgress(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
-	defer util.PushClearProgress()
-
+	util.PushStatusBar(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
 	for _, file := range files {
 		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
 			continue
@@ -101,7 +111,7 @@ func index(boxID string) {
 		treeSize += file.size
 		treeCount++
 		if 1 < i && 0 == i%64 {
-			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
+			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
 		}
 		i++
 	}

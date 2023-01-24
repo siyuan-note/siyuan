@@ -292,17 +292,6 @@ func ReindexBlockTree(tree *parse.Tree) {
 	blockTreesLock.Lock()
 	defer blockTreesLock.Unlock()
 
-	var ids []string
-	for _, b := range blockTrees {
-		if b.RootID == tree.ID {
-			ids = append(ids, b.ID)
-		}
-	}
-	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	for _, id := range ids {
-		delete(blockTrees, id)
-	}
-
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue

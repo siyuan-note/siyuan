@@ -393,6 +393,7 @@ var exitLock = sync.Mutex{}
 func Close(force bool, execInstallPkg int) (exitCode int) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
+	util.IsExiting = true
 
 	logging.LogInfof("exiting kernel [force=%v, execInstallPkg=%d]", force, execInstallPkg)
 	util.PushMsg(Conf.Language(95), 10000*60)

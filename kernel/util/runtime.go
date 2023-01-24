@@ -42,6 +42,9 @@ const (
 	ExitCodeFatal                 = 1  // 致命错误
 )
 
+// IsExiting 是否正在退出程序。
+var IsExiting = false
+
 func logBootInfo() {
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+

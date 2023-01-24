@@ -161,16 +161,6 @@ func Loop() {
 	}
 }
 
-func CloseWait() {
-	taskQueueStatus = QueueStatusClosing
-	for {
-		time.Sleep(10 * time.Millisecond)
-		if 1 > len(taskQueue) {
-			break
-		}
-	}
-}
-
 func clearQueue() {
 	queueLock.Lock()
 	defer queueLock.Unlock()

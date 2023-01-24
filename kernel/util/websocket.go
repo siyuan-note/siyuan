@@ -151,6 +151,10 @@ func PushStatusBar(msg string) {
 	BroadcastByType("main", "statusbar", 0, msg, nil)
 }
 
+func PushBackgroundTask(data map[string]interface{}) {
+	BroadcastByType("main", "backgroundtask", 0, "", data)
+}
+
 type BlockStatResult struct {
 	RuneCount  int `json:"runeCount"`
 	WordCount  int `json:"wordCount"`

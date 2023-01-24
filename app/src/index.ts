@@ -12,7 +12,7 @@ import {addBaseURL, setNoteBook} from "./util/pathName";
 import {openFileById} from "./editor/util";
 import {
     bootSync,
-    downloadProgress,
+    downloadProgress, processSync,
     progressLoading,
     progressStatus,
     setTitle,
@@ -44,10 +44,10 @@ class App {
                 msgCallback: (data) => {
                     if (data) {
                         switch (data.cmd) {
-                            case"progress":
+                            case "progress":
                                 progressLoading(data);
                                 break;
-                            case"setLocalStorageVal":
+                            case "setLocalStorageVal":
                                 window.siyuan.storage[data.data.key] = data.data.val;
                                 break;
                             case "rename":
@@ -89,22 +89,17 @@ class App {
                                     }
                                 });
                                 break;
-                            case"statusbar":
+                            case "statusbar":
                                 progressStatus(data);
                                 break;
-                            case"downloadProgress":
+                            case "downloadProgress":
                                 downloadProgress(data.data);
                                 break;
-                            case"txerr":
+                            case "txerr":
                                 transactionError(data);
                                 break;
-                            case"syncing":
-                                if (data.code === 0) {
-                                    document.querySelector("#barSync").classList.add("toolbar__item--active");
-                                } else {
-                                    document.querySelector("#barSync").classList.remove("toolbar__item--active");
-                                }
-                                document.querySelector("#barSync").setAttribute("aria-label", data.msg);
+                            case "syncing":
+                                processSync(data)
                                 break;
                             case "refreshtheme":
                                 if (!window.siyuan.config.appearance.customCSS && data.data.theme.indexOf("custom.css") > -1) {

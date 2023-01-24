@@ -311,3 +311,19 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
         }
     }
 };
+
+export const processSync = (data: IWebSocketData) => {
+    const iconElement = document.querySelector("#barSync")
+    const useElement = iconElement.querySelector("use")
+    if (data.code === 0) {  // syncing
+        iconElement.classList.add("toolbar__item--active");
+        useElement.setAttribute("xlink:href", "#iconCloudSync")
+    } else if (data.code === 2) {    // error
+        iconElement.classList.add("toolbar__item--active");
+        useElement.setAttribute("xlink:href", "#iconCloudError")
+    } else if (data.code === 1) {   // success
+        iconElement.classList.remove("toolbar__item--active");
+        useElement.setAttribute("xlink:href", "#iconCloud")
+    }
+    iconElement.setAttribute("aria-label", data.msg);
+}

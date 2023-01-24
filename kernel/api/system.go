@@ -153,6 +153,10 @@ func getConf(c *gin.Context) {
 		return
 	}
 
+	if !maskedConf.Sync.Enabled || (0 == maskedConf.Sync.Provider && !model.IsSubscriber()) {
+		maskedConf.Sync.Stat = model.Conf.Language(53)
+	}
+
 	ret.Data = map[string]interface{}{
 		"conf":  maskedConf,
 		"start": start,

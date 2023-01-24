@@ -928,7 +928,7 @@
     "50": "Resolving reference [%s]",
     "51": "Cache content block [%d]",
     "52": "Every time you open the user guide notebook data will be reset, so please do not save any data in it",
-    "53": "TODO",
+    "53": "Data synchronization has not been enabled",
     "54": "Indexing references...",
     "55": "Indexed references of [%d] documents",
     "56": "TODO",

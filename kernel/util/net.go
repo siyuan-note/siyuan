@@ -17,14 +17,28 @@
 package util
 
 import (
+	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/httpclient"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/olahol/melody"
 )
+
+func IsOnline() bool {
+	c := req.C().SetTimeout(1 * time.Second)
+	resp, err := c.R().Get("https://icanhazip.com")
+	if nil != err {
+		resp, err = c.R().Get("https://api.ipify.org")
+		if nil != err {
+			resp, err = c.R().Get("https://www.baidu.com")
+		}
+	}
+	return nil == err && nil != resp && 200 == resp.StatusCode
+}
 
 func GetRemoteAddr(session *melody.Session) string {
 	ret := session.Request.Header.Get("X-forwarded-for")

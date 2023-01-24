@@ -209,7 +209,10 @@ export const progressStatus = (data: IWebSocketData) => {
         }, 6000);
         return;
     }
-    statusElement.querySelector(".status__msg").innerHTML = data.msg;
+    const msgElement = statusElement.querySelector(".status__msg");
+    if (msgElement) {
+        msgElement.innerHTML = data.msg;
+    }
 };
 
 export const progressLoading = (data: IWebSocketData) => {

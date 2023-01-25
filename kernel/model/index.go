@@ -18,18 +18,21 @@ package model
 
 import (
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
+	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -82,15 +85,20 @@ func index(boxID string) {
 	var treeSize int64
 	i := 0
 	util.PushStatusBar(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
-	for _, file := range files {
-		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
-			continue
-		}
 
+	poolSize := runtime.NumCPU()
+	if 4 < poolSize {
+		poolSize = 4
+	}
+	waitGroup := &sync.WaitGroup{}
+	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
+		defer waitGroup.Done()
+
+		file := arg.(*FileInfo)
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
 		if nil != err {
 			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
-			continue
+			return
 		}
 
 		docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
@@ -114,7 +122,17 @@ func index(boxID string) {
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, len(files)-i))
 		}
 		i++
+	})
+	for _, file := range files {
+		if file.isdir || !strings.HasSuffix(file.name, ".sy") {
+			continue
+		}
+
+		waitGroup.Add(1)
+		p.Invoke(file)
 	}
+	waitGroup.Wait()
+	p.Release()
 
 	box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 	end := time.Now()

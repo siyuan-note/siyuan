@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
@@ -393,7 +394,7 @@ func getBlock(id string) (ret *Block, err error) {
 
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
-		if isIndexing() {
+		if task.ContainIndexTask() {
 			err = ErrIndexing
 		}
 		return

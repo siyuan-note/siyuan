@@ -52,26 +52,11 @@ func (box *Box) Index() {
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 }
 
-var indexing = false
-
-func isIndexing() (ret bool) {
-	for i := 0; indexing || i > 7; i++ {
-		time.Sleep(time.Millisecond * 100)
-		ret = true
-	}
-	return
-}
-
 func index(boxID string) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		return
 	}
-
-	indexing = true
-	defer func() {
-		indexing = false
-	}()
 
 	util.SetBootDetails("Listing files...")
 	files := box.ListFiles("/")

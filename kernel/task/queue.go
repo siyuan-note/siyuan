@@ -17,6 +17,7 @@
 package task
 
 import (
+	"context"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"reflect"
 	"sync"
@@ -110,6 +111,15 @@ const (
 	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块
 )
 
+func ContainIndexTask() bool {
+	for _, task := range taskQueue {
+		if DatabaseIndex == task.Action || DatabaseIndexFull == task.Action {
+			return true
+		}
+	}
+	return false
+}
+
 func StatusLoop() {
 	for {
 		time.Sleep(5 * time.Second)
@@ -138,15 +148,12 @@ func StatusLoop() {
 		}
 		data["tasks"] = items
 		util.PushBackgroundTask(data)
-		if 0 < len(tasks) {
-			time.Sleep(5 * time.Second)
-		}
 	}
 }
 
 func Loop() {
 	for {
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		if QueueStatusClosing == taskQueueStatus {
 			clearQueue()
 			break
@@ -161,7 +168,7 @@ func Loop() {
 			break
 		}
 
-		go execTask(task)
+		execTask(task)
 	}
 }
 
@@ -197,5 +204,18 @@ func execTask(task *Task) {
 		}
 	}
 
-	task.Handler.Call(args)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*12)
+	defer cancel()
+	ch := make(chan bool, 1)
+	go func() {
+		task.Handler.Call(args)
+		ch <- true
+	}()
+
+	select {
+	case <-ctx.Done():
+		//logging.LogWarnf("task [%s] timeout", task.Action)
+	case <-ch:
+		//logging.LogInfof("task [%s] done", task.Action)
+	}
 }

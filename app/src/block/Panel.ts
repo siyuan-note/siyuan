@@ -68,16 +68,18 @@ export class BlockPanel {
             let type = "move";
             let x = event.clientX - parseInt(this.element.style.left);
             let y = event.clientY - parseInt(this.element.style.top);
+            const height = this.element.clientHeight;
+            const width = this.element.clientWidth;
             if (!iconsElement) {
-                x = event.clientX - this.element.clientWidth;
-                y = event.clientY - this.element.clientHeight;
+                x = event.clientX;
+                y = event.clientY;
                 iconsElement = hasClosestByClassName(event.target, "block__rd") ||
-                    hasClosestByClassName(event.target, "block__r")||
-                    hasClosestByClassName(event.target, "block__rt")||
-                    hasClosestByClassName(event.target, "block__d")||
-                    hasClosestByClassName(event.target, "block__l")||
-                    hasClosestByClassName(event.target, "block__ld")||
-                    hasClosestByClassName(event.target, "block__lt")||
+                    hasClosestByClassName(event.target, "block__r") ||
+                    hasClosestByClassName(event.target, "block__rt") ||
+                    hasClosestByClassName(event.target, "block__d") ||
+                    hasClosestByClassName(event.target, "block__l") ||
+                    hasClosestByClassName(event.target, "block__ld") ||
+                    hasClosestByClassName(event.target, "block__lt") ||
                     hasClosestByClassName(event.target, "block__t");
                 if (!iconsElement) {
                     return;
@@ -93,23 +95,61 @@ export class BlockPanel {
                 if (!this.element) {
                     return;
                 }
-                let positionX = moveEvent.clientX - x;
-                let positionY = moveEvent.clientY - y;
                 if (type === "move") {
-                    if (positionX > window.innerWidth - this.element.clientWidth) {
-                        positionX = window.innerWidth - this.element.clientWidth;
+                    let positionX = moveEvent.clientX - x;
+                    let positionY = moveEvent.clientY - y;
+                    if (positionX > window.innerWidth - width) {
+                        positionX = window.innerWidth - width;
                     }
-                    if (positionY > window.innerHeight - this.element.clientHeight) {
-                        positionY = window.innerHeight - this.element.clientHeight;
+                    if (positionY > window.innerHeight - height) {
+                        positionY = window.innerHeight - height;
                     }
                     this.element.style.left = Math.max(positionX, 0) + "px";
                     this.element.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
                 } else {
-                    if (positionX > 200 && positionX < window.innerWidth && (type === "block__rd" || type === "block__r")) {
-                        this.element.style.width = positionX + "px";
-                    }
-                    if (positionY > 65 && positionY < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT && (type === "block__rd" || type === "block__d")) {
-                        this.element.style.height = positionY + "px";
+                    if (type === "block__r" &&
+                        moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth) {
+                        this.element.style.width = moveEvent.clientX - x + width + "px";
+                    } else if (type === "block__d" &&
+                        moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
+                        this.element.style.height = moveEvent.clientY - y + height + "px";
+                        this.element.style.maxHeight = "";
+                    } else if (type === "block__t" &&
+                        moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
+                        this.element.style.top = moveEvent.clientY + "px";
+                        this.element.style.maxHeight = "";
+                        this.element.style.height = (y - moveEvent.clientY + height) + "px";
+                    } else if (type === "block__l" &&
+                        moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200) {
+                        this.element.style.left = moveEvent.clientX + "px";
+                        this.element.style.width = (x - moveEvent.clientX + width) + "px";
+                    } else if (type === "block__rd" &&
+                        moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth &&
+                        moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
+                        this.element.style.height = moveEvent.clientY - y + height + "px";
+                        this.element.style.maxHeight = "";
+                        this.element.style.width = moveEvent.clientX - x + width + "px";
+                    } else if (type === "block__rt" &&
+                        moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth &&
+                        moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
+                        this.element.style.width = moveEvent.clientX - x + width + "px";
+                        this.element.style.top = moveEvent.clientY + "px";
+                        this.element.style.maxHeight = "";
+                        this.element.style.height = (y - moveEvent.clientY + height) + "px";
+                    } else if (type === "block__lt" &&
+                        moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200 &&
+                        moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
+                        this.element.style.left = moveEvent.clientX + "px";
+                        this.element.style.width = (x - moveEvent.clientX + width) + "px";
+                        this.element.style.top = moveEvent.clientY + "px";
+                        this.element.style.maxHeight = "";
+                        this.element.style.height = (y - moveEvent.clientY + height) + "px";
+                    } else if (type === "block__ld" &&
+                        moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200 &&
+                        moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
+                        this.element.style.left = moveEvent.clientX + "px";
+                        this.element.style.width = (x - moveEvent.clientX + width) + "px";
+                        this.element.style.height = moveEvent.clientY - y + height + "px";
                         this.element.style.maxHeight = "";
                     }
                 }

@@ -12,6 +12,7 @@ import {onGet} from "../protyle/util/onGet";
 import {scrollCenter} from "./highlightById";
 import {lockFile} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
+import {showMessage} from "../dialog/message";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
@@ -41,6 +42,10 @@ const focusStack = async (stack: IBackStack) => {
                 // 文件被锁定
                 lockFile(info.data);
                 return false;
+            }
+            if (info.code === 3) {
+                showMessage(info.msg);
+                return;
             }
             const tab = new Tab({
                 title: info.data.rootTitle,

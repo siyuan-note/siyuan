@@ -23,6 +23,7 @@ import {getPreviousHeading} from "../protyle/wysiwyg/getBlock";
 import {lockFile, setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
+import {showMessage} from "../dialog/message";
 
 export const openFileById = (options: {
     id: string,
@@ -37,6 +38,10 @@ export const openFileById = (options: {
         if (data.code === 2) {
             // 文件被锁定
             lockFile(data.data);
+            return;
+        }
+        if (data.code === 3) {
+            showMessage(data.msg);
             return;
         }
         if (typeof options.removeCurrentTab === "undefined") {

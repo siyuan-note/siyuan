@@ -484,7 +484,10 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
             lockFile(response.data);
             return;
         }
-
+        if (response.code === 3) {
+            showMessage(response.msg);
+            return;
+        }
         let exportType = "HTML (SiYuan)";
         switch (option.type) {
             case "htmlmd":

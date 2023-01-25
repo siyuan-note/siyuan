@@ -13,6 +13,7 @@ import {setEditMode} from "../protyle/util/setEditMode";
 import {hideElements} from "../protyle/ui/hideElements";
 import {pushBack} from "./util/MobileBackFoward";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {showMessage} from "../dialog/message";
 
 export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id, action};
@@ -42,6 +43,10 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
         if (data.code === 2) {
             // 文件被锁定
             lockFile(data.data);
+            return;
+        }
+        if (data.code === 3) {
+            showMessage(data.msg);
             return;
         }
         if (window.siyuan.mobile.editor) {

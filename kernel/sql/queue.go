@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"runtime"
 	"sync"
 	"time"
 
@@ -124,6 +125,10 @@ func FlushQueue() {
 		if err = commitTx(tx); nil != err {
 			logging.LogErrorf("commit tx failed: %s", err)
 			return
+		}
+
+		if 16 < i && 0 == i%256 {
+			runtime.GC()
 		}
 	}
 

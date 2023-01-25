@@ -37,12 +37,13 @@ var (
 
 type dbQueueOperation struct {
 	inQueueTime time.Time
-	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs
+	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index
 
+	indexPath                     string      // index
 	upsertTree                    *parse.Tree // upsert/insert_refs
 	removeTreeBox, removeTreePath string      // delete
 	removeTreeIDBox, removeTreeID string      // delete_id
-	box                           string      // delete_box/delete_box_refs
+	box                           string      // delete_box/delete_box_refs/index
 	renameTree                    *parse.Tree // rename
 	renameTreeOldHPath            string      // rename
 }
@@ -110,6 +111,8 @@ func FlushQueue() {
 		}
 
 		switch op.action {
+		case "index":
+			err = indexTree(tx, op.box, op.indexPath, context)
 		case "upsert":
 			err = upsertTree(tx, op.upsertTree, context)
 		case "delete":
@@ -224,6 +227,20 @@ func DeleteBoxQueue(boxID string) {
 	newOp := &dbQueueOperation{box: boxID, inQueueTime: time.Now(), action: "delete_box"}
 	for i, op := range operationQueue {
 		if "delete_box" == op.action && op.box == boxID {
+			operationQueue[i] = newOp
+			return
+		}
+	}
+	operationQueue = append(operationQueue, newOp)
+}
+
+func IndexTreeQueue(box, p string) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	newOp := &dbQueueOperation{indexPath: p, box: box, inQueueTime: time.Now(), action: "index"}
+	for i, op := range operationQueue {
+		if "index" == op.action && op.indexPath == p && op.box == box { // 相同树则覆盖
 			operationQueue[i] = newOp
 			return
 		}

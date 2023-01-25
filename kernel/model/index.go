@@ -105,7 +105,7 @@ func index(boxID string) {
 
 		cache.PutDocIAL(file.path, docIAL)
 		treenode.ReindexBlockTree(tree)
-		sql.UpsertTreeQueue(tree)
+		sql.IndexTreeQueue(box.ID, file.path)
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		treeSize += file.size

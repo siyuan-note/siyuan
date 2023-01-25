@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"strings"
 
 	"github.com/88250/lute/parse"
@@ -390,6 +391,16 @@ func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 		return
 	}
 	return err
+}
+
+func indexTree(tx *sql.Tx, box, p string, context map[string]interface{}) (err error) {
+	tree, err := filesys.LoadTree(box, p, luteEngine)
+	if nil != err {
+		return
+	}
+
+	err = upsertTree(tx, tree, context)
+	return
 }
 
 func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {

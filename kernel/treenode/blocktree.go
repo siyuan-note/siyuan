@@ -312,7 +312,7 @@ func ReindexBlockTree(tree *parse.Tree) {
 func AutoFlushBlockTree() {
 	for {
 		SaveBlockTree(false)
-		time.Sleep(7 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 }
 

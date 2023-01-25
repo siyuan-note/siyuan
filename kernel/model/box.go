@@ -507,7 +507,7 @@ func FullReindex() {
 }
 
 func fullReindex() {
-	util.PushMsg(Conf.Language(35), 60*1000*10)
+	util.PushMsg(Conf.Language(35), 7*1000)
 	WaitForWritingFiles()
 
 	if err := sql.InitDatabase(true); nil != err {

@@ -867,7 +867,8 @@
   "_taskAction": {
     "task.repo.checkout": "执行从快照中检出",
     "task.database.index.full": "执行重建索引",
-    "task.database.index": "执行数据库索引队列",
+    "task.database.index": "执行数据库索引",
+    "task.database.index.commit": "执行数据库索引提交",
     "task.database.index.ref": "执行数据库索引引用",
     "task.database.index.fix": "执行数据库索引订正",
     "task.ocr.image": "执行图片 OCR 提取文本",

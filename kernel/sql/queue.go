@@ -50,7 +50,7 @@ type dbQueueOperation struct {
 func AutoFlushTx() {
 	for {
 		time.Sleep(util.SQLFlushInterval)
-		task.PrependTask(task.DatabaseIndex, FlushQueue)
+		task.PrependTask(task.DatabaseIndexCommit, FlushQueue)
 	}
 }
 

@@ -867,7 +867,8 @@
   "_taskAction": {
     "task.repo.checkout": "Execute checkout from snapshot",
     "task.database.index.full": "Execute rebuild index",
-    "task.database.index": "Execute database index queue",
+    "task.database.index": "Execute database index",
+    "task.database.index.commit": "Execute database index commit",
     "task.database.index.ref": "Execute database index reference",
     "task.database.index.fix": "Execute database index fix",
     "task.ocr.image": "Execute image OCR to extract text",

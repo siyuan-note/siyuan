@@ -203,7 +203,7 @@ func init() {
 			return
 		}
 
-		current := context["current"]
+		current := context["current"].(int) + 1
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
 		util.SetBootDetails(msg)

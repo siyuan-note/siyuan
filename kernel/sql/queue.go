@@ -103,7 +103,8 @@ func FlushQueue() {
 	}
 
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	for _, op := range ops {
+	execOps := 0
+	for i, op := range ops {
 		if util.IsExiting {
 			break
 		}
@@ -131,16 +132,36 @@ func FlushQueue() {
 			err = upsertRefs(tx, op.upsertTree)
 		default:
 			logging.LogErrorf("unknown operation [%s]", op.action)
+			break
 		}
 
+		op.renameTree = nil
+		op.upsertTree = nil
+
+		execOps++
 		if nil != err {
 			logging.LogErrorf("queue operation failed: %s", err)
 			break
 		}
+
+		if 0 < i && 0 == i%64 {
+			if err = commitTx(tx); nil != err {
+				logging.LogErrorf("commit tx failed: %s", err)
+				break
+			}
+
+			execOps = 0
+			tx, err = beginTx()
+			if nil != err {
+				break
+			}
+		}
 	}
 
-	if err = commitTx(tx); nil != err {
-		logging.LogErrorf("commit tx failed: %s", err)
+	if 0 < execOps {
+		if err = commitTx(tx); nil != err {
+			logging.LogErrorf("commit tx failed: %s", err)
+		}
 	}
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 5000 < elapsed {

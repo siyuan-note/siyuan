@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"os"
 	"path"
 	"path/filepath"
@@ -38,7 +39,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -1303,6 +1303,13 @@ func autoFixIndex() {
 			}
 
 			reindexTreeByPath(box.ID, p, i, size)
+			if util.IsExiting {
+				break
+			}
+		}
+
+		if util.IsExiting {
+			break
 		}
 	}
 
@@ -1347,6 +1354,10 @@ func autoFixIndex() {
 		logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
 		sql.RemoveTreeQueue(root.Box, rootID)
 		reindexTree(rootID, i, size)
+
+		if util.IsExiting {
+			break
+		}
 	}
 
 	util.PushStatusBar(Conf.Language(185))
@@ -1357,6 +1368,10 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string, bl
 	size := len(rootUpdatedMap)
 	for rootID, updated := range rootUpdatedMap {
 		i++
+
+		if util.IsExiting {
+			break
+		}
 
 		rootUpdated := dbRootUpdatedMap[rootID]
 		if "" == rootUpdated {
@@ -1378,12 +1393,20 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string, bl
 			reindexTree(rootID, i, size)
 			continue
 		}
+
+		if util.IsExiting {
+			break
+		}
 	}
 
 	for rootID, _ := range dbRootUpdatedMap {
 		if _, ok := rootUpdatedMap[rootID]; !ok {
 			logging.LogWarnf("tree [%s] is not in block tree, remove it from [%s]", rootID, blocksTable)
 			sql.DeleteTree(blocksTable, rootID)
+		}
+
+		if util.IsExiting {
+			break
 		}
 	}
 }

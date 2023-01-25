@@ -94,12 +94,12 @@ func docTitleImgAsset(root *ast.Node) *Asset {
 
 func DeleteAssetsByHashes(hashes []string) {
 	sqlStmt := "DELETE FROM assets WHERE hash IN ('" + strings.Join(hashes, "','") + "') OR hash = ''"
-	tx, err := BeginTx()
+	tx, err := beginTx()
 	if nil != err {
 		return
 	}
 	execStmtTx(tx, sqlStmt)
-	CommitTx(tx)
+	commitTx(tx)
 }
 
 func QueryAssetByHash(hash string) (ret *Asset) {

@@ -29,7 +29,6 @@ var (
 	taskQueue       []*Task
 	taskQueueStatus int
 	queueLock       = sync.Mutex{}
-	taskLock        = sync.Mutex{}
 )
 
 const (
@@ -53,7 +52,6 @@ func PrependTask(action string, handler interface{}, args ...interface{}) {
 		return
 	}
 
-	cancelTask(action)
 	taskQueue = append([]*Task{newTask(action, handler, args...)}, taskQueue...)
 }
 
@@ -66,7 +64,6 @@ func AppendTask(action string, handler interface{}, args ...interface{}) {
 		return
 	}
 
-	cancelTask(action)
 	taskQueue = append(taskQueue, newTask(action, handler, args...))
 }
 
@@ -74,10 +71,6 @@ func CancelTask(actions ...string) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
 
-	cancelTask(actions...)
-}
-
-func cancelTask(actions ...string) {
 	for i := len(taskQueue) - 1; i >= 0; i-- {
 		task := taskQueue[i]
 		for _, action := range actions {
@@ -99,10 +92,10 @@ func newTask(action string, handler interface{}, args ...interface{}) *Task {
 }
 
 const (
-	CloudSync               = "task.cloud.sync"                // 数据同步
 	RepoCheckout            = "task.repo.checkout"             // 从快照中检出
 	DatabaseIndexFull       = "task.database.index.full"       // 重建索引
-	DatabaseIndex           = "task.database.index"            // 数据库索引队列
+	DatabaseIndex           = "task.database.index"            // 数据库索引
+	DatabaseIndexCommit     = "task.database.index.commit"     // 数据库索引提交
 	DatabaseIndexRef        = "task.database.index.ref"        // 数据库索引引用
 	DatabaseIndexFix        = "task.database.index.fix"        // 数据库索引订正
 	OCRImage                = "task.ocr.image"                 // 图片 OCR 提取文本
@@ -121,8 +114,15 @@ func StatusLoop() {
 				continue
 			}
 
+			actionLangs := util.TaskActionLangs[util.Lang]
+			action := task.Action
+			if nil != actionLangs {
+				if label := actionLangs[task.Action]; nil != label {
+					action = label.(string)
+				}
+			}
 			item := map[string]interface{}{
-				"action": task.Action,
+				"action": action,
 			}
 			items = append(items, item)
 		}
@@ -136,6 +136,8 @@ func StatusLoop() {
 		}
 	}
 }
+
+var taskWaitGroup = sync.WaitGroup{}
 
 func Loop() {
 	for {
@@ -154,17 +156,9 @@ func Loop() {
 			break
 		}
 
-		execTask(task)
-	}
-}
-
-func CloseWait() {
-	taskQueueStatus = QueueStatusClosing
-	for {
-		time.Sleep(10 * time.Millisecond)
-		if 1 > len(taskQueue) {
-			break
-		}
+		taskWaitGroup.Add(1)
+		go execTask(task)
+		taskWaitGroup.Wait()
 	}
 }
 
@@ -189,8 +183,6 @@ func popTask() (ret *Task) {
 }
 
 func execTask(task *Task) {
-	taskLock.Lock()
-	defer taskLock.Unlock()
 	defer logging.Recover()
 
 	args := make([]reflect.Value, len(task.Args))
@@ -201,5 +193,7 @@ func execTask(task *Task) {
 			args[i] = reflect.ValueOf(v)
 		}
 	}
+
 	task.Handler.Call(args)
+	taskWaitGroup.Done()
 }

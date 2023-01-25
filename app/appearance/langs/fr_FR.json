@@ -864,6 +864,17 @@
     "xy": "%d ans %s",
     "max": "un bon moment %s"
   },
+  "_taskAction": {
+    "task.repo.checkout": "Effectuer le paiement à partir d'un instantané",
+    "task.database.index.full": "Exécuter l'index de reconstruction",
+    "task.database.index": "Effectuer l'indexation de la base de données",
+    "task.database.index.commit": "Effectuer la validation de l'index de la base de données",
+    "task.database.index.ref": "Exécuter la référence d'index de la base de données",
+    "task.database.index.fix": "Effectuer la correction de l'index de la base de données",
+    "task.ocr.image": "Exécute l'OCR d'image pour extraire le texte",
+    "task.history.generateDoc": "Exécuter l'historique de GenerateDoc",
+    "task.database.index.embedBlock": "Exécuter le bloc d'intégration d'index de base de données"
+  },
   "_trayMenu": {
     "showWindow": "Afficher la fenêtre principale",
     "hideWindow": "Masquer la fenêtre principale",

@@ -104,3 +104,9 @@ const (
 	// SQLFlushInterval 为数据库事务队列写入间隔。
 	SQLFlushInterval = 3000 * time.Millisecond
 )
+
+var (
+	Langs           = map[string]map[int]string{}
+	TimeLangs       = map[string]map[string]interface{}{}
+	TaskActionLangs = map[string]map[string]interface{}{}
+)

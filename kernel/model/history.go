@@ -19,6 +19,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"io/fs"
 	"math"
 	"os"
@@ -38,7 +39,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -524,11 +524,10 @@ func clearOutdatedHistoryDir(historyDir string) {
 		p := strings.TrimPrefix(dir, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
 		if txErr = sql.DeleteHistoriesByPathPrefix(tx, dir); nil != txErr {
-			sql.RollbackTx(tx)
 			logging.LogErrorf("delete history [%s] failed: %s", dir, txErr)
 			return
 		}
-		if txErr = sql.CommitTx(tx); nil != txErr {
+		if txErr = sql.CommitHistoryTx(tx); nil != txErr {
 			logging.LogErrorf("commit history tx failed: %s", txErr)
 			return
 		}
@@ -683,10 +682,9 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	}
 	if err := sql.InsertHistories(tx, histories); nil != err {
 		logging.LogErrorf("insert histories failed: %s", err)
-		sql.RollbackTx(tx)
 		return
 	}
-	if err := sql.CommitTx(tx); nil != err {
+	if err := sql.CommitHistoryTx(tx); nil != err {
 		logging.LogErrorf("commit transaction failed: %s", err)
 		return
 	}

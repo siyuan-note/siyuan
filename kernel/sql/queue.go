@@ -50,7 +50,7 @@ type dbQueueOperation struct {
 func AutoFlushTx() {
 	for {
 		time.Sleep(util.SQLFlushInterval)
-		task.PrependTask(task.DatabaseIndex, FlushQueue)
+		task.PrependTask(task.DatabaseIndexCommit, FlushQueue)
 	}
 }
 
@@ -97,43 +97,69 @@ func FlushQueue() {
 	txLock.Lock()
 	defer txLock.Unlock()
 	start := time.Now()
-	tx, err := BeginTx()
+	tx, err := beginTx()
 	if nil != err {
 		return
 	}
 
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	for _, op := range ops {
+	execOps := 0
+	for i, op := range ops {
 		if util.IsExiting {
 			break
 		}
 
 		switch op.action {
 		case "upsert":
-			tree := op.upsertTree
-			if err = upsertTree(tx, tree, context); nil != err {
-				logging.LogErrorf("upsert tree [%s] into database failed: %s", tree.Box+tree.Path, err)
-			}
+			err = upsertTree(tx, op.upsertTree, context)
 		case "delete":
-			batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
+			err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 		case "delete_id":
-			DeleteByRootID(tx, op.removeTreeID)
+			err = deleteByRootID(tx, op.removeTreeID)
 		case "rename":
-			batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTreeOldHPath, op.renameTree.HPath)
-			updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)
+			err = batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTreeOldHPath, op.renameTree.HPath)
+			if nil != err {
+				break
+			}
+			err = updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)
 		case "delete_box":
-			DeleteByBoxTx(tx, op.box)
+			err = deleteByBoxTx(tx, op.box)
 		case "delete_box_refs":
-			DeleteRefsByBoxTx(tx, op.box)
+			err = deleteRefsByBoxTx(tx, op.box)
 		case "insert_refs":
-			InsertRefs(tx, op.upsertTree)
+			err = insertRefs(tx, op.upsertTree)
 		case "update_refs":
-			UpsertRefs(tx, op.upsertTree)
+			err = upsertRefs(tx, op.upsertTree)
 		default:
 			logging.LogErrorf("unknown operation [%s]", op.action)
+			break
+		}
+
+		execOps++
+		if nil != err {
+			logging.LogErrorf("queue operation failed: %s", err)
+			break
+		}
+
+		if 0 < i && 0 == i%64 {
+			if err = commitTx(tx); nil != err {
+				logging.LogErrorf("commit tx failed: %s", err)
+				break
+			}
+
+			execOps = 0
+			tx, err = beginTx()
+			if nil != err {
+				break
+			}
 		}
 	}
-	CommitTx(tx)
+
+	if 0 < execOps {
+		if err = commitTx(tx); nil != err {
+			logging.LogErrorf("commit tx failed: %s", err)
+		}
+	}
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 5000 < elapsed {
 		logging.LogInfof("op tx [%dms]", elapsed)

@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"math"
 	"os"
 	"path"
@@ -43,7 +44,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -97,7 +97,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 }
 
 func HumanizeTime(then time.Time) string {
-	labels := timeLangs[Conf.Lang]
+	labels := util.TimeLangs[Conf.Lang]
 
 	defaultMagnitudes := []humanize.RelTimeMagnitude{
 		{time.Second, labels["now"].(string), time.Second},

@@ -18,6 +18,7 @@ package model
 
 import (
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"strings"
 	"time"
 
@@ -29,7 +30,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )

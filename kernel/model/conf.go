@@ -38,7 +38,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/text/language"
@@ -106,7 +105,7 @@ func InitConf() {
 
 			if userLang, err := locale.Detect(); nil == err {
 				var supportLangs []language.Tag
-				for lang := range langs {
+				for lang := range util.Langs {
 					if tag, err := language.Parse(lang); nil == err {
 						supportLangs = append(supportLangs, tag)
 					} else {
@@ -126,6 +125,7 @@ func InitConf() {
 				Conf.Lang = util.Lang
 			}
 		}
+		util.Lang = Conf.Lang
 	}
 
 	Conf.Langs = loadLangs()
@@ -141,6 +141,7 @@ func InitConf() {
 	}
 	if !langOK {
 		Conf.Lang = "en_US"
+		util.Lang = Conf.Lang
 	}
 	Conf.Appearance.Lang = Conf.Lang
 	if nil == Conf.UILayout {
@@ -322,9 +323,6 @@ func InitConf() {
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 }
 
-var langs = map[string]map[int]string{}
-var timeLangs = map[string]map[string]interface{}{}
-
 func initLang() {
 	p := filepath.Join(util.WorkingDir, "appearance", "langs")
 	dir, err := os.Open(p)
@@ -364,14 +362,15 @@ func initLang() {
 		}
 		kernelMap[-1] = label
 		name := langName[:strings.LastIndex(langName, ".")]
-		langs[name] = kernelMap
+		util.Langs[name] = kernelMap
 
-		timeLangs[name] = langMap["_time"].(map[string]interface{})
+		util.TimeLangs[name] = langMap["_time"].(map[string]interface{})
+		util.TaskActionLangs[name] = langMap["_taskAction"].(map[string]interface{})
 	}
 }
 
 func loadLangs() (ret []*conf.Lang) {
-	for name, langMap := range langs {
+	for name, langMap := range util.Langs {
 		lang := &conf.Lang{Label: langMap[-1], Name: name}
 		ret = append(ret, lang)
 	}
@@ -422,7 +421,6 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		}
 	}
 
-	task.CloseWait()
 	Conf.Close()
 	sql.CloseDatabase()
 	treenode.SaveBlockTree(false)
@@ -569,11 +567,11 @@ func (conf *AppConf) GetClosedBoxes() (ret []*Box) {
 }
 
 func (conf *AppConf) Language(num int) (ret string) {
-	ret = langs[conf.Lang][num]
+	ret = util.Langs[conf.Lang][num]
 	if "" != ret {
 		return
 	}
-	ret = langs["en_US"][num]
+	ret = util.Langs["en_US"][num]
 	return
 }
 

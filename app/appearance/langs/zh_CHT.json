@@ -873,7 +873,8 @@
     "task.database.index.fix": "執行數據庫索引訂正",
     "task.ocr.image": "執行圖片 OCR 提取文本",
     "task.history.generateDoc": "執行生成文件歷史",
-    "task.database.index.embedBlock": "執行數據庫索引嵌入塊"
+    "task.database.index.embedBlock": "執行數據庫索引嵌入塊",
+    "task.reload.ui": "執行重載界面"
   },
   "_trayMenu": {
     "showWindow": "顯示主窗口",
@@ -944,7 +945,7 @@
     "55": "已完成索引 [%d] 篇文檔的引用關係",
     "56": "正在重建索引，請等重建索引完畢後再嘗試打開",
     "57": "創建臨時金鑰失敗",
-    "58": "重建索引完畢，稍後將自動重新整理介面...",
+    "58": "TODO",
     "59": "設置同步忽略列表失敗",
     "60": "獲取更新包失敗：%s",
     "61": "⬆️ 新版本安裝包已經準備就緒，是否現在安裝新版本？",

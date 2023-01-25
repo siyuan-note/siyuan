@@ -873,7 +873,8 @@
     "task.database.index.fix": "执行数据库索引订正",
     "task.ocr.image": "执行图片 OCR 提取文本",
     "task.history.generateDoc": "执行生成文件历史",
-    "task.database.index.embedBlock": "执行数据库索引嵌入块"
+    "task.database.index.embedBlock": "执行数据库索引嵌入块",
+    "task.reload.ui": "执行重载界面"
   },
   "_trayMenu": {
     "showWindow": "显示主窗口",
@@ -944,7 +945,7 @@
     "55": "已完成索引 [%d] 篇文档的引用关系",
     "56": "正在重建索引，请等重建索引完毕后再尝试打开",
     "57": "创建临时密钥失败",
-    "58": "重建索引完毕，稍后将自动刷新界面...",
+    "58": "TODO",
     "59": "设置同步忽略列表失败",
     "60": "获取更新包失败：%s",
     "61": "⬆️ 新版本安装包已经准备就绪，是否现在安装新版本？",

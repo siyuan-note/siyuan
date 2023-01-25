@@ -114,7 +114,9 @@ func FlushQueue() {
 			return
 		}
 
-		if err = execOp(op, tx, i, total, context); nil != err {
+		context["current"] = i
+		context["total"] = total
+		if err = execOp(op, tx, context); nil != err {
 			logging.LogErrorf("queue operation failed: %s", err)
 			return
 		}
@@ -131,12 +133,12 @@ func FlushQueue() {
 	}
 }
 
-func execOp(op *dbQueueOperation, tx *sql.Tx, current, total int, context map[string]interface{}) (err error) {
+func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (err error) {
 	switch op.action {
 	case "index":
-		err = indexTree(tx, op.box, op.indexPath, current, total, context)
+		err = indexTree(tx, op.box, op.indexPath, context)
 	case "upsert":
-		err = upsertTree(tx, op.upsertTree, current, total, context)
+		err = upsertTree(tx, op.upsertTree, context)
 	case "delete":
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 	case "delete_id":

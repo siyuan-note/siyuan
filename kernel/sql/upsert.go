@@ -51,7 +51,7 @@ const (
 	FileAnnotationRefsPlaceholder = "(?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 
-func insertBlocks(tx *sql.Tx, blocks []*Block, current, total int, context map[string]interface{}) (err error) {
+func insertBlocks(tx *sql.Tx, blocks []*Block, context map[string]interface{}) (err error) {
 	if 1 > len(blocks) {
 		return
 	}
@@ -63,20 +63,20 @@ func insertBlocks(tx *sql.Tx, blocks []*Block, current, total int, context map[s
 			continue
 		}
 
-		if err = insertBlocks0(tx, bulk, current, total, context); nil != err {
+		if err = insertBlocks0(tx, bulk, context); nil != err {
 			return
 		}
 		bulk = []*Block{}
 	}
 	if 0 < len(bulk) {
-		if err = insertBlocks0(tx, bulk, current, total, context); nil != err {
+		if err = insertBlocks0(tx, bulk, context); nil != err {
 			return
 		}
 	}
 	return
 }
 
-func insertBlocks0(tx *sql.Tx, bulk []*Block, current, total int, context map[string]interface{}) (err error) {
+func insertBlocks0(tx *sql.Tx, bulk []*Block, context map[string]interface{}) (err error) {
 	valueStrings := make([]string, 0, len(bulk))
 	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(BlocksPlaceholder, "?"))
 	hashBuf := bytes.Buffer{}
@@ -129,7 +129,7 @@ func insertBlocks0(tx *sql.Tx, bulk []*Block, current, total int, context map[st
 	}
 	hashBuf.WriteString("fts")
 	evtHash = fmt.Sprintf("%x", sha256.Sum256(hashBuf.Bytes()))[:7]
-	eventbus.Publish(eventbus.EvtSQLInsertBlocksFTS, context, current, total, len(bulk), evtHash)
+	eventbus.Publish(eventbus.EvtSQLInsertBlocksFTS, context, len(bulk), evtHash)
 	return
 }
 
@@ -393,24 +393,24 @@ func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 	return err
 }
 
-func indexTree(tx *sql.Tx, box, p string, current, total int, context map[string]interface{}) (err error) {
+func indexTree(tx *sql.Tx, box, p string, context map[string]interface{}) (err error) {
 	tree, err := filesys.LoadTree(box, p, luteEngine)
 	if nil != err {
 		return
 	}
 
-	err = insertTree(tx, tree, current, total, context)
+	err = insertTree(tx, tree, context)
 	return
 }
 
-func insertTree(tx *sql.Tx, tree *parse.Tree, current, total int, context map[string]interface{}) (err error) {
+func insertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	refs, fileAnnotationRefs := refsFromTree(tree)
-	err = insertTree0(tx, tree, current, total, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)
+	err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)
 	return
 }
 
-func upsertTree(tx *sql.Tx, tree *parse.Tree, current, total int, context map[string]interface{}) (err error) {
+func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
 	oldBlockHashes := queryBlockHashes(tree.ID)
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	newBlockHashes := map[string]string{}
@@ -460,16 +460,16 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, current, total int, context map[st
 	}
 
 	refs, fileAnnotationRefs := refsFromTree(tree)
-	if err = insertTree0(tx, tree, current, total, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs); nil != err {
+	if err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs); nil != err {
 		return
 	}
 	return err
 }
 
-func insertTree0(tx *sql.Tx, tree *parse.Tree, current, total int, context map[string]interface{},
+func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]interface{},
 	blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute,
 	refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) (err error) {
-	if err = insertBlocks(tx, blocks, current, total, context); nil != err {
+	if err = insertBlocks(tx, blocks, context); nil != err {
 		return
 	}
 

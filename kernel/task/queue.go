@@ -109,6 +109,7 @@ const (
 	OCRImage                = "task.ocr.image"                 // 图片 OCR 提取文本
 	HistoryGenerateDoc      = "task.history.generateDoc"       // 生成文件历史
 	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块
+	ReloadUI                = "task.reload.ui"                 // 重载 UI
 )
 
 func ContainIndexTask() bool {

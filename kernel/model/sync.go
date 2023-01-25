@@ -251,11 +251,6 @@ func incReindex(upserts, removes []string) {
 		treenode.IndexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 	}
-
-	util.PushStatusBar(Conf.Language(58))
-	if needPushRemoveProgress || needPushUpsertProgress {
-		util.PushEndlessProgress(Conf.Language(58))
-	}
 }
 
 func SetCloudSyncDir(name string) {

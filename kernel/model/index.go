@@ -197,16 +197,14 @@ func init() {
 	//	util.SetBootDetails(msg)
 	//	util.ContextPushMsg(context, msg)
 	//})
-	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, current, total, blockCount int, hash string) {
+	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
 			return
 		}
 
-		if (1 > current && 1 == total) || current == total-1 {
-			current = total
-		}
-
+		current := context["current"]
+		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)

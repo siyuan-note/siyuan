@@ -243,6 +243,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	FullReindex()
 	IncSync()
+	ReloadUI()
 	return nil
 }
 
@@ -298,6 +299,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 
 	FullReindex()
 	IncSync()
+	ReloadUI()
 	return nil
 }
 

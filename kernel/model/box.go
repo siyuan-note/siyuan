@@ -497,6 +497,10 @@ func genTreeID(tree *parse.Tree) {
 	return
 }
 
+func ReloadUI() {
+	task.AppendTask(task.ReloadUI, util.ReloadUI)
+}
+
 func FullReindex() {
 	task.PrependTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
@@ -518,12 +522,6 @@ func fullReindex() {
 	}
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
-
-	util.PushMsg(Conf.Language(58), 7000)
-	go func() {
-		time.Sleep(1 * time.Second)
-		util.ReloadUI()
-	}()
 }
 
 func ChangeBoxSort(boxIDs []string) {

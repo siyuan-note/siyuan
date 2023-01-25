@@ -71,19 +71,18 @@ export class BlockPanel {
             if (!iconsElement) {
                 x = event.clientX - this.element.clientWidth;
                 y = event.clientY - this.element.clientHeight;
-                iconsElement = hasClosestByClassName(event.target, "block__nwse");
-                type = "nwse-resize";
+                iconsElement = hasClosestByClassName(event.target, "block__rd") ||
+                    hasClosestByClassName(event.target, "block__r")||
+                    hasClosestByClassName(event.target, "block__rt")||
+                    hasClosestByClassName(event.target, "block__d")||
+                    hasClosestByClassName(event.target, "block__l")||
+                    hasClosestByClassName(event.target, "block__ld")||
+                    hasClosestByClassName(event.target, "block__lt")||
+                    hasClosestByClassName(event.target, "block__t");
                 if (!iconsElement) {
-                    iconsElement = hasClosestByClassName(event.target, "block__ns");
-                    type = "ns-resize";
-                    if (!iconsElement) {
-                        iconsElement = hasClosestByClassName(event.target, "block__ew");
-                        type = "ew-resize";
-                        if (!iconsElement) {
-                            return;
-                        }
-                    }
+                    return;
                 }
+                type = iconsElement.className;
             }
             const documentSelf = document;
             this.element.style.userSelect = "none";
@@ -106,10 +105,10 @@ export class BlockPanel {
                     this.element.style.left = Math.max(positionX, 0) + "px";
                     this.element.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
                 } else {
-                    if (positionX > 200 && positionX < window.innerWidth && (type === "nwse-resize" || type === "ew-resize")) {
+                    if (positionX > 200 && positionX < window.innerWidth && (type === "block__rd" || type === "block__r")) {
                         this.element.style.width = positionX + "px";
                     }
-                    if (positionY > 65 && positionY < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT && (type === "nwse-resize" || type === "ns-resize")) {
+                    if (positionY > 65 && positionY < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT && (type === "block__rd" || type === "block__d")) {
                         this.element.style.height = positionY + "px";
                         this.element.style.maxHeight = "";
                     }
@@ -262,7 +261,7 @@ export class BlockPanel {
             });
         }
         if (html) {
-            html += '</div><div class="block__nwse"></div><div class="block__ew"></div><div class="block__ns"></div>';
+            html += '</div><div class="block__rd"></div><div class="block__ld"></div><div class="block__lt"></div><div class="block__rt"></div><div class="block__r"></div><div class="block__d"></div><div class="block__t"></div><div class="block__l"></div>';
         }
         this.element.innerHTML = html;
         const observer = new IntersectionObserver((e) => {

@@ -33,33 +33,78 @@
           }
         }
 
-        &__nwse,
-        &__ew,
-        &__ns {
+        &__rd,
+        &__ld,
+        &__lt,
+        &__rt,
+        &__r,
+        &__l,
+        &__t,
+        &__d {
           position: absolute;
         }
 
-        &__nwse {
+        &__rd {
           height: 16px;
-          width: 8px;
+          width: 16px;
           cursor: nwse-resize;
           right: -8px;
           bottom: -8px;
         }
 
-        &__ns {
-          height: 8px;
-          cursor: ns-resize;
-          left: 0;
-          right: 0;
+        &__lt {
+          height: 16px;
+          width: 16px;
+          cursor: nwse-resize;
+          left: -8px;
+          top: -8px;
+        }
+
+        &__ld {
+          height: 16px;
+          width: 16px;
+          cursor: nesw-resize;
+          left: -8px;
           bottom: -8px;
         }
 
-        &__ew {
+        &__rt {
+          height: 16px;
+          width: 16px;
+          cursor: nesw-resize;
+          top: -8px;
+          right: -8px;
+        }
+
+        &__d {
+          height: 8px;
+          cursor: ns-resize;
+          left: 8px;
+          right: 8px;
+          bottom: -8px;
+        }
+
+        &__t {
+          height: 8px;
+          cursor: ns-resize;
+          left: 8px;
+          right: 8px;
+          top: -8px;
+        }
+
+        &__r {
           width: 8px;
           cursor: ew-resize;
-          top: 0;
+          top: 8px;
           right: -8px;
+          bottom: 8px;
+        }
+
+        &__l {
+          width: 8px;
+          cursor: ew-resize;
+          top: 8px;
+          left: -8px;
           bottom: 8px;
         }
       }

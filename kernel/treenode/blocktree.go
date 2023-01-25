@@ -45,6 +45,7 @@ type BlockTree struct {
 	Path     string // 文档数据路径
 	HPath    string // 文档可读路径
 	Updated  string // 更新时间
+	Type     string // 类型
 }
 
 func GetRootUpdated() (ret map[string]string) {
@@ -206,7 +207,7 @@ func SetBlockTreePath(tree *parse.Tree) {
 
 	for _, b := range blockTrees {
 		if b.RootID == tree.ID {
-			b.BoxID, b.Path, b.HPath, b.Updated = tree.Box, tree.Path, tree.HPath, tree.Root.IALAttr("updated")
+			b.BoxID, b.Path, b.HPath, b.Updated, b.Type = tree.Box, tree.Path, tree.HPath, tree.Root.IALAttr("updated"), TypeAbbr(ast.NodeDocument.String())
 		}
 	}
 	blockTreesChanged = time.Now()
@@ -288,7 +289,7 @@ func RemoveBlockTree(id string) {
 	blockTreesChanged = time.Now()
 }
 
-func ReindexBlockTree(tree *parse.Tree) {
+func IndexBlockTree(tree *parse.Tree) {
 	blockTreesLock.Lock()
 	defer blockTreesLock.Unlock()
 
@@ -303,7 +304,7 @@ func ReindexBlockTree(tree *parse.Tree) {
 		if "" == n.ID {
 			return ast.WalkContinue
 		}
-		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: tree.Root.IALAttr("updated")}
+		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: tree.Root.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
 		return ast.WalkContinue
 	})
 	blockTreesChanged = time.Now()

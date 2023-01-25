@@ -112,7 +112,7 @@ func index(boxID string) {
 		}
 
 		cache.PutDocIAL(file.path, docIAL)
-		treenode.ReindexBlockTree(tree)
+		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(box.ID, file.path)
 
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))

@@ -1093,7 +1093,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 
 func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 	tx.trees[tree.ID] = tree
-	treenode.ReindexBlockTree(tree)
+	treenode.IndexBlockTree(tree)
 	return
 }
 
@@ -1446,7 +1446,7 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 		tree.Root.SetIALAttr("updated", updated)
 		indexWriteJSONQueue(tree)
 	} else {
-		treenode.ReindexBlockTree(tree)
+		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(tree.Box, tree.Path)
 	}
 

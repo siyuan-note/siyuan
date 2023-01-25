@@ -874,12 +874,12 @@ func writeJSONQueueWithoutChangeTime(tree *parse.Tree) (err error) {
 }
 
 func indexWriteJSONQueue(tree *parse.Tree) (err error) {
-	treenode.ReindexBlockTree(tree)
+	treenode.IndexBlockTree(tree)
 	return writeJSONQueue(tree)
 }
 
 func indexWriteJSONQueueWithoutChangeTime(tree *parse.Tree) (err error) {
-	treenode.ReindexBlockTree(tree)
+	treenode.IndexBlockTree(tree)
 	return writeJSONQueueWithoutChangeTime(tree)
 }
 
@@ -888,7 +888,7 @@ func renameWriteJSONQueue(tree *parse.Tree, oldHPath string) (err error) {
 		return
 	}
 	sql.RenameTreeQueue(tree, oldHPath)
-	treenode.ReindexBlockTree(tree)
+	treenode.IndexBlockTree(tree)
 	return
 }
 

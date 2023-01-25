@@ -151,7 +151,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		newP := parse.NewParagraph()
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
-		treenode.ReindexBlockTree(tree)
+		treenode.IndexBlockTree(tree)
 	}
 
 	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)

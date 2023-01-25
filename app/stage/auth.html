@@ -529,7 +529,7 @@
   }
 
   // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-  new WebSocket(window.location.protocol === 'https:' ? 'wss' : 'ws' + '://' + window.location.host + '/ws?app=siyuan&id=auth')
+  new WebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws?app=siyuan&id=auth`)
 </script>
 </body>
 </html>

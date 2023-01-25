@@ -19,11 +19,13 @@ package model
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -393,10 +395,16 @@ func getBlock(id string) (ret *Block, err error) {
 
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
-		if indexing {
+		if task.ContainIndexTask() {
 			err = ErrIndexing
+			return
 		}
-		return
+
+		time.Sleep(1 * time.Second)
+		tree, err = loadTreeByBlockID(id)
+		if nil != err {
+			return
+		}
 	}
 
 	node := treenode.GetNodeInTree(tree, id)

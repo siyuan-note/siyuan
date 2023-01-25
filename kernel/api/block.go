@@ -175,8 +175,8 @@ func checkBlockExist(c *gin.Context) {
 		return
 	}
 	if errors.Is(err, model.ErrIndexing) {
-		ret.Code = 3
-		ret.Data = id
+		ret.Code = 0
+		ret.Data = false
 		return
 	}
 	ret.Data = nil != b
@@ -384,7 +384,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 	if errors.Is(err, model.ErrIndexing) {
 		ret.Code = 3
-		ret.Data = id
+		ret.Msg = model.Conf.Language(56)
 		return
 	}
 	if nil == block {
@@ -415,7 +415,7 @@ func getBlockInfo(c *gin.Context) {
 	}
 	if errors.Is(err, model.ErrIndexing) {
 		ret.Code = 3
-		ret.Data = id
+		ret.Data = model.Conf.Language(56)
 		return
 	}
 	rootTitle := root.IAL["title"]

@@ -1447,7 +1447,7 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 		indexWriteJSONQueue(tree)
 	} else {
 		treenode.ReindexBlockTree(tree)
-		sql.UpsertTreeQueue(tree)
+		sql.IndexTreeQueue(tree.Box, tree.Path)
 	}
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, html.EscapeHTMLStr(path.Base(tree.HPath))))
 }

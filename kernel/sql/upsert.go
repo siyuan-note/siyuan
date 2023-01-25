@@ -21,6 +21,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"strings"
 
 	"github.com/88250/lute/parse"
@@ -392,6 +393,23 @@ func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 	return err
 }
 
+func indexTree(tx *sql.Tx, box, p string, context map[string]interface{}) (err error) {
+	tree, err := filesys.LoadTree(box, p, luteEngine)
+	if nil != err {
+		return
+	}
+
+	err = insertTree(tx, tree, context)
+	return
+}
+
+func insertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
+	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
+	refs, fileAnnotationRefs := refsFromTree(tree)
+	err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)
+	return
+}
+
 func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
 	oldBlockHashes := queryBlockHashes(tree.ID)
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
@@ -420,7 +438,10 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 	for _, b := range blocks {
 		toRemoves = append(toRemoves, b.ID)
 	}
-	deleteBlocksByIDs(tx, toRemoves)
+
+	if err = deleteBlocksByIDs(tx, toRemoves); nil != err {
+		return
+	}
 
 	if err = deleteSpansByPathTx(tx, tree.Box, tree.Path); nil != err {
 		return
@@ -438,11 +459,20 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 		return
 	}
 
+	refs, fileAnnotationRefs := refsFromTree(tree)
+	if err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs); nil != err {
+		return
+	}
+	return err
+}
+
+func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]interface{},
+	blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute,
+	refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) (err error) {
 	if err = insertBlocks(tx, blocks, context); nil != err {
 		return
 	}
 
-	refs, fileAnnotationRefs := refsFromTree(tree)
 	if err = insertBlockRefs(tx, refs); nil != err {
 		return
 	}
@@ -465,5 +495,5 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 	if err = insertAttributes(tx, attributes); nil != err {
 		return
 	}
-	return err
+	return
 }

@@ -135,9 +135,6 @@ func FlushQueue() {
 			break
 		}
 
-		op.renameTree = nil
-		op.upsertTree = nil
-
 		execOps++
 		if nil != err {
 			logging.LogErrorf("queue operation failed: %s", err)

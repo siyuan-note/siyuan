@@ -197,12 +197,12 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	}
 	refPivot.Unlink()
 
-	treenode.ReindexBlockTree(refTree)
+	treenode.IndexBlockTree(refTree)
 	if err = writeJSONQueue(refTree); nil != err {
 		return
 	}
 	if !sameTree {
-		treenode.ReindexBlockTree(defTree)
+		treenode.IndexBlockTree(defTree)
 		if err = writeJSONQueue(defTree); nil != err {
 			return
 		}
@@ -391,10 +391,11 @@ func getBlock(id string) (ret *Block, err error) {
 		return
 	}
 
-	waitForIndexing()
-
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
+		if indexing {
+			err = ErrIndexing
+		}
 		return
 	}
 

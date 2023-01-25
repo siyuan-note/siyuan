@@ -54,7 +54,7 @@ type dbQueueOperation struct {
 func AutoFlushTx() {
 	for {
 		time.Sleep(util.SQLFlushInterval)
-		task.PrependTask(task.DatabaseIndexCommit, FlushQueue)
+		task.AppendTask(task.DatabaseIndexCommit, FlushQueue)
 	}
 }
 
@@ -121,7 +121,7 @@ func FlushQueue() {
 			return
 		}
 
-		if 0 < i && 0 == execOps%64 {
+		if 0 < i && 0 == execOps%128 {
 			if err = commitTx(tx); nil != err {
 				logging.LogErrorf("commit tx failed: %s", err)
 				return

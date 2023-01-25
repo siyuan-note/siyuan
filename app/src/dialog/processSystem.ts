@@ -187,6 +187,7 @@ export const transactionError = (data: { code: number, data: string }) => {
     });
     btnsElement[1].addEventListener("click", () => {
         fetchPost("/api/filetree/refreshFiletree", {});
+        dialog.destroy();
     });
 };
 

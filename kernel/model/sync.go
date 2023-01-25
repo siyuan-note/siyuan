@@ -253,7 +253,7 @@ func incReindex(upserts, removes []string) {
 		if nil != err0 {
 			continue
 		}
-		treenode.ReindexBlockTree(tree)
+		treenode.IndexBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 	}
 

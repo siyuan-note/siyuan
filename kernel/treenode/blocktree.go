@@ -35,7 +35,7 @@ import (
 
 var blockTrees = map[string]*BlockTree{}
 var blockTreesLock = sync.Mutex{}
-var blockTreesChanged = false
+var blockTreesChanged = time.Time{}
 
 type BlockTree struct {
 	ID       string // 块 ID
@@ -45,6 +45,7 @@ type BlockTree struct {
 	Path     string // 文档数据路径
 	HPath    string // 文档可读路径
 	Updated  string // 更新时间
+	Type     string // 类型
 }
 
 func GetRootUpdated() (ret map[string]string) {
@@ -206,10 +207,10 @@ func SetBlockTreePath(tree *parse.Tree) {
 
 	for _, b := range blockTrees {
 		if b.RootID == tree.ID {
-			b.BoxID, b.Path, b.HPath, b.Updated = tree.Box, tree.Path, tree.HPath, tree.Root.IALAttr("updated")
+			b.BoxID, b.Path, b.HPath, b.Updated, b.Type = tree.Box, tree.Path, tree.HPath, tree.Root.IALAttr("updated"), TypeAbbr(ast.NodeDocument.String())
 		}
 	}
-	blockTreesChanged = true
+	blockTreesChanged = time.Now()
 }
 
 func RemoveBlockTreesByRootID(rootID string) {
@@ -226,7 +227,7 @@ func RemoveBlockTreesByRootID(rootID string) {
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}
-	blockTreesChanged = true
+	blockTreesChanged = time.Now()
 }
 
 func RemoveBlockTreesByPath(path string) {
@@ -243,7 +244,7 @@ func RemoveBlockTreesByPath(path string) {
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}
-	blockTreesChanged = true
+	blockTreesChanged = time.Now()
 }
 
 func RemoveBlockTreesByPathPrefix(pathPrefix string) {
@@ -260,7 +261,7 @@ func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}
-	blockTreesChanged = true
+	blockTreesChanged = time.Now()
 }
 
 func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
@@ -276,7 +277,7 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 	for _, id := range ids {
 		delete(blockTrees, id)
 	}
-	blockTreesChanged = true
+	blockTreesChanged = time.Now()
 	return
 }
 
@@ -285,10 +286,10 @@ func RemoveBlockTree(id string) {
 	defer blockTreesLock.Unlock()
 
 	delete(blockTrees, id)
-	blockTreesChanged = true
+	blockTreesChanged = time.Now()
 }
 
-func ReindexBlockTree(tree *parse.Tree) {
+func IndexBlockTree(tree *parse.Tree) {
 	blockTreesLock.Lock()
 	defer blockTreesLock.Unlock()
 
@@ -303,16 +304,16 @@ func ReindexBlockTree(tree *parse.Tree) {
 		if "" == n.ID {
 			return ast.WalkContinue
 		}
-		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: tree.Root.IALAttr("updated")}
+		blockTrees[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: tree.Root.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
 		return ast.WalkContinue
 	})
-	blockTreesChanged = true
+	blockTreesChanged = time.Now()
 }
 
 func AutoFlushBlockTree() {
 	for {
 		SaveBlockTree(false)
-		time.Sleep(7 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -361,11 +362,14 @@ func InitBlockTree(force bool) {
 }
 
 func SaveBlockTree(force bool) {
-	if !force && !blockTreesChanged {
+	if !force && blockTreesChanged.IsZero() {
 		return
 	}
 
 	start := time.Now()
+	if blockTreesChanged.After(start.Add(-7 * time.Second)) {
+		return
+	}
 
 	blockTreesLock.Lock()
 	data, err := msgpack.Marshal(blockTrees)
@@ -387,5 +391,5 @@ func SaveBlockTree(force bool) {
 		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
 	}
 
-	blockTreesChanged = false
+	blockTreesChanged = time.Time{}
 }

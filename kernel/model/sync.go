@@ -91,7 +91,6 @@ func BootSyncData() {
 }
 
 func SyncData(boot, exit, byHand bool) {
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	syncData(boot, exit, byHand)
 }
 
@@ -158,10 +157,6 @@ func checkSync(boot, exit, byHand bool) bool {
 	}
 
 	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
-		return false
-	}
-
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		return false
 	}
 

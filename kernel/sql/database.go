@@ -785,7 +785,7 @@ func DeleteBlockByIDs(tx *sql.Tx, ids []string) (err error) {
 	return deleteBlocksByIDs(tx, ids)
 }
 
-func DeleteByBoxTx(tx *sql.Tx, box string) (err error) {
+func deleteByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = deleteBlocksByBoxTx(tx, box); nil != err {
 		return
 	}
@@ -798,7 +798,7 @@ func DeleteByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = deleteAttributesByBoxTx(tx, box); nil != err {
 		return
 	}
-	if err = deleteRefsByBoxTx(tx, box); nil != err {
+	if err = deleteBlockRefsByBoxTx(tx, box); nil != err {
 		return
 	}
 	if err = deleteFileAnnotationRefsByBoxTx(tx, box); nil != err {
@@ -914,14 +914,14 @@ func deleteRefsByPathTx(tx *sql.Tx, box, path string) (err error) {
 	return
 }
 
-func DeleteRefsByBoxTx(tx *sql.Tx, box string) (err error) {
+func deleteRefsByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = deleteFileAnnotationRefsByBoxTx(tx, box); nil != err {
 		return
 	}
-	return deleteRefsByBoxTx(tx, box)
+	return deleteBlockRefsByBoxTx(tx, box)
 }
 
-func deleteRefsByBoxTx(tx *sql.Tx, box string) (err error) {
+func deleteBlockRefsByBoxTx(tx *sql.Tx, box string) (err error) {
 	stmt := "DELETE FROM refs WHERE box = ?"
 	err = execStmtTx(tx, stmt, box)
 	return
@@ -945,7 +945,7 @@ func deleteFileAnnotationRefsByBoxTx(tx *sql.Tx, box string) (err error) {
 	return
 }
 
-func DeleteByRootID(tx *sql.Tx, rootID string) (err error) {
+func deleteByRootID(tx *sql.Tx, rootID string) (err error) {
 	stmt := "DELETE FROM blocks WHERE root_id = ?"
 	if err = execStmtTx(tx, stmt, rootID); nil != err {
 		return
@@ -1049,7 +1049,7 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 	return db.Query(query, args...)
 }
 
-func BeginTx() (tx *sql.Tx, err error) {
+func beginTx() (tx *sql.Tx, err error) {
 	if tx, err = db.Begin(); nil != err {
 		logging.LogErrorf("begin tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
@@ -1069,7 +1069,7 @@ func BeginHistoryTx() (tx *sql.Tx, err error) {
 	return
 }
 
-func CommitTx(tx *sql.Tx) (err error) {
+func CommitHistoryTx(tx *sql.Tx) (err error) {
 	if nil == tx {
 		logging.LogErrorf("tx is nil")
 		return errors.New("tx is nil")
@@ -1081,10 +1081,16 @@ func CommitTx(tx *sql.Tx) (err error) {
 	return
 }
 
-func RollbackTx(tx *sql.Tx) {
-	if err := tx.Rollback(); nil != err {
-		logging.LogErrorf("rollback tx failed: %s\n  %s", err, logging.ShortStack())
+func commitTx(tx *sql.Tx) (err error) {
+	if nil == tx {
+		logging.LogErrorf("tx is nil")
+		return errors.New("tx is nil")
 	}
+
+	if err = tx.Commit(); nil != err {
+		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
+	}
+	return
 }
 
 func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err error) {

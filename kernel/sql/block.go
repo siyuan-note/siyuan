@@ -46,27 +46,28 @@ type Block struct {
 	Updated  string
 }
 
-func updateRootContent(tx *sql.Tx, content, updated, id string) {
+func updateRootContent(tx *sql.Tx, content, updated, id string) (err error) {
 	stmt := "UPDATE blocks SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-	if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
+	if err = execStmtTx(tx, stmt, content, content, updated, id); nil != err {
 		return
 	}
 	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-	if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
+	if err = execStmtTx(tx, stmt, content, content, updated, id); nil != err {
 		return
 	}
 	if !caseSensitive {
 		stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-		if err := execStmtTx(tx, stmt, content, content, updated, id); nil != err {
+		if err = execStmtTx(tx, stmt, content, content, updated, id); nil != err {
 			return
 		}
 	}
 	removeBlockCache(id)
 	cache.RemoveBlockIAL(id)
+	return
 }
 
 func UpdateBlockContent(block *Block) {
-	tx, err := BeginTx()
+	tx, err := beginTx()
 	if nil != err {
 		return
 	}
@@ -93,7 +94,7 @@ func UpdateBlockContent(block *Block) {
 }
 
 func DeleteTree(table, rootID string) {
-	tx, err := BeginTx()
+	tx, err := beginTx()
 	if nil != err {
 		return
 	}

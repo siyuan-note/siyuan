@@ -43,15 +43,14 @@ func getDatabaseVer() (ret string) {
 
 func setDatabaseVer() {
 	key := "siyuan_database_ver"
-	tx, err := BeginTx()
+	tx, err := beginTx()
 	if nil != err {
 		return
 	}
 	if err = putStat(tx, key, util.DatabaseVer); nil != err {
-		RollbackTx(tx)
 		return
 	}
-	CommitTx(tx)
+	commitTx(tx)
 }
 
 func putStat(tx *sql.Tx, key, value string) (err error) {

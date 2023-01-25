@@ -37,13 +37,13 @@ type Ref struct {
 	Type             string
 }
 
-func UpsertRefs(tx *sql.Tx, tree *parse.Tree) {
-	if err := deleteRefsByPath(tx, tree.Box, tree.Path); nil != err {
+func upsertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
+	if err = deleteRefsByPath(tx, tree.Box, tree.Path); nil != err {
 		return
 	}
-	if err := deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); nil != err {
 		return
 	}
-	insertRef(tx, tree)
+	err = insertRefs(tx, tree)
 	return
 }

@@ -26,7 +26,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/eventbus"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -34,12 +33,6 @@ var luteEngine = util.NewLute()
 
 func init() {
 	luteEngine.RenderOptions.KramdownBlockIAL = false // 数据库 markdown 字段为标准 md，但是要保留 span block ial
-}
-
-func InsertRefs(tx *sql.Tx, tree *parse.Tree) {
-	if err := insertRef(tx, tree); nil != err {
-		logging.LogErrorf("insert refs tree [%s] into database failed: %s", tree.Box+tree.Path, err)
-	}
 }
 
 const (
@@ -285,7 +278,7 @@ func insertSpans0(tx *sql.Tx, bulk []*Span) (err error) {
 	return
 }
 
-func insertRefs(tx *sql.Tx, refs []*Ref) (err error) {
+func insertBlockRefs(tx *sql.Tx, refs []*Ref) (err error) {
 	if 1 > len(refs) {
 		return
 	}
@@ -388,9 +381,9 @@ func insertFileAnnotationRefs0(tx *sql.Tx, bulk []*FileAnnotationRef) (err error
 	return
 }
 
-func insertRef(tx *sql.Tx, tree *parse.Tree) (err error) {
+func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 	refs, fileAnnotationRefs := refsFromTree(tree)
-	if err = insertRefs(tx, refs); nil != err {
+	if err = insertBlockRefs(tx, refs); nil != err {
 		return
 	}
 	if err = insertFileAnnotationRefs(tx, fileAnnotationRefs); nil != err {
@@ -450,7 +443,7 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 	}
 
 	refs, fileAnnotationRefs := refsFromTree(tree)
-	if err = insertRefs(tx, refs); nil != err {
+	if err = insertBlockRefs(tx, refs); nil != err {
 		return
 	}
 	if err = insertFileAnnotationRefs(tx, fileAnnotationRefs); nil != err {

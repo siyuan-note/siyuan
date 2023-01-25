@@ -366,7 +366,7 @@ func SaveBlockTree(force bool) {
 	}
 
 	start := time.Now()
-	if blockTreesChanged.Before(start.Add(7 * time.Second)) {
+	if blockTreesChanged.After(start.Add(-7 * time.Second)) {
 		return
 	}
 

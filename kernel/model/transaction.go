@@ -1449,5 +1449,8 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 		treenode.ReindexBlockTree(tree)
 		sql.IndexTreeQueue(tree.Box, tree.Path)
 	}
-	util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, html.EscapeHTMLStr(path.Base(tree.HPath))))
+
+	if 0 == i%64 {
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(183), i, size, html.EscapeHTMLStr(path.Base(tree.HPath))))
+	}
 }

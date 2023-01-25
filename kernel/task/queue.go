@@ -52,7 +52,6 @@ func PrependTask(action string, handler interface{}, args ...interface{}) {
 		return
 	}
 
-	cancelTask(action)
 	taskQueue = append([]*Task{newTask(action, handler, args...)}, taskQueue...)
 }
 
@@ -65,7 +64,6 @@ func AppendTask(action string, handler interface{}, args ...interface{}) {
 		return
 	}
 
-	cancelTask(action)
 	taskQueue = append(taskQueue, newTask(action, handler, args...))
 }
 
@@ -73,10 +71,6 @@ func CancelTask(actions ...string) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
 
-	cancelTask(actions...)
-}
-
-func cancelTask(actions ...string) {
 	for i := len(taskQueue) - 1; i >= 0; i-- {
 		task := taskQueue[i]
 		for _, action := range actions {

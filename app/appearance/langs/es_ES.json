@@ -942,7 +942,7 @@
     "53": "No se ha habilitado la sincronizacion de datos",
     "54": "Indexando referencias...",
     "55": "Referencias indexadas de [%d] documentos",
-    "56": "TODO",
+    "56": "Reindexando, espere hasta que se complete la reconstrucción antes de intentar abrir el documento",
     "57": "Fallo en la creación de la clave temporal",
     "58": "Después de reconstruir el índice, la interfaz se actualizará automáticamente más tarde...",
     "59": " Falló la configuración de sincronización de la lista de ignorados",

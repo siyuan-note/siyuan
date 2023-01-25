@@ -144,8 +144,6 @@ func StatusLoop() {
 	}
 }
 
-var taskWaitGroup = sync.WaitGroup{}
-
 func Loop() {
 	for {
 		time.Sleep(10 * time.Millisecond)
@@ -163,9 +161,7 @@ func Loop() {
 			break
 		}
 
-		taskWaitGroup.Add(1)
 		go execTask(task)
-		taskWaitGroup.Wait()
 	}
 }
 
@@ -202,5 +198,4 @@ func execTask(task *Task) {
 	}
 
 	task.Handler.Call(args)
-	taskWaitGroup.Done()
 }

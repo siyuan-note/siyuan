@@ -393,7 +393,7 @@ func getBlock(id string) (ret *Block, err error) {
 
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
-		if indexing {
+		if isIndexing() {
 			err = ErrIndexing
 		}
 		return

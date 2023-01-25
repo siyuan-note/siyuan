@@ -54,10 +54,12 @@ func (box *Box) Index() {
 
 var indexing = false
 
-func waitForIndexing() {
-	for indexing {
+func isIndexing() (ret bool) {
+	for i := 0; indexing || i > 7; i++ {
 		time.Sleep(time.Millisecond * 100)
+		ret = true
 	}
+	return
 }
 
 func index(boxID string) {

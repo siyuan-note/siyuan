@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"path"
-	"runtime/debug"
 	"sync"
 	"time"
 
@@ -133,7 +132,6 @@ func FlushQueue() {
 			if nil != err {
 				return
 			}
-			debug.FreeOSMemory()
 		}
 	}
 

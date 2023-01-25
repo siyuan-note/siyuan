@@ -138,9 +138,12 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 	return
 }
 
-var ErrBoxNotFound = errors.New("notebook not found")
-var ErrBlockNotFound = errors.New("block not found")
-var ErrTreeNotFound = errors.New("tree not found")
+var (
+	ErrBoxNotFound   = errors.New("notebook not found")
+	ErrBlockNotFound = errors.New("block not found")
+	ErrTreeNotFound  = errors.New("tree not found")
+	ErrIndexing      = errors.New("indexing")
+)
 
 func loadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	if "" == id {

@@ -393,11 +393,10 @@ func getBlock(id string) (ret *Block, err error) {
 
 	tree, err := loadTreeByBlockID(id)
 	if nil != err {
-		waitForIndexing()
-		tree, err = loadTreeByBlockID(id)
-		if nil != err {
-			return
+		if indexing {
+			err = ErrIndexing
 		}
+		return
 	}
 
 	node := treenode.GetNodeInTree(tree, id)

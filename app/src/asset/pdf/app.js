@@ -2962,7 +2962,7 @@ function webViewerKeyUp (evt) {
   if (pdfInstance.overlayManager.active) {
     return
   }
-  if (pdfInstance.appConfig.toolbar.rectAnno.classList.contains('toggled')) {
+  if (evt.keyCode === 68 && pdfInstance.appConfig.toolbar.rectAnno.classList.contains('toggled')) {
     pdfInstance.appConfig.toolbar.rectAnno.dispatchEvent(
       new MouseEvent('click'))
   }
@@ -2987,10 +2987,12 @@ function webViewerKeyDown (evt) {
     (evt.shiftKey ? 4 : 0) |
     (evt.metaKey ? 8 : 0)
 
-  if ((cmd === 8 || cmd === 1 || cmd === 2) &&
+  if (!evt.repeat && (cmd === 8 || cmd === 1 || cmd === 2) && evt.keyCode === 68 &&  // D
     !pdfInstance.appConfig.toolbar.rectAnno.classList.contains('toggled')) {
     pdfInstance.appConfig.toolbar.rectAnno.dispatchEvent(
       new MouseEvent('click'))
+    evt.preventDefault()
+    return
   }
 
   // First, handle the key bindings that are independent whether an input

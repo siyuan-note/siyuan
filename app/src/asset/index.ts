@@ -241,7 +241,7 @@ export class Asset extends Model {
                 <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search}">
                   <svg><use xlink:href="#iconSearch"></use></svg>
                 </button>
-                <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation} ${updateHotkeyTip("⌘/⌥")}">
+                <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation} ${updateHotkeyTip("⌘D")}/${updateHotkeyTip("⌥D")}">
                   <svg><use xlink:href="#iconTopLeft"></use></svg>
                 </button>
                 <button class="toolbarButton pageUp b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.previousLabel}" id="previous" tabindex="13">

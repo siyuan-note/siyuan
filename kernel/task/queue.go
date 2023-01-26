@@ -27,9 +27,8 @@ import (
 )
 
 var (
-	taskQueue       []*Task
-	taskQueueStatus int
-	queueLock       = sync.Mutex{}
+	taskQueue []*Task
+	queueLock = sync.Mutex{}
 )
 
 type Task struct {

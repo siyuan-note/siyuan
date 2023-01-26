@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -979,6 +980,42 @@ func deleteByRootID(tx *sql.Tx, rootID string, context map[string]interface{}) (
 	}
 	ClearBlockCache()
 	eventbus.Publish(eventbus.EvtSQLDeleteBlocks, context, rootID)
+	return
+}
+
+func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]interface{}) (err error) {
+	ids := strings.Join(rootIDs, "','")
+	ids = "('" + ids + "')"
+	stmt := "DELETE FROM blocks WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); nil != err {
+		return
+	}
+	stmt = "DELETE FROM blocks_fts WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); nil != err {
+		return
+	}
+	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); nil != err {
+		return
+	}
+	stmt = "DELETE FROM spans WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); nil != err {
+		return
+	}
+	stmt = "DELETE FROM assets WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); nil != err {
+		return
+	}
+	stmt = "DELETE FROM refs WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); nil != err {
+		return
+	}
+	stmt = "DELETE FROM file_annotation_refs WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); nil != err {
+		return
+	}
+	ClearBlockCache()
+	eventbus.Publish(eventbus.EvtSQLDeleteBlocks, context, fmt.Sprintf("%d", len(rootIDs)))
 	return
 }
 

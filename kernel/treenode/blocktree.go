@@ -472,11 +472,6 @@ func InitBlockTree(force bool) {
 }
 
 func SaveBlockTree(force bool) {
-	if force {
-
-		return
-	}
-
 	start := time.Now()
 	os.MkdirAll(util.BlockTreePath, 0755)
 

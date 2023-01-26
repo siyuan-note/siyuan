@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"runtime"
 	"sync"
 	"time"
 
@@ -101,45 +102,36 @@ func FlushQueue() {
 	txLock.Lock()
 	defer txLock.Unlock()
 	start := time.Now()
-	tx, err := beginTx()
-	if nil != err {
-		return
-	}
 
-	var execOps int
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	total := len(ops)
 	for i, op := range ops {
 		if util.IsExiting {
 			return
 		}
 
-		err = execOp(op, tx, context)
-		execOps++
-
+		tx, err := beginTx()
 		if nil != err {
+			return
+		}
+
+		context["current"] = i
+		context["total"] = total
+		if err = execOp(op, tx, context); nil != err {
 			logging.LogErrorf("queue operation failed: %s", err)
 			return
 		}
 
-		if 0 < i && 0 == execOps%128 {
-			if err = commitTx(tx); nil != err {
-				logging.LogErrorf("commit tx failed: %s", err)
-				return
-			}
-
-			execOps = 0
-			tx, err = beginTx()
-			if nil != err {
-				return
-			}
-		}
-	}
-
-	if 0 < execOps {
 		if err = commitTx(tx); nil != err {
 			logging.LogErrorf("commit tx failed: %s", err)
+			return
+		}
+
+		if 16 < i && 0 == i%256 {
+			runtime.GC()
 		}
 	}
+
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 5000 < elapsed {
 		logging.LogInfof("op tx [%dms]", elapsed)
@@ -171,7 +163,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 	case "update_refs":
 		err = upsertRefs(tx, op.upsertTree)
 	default:
-		msg := fmt.Sprint("unknown operation [%s]", op.action)
+		msg := fmt.Sprintf("unknown operation [%s]", op.action)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 	}

@@ -180,9 +180,10 @@ func initHistoryDBConnection() {
 
 	dsn := util.HistoryDBPath + "?_journal_mode=OFF" +
 		"&_synchronous=OFF" +
+		"&_mmap_size=2684354560" +
 		"&_secure_delete=OFF" +
 		"&_cache_size=-20480" +
-		"&_page_size=8192" +
+		"&_page_size=32768" +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
 		"&_temp_store=MEMORY" +
@@ -212,9 +213,10 @@ func initDBConnection() {
 	}
 	dsn := util.DBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
+		"&_mmap_size=2684354560" +
 		"&_secure_delete=OFF" +
 		"&_cache_size=-20480" +
-		"&_page_size=8192" +
+		"&_page_size=32768" +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
 		"&_temp_store=MEMORY" +

@@ -540,6 +540,7 @@ func checkoutRepo(id string) {
 	}
 
 	FullReindex()
+	ReloadUI()
 
 	if syncEnabled {
 		func() {
@@ -1025,12 +1026,15 @@ func syncRepo(exit, byHand bool) (err error) {
 	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
 		FullReindex()
+		if !exit {
+			ReloadUI()
+		}
 		return
 	}
-	incReindex(upserts, removes)
 
+	incReindex(upserts, removes)
 	if !exit {
-		util.ReloadUI()
+		ReloadUI()
 	}
 
 	elapsed = time.Since(start)

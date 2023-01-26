@@ -873,7 +873,8 @@
     "task.database.index.fix": "Execute database index fix",
     "task.ocr.image": "Execute image OCR to extract text",
     "task.history.generateDoc": "Execute GenerateDoc History",
-    "task.database.index.embedBlock": "Execute database index embed block"
+    "task.database.index.embedBlock": "Execute database index embed block",
+    "task.reload.ui": "Execute reload UI"
   },
   "_trayMenu": {
     "showWindow": "Show Window",
@@ -944,7 +945,7 @@
     "55": "Indexed references of [%d] documents",
     "56": "Reindexing, please wait until rebuilding is complete before trying to open",
     "57": "Failed to create temp key",
-    "58": "After the index is rebuilt, the interface will be automatically refreshed later...",
+    "58": "TODO",
     "59": "Failed to set sync ignore list",
     "60": "Failed to get the update package: %s",
     "61": "⬆️ The new version installation package is ready, do you want to install the new version now?",
@@ -975,8 +976,8 @@
     "86": "Please configure [Settings - About - Access authorization code]",
     "87": "Cannot move to this location",
     "88": "Finished parsing [%d] data files, remaining to be processed [%d]",
-    "89": "Created [%d] of data indexes of block-level elements [%s]",
-    "90": "Created [%d] of search indexes of block-level elements [%s]",
+    "89": "[%d/%d] Created [%d] of data indexes of block-level elements [%s]",
+    "90": "[%d/%d] Created [%d] of search indexes of block-level elements [%s]",
     "91": "Reading block tree data...",
     "92": "Parsing document tree [%s]",
     "93": "TODO",

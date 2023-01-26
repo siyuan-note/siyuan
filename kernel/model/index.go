@@ -187,23 +187,25 @@ func IndexRefs() {
 }
 
 func init() {
-	eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, blockCount int, hash string) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
-			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
-			return
-		}
-
-		msg := fmt.Sprintf(Conf.Language(89), blockCount, hash)
-		util.SetBootDetails(msg)
-		util.ContextPushMsg(context, msg)
-	})
+	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, current, total, blockCount int, hash string) {
+	//	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+	//		// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
+	//		return
+	//	}
+	//
+	//	msg := fmt.Sprintf(Conf.Language(89), current, total, blockCount, hash)
+	//	util.SetBootDetails(msg)
+	//	util.ContextPushMsg(context, msg)
+	//})
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
 			return
 		}
 
-		msg := fmt.Sprintf(Conf.Language(90), blockCount, hash)
+		current := context["current"].(int) + 1
+		total := context["total"]
+		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})

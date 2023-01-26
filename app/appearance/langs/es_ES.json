@@ -873,7 +873,8 @@
     "task.database.index.fix": "Ejecutar corrección del índice de la base de datos",
     "task.ocr.image": "Ejecutar OCR de imagen para extraer texto",
     "task.history.generateDoc": "Ejecutar Historial GenerateDoc",
-    "task.database.index.embedBlock": "Ejecutar bloque de incrustación de índice de base de datos"
+    "task.database.index.embedBlock": "Ejecutar bloque de incrustación de índice de base de datos",
+    "task.reload.ui": "IU de recarga de tareas"
   },
   "_trayMenu": {
     "showWindow": "Mostrar ventana",
@@ -944,7 +945,7 @@
     "55": "Referencias indexadas de [%d] documentos",
     "56": "Reindexando, espere hasta que se complete la reconstrucción antes de intentar abrir",
     "57": "Fallo en la creación de la clave temporal",
-    "58": "Después de reconstruir el índice, la interfaz se actualizará automáticamente más tarde...",
+    "58": "TODO",
     "59": " Falló la configuración de sincronización de la lista de ignorados",
     "60": "Fallo al obtener el paquete de actualización: %s",
     "61": "⬆️ El paquete de instalación de la nueva versión está listo, ¿quieres instalar la nueva versión ahora?",
@@ -975,8 +976,8 @@
     "86": "Por favor, configure [Configuración - Acerca de - Código de autorización de acceso]",
     "87": "No se puede mover a esta ubicación",
     "88": "Se ha terminado de analizar [%d] archivos de datos, quedan por procesar [%d]",
-    "89": "Creado [%d] de índices de datos de elementos a nivel de bloque [%s]",
-    "90": "Creado [%d] de índices de búsqueda de elementos a nivel de bloque [%s]",
+    "89": "[%d/%d] Creado [%d] de índices de datos de elementos a nivel de bloque [%s]",
+    "90": "[%d/%d] Creado [%d] de índices de búsqueda de elementos a nivel de bloque [%s]",
     "91": "Leyendo datos del árbol de bloques...",
     "92": "Analizando el árbol del documento [%s]",
     "93": "TODO",

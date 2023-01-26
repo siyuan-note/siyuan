@@ -519,6 +519,11 @@ func SaveBlockTree(force bool) {
 	})
 
 	blockTrees.Range(func(key, value interface{}) bool {
+		slice := value.(*btSlice)
+		if !force && (slice.changed.IsZero() || slice.changed.After(start.Add(-7*time.Second))) {
+			return true
+		}
+
 		waitGroup.Add(1)
 		p.Invoke(map[string]interface{}{"key": key, "value": value})
 		return true

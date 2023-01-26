@@ -884,6 +884,10 @@ app.on('open-url', (event, url) => { // for macOS
   }
 })
 
+app.on('browser-window-created', (_, window) => {
+  require("@electron/remote/main").enable(window.webContents)
+})
+
 app.on('second-instance', (event, argv) => {
   writeLog('second-instance [' + argv + ']')
   let workspace = argv.find((arg) => arg.startsWith('--workspace='))

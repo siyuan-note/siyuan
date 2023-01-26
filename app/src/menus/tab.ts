@@ -2,7 +2,12 @@ import {Tab} from "../layout/Tab";
 import {MenuItem} from "./Menu";
 import {Editor} from "../editor";
 import {copyTab} from "../layout/util";
+/// #if !BROWSER
+import {BrowserWindow} from "@electron/remote";
+import * as path from "path";
+/// #endif
 import {copySubMenu} from "./commonMenuItem";
+import {Constants} from "../constants";
 
 const closeMenu = (tab: Tab) => {
     const allTabs: Tab[] = [];
@@ -163,7 +168,7 @@ export const initTabMenu = (tab: Tab) => {
         submenu: splitSubMenu(tab)
     }).element);
     const model = tab.model;
-    let rootId;
+    let rootId:string;
     if ((model && model instanceof Editor)) {
         rootId = model.editor.protyle.block.rootID;
     } else {
@@ -198,5 +203,27 @@ export const initTabMenu = (tab: Tab) => {
             }
         }).element);
     }
+    /// #if !BROWSER
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: "new window",
+        click: () => {
+            const win = new BrowserWindow({
+                show: true,
+                width: 1032,
+                height: 650,
+                frame: "darwin" === window.siyuan.config.system.os,
+                icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
+                titleBarStyle: "hidden",
+                webPreferences: {
+                    contextIsolation: false,
+                    nodeIntegration: true,
+                    webviewTag: true,
+                    webSecurity: false,
+                },
+            });
+            win.loadURL(`${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&id=${rootId}`)
+        }
+    }).element);
+    /// #endif
     return window.siyuan.menus.menu;
 };

@@ -118,8 +118,9 @@ export const onGetConfig = (isStart: boolean) => {
     const hasKeymap4 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.heading, "editor", "heading");
     const hasKeymap5 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.list, "editor", "list");
     const hasKeymap6 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.table, "editor", "table");
-    if (!window.siyuan.config.readonly && (!matchKeymap1 || !matchKeymap2 || !matchKeymap3 || !matchKeymap4 || !matchKeymap5 || !matchKeymap6) &&
-        (!hasKeymap1 || !hasKeymap2 || !hasKeymap3 || !hasKeymap4 || !hasKeymap5 || !hasKeymap6)) {
+    if (!window.siyuan.config.readonly &&
+        (!matchKeymap1 || !matchKeymap2 || !matchKeymap3 || !matchKeymap4 || !matchKeymap5 || !matchKeymap6 ||
+        !hasKeymap1 || !hasKeymap2 || !hasKeymap3 || !hasKeymap4 || !hasKeymap5 || !hasKeymap6)) {
         fetchPost("/api/setting/setKeymap", {
             data: window.siyuan.config.keymap
         }, () => {
@@ -179,7 +180,7 @@ export const onGetConfig = (isStart: boolean) => {
     addGA();
 };
 
-const initBar = () => {
+export const initBar = () => {
     const toolbar = document.getElementById("toolbar");
     toolbar.innerHTML = `
 <div id="barWorkspace" class="toolbar__item">
@@ -325,7 +326,7 @@ const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
     /// #endif
 };
 
-const initWindow = () => {
+export const initWindow = () => {
     /// #if !BROWSER
     const currentWindow = getCurrentWindow();
     currentWindow.on("focus", winOnFocus);
@@ -451,8 +452,8 @@ const initWindow = () => {
     window.addEventListener("beforeunload", () => {
         currentWindow.off("focus", winOnFocus);
     }, false);
-    if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
-        document.getElementById("drag").addEventListener("dblclick", () => {
+    if ( "darwin" === window.siyuan.config.system.os) {
+        document.getElementById("drag")?.addEventListener("dblclick", () => {
             if (currentWindow.isMaximized()) {
                 currentWindow.unmaximize();
             } else {
@@ -474,7 +475,7 @@ const initWindow = () => {
     }
     document.body.classList.add("body--win32");
 
-    //添加应用图标
+    // 添加应用图标
     const toolbar = document.getElementById("toolbar");
     toolbar.insertAdjacentHTML("afterbegin", `<div class="toolbar__item" id="windowAppIcon">
     <svg>
@@ -482,7 +483,7 @@ const initWindow = () => {
     </svg>
 </div>`);
 
-    //添加窗口控件
+    // 添加窗口控件
     const controlsElement = document.getElementById("windowControls");
     controlsElement.innerHTML = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg>

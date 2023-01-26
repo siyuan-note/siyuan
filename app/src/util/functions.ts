@@ -1,5 +1,9 @@
 export const isMobile = () => {
-    return !document.getElementById("dockBottom");
+    return document.getElementById("sidebar") ? true : false;
+};
+
+export const isWindow = () => {
+    return document.getElementById("toolbar") ? false : true;
 };
 
 export const isTouchDevice = () => {

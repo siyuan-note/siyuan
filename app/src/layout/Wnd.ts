@@ -29,6 +29,8 @@ import {Asset} from "../asset";
 import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
+import {isWindow} from "../util/functions";
+import {setTabPosition} from "../window/setHeader";
 
 export class Wnd {
     public id: string;
@@ -319,6 +321,7 @@ export class Wnd {
                         switchWnd(newWnd, targetWnd);
                     }
                 }
+                setTabPosition();
                 return;
             }
 
@@ -370,7 +373,7 @@ export class Wnd {
                 }
             }
         });
-        if (currentTab) {
+        if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
             if (initData) {
                 const json = JSON.parse(initData);
@@ -495,6 +498,8 @@ export class Wnd {
         } else if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
             this.removeOverCounter(oldFocusIndex);
         }
+
+        setTabPosition();
     }
 
     private renderTabList(event: MouseEvent) {
@@ -652,6 +657,12 @@ export class Wnd {
         if (window.siyuan.layout.centerLayout) {
             const wnd = getWndByLayout(window.siyuan.layout.centerLayout);
             if (!wnd) {
+                /// #if !BROWSER
+                if (isWindow()) {
+                    getCurrentWindow().destroy();
+                    return;
+                }
+                /// #endif
                 const wnd = new Wnd();
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab());

@@ -12,21 +12,25 @@ import {getCurrentWindow} from "@electron/remote";
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
 
-export const initStatus = () => {
+export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
     const allDocks = getAllDocks();
     let menuHTML = "";
     allDocks.forEach(item => {
         menuHTML += `<button class="b3-menu__item" data-type="${item.type}"><svg class="b3-menu__icon""><use xlink:href="#${item.icon}"></use></svg><span class="b3-menu__label">${window.siyuan.languages[item.hotkeyLangId]}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span></button>`;
     });
-    document.getElementById("status").innerHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
+    let barDockHTML = "";
+    if (!isWindow) {
+        barDockHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
     <div class="b3-menu fn__none" style="bottom: 32px;left: 5px">
         ${menuHTML}
     </div>
-</div>
+</div>`
+    }
+    document.getElementById("status").innerHTML = `${barDockHTML}
 <div class="status__msg"></div>
 <div class="fn__flex-1"></div>
 <div class="status__backgroundtask fn__none"></div>
@@ -34,13 +38,16 @@ export const initStatus = () => {
 <div id="statusHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
-    const dockElement = document.getElementById("barDock");
-    dockElement.addEventListener("mousemove", () => {
-        dockElement.querySelector(".b3-menu").classList.remove("fn__none");
-    });
-    dockElement.addEventListener("mouseleave", () => {
-        dockElement.querySelector(".b3-menu").classList.add("fn__none");
-    });
+    if (!isWindow) {
+        const dockElement = document.getElementById("barDock");
+        dockElement.addEventListener("mousemove", () => {
+            dockElement.querySelector(".b3-menu").classList.remove("fn__none");
+        });
+        dockElement.addEventListener("mouseleave", () => {
+            dockElement.querySelector(".b3-menu").classList.add("fn__none");
+        });
+    }
+
     document.querySelector("#status").addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target.id !== "status") {

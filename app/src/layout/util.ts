@@ -27,7 +27,8 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
-import {getSearch} from "../util/functions";
+import {getSearch, isWindow} from "../util/functions";
+import {setTabPosition} from "../window/setHeader";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -175,11 +176,17 @@ const JSONToDock = (json: any) => {
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom});
 };
 
-const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
+export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
         if (!layout) {
-            window.siyuan.layout.layout = new Layout({element: document.getElementById("layouts")});
+            window.siyuan.layout.layout = new Layout({
+                element: document.getElementById("layouts"),
+                direction: json.direction,
+                size: json.size,
+                type: json.type,
+                resize: json.resize
+            });
         } else {
             child = new Layout({
                 direction: json.direction,
@@ -635,10 +642,10 @@ export const addResize = (obj: Layout | Wnd) => {
                     if (previousNowSize < 8 || nextNowSize < 8) {
                         return;
                     }
-                    if (window.siyuan.layout.leftDock.layout.element.contains(previousElement) && previousNowSize < 188) {
+                    if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) && previousNowSize < 188) {
                         return;
                     }
-                    if (window.siyuan.layout.rightDock.layout.element.contains(nextElement) && nextNowSize < 188) {
+                    if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) && nextNowSize < 188) {
                         return;
                     }
                     previousElement.style[direction === "lr" ? "width" : "height"] = previousNowSize + "px";
@@ -666,10 +673,12 @@ export const addResize = (obj: Layout | Wnd) => {
                         nextElement.classList.add("fn__flex-1");
                     }
                     resizeTabs();
-                    window.siyuan.layout.leftDock.setSize();
-                    window.siyuan.layout.topDock.setSize();
-                    window.siyuan.layout.bottomDock.setSize();
-                    window.siyuan.layout.rightDock.setSize();
+                    if (!isWindow()) {
+                        window.siyuan.layout.leftDock.setSize();
+                        window.siyuan.layout.topDock.setSize();
+                        window.siyuan.layout.bottomDock.setSize();
+                        window.siyuan.layout.rightDock.setSize();
+                    }
                     if (range) {
                         focusByRange(range);
                     }

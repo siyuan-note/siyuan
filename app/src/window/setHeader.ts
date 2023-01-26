@@ -23,7 +23,7 @@ export const setTabPosition = () => {
         const headerElement = item.headersElement.parentElement;
         const rect = headerElement.getBoundingClientRect()
         const dragElement = headerElement.querySelector('.item--readonly .fn__flex-1') as HTMLElement
-        if (rect.top === 0) {
+        if (rect.top <= 0) {
             dragElement.style.height = dragElement.parentElement.clientHeight + "px"
             // @ts-ignore
             dragElement.style.WebkitAppRegion = "drag";

@@ -332,7 +332,6 @@ export class Wnd {
                 return;
             }
 
-
             if (targetWndElement.contains(document.querySelector(`[data-id="${tabId}"]`))) {
                 return;
             }

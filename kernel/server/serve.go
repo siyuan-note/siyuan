@@ -63,10 +63,7 @@ func Serve(fastMode bool) {
 	})
 	ginServer.Use(sessions.Sessions("siyuan", cookieStore))
 
-	if "dev" == util.Mode {
-		serveDebug(ginServer)
-	}
-
+	serveDebug(ginServer)
 	serveAssets(ginServer)
 	serveAppearance(ginServer)
 	serveWebSocket(ginServer)

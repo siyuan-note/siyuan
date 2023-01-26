@@ -86,9 +86,9 @@
         }
 
         .b3-button--white:active {
-             background-color: var(--b3-theme-primary-lighter);
-             box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
-         }
+            background-color: var(--b3-theme-primary-lighter);
+            box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+        }
 
         .b3-text-filed {
             width: 240px;
@@ -200,7 +200,8 @@
     </div>
 </div>
 <div style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
-    <svg style="top: 50%;left: 50%;width: 200%;transform: translate(-50%, -50%);position: absolute;z-index: 1;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" height="1602"
+    <svg style="top: 50%;left: 50%;width: 200%;transform: translate(-50%, -50%);position: absolute;z-index: 1;"
+         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" height="1602"
          viewBox="0 0 2769 1602" width="2769">
         <filter id="a" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse" height="1044" width="1044"
                 x="1682" y="558">
@@ -435,7 +436,7 @@
   const exitApp = () => {
     try {
       const {ipcRenderer} = require('electron')
-      const {getCurrentWindow} = require('@electron/remote');
+      const {getCurrentWindow} = require('@electron/remote')
       ipcRenderer.send('siyuan-quit', getCurrentWindow().id)
     } catch (e) {
       if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid) {
@@ -529,7 +530,8 @@
   }
 
   // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-  new WebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws?app=siyuan&id=auth`)
+  new WebSocket(
+    window.location.protocol === 'https:' ? 'wss' : 'ws' + '://' + window.location.host + '/ws?app=siyuan&id=auth')
 </script>
 </body>
 </html>

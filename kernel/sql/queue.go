@@ -147,7 +147,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 	case "delete":
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 	case "delete_id":
-		err = deleteByRootID(tx, op.removeTreeID)
+		err = deleteByRootID(tx, op.removeTreeID, context)
 	case "rename":
 		err = batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTreeOldHPath, op.renameTree.HPath)
 		if nil != err {
@@ -285,16 +285,13 @@ func RemoveTreeQueue(box, rootID string) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	var tmp []*dbQueueOperation
-	// 将已有的 upsert 操作去重
-	for _, op := range operationQueue {
-		if "upsert" == op.action && op.upsertTree.ID != rootID {
-			tmp = append(tmp, op)
+	newOp := &dbQueueOperation{removeTreeIDBox: box, removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
+	for i, op := range operationQueue {
+		if "delete_id" == op.action && op.removeTreeIDBox == box && op.removeTreeID == rootID {
+			operationQueue[i] = newOp
+			return
 		}
 	}
-	operationQueue = tmp
-
-	newOp := &dbQueueOperation{removeTreeIDBox: box, removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
 	operationQueue = append(operationQueue, newOp)
 }
 
@@ -302,15 +299,12 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	var tmp []*dbQueueOperation
-	// 将已有的 upsert 操作去重
-	for _, op := range operationQueue {
-		if "upsert" == op.action && (op.removeTreeBox != treeBox || op.upsertTree.Path != treePathPrefix) {
-			tmp = append(tmp, op)
+	newOp := &dbQueueOperation{removeTreeBox: treeBox, removeTreePath: treePathPrefix, inQueueTime: time.Now(), action: "delete"}
+	for i, op := range operationQueue {
+		if "delete" == op.action && (op.removeTreeBox == treeBox && op.removeTreePath == treePathPrefix) {
+			operationQueue[i] = newOp
+			return
 		}
 	}
-	operationQueue = tmp
-
-	newOp := &dbQueueOperation{removeTreeBox: treeBox, removeTreePath: treePathPrefix, inQueueTime: time.Now(), action: "delete"}
 	operationQueue = append(operationQueue, newOp)
 }

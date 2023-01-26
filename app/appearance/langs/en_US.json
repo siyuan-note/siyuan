@@ -980,7 +980,7 @@
     "90": "[%d/%d] Created [%d] of search indexes of block-level elements [%s]",
     "91": "Reading block tree data...",
     "92": "Parsing document tree [%s]",
-    "93": "TODO",
+    "93": "[%d/%d] Cleaned up the index related to document [%s]",
     "94": "Upload failed: %s",
     "95": "Exiting...",
     "96": "Synchronization failed when exiting. Please manually perform a synchronization to ensure that the local data is consistent with the cloud data",

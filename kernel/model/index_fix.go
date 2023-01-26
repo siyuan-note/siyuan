@@ -69,6 +69,7 @@ func autoFixIndex() {
 	for _, root := range roots {
 		rootMap[root.ID] = root
 	}
+	var deletes int
 	for _, rootID := range duplicatedRootIDs {
 		root := rootMap[rootID]
 		if nil == root {
@@ -77,13 +78,13 @@ func autoFixIndex() {
 
 		//logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
 		sql.RemoveTreeQueue(root.Box, rootID)
-
+		deletes++
 		if util.IsExiting {
 			break
 		}
 	}
-	if 0 < len(duplicatedRootIDs) {
-		logging.LogWarnf("exist more than one tree duplicated [%d], reindex it", len(duplicatedRootIDs))
+	if 0 < deletes {
+		logging.LogWarnf("exist more than one tree duplicated [%d], reindex it", deletes)
 	}
 
 	util.PushStatusBar(Conf.Language(58))

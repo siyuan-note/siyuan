@@ -980,7 +980,7 @@
     "90": "[%d/%d] Creado [%d] de índices de búsqueda de elementos a nivel de bloque [%s]",
     "91": "Leyendo datos del árbol de bloques...",
     "92": "Analizando el árbol del documento [%s]",
-    "93": "TODO",
+    "93": "[%d/%d] ha limpiado el índice relacionado con el documento [%s]",
     "94": "Carga fallida: %s",
     "95": "Saliendo...",
     "96": "La sincronización falló al salir. Por favor, realice manualmente una sincronización para asegurarse de que los datos locales son coherentes con los datos de la nube",

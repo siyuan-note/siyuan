@@ -253,4 +253,16 @@ func init() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
+	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]interface{}, rootID string) {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
+			return
+		}
+
+		current := context["current"].(int) + 1
+		total := context["total"]
+		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
 }

@@ -20,7 +20,7 @@ import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {openSetting} from "../config";
-import {getSearch} from "./functions";
+import {getSearch, isWindow} from "./functions";
 import {initStatus} from "../layout/status";
 import {syncGuide} from "../sync/syncGuide";
 import {showMessage} from "../dialog/message";
@@ -120,7 +120,7 @@ export const onGetConfig = (isStart: boolean) => {
     const hasKeymap6 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.table, "editor", "table");
     if (!window.siyuan.config.readonly &&
         (!matchKeymap1 || !matchKeymap2 || !matchKeymap3 || !matchKeymap4 || !matchKeymap5 || !matchKeymap6 ||
-        !hasKeymap1 || !hasKeymap2 || !hasKeymap3 || !hasKeymap4 || !hasKeymap5 || !hasKeymap6)) {
+            !hasKeymap1 || !hasKeymap2 || !hasKeymap3 || !hasKeymap4 || !hasKeymap5 || !hasKeymap6)) {
         fetchPost("/api/setting/setKeymap", {
             data: window.siyuan.config.keymap
         }, () => {
@@ -333,31 +333,33 @@ export const initWindow = () => {
     currentWindow.on("blur", () => {
         document.body.classList.add("body--blur");
     });
-    ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-        if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
-            return;
-        }
-        const id = url.substr(16, 22);
-        fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
-            if (existResponse.data) {
-                openFileById({
-                    id,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                    zoomIn: getSearch("focus", url) === "1"
-                });
-                ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
+    if (!isWindow()) {
+        ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
+            if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
+                return;
             }
+            const id = url.substr(16, 22);
+            fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
+                if (existResponse.data) {
+                    openFileById({
+                        id,
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                        zoomIn: getSearch("focus", url) === "1"
+                    });
+                    ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
+                }
+            });
         });
-    });
+        ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
+            winOnClose(currentWindow, close);
+        });
+    }
     ipcRenderer.on(Constants.SIYUAN_LOCK_SCREEN, () => {
         exportLayout(false, () => {
             fetchPost("/api/system/logoutAuth", {}, () => {
                 window.location.reload();
             });
         });
-    });
-    ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
-        winOnClose(currentWindow, close);
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
         window.siyuan.printWin.destroy();
@@ -452,7 +454,7 @@ export const initWindow = () => {
     window.addEventListener("beforeunload", () => {
         currentWindow.off("focus", winOnFocus);
     }, false);
-    if ( "darwin" === window.siyuan.config.system.os) {
+    if ("darwin" === window.siyuan.config.system.os) {
         document.getElementById("drag")?.addEventListener("dblclick", () => {
             if (currentWindow.isMaximized()) {
                 currentWindow.unmaximize();

@@ -45,5 +45,4 @@ func StartCron() {
 	s.Every(30).Seconds().Do(model.HookDesktopUIProcJob)
 	s.SingletonModeAll()
 	s.StartAsync()
-
 }

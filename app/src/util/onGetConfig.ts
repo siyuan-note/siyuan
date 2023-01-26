@@ -562,15 +562,21 @@ export const initWindow = () => {
         currentWindow.minimize();
     });
     closeBtnElement.addEventListener("click", () => {
-        winOnClose(currentWindow);
+        if (isWindow()) {
+            currentWindow.destroy();
+        } else {
+            winOnClose(currentWindow);
+        }
     });
     /// #else
-    document.querySelector(".toolbar").classList.add("toolbar--browser");
-    window.addEventListener("beforeunload", () => {
-        exportLayout(false);
-    }, false);
-    window.addEventListener("pagehide", () => {
-        exportLayout(false);
-    }, false);
+    if (!isWindow()) {
+        document.querySelector(".toolbar").classList.add("toolbar--browser");
+        window.addEventListener("beforeunload", () => {
+            exportLayout(false);
+        }, false);
+        window.addEventListener("pagehide", () => {
+            exportLayout(false);
+        }, false);
+    }
     /// #endif
 };

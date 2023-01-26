@@ -39,7 +39,7 @@ export const setTabPosition = () => {
             }
         } else {
             if (rect.top <= 0 && rect.right >= window.innerWidth) {
-                (headerElement.lastElementChild as HTMLElement).style.paddingRight = (42 * 3) + "px";
+                (headerElement.lastElementChild as HTMLElement).style.paddingRight = (32 * 3) + "px";
             } else {
                 (headerElement.lastElementChild as HTMLElement).style.paddingRight = "";
             }

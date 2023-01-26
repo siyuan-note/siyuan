@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -132,7 +131,6 @@ func unmount0(boxID string) {
 	boxConf.Closed = true
 	box.SaveConf(boxConf)
 	box.Unindex()
-	debug.FreeOSMemory()
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {

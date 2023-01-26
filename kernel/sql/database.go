@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -33,6 +34,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/mattn/go-sqlite3"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -65,7 +67,6 @@ func InitDatabase(forceRebuild bool) (err error) {
 
 	if forceRebuild {
 		ClearQueue()
-		WaitForWritingDatabase()
 	}
 
 	initDBConnection()
@@ -80,12 +81,12 @@ func InitDatabase(forceRebuild bool) (err error) {
 
 	// 不存在库或者版本不一致都会走到这里
 
-	db.Close()
+	closeDatabase()
 	if gulu.File.IsExist(util.DBPath) {
 		if err = removeDatabaseFile(); nil != err {
 			logging.LogErrorf("remove database file [%s] failed: %s", util.DBPath, err)
 			util.PushClearProgress()
-			return
+			err = nil
 		}
 	}
 	if gulu.File.IsExist(util.BlockTreePath) {
@@ -209,7 +210,7 @@ func initHistoryDBTables() {
 
 func initDBConnection() {
 	if nil != db {
-		db.Close()
+		closeDatabase()
 	}
 	dsn := util.DBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
@@ -947,8 +948,16 @@ func deleteFileAnnotationRefsByBoxTx(tx *sql.Tx, box string) (err error) {
 	return
 }
 
-func deleteByRootID(tx *sql.Tx, rootID string) (err error) {
+func deleteByRootID(tx *sql.Tx, rootID string, context map[string]interface{}) (err error) {
 	stmt := "DELETE FROM blocks WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, rootID); nil != err {
+		return
+	}
+	stmt = "DELETE FROM blocks_fts WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, rootID); nil != err {
+		return
+	}
+	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id = ?"
 	if err = execStmtTx(tx, stmt, rootID); nil != err {
 		return
 	}
@@ -969,6 +978,7 @@ func deleteByRootID(tx *sql.Tx, rootID string) (err error) {
 		return
 	}
 	ClearBlockCache()
+	eventbus.Publish(eventbus.EvtSQLDeleteBlocks, context, rootID)
 	return
 }
 
@@ -1023,7 +1033,7 @@ func batchUpdateHPath(tx *sql.Tx, boxID, rootID, oldHPath, newHPath string) (err
 }
 
 func CloseDatabase() {
-	if err := db.Close(); nil != err {
+	if err := closeDatabase(); nil != err {
 		logging.LogErrorf("close database failed: %s", err)
 		return
 	}
@@ -1111,7 +1121,7 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 	if _, err = tx.Exec(stmt, args...); nil != err {
 		if strings.Contains(err.Error(), "database disk image is malformed") {
 			tx.Rollback()
-			db.Close()
+			closeDatabase()
 			removeDatabaseFile()
 			logging.LogFatalf("database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it", util.DBPath)
 		}
@@ -1178,5 +1188,15 @@ func removeDatabaseFile() (err error) {
 	if nil != err {
 		return
 	}
+	return
+}
+
+func closeDatabase() (err error) {
+	if nil == db {
+		return
+	}
+
+	err = db.Close()
+	runtime.GC() // 没有这句的话文件句柄不会释放，后面就无法删除文件
 	return
 }

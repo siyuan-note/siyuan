@@ -92,17 +92,3 @@ func UpdateBlockContent(block *Block) {
 	tx.Commit()
 	putBlockCache(block)
 }
-
-func DeleteTree(table, rootID string) {
-	tx, err := beginTx()
-	if nil != err {
-		return
-	}
-
-	stmt := "DELETE FROM `" + table + "` WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, rootID); nil != err {
-		tx.Rollback()
-		return
-	}
-	tx.Commit()
-}

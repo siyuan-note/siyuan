@@ -125,6 +125,7 @@ func index(boxID string) {
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
 	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
+	runtime.GC()
 	return
 }
 
@@ -186,6 +187,49 @@ func IndexRefs() {
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
 }
 
+// AutoIndexEmbedBlock 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+func AutoIndexEmbedBlock() {
+	for {
+		embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+		task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock, embedBlocks)
+		time.Sleep(10 * time.Minute)
+	}
+}
+
+func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
+	for i, embedBlock := range embedBlocks {
+		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
+		stmt = strings.TrimSuffix(stmt, "}}")
+		queryResultBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		for _, block := range queryResultBlocks {
+			embedBlock.Content += block.Content
+		}
+		if "" == embedBlock.Content {
+			embedBlock.Content = "no query result"
+		}
+		sql.UpdateBlockContent(embedBlock)
+
+		if 63 <= i { // 一次任务中最多处理 64 个嵌入块，防止卡顿
+			break
+		}
+	}
+}
+
+func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBlock) {
+	embedBlock := sql.GetBlock(embedBlockID)
+	if nil == embedBlock {
+		return
+	}
+
+	for _, block := range queryResultBlocks {
+		embedBlock.Content += block.Block.Markdown
+	}
+	if "" == embedBlock.Content {
+		embedBlock.Content = "no query result"
+	}
+	sql.UpdateBlockContent(embedBlock)
+}
+
 func init() {
 	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, current, total, blockCount int, hash string) {
 	//	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
@@ -206,6 +250,18 @@ func init() {
 		current := context["current"].(int) + 1
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]interface{}, rootID string) {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
+			return
+		}
+
+		current := context["current"].(int) + 1
+		total := context["total"]
+		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})

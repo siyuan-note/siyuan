@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -516,12 +517,15 @@ func fullReindex() {
 	}
 	treenode.InitBlockTree(true)
 
+	sql.DisableCache()
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)
 	}
+	sql.EnableCache()
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
+	runtime.GC()
 }
 
 func ChangeBoxSort(boxIDs []string) {

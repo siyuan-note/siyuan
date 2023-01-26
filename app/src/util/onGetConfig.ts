@@ -29,6 +29,7 @@ import {goBack, goForward} from "./backForward";
 import {replaceLocalPath} from "../editor/rename";
 import {workspaceMenu} from "../menus/workspace";
 import {getWorkspaceName} from "./noRelyPCFunction";
+import {setTabPosition} from "../window/setHeader";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -464,13 +465,21 @@ export const initWindow = () => {
         });
         const toolbarElement = document.getElementById("toolbar");
         currentWindow.on("enter-full-screen", () => {
-            toolbarElement.style.paddingLeft = "0";
+            if (isWindow()) {
+                setTabPosition();
+            } else {
+                toolbarElement.style.paddingLeft = "0";
+            }
         });
         currentWindow.on("leave-full-screen", () => {
-            toolbarElement.setAttribute("style", "");
+            if (isWindow()) {
+                setTabPosition();
+            } else {
+                toolbarElement.setAttribute("style", "");
+            }
         });
 
-        if (currentWindow.isFullScreen()) {
+        if (currentWindow.isFullScreen() && !isWindow()) {
             toolbarElement.style.paddingLeft = "0";
         }
         return;
@@ -478,16 +487,17 @@ export const initWindow = () => {
     document.body.classList.add("body--win32");
 
     // 添加应用图标
-    const toolbar = document.getElementById("toolbar");
-    toolbar.insertAdjacentHTML("afterbegin", `<div class="toolbar__item" id="windowAppIcon">
+    if (!isWindow()) {
+        const toolbarElement = document.getElementById("toolbar");
+        toolbarElement.insertAdjacentHTML("afterbegin", `<div class="toolbar__item" id="windowAppIcon">
     <svg>
         <use xlink:href="#iconSiYuan"></use>
     </svg>
 </div>`);
+    }
 
     // 添加窗口控件
-    const controlsElement = document.getElementById("windowControls");
-    controlsElement.innerHTML = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">
+    const controlsHTML = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">
     <svg>
         <use xlink:href="#iconMin"></use>
     </svg>
@@ -507,6 +517,11 @@ export const initWindow = () => {
         <use xlink:href="#iconClose"></use>
     </svg>
 </div>`;
+    if (isWindow()) {
+        document.body.insertAdjacentHTML("beforeend", `<div style="position: fixed;top: 0;right: 0;display: flex;z-index: 502;">${controlsHTML}</div>`)
+    } else {
+        document.getElementById("windowControls").innerHTML = controlsHTML;
+    }
     const maxBtnElement = document.getElementById("maxWindow");
     const restoreBtnElement = document.getElementById("restoreWindow");
 

@@ -597,8 +597,8 @@ func GetBlock(id string) (ret *Block) {
 	return
 }
 
-func GetRootUpdated(blocksTable string) (ret map[string]string, err error) {
-	rows, err := query("SELECT root_id, updated FROM `" + blocksTable + "` WHERE type = 'd'")
+func GetRootUpdated() (ret map[string]string, err error) {
+	rows, err := query("SELECT root_id, updated FROM `blocks` WHERE type = 'd'")
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

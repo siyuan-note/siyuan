@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
@@ -47,6 +48,42 @@ var autoFixLock = sync.Mutex{}
 
 func autoFixIndex() {
 	defer logging.Recover()
+
+	autoFixLock.Lock()
+	defer autoFixLock.Unlock()
+
+	// 去除重复的数据库块记录
+	duplicatedRootIDs := sql.GetDuplicatedRootIDs("blocks")
+	if 1 > len(duplicatedRootIDs) {
+		duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts")
+		if 1 > len(duplicatedRootIDs) && !Conf.Search.CaseSensitive {
+			duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts_case_insensitive")
+		}
+	}
+
+	roots := sql.GetBlocks(duplicatedRootIDs)
+	rootMap := map[string]*sql.Block{}
+	for _, root := range roots {
+		rootMap[root.ID] = root
+	}
+	for _, rootID := range duplicatedRootIDs {
+		root := rootMap[rootID]
+		if nil == root {
+			continue
+		}
+
+		//logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
+		sql.RemoveTreeQueue(root.Box, rootID)
+
+		if util.IsExiting {
+			break
+		}
+	}
+	if 0 < len(duplicatedRootIDs) {
+		logging.LogWarnf("exist more than one tree duplicated [%d], reindex it", len(duplicatedRootIDs))
+	}
+
+	sql.WaitForWritingDatabase()
 
 	// 根据文件系统补全块树
 	boxes := Conf.GetOpenedBoxes()
@@ -88,6 +125,8 @@ func autoFixIndex() {
 		}
 	}
 
+	sql.WaitForWritingDatabase()
+
 	// 清理已关闭的笔记本块树
 	boxes = Conf.GetClosedBoxes()
 	for _, box := range boxes {
@@ -96,49 +135,17 @@ func autoFixIndex() {
 
 	// 对比块树和数据库并订正数据库
 	rootUpdatedMap := treenode.GetRootUpdated()
-	dbRootUpdatedMap, err := sql.GetRootUpdated("blocks")
+	dbRootUpdatedMap, err := sql.GetRootUpdated()
 	if nil == err {
-		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap, "blocks")
-	}
-	dbFtsRootUpdatedMap, err := sql.GetRootUpdated("blocks_fts")
-	if nil == err {
-		reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap, "blocks_fts")
-	}
-	if !Conf.Search.CaseSensitive {
-		dbFtsRootUpdatedMap, err = sql.GetRootUpdated("blocks_fts_case_insensitive")
-		if nil == err {
-			reindexTreeByUpdated(rootUpdatedMap, dbFtsRootUpdatedMap, "blocks_fts_case_insensitive")
-		}
+		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap)
 	}
 
-	// 去除重复的数据库块记录
-	duplicatedRootIDs := sql.GetDuplicatedRootIDs("blocks")
-	if 1 > len(duplicatedRootIDs) {
-		duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts")
-		if 1 > len(duplicatedRootIDs) && !Conf.Search.CaseSensitive {
-			duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts_case_insensitive")
-		}
-	}
-	size := len(duplicatedRootIDs)
-	for i, rootID := range duplicatedRootIDs {
-		root := sql.GetBlock(rootID)
-		if nil == root {
-			continue
-		}
-
-		logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
-		sql.RemoveTreeQueue(root.Box, rootID)
-		reindexTree(rootID, i, size)
-
-		if util.IsExiting {
-			break
-		}
-	}
+	sql.WaitForWritingDatabase()
 
 	util.PushStatusBar(Conf.Language(185))
 }
 
-func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string, blocksTable string) {
+func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 	i := -1
 	size := len(rootUpdatedMap)
 	for rootID, updated := range rootUpdatedMap {
@@ -174,12 +181,29 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string, bl
 		}
 	}
 
+	var rootIDs []string
 	for rootID, _ := range dbRootUpdatedMap {
 		if _, ok := rootUpdatedMap[rootID]; !ok {
-			logging.LogWarnf("tree [%s] is not in block tree, remove it from [%s]", rootID, blocksTable)
-			sql.DeleteTree(blocksTable, rootID)
+			rootIDs = append(rootIDs, rootID)
 		}
 
+		if util.IsExiting {
+			break
+		}
+	}
+	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
+	roots := map[string]*sql.Block{}
+	blocks := sql.GetBlocks(rootIDs)
+	for _, block := range blocks {
+		roots[block.RootID] = block
+	}
+	for id, root := range roots {
+		if nil == root {
+			continue
+		}
+
+		logging.LogWarnf("tree [%s] is not in block tree, remove it from [%s]", id, root.Box)
+		sql.RemoveTreeQueue(root.Box, root.ID)
 		if util.IsExiting {
 			break
 		}

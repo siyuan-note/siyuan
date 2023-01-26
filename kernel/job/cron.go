@@ -29,7 +29,7 @@ import (
 
 func StartCron() {
 	s := gocron.NewScheduler(time.Local)
-	s.Every(100).Milliseconds().Do(task.ExecTaskJob)
+	s.Every(1).Seconds().Do(task.ExecTaskJob)
 	s.Every(5).Seconds().Do(task.StatusJob)
 	s.Every(1).Second().Do(treenode.SaveBlockTreeJob)
 	s.Every(5).Seconds().Do(model.SyncDataJob)
@@ -43,6 +43,5 @@ func StartCron() {
 	s.Every(7).Seconds().Do(model.OCRAssetsJob)
 	s.Every(7).Seconds().Do(model.FlushAssetsTextsJob)
 	s.Every(30).Seconds().Do(model.HookDesktopUIProcJob)
-	s.SingletonModeAll()
 	s.StartAsync()
 }

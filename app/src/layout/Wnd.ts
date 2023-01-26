@@ -101,16 +101,23 @@ export class Wnd {
                 target = target.parentElement;
             }
         });
-        this.headersElement.addEventListener("dblclick", (event) => {
-            if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
-                let target = event.target as HTMLElement;
-                while (target && !target.isEqualNode(this.headersElement)) {
-                    if (target.tagName === "LI") {
-                        target.classList.remove("item--unupdate");
-                        break;
+        this.headersElement.parentElement.addEventListener("dblclick", (event) => {
+            let target = event.target as HTMLElement;
+            while (target && !target.isEqualNode(this.headersElement)) {
+                if (window.siyuan.config.fileTree.openFilesUseCurrentTab && target.getAttribute("data-type") === "tab-header") {
+                    target.classList.remove("item--unupdate");
+                    break;
+                } else if (target.tagName === "SPAN" && target.className === "fn__flex-1" &&
+                    isWindow() && this.headersElement.getBoundingClientRect().top <= 0) {
+                    const currentWindow = getCurrentWindow();
+                    if (currentWindow.isMaximized()) {
+                        currentWindow.unmaximize();
+                    } else {
+                        currentWindow.maximize();
                     }
-                    target = target.parentElement;
+                    break;
                 }
+                target = target.parentElement;
             }
         });
         const dragElement = this.element.querySelector(".layout-tab-container__drag") as HTMLElement;
@@ -289,7 +296,7 @@ export class Wnd {
             const targetWnd = getInstanceById(targetWndElement.getAttribute("data-id")) as Wnd;
             const tabId = event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB);
             const oldTab = getInstanceById(tabId) as Tab;
-            if (oldTab.model instanceof  Asset) {
+            if (oldTab.model instanceof Asset) {
                 // https://github.com/siyuan-note/siyuan/issues/6890
                 const pdfViewerElement = oldTab.model.element.querySelector("#viewerContainer");
                 if (pdfViewerElement) {

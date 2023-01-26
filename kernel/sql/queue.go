@@ -128,9 +128,13 @@ func FlushQueue() {
 			return
 		}
 
-		if 16 < i && 0 == i%256 {
+		if 16 < i && 0 == i%128 {
 			runtime.GC()
 		}
+	}
+
+	if 128 < len(ops) {
+		runtime.GC()
 	}
 
 	elapsed := time.Now().Sub(start).Milliseconds()

@@ -953,6 +953,14 @@ func deleteByRootID(tx *sql.Tx, rootID string, context map[string]interface{}) (
 	if err = execStmtTx(tx, stmt, rootID); nil != err {
 		return
 	}
+	stmt = "DELETE FROM blocks_fts WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, rootID); nil != err {
+		return
+	}
+	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, rootID); nil != err {
+		return
+	}
 	stmt = "DELETE FROM spans WHERE root_id = ?"
 	if err = execStmtTx(tx, stmt, rootID); nil != err {
 		return

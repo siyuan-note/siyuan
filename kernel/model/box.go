@@ -56,17 +56,9 @@ type Box struct {
 	historyGenerated int64 // 最近一次历史生成时间
 }
 
-func AutoStat() {
-	time.Sleep(time.Minute)
-	autoStat()
-	for range time.Tick(2 * time.Hour) {
-		autoStat()
-	}
-}
-
 var statLock = sync.Mutex{}
 
-func autoStat() {
+func StatJob() {
 	statLock.Lock()
 	defer statLock.Unlock()
 

@@ -66,7 +66,6 @@ const txFixDelay = 10
 var (
 	txQueue     []*Transaction
 	txQueueLock = sync.Mutex{}
-	txDelay     = txFixDelay
 
 	currentTx *Transaction
 )
@@ -88,19 +87,15 @@ func WaitForWritingFiles() {
 }
 
 func isWritingFiles() bool {
-	time.Sleep(time.Duration(txDelay+5) * time.Millisecond)
+	time.Sleep(time.Duration(txFixDelay+10) * time.Millisecond)
 	if 0 < len(txQueue) || util.IsMutexLocked(&txQueueLock) {
 		return true
 	}
 	return nil != currentTx
 }
 
-func AutoFlushTx() {
-	go autoFlushUpdateRefTextRenameDoc()
-	for {
-		flushTx()
-		time.Sleep(time.Duration(txDelay) * time.Millisecond)
-	}
+func FlushTxJob() {
+	flushTx()
 }
 
 func flushTx() {
@@ -123,7 +118,7 @@ func flushTx() {
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 0 < len(currentTx.DoOperations) {
 		if 2000 < elapsed {
-			logging.LogWarnf("tx [%dms]", elapsed)
+			logging.LogWarnf("op tx [%dms]", elapsed)
 		}
 	}
 	currentTx = nil
@@ -178,12 +173,6 @@ type TxErr struct {
 
 func performTx(tx *Transaction) (ret *TxErr) {
 	if 1 > len(tx.DoOperations) {
-		txDelay -= 1000
-		if 100*txFixDelay < txDelay {
-			txDelay = txDelay / 2
-		} else if 0 > txDelay {
-			txDelay = txFixDelay
-		}
 		return
 	}
 
@@ -202,7 +191,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		return
 	}
 
-	start := time.Now()
 	for _, op := range tx.DoOperations {
 		switch op.Action {
 		case "create":
@@ -242,11 +230,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 		logging.LogErrorf("commit tx failed: %s", cr)
 		return &TxErr{msg: cr.Error()}
-	}
-	elapsed := int(time.Now().Sub(start).Milliseconds())
-	txDelay = 10 + elapsed
-	if 1000*10 < txDelay {
-		txDelay = 1000 * 10
 	}
 	return
 }
@@ -1186,11 +1169,9 @@ func updateRefTextRenameDoc(renamedTree *parse.Tree) {
 	updateRefTextRenameDocLock.Unlock()
 }
 
-func autoFlushUpdateRefTextRenameDoc() {
-	for {
-		sql.WaitForWritingDatabase()
-		flushUpdateRefTextRenameDoc()
-	}
+func FlushUpdateRefTextRenameDocJob() {
+	sql.WaitForWritingDatabase()
+	flushUpdateRefTextRenameDoc()
 }
 
 func flushUpdateRefTextRenameDoc() {

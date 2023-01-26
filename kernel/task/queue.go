@@ -121,56 +121,50 @@ func ContainIndexTask() bool {
 	return false
 }
 
-func StatusLoop() {
-	for {
-		time.Sleep(5 * time.Second)
-		tasks := taskQueue
-		data := map[string]interface{}{}
-		var items []map[string]interface{}
-		for _, task := range tasks {
-			if OCRImage == task.Action || DatabaseIndexEmbedBlock == task.Action {
-				continue
-			}
-
-			actionLangs := util.TaskActionLangs[util.Lang]
-			action := task.Action
-			if nil != actionLangs {
-				if label := actionLangs[task.Action]; nil != label {
-					action = label.(string)
-				}
-			}
-			item := map[string]interface{}{
-				"action": action,
-			}
-			items = append(items, item)
-		}
-		if 1 > len(items) {
-			items = []map[string]interface{}{}
-		}
-		data["tasks"] = items
-		util.PushBackgroundTask(data)
-	}
-}
-
-func Loop() {
-	for {
-		time.Sleep(100 * time.Millisecond)
-		if QueueStatusClosing == taskQueueStatus {
-			clearQueue()
-			break
-		}
-
-		task := popTask()
-		if nil == task {
+func StatusJob() {
+	tasks := taskQueue
+	data := map[string]interface{}{}
+	var items []map[string]interface{}
+	for _, task := range tasks {
+		if OCRImage == task.Action || DatabaseIndexEmbedBlock == task.Action {
 			continue
 		}
 
-		if util.IsExiting {
-			break
+		actionLangs := util.TaskActionLangs[util.Lang]
+		action := task.Action
+		if nil != actionLangs {
+			if label := actionLangs[task.Action]; nil != label {
+				action = label.(string)
+			}
 		}
-
-		execTask(task)
+		item := map[string]interface{}{
+			"action": action,
+		}
+		items = append(items, item)
 	}
+	if 1 > len(items) {
+		items = []map[string]interface{}{}
+	}
+	data["tasks"] = items
+	util.PushBackgroundTask(data)
+}
+
+func ExecTaskJob() {
+	if QueueStatusClosing == taskQueueStatus {
+		clearQueue()
+		return
+	}
+
+	task := popTask()
+	if nil == task {
+		return
+	}
+
+	if util.IsExiting {
+		return
+	}
+
+	execTask(task)
 }
 
 func clearQueue() {

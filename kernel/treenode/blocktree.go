@@ -400,13 +400,6 @@ func IndexBlockTree(tree *parse.Tree) {
 	})
 }
 
-func AutoFlushBlockTree() {
-	for {
-		SaveBlockTree(false)
-		time.Sleep(1 * time.Second)
-	}
-}
-
 func InitBlockTree(force bool) {
 	start := time.Now()
 
@@ -481,6 +474,10 @@ func InitBlockTree(force bool) {
 	elapsed := time.Since(start).Seconds()
 	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes((size)), util.BlockTreePath, elapsed)
 	return
+}
+
+func SaveBlockTreeJob() {
+	SaveBlockTree(false)
 }
 
 func SaveBlockTree(force bool) {

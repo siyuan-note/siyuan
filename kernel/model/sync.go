@@ -46,12 +46,9 @@ var (
 	ExitSyncSucc = -1
 )
 
-func AutoSync() {
-	for {
-		time.Sleep(5 * time.Second)
-		if time.Now().After(syncPlanTime) {
-			SyncData(false, false, false)
-		}
+func SyncDataJob() {
+	if time.Now().After(syncPlanTime) {
+		SyncData(false, false, false)
 	}
 }
 

@@ -187,13 +187,10 @@ func IndexRefs() {
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
 }
 
-// AutoIndexEmbedBlock 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
-func AutoIndexEmbedBlock() {
-	for {
-		embedBlocks := sql.QueryEmptyContentEmbedBlocks()
-		task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock, embedBlocks)
-		time.Sleep(10 * time.Minute)
-	}
+// IndexEmbedBlockJob 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+func IndexEmbedBlockJob() {
+	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+	task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock, embedBlocks)
 }
 
 func autoIndexEmbedBlock(embedBlocks []*sql.Block) {

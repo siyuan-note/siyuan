@@ -53,11 +53,8 @@ type dbQueueOperation struct {
 	renameTreeOldHPath            string      // rename
 }
 
-func AutoFlushTx() {
-	for {
-		time.Sleep(util.SQLFlushInterval)
-		task.AppendTask(task.DatabaseIndexCommit, FlushQueue)
-	}
+func FlushTxJob() {
+	task.AppendTask(task.DatabaseIndexCommit, FlushQueue)
 }
 
 func WaitForWritingDatabase() {

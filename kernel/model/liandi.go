@@ -144,19 +144,14 @@ func LoadUploadToken() (err error) {
 }
 
 var (
-	refreshCheckTicker             = time.NewTicker(2 * time.Hour)
 	subscriptionExpirationReminded bool
 )
 
-func AutoRefreshCheck() {
-	for {
-		go refreshSubscriptionExpirationRemind()
-		go refreshUser()
-		go refreshAnnouncement()
-		go refreshCheckDownloadInstallPkg()
-
-		<-refreshCheckTicker.C
-	}
+func RefreshCheckJob() {
+	go refreshSubscriptionExpirationRemind()
+	go refreshUser()
+	go refreshAnnouncement()
+	go refreshCheckDownloadInstallPkg()
 }
 
 func refreshSubscriptionExpirationRemind() {

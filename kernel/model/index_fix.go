@@ -36,12 +36,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// AutoFixIndex 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016
-func AutoFixIndex() {
-	for {
-		task.AppendTask(task.DatabaseIndexFix, autoFixIndex)
-		time.Sleep(10 * time.Minute)
-	}
+// FixIndexJob 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016
+func FixIndexJob() {
+	task.AppendTask(task.DatabaseIndexFix, autoFixIndex)
 }
 
 var autoFixLock = sync.Mutex{}

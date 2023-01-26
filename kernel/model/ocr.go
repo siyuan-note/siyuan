@@ -19,15 +19,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func AutoOCRAssets() {
+func OCRAssetsJob() {
 	if !util.TesseractEnabled {
 		return
 	}
 
-	for {
-		task.AppendTask(task.OCRImage, autoOCRAssets)
-		time.Sleep(7 * time.Second)
-	}
+	task.AppendTask(task.OCRImage, autoOCRAssets)
 }
 
 func autoOCRAssets() {
@@ -111,11 +108,8 @@ func getUnOCRAssetsAbsPaths() (ret []string) {
 	return
 }
 
-func AutoFlushAssetsTexts() {
-	for {
-		SaveAssetsTexts()
-		time.Sleep(7 * time.Second)
-	}
+func FlushAssetsTextsJob() {
+	SaveAssetsTexts()
 }
 
 func LoadAssetsTexts() {

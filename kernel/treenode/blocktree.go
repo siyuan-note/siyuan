@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
+	"github.com/panjf2000/ants/v2"
 	util2 "github.com/siyuan-note/dejavu/util"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -425,11 +426,13 @@ func InitBlockTree(force bool) {
 	}
 
 	size := uint64(0)
-	for _, entry := range entries {
-		if !strings.HasSuffix(entry.Name(), ".msgpack") {
-			continue
-		}
 
+	poolSize := runtime.NumCPU()
+	waitGroup := &sync.WaitGroup{}
+	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
+		defer waitGroup.Done()
+
+		entry := arg.(os.DirEntry)
 		p := filepath.Join(util.BlockTreePath, entry.Name())
 		var fh *os.File
 		fh, err = os.OpenFile(p, os.O_RDWR, 0644)
@@ -461,13 +464,22 @@ func InitBlockTree(force bool) {
 		name := entry.Name()[0:strings.Index(entry.Name(), ".")]
 		blockTrees.Store(name, &btSlice{data: sliceData, changed: time.Time{}, m: &sync.Mutex{}})
 		size += uint64(len(data))
+	})
+	for _, entry := range entries {
+		if !strings.HasSuffix(entry.Name(), ".msgpack") {
+			continue
+		}
+
+		waitGroup.Add(1)
+		p.Invoke(entry)
 	}
+
+	waitGroup.Wait()
+	p.Release()
 
 	runtime.GC()
-
-	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
-		logging.LogWarnf("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes((size)), util.BlockTreePath, elapsed)
-	}
+	elapsed := time.Since(start).Seconds()
+	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes((size)), util.BlockTreePath, elapsed)
 	return
 }
 

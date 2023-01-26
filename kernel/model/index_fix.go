@@ -69,20 +69,23 @@ func autoFixIndex() {
 	for _, root := range roots {
 		rootMap[root.ID] = root
 	}
+
+	var toRemoveRootIDs []string
 	var deletes int
 	for _, rootID := range duplicatedRootIDs {
 		root := rootMap[rootID]
 		if nil == root {
 			continue
 		}
-
-		//logging.LogWarnf("exist more than one tree [%s], reindex it", rootID)
-		sql.RemoveTreeQueue(root.Box, rootID)
 		deletes++
+		toRemoveRootIDs = append(toRemoveRootIDs, rootID)
 		if util.IsExiting {
 			break
 		}
 	}
+	toRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(toRemoveRootIDs)
+	sql.BatchRemoveTreeQueue(toRemoveRootIDs)
+
 	if 0 < deletes {
 		logging.LogWarnf("exist more than one tree duplicated [%d], reindex it", deletes)
 	}
@@ -203,17 +206,20 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 	for _, block := range blocks {
 		roots[block.RootID] = block
 	}
+	var toRemoveRootIDs []string
 	for id, root := range roots {
 		if nil == root {
 			continue
 		}
 
-		logging.LogWarnf("tree [%s] is not in block tree, remove it from [%s]", id, root.Box)
-		sql.RemoveTreeQueue(root.Box, root.ID)
+		toRemoveRootIDs = append(toRemoveRootIDs, id)
 		if util.IsExiting {
 			break
 		}
 	}
+	toRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(toRemoveRootIDs)
+	//logging.LogWarnf("tree [%s] is not in block tree, remove it from [%s]", id, root.Box)
+	sql.BatchRemoveTreeQueue(toRemoveRootIDs)
 }
 
 func reindexTreeByPath(box, p string, i, size int) {

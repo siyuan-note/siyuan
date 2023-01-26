@@ -41,12 +41,13 @@ var (
 
 type dbQueueOperation struct {
 	inQueueTime time.Time
-	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index
+	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index/delete_ids
 
 	indexPath                     string      // index
 	upsertTree                    *parse.Tree // upsert/insert_refs
 	removeTreeBox, removeTreePath string      // delete
 	removeTreeIDBox, removeTreeID string      // delete_id
+	removeTreeIDs                 []string    // delete_ids
 	box                           string      // delete_box/delete_box_refs/index
 	renameTree                    *parse.Tree // rename
 	renameTreeOldHPath            string      // rename
@@ -148,6 +149,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
 	case "delete_id":
 		err = deleteByRootID(tx, op.removeTreeID, context)
+	case "delete_ids":
+		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
 	case "rename":
 		err = batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTreeOldHPath, op.renameTree.HPath)
 		if nil != err {
@@ -292,6 +295,14 @@ func RemoveTreeQueue(box, rootID string) {
 			return
 		}
 	}
+	operationQueue = append(operationQueue, newOp)
+}
+
+func BatchRemoveTreeQueue(rootIDs []string) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	newOp := &dbQueueOperation{removeTreeIDs: rootIDs, inQueueTime: time.Now(), action: "delete_ids"}
 	operationQueue = append(operationQueue, newOp)
 }
 

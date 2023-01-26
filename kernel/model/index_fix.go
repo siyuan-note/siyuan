@@ -52,6 +52,8 @@ func autoFixIndex() {
 	autoFixLock.Lock()
 	defer autoFixLock.Unlock()
 
+	util.PushStatusBar(Conf.Language(58))
+
 	// 去除重复的数据库块记录
 	duplicatedRootIDs := sql.GetDuplicatedRootIDs("blocks")
 	if 1 > len(duplicatedRootIDs) {
@@ -61,6 +63,7 @@ func autoFixIndex() {
 		}
 	}
 
+	util.PushStatusBar(Conf.Language(58))
 	roots := sql.GetBlocks(duplicatedRootIDs)
 	rootMap := map[string]*sql.Block{}
 	for _, root := range roots {
@@ -83,8 +86,9 @@ func autoFixIndex() {
 		logging.LogWarnf("exist more than one tree duplicated [%d], reindex it", len(duplicatedRootIDs))
 	}
 
+	util.PushStatusBar(Conf.Language(58))
 	sql.WaitForWritingDatabase()
-
+	util.PushStatusBar(Conf.Language(58))
 	// 根据文件系统补全块树
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
@@ -125,8 +129,9 @@ func autoFixIndex() {
 		}
 	}
 
+	util.PushStatusBar(Conf.Language(58))
 	sql.WaitForWritingDatabase()
-
+	util.PushStatusBar(Conf.Language(58))
 	// 清理已关闭的笔记本块树
 	boxes = Conf.GetClosedBoxes()
 	for _, box := range boxes {
@@ -140,8 +145,8 @@ func autoFixIndex() {
 		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap)
 	}
 
+	util.PushStatusBar(Conf.Language(58))
 	sql.WaitForWritingDatabase()
-
 	util.PushStatusBar(Conf.Language(185))
 }
 

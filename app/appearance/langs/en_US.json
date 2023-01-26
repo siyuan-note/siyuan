@@ -945,7 +945,7 @@
     "55": "Indexed references of [%d] documents",
     "56": "Reindexing, please wait until rebuilding is complete before trying to open",
     "57": "Failed to create temp key",
-    "58": "TODO",
+    "58": "Verifying index...",
     "59": "Failed to set sync ignore list",
     "60": "Failed to get the update package: %s",
     "61": "⬆️ The new version installation package is ready, do you want to install the new version now?",

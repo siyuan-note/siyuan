@@ -184,6 +184,18 @@ progressLoading: 400
     padding-left: 0;
   }
 
+  &__window {
+    position: fixed;
+    top: 0;
+    right: 0;
+    display: flex;
+    z-index: 502;
+
+    .toolbar__item {
+      padding: 14px;
+    }
+  }
+
   #windowAppIcon {
     -webkit-app-region: drag;
     width: 42px;

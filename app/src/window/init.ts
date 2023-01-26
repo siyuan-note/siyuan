@@ -16,27 +16,16 @@ export const init = () => {
     globalShortcut();
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
-        const id = getSearch("id");
+        const tabJSON = JSON.parse(getSearch("json"));
         JSONToCenter({
-            "direction": "lr",
-            "resize": "lr",
-            "size": "auto",
-            "type": "center",
-            "instance": "Layout",
-            "children": [{
-                "instance": "Wnd",
-                "children": [{
-                    "instance": "Tab",
-                    active: true,
-                    docIcon: "1f389",
-                    title: "请从这里开始",
-                    "children": [{
-                        rootId: id,
-                        blockId: id,
-                        instance: "Editor",
-                        mode: "wysiwyg"
-                    }]
-                }]
+            direction: "lr",
+            resize: "lr",
+            size: "auto",
+            type: "center",
+            instance: "Layout",
+            children: [{
+                instance: "Wnd",
+                children: [tabJSON]
             }]
         });
         window.siyuan.layout.centerLayout = window.siyuan.layout.layout;

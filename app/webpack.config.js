@@ -19,7 +19,7 @@ module.exports = (env, argv) => {
     },
     entry: {
       'main': './src/index.ts',
-      'window': './src/window.ts',
+      'window': './src/window/index.ts',
     },
     resolve: {
       extensions: ['.ts', '.js', '.tpl', '.scss', '.png', '.svg'],

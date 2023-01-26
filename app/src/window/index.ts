@@ -1,13 +1,13 @@
-import {Constants} from "./constants";
-import {Menus} from "./menus";
-import {Model} from "./layout/Model";
-import "./assets/scss/base.scss";
-import {initBlockPopover} from "./block/popover";
-import {addScript, addScriptSync} from "./protyle/util/addScript";
-import {genUUID} from "./util/genID";
-import {fetchGet, fetchPost} from "./util/fetch";
-import {addBaseURL, setNoteBook} from "./util/pathName";
-import {openFileById} from "./editor/util";
+import {Constants} from "../constants";
+import {Menus} from "../menus";
+import {Model} from "../layout/Model";
+import "../assets/scss/base.scss";
+import {initBlockPopover} from "../block/popover";
+import {addScript, addScriptSync} from "../protyle/util/addScript";
+import {genUUID} from "../util/genID";
+import {fetchGet, fetchPost} from "../util/fetch";
+import {addBaseURL, setNoteBook} from "../util/pathName";
+import {openFileById} from "../editor/util";
 import {
     downloadProgress,
     processSync, progressBackgroundTask,
@@ -15,12 +15,12 @@ import {
     progressStatus,
     setTitle,
     transactionError
-} from "./dialog/processSystem";
-import {promiseTransactions} from "./protyle/wysiwyg/transaction";
-import {initMessage} from "./dialog/message";
-import {getAllTabs} from "./layout/getAll";
-import {getLocalStorage} from "./protyle/util/compatibility";
-import {init} from "./window/init";
+} from "../dialog/processSystem";
+import {promiseTransactions} from "../protyle/wysiwyg/transaction";
+import {initMessage} from "../dialog/message";
+import {getAllTabs} from "../layout/getAll";
+import {getLocalStorage} from "../protyle/util/compatibility";
+import {init} from "../window/init";
 
 class App {
     constructor() {

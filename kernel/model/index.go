@@ -125,6 +125,7 @@ func index(boxID string) {
 	end := time.Now()
 	elapsed := end.Sub(start).Seconds()
 	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.Bytes(uint64(treeSize)))
+	runtime.GC()
 	return
 }
 
@@ -184,6 +185,49 @@ func IndexRefs() {
 	}
 	logging.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
+}
+
+// AutoIndexEmbedBlock 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
+func AutoIndexEmbedBlock() {
+	for {
+		embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+		task.AppendTask(task.DatabaseIndexEmbedBlock, autoIndexEmbedBlock, embedBlocks)
+		time.Sleep(10 * time.Minute)
+	}
+}
+
+func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
+	for i, embedBlock := range embedBlocks {
+		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
+		stmt = strings.TrimSuffix(stmt, "}}")
+		queryResultBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		for _, block := range queryResultBlocks {
+			embedBlock.Content += block.Content
+		}
+		if "" == embedBlock.Content {
+			embedBlock.Content = "no query result"
+		}
+		sql.UpdateBlockContent(embedBlock)
+
+		if 63 <= i { // 一次任务中最多处理 64 个嵌入块，防止卡顿
+			break
+		}
+	}
+}
+
+func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBlock) {
+	embedBlock := sql.GetBlock(embedBlockID)
+	if nil == embedBlock {
+		return
+	}
+
+	for _, block := range queryResultBlocks {
+		embedBlock.Content += block.Block.Markdown
+	}
+	if "" == embedBlock.Content {
+		embedBlock.Content = "no query result"
+	}
+	sql.UpdateBlockContent(embedBlock)
 }
 
 func init() {

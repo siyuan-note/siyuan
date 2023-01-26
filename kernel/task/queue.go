@@ -32,11 +32,6 @@ var (
 	queueLock       = sync.Mutex{}
 )
 
-const (
-	QueueStatusRunning = iota
-	QueueStatusClosing
-)
-
 type Task struct {
 	Action  string
 	Handler reflect.Value
@@ -48,7 +43,7 @@ func PrependTask(action string, handler interface{}, args ...interface{}) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
 
-	if QueueStatusRunning != taskQueueStatus {
+	if util.IsExiting {
 		//logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
 		return
 	}
@@ -61,7 +56,7 @@ func AppendTask(action string, handler interface{}, args ...interface{}) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
 
-	if QueueStatusRunning != taskQueueStatus {
+	if util.IsExiting {
 		//logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
 		return
 	}
@@ -150,11 +145,6 @@ func StatusJob() {
 }
 
 func ExecTaskJob() {
-	if QueueStatusClosing == taskQueueStatus {
-		clearQueue()
-		return
-	}
-
 	task := popTask()
 	if nil == task {
 		return
@@ -165,13 +155,6 @@ func ExecTaskJob() {
 	}
 
 	execTask(task)
-}
-
-func clearQueue() {
-	queueLock.Lock()
-	defer queueLock.Unlock()
-
-	taskQueue = []*Task{}
 }
 
 func popTask() (ret *Task) {

@@ -19,7 +19,7 @@ package treenode
 import (
 	"io"
 	"os"
-	"runtime/debug"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -353,7 +353,7 @@ func InitBlockTree(force bool) {
 		return
 	}
 	blockTreesLock.Unlock()
-	debug.FreeOSMemory()
+	runtime.GC()
 
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)
@@ -385,7 +385,7 @@ func SaveBlockTree(force bool) {
 		os.Exit(util.ExitCodeBlockTreeErr)
 		return
 	}
-	debug.FreeOSMemory()
+	runtime.GC()
 
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(len(data))), util.BlockTreePath, elapsed)

@@ -12,19 +12,19 @@ const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
             getAllWnds(item, wnds);
         }
     }
-}
+};
 export const setTabPosition = () => {
     if (!isWindow()) {
         return;
     }
-    const wndsTemp: Wnd[] = []
+    const wndsTemp: Wnd[] = [];
     getAllWnds(window.siyuan.layout.layout, wndsTemp);
     wndsTemp.forEach(item => {
         const headerElement = item.headersElement.parentElement;
-        const rect = headerElement.getBoundingClientRect()
-        const dragElement = headerElement.querySelector('.item--readonly .fn__flex-1') as HTMLElement
+        const rect = headerElement.getBoundingClientRect();
+        const dragElement = headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement;
         if (rect.top <= 0) {
-            dragElement.style.height = dragElement.parentElement.clientHeight + "px"
+            dragElement.style.height = dragElement.parentElement.clientHeight + "px";
             // @ts-ignore
             dragElement.style.WebkitAppRegion = "drag";
         } else {
@@ -44,5 +44,5 @@ export const setTabPosition = () => {
                 (headerElement.lastElementChild as HTMLElement).style.paddingRight = "";
             }
         }
-    })
-}
+    });
+};

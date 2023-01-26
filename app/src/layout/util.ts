@@ -28,7 +28,6 @@ import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {getSearch, isWindow} from "../util/functions";
-import {setTabPosition} from "../window/setHeader";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {

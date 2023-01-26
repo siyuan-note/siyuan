@@ -8,7 +8,6 @@ import {appearance} from "../config/appearance";
 import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
-import {Layout} from "../layout";
 import {initWindow} from "../util/onGetConfig";
 
 export const init = () => {
@@ -43,4 +42,4 @@ export const init = () => {
             resizeTabs();
         }, 200);
     });
-}
+};

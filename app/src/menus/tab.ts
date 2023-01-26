@@ -223,9 +223,9 @@ export const initTabMenu = (tab: Tab) => {
                     webSecurity: false,
                 },
             });
-            const json = {}
-            layoutToJSON(tab, json)
-            win.loadURL(`${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`)
+            const json = {};
+            layoutToJSON(tab, json);
+            win.loadURL(`${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`);
             tab.parent.removeTab(tab.id);
         }
     }).element);

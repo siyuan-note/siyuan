@@ -28,7 +28,7 @@ export const initStatus = (isWindow = false) => {
     <div class="b3-menu fn__none" style="bottom: 32px;left: 5px">
         ${menuHTML}
     </div>
-</div>`
+</div>`;
     }
     document.getElementById("status").innerHTML = `${barDockHTML}
 <div class="status__msg"></div>

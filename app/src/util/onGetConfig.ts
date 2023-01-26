@@ -518,7 +518,7 @@ export const initWindow = () => {
     </svg>
 </div>`;
     if (isWindow()) {
-        document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">${controlsHTML}</div>`)
+        document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">${controlsHTML}</div>`);
     } else {
         document.getElementById("windowControls").innerHTML = controlsHTML;
     }

@@ -57,7 +57,6 @@ func HookDesktopUIProcJob() {
 
 	uiProcNames := []string{"siyuan", "electron"}
 	existUIProc := false
-
 	util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
 		uiProcID, err := strconv.Atoi(uiProcIDArg.(string))
 		if nil != err {

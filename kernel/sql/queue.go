@@ -136,7 +136,7 @@ func FlushQueue() {
 
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 7000 < elapsed {
-		logging.LogInfof("op tx [%dms]", elapsed)
+		logging.LogInfof("database op tx [%dms]", elapsed)
 	}
 }
 

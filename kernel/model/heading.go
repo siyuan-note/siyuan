@@ -245,7 +245,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	}
 	srcRootBlockID = srcTree.Root.ID
 
-	headingBlock, err := getBlock(srcHeadingID)
+	headingBlock, err := getBlock(srcHeadingID, srcTree)
 	if nil != err {
 		return
 	}

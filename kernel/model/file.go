@@ -892,18 +892,12 @@ func renameWriteJSONQueue(tree *parse.Tree, oldHPath string) (err error) {
 	return
 }
 
-func DuplicateDoc(rootID string) (ret *parse.Tree, err error) {
+func DuplicateDoc(tree *parse.Tree) {
 	msgId := util.PushMsg(Conf.Language(116), 30000)
 	defer util.PushClearMsg(msgId)
 
-	WaitForWritingFiles()
-	ret, err = loadTreeByBlockID(rootID)
-	if nil != err {
-		return
-	}
-
-	resetTree(ret, "Duplicated")
-	createTreeTx(ret)
+	resetTree(tree, "Duplicated")
+	createTreeTx(tree)
 	WaitForWritingFiles()
 	return
 }

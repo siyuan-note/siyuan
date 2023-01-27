@@ -91,6 +91,9 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		}
 
 		ial := ReadDocIAL(parentData)
+		if 1 > len(ial) {
+			logging.LogWarnf("tree [%s] is corrupted", filePath)
+		}
 		title := ial["title"]
 		if "" == title {
 			title = "Untitled"
@@ -266,6 +269,10 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 
 func ReadDocIAL(data []byte) (ret map[string]string) {
 	ret = map[string]string{}
-	jsoniter.Get(data, "Properties").ToVal(&ret)
+	val := jsoniter.Get(data, "Properties")
+	if nil == val || val.ValueType() == jsoniter.InvalidValue {
+		return
+	}
+	val.ToVal(&ret)
 	return
 }

@@ -95,25 +95,6 @@ func (block *Block) IsContainerBlock() bool {
 	return false
 }
 
-func IsBlockFolded(id string) (ret bool) {
-	sqlStmt := "SELECT parent_id, ial FROM blocks WHERE id = ? AND type != 'd'"
-	for i := 0; i < 64; i++ {
-		row := queryRow(sqlStmt, id)
-		var pid, ial string
-		if err := row.Scan(&pid, &ial); nil != err {
-			if sql.ErrNoRows != err {
-				logging.LogErrorf("query scan field failed: %s", err)
-			}
-			return
-		}
-		id = pid
-		if strings.Contains(ial, "fold=\"1\"") {
-			return true
-		}
-	}
-	return
-}
-
 func queryBlockChildrenIDs(id string) (ret []string) {
 	ret = append(ret, id)
 	childIDs := queryBlockIDByParentID(id)

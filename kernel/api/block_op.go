@@ -190,7 +190,7 @@ func updateBlock(c *gin.Context) {
 		return
 	}
 
-	block, err := model.GetBlock(id)
+	block, err := model.GetBlock(id, nil)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = "get block failed: " + err.Error()

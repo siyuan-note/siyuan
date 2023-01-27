@@ -87,7 +87,7 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
 	for _, block := range blocks {
 		root := getBlockIn(blockRoots, block.RootID)
 		if nil == root {
-			root, _ = getBlock(block.RootID)
+			root, _ = getBlock(block.RootID, nil)
 			blockRoots = append(blockRoots, root)
 		}
 		if nil == root {
@@ -134,7 +134,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 	for _, block := range blocks {
 		root := getBlockIn(blockRoots, block.RootID)
 		if nil == root {
-			root, _ = getBlock(block.RootID)
+			root, _ = getBlock(block.RootID, nil)
 			blockRoots = append(blockRoots, root)
 		}
 		block.Depth = 1
@@ -195,11 +195,11 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 					}
 				}
 				for next := li.FirstChild.Next; nil != next; next = next.Next {
-					subBlock, _ := getBlock(next.ID)
+					subBlock, _ := getBlock(next.ID, tree)
 					if unfold {
 						if ast.NodeList == next.Type {
 							for subLi := next.FirstChild; nil != subLi; subLi = subLi.Next {
-								subLiBlock, _ := getBlock(subLi.ID)
+								subLiBlock, _ := getBlock(subLi.ID, tree)
 								var subFirst *sql.Block
 								if 3 != subLi.ListData.Typ {
 									subFirst = sql.GetBlock(subLi.FirstChild.ID)
@@ -224,7 +224,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 							headingChildren := treenode.HeadingChildren(next)
 							var breakSub bool
 							for _, n := range headingChildren {
-								block, _ := getBlock(n.ID)
+								block, _ := getBlock(n.ID, tree)
 								subPos := 0
 								content := block.Content
 								if "" != keyword {
@@ -295,7 +295,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 					for _, headingChild := range headingChildren {
 						if ast.NodeList == headingChild.Type {
 							for subLi := headingChild.FirstChild; nil != subLi; subLi = subLi.Next {
-								subLiBlock, _ := getBlock(subLi.ID)
+								subLiBlock, _ := getBlock(subLi.ID, tree)
 								var subFirst *sql.Block
 								if 3 != subLi.ListData.Typ {
 									subFirst = sql.GetBlock(subLi.FirstChild.ID)
@@ -315,7 +315,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 								subRoot.Blocks = append(subRoot.Blocks, subLiBlock)
 							}
 						} else {
-							subBlock, _ := getBlock(headingChild.ID)
+							subBlock, _ := getBlock(headingChild.ID, tree)
 							subBlock.Depth = 2
 							subRoot.Blocks = append(subRoot.Blocks, subBlock)
 						}

@@ -1,7 +1,7 @@
 import {isWindow} from "../util/functions";
 import {Wnd} from "../layout/Wnd";
-import {Layout} from "../layout";
 import {getCurrentWindow} from "@electron/remote";
+import {Layout} from "../layout";
 
 const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
     for (let i = 0; i < layout.children.length; i++) {

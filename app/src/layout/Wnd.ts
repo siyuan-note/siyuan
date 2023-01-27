@@ -17,6 +17,7 @@ import {Constants} from "../constants";
 /// #if !BROWSER
 import {webFrame} from "electron";
 import {getCurrentWindow} from "@electron/remote";
+import {setTabPosition} from "../window/setHeader";
 /// #endif
 import {Search} from "../search";
 import {showMessage} from "../dialog/message";
@@ -30,7 +31,6 @@ import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
-import {setTabPosition} from "../window/setHeader";
 
 export class Wnd {
     public id: string;
@@ -109,12 +109,14 @@ export class Wnd {
                     break;
                 } else if (target.tagName === "SPAN" && target.className === "fn__flex-1" &&
                     isWindow() && this.headersElement.getBoundingClientRect().top <= 0) {
+                    /// #if !BROWSER
                     const currentWindow = getCurrentWindow();
                     if (currentWindow.isMaximized()) {
                         currentWindow.unmaximize();
                     } else {
                         currentWindow.maximize();
                     }
+                    /// #endif
                     break;
                 }
                 target = target.parentElement;
@@ -328,7 +330,9 @@ export class Wnd {
                         switchWnd(newWnd, targetWnd);
                     }
                 }
+                /// #if !BROWSER
                 setTabPosition();
+                /// #endif
                 return;
             }
 
@@ -504,8 +508,9 @@ export class Wnd {
         } else if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
             this.removeOverCounter(oldFocusIndex);
         }
-
+        /// #if !BROWSER
         setTabPosition();
+        /// #endif
     }
 
     private renderTabList(event: MouseEvent) {

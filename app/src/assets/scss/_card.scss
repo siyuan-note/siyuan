@@ -8,6 +8,7 @@
   position: relative;
   transition: var(--b3-transition);
   cursor: pointer;
+  border: 1px solid var(--b3-theme-surface-lighter);
 
   &:hover {
     background-color: var(--b3-theme-surface-lighter);

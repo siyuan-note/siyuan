@@ -94,7 +94,7 @@
     --b3-width-transition: width .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
     /* 阴影 */
-    --b3-point-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+    --b3-point-shadow: 0 3px 6px rgba(140,149,159,0.15);
     --b3-dialog-shadow: 0 8px 24px rgba(140,149,159,0.2);
 
     /* 图表颜色 */

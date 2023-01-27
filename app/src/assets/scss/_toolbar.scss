@@ -7,6 +7,7 @@
     border-radius: 4px;
     display: flex;
     transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms;
+    border: 1px solid var(--b3-theme-surface-lighter);
 
     &__item {
       color: var(--b3-theme-on-surface);

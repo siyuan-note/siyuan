@@ -149,7 +149,7 @@ progressLoading: 400
   .pcr-selection .pcr-picker {
     height: 16px;
     width: 16px;
-    border: 0;
+    border: 1px solid var(--b3-theme-surface-lighter);
     box-shadow: var(--b3-point-shadow);
     transition: transform 100ms ease-out;
   }
@@ -444,6 +444,7 @@ progressLoading: 400
       border-radius: 90px;
       background-color: rgba(255, 255, 255, 0.8);
       box-shadow: var(--b3-point-shadow);
+      border: 1px solid var(--b3-theme-surface-lighter);
     }
 
     &__name {

@@ -16,11 +16,11 @@
   user-select: none;
 
   &:after {
+    border: 1px solid var(--b3-theme-surface-lighter);
     box-shadow: var(--b3-point-shadow);
     box-sizing: border-box;
     width: 16px;
     height: 16px;
-    border: 1px solid #fff;
     border-radius: 50%;
     pointer-events: none;
     z-index: 1;

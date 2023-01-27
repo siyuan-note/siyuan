@@ -61,8 +61,6 @@ func IsUnfoldHeading(transactions *[]*Transaction) bool {
 	return false
 }
 
-const txFixDelay = 10
-
 var (
 	txQueue     []*Transaction
 	txQueueLock = sync.Mutex{}
@@ -87,7 +85,7 @@ func WaitForWritingFiles() {
 }
 
 func isWritingFiles() bool {
-	time.Sleep(time.Duration(txFixDelay+10) * time.Millisecond)
+	time.Sleep(time.Duration(20) * time.Millisecond)
 	if 0 < len(txQueue) || util.IsMutexLocked(&txQueueLock) {
 		return true
 	}

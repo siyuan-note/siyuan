@@ -916,17 +916,16 @@ func createTreeTx(tree *parse.Tree) {
 	}
 }
 
-func CreateDocByMd(boxID, p, title, md string, sorts []string) (err error) {
-	WaitForWritingFiles()
-
+func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree, err error) {
 	box := Conf.Box(boxID)
 	if nil == box {
-		return errors.New(Conf.Language(0))
+		err = errors.New(Conf.Language(0))
+		return
 	}
 
 	luteEngine := NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	err = createDoc(box.ID, p, title, dom)
+	tree, err = createDoc(box.ID, p, title, dom)
 	if nil != err {
 		return
 	}
@@ -1389,26 +1388,30 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	return
 }
 
-func createDoc(boxID, p, title, dom string) (err error) {
+func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	title = gulu.Str.RemoveInvisible(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
-		return errors.New(Conf.Language(106))
+		err = errors.New(Conf.Language(106))
+		return
 	}
 	title = strings.ReplaceAll(title, "/", "")
 
 	baseName := strings.TrimSpace(path.Base(p))
 	if "" == strings.TrimSuffix(baseName, ".sy") {
-		return errors.New(Conf.Language(16))
+		err = errors.New(Conf.Language(16))
+		return
 	}
 
 	if strings.HasPrefix(baseName, ".") {
-		return errors.New(Conf.Language(13))
+		err = errors.New(Conf.Language(13))
+		return
 	}
 
 	box := Conf.Box(boxID)
 	if nil == box {
-		return errors.New(Conf.Language(0))
+		err = errors.New(Conf.Language(0))
+		return
 	}
 
 	id := strings.TrimSuffix(path.Base(p), ".sy")
@@ -1416,10 +1419,11 @@ func createDoc(boxID, p, title, dom string) (err error) {
 	folder := path.Dir(p)
 	if "/" != folder {
 		parentID := path.Base(folder)
-		parentTree, err := loadTreeByBlockID(parentID)
-		if nil != err {
+		parentTree, loadErr := loadTreeByBlockID(parentID)
+		if nil != loadErr {
 			logging.LogErrorf("get parent tree [id=%s] failed", parentID)
-			return ErrBlockNotFound
+			err = ErrBlockNotFound
+			return
 		}
 		hPath = path.Join(parentTree.HPath, title)
 	} else {
@@ -1433,15 +1437,15 @@ func createDoc(boxID, p, title, dom string) (err error) {
 
 	if !box.Exist(folder) {
 		if err = box.MkdirAll(folder); nil != err {
-			return err
+			return
 		}
 	}
 
 	if box.Exist(p) {
-		return errors.New(Conf.Language(1))
+		err = errors.New(Conf.Language(1))
+		return
 	}
 
-	var tree *parse.Tree
 	luteEngine := NewLute()
 	tree = luteEngine.BlockDOM2Tree(dom)
 	tree.Box = boxID

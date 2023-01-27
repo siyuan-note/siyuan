@@ -327,7 +327,7 @@ func duplicateDoc(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	newTree, err := model.DuplicateDoc(id)
+	tree, err := model.LoadTreeByID(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -335,24 +335,17 @@ func duplicateDoc(c *gin.Context) {
 		return
 	}
 
-	block, _ := model.GetBlock(id)
-	p := block.Path
-	notebook := block.Box
+	p := tree.Path
+	notebook := tree.Box
 	box := model.Conf.Box(notebook)
-	tree, err := model.LoadTree(box.ID, p)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
+	model.DuplicateDoc(tree)
 	pushCreate(box, p, tree.Root.ID, arg)
 
 	ret.Data = map[string]interface{}{
-		"id":       newTree.Root.ID,
+		"id":       tree.Root.ID,
 		"notebook": notebook,
-		"path":     newTree.Path,
-		"hPath":    newTree.HPath,
+		"path":     tree.Path,
+		"hPath":    tree.HPath,
 	}
 }
 
@@ -478,7 +471,7 @@ func createDocWithMd(c *gin.Context) {
 	ret.Data = id
 
 	box := model.Conf.Box(notebook)
-	b, _ := model.GetBlock(id)
+	b, _ := model.GetBlock(id, nil)
 	p := b.Path
 	pushCreate(box, p, id, arg)
 }

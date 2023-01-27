@@ -30,6 +30,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -145,6 +146,10 @@ var (
 	ErrIndexing      = errors.New("indexing")
 )
 
+func LoadTreeByID(id string) (ret *parse.Tree, err error) {
+	return loadTreeByBlockID(id)
+}
+
 func loadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	if "" == id {
 		return nil, ErrTreeNotFound
@@ -152,6 +157,11 @@ func loadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
+		if task.ContainIndexTask() {
+			err = ErrIndexing
+			return
+		}
+
 		return nil, ErrBlockNotFound
 	}
 	ret, err = LoadTree(bt.BoxID, bt.Path)

@@ -25,7 +25,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -383,31 +382,33 @@ func GetBlockKramdown(id string) (ret string) {
 	return
 }
 
-func GetBlock(id string) (ret *Block, err error) {
-	ret, err = getBlock(id)
+func GetBlock(id string, tree *parse.Tree) (ret *Block, err error) {
+	ret, err = getBlock(id, tree)
 	return
 }
 
-func getBlock(id string) (ret *Block, err error) {
+func getBlock(id string, tree *parse.Tree) (ret *Block, err error) {
 	if "" == id {
 		return
 	}
 
-	tree, err := loadTreeByBlockID(id)
-	if nil != err {
-		if task.ContainIndexTask() {
-			err = ErrIndexing
-			return
-		}
-
-		time.Sleep(1 * time.Second)
+	if nil == tree {
 		tree, err = loadTreeByBlockID(id)
 		if nil != err {
-			return
+			time.Sleep(1 * time.Second)
+			tree, err = loadTreeByBlockID(id)
+			if nil != err {
+				return
+			}
 		}
 	}
 
 	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
 	sqlBlock := sql.BuildBlockFromNode(node, tree)
 	if nil == sqlBlock {
 		return

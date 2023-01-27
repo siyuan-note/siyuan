@@ -27,7 +27,6 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -155,7 +154,19 @@ func checkBlockFold(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	ret.Data = sql.IsBlockFolded(id)
+	b, err := model.GetBlock(id, nil)
+	if errors.Is(err, filelock.ErrUnableAccessFile) {
+		ret.Code = 2
+		ret.Data = id
+		return
+	}
+	if errors.Is(err, model.ErrIndexing) {
+		ret.Code = 0
+		ret.Data = false
+		return
+	}
+
+	ret.Data = nil != b && "1" == b.IAL["fold"]
 }
 
 func checkBlockExist(c *gin.Context) {
@@ -168,7 +179,7 @@ func checkBlockExist(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	b, err := model.GetBlock(id)
+	b, err := model.GetBlock(id, nil)
 	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
@@ -376,7 +387,8 @@ func getBlockInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	block, err := model.GetBlock(id)
+
+	tree, err := model.LoadTreeByID(id)
 	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
@@ -387,6 +399,8 @@ func getBlockInfo(c *gin.Context) {
 		ret.Msg = model.Conf.Language(56)
 		return
 	}
+
+	block, _ := model.GetBlock(id, tree)
 	if nil == block {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
@@ -401,13 +415,13 @@ func getBlockInfo(c *gin.Context) {
 			rootChildID = b.ID
 			break
 		}
-		if b, _ = model.GetBlock(parentID); nil == b {
+		if b, _ = model.GetBlock(parentID, tree); nil == b {
 			logging.LogErrorf("not found parent")
 			break
 		}
 	}
 
-	root, err := model.GetBlock(block.RootID)
+	root, err := model.GetBlock(block.RootID, tree)
 	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id

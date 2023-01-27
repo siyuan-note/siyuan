@@ -9,6 +9,10 @@ import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {showTooltip} from "../dialog/tooltip";
 import {isTouchDevice} from "../util/functions";
+/// #if !BROWSER
+import {getCurrentWindow} from "@electron/remote";
+import {openNewWindow} from "../window/openNewWindow";
+/// #endif
 import {layoutToJSON} from "./util";
 
 export class Tab {
@@ -93,6 +97,17 @@ export class Tab {
                         item.remove();
                     });
                 }
+                /// #if !BROWSER
+                // 拖拽到屏幕外
+                setTimeout(() => {
+                    if (!this.headElement.style.maxWidth) {
+                        const windowBounds = getCurrentWindow().getBounds();
+                        if (event.clientX < 0 || event.clientY < 0 || event.clientX > windowBounds.width || event.clientY > windowBounds.height) {
+                            openNewWindow(this)
+                        }
+                    }
+                }, Constants.TIMEOUT_BLOCKLOAD) // 等待主进程发送关闭消息
+                /// #endif
                 window.siyuan.dragElement = undefined;
                 if (event.dataTransfer.dropEffect === "none") {
                     // 按 esc 取消的时候应该还原在 dragover 时交换的 tab

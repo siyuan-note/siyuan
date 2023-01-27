@@ -351,9 +351,11 @@ export const processSync = (data?: IWebSocketData) => {
         }
         return;
     }
+    iconElement.firstElementChild.classList.remove("fn__rotate");
     if (data.code === 0) {  // syncing
         iconElement.classList.add("toolbar__item--active");
-        useElement.setAttribute("xlink:href", "#iconCloudSync");
+        iconElement.firstElementChild.classList.add("fn__rotate");
+        useElement.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
         iconElement.classList.remove("toolbar__item--active");
         useElement.setAttribute("xlink:href", "#iconCloudError");

@@ -616,10 +616,10 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 #dialogContainer > .dialog {
   padding: 8px;
   box-shadow: var(--b3-dialog-shadow);
+  border: 1px solid var(--b3-theme-surface-lighter);
   background-color: var(--b3-menu-background);
   border-radius: 4px;
   width: 520px;
-  border: 0;
   position: absolute;
   inset-inline-start: 0px;
   inset-inline-end: 0px;

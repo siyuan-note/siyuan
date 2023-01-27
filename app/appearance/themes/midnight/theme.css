@@ -95,11 +95,11 @@
 
     /* 阴影 */
     --b3-point-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-    --b3-dialog-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+    --b3-dialog-shadow: 0 8px 24px #010409;
 
     /* 图表颜色 */
     --b3-graph-p-point: #076f7e;
-    --b3-graph-heading-point: #9876aa;
+    --b3-graph-heading-point: #8957e5;
     --b3-graph-math-point: #80FFA5;
     --b3-graph-code-point: #00DDFF;
     --b3-graph-table-point: #37A2FF;
@@ -137,7 +137,7 @@
     --b3-protyle-inline-mark-background: rgb(50, 89, 61);
     --b3-protyle-inline-mark-color: #e8eaed;
     --b3-protyle-inline-tag-color: #9aa0a6;
-    --b3-protyle-inline-blockref-color: #9876aa;
+    --b3-protyle-inline-blockref-color: #8957e5;
 
     /* PDF */
     --b3-pdf-selection: #779170;

@@ -2,7 +2,7 @@ import {Layout} from "./index";
 import {genUUID} from "../util/genID";
 import {
     getInstanceById,
-    getWndByLayout,
+    getWndByLayout, JSONToCenter,
     newCenterEmptyTab,
     resizeTabs,
     setPanelFocus,
@@ -297,7 +297,11 @@ export class Wnd {
             const targetWndElement = event.target.parentElement.parentElement;
             const targetWnd = getInstanceById(targetWndElement.getAttribute("data-id")) as Wnd;
             const tabId = event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB);
-            const oldTab = getInstanceById(tabId) as Tab;
+            let oldTab = getInstanceById(tabId) as Tab;
+            if (isWindow() && !oldTab) { // 从主窗口拖拽到页签新窗口
+                JSONToCenter(JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TABTOWINDOW)), this);
+                oldTab = this.children[this.children.length - 1];
+            }
             if (oldTab.model instanceof Asset) {
                 // https://github.com/siyuan-note/siyuan/issues/6890
                 const pdfViewerElement = oldTab.model.element.querySelector("#viewerContainer");
@@ -636,6 +640,9 @@ export class Wnd {
                             }
                         });
                     }
+                    /// #if !BROWSER
+                    setTabPosition();
+                    /// #endif
                     return;
                 }
                 if (item.headElement) {

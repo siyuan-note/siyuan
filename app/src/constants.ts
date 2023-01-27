@@ -17,6 +17,7 @@ export abstract class Constants {
     // drop 事件
     public static readonly SIYUAN_DROP_FILE: string = "application/siyuan-file";
     public static readonly SIYUAN_DROP_TAB: string = "application/siyuan-tab";
+    public static readonly SIYUAN_DROP_TABTOWINDOW: string = "application/siyuan-tabtowindow";
     public static readonly SIYUAN_DROP_EDITOR: string = "application/siyuan-editor";
 
     // 渲染进程调主进程

@@ -9,6 +9,7 @@ import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {showTooltip} from "../dialog/tooltip";
 import {isTouchDevice} from "../util/functions";
+import {layoutToJSON} from "./util";
 
 export class Tab {
     public parent: Wnd;
@@ -76,6 +77,9 @@ export class Tab {
                 if (tabElement) {
                     event.dataTransfer.setData("text/html", tabElement.outerHTML);
                     event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, this.id);
+                    const modeJSON = {}
+                    layoutToJSON(this, modeJSON)
+                    event.dataTransfer.setData(Constants.SIYUAN_DROP_TABTOWINDOW, JSON.stringify(modeJSON));
                     event.dataTransfer.dropEffect = "move";
                     tabElement.style.opacity = "0.1";
                     window.siyuan.dragElement = this.headElement;

@@ -43,7 +43,7 @@ const setBacklinkFold = (html: string, expand: boolean) => {
         Array.from(tempDom.content.children).forEach((item, index) => {
             if ((expand && index > 2) || (!expand && index > 1)) {
                 if ((expand && index === 3) || (!expand && index === 2)) {
-                    item.insertAdjacentHTML("beforebegin", "<div style=\"max-width: 100%;justify-content: center;\" contenteditable=\"false\" class=\"protyle-breadcrumb__item\"><svg><use xlink:href=\"#iconMore\"></use></svg></div>");
+                    item.insertAdjacentHTML("beforebegin", '<div style="max-width: 100%;justify-content: center;" contenteditable="false" class="protyle-breadcrumb__item"><svg><use xlink:href="#iconMore"></use></svg></div>');
                 }
                 item.classList.add("fn__none");
             }

@@ -166,7 +166,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
 
     public genLoading(protyle: IProtyle) {
         if (this.element.classList.contains("fn__none")) {
-            this.element.innerHTML = "<div class=\"fn__loading\" style=\"height: 128px;position: initial\"><img width=\"64px\" src=\"/stage/loading-pure.svg\"></div>";
+            this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);

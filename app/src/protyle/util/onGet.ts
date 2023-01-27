@@ -194,7 +194,7 @@ const setHTML = (options: {
             Array.from(protyle.wysiwyg.element.children).forEach((item, index) => {
                 if ((options.expand && index > 2) || (!options.expand && index > 1)) {
                     if ((options.expand && index === 3) || (!options.expand && index === 2)) {
-                        item.insertAdjacentHTML("beforebegin", "<div style=\"max-width: 100%;justify-content: center;\" contenteditable=\"false\" class=\"protyle-breadcrumb__item\"><svg><use xlink:href=\"#iconMore\"></use></svg></div>");
+                        item.insertAdjacentHTML("beforebegin", '<div style="max-width: 100%;justify-content: center;" contenteditable="false" class="protyle-breadcrumb__item"><svg><use xlink:href="#iconMore"></use></svg></div>');
                     }
                     item.classList.add("fn__none");
                 }

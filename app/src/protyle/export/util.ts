@@ -80,7 +80,7 @@ export const exportImage = (id: string) => {
     foldElement.addEventListener("change", () => {
         btnsElement[0].setAttribute("disabled", "disabled");
         btnsElement[1].setAttribute("disabled", "disabled");
-        btnsElement[1].parentElement.insertAdjacentHTML("afterend", "<div class=\"fn__loading\"><img height=\"128px\" width=\"128px\" src=\"stage/loading-pure.svg\"></div>");
+        btnsElement[1].parentElement.insertAdjacentHTML("afterend", '<div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>');
         window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold = foldElement.checked;
         fetchPost("/api/export/exportPreviewHTML", {
             id,

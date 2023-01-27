@@ -10,7 +10,7 @@
     <style id="editorFontSize" type="text/css"></style>
     <style id="editorAttr" type="text/css"></style>
 </head>
-<body class="fn__flex-column">
+<body class="fn__flex-column body--window">
 <div id="loading" class="b3-dialog b3-dialog--open">
     <div class="b3-dialog__scrim" style="background-color: #212224"></div>
     <img style="position: absolute;width: 36vh;" src="../../icon.png">

@@ -610,22 +610,14 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			})
 
 			reassignIDUpdated(tree)
-			if err = filesys.WriteTree(tree); nil != err {
-				return io.EOF
-			}
+			indexWriteJSONQueue(tree)
+
 			i++
 			if 0 == i%4 {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), util.ShortPathForBootingDisplay(tree.Path)))
 			}
 			return nil
 		})
-
-		if nil != err {
-			return err
-		}
-
-		IncSync()
-		FullReindex()
 	} else { // 导入单个文件
 		fileName := filepath.Base(localPath)
 		if !strings.HasSuffix(fileName, ".md") && !strings.HasSuffix(fileName, ".markdown") {
@@ -703,13 +695,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		})
 
 		reassignIDUpdated(tree)
-		if err = indexWriteJSONQueue(tree); nil != err {
-			return
-		}
-		IncSync()
+		indexWriteJSONQueue(tree)
 	}
 
 	IncSync()
+	ReloadUI()
 	runtime.GC()
 	return
 }

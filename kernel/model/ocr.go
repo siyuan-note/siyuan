@@ -32,34 +32,37 @@ func autoOCRAssets() {
 
 	assetsPath := util.GetDataAssetsAbsPath()
 	assets := getUnOCRAssetsAbsPaths()
-
-	poolSize := runtime.NumCPU()
-	if 4 < poolSize {
-		poolSize = 4
-	}
-	waitGroup := &sync.WaitGroup{}
-	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
-		defer waitGroup.Done()
-
-		assetAbsPath := arg.(string)
-		text := util.Tesseract(assetAbsPath)
-		p := strings.TrimPrefix(assetAbsPath, assetsPath)
-		p = "assets" + filepath.ToSlash(p)
-		util.AssetsTextsLock.Lock()
-		util.AssetsTexts[p] = text
-		util.AssetsTextsLock.Unlock()
-		util.AssetsTextsChanged = true
-	})
-	for i, assetAbsPath := range assets {
-		waitGroup.Add(1)
-		p.Invoke(assetAbsPath)
-
-		if 63 <= i { // 一次任务中最多处理 64 张图片，防止卡顿
-			break
+	if 0 < len(assets) {
+		poolSize := runtime.NumCPU()
+		if 4 < poolSize {
+			poolSize = 4
 		}
+		waitGroup := &sync.WaitGroup{}
+		p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
+			defer waitGroup.Done()
+
+			assetAbsPath := arg.(string)
+			text := util.Tesseract(assetAbsPath)
+			p := strings.TrimPrefix(assetAbsPath, assetsPath)
+			p = "assets" + filepath.ToSlash(p)
+			util.AssetsTextsLock.Lock()
+			util.AssetsTexts[p] = text
+			util.AssetsTextsLock.Unlock()
+			util.AssetsTextsChanged = true
+		})
+
+		for i, assetAbsPath := range assets {
+			waitGroup.Add(1)
+			p.Invoke(assetAbsPath)
+
+			if 63 <= i { // 一次任务中最多处理 64 张图片，防止卡顿
+				break
+			}
+		}
+
+		waitGroup.Wait()
+		p.Release()
 	}
-	waitGroup.Wait()
-	p.Release()
 
 	cleanNotExistAssetsTexts()
 }

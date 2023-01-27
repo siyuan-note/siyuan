@@ -698,7 +698,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	}
 
 	IncSync()
-	ReloadUI()
+	util.ReloadUI()
 	runtime.GC()
 	return
 }

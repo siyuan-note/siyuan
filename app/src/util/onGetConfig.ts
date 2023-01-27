@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, getInstanceById, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
@@ -30,6 +30,7 @@ import {replaceLocalPath} from "../editor/rename";
 import {workspaceMenu} from "../menus/workspace";
 import {getWorkspaceName} from "./noRelyPCFunction";
 import {setTabPosition} from "../window/setHeader";
+import { Tab } from "../layout/Tab";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -355,6 +356,12 @@ export const initWindow = () => {
             winOnClose(currentWindow, close);
         });
     }
+    ipcRenderer.on(Constants.SIYUAN_CLOSETAB, (e, ipcData) => {
+       const tab =  getInstanceById(ipcData);
+        if (tab && tab instanceof Tab) {
+            tab.parent.removeTab(ipcData);
+        }
+    });
     ipcRenderer.on(Constants.SIYUAN_LOCK_SCREEN, () => {
         exportLayout(false, () => {
             fetchPost("/api/system/logoutAuth", {}, () => {

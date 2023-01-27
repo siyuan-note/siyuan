@@ -15,7 +15,7 @@ import {Graph} from "./dock/Graph";
 import {hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 /// #if !BROWSER
-import {webFrame} from "electron";
+import {webFrame, ipcRenderer} from "electron";
 import {getCurrentWindow} from "@electron/remote";
 import {setTabPosition} from "../window/setHeader";
 /// #endif
@@ -298,9 +298,15 @@ export class Wnd {
             const targetWnd = getInstanceById(targetWndElement.getAttribute("data-id")) as Wnd;
             const tabId = event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB);
             let oldTab = getInstanceById(tabId) as Tab;
-            if (isWindow() && !oldTab) { // 从主窗口拖拽到页签新窗口
+            /// #if !BROWSER
+            if (!oldTab) { // 从主窗口拖拽到页签新窗口
                 JSONToCenter(JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TABTOWINDOW)), this);
                 oldTab = this.children[this.children.length - 1];
+                ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabId);
+            }
+            /// #endif
+            if (!oldTab) {
+                return;
             }
             if (oldTab.model instanceof Asset) {
                 // https://github.com/siyuan-note/siyuan/issues/6890

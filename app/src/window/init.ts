@@ -16,6 +16,7 @@ export const init = () => {
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         const tabJSON = JSON.parse(getSearch("json"));
+        tabJSON.active = true;
         JSONToCenter({
             direction: "lr",
             resize: "lr",

@@ -6,7 +6,7 @@
 		"id": "20200822191536-rm6hwid",
 		"title": "窗口和页签",
 		"type": "doc",
-		"updated": "20200822191536"
+		"updated": "20230128004223"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091259-86iaf33",
-				"updated": "20210401004103"
+				"updated": "20230128004223"
 			},
 			"Children": [
 				{
@@ -83,7 +83,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，这样就能通过浏览器实例进行界面切换。"
+					"Data": "，这样就能通过浏览器实例进行整体界面切换。如果你只需要将页签转换为独立的窗口，可以在页签上右键点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "移动到新窗口"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，或者将页签拖拽到当前窗口之外的地方后释放拖拽，这样也能将该页签转换为独立的窗口。"
 				}
 			]
 		}

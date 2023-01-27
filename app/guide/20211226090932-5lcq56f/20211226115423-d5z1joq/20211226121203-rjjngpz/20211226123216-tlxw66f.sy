@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
-		"updated": "20211228143144"
+		"updated": "20230128004525"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123228-679kzyd",
-				"updated": "20211226145331"
+				"updated": "20230128004525"
 			},
 			"Children": [
 				{
@@ -85,17 +85,18 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，這樣就能通過瀏覽器實例進行界面切換。"
+					"Data": "，這樣就能通過瀏覽器實例進行整體界面切換。如果你只需要將分頁轉換為獨立的視窗，可以在分頁上右鍵點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "移動到新窗口"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，或者將分頁拖拽到當前視窗之外的地方後釋放拖拽，這樣也能將該分頁轉換為獨立的視窗。"
 				}
 			]
-		},
-		{
-			"ID": "20211226124551-w39qoc6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226124551-w39qoc6",
-				"updated": "20211226124551"
-			}
 		}
 	]
 }

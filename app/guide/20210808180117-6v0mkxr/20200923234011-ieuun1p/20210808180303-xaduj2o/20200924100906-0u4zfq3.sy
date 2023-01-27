@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20200924100906"
+		"updated": "20230128004654"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091452-2iom04i",
-				"updated": "20210401004432"
+				"updated": "20230128004654"
 			},
 			"Children": [
 				{
@@ -83,7 +83,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", so that you can switch the interface through the browser instance."
+					"Data": ", in this way, the overall interface switching can be performed through the browser instance. If you only need to convert the tab into an independent window, you can right-click on the tab "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Move to New Window"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, or drag the tab to a place outside the current window and release the drag, this also converts the tab into a separate window."
 				}
 			]
 		}

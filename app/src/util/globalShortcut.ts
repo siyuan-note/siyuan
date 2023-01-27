@@ -48,6 +48,7 @@ import {webFrame} from "electron";
 import {openHistory} from "../history/history";
 import {openCard} from "../card/openCard";
 import {lockScreen} from "../dialog/processSystem";
+import {isWindow} from "./functions";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -393,6 +394,7 @@ export const globalShortcut = () => {
             dialogArrow(switchDialog.element, event);
             return;
         }
+        const isTabWindow = isWindow();
         if (event.ctrlKey && !event.metaKey && event.key === "Tab") {
             if (switchDialog && switchDialog.element.parentElement) {
                 return;
@@ -421,13 +423,17 @@ export const globalShortcut = () => {
                 });
             }
             let dockHtml = "";
-            getAllDocks().forEach((item, index) => {
-                dockHtml += `<li data-type="${item.type}" data-index="${index}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
+            if (!isTabWindow) {
+                dockHtml = '<ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">';
+                getAllDocks().forEach((item, index) => {
+                    dockHtml += `<li data-type="${item.type}" data-index="${index}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
     <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
     <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
 </li>`;
-            });
+                });
+                dockHtml = dockHtml + "</ul>";
+            }
             let range: Range;
             if (getSelection().rangeCount > 0) {
                 range = getSelection().getRangeAt(0).cloneRange();
@@ -437,9 +443,8 @@ export const globalShortcut = () => {
                 title: window.siyuan.languages.switchTab,
                 content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
-    <div class="fn__flex">
-        <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${dockHtml}</ul>
-        <ul class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
+    <div class="fn__flex">${dockHtml}
+        <ul${!isTabWindow ? "" : ' style="border-left:0"'} class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>
     <div class="dialog__path"></div>
 </div>`,
@@ -524,7 +529,7 @@ export const globalShortcut = () => {
         }
         /// #endif
 
-        if (matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
+        if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
             event.preventDefault();
             syncGuide(document.querySelector("#barSync"));
             return;
@@ -539,12 +544,12 @@ export const globalShortcut = () => {
             event.preventDefault();
             return;
         }
-        if (matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
+        if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
             openHistory();
             event.preventDefault();
             return;
         }
-        if (!window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config.custom, event)) {
+        if (!isTabWindow && !window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config.custom, event)) {
             openSetting();
             event.preventDefault();
             return;
@@ -580,7 +585,7 @@ export const globalShortcut = () => {
             event.preventDefault();
             return;
         }
-        if (matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
+        if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
             newDailyNote();
             if (target.classList.contains("protyle-wysiwyg") ||
                 target.tagName === "TABLE" ||
@@ -736,12 +741,12 @@ export const globalShortcut = () => {
         }
 
         // 文件树的操作
-        if (fileTreeKeydown(event)) {
+        if (!isTabWindow && fileTreeKeydown(event)) {
             return;
         }
 
         // 面板的操作
-        if (panelTreeKeydown(event)) {
+        if (!isTabWindow && panelTreeKeydown(event)) {
             return;
         }
 
@@ -843,8 +848,12 @@ const dialogArrow = (element: HTMLElement, event: KeyboardEvent) => {
                 currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
             }
         } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            const sideElement = currentLiElement.parentElement.previousElementSibling || currentLiElement.parentElement.nextElementSibling;
-            (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild).classList.add("b3-list-item--focus");
+            if (isWindow()) {
+                currentLiElement.classList.add("b3-list-item--focus");
+            } else {
+                const sideElement = currentLiElement.parentElement.previousElementSibling || currentLiElement.parentElement.nextElementSibling;
+                (sideElement.querySelector(`[data-index="${currentLiElement.getAttribute("data-index")}"]`) || sideElement.lastElementChild).classList.add("b3-list-item--focus");
+            }
         } else if (event.key === "Enter") {
             const currentType = currentLiElement.getAttribute("data-type") as TDockType;
             if (currentType) {
@@ -893,20 +902,23 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
 </li>`;
         });
         let dockHtml = "";
-        getAllDocks().forEach((item, index) => {
-            dockHtml += `<li data-type="${item.type}" data-index="${index}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
+        if (!isWindow()) {
+            dockHtml = '<ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">'
+            getAllDocks().forEach((item, index) => {
+                dockHtml += `<li data-type="${item.type}" data-index="${index}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
     <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
     <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
 </li>`;
-        });
+            });
+            dockHtml = dockHtml + "</ul>";
+        }
         const dialog = new Dialog({
             title: window.siyuan.languages.recentDocs,
             content: `<div class="fn__flex-column b3-dialog--switch">
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
-    <div class="fn__flex">
-        <ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">${dockHtml}</ul>
-        <ul class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
+    <div class="fn__flex">${dockHtml}
+        <ul${!isWindow() ? "" : ' style="border-left:0"'} class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>
     <div class="dialog__path"></div>
 </div>`,

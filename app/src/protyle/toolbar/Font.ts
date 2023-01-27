@@ -1,7 +1,7 @@
 import {getEventName, setStorageVal, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
 import {setPosition} from "../../util/setPosition";
-import {getSelectionPosition} from "../util/selection";
+import {focusByRange, getSelectionPosition} from "../util/selection";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute} from "../util/hasClosest";
 
@@ -21,13 +21,14 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElement.append(fontMenu(protyle));
             protyle.toolbar.subElement.classList.remove("fn__none");
             protyle.toolbar.subElementCloseCB = undefined;
+            focusByRange(protyle.toolbar.range);
             const position = getSelectionPosition(protyle.wysiwyg.element, protyle.toolbar.range);
             setPosition(protyle.toolbar.subElement, position.left, position.top + 18, 26);
         });
     }
 }
 
-export const fontMenu = (protyle: IProtyle) => {
+const fontMenu = (protyle: IProtyle) => {
     let colorHTML = "";
     ["var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
@@ -97,7 +98,7 @@ export const fontMenu = (protyle: IProtyle) => {
 </div>
 <div style="margin: 4px 0 2px">${window.siyuan.languages.fontSize}</div>
 <div class="fn__flex">
-    <select class="b3-select">
+    <select class="b3-select fn__block">
         <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
         <option ${fontSize === "13px" ? "selected" : ""} value="13px">13px</option>
         <option ${fontSize === "14px" ? "selected" : ""} value="14px">14px</option>

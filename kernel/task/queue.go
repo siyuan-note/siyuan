@@ -47,7 +47,6 @@ func PrependTask(action string, handler interface{}, args ...interface{}) {
 		return
 	}
 
-	cancelTask(action, args...)
 	taskQueue = append([]*Task{newTask(action, handler, args...)}, taskQueue...)
 }
 
@@ -60,28 +59,7 @@ func AppendTask(action string, handler interface{}, args ...interface{}) {
 		return
 	}
 
-	cancelTask(action, args...)
 	taskQueue = append(taskQueue, newTask(action, handler, args...))
-}
-
-func cancelTask(action string, args ...interface{}) {
-	for i := len(taskQueue) - 1; i >= 0; i-- {
-		task := taskQueue[i]
-		if action == task.Action {
-			if len(task.Args) != len(args) {
-				continue
-			}
-
-			for j, arg := range args {
-				if arg != task.Args[j] {
-					continue
-				}
-			}
-
-			taskQueue = append(taskQueue[:i], taskQueue[i+1:]...)
-			break
-		}
-	}
 }
 
 func newTask(action string, handler interface{}, args ...interface{}) *Task {
@@ -181,7 +159,7 @@ func execTask(task *Task) {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*12)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*7)
 	defer cancel()
 	ch := make(chan bool, 1)
 	go func() {

@@ -234,6 +234,9 @@ const viewCards = (deckID: string, title: string, sourceElement: HTMLElement) =>
             while (target && !dialog.element.isSameNode(target)) {
                 const type = target.getAttribute("data-type");
                 if (type === "previous") {
+                    if (pageIndex <= 1) {
+                        return;
+                    }
                     pageIndex--;
                     if (pageIndex <= 1) {
                         previousElement.setAttribute("disabled", "disabled");
@@ -252,6 +255,9 @@ const viewCards = (deckID: string, title: string, sourceElement: HTMLElement) =>
                     event.preventDefault();
                     break;
                 } else if (type === "next") {
+                    if (pageIndex >= response.data.pageCount) {
+                        return;
+                    }
                     pageIndex++;
                     previousElement.removeAttribute("disabled");
                     fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (cardsResponse) => {

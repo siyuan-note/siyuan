@@ -67,17 +67,23 @@ body {
     }
   }
 
-  &.body--window.body--win32 .fullscreen {
-    & > .protyle-breadcrumb,
-    & > .block__icons {
-      padding-right: 126px;
+  &.body--window {
+    .fullscreen {
+      & > .protyle-breadcrumb,
+      & > .block__icons {
+        height: 42px;
+      }
     }
-  }
 
-  &.body--window .fullscreen {
-    & > .protyle-breadcrumb,
-    & > .block__icons {
-      height: 42px;
+    &.body--win32 .fullscreen {
+      & > .protyle-breadcrumb,
+      & > .block__icons {
+        padding-right: 126px;
+      }
+    }
+
+    &.body--blur .layout-tab-bar {
+      background-color: var(--b3-toolbar-blur-background);
     }
   }
 }

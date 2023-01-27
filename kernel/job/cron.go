@@ -45,6 +45,7 @@ func StartCron() {
 }
 
 func every(interval time.Duration, f func()) {
+	util.RandomSleep(50, 200)
 	for {
 		func() {
 			defer logging.Recover()

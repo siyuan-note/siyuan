@@ -97,21 +97,23 @@ func StatusJob() {
 	tasks := taskQueue
 	data := map[string]interface{}{}
 	var items []map[string]interface{}
+	count := map[string]int{}
 	for _, task := range tasks {
-		if OCRImage == task.Action || DatabaseIndexEmbedBlock == task.Action {
-			continue
-		}
-
 		actionLangs := util.TaskActionLangs[util.Lang]
 		action := task.Action
+		if c := count[action]; 3 < c {
+			logging.LogWarnf("too many tasks [%s], ignore show its status", action)
+			continue
+		}
+		count[action]++
+
 		if nil != actionLangs {
 			if label := actionLangs[task.Action]; nil != label {
 				action = label.(string)
 			}
 		}
-		item := map[string]interface{}{
-			"action": action,
-		}
+
+		item := map[string]interface{}{"action": action}
 		items = append(items, item)
 	}
 	if 1 > len(items) {

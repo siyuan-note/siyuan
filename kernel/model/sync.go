@@ -47,9 +47,11 @@ var (
 )
 
 func SyncDataJob() {
-	if time.Now().After(syncPlanTime) {
-		SyncData(false, false, false)
+	if time.Now().Before(syncPlanTime) {
+		return
 	}
+
+	SyncData(false, false, false)
 }
 
 func BootSyncData() {

@@ -373,6 +373,7 @@ export class Breadcrumb {
             window.siyuan.menus.menu.append(exportMd(protyle.block.parentID));
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                iconHTML: Constants.ZWSP,
                 type: "readonly",
                 label: `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${response.data.runeCount}</div>
 <div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${response.data.wordCount}</div>

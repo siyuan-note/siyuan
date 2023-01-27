@@ -252,6 +252,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                     window.siyuan.menus.menu.remove();
                     if (response.data.length === 0) {
                         window.siyuan.menus.menu.append(new MenuItem({
+                            iconHTML: Constants.ZWSP,
                             label: window.siyuan.languages.emptyContent,
                             type: "readonly",
                         }).element);
@@ -458,6 +459,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                         window.siyuan.menus.menu.remove();
                         if (response.data.length === 0) {
                             window.siyuan.menus.menu.append(new MenuItem({
+                                iconHTML: Constants.ZWSP,
                                 label: window.siyuan.languages.emptyContent,
                                 type: "readonly",
                             }).element);

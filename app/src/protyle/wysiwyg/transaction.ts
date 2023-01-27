@@ -431,7 +431,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         const attrsResult: IObject = {};
         Object.keys(data.new).forEach(key => {
             attrsResult[key] = data.new[key];
-            const escapeHTML = data.new[key];
+            const escapeHTML = Lute.EscapeHTMLStr(data.new[key]);
             if (key === "bookmark") {
                 nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
             } else if (key === "name") {

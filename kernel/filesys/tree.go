@@ -270,7 +270,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 func ReadDocIAL(data []byte) (ret map[string]string) {
 	ret = map[string]string{}
 	val := jsoniter.Get(data, "Properties")
-	if nil == val {
+	if nil == val || val.ValueType() == jsoniter.InvalidValue {
 		return
 	}
 	val.ToVal(&ret)

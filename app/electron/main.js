@@ -131,8 +131,8 @@ const boot = () => {
   let defaultHeight
   let workArea
   try {
-    defaultWidth = screen.getPrimaryDisplay().size.width * 4 / 5
-    defaultHeight = screen.getPrimaryDisplay().workAreaSize.height * 4 / 5
+    defaultWidth = screen.getPrimaryDisplay().size.width
+    defaultHeight = screen.getPrimaryDisplay().workAreaSize.height
     workArea = screen.getPrimaryDisplay().workArea
   } catch (e) {
     console.error(e)
@@ -807,8 +807,8 @@ app.whenReady().then(() => {
 
   if (firstOpen) {
     const firstOpenWindow = new BrowserWindow({
-      width: screen.getPrimaryDisplay().size.width / 2,
-      height: screen.getPrimaryDisplay().workAreaSize.height / 2,
+      width: screen.getPrimaryDisplay().size.width * 0.6,
+      height: screen.getPrimaryDisplay().workAreaSize.height * 0.8,
       frame: false,
       icon: path.join(appDir, 'stage', 'icon-large.png'),
       transparent: 'linux' !== process.platform,

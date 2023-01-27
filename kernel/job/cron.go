@@ -47,7 +47,7 @@ func StartCron() {
 func every(interval time.Duration, f func()) {
 	for {
 		func() {
-			logging.Recover()
+			defer logging.Recover()
 			f()
 		}()
 

@@ -26,4 +26,4 @@ export const openNewWindow = (tab: Tab) => {
     layoutToJSON(tab, json);
     win.loadURL(`${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`);
     tab.parent.removeTab(tab.id);
-}
+};

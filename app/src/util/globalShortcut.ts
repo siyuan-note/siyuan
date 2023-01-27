@@ -903,7 +903,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
         });
         let dockHtml = "";
         if (!isWindow()) {
-            dockHtml = '<ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">'
+            dockHtml = '<ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px)">';
             getAllDocks().forEach((item, index) => {
                 dockHtml += `<li data-type="${item.type}" data-index="${index}" class="b3-list-item${(!tabHtml && !dockHtml) ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>

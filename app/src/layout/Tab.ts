@@ -81,8 +81,8 @@ export class Tab {
                 if (tabElement) {
                     event.dataTransfer.setData("text/html", tabElement.outerHTML);
                     event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, this.id);
-                    const modeJSON = {}
-                    layoutToJSON(this, modeJSON)
+                    const modeJSON = {};
+                    layoutToJSON(this, modeJSON);
                     event.dataTransfer.setData(Constants.SIYUAN_DROP_TABTOWINDOW, JSON.stringify(modeJSON));
                     event.dataTransfer.dropEffect = "move";
                     tabElement.style.opacity = "0.1";
@@ -103,10 +103,10 @@ export class Tab {
                     if (!this.headElement.style.maxWidth) {
                         const windowBounds = getCurrentWindow().getBounds();
                         if (event.clientX < 0 || event.clientY < 0 || event.clientX > windowBounds.width || event.clientY > windowBounds.height) {
-                            openNewWindow(this)
+                            openNewWindow(this);
                         }
                     }
-                }, Constants.TIMEOUT_BLOCKLOAD) // 等待主进程发送关闭消息
+                }, Constants.TIMEOUT_BLOCKLOAD); // 等待主进程发送关闭消息
                 /// #endif
                 window.siyuan.dragElement = undefined;
                 if (event.dataTransfer.dropEffect === "none") {

@@ -173,9 +173,9 @@ export class Wnd {
                 it.append(oldTabHeaderElement);
                 return;
             } else if (!exitDrag && !oldTabHeaderElement) { // 拖拽到新窗口
-                oldTabHeaderElement = document.createElement("li")
-                oldTabHeaderElement.style.opacity = "0.1"
-                oldTabHeaderElement.innerHTML = '<svg class="svg"><use xlink:href="#iconFile"></use></svg>'
+                oldTabHeaderElement = document.createElement("li");
+                oldTabHeaderElement.style.opacity = "0.1";
+                oldTabHeaderElement.innerHTML = '<svg class="svg"><use xlink:href="#iconFile"></use></svg>';
                 oldTabHeaderElement.setAttribute("data-clone", "true");
                 it.append(oldTabHeaderElement);
             }
@@ -224,7 +224,7 @@ export class Wnd {
                 it.style.opacity = "";
                 return;
             }
-            const tabId = event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB)
+            const tabId = event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB);
             let oldTab = getInstanceById(tabId) as Tab;
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口

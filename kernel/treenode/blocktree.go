@@ -386,15 +386,8 @@ func IndexBlockTree(tree *parse.Tree) {
 		}
 		slice := val.(*btSlice)
 		slice.m.Lock()
-		if bt := slice.data[n.ID]; nil != bt {
-			if bt.Updated != n.IALAttr("updated") {
-				slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
-				slice.changed = time.Now()
-			}
-		} else {
-			slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
-			slice.changed = time.Now()
-		}
+		slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
+		slice.changed = time.Now()
 		slice.m.Unlock()
 		return ast.WalkContinue
 	})

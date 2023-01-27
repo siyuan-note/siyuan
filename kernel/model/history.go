@@ -19,7 +19,6 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"io/fs"
 	"math"
 	"os"
@@ -37,8 +36,10 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -154,7 +155,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 	isLargeDoc = 1024*1024*1 <= len(data)
 
 	luteEngine := NewLute()
-	historyTree, err := parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	historyTree, err := filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		logging.LogErrorf("parse tree from file [%s] failed, remove it", historyPath)
 		os.RemoveAll(historyPath)

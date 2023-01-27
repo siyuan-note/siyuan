@@ -45,6 +45,7 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -125,7 +126,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			err = readErr
 			return
 		}
-		tree, _, parseErr := parse.ParseJSON(data, luteEngine.ParseOptions)
+		tree, _, parseErr := filesys.ParseJSON(data, luteEngine.ParseOptions)
 		if nil != parseErr {
 			logging.LogErrorf("parse .sy [%s] failed: %s", syPath, parseErr)
 			err = parseErr

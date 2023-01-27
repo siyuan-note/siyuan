@@ -151,7 +151,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
 
 	if nil == tree.Root.FirstChild {
-		newP := parse.NewParagraph()
+		newP := treenode.NewParagraph()
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
 		treenode.IndexBlockTree(tree)
@@ -229,7 +229,7 @@ func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (re
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree) {
 	var err error
 	var needFix bool
-	ret, needFix, err = parse.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, needFix, err = ParseJSON(jsonData, luteEngine.ParseOptions)
 	if nil != err {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		return

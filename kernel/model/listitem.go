@@ -72,7 +72,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 		children = append(children, c)
 	}
 	if 1 > len(children) {
-		newNode := parse.NewParagraph()
+		newNode := treenode.NewParagraph()
 		children = append(children, newNode)
 	}
 
@@ -96,7 +96,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	}
 	srcTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	if nil == srcTree.Root.FirstChild {
-		srcTree.Root.AppendChild(parse.NewParagraph())
+		srcTree.Root.AppendChild(treenode.NewParagraph())
 	}
 	if err = indexWriteJSONQueue(srcTree); nil != err {
 		return "", "", err

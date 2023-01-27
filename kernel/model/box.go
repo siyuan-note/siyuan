@@ -425,7 +425,7 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 
 func genTreeID(tree *parse.Tree) {
 	if nil == tree.Root.FirstChild {
-		tree.Root.AppendChild(parse.NewParagraph())
+		tree.Root.AppendChild(treenode.NewParagraph())
 	}
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

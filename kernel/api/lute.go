@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -70,7 +71,7 @@ func html2BlockDOM(c *gin.Context) {
 		}
 
 		if ast.NodeListItem == n.Type && nil == n.FirstChild {
-			newNode := parse.NewParagraph()
+			newNode := treenode.NewParagraph()
 			n.AppendChild(newNode)
 			n.SetIALAttr("updated", util.TimeFromID(newNode.ID))
 			return ast.WalkSkipChildren

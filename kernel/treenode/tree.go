@@ -114,3 +114,11 @@ func RootChildIDs(rootID string) (ret []string) {
 	})
 	return
 }
+
+func NewParagraph() (ret *ast.Node) {
+	newID := ast.NewNodeID()
+	ret = &ast.Node{ID: newID, Type: ast.NodeParagraph}
+	ret.SetIALAttr("id", newID)
+	ret.SetIALAttr("updated", newID[:14])
+	return
+}

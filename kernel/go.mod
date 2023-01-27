@@ -6,7 +6,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
 	github.com/88250/gulu v1.2.3-0.20221117052724-cd06804db798
-	github.com/88250/lute v1.7.5
+	github.com/88250/lute v1.7.6-0.20230127125719-f7a1c703548a
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
@@ -27,6 +27,7 @@ require (
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.2
+	github.com/goccy/go-json v0.10.0
 	github.com/gofrs/flock v0.8.1
 	github.com/imroc/req/v3 v3.30.0
 	github.com/jinzhu/copier v0.3.5
@@ -73,7 +74,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
-	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect

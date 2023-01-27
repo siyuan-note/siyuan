@@ -447,6 +447,11 @@ func getMarkSpanEnd() string {
 }
 
 func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int, isBacklink bool) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, isBacklinkExpand bool, err error) {
+	//os.MkdirAll("pprof", 0755)
+	//cpuProfile, _ := os.Create("pprof/GetDoc")
+	//pprof.StartCPUProfile(cpuProfile)
+	//defer pprof.StopCPUProfile()
+
 	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
@@ -1451,7 +1456,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {
-		tree.Root.AppendChild(parse.NewParagraph())
+		tree.Root.AppendChild(treenode.NewParagraph())
 	}
 
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}

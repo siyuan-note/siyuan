@@ -138,7 +138,7 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 		}
 	}
 
-	refPivot := parse.NewParagraph()
+	refPivot := treenode.NewParagraph()
 	refNode.InsertBefore(refPivot)
 
 	if ast.NodeListItem == defNode.Type {

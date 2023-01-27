@@ -131,7 +131,7 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 		return
 	}
 
-	ret, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	ret, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		logging.LogErrorf("parse json to tree [%s] failed: %s", localPath, err)
 		return

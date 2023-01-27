@@ -23,7 +23,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"math"
 	"net/http"
 	"os"
@@ -49,7 +48,9 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/studio-b12/gowebdav"
@@ -255,7 +256,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	}
 
 	var tree *parse.Tree
-	tree, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
 		return
@@ -277,7 +278,7 @@ func parseTreeInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute
 	}
 
 	isLargeDoc = 1024*1024*1 <= len(data)
-	tree, err = parse.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		return
 	}

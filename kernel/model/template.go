@@ -20,13 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/88250/lute/ast"
-	"github.com/88250/lute/parse"
-	"github.com/88250/lute/render"
-	"github.com/araddon/dateparse"
-	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -36,9 +29,16 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	sprig "github.com/Masterminds/sprig/v3"
+	"github.com/araddon/dateparse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
@@ -258,7 +258,7 @@ func renderTemplate(p, id string) (string, error) {
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {
-		n.AppendChild(parse.NewParagraph())
+		n.AppendChild(treenode.NewParagraph())
 	}
 	for _, n := range unlinks {
 		n.Unlink()

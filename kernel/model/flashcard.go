@@ -58,7 +58,7 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 	start := (page - 1) * pageSize
 	end := page * pageSize
 	if start > len(allBlockIDs) {
-		return
+		start = len(allBlockIDs)
 	}
 	if end > len(allBlockIDs) {
 		end = len(allBlockIDs)

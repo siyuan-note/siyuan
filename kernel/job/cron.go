@@ -17,31 +17,40 @@
 package job
 
 import (
+	"time"
+
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
-	"github.com/siyuan-note/siyuan/kernel/util"
-	"time"
-
-	"github.com/go-co-op/gocron"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func StartCron() {
-	s := gocron.NewScheduler(time.Local)
-	s.Every(1).Seconds().Do(task.ExecTaskJob)
-	s.Every(5).Seconds().Do(task.StatusJob)
-	s.Every(1).Second().Do(treenode.SaveBlockTreeJob)
-	s.Every(5).Seconds().Do(model.SyncDataJob)
-	s.Every(2).Hours().Do(model.StatJob)
-	s.Every(2).Hours().Do(model.RefreshCheckJob)
-	s.Every(3).Seconds().Do(model.FlushUpdateRefTextRenameDocJob)
-	s.Every(2).Seconds().Do(model.FlushTxJob)
-	s.Every(util.SQLFlushInterval).Do(sql.FlushTxJob)
-	s.Every(10).Minutes().Do(model.FixIndexJob)
-	s.Every(10).Minutes().Do(model.IndexEmbedBlockJob)
-	s.Every(7).Seconds().Do(model.OCRAssetsJob)
-	s.Every(7).Seconds().Do(model.FlushAssetsTextsJob)
-	s.Every(30).Seconds().Do(model.HookDesktopUIProcJob)
-	s.StartAsync()
+	go every(100*time.Millisecond, task.ExecTaskJob)
+	go every(5*time.Second, task.StatusJob)
+	go every(3*time.Second, treenode.SaveBlockTreeJob)
+	go every(5*time.Second, model.SyncDataJob)
+	go every(2*time.Hour, model.StatJob)
+	go every(2*time.Hour, model.RefreshCheckJob)
+	go every(3*time.Second, model.FlushUpdateRefTextRenameDocJob)
+	go every(2*time.Second, model.FlushTxJob)
+	go every(util.SQLFlushInterval, sql.FlushTxJob)
+	go every(10*time.Minute, model.FixIndexJob)
+	go every(10*time.Minute, model.IndexEmbedBlockJob)
+	go every(12*time.Second, model.OCRAssetsJob)
+	go every(12*time.Second, model.FlushAssetsTextsJob)
+	go every(30*time.Second, model.HookDesktopUIProcJob)
+}
+
+func every(interval time.Duration, f func()) {
+	for {
+		func() {
+			defer logging.Recover()
+			f()
+		}()
+
+		time.Sleep(interval)
+	}
 }

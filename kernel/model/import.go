@@ -45,7 +45,6 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -524,7 +523,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			hPath = strings.TrimSuffix(hPath, ext)
 			if info.IsDir() {
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)
-				if err = filesys.WriteTree(tree); nil != err {
+				if err = indexWriteJSONQueue(tree); nil != err {
 					return io.EOF
 				}
 				return nil
@@ -614,7 +613,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			i++
 			if 0 == i%4 {
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), util.ShortPathForBootingDisplay(tree.Path)))
+				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d ", i)+util.ShortPathForBootingDisplay(tree.Path)))
 			}
 			return nil
 		})

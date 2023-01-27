@@ -377,7 +377,7 @@ func createDoc(c *gin.Context) {
 		}
 	}
 
-	err := model.CreateDocByMd(notebook, p, title, md, sorts)
+	tree, err := model.CreateDocByMd(notebook, p, title, md, sorts)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -386,13 +386,6 @@ func createDoc(c *gin.Context) {
 	}
 
 	box := model.Conf.Box(notebook)
-	tree, err := model.LoadTree(box.ID, p)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
 	pushCreate(box, p, tree.Root.ID, arg)
 }
 

@@ -50,11 +50,11 @@ func createDocsByHPath(boxID, hPath, content string) (id string, existed bool, e
 			pathBuilder.WriteString(id)
 			docP := pathBuilder.String() + ".sy"
 			if isNotLast {
-				if err = createDoc(boxID, docP, part, ""); nil != err {
+				if _, err = createDoc(boxID, docP, part, ""); nil != err {
 					return
 				}
 			} else {
-				if err = createDoc(boxID, docP, part, content); nil != err {
+				if _, err = createDoc(boxID, docP, part, content); nil != err {
 					return
 				}
 			}

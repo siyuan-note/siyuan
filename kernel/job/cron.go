@@ -35,7 +35,7 @@ func StartCron() {
 	go every(2*time.Hour, model.StatJob)
 	go every(2*time.Hour, model.RefreshCheckJob)
 	go every(3*time.Second, model.FlushUpdateRefTextRenameDocJob)
-	go every(2*time.Second, model.FlushTxJob)
+	go every(50*time.Millisecond, model.FlushTxJob)
 	go every(util.SQLFlushInterval, sql.FlushTxJob)
 	go every(10*time.Minute, model.FixIndexJob)
 	go every(10*time.Minute, model.IndexEmbedBlockJob)

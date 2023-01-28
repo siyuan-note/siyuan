@@ -4,7 +4,7 @@
   "description": "Build Your Eternal Digital Garden",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@7.18.1",
+  "packageManager": "pnpm@7.26.1",
   "scripts": {
     "lint": "eslint . --fix --ext .ts",
     "dev": "webpack --mode development",
@@ -58,7 +58,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.1",
     "dayjs": "^1.11.5",
-    "electron": "22.0.3",
+    "electron": "22.1.0",
     "electron-builder": "^23.3.3",
     "encoding": "^0.1.13",
     "eslint": "^8.19.0",

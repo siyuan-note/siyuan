@@ -29,6 +29,7 @@ export abstract class Constants {
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
     public static readonly SIYUAN_INIT: string = "siyuan-init";
     public static readonly SIYUAN_OPENURL: string = "siyuan-openurl";
+    public static readonly SIYUAN_OPENWINDOW: string = "siyuan-openwindow";
     public static readonly SIYUAN_CLOSETAB: string = "siyuan-closetab";
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";

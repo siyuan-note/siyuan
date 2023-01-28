@@ -85,7 +85,7 @@ const (
 	ReloadUI                = "task.reload.ui"                 // 重载 UI
 )
 
-func ContainIndexTask(action string, moreActions ...string) bool {
+func Contain(action string, moreActions ...string) bool {
 	actions := append(moreActions, action)
 	actions = gulu.Str.RemoveDuplicatedElem(actions)
 

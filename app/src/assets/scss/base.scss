@@ -198,18 +198,6 @@ progressLoading: 400
     }
   }
 
-  #windowAppIcon {
-    -webkit-app-region: drag;
-    width: 42px;
-    margin-left: 1px;
-    justify-content: center;
-    color: #fff;
-
-    &:hover {
-      color: var(--b3-theme-on-background);
-    }
-  }
-
   #windowControls {
     top: 0;
     z-index: 502;

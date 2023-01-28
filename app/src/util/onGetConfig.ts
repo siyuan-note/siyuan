@@ -183,8 +183,8 @@ export const onGetConfig = (isStart: boolean) => {
 };
 
 export const initBar = () => {
-    const toolbar = document.getElementById("toolbar");
-    toolbar.innerHTML = `
+    const toolbarElement = document.getElementById("toolbar");
+    toolbarElement.innerHTML = `
 <div id="barWorkspace" class="toolbar__item">
     <span class="toolbar__text">${getWorkspaceName()}</span>
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
@@ -211,7 +211,7 @@ export const initBar = () => {
 </div>
 <div class="fn__flex" id="windowControls"></div>`;
     processSync();
-    toolbar.addEventListener("click", (event: MouseEvent) => {
+    toolbarElement.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         while (!target.classList.contains("toolbar")) {
             if (target.id === "barBack") {
@@ -492,16 +492,6 @@ export const initWindow = () => {
         return;
     }
     document.body.classList.add("body--win32");
-
-    // 添加应用图标
-    if (!isWindow()) {
-        const toolbarElement = document.getElementById("toolbar");
-        toolbarElement.insertAdjacentHTML("afterbegin", `<div class="toolbar__item" id="windowAppIcon">
-    <svg>
-        <use xlink:href="#iconSiYuan"></use>
-    </svg>
-</div>`);
-    }
 
     // 添加窗口控件
     const controlsHTML = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}" id="minWindow">

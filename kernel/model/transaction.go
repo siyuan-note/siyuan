@@ -235,7 +235,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
 	if nil != err {
-		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -265,7 +265,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		var targetTree *parse.Tree
 		targetTree, err = tx.loadTree(targetPreviousID)
 		if nil != err {
-			logging.LogErrorf("load tree [id=%s] failed: %s", targetPreviousID, err)
+			logging.LogErrorf("load tree [%s] failed: %s", targetPreviousID, err)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: targetPreviousID}
 		}
 		isSameTree := srcTree.ID == targetTree.ID
@@ -318,7 +318,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	targetTree, err := tx.loadTree(targetParentID)
 	if nil != err {
-		logging.LogErrorf("load tree [id=%s] failed: %s", targetParentID, err)
+		logging.LogErrorf("load tree [%s] failed: %s", targetParentID, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetParentID}
 	}
 	isSameTree := srcTree.ID == targetTree.ID
@@ -404,7 +404,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	var err error
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
-		msg := fmt.Sprintf("not found parent block [id=%s]", operation.ParentID)
+		msg := fmt.Sprintf("not found parent block [%s]", operation.ParentID)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
@@ -413,7 +413,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
-		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
+		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
@@ -492,7 +492,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	var err error
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
-		msg := fmt.Sprintf("not found parent block [id=%s]", operation.ParentID)
+		msg := fmt.Sprintf("not found parent block [%s]", operation.ParentID)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
@@ -501,7 +501,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
-		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
+		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
@@ -569,7 +569,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
 	if nil != err {
-		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -607,7 +607,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 
 	targetTree, err := tx.loadTree(targetRootID)
 	if nil != err {
-		logging.LogErrorf("load tree [id=%s] failed: %s", targetRootID, err)
+		logging.LogErrorf("load tree [%s] failed: %s", targetRootID, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetRootID}
 	}
 	isSameTree := srcTree.ID == targetTree.ID
@@ -663,7 +663,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	if nil != err {
-		msg := fmt.Sprintf("load tree [id=%s] failed: %s", id, err)
+		msg := fmt.Sprintf("load tree [%s] failed: %s", id, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -704,7 +704,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	if nil == block {
-		msg := fmt.Sprintf("not found next block [id=%s]", operation.NextID)
+		msg := fmt.Sprintf("not found next block [%s]", operation.NextID)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.NextID}
 	}
@@ -714,7 +714,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: block.ID}
 	}
 	if nil != err {
-		msg := fmt.Sprintf("load tree [id=%s] failed: %s", block.ID, err)
+		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
@@ -860,7 +860,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeUnableAccessFile, msg: err.Error(), id: id}
 	}
 	if nil != err {
-		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -948,7 +948,7 @@ func (tx *Transaction) setAttrs(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
 	if nil != err {
-		logging.LogErrorf("load tree [id=%s] failed: %s", id, err)
+		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 

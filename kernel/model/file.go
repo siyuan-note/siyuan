@@ -1420,7 +1420,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 		parentID := path.Base(folder)
 		parentTree, loadErr := loadTreeByBlockID(parentID)
 		if nil != loadErr {
-			logging.LogErrorf("get parent tree [id=%s] failed", parentID)
+			logging.LogErrorf("get parent tree [%s] failed", parentID)
 			err = ErrBlockNotFound
 			return
 		}

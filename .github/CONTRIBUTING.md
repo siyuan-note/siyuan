@@ -14,10 +14,10 @@ Install pnpm: `npm install -g pnpm`
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@22.0.3 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@22.1.0 -D`
 * Windows:
     * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
-    * `pnpm install electron@22.0.3 -D`
+    * `pnpm install electron@22.1.0 -D`
 
 NPM mirror:
 
@@ -28,7 +28,7 @@ NPM mirror:
 
 On the desktop, go to the app folder to run:
 
-* `pnpm install electron@22.0.3 -D`
+* `pnpm install electron@22.1.0 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

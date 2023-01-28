@@ -806,7 +806,7 @@ app.whenReady().then(() => {
 
   ipcMain.on('siyuan-lock-screen', () => {
     BrowserWindow.getAllWindows().forEach(item => {
-      item.browserWindow.webContents.send('siyuan-lock-screen')
+      item.webContents.send('siyuan-lock-screen')
     })
   })
 

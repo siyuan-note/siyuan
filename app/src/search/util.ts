@@ -915,7 +915,7 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         title: window.siyuan.languages.type,
         content: `<div class="b3-dialog__content" style="height:calc(70vh - 45px);overflow: auto">
     <label class="fn__flex b3-label">
-        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconParagraph"></use></svg>
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconMath"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.math}
@@ -924,6 +924,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="mathBlock" type="checkbox"${config.types.mathBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconTable"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.table}
         </div>
@@ -931,6 +933,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="table" type="checkbox"${config.types.table ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconQuote"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.quote}
         </div>
@@ -938,6 +942,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="blockquote" type="checkbox"${config.types.blockquote ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconSuper"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.superBlock}
         </div>
@@ -945,6 +951,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="superBlock" type="checkbox"${config.types.superBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconParagraph"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.paragraph}
         </div>
@@ -952,6 +960,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="paragraph" type="checkbox"${config.types.paragraph ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconFile"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.doc}
         </div>
@@ -959,6 +969,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="document" type="checkbox"${config.types.document ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconHeadings"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.headings}
         </div>
@@ -966,6 +978,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="heading" type="checkbox"${config.types.heading ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconList"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.list1}
         </div>
@@ -973,6 +987,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="list" type="checkbox"${config.types.list ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconListItem"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.listItem}
         </div>
@@ -980,6 +996,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="listItem" type="checkbox"${config.types.listItem ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconCode"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.code}
         </div>
@@ -987,6 +1005,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="codeBlock" type="checkbox"${config.types.codeBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconHTML5"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             HTML
         </div>
@@ -994,6 +1014,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         <input id="removeAssets" class="b3-switch fn__flex-center" data-type="htmlBlock" type="checkbox"${config.types.htmlBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconSQL"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.embedBlock}
         </div>

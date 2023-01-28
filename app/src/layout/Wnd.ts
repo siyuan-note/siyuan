@@ -161,7 +161,7 @@ export class Wnd {
                     return true;
                 }
             });
-            if (!newTabHeaderElement  && oldTabHeaderElement && !oldTabHeaderElement.classList.contains("item--pin")) {
+            if (!newTabHeaderElement && oldTabHeaderElement && !oldTabHeaderElement.classList.contains("item--pin")) {
                 it.classList.add("layout-tab-bar--drag");
             }
             if (!exitDrag && oldTabHeaderElement) {
@@ -206,7 +206,6 @@ export class Wnd {
             });
             it.style.opacity = "";
         });
-        const that = this;
         this.headersElement.addEventListener("drop", function (event: DragEvent & { target: HTMLElement }) {
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
@@ -228,11 +227,14 @@ export class Wnd {
             let oldTab = getInstanceById(tabId) as Tab;
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
-                JSONToCenter(JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TABTOWINDOW)), that);
-                oldTab = that.children[that.children.length - 1];
-                ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabId);
-                it.querySelector("li[data-clone='true']").remove();
-                that.switchTab(oldTab.headElement);
+                const wnd = getInstanceById(this.parentElement.parentElement.getAttribute("data-id"));
+                if (wnd instanceof Wnd) {
+                    JSONToCenter(JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TABTOWINDOW)), wnd);
+                    oldTab = wnd.children[wnd.children.length - 1];
+                    ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabId);
+                    it.querySelector("li[data-clone='true']").remove();
+                    wnd.switchTab(oldTab.headElement);
+                }
             }
             /// #endif
             if (!oldTab) {

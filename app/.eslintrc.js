@@ -14,7 +14,6 @@ module.exports = {
     'no-prototype-builtins': 'off',
     'no-useless-escape': 'off',
     'no-irregular-whitespace': 'off',
-    '@typescript-eslint/no-this-alia': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

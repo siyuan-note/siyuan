@@ -83,7 +83,7 @@ body {
     }
 
     &.body--blur .layout-tab-bar {
-      background-color: var(--b3-toolbar-blur-background);
+      opacity: .38;
     }
   }
 }

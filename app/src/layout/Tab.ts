@@ -10,7 +10,6 @@ import {fetchPost} from "../util/fetch";
 import {showTooltip} from "../dialog/tooltip";
 import {isTouchDevice} from "../util/functions";
 /// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
 import {openNewWindow} from "../window/openNewWindow";
 /// #endif
 import {layoutToJSON} from "./util";
@@ -100,11 +99,9 @@ export class Tab {
                 /// #if !BROWSER
                 // 拖拽到屏幕外
                 setTimeout(() => {
-                    if (!this.headElement.style.maxWidth) {
-                        const windowBounds = getCurrentWindow().getBounds();
-                        if (event.clientX < 0 || event.clientY < 0 || event.clientX > windowBounds.width || event.clientY > windowBounds.height) {
-                            openNewWindow(this);
-                        }
+                    if (document.body.contains(this.panelElement) &&
+                        (event.clientX < 0 || event.clientY < 0 || event.clientX > window.innerWidth || event.clientY > window.innerHeight)) {
+                        openNewWindow(this);
                     }
                 }, Constants.TIMEOUT_BLOCKLOAD); // 等待主进程发送关闭消息
                 /// #endif

@@ -1,3 +1,72 @@
+## v2.7.1 / 2023-01-28
+
+### 改进功能
+
+* [支持移动页签到新窗口](https://github.com/siyuan-note/siyuan/issues/2955)
+* [PDF 按住 `Ctrl+D` 矩形标注，`Alt+D` 矩形标注并显示背景](https://github.com/siyuan-note/siyuan/issues/3318)
+* [为浮窗四周添加大小拖拽功能](https://github.com/siyuan-note/siyuan/issues/3659)
+* [Android 端支持通过 `siyuan://` 协议拉起](https://github.com/siyuan-note/siyuan/issues/3716)
+* [为同步状态添加对应的图标](https://github.com/siyuan-note/siyuan/issues/7041)
+* [标签联想改进](https://github.com/siyuan-note/siyuan/issues/7046)
+* [导出图片支持保留原有折叠状态](https://github.com/siyuan-note/siyuan/issues/7093)
+* [移动端不显示 `退出聚焦`](https://github.com/siyuan-note/siyuan/issues/7095)
+* [嵌入块纳入引用计数和反链](https://github.com/siyuan-note/siyuan/issues/7096)
+* [插入资源文件时文件名长度最大限制 189 字节](https://github.com/siyuan-note/siyuan/issues/7099)
+* [改进设置行级元素字体颜色和块外观背景](https://github.com/siyuan-note/siyuan/issues/7102)
+* [改进搜索预览结果定位](https://github.com/siyuan-note/siyuan/issues/7103)
+* [Docker 镜像中加入环境变量 `RUN_IN_CONTAINER`](https://github.com/siyuan-note/siyuan/issues/7104)
+* [移动端底部工具栏遮挡侧边栏问题](https://github.com/siyuan-note/siyuan/pull/7106)
+* [改进图片 OCR 提取文本结果中的多余字符](https://github.com/siyuan-note/siyuan/issues/7109)
+* [自动校验索引时排除非 id 格式的 .sy 文件](https://github.com/siyuan-note/siyuan/issues/7111)
+* [嵌入块支持搜索](https://github.com/siyuan-note/siyuan/issues/7112)
+* [改进内核任务调度机制提升稳定性](https://github.com/siyuan-note/siyuan/issues/7113)
+* [数据同步后需要重新加载图片 OCR 提取结果](https://github.com/siyuan-note/siyuan/issues/7114)
+* [前端用户界面引入后台任务列表](https://github.com/siyuan-note/siyuan/issues/7117)
+* [移动端编辑后显示 `立即同步` 提示](https://github.com/siyuan-note/siyuan/issues/7121)
+* [Android 端前后台切换时自动触发同步](https://github.com/siyuan-note/siyuan/issues/7122)
+* [导入 Markdown 和 `.sy.zip` 时增量建立索引](https://github.com/siyuan-note/siyuan/issues/7123)
+* [改进关闭笔记本体验](https://github.com/siyuan-note/siyuan/issues/7124)
+* [自动校验索引时考虑大小写忽略表](https://github.com/siyuan-note/siyuan/issues/7125)
+* [重命名资源文件不再需要等待数据写入](https://github.com/siyuan-note/siyuan/issues/7133)
+* [双击图片浏览时简化文件名](https://github.com/siyuan-note/siyuan/issues/7134)
+* [改进导入 Markdown 文件时解析 HTML 块](https://github.com/siyuan-note/siyuan/issues/7137)
+* [引用时按下左右键取消引用](https://github.com/siyuan-note/siyuan/issues/7146)
+* [iOS 端支持通过 `siyuan://` 协议拉起](https://github.com/siyuan-note/siyuan/issues/7151)
+* [重建索引改为后台任务](https://github.com/siyuan-note/siyuan/issues/7153)
+* [书签和标签重命名、删除不再需要等待数据写入](https://github.com/siyuan-note/siyuan/issues/7154)
+* [数据同步前先判断网络连通性](https://github.com/siyuan-note/siyuan/issues/7156)
+* [Tesseract OCR 使用用户安装的语言包](https://github.com/siyuan-note/siyuan/issues/7157)
+* [使用 HTTPS 访问认证页面时无法建立 WebSocket 连接](https://github.com/siyuan-note/siyuan/pull/7161)
+* [改进块树数据存取](https://github.com/siyuan-note/siyuan/issues/7168)
+* [搜索时隐藏字体设置面板](https://github.com/siyuan-note/siyuan/issues/7174)
+* [改进创建文档性能](https://github.com/siyuan-note/siyuan/issues/7175)
+* [改进打开文档性能](https://github.com/siyuan-note/siyuan/issues/7177)
+* [搜索界面的类型过滤设置界面的优化](https://github.com/siyuan-note/siyuan/issues/7180)
+* [扩展页签拖拽范围](https://github.com/siyuan-note/siyuan/issues/7187)
+
+### 开发重构
+
+* [改进 getSearch 函数实现](https://github.com/siyuan-note/siyuan/pull/7094)
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/7158)
+* [重构定时任务实现](https://github.com/siyuan-note/siyuan/issues/7171)
+
+### 移除功能
+
+* [移除桌面端左上角窗口标题栏应用图标](https://github.com/siyuan-note/siyuan/issues/7184)
+
+### 修复缺陷
+
+* [PDF 文件名长短影响页签图标大小](https://github.com/siyuan-note/siyuan/issues/7100)
+* [macOS 端 Tesseract OCR 安装后不识别](https://github.com/siyuan-note/siyuan/issues/7107)
+* [包含列表时 Md2BlockDOM 不会进行转义](https://github.com/siyuan-note/siyuan/issues/7118)
+* [图片 OCR 搜索结果后出现多余的 `span` 字符串](https://github.com/siyuan-note/siyuan/issues/7119)
+* [响应较慢时连续点击工作空间菜单会重复](https://github.com/siyuan-note/siyuan/issues/7120)
+* [嵌入块面板按钮显示不全](https://github.com/siyuan-note/siyuan/issues/7128)
+* [数据同步时展开文档树操作可能导致数据丢失](https://github.com/siyuan-note/siyuan/issues/7129)
+* [折叠标题移动到下方后触发状态异常并导致数据丢失](https://github.com/siyuan-note/siyuan/issues/7163)
+* [闪卡预览的下一页可以一直点击](https://github.com/siyuan-note/siyuan/issues/7173)
+* [打开两个相同文档后关闭其中一个时属性转义会被执行](https://github.com/siyuan-note/siyuan/issues/7178)
+
 ## v2.7.0 / 2023-01-17
 
 ### 引入特性

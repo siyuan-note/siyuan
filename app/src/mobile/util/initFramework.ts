@@ -141,8 +141,6 @@ export const initFramework = () => {
             if (window.openFileByURL(window.JSAndroid.getBlockURL())) {
                 return;
             }
-        } else if (window.webkit?.messageHandlers) {
-            window.webkit.messageHandlers.getBlockURL.postMessage()
         }
         const openId = getSearch("id");
         if (openId) {

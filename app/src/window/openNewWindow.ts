@@ -12,6 +12,7 @@ export const openNewWindow = (tab: Tab) => {
         trafficLightPosition: {x: 8, y: 13},
         width: 1032,
         height: 650,
+        transparent: window.siyuan.config.system.os !== "linux",
         frame: "darwin" === window.siyuan.config.system.os,
         icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
         titleBarStyle: "hidden",

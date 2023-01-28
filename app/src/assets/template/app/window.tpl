@@ -11,10 +11,6 @@
     <style id="editorAttr" type="text/css"></style>
 </head>
 <body class="fn__flex-column body--window">
-<div id="loading" class="b3-dialog b3-dialog--open">
-    <div class="b3-dialog__scrim" style="background-color: #212224"></div>
-    <img style="position: absolute;width: 36vh;" src="../../icon.png">
-</div>
 <div class="fn__flex-1 fn__flex">
     <div id="layouts" class="layout fn__flex-1"></div>
 </div>

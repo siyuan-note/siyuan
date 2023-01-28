@@ -193,17 +193,17 @@ export class Wnd {
                 }
             }
         });
+        let dragleaveTimeout: number
         this.headersElement.addEventListener("dragleave", function () {
+            clearTimeout(dragleaveTimeout)
+            // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
+            dragleaveTimeout = window.setTimeout(() => {
+                document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
+                    item.remove();
+                });
+            }, 1000);
             const it = this as HTMLElement;
             it.classList.remove("layout-tab-bar--drag");
-            document.querySelectorAll(".layout-tab-bar").forEach(item => {
-                if (item !== it) {
-                    const cloneElement = item.querySelector("li[data-clone='true']");
-                    if (cloneElement) {
-                        cloneElement.remove();
-                    }
-                }
-            });
             it.style.opacity = "";
         });
         this.headersElement.addEventListener("drop", function (event: DragEvent & { target: HTMLElement }) {

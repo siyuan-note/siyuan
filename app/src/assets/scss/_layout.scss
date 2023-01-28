@@ -106,6 +106,10 @@
       }
     }
 
+    &-bars--drag > .layout-tab-bar {
+      background-color: var(--b3-theme-primary-lightest);
+    }
+
     &-bar {
       list-style: none;
       align-items: center;
@@ -115,10 +119,6 @@
 
       &::-webkit-scrollbar {
         display: none;
-      }
-
-      &--drag {
-        background-color: var(--b3-theme-primary-lightest);
       }
 
       &--readonly {

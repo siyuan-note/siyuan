@@ -18,12 +18,13 @@ package task
 
 import (
 	"context"
-	"github.com/siyuan-note/siyuan/kernel/util"
 	"reflect"
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var (
@@ -84,9 +85,12 @@ const (
 	ReloadUI                = "task.reload.ui"                 // 重载 UI
 )
 
-func ContainIndexTask() bool {
+func ContainIndexTask(action string, moreActions ...string) bool {
+	actions := append(moreActions, action)
+	actions = gulu.Str.RemoveDuplicatedElem(actions)
+
 	for _, task := range taskQueue {
-		if DatabaseIndex == task.Action || DatabaseIndexFull == task.Action {
+		if gulu.Str.Contains(task.Action, actions) {
 			return true
 		}
 	}

@@ -2,7 +2,7 @@
   "tabToWindow": "移动到新窗口",
   "exitFocus": "退出聚焦",
   "pointExchangeSize": "积分兑换",
-  "panel": "面板",
+  "panels": "面板",
   "copyPath": "复制路径",
   "workspaceList": "工作空间",
   "removeWorkspaceTip": "从工作空间列表中移除",

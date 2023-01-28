@@ -47,7 +47,7 @@ export const workspaceMenu = (rect: DOMRect) => {
             });
         });
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.panel,
+            label: window.siyuan.languages.panels,
             icon: "iconDock",
             type: "submenu",
             submenu: dockMenu

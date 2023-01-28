@@ -138,9 +138,11 @@ export const initFramework = () => {
     });
     if (getOpenNotebookCount() > 0) {
         if (window.JSAndroid) {
-           if (window.openFileByURL(window.JSAndroid.getBlockURL())) {
-               return;
+            if (window.openFileByURL(window.JSAndroid.getBlockURL())) {
+                return;
             }
+        } else if (window.webkit?.messageHandlers) {
+            window.webkit.messageHandlers.getBlockURL.postMessage()
         }
         const openId = getSearch("id");
         if (openId) {

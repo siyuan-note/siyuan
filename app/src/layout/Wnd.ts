@@ -193,9 +193,9 @@ export class Wnd {
                 }
             }
         });
-        let dragleaveTimeout: number
+        let dragleaveTimeout: number;
         this.headersElement.addEventListener("dragleave", function () {
-            clearTimeout(dragleaveTimeout)
+            clearTimeout(dragleaveTimeout);
             // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
             dragleaveTimeout = window.setTimeout(() => {
                 document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {

@@ -915,6 +915,8 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
         title: window.siyuan.languages.type,
         content: `<div class="b3-dialog__content" style="height:calc(70vh - 45px);overflow: auto">
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconParagraph"></use></svg>
+        <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             ${window.siyuan.languages.math}
         </div>

@@ -7,7 +7,7 @@ export const query = {
  ${window.siyuan.languages.searchType}
     <div class="fn__flex config-query">
         <label class="fn__flex">
-            <svg class="svg"><use xlink:href="#iconParagraph"></use></svg>
+            <svg class="svg"><use xlink:href="#iconMath"></use></svg>
             <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.math}
@@ -16,6 +16,8 @@ export const query = {
             <input class="b3-switch" id="mathBlock" type="checkbox"${window.siyuan.config.search.mathBlock ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconTable"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.table}
             </div>
@@ -23,6 +25,8 @@ export const query = {
             <input class="b3-switch" id="table" type="checkbox"${window.siyuan.config.search.table ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconQuote"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.quote}
             </div>
@@ -30,6 +34,8 @@ export const query = {
             <input class="b3-switch" id="blockquote" type="checkbox"${window.siyuan.config.search.blockquote ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconSuper"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.superBlock}
             </div>
@@ -37,6 +43,8 @@ export const query = {
             <input class="b3-switch" id="superBlock" type="checkbox"${window.siyuan.config.search.superBlock ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconParagraph"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.paragraph}
             </div>
@@ -44,6 +52,8 @@ export const query = {
             <input class="b3-switch" id="paragraph" type="checkbox"${window.siyuan.config.search.paragraph ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconFile"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.doc}
             </div>
@@ -51,6 +61,8 @@ export const query = {
             <input class="b3-switch" id="document" type="checkbox"${window.siyuan.config.search.document ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconHeadings"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.headings}
             </div>
@@ -58,6 +70,8 @@ export const query = {
             <input class="b3-switch" id="heading" type="checkbox"${window.siyuan.config.search.heading ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconList"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.list1}
             </div>
@@ -65,6 +79,8 @@ export const query = {
             <input class="b3-switch" id="list" type="checkbox"${window.siyuan.config.search.list ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconListItem"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.listItem}
             </div>
@@ -72,6 +88,8 @@ export const query = {
             <input class="b3-switch" id="listItem" type="checkbox"${window.siyuan.config.search.listItem ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconCode"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.code}
             </div>
@@ -79,6 +97,8 @@ export const query = {
             <input class="b3-switch" id="codeBlock" type="checkbox"${window.siyuan.config.search.codeBlock ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconHTML5"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 HTML
             </div>
@@ -86,6 +106,8 @@ export const query = {
             <input class="b3-switch" id="htmlBlock" type="checkbox"${window.siyuan.config.search.htmlBlock ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconSQL"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.embedBlock}
             </div>
@@ -98,6 +120,8 @@ export const query = {
  ${window.siyuan.languages.searchAttr}
     <div class="config-query">
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconN"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.name}
             </div>
@@ -105,6 +129,8 @@ export const query = {
             <input class="b3-switch" id="name" type="checkbox"${window.siyuan.config.search.name ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconA"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.alias}
             </div>
@@ -112,6 +138,8 @@ export const query = {
             <input class="b3-switch" id="alias" type="checkbox"${window.siyuan.config.search.alias ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconM"></use></svg>
+            <span class="fn__space"></span>
             <div class="fn__flex-1">
                 ${window.siyuan.languages.memo}
             </div>

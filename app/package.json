@@ -80,7 +80,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.8",
+    "@electron/remote": "^2.0.9",
     "electron-fetch": "^1.7.4",
     "pnpm": "7.9.3"
   }

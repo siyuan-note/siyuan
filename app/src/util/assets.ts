@@ -5,7 +5,7 @@ import {addStyle} from "../protyle/util/addStyle";
 import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
-import {isMobile} from "./functions";
+import {isMobile, updateColorScheme} from "./functions";
 import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
 
@@ -44,6 +44,8 @@ export const loadAssets = (data: IAppearance) => {
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");
     }
+    updateColorScheme(data.mode);
+
     const styleElement = document.getElementById("themeStyle");
     if ((data.mode === 1 && data.themeDark !== "midnight") || (data.mode === 0 && data.themeLight !== "daylight")) {
         const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/${data.customCSS ? "custom" : "theme"}.css?v=${data.customCSS ? new Date().getTime() : data.themeVer}`;

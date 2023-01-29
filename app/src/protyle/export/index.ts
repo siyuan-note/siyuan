@@ -15,6 +15,7 @@ import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
+import {getColorSchemeName} from "../../util/functions";
 
 export const saveExport = (option: { type: string, id: string }) => {
     /// #if !BROWSER
@@ -79,7 +80,7 @@ const renderPDF = (id: string) => {
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    const html = `<!DOCTYPE html><html>
+    const html = `<!DOCTYPE html><html data-color-scheme="${getColorSchemeName(window.siyuan.config.appearance.mode)}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -553,7 +554,7 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/${themeName}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    const html = `<!DOCTYPE html><html>
+    const html = `<!DOCTYPE html><html data-color-scheme="${getColorSchemeName(window.siyuan.config.appearance.mode)}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">

@@ -21,6 +21,7 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
+import {updateColorScheme} from "../util/functions";
 
 class App {
     constructor() {
@@ -110,6 +111,7 @@ class App {
                                     (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
                                 } else {
                                     (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
+                                    updateColorScheme(window.siyuan.config.appearance.mode);
                                 }
                                 break;
                             case "createdailynote":

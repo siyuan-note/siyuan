@@ -46,3 +46,23 @@ export const isFileAnnotation = (text: string) => {
 export const looseJsonParse = (text: string) => {
     return Function(`"use strict";return (${text})`)();
 };
+
+export const getColorSchemeName = (mode: number) => {
+    switch (mode) {
+        case 0:
+            return "light";
+        case 1:
+            return "dark";
+        default:
+            return null;
+    }
+}
+
+export const updateColorScheme = (mode: number) => {
+    const name = getColorSchemeName(mode);
+    if (name) {
+        document.documentElement.dataset.colorScheme = name;
+    } else {
+        delete document.documentElement.dataset.colorScheme;
+    }
+};

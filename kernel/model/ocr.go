@@ -34,8 +34,8 @@ func autoOCRAssets() {
 	assets := getUnOCRAssetsAbsPaths()
 	if 0 < len(assets) {
 		poolSize := runtime.NumCPU()
-		if 4 < poolSize {
-			poolSize = 4
+		if 2 < poolSize {
+			poolSize = 2
 		}
 		waitGroup := &sync.WaitGroup{}
 		p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {

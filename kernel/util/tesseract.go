@@ -69,6 +69,8 @@ func Tesseract(imgAbsPath string) string {
 		return ""
 	}
 
+	defer logging.Recover()
+
 	if !IsTesseractExtractable(imgAbsPath) {
 		return ""
 	}

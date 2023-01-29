@@ -115,7 +115,8 @@
       align-items: center;
       overflow: auto;
       position: relative;
-      background-color: var(--b3-theme-surface);
+      background-color: var(--b3-theme-background);
+      border-bottom: 1px solid var(--b3-theme-background-light);
 
       &::-webkit-scrollbar {
         display: none;

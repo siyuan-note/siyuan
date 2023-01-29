@@ -1,9 +1,9 @@
 :root {
     /* 主色 */
-    --b3-theme-primary: #3573f0;
-    --b3-theme-primary-light: rgba(53, 115, 240, 0.54);
-    --b3-theme-primary-lighter: rgba(53, 115, 240, 0.38);
-    --b3-theme-primary-lightest: rgba(53, 115, 240, 0.12);
+    --b3-theme-primary: #3575f0;
+    --b3-theme-primary-light: rgba(53, 117, 240, 0.54);
+    --b3-theme-primary-lighter: rgba(53, 117, 240, 0.38);
+    --b3-theme-primary-lightest: rgba(53, 117, 240, 0.12);
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #fff;
     --b3-theme-background-light: #dfe0e1;
@@ -28,9 +28,10 @@
     --b3-font-family-math: KaTeX_Math;
 
     /* 顶部工具栏 */
-    --b3-toolbar-background: #292a2d;
-    --b3-toolbar-blur-background: #3f4041;
+    --b3-toolbar-background: #2b2d30;
+    --b3-toolbar-blur-background: #373a41;
     --b3-toolbar-color: #9aa0a6;
+    --b3-toolbar-hover: #383a42;
 
     /* 线条 */
     --b3-border-color: rgba(0, 0, 0, .1);

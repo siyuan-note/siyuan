@@ -50,8 +50,6 @@ type EmbedBlock struct {
 }
 
 func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	time.Sleep(util.FrontendQueueInterval)
-	WaitForWritingFiles()
 	return searchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
 }
 

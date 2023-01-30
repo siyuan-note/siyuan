@@ -460,7 +460,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
             pushBack();
         }
     } else if (protyle.breadcrumb) {
-        const exitFocusElement =  protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
+        const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
         if (id === protyle.block.rootID) {
             exitFocusElement.classList.add("fn__none");
             exitFocusElement.nextElementSibling.classList.add("fn__none");
@@ -1435,6 +1435,9 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
                 focusBlock(nodeElement, undefined, false);
             }
         }
+        nodeElement.querySelectorAll(".img--select").forEach((item) => {
+            item.classList.remove("img--select");
+        });
     }
     const id = nodeElement.getAttribute("data-node-id");
     if (nodeElement.getAttribute("data-type") === "NodeHeading") {

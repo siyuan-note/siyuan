@@ -66,12 +66,7 @@ func updateRootContent(tx *sql.Tx, content, updated, id string) (err error) {
 	return
 }
 
-func UpdateBlockContent(block *Block) {
-	tx, err := beginTx()
-	if nil != err {
-		return
-	}
-
+func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
 	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
 	if err = execStmtTx(tx, stmt, block.Content, block.ID); nil != err {
 		tx.Rollback()
@@ -89,6 +84,7 @@ func UpdateBlockContent(block *Block) {
 			return
 		}
 	}
-	tx.Commit()
+
 	putBlockCache(block)
+	return
 }

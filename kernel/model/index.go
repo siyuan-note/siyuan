@@ -204,7 +204,7 @@ func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 		if "" == embedBlock.Content {
 			embedBlock.Content = "no query result"
 		}
-		sql.UpdateBlockContent(embedBlock)
+		sql.UpdateBlockContentQueue(embedBlock)
 
 		if 63 <= i { // 一次任务中最多处理 64 个嵌入块，防止卡顿
 			break
@@ -225,7 +225,7 @@ func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBloc
 	if "" == embedBlock.Content {
 		embedBlock.Content = "no query result"
 	}
-	sql.UpdateBlockContent(embedBlock)
+	sql.UpdateBlockContentQueue(embedBlock)
 }
 
 func init() {

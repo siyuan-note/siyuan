@@ -41,7 +41,7 @@ var (
 
 type dbQueueOperation struct {
 	inQueueTime time.Time
-	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index/delete_ids
+	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index/delete_ids/update_block_content
 
 	indexPath                     string      // index
 	upsertTree                    *parse.Tree // upsert/insert_refs
@@ -51,6 +51,7 @@ type dbQueueOperation struct {
 	box                           string      // delete_box/delete_box_refs/index
 	renameTree                    *parse.Tree // rename
 	renameTreeOldHPath            string      // rename
+	block                         *Block      // update_block_content
 }
 
 func FlushTxJob() {
@@ -166,6 +167,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = insertRefs(tx, op.upsertTree)
 	case "update_refs":
 		err = upsertRefs(tx, op.upsertTree)
+	case "update_block_content":
+		err = updateBlockContent(tx, op.block)
 	default:
 		msg := fmt.Sprintf("unknown operation [%s]", op.action)
 		logging.LogErrorf(msg)
@@ -174,13 +177,18 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 	return
 }
 
-func mergeUpsertTrees() (ops []*dbQueueOperation) {
+func UpdateBlockContentQueue(block *Block) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	ops = operationQueue
-	operationQueue = nil
-	return
+	newOp := &dbQueueOperation{block: block, inQueueTime: time.Now(), action: "update_block_content"}
+	for i, op := range operationQueue {
+		if "update_block_content" == op.action && op.block.ID == block.ID {
+			operationQueue[i] = newOp
+			return
+		}
+	}
+	operationQueue = append(operationQueue, newOp)
 }
 
 func UpdateRefsTreeQueue(tree *parse.Tree) {
@@ -319,4 +327,13 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 		}
 	}
 	operationQueue = append(operationQueue, newOp)
+}
+
+func mergeUpsertTrees() (ops []*dbQueueOperation) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	ops = operationQueue
+	operationQueue = nil
+	return
 }

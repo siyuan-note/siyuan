@@ -61,6 +61,7 @@ export const about = {
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
         <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
+      
     </div>
     <div class="fn__space"></div>
     <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">

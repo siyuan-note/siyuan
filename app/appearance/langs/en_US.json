@@ -753,7 +753,7 @@
   "about": "About",
   "about1": "Copyright (c) 2020-present • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/privacy.html'>Privacy Policy</a> • <a target='_blank' href='https://b3log.org/siyuan/eula.html'>User Agreement</a><div class='fn__hr'></div><div class='fn__hr'></div><div class='ft__on-surface'>The core developers of SiYuan are <a href=\"https://github.com/88250\" target=\"_blank\">D</a> and <a href=\"https://github.com/Vanessa219\" target=\"_blank\">V</a>, and the community development contributors can be seen <a href=\"https://github.com/siyuan-note/bazaar/graphs/contributors\" target=\"_blank\">here</a></div>",
   "about2": "Use on browser",
-  "about3": "Please use the Chrome browser and keep it in the same network as the computer, port <code class='fn__code'>${port}</code>, the addresses that may be connected are as follows: ",
+  "about3": "Please use the Chrome browser and keep it in the same network as the computer, port <code class='fn__code'>${port}</code>(In addition to the random port, the first started workspace will also automatically listen to <code class='fn__code'>6806</code> as a fixed port, so that it is convenient for the browser to clip extensions or other external programs to call the kernel interface), the addresses that may be connected are as follows: ",
   "about4": "Open browser",
   "about5": "Access Authorization Code",
   "about6": "After configuration, it will be used as the access authentication password, leave it blank to close the authentication",

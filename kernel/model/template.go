@@ -258,7 +258,11 @@ func renderTemplate(p, id string) (string, error) {
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {
-		n.AppendChild(treenode.NewParagraph())
+		if ast.NodeBlockquote == n.Type {
+			n.FirstChild.InsertAfter(treenode.NewParagraph())
+		} else {
+			n.AppendChild(treenode.NewParagraph())
+		}
 	}
 	for _, n := range unlinks {
 		n.Unlink()

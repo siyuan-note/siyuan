@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"regexp"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -46,6 +47,14 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 		if !entering {
 			return ast.WalkContinue
 		}
+
+		if style := n.IALAttr("style"); "" != style {
+			if strings.Contains(style, "font-size") { // 大纲字号不应该跟随字体设置 https://github.com/siyuan-note/siyuan/issues/7202
+				style = regexp.MustCompile("font-size:.*?;").ReplaceAllString(style, "font-size: inherit;")
+				n.SetIALAttr("style", style)
+			}
+		}
+
 		switch n.Type {
 		case ast.NodeText, ast.NodeLinkText, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			tokens := html.EscapeHTML(n.Tokens)

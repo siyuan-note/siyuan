@@ -474,6 +474,8 @@ func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
 			if confLimit && limit < len(ret) {
 				break
 			}
+		} else {
+			logging.LogWarnf("raw sql query [%s] failed: %s", stmt, err)
 		}
 	}
 	return

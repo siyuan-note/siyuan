@@ -31,7 +31,7 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
 };
 
 export const pasteAsPlainText = async (protyle: IProtyle) => {
-    /// #if !BROWSER && !MOBILE
+    /// #if !BROWSER
     let localFiles: string[] = [];
     if ("darwin" === window.siyuan.config.system.os) {
         const xmlString = clipboard.read("NSFilenamesPboardType");
@@ -49,9 +49,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     if (localFiles.length > 0) {
         uploadLocalFiles(localFiles, protyle, false);
         writeText("");
-    } else {
-        getCurrentWindow().webContents.pasteAndMatchStyle();
     }
+    /// #else
+    getCurrentWindow().webContents.pasteAndMatchStyle();
     /// #endif
 };
 
@@ -101,10 +101,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (textPlain.endsWith(Constants.ZWSP) && !textHTML) {
         textHTML = textPlain;
     }
-    /// #if !MOBILE
+    /// #if !BROWSER
+    // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
     if (!textHTML && !textPlain && ("clipboardData" in event)) {
         if ("darwin" === window.siyuan.config.system.os) {
-            /// #if !BROWSER
             const xmlString = clipboard.read("NSFilenamesPboardType");
             const domParser = new DOMParser();
             const xmlDom = domParser.parseFromString(xmlString, "application/xml");
@@ -117,7 +117,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 writeText("");
                 return;
             }
-            /// #endif
         } else {
             const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
             if (xmlString.data.length > 0) {

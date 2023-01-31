@@ -39,7 +39,7 @@ export const image = {
                                 item.parent.parent.removeTab(item.parent.id);
                             }
                         });
-                        assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
+                        assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                         image.element.querySelector(".config-assets__preview").innerHTML = "";
                     });
                 });

@@ -282,11 +282,16 @@ export class Toolbar {
             // **aaa**bbb 选中 bbb 加粗
             previousElement = previousSibling as HTMLElement;
         }
+        let isEndSpan = false;
         const nextSibling = hasNextSibling(this.range.endContainer);
         if (!["DIV", "TD", "TH", "TR"].includes(this.range.endContainer.parentElement.tagName)) {
             if (this.range.endOffset === this.range.endContainer.textContent.length && !nextSibling) {
                 nextElement = this.range.endContainer.parentElement.nextSibling as HTMLElement;
                 this.range.setEndAfter(this.range.endContainer.parentElement);
+                if (selectText === "") {
+                    isEndSpan = true;
+                    this.range.collapse(false);
+                }
             } else {
                 nextElement = this.range.endContainer.parentElement;
             }
@@ -334,6 +339,15 @@ export class Toolbar {
                 if (rangeTypes.length === 0) {
                     newNodes.push(document.createTextNode(Constants.ZWSP));
                 } else {
+                    // 遇到以下类型结尾不应继承 https://github.com/siyuan-note/siyuan/issues/7200
+                    let removeIndex = 0;
+                    while (removeIndex < rangeTypes.length) {
+                        if (["inline-memo", "text", "block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
+                            rangeTypes.splice(removeIndex, 1);
+                        } else {
+                            ++removeIndex;
+                        }
+                    }
                     const inlineElement = document.createElement("span");
                     inlineElement.setAttribute("data-type", rangeTypes.join(" "));
                     inlineElement.textContent = Constants.ZWSP;
@@ -406,6 +420,18 @@ export class Toolbar {
             if (selectText === "") {
                 const inlineElement = document.createElement("span");
                 rangeTypes.push(type);
+
+                // 遇到以下类型结尾不应继承 https://github.com/siyuan-note/siyuan/issues/7200
+                if (isEndSpan) {
+                    let removeIndex = 0;
+                    while (removeIndex < rangeTypes.length) {
+                        if (["inline-memo", "text", "block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
+                            rangeTypes.splice(removeIndex, 1);
+                        } else {
+                            ++removeIndex;
+                        }
+                    }
+                }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
                 setFontStyle(inlineElement, textObj);
@@ -522,7 +548,7 @@ export class Toolbar {
             }
         }
         if (this.range.startContainer.nodeType !== 3 && (this.range.startContainer as HTMLElement).tagName === "SPAN" &&
-            this.range.startContainer.isSameNode(this.range.endContainer)) {
+            this.range.startContainer.isSameNode(this.range.endContainer) && !isEndSpan) {
             // 切割元素
             const startContainer = this.range.startContainer as HTMLElement;
             const afterElement = document.createElement("span");

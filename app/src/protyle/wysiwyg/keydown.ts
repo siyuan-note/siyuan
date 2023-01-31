@@ -1620,7 +1620,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         /// #endif
 
-        /// #if !BROWSER && !MOBILE
+        /// #if !BROWSER
         if (matchHotKey("⇧⌘V", event)) {
             event.returnValue = false;
             event.preventDefault();

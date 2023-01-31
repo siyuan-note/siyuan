@@ -365,7 +365,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }
         }
     }).element);
-    /// #if !BROWSER && !MOBILE
+    /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.pasteAsPlainText,
         accelerator: "⇧⌘V",

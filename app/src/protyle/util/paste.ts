@@ -49,9 +49,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     if (localFiles.length > 0) {
         uploadLocalFiles(localFiles, protyle, false);
         writeText("");
+    } else {
+        getCurrentWindow().webContents.pasteAndMatchStyle();
     }
-    /// #else
-    getCurrentWindow().webContents.pasteAndMatchStyle();
     /// #endif
 };
 

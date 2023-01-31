@@ -419,7 +419,7 @@ func RemoveUnusedAssets() (ret []string) {
 		}
 	}
 
-	sql.DeleteAssetsByHashes(hashes)
+	sql.BatchRemoveAssetsQueue(hashes)
 
 	for _, unusedAsset := range unusedAssets {
 		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); gulu.File.IsExist(unusedAsset) {
@@ -458,7 +458,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		}
 
 		hash, _ := util.GetEtag(absPath)
-		sql.DeleteAssetsByHashes([]string{hash})
+		sql.BatchRemoveAssetsQueue([]string{hash})
 	}
 
 	if err = os.RemoveAll(absPath); nil != err {

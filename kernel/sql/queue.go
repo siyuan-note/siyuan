@@ -41,7 +41,7 @@ var (
 
 type dbQueueOperation struct {
 	inQueueTime time.Time
-	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index/delete_ids/update_block_content
+	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index/delete_ids/update_block_content/delete_assets
 
 	indexPath                     string      // index
 	upsertTree                    *parse.Tree // upsert/insert_refs
@@ -52,6 +52,7 @@ type dbQueueOperation struct {
 	renameTree                    *parse.Tree // rename
 	renameTreeOldHPath            string      // rename
 	block                         *Block      // update_block_content
+	removeAssetHashes             []string    // delete_assets
 }
 
 func FlushTxJob() {
@@ -169,12 +170,22 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = upsertRefs(tx, op.upsertTree)
 	case "update_block_content":
 		err = updateBlockContent(tx, op.block)
+	case "delete_assets":
+		err = deleteAssetsByHashes(tx, op.removeAssetHashes)
 	default:
 		msg := fmt.Sprintf("unknown operation [%s]", op.action)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 	}
 	return
+}
+
+func BatchRemoveAssetsQueue(hashes []string) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	newOp := &dbQueueOperation{removeAssetHashes: hashes, inQueueTime: time.Now(), action: "delete_assets"}
+	operationQueue = append(operationQueue, newOp)
 }
 
 func UpdateBlockContentQueue(block *Block) {

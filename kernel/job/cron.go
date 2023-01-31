@@ -30,7 +30,7 @@ import (
 func StartCron() {
 	go every(100*time.Millisecond, task.ExecTaskJob)
 	go every(5*time.Second, task.StatusJob)
-	go every(3*time.Second, treenode.SaveBlockTreeJob)
+	go every(5*time.Second, treenode.SaveBlockTreeJob)
 	go every(5*time.Second, model.SyncDataJob)
 	go every(2*time.Hour, model.StatJob)
 	go every(2*time.Hour, model.RefreshCheckJob)

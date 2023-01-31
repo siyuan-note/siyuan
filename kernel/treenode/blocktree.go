@@ -36,7 +36,7 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-var blockTrees = sync.Map{}
+var blockTrees = &sync.Map{}
 
 type btSlice struct {
 	data    map[string]*BlockTree
@@ -269,13 +269,13 @@ func RemoveBlockTreesByRootID(rootID string) {
 	}
 }
 
-func RemoveBlockTreesByPath(path string) {
+func RemoveBlockTreesByPath(boxID, path string) {
 	var ids []string
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)
 		slice.m.Lock()
 		for _, b := range slice.data {
-			if b.Path == path {
+			if b.Path == path && b.BoxID == boxID {
 				ids = append(ids, b.RootID)
 			}
 		}
@@ -386,8 +386,15 @@ func IndexBlockTree(tree *parse.Tree) {
 		}
 		slice := val.(*btSlice)
 		slice.m.Lock()
-		slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
-		slice.changed = time.Now()
+		if bt := slice.data[n.ID]; nil != bt {
+			if bt.Updated != n.IALAttr("updated") {
+				slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
+				slice.changed = time.Now()
+			}
+		} else {
+			slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
+			slice.changed = time.Now()
+		}
 		slice.m.Unlock()
 		return ast.WalkContinue
 	})
@@ -401,6 +408,7 @@ func InitBlockTree(force bool) {
 		if nil != err {
 			logging.LogErrorf("remove blocktree file failed: %s", err)
 		}
+		blockTrees = &sync.Map{}
 		return
 	}
 
@@ -485,7 +493,7 @@ func SaveBlockTree(force bool) {
 
 		key := arg.(map[string]interface{})["key"].(string)
 		slice := arg.(map[string]interface{})["value"].(*btSlice)
-		if !force && (slice.changed.IsZero() || slice.changed.After(start.Add(-7*time.Second))) {
+		if !force && slice.changed.IsZero() {
 			return
 		}
 
@@ -508,16 +516,22 @@ func SaveBlockTree(force bool) {
 		size += uint64(len(data))
 	})
 
+	var count int
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)
-		if !force && (slice.changed.IsZero() || slice.changed.After(start.Add(-7*time.Second))) {
+		if !force && slice.changed.IsZero() {
 			return true
 		}
+
+		count++
 
 		waitGroup.Add(1)
 		p.Invoke(map[string]interface{}{"key": key, "value": value})
 		return true
 	})
+	if 0 < count {
+		logging.LogInfof("wrote block trees [%d]", count)
+	}
 
 	waitGroup.Wait()
 	p.Release()

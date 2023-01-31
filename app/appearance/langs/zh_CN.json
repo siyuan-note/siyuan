@@ -753,7 +753,7 @@
   "about": "关于",
   "about1": "版权所有 (c) 2020-现在 • 云南链滴科技有限公司 • <a target='_blank' href='https://b3log.org/siyuan/privacy.html'>隐私政策</a> • <a target='_blank' href='https://b3log.org/siyuan/eula.html'>用户协议</a><div class='fn__hr'></div><div class='fn__hr'></div><div class='ft__on-surface'>思源笔记的核心开发者是 <a href=\"https://ld246.com/member/88250\" target=\"_blank\">D</a> 和 <a href=\"https://ld246.com/member/Vanessa\" target=\"_blank\">V</a>，社区开发贡献者可在<a href=\"https://github.com/siyuan-note/bazaar/graphs/contributors\" target=\"_blank\">这里</a>看到</div>",
   "about2": "在浏览器上使用",
-  "about3": "请使用 Chrome 浏览器并保持和电脑在同一个网络内，端口 <code class='fn__code'>${port}</code>，可能连通的网络地址：",
+  "about3": "请使用 Chrome 浏览器并保持和电脑在同一个网络内，端口 <code class='fn__code'>${port}</code>（第一个启动的工作空间除了随机端口外也会自动监听 <code class='fn__code'>6806</code> 作为固定端口，以方便浏览器剪藏扩展或者其他外部程序调用内核接口），可能连通的网络地址：",
   "about4": "打开浏览器",
   "about5": "访问授权码",
   "about6": "配置后作为访问鉴权密码，留空则关闭鉴权",

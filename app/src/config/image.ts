@@ -44,6 +44,7 @@ export const image = {
                         });
                     });
                     assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`
+                    image.element.querySelector(".config-assets__preview").innerHTML = "";
                 });
         });
 

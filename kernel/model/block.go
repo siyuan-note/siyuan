@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/88250/lute"
@@ -464,6 +465,18 @@ func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBloc
 	b := treenode.GetBlockTree(def.ID)
 	if nil == b {
 		return
+	}
+
+	// 嵌入块查询结果中显示块引用计数 https://github.com/siyuan-note/siyuan/issues/7191
+	var defIDs []string
+	for _, n := range nodes {
+		defIDs = append(defIDs, n.ID)
+	}
+	refCount := sql.QueryRefCount(defIDs)
+	for _, n := range nodes {
+		if cnt := refCount[n.ID]; 0 < cnt {
+			n.SetIALAttr("refcount", strconv.Itoa(cnt))
+		}
 	}
 
 	luteEngine := NewLute()

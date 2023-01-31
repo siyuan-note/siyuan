@@ -79,6 +79,28 @@ func queryRefTexts() (ret []string) {
 	return
 }
 
+func QueryRefCount(defIDs []string) (ret map[string]int) {
+	ret = map[string]int{}
+	ids := strings.Join(defIDs, "','")
+	ids = "('" + ids + "')"
+	rows, err := query("SELECT def_block_id, COUNT(*) AS ref_cnt FROM refs WHERE def_block_id IN " + ids + " GROUP BY def_block_id")
+	if nil != err {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		var cnt int
+		if err = rows.Scan(&id, &cnt); nil != err {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret[id] = cnt
+	}
+	return
+}
+
 func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
 	ret = map[string]int{}
 	rows, err := query("SELECT def_block_id, COUNT(*) AS ref_cnt FROM refs WHERE def_block_root_id = ? GROUP BY def_block_id", defRootID)

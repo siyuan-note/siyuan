@@ -497,6 +497,10 @@ export const resizeTabs = () => {
             });
         });
         pdfResize();
+        document.querySelectorAll(".protyle-gutters").forEach(item => {
+            item.classList.add("fn__none");
+            item.innerHTML = "";
+        });
     }, 200);
 };
 

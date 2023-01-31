@@ -96,7 +96,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
                 newHeight = y - newTop;
             }
             rectResizeElement.setAttribute("style",
-                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey?"var(--b3-pdf-background1)":""}`);
+                `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey ? "var(--b3-pdf-background1)" : ""}`);
         };
         documentSelf.onmouseup = () => {
             documentSelf.onmousemove = null;
@@ -401,7 +401,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
     return results;
 };
 
-const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: HTMLElement, type:string) => {
+const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: HTMLElement, type: string) => {
     const rect = rectResizeElement.getBoundingClientRect();
 
     const startPageElement = hasClosestByClassName(document.elementFromPoint(rect.left, rect.top - 1), "page");
@@ -615,10 +615,10 @@ const copyAnno = (idPath: string, fileName: string) => {
         ) {
             const rect = rectElement.firstElementChild.getBoundingClientRect();
             getCurrentWindow().webContents.capturePage({
-                x: Math.floor(rect.x),
-                y: Math.floor(rect.y),
-                width: Math.floor(rect.width),
-                height: Math.floor(rect.height)
+                x: Math.floor(rect.x * window.siyuan.storage[Constants.LOCAL_ZOOM]),
+                y: Math.floor(rect.y * window.siyuan.storage[Constants.LOCAL_ZOOM]),
+                width: Math.floor(rect.width * window.siyuan.storage[Constants.LOCAL_ZOOM]),
+                height: Math.floor(rect.height * window.siyuan.storage[Constants.LOCAL_ZOOM])
             }).then((image: NativeImage) => {
                 fetch(image.toDataURL()).then((response) => {
                     return response.blob();

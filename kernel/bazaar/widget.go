@@ -55,7 +55,7 @@ func Widgets() (widgets []*Widget) {
 
 		widget := &Widget{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(widget).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(widget).Get(innerU)
 		if nil != innerErr {
 			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
 			return

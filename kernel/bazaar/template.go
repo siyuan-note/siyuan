@@ -55,7 +55,7 @@ func Templates() (templates []*Template) {
 
 		template := &Template{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(template).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(template).Get(innerU)
 		if nil != innerErr {
 			logging.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
 			return

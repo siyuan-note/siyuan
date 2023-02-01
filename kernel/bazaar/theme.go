@@ -56,7 +56,7 @@ func Themes() (ret []*Theme) {
 
 		theme := &Theme{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/theme.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(theme).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(theme).Get(innerU)
 		if nil != innerErr {
 			logging.LogErrorf("get bazaar package [%s] failed: %s", innerU, innerErr)
 			return

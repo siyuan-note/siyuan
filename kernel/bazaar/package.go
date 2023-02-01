@@ -164,7 +164,7 @@ func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
 	ret = map[string]interface{}{}
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
-	resp, reqErr := request.SetResult(&ret).Get(u)
+	resp, reqErr := request.SetSuccessResult(&ret).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
 		return
@@ -409,7 +409,7 @@ func getBazaarIndex() map[string]*bazaarPackage {
 
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"
-	resp, reqErr := request.SetResult(&cachedBazaarIndex).Get(u)
+	resp, reqErr := request.SetSuccessResult(&cachedBazaarIndex).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
 		return cachedBazaarIndex

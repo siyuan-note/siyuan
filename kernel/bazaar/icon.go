@@ -54,7 +54,7 @@ func Icons() (icons []*Icon) {
 
 		icon := &Icon{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/icon.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetResult(icon).Get(innerU)
+		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(icon).Get(innerU)
 		if nil != innerErr {
 			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
 			return

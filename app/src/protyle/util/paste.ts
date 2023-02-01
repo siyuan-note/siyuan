@@ -178,7 +178,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             wbrElement.remove();
             range.deleteContents();
             const tempElement = document.createElement("span");
-            tempElement.setAttribute("data-type", "code")
+            tempElement.setAttribute("data-type", "code");
             tempElement.textContent = Constants.ZWSP + code;
             range.insertNode(tempElement);
             if (!hasPreviousSibling(tempElement)) {

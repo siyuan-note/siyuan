@@ -524,13 +524,12 @@ func SaveBlockTree(force bool) {
 		}
 
 		count++
-
 		waitGroup.Add(1)
 		p.Invoke(map[string]interface{}{"key": key, "value": value})
 		return true
 	})
 	if 0 < count {
-		logging.LogInfof("wrote block trees [%d]", count)
+		//logging.LogInfof("wrote block trees [%d]", count)
 	}
 
 	waitGroup.Wait()

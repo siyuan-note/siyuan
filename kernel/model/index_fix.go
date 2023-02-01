@@ -106,6 +106,7 @@ func autoFixIndex() {
 
 		size := len(paths)
 
+		// 清理块树中重复冗余的数据
 		redundantPaths := treenode.GetRedundantPaths(box.ID, paths)
 		for _, p := range redundantPaths {
 			treenode.RemoveBlockTreesByPath(box.ID, p)

@@ -270,31 +270,18 @@ func RemoveBlockTreesByRootID(rootID string) {
 }
 
 func RemoveBlockTreesByPath(boxID, path string) {
-	var ids []string
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)
 		slice.m.Lock()
 		for _, b := range slice.data {
 			if b.Path == path && b.BoxID == boxID {
-				ids = append(ids, b.RootID)
+				delete(slice.data, b.ID)
+				slice.changed = time.Now()
 			}
 		}
 		slice.m.Unlock()
 		return true
 	})
-
-	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	for _, id := range ids {
-		val, ok := blockTrees.Load(btHash(id))
-		if !ok {
-			continue
-		}
-		slice := val.(*btSlice)
-		slice.m.Lock()
-		delete(slice.data, id)
-		slice.m.Unlock()
-		slice.changed = time.Now()
-	}
 }
 
 func RemoveBlockTreesByPathPrefix(pathPrefix string) {

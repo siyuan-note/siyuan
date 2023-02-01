@@ -474,7 +474,7 @@ func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
 		if block := scanBlockRows(rows); nil != block {
 			ret = append(ret, block)
 		} else {
-			logging.LogWarnf("raw sql query [%s] failed: %s", stmt)
+			logging.LogWarnf("raw sql query [%s] failed", stmt)
 			errCount++
 		}
 

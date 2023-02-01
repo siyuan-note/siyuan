@@ -197,6 +197,10 @@ func autoIndexEmbedBlock(embedBlocks []*sql.Block) {
 	for i, embedBlock := range embedBlocks {
 		stmt := strings.TrimPrefix(embedBlock.Markdown, "{{")
 		stmt = strings.TrimSuffix(stmt, "}}")
+		if !strings.Contains(strings.ToLower(stmt), "select") {
+			continue
+		}
+
 		queryResultBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
 		for _, block := range queryResultBlocks {
 			embedBlock.Content += block.Content

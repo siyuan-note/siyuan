@@ -468,14 +468,18 @@ func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
 	defer rows.Close()
 
 	confLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	var count, errCount int
 	for rows.Next() {
+		count++
 		if block := scanBlockRows(rows); nil != block {
 			ret = append(ret, block)
-			if confLimit && limit < len(ret) {
-				break
-			}
 		} else {
-			logging.LogWarnf("raw sql query [%s] failed: %s", stmt, err)
+			logging.LogWarnf("raw sql query [%s] failed: %s", stmt)
+			errCount++
+		}
+
+		if (confLimit && limit < count) || 7 < errCount {
+			break
 		}
 	}
 	return

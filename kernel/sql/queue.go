@@ -181,6 +181,10 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 }
 
 func BatchRemoveAssetsQueue(hashes []string) {
+	if 1 > len(hashes) {
+		return
+	}
+
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
@@ -319,6 +323,10 @@ func RemoveTreeQueue(box, rootID string) {
 }
 
 func BatchRemoveTreeQueue(rootIDs []string) {
+	if 1 > len(rootIDs) {
+		return
+	}
+
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 

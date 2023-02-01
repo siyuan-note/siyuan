@@ -32,10 +32,11 @@ const setBacklinkFold = (html: string, expand: boolean) => {
     tempDom.innerHTML = html;
     if (tempDom.content.firstElementChild.classList.contains("li")) {
         if (expand) {
-            const thirdLiElement = tempDom.content.querySelector(".li .li .li");
-            if (thirdLiElement) {
-                thirdLiElement.setAttribute("fold", "1");
-            }
+            tempDom.content.querySelectorAll(".li .li .li").forEach(item => {
+                if (item.childElementCount > 3) {
+                    item.setAttribute("fold", "1");
+                }
+            });
         } else {
             tempDom.content.firstElementChild.setAttribute("fold", "1");
         }

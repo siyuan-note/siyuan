@@ -230,7 +230,7 @@ func reindexTreeByPath(box, p string, i, size int) {
 func reindexTree(rootID string, i, size int) {
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
-		logging.LogWarnf("root block not found", rootID)
+		logging.LogWarnf("root block [%s] not found", rootID)
 		return
 	}
 

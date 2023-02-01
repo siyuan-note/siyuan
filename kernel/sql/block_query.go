@@ -478,7 +478,7 @@ func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
 			errCount++
 		}
 
-		if (confLimit && limit < count) || 2 < errCount {
+		if (confLimit && limit < count) || 1 < errCount {
 			break
 		}
 	}

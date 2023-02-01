@@ -57,34 +57,6 @@ func extensionCopy(c *gin.Context) {
 		return
 	}
 
-	luteEngine := model.NewLute()
-	md := luteEngine.HTML2Md(dom)
-	md = strings.TrimSpace(md)
-
-	var unlinks []*ast.Node
-	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if ast.NodeText == n.Type {
-			// 剔除行首空白
-			if ast.NodeParagraph == n.Parent.Type && n.Parent.FirstChild == n {
-				n.Tokens = bytes.TrimLeft(n.Tokens, " \t\n")
-			}
-		}
-		return ast.WalkContinue
-	})
-	for _, unlink := range unlinks {
-		unlink.Unlink()
-	}
-
-	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
-	ret.Data = map[string]interface{}{
-		"md": md,
-	}
-
 	uploaded := map[string]string{}
 	for originalName, file := range form.File {
 		oName, err := url.PathUnescape(originalName)
@@ -139,20 +111,34 @@ func extensionCopy(c *gin.Context) {
 		uploaded[oName] = "assets/" + fName
 	}
 
-	for k, v := range uploaded {
-		if "" == md {
-			// 复制单个图片的情况
-			md = "![](" + v + ")"
-			break
+	luteEngine := lute.New()
+	md := luteEngine.HTML2Md(dom)
+	md = strings.TrimSpace(md)
+
+	var unlinks []*ast.Node
+	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
 		}
-		md = strings.ReplaceAll(md, "]("+k+")", "]("+v+")")
-		p, err := url.Parse(k)
-		if nil != err {
-			continue
+
+		if ast.NodeText == n.Type {
+			// 剔除行首空白
+			if ast.NodeParagraph == n.Parent.Type && n.Parent.FirstChild == n {
+				n.Tokens = bytes.TrimLeft(n.Tokens, " \t\n")
+			}
+		} else if ast.NodeImage == n.Type {
+			if dest := n.ChildByType(ast.NodeLinkDest); nil != dest {
+				dest.Tokens = []byte(uploaded[string(dest.Tokens)])
+			}
 		}
-		md = strings.ReplaceAll(md, "]("+p.Path+")", "]("+v+")")
+		return ast.WalkContinue
+	})
+	for _, unlink := range unlinks {
+		unlink.Unlink()
 	}
 
+	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	ret.Data = map[string]interface{}{
 		"md": md,
 	}

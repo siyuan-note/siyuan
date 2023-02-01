@@ -16,6 +16,7 @@ import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
+import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 
 const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     let needRender = true;
@@ -176,10 +177,18 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             const html = nodeElement.outerHTML;
             wbrElement.remove();
             range.deleteContents();
-            const tempElement = document.createElement("code");
-            tempElement.textContent = code;
-            range.insertNode(document.createElement("wbr"));
+            const tempElement = document.createElement("span");
+            tempElement.setAttribute("data-type", "code")
+            tempElement.textContent = Constants.ZWSP + code;
             range.insertNode(tempElement);
+            if (!hasPreviousSibling(tempElement)) {
+                tempElement.insertAdjacentHTML("beforebegin", Constants.ZWSP);
+            }
+            if (hasNextSibling(tempElement)) {
+                tempElement.insertAdjacentHTML("afterend", "<wbr>");
+            } else {
+                tempElement.insertAdjacentHTML("afterend", Constants.ZWSP + "<wbr>");
+            }
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
             focusByWbr(protyle.wysiwyg.element, range);
         } else {

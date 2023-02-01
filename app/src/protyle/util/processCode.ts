@@ -16,18 +16,13 @@ export const processPasteCode = (html: string, text: string) => {
         (tempElement.lastElementChild as HTMLElement).style.fontFamily.indexOf("monospace") > -1) {
         // VS Code
         isCode = true;
-    }
-    const pres = tempElement.querySelectorAll("pre");
-    if (tempElement.childElementCount === 1 && pres.length === 1
-        && pres[0].className !== "protyle-sv") {
+    } else if (tempElement.childElementCount === 1 && tempElement.querySelectorAll("pre").length === 1) {
         // IDE
         isCode = true;
-    }
-    if (html.indexOf('\n<p class="p1">') === 0) {
+    } else if (html.indexOf('\n<p class="p1">') === 0) {
         // Xcode
         isCode = true;
-    }
-    if (tempElement.childElementCount === 1 && tempElement.firstElementChild.tagName === "TABLE" &&
+    } else if (tempElement.childElementCount === 1 && tempElement.firstElementChild.tagName === "TABLE" &&
         tempElement.querySelector(".line-number") && tempElement.querySelector(".line-content")) {
         // 网页源码
         isCode = true;
@@ -35,7 +30,7 @@ export const processPasteCode = (html: string, text: string) => {
 
     if (isCode) {
         const code = text || html;
-        if (/\n/.test(code) || pres.length === 1) {
+        if (/\n/.test(code)) {
             return `<div data-type="NodeCodeBlock" class="code-block" data-node-id="${Lute.NewNodeID()}"><div class="protyle-action"><span class="protyle-action--first protyle-action__language" contenteditable="false">${window.siyuan.storage[Constants.LOCAL_CODELANG]}</span><span class="fn__flex-1"></span><span class="protyle-icon protyle-icon--first protyle-action__copy"><svg><use xlink:href="#iconCopy"></use></svg></span><span class="protyle-icon protyle-icon--last protyle-action__menu"><svg><use xlink:href="#iconMore"></use></svg></span></div><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}">${code.replace(/&/g, "&amp;").replace(/</g, "&lt;")}<wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         } else {
             return code;

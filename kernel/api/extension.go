@@ -129,7 +129,10 @@ func extensionCopy(c *gin.Context) {
 			}
 		} else if ast.NodeImage == n.Type {
 			if dest := n.ChildByType(ast.NodeLinkDest); nil != dest {
-				dest.Tokens = []byte(uploaded[string(dest.Tokens)])
+				assetPath := uploaded[string(dest.Tokens)]
+				if "" != assetPath {
+					dest.Tokens = []byte(assetPath)
+				}
 			}
 		}
 		return ast.WalkContinue

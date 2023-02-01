@@ -1,3 +1,31 @@
+## v2.7.2 / 2023-02-01
+
+### 改进功能
+
+* [改进订阅到期提醒短信内容](https://github.com/siyuan-note/siyuan/issues/7110)
+* [调整外观配色](https://github.com/siyuan-note/siyuan/issues/7189)
+* [嵌入块查询结果中显示块引用计数](https://github.com/siyuan-note/siyuan/issues/7191)
+* [窗口变动后隐藏块标](https://github.com/siyuan-note/siyuan/issues/7195)
+* [大纲字号不应该跟随字体设置](https://github.com/siyuan-note/siyuan/issues/7202)
+* [浏览器端不使用内核伺服设备的剪贴板](https://github.com/siyuan-note/siyuan/issues/7206)
+* [改进缩放后 PDF 复制标注中的截图](https://github.com/siyuan-note/siyuan/issues/7208)
+* [终身订阅账号支持通过积分兑换扩容云端存储](https://github.com/siyuan-note/siyuan/issues/7210)
+* [导出没有内容的引述块为模板时添加空段落块](https://github.com/siyuan-note/siyuan/issues/7211)
+* [在 `关于` - `在浏览器上使用` 中提示用户固定端口 `6806`](https://github.com/siyuan-note/siyuan/issues/7212)
+* [改进清理未引用资源](https://github.com/siyuan-note/siyuan/issues/7216)
+* [改进从 IDE 中粘贴行内代码后的光标位置](https://github.com/siyuan-note/siyuan/issues/7220)
+
+### 修复缺陷
+
+* [Android 端部分系统闪退](https://github.com/siyuan-note/siyuan/issues/7188)
+* [选中图片状态下折叠回车再撤销触发状态异常](https://github.com/siyuan-note/siyuan/issues/7190)
+* [嵌入块每查询一次多一个结果](https://github.com/siyuan-note/siyuan/issues/7196)
+* [块引用后创建行内公式转为无效引用](https://github.com/siyuan-note/siyuan/issues/7200)
+* [索引嵌入块内容可能会导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/7213)
+* [反链面板列表项层级折叠计算问题](https://github.com/siyuan-note/siyuan/issues/7214)
+* [未找到 ID 为 xxx 的内容块](https://github.com/siyuan-note/siyuan/issues/7215)
+* [网络请求时潜在的空指针问题](https://github.com/siyuan-note/siyuan/issues/7217)
+
 ## v2.7.1 / 2023-01-28
 
 ### 改进功能

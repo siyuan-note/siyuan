@@ -168,8 +168,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     const range = getEditorRange(protyle.wysiwyg.element);
     if (siyuanHTML) {
         // 编辑器内部粘贴
-        const tempElement = document.createElement("div")
-        tempElement.innerHTML = siyuanHTML
+        const tempElement = document.createElement("div");
+        tempElement.innerHTML = siyuanHTML;
         let isBlock = false;
         tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
             const newId = Lute.NewNodeID();

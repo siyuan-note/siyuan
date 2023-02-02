@@ -406,6 +406,10 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 action: "delete",
                 id: liId
             });
+            // 聚焦列表，第一个列表项反向缩进后刷新会关闭页签
+            if (liId === protyle.block.id) {
+                protyle.block.id = protyle.block.parentID;
+            }
             undoOperations.splice(0, 0, {
                 action: "insert",
                 data: movedHTML,

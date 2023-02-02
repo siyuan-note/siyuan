@@ -21,7 +21,7 @@ import {hideElements} from "../ui/hideElements";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {blockRender} from "../markdown/blockRender";
-import {getEnableHTML, removeEmbed} from "../wysiwyg/removeEmbed";
+import {removeEmbed} from "../wysiwyg/removeEmbed";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";

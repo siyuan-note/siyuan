@@ -518,6 +518,10 @@ func fullReindex() {
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
 	runtime.GC()
+	go func() {
+		time.Sleep(3 * time.Second)
+		util.PushStatusBar(Conf.Language(108))
+	}()
 }
 
 func ChangeBoxSort(boxIDs []string) {

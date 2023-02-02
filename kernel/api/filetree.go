@@ -163,6 +163,10 @@ func getHPathByPath(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	p := arg["path"].(string)
 
 	hPath, err := model.GetHPathByPath(notebook, p)
@@ -207,6 +211,10 @@ func getHPathByID(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
 	hPath, err := model.GetHPathByID(id)
 	if nil != err {
 		ret.Code = -1
@@ -254,6 +262,9 @@ func moveDocs(c *gin.Context) {
 	}
 	toPath := arg["toPath"].(string)
 	toNotebook := arg["toNotebook"].(string)
+	if util.InvalidIDPattern(toNotebook, ret) {
+		return
+	}
 
 	err := model.MoveDocs(fromPaths, toNotebook, toPath)
 	if nil != err {
@@ -274,6 +285,10 @@ func removeDoc(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	p := arg["path"].(string)
 	model.RemoveDoc(notebook, p)
 }
@@ -305,6 +320,10 @@ func renameDoc(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	p := arg["path"].(string)
 	title := arg["title"].(string)
 
@@ -447,6 +466,10 @@ func createDocWithMd(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	hPath := arg["path"].(string)
 	markdown := arg["markdown"].(string)
 

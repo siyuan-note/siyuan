@@ -471,6 +471,10 @@ func getBlockKramdown(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
 	kramdown := model.GetBlockKramdown(id)
 	ret.Data = map[string]string{
 		"id":       id,

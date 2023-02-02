@@ -16,7 +16,7 @@
     * [Create a document with Markdown](#Create-a-document-with-Markdown)
     * [Rename a document](#Rename-a-document)
     * [Remove a document](#Remove-a-document)
-    * [Move a document](#Move-a-document)
+    * [Move documents](#Move-documents)
     * [Get human-readable path based on path](#Get-human-readable-path-based-on-path)
     * [Get human-readable path based on ID](#Get-human-readable-path-based-on-ID)
 * [Assets](#Assets)
@@ -378,22 +378,20 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### Move a document
+### Move documents
 
-* `/api/filetree/moveDoc`
+* `/api/filetree/moveDocs`
 * Parameters
 
   ```json
   {
-    "fromNotebook": "20210831090520-7dvbdv0",
-    "fromPath": "/20210917220056-yxtyl7i.sy",
+    "fromPaths": ["/20210917220056-yxtyl7i.sy"],
     "toNotebook": "20210817205410-2kvfpfn",
     "toPath": "/"
   }
   ```
 
-    * `fromNotebook`: Source notebook ID
-    * `fromPath`: Source path
+    * `fromPaths`: Source paths
     * `toNotebook`: Target notebook ID
     * `toPath`: Target path
 * Return value

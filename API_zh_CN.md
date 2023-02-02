@@ -377,20 +377,18 @@
 
 ### 移动文档
 
-* `/api/filetree/moveDoc`
+* `/api/filetree/moveDocs`
 * 参数
 
   ```json
   {
-    "fromNotebook": "20210831090520-7dvbdv0",
-    "fromPath": "/20210917220056-yxtyl7i.sy",
+    "fromPaths": ["/20210917220056-yxtyl7i.sy"],
     "toNotebook": "20210817205410-2kvfpfn",
     "toPath": "/"
   }
   ```
 
-    * `fromNotebook`：源笔记本 ID
-    * `fromPath`：源路径
+    * `fromPaths`：源路径
     * `toNotebook`：目标笔记本 ID
     * `toPath`：目标路径
 * 返回值

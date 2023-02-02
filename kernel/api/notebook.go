@@ -67,6 +67,10 @@ func renameNotebook(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	name := arg["name"].(string)
 	err := model.RenameBox(notebook, name)
 	if nil != err {
@@ -94,6 +98,10 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	err := model.RemoveBox(notebook)
 	if nil != err {
 		ret.Code = -1
@@ -155,6 +163,10 @@ func openNotebook(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
 	defer util.PushClearMsg(msgId)
 	existed, err := model.Mount(notebook)
@@ -183,6 +195,9 @@ func closeNotebook(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
 	model.Unmount(notebook)
 }
 
@@ -196,6 +211,10 @@ func getNotebookConf(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	box := model.Conf.Box(notebook)
 	ret.Data = map[string]interface{}{
 		"box":  box.ID,
@@ -214,6 +233,10 @@ func setNotebookConf(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
 	box := model.Conf.Box(notebook)
 
 	param, err := gulu.JSON.MarshalJSON(arg["conf"])

@@ -40,6 +40,9 @@ func appendBlock(c *gin.Context) {
 	data := arg["data"].(string)
 	dataType := arg["dataType"].(string)
 	parentID := arg["parentID"].(string)
+	if util.InvalidIDPattern(parentID, ret) {
+		return
+	}
 	if "markdown" == dataType {
 		luteEngine := model.NewLute()
 		data = dataBlockDOM(data, luteEngine)
@@ -82,6 +85,9 @@ func prependBlock(c *gin.Context) {
 	data := arg["data"].(string)
 	dataType := arg["dataType"].(string)
 	parentID := arg["parentID"].(string)
+	if util.InvalidIDPattern(parentID, ret) {
+		return
+	}
 	if "markdown" == dataType {
 		luteEngine := model.NewLute()
 		data = dataBlockDOM(data, luteEngine)
@@ -126,12 +132,21 @@ func insertBlock(c *gin.Context) {
 	var parentID, previousID, nextID string
 	if nil != arg["parentID"] {
 		parentID = arg["parentID"].(string)
+		if util.InvalidIDPattern(parentID, ret) {
+			return
+		}
 	}
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
+		if util.InvalidIDPattern(previousID, ret) {
+			return
+		}
 	}
 	if nil != arg["nextID"] {
 		nextID = arg["nextID"].(string)
+		if util.InvalidIDPattern(nextID, ret) {
+			return
+		}
 	}
 
 	if "markdown" == dataType {
@@ -178,6 +193,9 @@ func updateBlock(c *gin.Context) {
 	data := arg["data"].(string)
 	dataType := arg["dataType"].(string)
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
 
 	luteEngine := model.NewLute()
 	if "markdown" == dataType {
@@ -264,6 +282,9 @@ func deleteBlock(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
 
 	transactions := []*model.Transaction{
 		{

@@ -165,6 +165,10 @@ func exportMdContent(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
 	hPath, content := model.ExportMarkdownContent(id)
 	ret.Data = map[string]interface{}{
 		"hPath":   hPath,

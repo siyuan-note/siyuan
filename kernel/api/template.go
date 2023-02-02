@@ -56,6 +56,10 @@ func renderTemplate(c *gin.Context) {
 
 	p := arg["path"].(string)
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
 	content, err := model.RenderTemplate(p, id)
 	if nil != err {
 		ret.Code = -1

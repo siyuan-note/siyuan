@@ -17,6 +17,7 @@
 package util
 
 import (
+	"github.com/88250/lute/ast"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/httpclient"
 	"net/http"
@@ -63,6 +64,16 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]interface{}, o
 
 	ok = true
 	return
+}
+
+func InvalidIDPattern(idArg string, result *gulu.Result) bool {
+	if ast.IsNodeIDPattern(idArg) {
+		return false
+	}
+
+	result.Code = -1
+	result.Msg = "invalid ID argument"
+	return true
 }
 
 func initHttpClient() {

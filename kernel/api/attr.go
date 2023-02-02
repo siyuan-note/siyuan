@@ -43,6 +43,10 @@ func getBlockAttrs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
 	ret.Data = model.GetBlockAttrs(id)
 }
 
@@ -56,6 +60,10 @@ func setBlockAttrs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
 	attrs := arg["attrs"].(map[string]interface{})
 	if 1 == len(attrs) && "" != attrs["scroll"] {
 		// 不记录用户指南滚动位置

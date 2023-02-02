@@ -5,6 +5,7 @@ import {isMobile} from "../util/functions";
 
 export class Menu {
     public element: HTMLElement;
+    public removeCB: () => void;
     private wheelEvent: string;
 
     constructor() {
@@ -64,6 +65,10 @@ export class Menu {
     }
 
     public remove() {
+        if (window.siyuan.menus.menu.removeCB) {
+            window.siyuan.menus.menu.removeCB();
+            window.siyuan.menus.menu.removeCB = undefined;
+        }
         if (isMobile()) {
             window.removeEventListener("touchmove", this.preventDefault, false);
         } else {

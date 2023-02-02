@@ -86,8 +86,11 @@ func HookDesktopUIProcJob() {
 		return true
 	})
 
-	if 1 < noUIProcCount {
-		logging.LogInfof("no active UI proc, exit kernel process now")
-		Close(false, 1)
+	if 0 < noUIProcCount {
+		logging.LogInfof("no active UI proc count [%d]", noUIProcCount)
+		if 1 < noUIProcCount {
+			logging.LogInfof("confirmed no active UI proc, exit kernel process now")
+			Close(false, 1)
+		}
 	}
 }

@@ -147,26 +147,8 @@ func GetBlockTree(id string) (ret *BlockTree) {
 }
 
 func SetBlockTreePath(tree *parse.Tree) {
-	hash := btHash(tree.ID)
-	val, ok := blockTrees.Load(hash)
-	if !ok {
-		val = &btSlice{data: map[string]*BlockTree{}, changed: time.Time{}, m: &sync.Mutex{}}
-		blockTrees.Store(hash, val)
-	}
-
-	slice := val.(*btSlice)
-	slice.m.Lock()
-	slice.data[tree.ID] = &BlockTree{
-		ID:      tree.ID,
-		RootID:  tree.Root.ID,
-		BoxID:   tree.Box,
-		Path:    tree.Path,
-		HPath:   tree.HPath,
-		Updated: tree.Root.IALAttr("updated"),
-		Type:    TypeAbbr(ast.NodeDocument.String()),
-	}
-	slice.m.Unlock()
-	slice.changed = time.Now()
+	RemoveBlockTreesByRootID(tree.ID)
+	IndexBlockTree(tree)
 }
 
 func RemoveBlockTreesByRootID(rootID string) {
@@ -176,7 +158,7 @@ func RemoveBlockTreesByRootID(rootID string) {
 		slice.m.Lock()
 		for _, b := range slice.data {
 			if b.RootID == rootID {
-				ids = append(ids, b.RootID)
+				ids = append(ids, b.ID)
 			}
 		}
 		slice.m.Unlock()

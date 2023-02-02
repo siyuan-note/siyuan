@@ -119,10 +119,19 @@ func initTesseract() {
 		return
 	}
 
-	for _, lang := range langs {
-		TesseractLangs = append(TesseractLangs, lang)
-	}
+	TesseractLangs = filterTesseractLangs(langs)
 	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(TesseractLangs, "+"))
+}
+
+func filterTesseractLangs(langs []string) (ret []string) {
+	ret = []string{}
+	for _, lang := range langs {
+		if "eng" == lang || strings.HasPrefix(lang, "chi") || "fra" == lang || "spa" == lang || "deu" == lang ||
+			"rus" == lang || "osd" == lang {
+			ret = append(ret, lang)
+		}
+	}
+	return ret
 }
 
 func getTesseractVer() (ret string) {

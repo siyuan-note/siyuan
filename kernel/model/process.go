@@ -37,7 +37,10 @@ func HandleSignal() {
 	Close(false, 1)
 }
 
-var firstRunHookDesktopUIProcJob = true
+var (
+	firstRunHookDesktopUIProcJob = true
+	noUIProcCount                int
+)
 
 func HookDesktopUIProcJob() {
 	if util.ContainerStd != util.Container || "dev" == util.Mode {
@@ -56,7 +59,6 @@ func HookDesktopUIProcJob() {
 	}
 
 	uiProcNames := []string{"siyuan", "electron"}
-	existUIProc := false
 	util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
 		uiProcID, err := strconv.Atoi(uiProcIDArg.(string))
 		if nil != err {
@@ -77,14 +79,14 @@ func HookDesktopUIProcJob() {
 		procName := strings.ToLower(proc.Executable())
 		for _, name := range uiProcNames {
 			if strings.Contains(procName, name) {
-				existUIProc = true
+				noUIProcCount++
 				return false
 			}
 		}
 		return true
 	})
 
-	if !existUIProc {
+	if 1 < noUIProcCount {
 		logging.LogInfof("no active UI proc, exit kernel process now")
 		Close(false, 1)
 	}

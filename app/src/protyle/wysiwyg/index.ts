@@ -281,7 +281,8 @@ export class WYSIWYG {
                 html = getEnableHTML(html);
             }
             event.clipboardData.setData("text/plain", textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd());
-            event.clipboardData.setData("text/html", html + Constants.ZWSP);
+            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(html));
+            event.clipboardData.setData("text/siyuan", html);
         });
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             if (event.button === 2 || window.siyuan.ctrlIsPressed) {
@@ -1115,7 +1116,8 @@ export class WYSIWYG {
             }
             protyle.hint.render(protyle);
             event.clipboardData.setData("text/plain", protyle.lute.BlockDOM2StdMd(html).trimEnd());  // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
-            event.clipboardData.setData("text/html", Constants.ZWSP + html);
+            event.clipboardData.setData("text/html",  protyle.lute.BlockDOM2HTML(html));
+            event.clipboardData.setData("text/siyuan",  html);
         });
 
         let beforeContextmenuRange: Range;

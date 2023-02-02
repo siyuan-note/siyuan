@@ -302,26 +302,6 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 copyPlainText(cloneContents.textContent);
             }
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.copy + " HTML",
-            click() {
-                focusByRange(getEditorRange(nodeElement));
-                let html = "";
-                getSelection().getRangeAt(0).cloneContents().childNodes.forEach(item => {
-                    if (item.nodeType === 3) {
-                        html += item.textContent;
-                    } else {
-                        html += (item as Element).outerHTML;
-                    }
-                });
-                if (protyle.disabled) {
-                    html = getEnableHTML(html);
-                }
-                const tempElement = document.createElement("template");
-                tempElement.innerHTML = protyle.lute.BlockDOM2HTML(html);
-                writeText(tempElement.content.firstElementChild.innerHTML);
-            }
-        }).element);
         if (protyle.disabled) {
             return;
         }

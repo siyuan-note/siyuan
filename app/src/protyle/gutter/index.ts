@@ -602,18 +602,6 @@ export class Gutter {
                     copyPlainText(html.trimEnd());
                 }
             }, {
-                label: window.siyuan.languages.copy + " HTML",
-                click() {
-                    let html = "";
-                    selectsElement.forEach(item => {
-                        html += item.outerHTML;
-                    });
-                    if (protyle.disabled) {
-                        html = getEnableHTML(html);
-                    }
-                    writeText(protyle.lute.BlockDOM2HTML(html));
-                }
-            }, {
                 label: window.siyuan.languages.duplicate,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 disabled: protyle.disabled,
@@ -988,15 +976,6 @@ export class Gutter {
                         text += cloneNode.textContent + "\n";
                     });
                     copyPlainText(text.trimEnd());
-                }
-            }, {
-                label: window.siyuan.languages.copy + " HTML",
-                click() {
-                    let html = nodeElement.outerHTML;
-                    if (protyle.disabled) {
-                        html = getEnableHTML(html);
-                    }
-                    writeText(protyle.lute.BlockDOM2HTML(html));
                 }
             }, {
                 label: window.siyuan.languages.duplicate,

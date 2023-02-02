@@ -86,25 +86,24 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     event.preventDefault();
     let textHTML;
     let textPlain;
+    let siyuanHTML;
     let files;
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
         textPlain = event.clipboardData.getData("text/plain");
+        siyuanHTML = event.clipboardData.getData("text/siyuan");
         files = event.clipboardData.files;
     } else {
         textHTML = event.dataTransfer.getData("text/html");
         textPlain = event.dataTransfer.getData("text/plain");
+        siyuanHTML = event.dataTransfer.getData("text/siyuan");
         if (event.dataTransfer.types[0] === "Files") {
             files = event.dataTransfer.items;
         }
     }
-    // 复制标题及其下方块使用 writeText，需将 textPLain 转换为 textHTML
-    if (textPlain.endsWith(Constants.ZWSP) && !textHTML) {
-        textHTML = textPlain;
-    }
     /// #if !BROWSER
     // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
-    if (!textHTML && !textPlain && ("clipboardData" in event)) {
+    if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {
         if ("darwin" === window.siyuan.config.system.os) {
             const xmlString = clipboard.read("NSFilenamesPboardType");
             const domParser = new DOMParser();
@@ -136,9 +135,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         `<!--StartFragment--><a href="${textPlain}">${textPlain}</a><!--EndFragment-->`) {
         textHTML = "";
     }
-
+    // 复制标题及其下方块使用 writeText，需将 textPlain 转换为 textHTML
+    if (textPlain.endsWith(Constants.ZWSP) && !textHTML && !siyuanHTML) {
+        siyuanHTML = textPlain.substr(0, textPlain.length - 1);
+    }
     // 剪切复制中首位包含空格或仅有空格 https://github.com/siyuan-note/siyuan/issues/5667
-    if (!textHTML.endsWith(Constants.ZWSP) && !textHTML.startsWith(Constants.ZWSP)) {
+    if (!siyuanHTML) {
         // process word
         const doc = new DOMParser().parseFromString(textHTML, "text/html");
         if (doc.body && doc.body.innerHTML) {
@@ -148,9 +150,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (textHTML.startsWith("\n<!--StartFragment-->") && textHTML.endsWith("<!--EndFragment-->\n\n")) {
             textHTML = doc.body.innerHTML.trim().replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "");
         }
+        textHTML = Lute.Sanitize(textHTML);
     }
-
-    textHTML = Lute.Sanitize(textHTML);
 
     const nodeElement = hasClosestBlock(event.target);
     if (!nodeElement) {
@@ -165,8 +166,29 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     });
     const code = processPasteCode(textHTML, textPlain);
     const range = getEditorRange(protyle.wysiwyg.element);
-    // process code
-    if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+    if (siyuanHTML) {
+        // 编辑器内部粘贴
+        const tempElement = document.createElement("div")
+        tempElement.innerHTML = siyuanHTML
+        let isBlock = false;
+        tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
+            const newId = Lute.NewNodeID();
+            e.setAttribute("data-node-id", newId);
+            e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+            e.setAttribute("updated", newId.split("-")[0]);
+            isBlock = true;
+        });
+        if (nodeElement.classList.contains("table")) {
+            isBlock = false;
+        }
+        // 从历史中复制后粘贴
+        tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
+            e.setAttribute("contenteditable", "true");
+        });
+        const tempInnerHTML = tempElement.innerHTML;
+        insertHTML(tempInnerHTML, protyle, isBlock);
+        filterClipboardHint(protyle, tempInnerHTML);
+    } else if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
         // 粘贴在代码位置
         insertHTML(textPlain, protyle);
         return;
@@ -213,77 +235,34 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         if (isHTML) {
             const tempElement = document.createElement("div");
-            if (textHTML.startsWith(Constants.ZWSP)) {
-                // 剪切块内容后粘贴
-                // mac 复制后会带有 <meta charset="utf-8"> https://github.com/siyuan-note/siyuan/issues/5751
-                tempElement.innerHTML = textHTML.substr(1).replace('<meta charset="utf-8">', "");
-                let isBlock = false;
-                tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
-                    const newId = Lute.NewNodeID();
-                    e.setAttribute("data-node-id", newId);
-                    e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
-                    e.setAttribute("updated", newId.split("-")[0]);
-                    isBlock = true;
-                });
-                if (nodeElement.classList.contains("table")) {
-                    isBlock = false;
+            tempElement.innerHTML = textHTML;
+            tempElement.querySelectorAll("[style]").forEach((e) => {
+                e.removeAttribute("style");
+            });
+            // 移除空的 A 标签
+            tempElement.querySelectorAll("a").forEach((e) => {
+                if (e.innerHTML.trim() === "") {
+                    e.remove();
                 }
-                insertHTML(tempElement.innerHTML, protyle, isBlock);
-                // 转换为 md，避免再次粘贴 ID 重复
-                const tempMd = protyle.lute.BlockDOM2StdMd(tempElement.innerHTML);
-                writeText(tempMd);
-                filterClipboardHint(protyle, tempMd);
-            } else if (textHTML.endsWith(Constants.ZWSP)) {
-                // 编辑器内部粘贴
-                tempElement.innerHTML = textHTML.substr(0, textHTML.length - 1).replace('<meta charset="utf-8">', "");
-                let isBlock = false;
-                tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
-                    const newId = Lute.NewNodeID();
-                    e.setAttribute("data-node-id", newId);
-                    e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
-                    e.setAttribute("updated", newId.split("-")[0]);
-                    isBlock = true;
-                });
-                if (nodeElement.classList.contains("table")) {
-                    isBlock = false;
-                }
-                // 从历史中复制后粘贴
-                tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
-                    e.setAttribute("contenteditable", "true");
-                });
-                const tempInnerHTML = tempElement.innerHTML;
-                insertHTML(tempInnerHTML, protyle, isBlock);
-                filterClipboardHint(protyle, tempInnerHTML);
-            } else {
-                tempElement.innerHTML = textHTML;
-                tempElement.querySelectorAll("[style]").forEach((e) => {
-                    e.removeAttribute("style");
-                });
-                // 移除空的 A 标签
-                tempElement.querySelectorAll("a").forEach((e) => {
-                    if (e.innerHTML.trim() === "") {
-                        e.remove();
+            });
+            fetchPost("/api/lute/html2BlockDOM", {
+                dom: tempElement.innerHTML
+            }, (response) => {
+                insertHTML(response.data, protyle);
+                protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
+                    if (item.textContent === "") {
+                        fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
+                            item.innerHTML = response.data;
+                        });
                     }
                 });
-                fetchPost("/api/lute/html2BlockDOM", {
-                    dom: tempElement.innerHTML
-                }, (response) => {
-                    insertHTML(response.data, protyle);
-                    protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
-                        if (item.textContent === "") {
-                            fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
-                                item.innerHTML = response.data;
-                            });
-                        }
-                    });
-                    blockRender(protyle, protyle.wysiwyg.element);
-                    processRender(protyle.wysiwyg.element);
-                    highlightRender(protyle.wysiwyg.element);
-                    filterClipboardHint(protyle, response.data);
-                    scrollCenter(protyle);
-                });
-                return;
-            }
+                blockRender(protyle, protyle.wysiwyg.element);
+                processRender(protyle.wysiwyg.element);
+                highlightRender(protyle.wysiwyg.element);
+                filterClipboardHint(protyle, response.data);
+                scrollCenter(protyle);
+            });
+            return;
         } else if (files && files.length > 0) {
             uploadFiles(protyle, files);
         } else if (textPlain.trim() !== "" && files && files.length === 0) {

@@ -518,9 +518,9 @@ func fullReindex() {
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
 	runtime.GC()
-	util.PushClearMsg(msgId)
 	go func() {
 		time.Sleep(3 * time.Second)
+		util.PushClearMsg(msgId)
 		util.PushStatusBar(Conf.Language(108))
 	}()
 }

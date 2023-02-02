@@ -477,13 +477,13 @@ export const bazaar = {
                         fetchPost("/api/setting/setAppearance",  Object.assign({}, window.siyuan.config.appearance, {
                             icon: packageName,
                         }), response => {
-                            bazaar.element.querySelectorAll(`[data-name="${window.siyuan.config.appearance.icon}"]`).forEach(item => {
+                            bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${window.siyuan.config.appearance.icon}"]`).forEach(item => {
                                 item.parentElement.classList.remove("b3-card--current");
                                 const switchElement = item.querySelector('[data-type="switch"]');
                                 switchElement.classList.remove("fn__none");
                                 switchElement.previousElementSibling.classList.remove("fn__none");
                             });
-                            bazaar.element.querySelectorAll(`[data-name="${packageName}"]`).forEach(item => {
+                            bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${packageName}"]`).forEach(item => {
                                 item.parentElement.classList.add("b3-card--current");
                                 const switchElement = item.querySelector('[data-type="switch"]');
                                 switchElement.classList.add("fn__none");
@@ -505,14 +505,14 @@ export const bazaar = {
                                 exportLayout(true);
                             } else {
                                 const oldTheme = window.siyuan.config.appearance.mode === 1 ? window.siyuan.config.appearance.themeDark : window.siyuan.config.appearance.themeLight;
-                                bazaar.element.querySelectorAll(`[data-name="${oldTheme}"]`).forEach(item => {
+                                bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${oldTheme}"]`).forEach(item => {
                                     item.parentElement.classList.remove("b3-card--current");
                                     const switchElement = item.querySelector('[data-type="switch"]');
                                     switchElement.classList.remove("fn__none");
                                     switchElement.previousElementSibling.classList.remove("fn__none");
                                 });
                                 appearance.onSetappearance(response.data);
-                                bazaar.element.querySelectorAll(`[data-name="${packageName}"]`).forEach(item => {
+                                bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${packageName}"]`).forEach(item => {
                                     item.parentElement.classList.add("b3-card--current");
                                     const switchElement = item.querySelector('[data-type="switch"]');
                                     switchElement.classList.add("fn__none");

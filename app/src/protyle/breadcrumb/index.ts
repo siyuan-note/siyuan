@@ -54,7 +54,10 @@ export class Breadcrumb {
                 if (id) {
                     if (protyle.options.render.breadcrumbDocName && window.siyuan.ctrlIsPressed) {
                         /// #if !MOBILE
-                        openFileById({id, action: [Constants.CB_GET_FOCUS]});
+                        openFileById({
+                            id,
+                            action: id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
+                        });
                         /// #endif
                     } else {
                         zoomOut(protyle, id);
@@ -173,7 +176,9 @@ export class Breadcrumb {
                     icon: "iconDownload",
                     label: `${window.siyuan.languages.insertAsset}${uploadHTML}`,
                 }).element;
-                uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+                uploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {
+                    target: HTMLInputElement
+                }) => {
                     if (event.target.files.length === 0) {
                         return;
                     }

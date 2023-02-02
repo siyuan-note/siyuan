@@ -1436,7 +1436,10 @@ export class WYSIWYG {
                 const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id");
                 if (breadcrumbId) {
                     if (window.siyuan.ctrlIsPressed) {
-                        openFileById({id: breadcrumbId, action: [Constants.CB_GET_FOCUS]});
+                        openFileById({
+                            id: breadcrumbId,
+                            action: breadcrumbId === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
+                        });
                     } else {
                         loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
                     }

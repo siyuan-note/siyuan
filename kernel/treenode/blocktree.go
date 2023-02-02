@@ -248,13 +248,10 @@ func RemoveBlockTree(id string) {
 }
 
 func IndexBlockTree(tree *parse.Tree) {
+	var changedNodes []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue
-		}
-		var parentID string
-		if nil != n.Parent {
-			parentID = n.Parent.ID
 		}
 		if "" == n.ID {
 			return ast.WalkContinue
@@ -267,19 +264,45 @@ func IndexBlockTree(tree *parse.Tree) {
 			blockTrees.Store(hash, val)
 		}
 		slice := val.(*btSlice)
+
 		slice.m.Lock()
-		if bt := slice.data[n.ID]; nil != bt {
+		bt := slice.data[n.ID]
+		slice.m.Unlock()
+
+		if nil != bt {
 			if bt.Updated != n.IALAttr("updated") {
-				slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
-				slice.changed = time.Now()
+				children := ChildBlockNodes(n) // 需要考虑子块，因为一些操作（比如移动块）后需要同时更新子块
+				changedNodes = append(changedNodes, children...)
 			}
 		} else {
-			slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
-			slice.changed = time.Now()
+			children := ChildBlockNodes(n)
+			changedNodes = append(changedNodes, children...)
 		}
-		slice.m.Unlock()
 		return ast.WalkContinue
 	})
+
+	for _, n := range changedNodes {
+		updateBtSlice(n, tree)
+	}
+}
+
+func updateBtSlice(n *ast.Node, tree *parse.Tree) {
+	var parentID string
+	if nil != n.Parent {
+		parentID = n.Parent.ID
+	}
+
+	hash := btHash(n.ID)
+	val, ok := blockTrees.Load(hash)
+	if !ok {
+		val = &btSlice{data: map[string]*BlockTree{}, changed: time.Time{}, m: &sync.Mutex{}}
+		blockTrees.Store(hash, val)
+	}
+	slice := val.(*btSlice)
+	slice.m.Lock()
+	slice.data[n.ID] = &BlockTree{ID: n.ID, ParentID: parentID, RootID: tree.ID, BoxID: tree.Box, Path: tree.Path, HPath: tree.HPath, Updated: n.IALAttr("updated"), Type: TypeAbbr(n.Type.String())}
+	slice.changed = time.Now()
+	slice.m.Unlock()
 }
 
 func InitBlockTree(force bool) {

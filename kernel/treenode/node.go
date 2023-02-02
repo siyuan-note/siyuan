@@ -285,6 +285,24 @@ func ParentNodes(node *ast.Node) (parents []*ast.Node) {
 	return
 }
 
+func ChildBlockNodes(node *ast.Node) (children []*ast.Node) {
+	children = []*ast.Node{}
+	if !node.IsContainerBlock() || ast.NodeDocument == node.Type {
+		children = append(children, node)
+		return
+	}
+
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+
+		children = append(children, n)
+		return ast.WalkContinue
+	})
+	return
+}
+
 func ParentBlock(node *ast.Node) *ast.Node {
 	for p := node.Parent; nil != p; p = p.Parent {
 		if "" != p.ID && p.IsBlock() {

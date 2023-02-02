@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230117003908"
+		"updated": "20230202231927"
 	},
 	"Children": [
 		{
@@ -696,7 +696,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 程序。​"
+					"Data": " 程序。"
+				}
+			]
+		},
+		{
+			"ID": "20230202231513-80u3j7f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230202231513-80u3j7f",
+				"updated": "20230202231515"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -705,25 +719,92 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​在安裝 Tesseract OCR 時需要勾選中文語言包，並將安裝後的 Tesseract-OCR 目錄路徑添加到環境變量 PATH 中，這樣思源才能直接調用 "
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20230202231516-o6k9mj1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230202231516-o6k9mj1",
+				"updated": "20230202231927"
+			},
+			"Children": [
+				{
+					"ID": "20230202231516-pwj2ndg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231516-pwj2ndg",
+						"updated": "20230202231927"
+					},
+					"Children": [
+						{
+							"ID": "20230202231516-8trf08t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231516-8trf08t",
+								"updated": "20230202231927"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在安裝 Tesseract OCR 時需要勾選你需要的語言包，並將安裝後的 Tesseract-OCR 目錄路徑添加到環境變量 PATH 中，這樣思源才能直接調用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 命令進行圖片 OCR 提取文本。如果安裝正常的話，在內核啟動日誌中可以搜索到 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract-ocr enabled"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "tesseract"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 命令進行圖片 OCR 提取文本。如果安裝正常的話，在內核啟動日誌中可以搜索到 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "tesseract-ocr enabled"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​。"
+					"ID": "20230202231519-x47s7he",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231519-x47s7he",
+						"updated": "20230202231811"
+					},
+					"Children": [
+						{
+							"ID": "20230202231519-04f6dh6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231519-04f6dh6",
+								"updated": "20230202231811"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "語言包不要安裝太多，否則會導致 OCR 緩慢甚至超時返回空結果，並且佔用過多的系統資源"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

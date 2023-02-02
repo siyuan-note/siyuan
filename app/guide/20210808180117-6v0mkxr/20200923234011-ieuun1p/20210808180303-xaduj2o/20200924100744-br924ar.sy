@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230117003842"
+		"updated": "20230202231916"
 	},
 	"Children": [
 		{
@@ -696,33 +696,110 @@
 				{
 					"Type": "NodeText",
 					"Data": " program needs to be manually installed first. "
+				}
+			]
+		},
+		{
+			"ID": "20230202231728-0z5bs0m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230202231728-0z5bs0m",
+				"updated": "20230202231731"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note"
+					"TextMarkTextContent": "Note:"
+				}
+			]
+		},
+		{
+			"ID": "20230202231731-bdh7lab",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230202231731-bdh7lab",
+				"updated": "20230202231916"
+			},
+			"Children": [
+				{
+					"ID": "20230202231732-n7z8jth",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231732-n7z8jth",
+						"updated": "20230202231916"
+					},
+					"Children": [
+						{
+							"ID": "20230202231732-f3jkj7p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231732-f3jkj7p",
+								"updated": "20230202231916"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When installing Tesseract OCR, you need to check the language pack you need, and add the installed Tesseract-OCR directory path to the environment variable PATH, so that SiYuan can directly call the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ command to extract text from image OCR. If the installation is normal, you can search for "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract-ocr enabled"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the kernel boot log"
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeText",
-					"Data": "​ that you need to check the Chinese language pack when installing Tesseract OCR, and add the installed Tesseract-OCR directory path to the environment variable PATH, so that SiYuan can directly call the "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "tesseract"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ command to extract text from image OCR. If the installation is normal, you can search for "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "tesseract-ocr enabled"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ in the kernel boot log."
+					"ID": "20230202231800-z8hswmk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231800-z8hswmk",
+						"updated": "20230202231819"
+					},
+					"Children": [
+						{
+							"ID": "20230202231800-c3x45ky",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231800-c3x45ky",
+								"updated": "20230202231819"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not install too many language packs, otherwise it will cause OCR to be slow or even timeout to return empty results, and take up too many system resources"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

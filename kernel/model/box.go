@@ -500,7 +500,7 @@ func FullReindex() {
 }
 
 func fullReindex() {
-	util.PushMsg(Conf.Language(35), 7*1000)
+	msgId := util.PushMsg(Conf.Language(35), 7*1000)
 	WaitForWritingFiles()
 
 	if err := sql.InitDatabase(true); nil != err {
@@ -520,6 +520,7 @@ func fullReindex() {
 	runtime.GC()
 	go func() {
 		time.Sleep(3 * time.Second)
+		util.PushClearMsg(msgId)
 		util.PushStatusBar(Conf.Language(108))
 	}()
 }

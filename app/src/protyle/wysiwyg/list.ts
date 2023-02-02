@@ -537,13 +537,13 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             lastBlockElement.setAttribute("data-type", "NodeList");
             lastBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             lastBlockElement.innerHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
-            liItemElements[0].lastElementChild.before(lastBlockElement);
             doOperations.push({
                 action: "insert",
                 id: newId,
                 data: lastBlockElement.outerHTML,
                 previousID: liItemElements[0].lastElementChild.previousElementSibling.getAttribute("data-node-id"),
             });
+            liItemElements[0].lastElementChild.before(lastBlockElement);
         }
         let previousID;
         while (nextElement && !nextElement.classList.contains("protyle-attr")) {
@@ -572,8 +572,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             undoOperations.push({
                 action: "move",
                 id: nextId,
-                parentID: lastBlockElement.getAttribute("data-node-id"),
-                previousID: previousID || nextElement.previousElementSibling?.getAttribute("data-node-id"),
+                previousID: previousID || lastBlockElement.parentElement?.getAttribute("data-node-id"),
             });
             previousID = nextId;
             const tempElement = nextElement;

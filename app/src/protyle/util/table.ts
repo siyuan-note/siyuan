@@ -687,6 +687,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             deleteRow(protyle, range, cellElement, nodeElement);
         }
         event.preventDefault();
+        event.stopPropagation();
         return true;
     }
 

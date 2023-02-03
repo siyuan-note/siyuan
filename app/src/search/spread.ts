@@ -99,5 +99,6 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
     }, dialog.element.querySelector(".b3-dialog__container").lastElementChild, () => {
         dialog.destroy();
     });
+    // 搜索面板层级需高于 .protyle-hint 的 201
     dialog.element.firstElementChild.setAttribute("style", "z-index:202"); // https://github.com/siyuan-note/siyuan/issues/3515
 };

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230202231927"
+		"updated": "20230203183310"
 	},
 	"Children": [
 		{
@@ -729,7 +729,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231516-o6k9mj1",
-				"updated": "20230202231927"
+				"updated": "20230203183310"
 			},
 			"Children": [
 				{
@@ -741,7 +741,7 @@
 					},
 					"Properties": {
 						"id": "20230202231516-pwj2ndg",
-						"updated": "20230202231927"
+						"updated": "20230203183210"
 					},
 					"Children": [
 						{
@@ -749,12 +749,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231516-8trf08t",
-								"updated": "20230202231927"
+								"updated": "20230203183210"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在安裝 Tesseract OCR 時需要勾選你需要的語言包，並將安裝後的 Tesseract-OCR 目錄路徑添加到環境變量 PATH 中，這樣思源才能直接調用 "
+									"Data": "在安裝 Tesseract OCR 時需要勾選你需要的語言包，並將安裝後的 Tesseract-OCR 目錄路徑添加到環境變量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中，這樣思源才能直接調用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -787,7 +796,7 @@
 					},
 					"Properties": {
 						"id": "20230202231519-x47s7he",
-						"updated": "20230202231811"
+						"updated": "20230203183310"
 					},
 					"Children": [
 						{
@@ -795,12 +804,93 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231519-04f6dh6",
-								"updated": "20230202231811"
+								"updated": "20230203183310"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "語言包不要安裝太多，否則會導致 OCR 緩慢甚至超時返回空結果，並且佔用過多的系統資源"
+									"Data": "思源並不會啟用所有已安裝的語言包，因為語言包太多的話會導致 OCR 緩慢甚至超時返回空結果，並且佔用過多的系統資源，所以默認最多只會啟用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eng"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "chi*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "fra"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "spa"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "deu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "rus"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "osd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，如果你需要更準確的語言支持，可以通過配置環境變量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 來指定語言包，比如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS=chi_sim+eng"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

@@ -125,10 +125,21 @@ func initTesseract() {
 
 func filterTesseractLangs(langs []string) (ret []string) {
 	ret = []string{}
-	for _, lang := range langs {
-		if "eng" == lang || strings.HasPrefix(lang, "chi") || "fra" == lang || "spa" == lang || "deu" == lang ||
-			"rus" == lang || "osd" == lang {
-			ret = append(ret, lang)
+
+	envLangsVal := os.Getenv("SIYUAN_TESSERACT_LANGS")
+	if "" != envLangsVal {
+		envLangs := strings.Split(envLangsVal, "+")
+		for _, lang := range langs {
+			if gulu.Str.Contains(lang, envLangs) {
+				ret = append(ret, lang)
+			}
+		}
+	} else {
+		for _, lang := range langs {
+			if "eng" == lang || strings.HasPrefix(lang, "chi") || "fra" == lang || "spa" == lang || "deu" == lang ||
+				"rus" == lang || "osd" == lang {
+				ret = append(ret, lang)
+			}
 		}
 	}
 	return ret

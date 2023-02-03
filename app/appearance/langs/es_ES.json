@@ -170,7 +170,6 @@
   "mergeCell": "Merge Cell",
   "cancelMerged": "Cancelar fusión de celda",
   "useDefaultWidth": "Usar el ancho de columna por defecto",
-  "crossPageUse": "Consejos para utilizar selecciones múltiples a través de las páginas: haga clic en la posición inicial y, después de desplazarse por la página, en la posición final ${}",
   "type": "Tipo",
   "searchType": "Tipos (busque en los tipos habilitados a continuación, la opción de filtro en la búsqueda global anula esta configuración)",
   "searchAttr": "Atributo (busca no sólo en el contenido, sino también en los siguientes atributos habilitados)",

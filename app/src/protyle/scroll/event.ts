@@ -33,9 +33,6 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         if (!window.siyuan.dragElement) { // https://ld246.com/article/1649638389841
             hideElements(["gutter"], protyle);
         }
-        if (!protyle.selectElement.classList.contains("fn__none")) {
-            showMessage(window.siyuan.languages.crossPageUse.replace("${}", updateHotkeyTip("⇧Click")), 9000);
-        }
 
         const panelContextElement = protyle.breadcrumb?.element.parentElement.querySelector('[data-type="context"]');
         if (panelContextElement && !panelContextElement.classList.contains("ft__primary")) {

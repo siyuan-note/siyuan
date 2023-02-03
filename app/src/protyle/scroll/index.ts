@@ -11,7 +11,7 @@ export class Scroll {
     private parentElement: HTMLElement;
     private inputElement: HTMLInputElement;
     public lastScrollTop: number;
-    public keepLazyLoad: boolean;
+    public keepLazyLoad: boolean;   // 保持加载内容
 
     constructor(protyle: IProtyle) {
         this.parentElement = document.createElement("div");

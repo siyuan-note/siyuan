@@ -170,7 +170,6 @@
   "mergeCell": "Merge Cell",
   "cancelMerged": "Cancel cell merge",
   "useDefaultWidth": "Use Default Column Width",
-  "crossPageUse": "Tips for using multiple selections across pages: click at the start position, and after scrolling the page, at the end position ${}",
   "type": "Type",
   "searchType": "Type (searches in the enabled types below, the filter option in the global search overrides this setting)",
   "searchAttr": "Attribute (search not only in the content, but also in the following enabled attributes)",

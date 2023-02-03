@@ -170,7 +170,6 @@
   "mergeCell": "Fusionner la cellule",
   "cancelMerged": "Annuler la fusion de cellules",
   "useDefaultWidth": "Utiliser la largeur de colonne par défaut",
-  "crossPageUse": "Conseils pour utiliser plusieurs sélections sur plusieurs pages : cliquez à la position de départ et, après avoir fait défiler la page, à la position de fin ${}",
   "type": "Type",
   "searchType": "Types (recherche dans les types activés ci-dessous, l'option de filtre dans la recherche globale remplace ce paramètre)",
   "searchAttr": "Attribut (recherche non seulement dans le contenu, mais aussi dans les attributs activés suivants)",

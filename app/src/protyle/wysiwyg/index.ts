@@ -434,6 +434,8 @@ export class WYSIWYG {
 
             let mouseElement: Element;
             let moveCellElement: HTMLElement;
+            let startFirstElement: Element;
+            let endLastElement: Element;
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 const moveTarget = moveEvent.target as HTMLElement;
                 // table cell select
@@ -555,7 +557,14 @@ export class WYSIWYG {
                     mouseElement = newMouseElement;
                 }
                 hideElements(["select"], protyle);
-                let firstElement = document.elementFromPoint(newLeft - 1, newTop);
+                let firstElement
+                if (moveEvent.clientY > y) {
+                    firstElement = startFirstElement || document.elementFromPoint(newLeft - 1, newTop);
+                    endLastElement = undefined
+                } else {
+                    firstElement = document.elementFromPoint(newLeft - 1, newTop);
+                    startFirstElement = undefined;
+                }
                 if (!firstElement) {
                     return;
                 }
@@ -565,6 +574,9 @@ export class WYSIWYG {
                 if (!firstElement || firstElement.classList.contains("protyle-wysiwyg")) {
                     return;
                 }
+                if (moveEvent.clientY > y && !startFirstElement) {
+                    startFirstElement = firstElement;
+                }
                 const firstBlockElement = hasClosestBlock(firstElement);
                 if (!firstBlockElement) {
                     return;
@@ -572,15 +584,16 @@ export class WYSIWYG {
                 let selectElements: Element[] = [];
                 let currentElement: Element | boolean = firstBlockElement;
                 let hasJump = false;
+                const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight)
                 while (currentElement) {
                     if (currentElement && !currentElement.classList.contains("protyle-attr")) {
                         const currentRect = currentElement.getBoundingClientRect();
-                        if (currentRect.height > 0 && currentRect.top < newTop + newHeight && currentRect.left < newLeft + newWidth) {
+                        if (currentRect.height > 0 && currentRect.top < selectBottom && currentRect.left < newLeft + newWidth) {
                             if (hasJump) {
                                 // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
                                 if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
                                     const nextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                    if (nextRect.top < newTop + newHeight && nextRect.left < newLeft + newWidth) {
+                                    if (nextRect.top < selectBottom && nextRect.left < newLeft + newWidth) {
                                         selectElements = [currentElement];
                                         currentElement = currentElement.nextElementSibling;
                                         hasJump = false;
@@ -613,6 +626,7 @@ export class WYSIWYG {
                         hasJump = true;
                     }
                 }
+                endLastElement = selectElements[selectElements.length - 1]
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
@@ -632,6 +646,8 @@ export class WYSIWYG {
                 documentSelf.ondragstart = null;
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
+                startFirstElement = undefined;
+                endLastElement = undefined;
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
                 if (!protyle.disabled && tableBlockElement) {
@@ -1116,8 +1132,8 @@ export class WYSIWYG {
             }
             protyle.hint.render(protyle);
             event.clipboardData.setData("text/plain", protyle.lute.BlockDOM2StdMd(html).trimEnd());  // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
-            event.clipboardData.setData("text/html",  protyle.lute.BlockDOM2HTML(html));
-            event.clipboardData.setData("text/siyuan",  html);
+            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(html));
+            event.clipboardData.setData("text/siyuan", html);
         });
 
         let beforeContextmenuRange: Range;

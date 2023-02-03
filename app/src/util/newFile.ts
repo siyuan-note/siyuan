@@ -68,7 +68,7 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
             } else {
                 fetchPost("/api/filetree/getHPathByPath", {
                     notebook: notebookId,
-                    path: currentPath
+                    path: currentPath.endsWith(".sy") ? currentPath : currentPath + ".sy"
                 }, (responseHPath) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: notebookId,

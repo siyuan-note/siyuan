@@ -29,7 +29,7 @@ require (
 	github.com/gin-gonic/gin v1.8.2
 	github.com/goccy/go-json v0.10.0
 	github.com/gofrs/flock v0.8.1
-	github.com/imroc/req/v3 v3.31.1
+	github.com/imroc/req/v3 v3.31.2
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -40,7 +40,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.23.1
-	github.com/siyuan-note/dejavu v0.0.0-20230201041324-d474aaa63b4e
+	github.com/siyuan-note/dejavu v0.0.0-20230203032858-f307dcd7c8fc
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230126092943-c6bf51e65ae2
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
@@ -63,7 +63,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.191 // indirect
+	github.com/aws/aws-sdk-go v1.44.193 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/dlclark/regexp2 v1.8.0 // indirect
@@ -76,6 +76,7 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
+	github.com/google/pprof v0.0.0-20230131232505-5a9e8f65f08f // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
@@ -93,7 +94,6 @@ require (
 	github.com/juju/errors v1.0.0 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/marten-seemann/qpack v0.3.0 // indirect
 	github.com/marten-seemann/qtls-go1-16 v0.1.5 // indirect
 	github.com/marten-seemann/qtls-go1-17 v0.1.2 // indirect
 	github.com/marten-seemann/qtls-go1-18 v0.1.4 // indirect
@@ -105,11 +105,13 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/ginkgo/v2 v2.8.0 // indirect
 	github.com/open-spaced-repetition/go-fsrs v0.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/qiniu/go-sdk/v7 v7.14.0 // indirect
+	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect

@@ -174,7 +174,7 @@ export class MobileFiles extends Model {
                         const notebookId = ulElement.getAttribute("data-url");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile(notebookId, pathString, true);
+                                newFile(notebookId, pathString);
                             } else if (type === "more-root") {
                                 initNavigationMenu(target.parentElement).popup({x, y});
                                 window.siyuan.menus.menu.element.style.zIndex = "310";

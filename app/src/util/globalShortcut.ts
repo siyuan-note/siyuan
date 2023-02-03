@@ -597,7 +597,7 @@ export const globalShortcut = () => {
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
-            newFile(undefined, undefined, true);
+            newFile(undefined, undefined, undefined, true);
             event.preventDefault();
             return;
         }

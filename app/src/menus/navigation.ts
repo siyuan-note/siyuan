@@ -206,7 +206,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                             paths.push(item.getAttribute("data-path"));
                         }
                     });
-                    newFile(notebookId, pathPosix().dirname(pathString), true, paths);
+                    newFile(notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -222,7 +222,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                             }
                         }
                     });
-                    newFile(notebookId, pathPosix().dirname(pathString), true, paths);
+                    newFile(notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

@@ -735,7 +735,7 @@ export const newCenterEmptyTab = () => {
                     newNotebook();
                 });
                 tab.panelElement.querySelector("#editorEmptyFile").addEventListener("click", () => {
-                    newFile(undefined, undefined, true);
+                    newFile(undefined, undefined, undefined, true);
                 });
             }
         }

@@ -21,11 +21,11 @@ export const setEmpty = () => {
 </div>`;
     document.getElementById("emptyNewFile").addEventListener(getEventName(), () => {
         if (window.siyuan.mobile.editor) {
-            newFile(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path, true);
+            newFile(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path, undefined, true);
         } else {
             window.siyuan.notebooks.find(item => {
                 if (item.closed) {
-                    newFile(item.id, "/", true);
+                    newFile(item.id, "/", undefined, true);
                 }
             });
         }

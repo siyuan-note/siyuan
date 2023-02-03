@@ -94,7 +94,7 @@ export class Wnd {
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (target.classList.contains("item__close") && target.getAttribute("data-type") === "new") {
                     setPanelFocus(this.headersElement.parentElement.parentElement);
-                    newFile(undefined, undefined, true);
+                    newFile(undefined, undefined, undefined, true);
                     break;
                 } else if (target.classList.contains("item__close") && target.getAttribute("data-type") === "more") {
                     this.renderTabList(event);

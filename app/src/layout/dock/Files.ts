@@ -231,7 +231,7 @@ export class Files extends Model {
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile(notebookId, pathString, true);
+                                newFile(notebookId, pathString);
                             } else if (type === "more-root") {
                                 initNavigationMenu(target.parentElement).popup({x: event.clientX, y: event.clientY});
                             }

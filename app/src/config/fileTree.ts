@@ -49,7 +49,7 @@ export const fileTree = {
         <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="createDocNameTemplate" value="">
+    <input class="b3-text-field fn__flex-center fn__size200" id="docCreateSavePath" value="">
 </label>
 <label class="b3-label fn__flex config__item">
     <div class="fn__flex-1">
@@ -92,7 +92,7 @@ export const fileTree = {
             sort: window.siyuan.config.fileTree.sort,
             alwaysSelectOpenedFile: (fileTree.element.querySelector("#alwaysSelectOpenedFile") as HTMLInputElement).checked,
             refCreateSavePath: (fileTree.element.querySelector("#refCreateSavePath") as HTMLInputElement).value,
-            createDocNameTemplate: (fileTree.element.querySelector("#createDocNameTemplate") as HTMLInputElement).value,
+            docCreateSavePath: (fileTree.element.querySelector("#docCreateSavePath") as HTMLInputElement).value,
             openFilesUseCurrentTab: (fileTree.element.querySelector("#openFilesUseCurrentTab") as HTMLInputElement).checked,
             closeTabsOnStart: (fileTree.element.querySelector("#closeTabsOnStart") as HTMLInputElement).checked,
             allowCreateDeeper: (fileTree.element.querySelector("#allowCreateDeeper") as HTMLInputElement).checked,
@@ -104,7 +104,7 @@ export const fileTree = {
         });
     },
     bindEvent: () => {
-        (fileTree.element.querySelector("#createDocNameTemplate") as HTMLInputElement).value = window.siyuan.config.fileTree.createDocNameTemplate;
+        (fileTree.element.querySelector("#docCreateSavePath") as HTMLInputElement).value = window.siyuan.config.fileTree.docCreateSavePath;
         (fileTree.element.querySelector("#refCreateSavePath") as HTMLInputElement).value = window.siyuan.config.fileTree.refCreateSavePath;
         fileTree.element.querySelectorAll("input").forEach((item) => {
             item.addEventListener("change", () => {

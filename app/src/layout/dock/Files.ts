@@ -950,7 +950,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                 sort: window.siyuan.config.fileTree.sort,
                 alwaysSelectOpenedFile: window.siyuan.config.fileTree.alwaysSelectOpenedFile,
                 refCreateSavePath: window.siyuan.config.fileTree.refCreateSavePath,
-                createDocNameTemplate: window.siyuan.config.fileTree.createDocNameTemplate,
+                docCreateSavePath: window.siyuan.config.fileTree.docCreateSavePath,
                 openFilesUseCurrentTab: window.siyuan.config.fileTree.openFilesUseCurrentTab,
                 maxListCount: window.siyuan.config.fileTree.maxListCount,
             }, () => {

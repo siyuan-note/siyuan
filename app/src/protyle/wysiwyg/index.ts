@@ -626,7 +626,9 @@ export class WYSIWYG {
                         hasJump = true;
                     }
                 }
-                endLastElement = selectElements[selectElements.length - 1]
+                if (moveEvent.clientY <= y && !endLastElement) {
+                    endLastElement = selectElements[selectElements.length - 1]
+                }
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";

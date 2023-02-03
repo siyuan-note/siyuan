@@ -15,7 +15,8 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     nodeElement.removeAttribute("select-start");
     nodeElement.removeAttribute("select-end");
     const id = nodeElement.getAttribute("data-node-id");
-    const sbElement = genSBElement(nodeElement.getAttribute("data-sb-layout"), id, nodeElement.lastElementChild.outerHTML);
+    const sbElement = nodeElement.cloneNode() as HTMLElement;
+    sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
     undoOperations.push({
         action: "insert",
         id,

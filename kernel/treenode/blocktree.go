@@ -420,7 +420,7 @@ func SaveBlockTree(force bool) {
 		return true
 	})
 	if 0 < count {
-		logging.LogInfof("wrote block trees [%d]", count)
+		//logging.LogInfof("wrote block trees [%d]", count)
 	}
 
 	elapsed := time.Since(start).Seconds()

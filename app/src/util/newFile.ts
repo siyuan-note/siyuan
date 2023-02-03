@@ -53,13 +53,13 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
             }
         });
     }
-    fetchPost("/api/filetree/getDocNameTemplate", {notebook: notebookId}, (data) => {
+    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: notebookId}, (data) => {
         const id = Lute.NewNodeID();
         const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy");
         if (paths) {
             paths[paths.indexOf(undefined)] = newPath;
         }
-        if (!validateName(data.data.name)) {
+        if (!validateName(data.data.path)) {
             return;
         }
         fetchPost("/api/filetree/createDoc", {

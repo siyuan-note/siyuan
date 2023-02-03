@@ -154,19 +154,7 @@ func checkBlockFold(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	b, err := model.GetBlock(id, nil)
-	if errors.Is(err, filelock.ErrUnableAccessFile) {
-		ret.Code = 2
-		ret.Data = id
-		return
-	}
-	if errors.Is(err, model.ErrIndexing) {
-		ret.Code = 0
-		ret.Data = false
-		return
-	}
-
-	ret.Data = nil != b && "1" == b.IAL["fold"]
+	ret.Data = model.IsBlockFolded(id)
 }
 
 func checkBlockExist(c *gin.Context) {

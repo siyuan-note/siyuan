@@ -87,6 +87,22 @@ type Path struct {
 	Created string `json:"created"` // 创建时间
 }
 
+func IsBlockFolded(id string) bool {
+	for i := 0; i < 32; i++ {
+		b, _ := getBlock(id, nil)
+		if nil == b {
+			return true
+		}
+
+		if "1" == b.IAL["fold"] {
+			return true
+		}
+
+		id = b.ParentID
+	}
+	return false
+}
+
 func RecentUpdatedBlocks() (ret []*Block) {
 	ret = []*Block{}
 

@@ -536,14 +536,14 @@ func getDocCreateSavePath(c *gin.Context) {
 		docCreateSavePathTpl = model.Conf.FileTree.DocCreateSavePath
 	}
 
-	path, err := model.RenderGoTemplate(docCreateSavePathTpl)
+	p, err := model.RenderGoTemplate(docCreateSavePathTpl)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = map[string]interface{}{
-		"path": path,
+		"path": p,
 	}
 }
 

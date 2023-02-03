@@ -391,36 +391,6 @@ func SaveBlockTree(force bool) {
 	os.MkdirAll(util.BlockTreePath, 0755)
 
 	size := uint64(0)
-	poolSize := runtime.NumCPU()
-	waitGroup := &sync.WaitGroup{}
-	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
-		defer waitGroup.Done()
-
-		key := arg.(map[string]interface{})["key"].(string)
-		slice := arg.(map[string]interface{})["value"].(*btSlice)
-		if !force && slice.changed.IsZero() {
-			return
-		}
-
-		slice.m.Lock()
-		data, err := msgpack.Marshal(slice.data)
-		if nil != err {
-			logging.LogErrorf("marshal block tree failed: %s", err)
-			os.Exit(util.ExitCodeBlockTreeErr)
-			return
-		}
-		slice.m.Unlock()
-
-		p := filepath.Join(util.BlockTreePath, key) + ".msgpack"
-		if err = gulu.File.WriteFileSafer(p, data, 0644); nil != err {
-			logging.LogErrorf("write block tree failed: %s", err)
-			os.Exit(util.ExitCodeBlockTreeErr)
-			return
-		}
-		slice.changed = time.Time{}
-		size += uint64(len(data))
-	})
-
 	var count int
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)
@@ -428,19 +398,31 @@ func SaveBlockTree(force bool) {
 			return true
 		}
 
+		slice.m.Lock()
+		data, err := msgpack.Marshal(slice.data)
+		if nil != err {
+			logging.LogErrorf("marshal block tree failed: %s", err)
+			os.Exit(util.ExitCodeBlockTreeErr)
+			return false
+		}
+		slice.m.Unlock()
+
+		p := filepath.Join(util.BlockTreePath, key.(string)) + ".msgpack"
+		if err = gulu.File.WriteFileSafer(p, data, 0644); nil != err {
+			logging.LogErrorf("write block tree failed: %s", err)
+			os.Exit(util.ExitCodeBlockTreeErr)
+			return false
+		}
+
+		slice.changed = time.Time{}
+		size += uint64(len(data))
 		count++
-		waitGroup.Add(1)
-		p.Invoke(map[string]interface{}{"key": key, "value": value})
 		return true
 	})
 	if 0 < count {
-		//logging.LogInfof("wrote block trees [%d]", count)
+		logging.LogInfof("wrote block trees [%d]", count)
 	}
 
-	waitGroup.Wait()
-	p.Release()
-
-	runtime.GC()
 	elapsed := time.Since(start).Seconds()
 	if 2 < elapsed {
 		logging.LogWarnf("save block tree [size=%s] to [%s], elapsed [%.2fs]", humanize.Bytes(size), util.BlockTreePath, elapsed)

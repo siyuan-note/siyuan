@@ -1072,6 +1072,10 @@
     "182": "Compartiendo documento, por favor espere...",
     "183": "Validando el árbol del documento de índice [%d/%d %s]",
     "184": "Con la tecnología de <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
-    "185": "Verificación de índice completada"
+    "185": "Verificación de índice completada",
+    "186": "Bloqueando el directorio de sincronización de la nube",
+    "187": "Desbloqueando el directorio de sincronización en la nube",
+    "188": "Error al bloquear el directorio de sincronizaci\u00f3n en la nube, int\u00e1ntelo de nuevo m\u00e1s tarde",
+    "189": "El directorio de sincronización en la nube todavía está bloqueado por otros dispositivos, inténtalo de nuevo más tarde"
   }
 }

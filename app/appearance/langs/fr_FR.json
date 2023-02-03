@@ -1072,6 +1072,10 @@
     "182": "Partage du document, veuillez patienter...",
     "183": "Validation de l'arborescence du document d'index [%d/%d %s]",
     "184": "Propulsé par <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
-    "185": "Vérification de l'index terminée"
+    "185": "Vérification de l'index terminée",
+    "186": "Verrouillage du répertoire de synchronisation cloud",
+    "187": "Déverrouillage du répertoire de synchronisation cloud",
+    "188": "Échec du verrouillage du répertoire de synchronisation cloud, veuillez réessayer plus tard",
+    "189": "Le répertoire de synchronisation cloud est toujours verrouillé par d'autres appareils, veuillez réessayer plus tard"
   }
 }

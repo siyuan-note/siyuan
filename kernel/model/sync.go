@@ -437,6 +437,10 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(28)
 	} else if strings.Contains(msgLowerCase, "cloud object not found") {
 		msg = Conf.Language(129)
+	} else if strings.Contains(msgLowerCase, "lock cloud repo failed") {
+		msg = Conf.Language(188)
+	} else if strings.Contains(msgLowerCase, "cloud repo is locked") {
+		msg = Conf.Language(189)
 	}
 	msg = msg + " v" + util.Ver
 	return msg

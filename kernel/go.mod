@@ -40,9 +40,9 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.23.1
-	github.com/siyuan-note/dejavu v0.0.0-20230203032858-f307dcd7c8fc
+	github.com/siyuan-note/dejavu v0.0.0-20230203091000-b288dbd9185f
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
-	github.com/siyuan-note/eventbus v0.0.0-20230126092943-c6bf51e65ae2
+	github.com/siyuan-note/eventbus v0.0.0-20230203085647-fb624740be03
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
 	github.com/siyuan-note/httpclient v0.0.0-20230201041143-5c2b2b88b985
 	github.com/siyuan-note/logging v0.0.0-20221031125421-9b7234d79d8a

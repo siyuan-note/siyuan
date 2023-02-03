@@ -1072,6 +1072,10 @@
     "182": "Sharing document, please wait...",
     "183": "Validating index document tree [%d/%d %s]",
     "184": "Powered by <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
-    "185": "Index verification complete"
+    "185": "Index verification complete",
+    "186": "Locking cloud sync directory",
+    "187": "Unlocking cloud sync directory",
+    "188": "Failed to lock the cloud sync directory, please try again later",
+    "189": "Cloud sync directory is still locked by other devices, please try again later"
   }
 }

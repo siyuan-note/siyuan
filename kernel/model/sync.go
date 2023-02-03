@@ -28,6 +28,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -415,32 +416,32 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 }
 
 func formatErrorMsg(err error) string {
-	if errors.Is(err, cloud.ErrCloudAuthFailed) {
-		return Conf.Language(31) + " v" + util.Ver
-	}
-
 	msg := err.Error()
-	msgLowerCase := strings.ToLower(msg)
-	if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
-		msg = Conf.Language(33) + " " + err.Error()
-	} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
-		msg = fmt.Sprintf(Conf.Language(85), err)
-	} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
-		msg = Conf.Language(135)
-	} else if strings.Contains(msgLowerCase, "repo fatal error") {
-		msg = Conf.Language(23)
-	} else if strings.Contains(msgLowerCase, "no such host") || strings.Contains(msgLowerCase, "connection failed") || strings.Contains(msgLowerCase, "hostname resolution") || strings.Contains(msgLowerCase, "No address associated with hostname") {
-		msg = Conf.Language(24)
-	} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") || strings.Contains(msgLowerCase, "timeout") || strings.Contains(msgLowerCase, "context cancellation while reading body") {
-		msg = Conf.Language(24)
-	} else if strings.Contains(msgLowerCase, "connection was") || strings.Contains(msgLowerCase, "reset by peer") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") {
-		msg = Conf.Language(28)
-	} else if strings.Contains(msgLowerCase, "cloud object not found") {
+	if errors.Is(err, cloud.ErrCloudAuthFailed) {
+		msg = Conf.Language(31)
+	} else if errors.Is(err, cloud.ErrCloudObjectNotFound) {
 		msg = Conf.Language(129)
-	} else if strings.Contains(msgLowerCase, "lock cloud repo failed") {
+	} else if errors.Is(err, dejavu.ErrLockCloudFailed) {
 		msg = Conf.Language(188)
-	} else if strings.Contains(msgLowerCase, "cloud repo is locked") {
+	} else if errors.Is(err, dejavu.ErrCloudLocked) {
 		msg = Conf.Language(189)
+	} else if errors.Is(err, dejavu.ErrRepoFatalErr) {
+		msg = Conf.Language(23)
+	} else {
+		msgLowerCase := strings.ToLower(msg)
+		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
+			msg = Conf.Language(33)
+		} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
+			msg = fmt.Sprintf(Conf.Language(85), err)
+		} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
+			msg = Conf.Language(135)
+		} else if strings.Contains(msgLowerCase, "no such host") || strings.Contains(msgLowerCase, "connection failed") || strings.Contains(msgLowerCase, "hostname resolution") || strings.Contains(msgLowerCase, "No address associated with hostname") {
+			msg = Conf.Language(24)
+		} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") || strings.Contains(msgLowerCase, "timeout") || strings.Contains(msgLowerCase, "context cancellation while reading body") {
+			msg = Conf.Language(24)
+		} else if strings.Contains(msgLowerCase, "connection was") || strings.Contains(msgLowerCase, "reset by peer") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") {
+			msg = Conf.Language(28)
+		}
 	}
 	msg = msg + " v" + util.Ver
 	return msg

@@ -48,7 +48,7 @@ func HookDesktopUIProcJob() {
 	}
 
 	if firstRunHookDesktopUIProcJob {
-		// 等待启动结束再
+		// 等待启动结束再监控
 		time.Sleep(30 * time.Second)
 		firstRunHookDesktopUIProcJob = false
 		return
@@ -59,7 +59,9 @@ func HookDesktopUIProcJob() {
 	}
 
 	uiProcNames := []string{"siyuan", "electron"}
+	uiProcessCount := 0
 	util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
+		uiProcessCount++
 		uiProcID, err := strconv.Atoi(uiProcIDArg.(string))
 		if nil != err {
 			logging.LogErrorf("invalid UI proc ID [%s]: %s", uiProcIDArg, err)
@@ -73,18 +75,23 @@ func HookDesktopUIProcJob() {
 		}
 
 		if nil == proc {
+			noUIProcCount++
 			return true
 		}
 
 		procName := strings.ToLower(proc.Executable())
+		uiProcOk := false
 		for _, name := range uiProcNames {
-			if strings.Contains(procName, name) {
-				noUIProcCount++
-				return false
-			}
+			uiProcOk = strings.Contains(procName, name)
+		}
+		if !uiProcOk {
+			noUIProcCount++
 		}
 		return true
 	})
+	if 1 > uiProcessCount {
+		noUIProcCount++
+	}
 
 	if 0 < noUIProcCount {
 		logging.LogInfof("no active UI proc count [%d]", noUIProcCount)

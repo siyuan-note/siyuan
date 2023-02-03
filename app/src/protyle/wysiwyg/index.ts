@@ -571,15 +571,16 @@ export class WYSIWYG {
                 if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") || firstElement.classList.contains("sb") || firstElement.classList.contains("bq")) {
                     firstElement = document.elementFromPoint(newLeft - 1, newTop + 16);
                 }
-                if (!firstElement || firstElement.classList.contains("protyle-wysiwyg")) {
+                if (!firstElement) {
                     return;
                 }
-                if (moveEvent.clientY > y && !startFirstElement) {
-                    startFirstElement = firstElement;
-                }
-                const firstBlockElement = hasClosestBlock(firstElement);
-                if (!firstBlockElement) {
-                    return;
+                let firstBlockElement = hasClosestBlock(firstElement);
+                if (moveEvent.clientY > y) {
+                    if (!startFirstElement) {
+                        startFirstElement = firstElement;
+                    }
+                } else if (!firstBlockElement) {
+                    firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
                 }
                 let selectElements: Element[] = [];
                 let currentElement: Element | boolean = firstBlockElement;

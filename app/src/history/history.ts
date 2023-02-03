@@ -89,7 +89,15 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
     let repoHTML = "";
-    response.data.snapshots.forEach((item: { memo: string, id: string, hCreated: string, count: number, hSize: string, tag: string, typesCount: { type: string, count: number }[] }) => {
+    response.data.snapshots.forEach((item: {
+        memo: string,
+        id: string,
+        hCreated: string,
+        count: number,
+        hSize: string,
+        tag: string,
+        typesCount: { type: string, count: number }[]
+    }) => {
         if (isMobile()) {
             repoHTML += `<li class="b3-list-item b3-list-item--two" data-type="repoitem">
     <div class="b3-list-item__first">
@@ -179,7 +187,10 @@ const renderRmNotebook = (element: HTMLElement) => {
             return;
         }
         let logsHTML = "";
-        response.data.histories.forEach((item: { items: { path: string, title: string }[], hCreated: string }, index: number) => {
+        response.data.histories.forEach((item: {
+            items: { path: string, title: string }[],
+            hCreated: string
+        }, index: number) => {
             logsHTML += `<li class="b3-list-item" style="padding-left: 0" data-type="rmtoggle">
     <span style="padding-left: 8px" class="b3-list-item__toggle"><svg class="b3-list-item__arrow${index === 0 ? " b3-list-item__arrow--open" : ""}${item.items.length > 0 ? "" : " fn__hidden"}"><use xlink:href="#iconRight"></use></svg></span>
     <span class="b3-list-item__text">${item.hCreated}</span>
@@ -441,30 +452,31 @@ export const openHistory = () => {
                 break;
             } else if (target.classList.contains("b3-list-item") && type === "repoitem") {
                 const btnElement = dialog.element.querySelector(".b3-button[data-type='compare']");
-                const idstring = btnElement.getAttribute("data-ids");
-                const ids = idstring ? idstring.split(",") : [];
+                const idJSON = JSON.parse(btnElement.getAttribute("data-ids") || "[]");
                 const id = target.getAttribute("data-id");
                 if (target.classList.contains("b3-list-item--focus")) {
                     target.classList.remove("b3-list-item--focus");
-                    if (ids.includes(id)) {
-                        ids.splice(ids.indexOf(id), 1);
-                    }
+                    idJSON.forEach((item: { id: string, time: string }, index: number) => {
+                        if (id === item.id) {
+                            idJSON.splice(index, 1);
+                        }
+                    })
                 } else {
                     target.classList.add("b3-list-item--focus");
-                    if (!ids.includes(id)) {
-                        while (ids.length > 1) {
-                            const removeId = ids.splice(0, 1)[0];
-                            target.parentElement.querySelector(`.b3-list-item[data-id="${removeId}"]`)?.classList.remove("b3-list-item--focus");
+                    while (idJSON.length > 1) {
+                        if (idJSON[0].id !== id) {
+                            target.parentElement.querySelector(`.b3-list-item[data-id="${idJSON.splice(0, 1)[0].id}"]`)?.classList.remove("b3-list-item--focus");
                         }
-                        ids.push(id);
                     }
+                    idJSON.push({id, time: target.querySelector(".ft__smaller").textContent});
                 }
-                if (ids.length === 2) {
+
+                if (idJSON.length === 2) {
                     btnElement.removeAttribute("disabled");
                 } else {
                     btnElement.setAttribute("disabled", "disabled");
                 }
-                btnElement.setAttribute("data-ids", ids.join(","));
+                btnElement.setAttribute("data-ids", JSON.stringify(idJSON));
                 break;
             } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
                 const dataPath = target.getAttribute("data-path");
@@ -600,7 +612,7 @@ export const openHistory = () => {
                 });
                 break;
             } else if (type === "compare") {
-                showDiff(target.getAttribute("data-ids"));
+                showDiff(JSON.parse(target.getAttribute("data-ids") || "[]"));
                 break;
             }
             target = target.parentElement;

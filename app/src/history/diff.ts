@@ -97,12 +97,20 @@ const renderCompare = (element: HTMLElement) => {
     }
 };
 
-export const showDiff = (ids: string) => {
-    const idArray = ids.split(",");
-    if (idArray.length !== 2) {
+export const showDiff = (data: { id: string, time: string }[]) => {
+    if (data.length !== 2) {
         return;
     }
-    fetchPost("/api/repo/diffRepoSnapshots", {left: idArray[0], right: idArray[1]}, (response) => {
+    let left
+    let right
+    if (data[0].time > data[1].time) {
+        left = data[1].id
+        right = data[0].id
+    } else {
+        left = data[0].id
+        right = data[1].id
+    }
+    fetchPost("/api/repo/diffRepoSnapshots", {left, right}, (response) => {
         const dialog = new Dialog({
             title: window.siyuan.languages.compare,
             content: `<div class="fn__flex" style="height: 100%">
@@ -114,7 +122,7 @@ export const showDiff = (ids: string) => {
                 </span>
                 <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.update}</span>
             </li>
-            <ul class="fn__none">${genItem(response.data.updatesRight, response.data.updatesLeft)}</ul>
+            <ul class="fn__none">${genItem(response.data.updatesLeft, response.data.updatesRight)}</ul>
         </ul>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">

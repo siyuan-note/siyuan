@@ -89,7 +89,7 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
             }
             const id = Lute.NewNodeID();
             const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy");
-            if (paths.length > 0) {
+            if (paths) {
                 paths[paths.indexOf(undefined)] = newPath;
             }
             fetchPost("/api/filetree/createDoc", {

@@ -99,5 +99,5 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
     }, dialog.element.querySelector(".b3-dialog__container").lastElementChild, () => {
         dialog.destroy();
     });
-    dialog.element.firstElementChild.setAttribute("style", "z-index:199"); // https://github.com/siyuan-note/siyuan/issues/3515
+    dialog.element.firstElementChild.setAttribute("style", "z-index:202"); // https://github.com/siyuan-note/siyuan/issues/3515
 };

@@ -22,7 +22,11 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
             const currentElement = item.parent.headElement;
             if (currentElement.classList.contains("item--focus")) {
                 notebookId = item.editor.protyle.notebookId;
-                currentPath = pathPosix().dirname(item.editor.protyle.path);
+                if (useSavePath) {
+                    currentPath = item.editor.protyle.path;
+                } else {
+                    currentPath = pathPosix().dirname(item.editor.protyle.path);
+                }
                 if (hasClosestByClassName(currentElement, "layout__wnd--active")) {
                     return true;
                 }
@@ -38,7 +42,11 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
                         notebookId = topElement.getAttribute("data-url");
                     }
                     const selectPath = currentElement.getAttribute("data-path");
-                    currentPath = pathPosix().dirname(selectPath);
+                    if (useSavePath) {
+                        currentPath = selectPath;
+                    } else {
+                        currentPath = pathPosix().dirname(selectPath);
+                    }
                 }
             }
         }
@@ -55,7 +63,7 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
     }
     fetchPost("/api/filetree/getDocCreateSavePath", {notebook: notebookId}, (data) => {
         if (data.data.path.indexOf("/") > -1 && useSavePath) {
-            if (data.data.path.startsWith("/")) {
+            if (data.data.path.startsWith("/") || currentPath === "/") {
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: notebookId,
                     path: data.data.path,

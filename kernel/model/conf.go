@@ -215,7 +215,7 @@ func InitConf() {
 	if "" == Conf.System.ID {
 		Conf.System.ID = util.GetDeviceID()
 	}
-	if "std" == util.Container {
+	if util.ContainerStd == util.Container {
 		Conf.System.ID = util.GetDeviceID()
 	}
 

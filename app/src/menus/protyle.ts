@@ -40,12 +40,14 @@ import {exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
+import {hideElements} from "../protyle/ui/hideElements";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const refBlockId = element.getAttribute("data-id");
     const id = nodeElement.getAttribute("data-node-id");
     let oldHTML = nodeElement.outerHTML;
@@ -494,6 +496,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     const imgElement = assetElement.querySelector("img");
     const titleElement = assetElement.querySelector(".protyle-action__title") as HTMLElement;
@@ -680,6 +683,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     const html = nodeElement.outerHTML;
     const linkAddress = linkElement.getAttribute("data-href");
@@ -854,6 +858,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     let html = nodeElement.outerHTML;
     window.siyuan.menus.menu.append(new MenuItem({
@@ -962,10 +967,10 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
-        label: `<div class="fn__hr--small"></div><input style="margin: 4px 0" class="b3-text-field fn__size200" value="${iframeElement.getAttribute("src") || ""}" placeholder="${window.siyuan.languages.link}"><div class="fn__hr--small"></div>`,
+        label: `<div class="fn__hr--small"></div><textarea rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.link}">${iframeElement.getAttribute("src") || ""}</textarea><div class="fn__hr--small"></div>`,
         bind(element) {
-            element.querySelector("input").addEventListener("change", (event) => {
-                const value = (event.target as HTMLInputElement).value;
+            element.querySelector("textarea").addEventListener("change", (event) => {
+                const value = (event.target as HTMLTextAreaElement).value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "");
                 const biliMatch = value.match(/(?:www\.|\/\/)bilibili\.com\/video\/(\w+)/);
                 if (value.indexOf("bilibili.com") > -1 && (value.indexOf("bvid=") > -1 || (biliMatch && biliMatch[1]))) {
                     const params: IObject = {
@@ -1026,11 +1031,10 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const videoElement = nodeElement.querySelector(type === "NodeVideo" ? "video" : "audio");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
-        label: `<input style="margin: 4px 0" class="b3-text-field" value="${videoElement.getAttribute("src")}" placeholder="${window.siyuan.languages.link}">`,
+        label: `<div class="fn__hr--small"></div><textarea rows="1" class="b3-text-field" placeholder="${window.siyuan.languages.link}">${videoElement.getAttribute("src")}</textarea><div class="fn__hr--small"></div>`,
         bind(element) {
-            element.querySelector("input").addEventListener("change", (event) => {
-                const value = (event.target as HTMLInputElement).value;
-                videoElement.setAttribute("src", value);
+            element.querySelector("textarea").addEventListener("change", (event) => {
+                videoElement.setAttribute("src", (event.target as HTMLTextAreaElement).value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 html = nodeElement.outerHTML;
                 event.stopPropagation();

@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -148,6 +149,7 @@ func autoFixIndex() {
 	util.PushStatusBar(Conf.Language(58))
 	sql.WaitForWritingDatabase()
 	util.PushStatusBar(Conf.Language(185))
+	debug.FreeOSMemory()
 }
 
 func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {

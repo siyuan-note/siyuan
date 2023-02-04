@@ -1,4 +1,5 @@
 {
+  "sortByFiletree": "使用文檔樹排序規則",
   "tabToWindow": "移動到新窗口",
   "exitFocus": "退出聚焦",
   "pointExchangeSize": "積分兌換",
@@ -655,14 +656,14 @@
   "fileTree3": "刪除文檔時不需要確認",
   "fileTree4": "不啟用時每次刪除文檔都會彈出確認框",
   "fileTree5": "塊引新建文檔存放位置",
-  "fileTree6": "使用 <code class='fn__code'>((</code> 時新建文檔的存放路徑（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>，不以 / 開頭則使用當前文檔相對路徑）",
+  "fileTree6": "使用 <code class='fn__code'>((</code> 時新建文檔的存放路徑（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>）",
   "fileTree7": "在當前分頁中打開",
   "fileTree8": "新打開的文檔分頁將會替換沒有修改過的分頁",
   "fileTree9": "啟動時關閉所有頁籤",
   "fileTree10": "啟用後每次啟動界面後都會自動關閉上次打開未釘住的頁籤",
   "fileTree11": "新建日記",
-  "fileTree12": "新建文檔名範本",
-  "fileTree13": "使用該範本片段進行命名（例如<code class='fn__code'>{{now | date \"20060102150405\"}}</code>）",
+  "fileTree12": "新建文檔存放位置",
+  "fileTree13": "使用 <code class='fn__code'>Ctrl+N</code> 時新建文檔的存放路徑（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>，不以 <code class='fn__code'>/</code> 開頭則使用當前文檔相對路徑）",
   "fileTree14": "存放路徑（可使用日期格式範本變數，例如 <code class='fn__code'>/日記/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>）",
   "fileTree15": "範本路徑（例如 <code class='fn__code'>dailynote.md</code>，需要將該檔放置於工作空間/data/templates/ 下）",
   "fileTree16": "最大列出數量",
@@ -995,7 +996,7 @@
     "105": "已經自動重置損壞的數據倉庫",
     "106": "最大長度限制為 512 字元",
     "107": "正在移動文檔 [%s]",
-    "108": "重建索引完畢",
+    "108": "TODO",
     "109": "移除提醒完畢 [%s]",
     "110": "正在重命名...",
     "111": "正在保存文檔 [%s]...",
@@ -1072,6 +1073,10 @@
     "182": "正在分享文檔，請稍等...",
     "183": "正在校驗索引文檔樹 [%d/%d %s]",
     "184": "由<a href=\"https://b3log.org/siyuan\" target=\"_blank\">思源筆記</a>強力驅動",
-    "185": "索引校驗完畢"
+    "185": "索引校驗完畢",
+    "186": "正在鎖定雲端同步目錄",
+    "187": "正在解鎖雲端同步目錄",
+    "188": "鎖定雲端同步目錄失敗，請稍後再試",
+    "189": "雲端同步目錄還在被其他設備鎖定，請稍後再試"
   }
 }

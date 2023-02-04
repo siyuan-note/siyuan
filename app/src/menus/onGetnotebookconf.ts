@@ -10,7 +10,7 @@ export const onGetnotebookconf = (data: {
     box: string,
     conf: {
         refCreateSavePath: string
-        createDocNameTemplate: string
+        docCreateSavePath: string
         dailyNoteSavePath: string
         dailyNoteTemplatePath: string
     }
@@ -24,7 +24,7 @@ export const onGetnotebookconf = (data: {
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="createDocNameTemplate" value="">
+    <input class="b3-text-field fn__flex-center fn__block" id="docCreateSavePath" value="">
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.fileTree5}
@@ -65,8 +65,8 @@ export const onGetnotebookconf = (data: {
     });
     const dailyNoteSavePathElement = contentElement.querySelector("#dailyNoteSavePath") as HTMLInputElement;
     dailyNoteSavePathElement.value = data.conf.dailyNoteSavePath;
-    const createDocNameTemplateElement = contentElement.querySelector("#createDocNameTemplate") as HTMLInputElement;
-    createDocNameTemplateElement.value = data.conf.createDocNameTemplate;
+    const docCreateSavePathElement = contentElement.querySelector("#docCreateSavePath") as HTMLInputElement;
+    docCreateSavePathElement.value = data.conf.docCreateSavePath;
     const refCreateSavePathElement = contentElement.querySelector("#refCreateSavePath") as HTMLInputElement;
     refCreateSavePathElement.value = data.conf.refCreateSavePath;
     const dailyNoteTemplatePathElement = contentElement.querySelector("#dailyNoteTemplatePath") as HTMLInputElement;
@@ -77,7 +77,7 @@ export const onGetnotebookconf = (data: {
                 notebook: data.box,
                 conf: {
                     refCreateSavePath: refCreateSavePathElement.value,
-                    createDocNameTemplate: createDocNameTemplateElement.value,
+                    docCreateSavePath: docCreateSavePathElement.value,
                     dailyNoteSavePath: dailyNoteSavePathElement.value,
                     dailyNoteTemplatePath: dailyNoteTemplatePathElement.value,
                 }

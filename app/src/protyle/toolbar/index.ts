@@ -725,6 +725,8 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
+        hideElements(["hint"], protyle);
+        window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
         const html = nodeElement.outerHTML;
         this.subElement.style.width = isMobile() ? "80vw" : Math.min(480, window.innerWidth) + "px";
@@ -798,6 +800,8 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
+        hideElements(["hint"], protyle);
+        window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
         const types = (renderElement.getAttribute("data-type") || "").split(" ");
         const html = oldHTML || protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
@@ -1173,6 +1177,8 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
+        hideElements(["hint"], protyle);
+        window.siyuan.menus.menu.remove();
         this.range = getEditorRange(nodeElement);
         const id = nodeElement.getAttribute("data-node-id");
         let oldHtml = nodeElement.outerHTML;
@@ -1292,6 +1298,8 @@ export class Toolbar {
 
     public showTpl(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
         this.range = range;
+        hideElements(["hint"], protyle);
+        window.siyuan.menus.menu.remove();
         fetchPost("/api/search/searchTemplate", {
             k: "",
         }, (response) => {
@@ -1420,6 +1428,8 @@ export class Toolbar {
 
     public showWidget(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
         this.range = range;
+        hideElements(["hint"], protyle);
+        window.siyuan.menus.menu.remove();
         fetchPost("/api/search/searchWidget", {
             k: "",
         }, (response) => {
@@ -1480,6 +1490,8 @@ export class Toolbar {
 
     public showAssets(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
         this.range = range;
+        hideElements(["hint"], protyle);
+        window.siyuan.menus.menu.remove();
         fetchPost("/api/search/searchAsset", {
             k: "",
         }, (response) => {

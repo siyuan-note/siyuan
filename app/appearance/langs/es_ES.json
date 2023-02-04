@@ -1,4 +1,5 @@
 {
+  "sortByFiletree": "Usar reglas de clasificación del árbol de documentos",
   "tabToWindow": "Mover a una nueva ventana",
   "exitFocus": "Salir del enfoque",
   "pointExchangeSize": "Intercambio de puntos",
@@ -655,14 +656,14 @@
   "fileTree3": "No se requiere confirmación al borrar documentos",
   "fileTree4": "Si no se activa, aparecerá un cuadro de confirmación cada vez que se elimine un documento",
   "fileTree5": "Ref crear ubicación de guardado de documentos",
-  "fileTree6": "Al utilizar <code class='fn__code'>((</code>, la ruta de guardado del nuevo documento (por ejemplo, <code class='fn__code'>/carpeta1/{{now | date \"20060102150405\"}}/</code>, se utiliza la ruta relativa del documento actual si no empieza por /)",
+  "fileTree6": "Al utilizar <code class='fn__code'>((</code>, la ruta de guardado del nuevo documento (por ejemplo, <code class='fn__code'>/carpeta1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Abrir en la pestaña actual",
   "fileTree8": "La pestaña del documento recién abierto sustituirá a la pestaña no modificada",
   "fileTree9": "Cerrar todas las pestañas al inicio",
   "fileTree10": "Cuando está habilitado, las pestañas no fijadas que se abrieron la última vez se cerrarán automáticamente cada vez que se inicie la interfaz",
   "fileTree11": "Nueva nota diaria",
-  "fileTree12": "Nueva pantilla de nombre de documento",
-  "fileTree13": "El fragmento de plantilla se utiliza por defecto cuando se crea un nuevo documento para nombrar (por ejemplo <code class='fn__code'>{{now | date \"20060102150405\"}}</code>)",
+  "fileTree12": "Nueva ubicación para guardar el documento",
+  "fileTree13": "Al usar <code class='fn__code'>Ctrl+N</code>, la ruta de guardado del nuevo documento (por ejemplo, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>, se utiliza la ruta relativa del documento actual si no empieza por <code class='fn__code'>/</code>)",
   "fileTree14": "Ruta de guardado (admite variables de plantilla de formato de fecha, como <code class='fn__code'>/Notas del día/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}</code>)",
   "fileTree15": "Ruta de la plantilla (por ejemplo, <code class='fn__code'>dailynote.md</code>, el archivo debe colocarse en el espacio de trabajo/data/templates/)",
   "fileTree16": "Número máximo a listar",
@@ -995,7 +996,7 @@
     "105": "El repositorio de datos corruptos se ha restablecido automáticamente",
     "106": "La longitud máxima está limitada a 512 caracteres",
     "107": "Moviendo documento [%s]",
-    "108": "Reconstrucción del índice completada",
+    "108": "TODO",
     "109": "Eliminación de recordatorios completada [%s]",
     "110": "Renombrar...",
     "111": "Guardando documento [%s]...",
@@ -1072,6 +1073,10 @@
     "182": "Compartiendo documento, por favor espere...",
     "183": "Validando el árbol del documento de índice [%d/%d %s]",
     "184": "Con la tecnología de <a href=\"https://b3log.org/siyuan\" target=\"_blank\">SiYuan</a>",
-    "185": "Verificación de índice completada"
+    "185": "Verificación de índice completada",
+    "186": "Bloqueando el directorio de sincronización de la nube",
+    "187": "Desbloqueando el directorio de sincronización en la nube",
+    "188": "Error al bloquear el directorio de sincronizaci\u00f3n en la nube, int\u00e1ntelo de nuevo m\u00e1s tarde",
+    "189": "El directorio de sincronización en la nube todavía está bloqueado por otros dispositivos, inténtalo de nuevo más tarde"
   }
 }

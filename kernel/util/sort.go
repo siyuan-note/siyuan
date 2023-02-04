@@ -68,4 +68,5 @@ const (
 	SortModeSizeDESC               // 12：文件大小降序
 	SortModeSubDocCountASC         // 13：子文档数升序
 	SortModeSubDocCountDESC        // 14：子文档数降序
+	SortModeFileTree               // 15：使用文档树排序规则
 )

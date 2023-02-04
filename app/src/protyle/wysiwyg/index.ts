@@ -214,14 +214,35 @@ export class WYSIWYG {
             let html = "";
             let textPlain = "";
             if (selectElements.length > 0) {
+                const isRefText = selectElements[0].getAttribute("data-reftext") === "true"
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
                     selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
-                    html = selectElements[0].parentElement.outerHTML;
+                    if (isRefText) {
+                        const cloneElement = selectElements[0].parentElement.cloneNode(true) as HTMLElement
+                        const cloneEditElement = getContenteditableElement(cloneElement)
+                        if (cloneEditElement) {
+                            cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${cloneElement.getAttribute("data-node-id")}">*</span>`)
+                        }
+                        html = cloneElement.outerHTML;
+                        selectElements[0].removeAttribute("data-reftext")
+                    } else {
+                        html = selectElements[0].parentElement.outerHTML;
+                    }
                 } else {
-                    selectElements.forEach(item => {
+                    selectElements.forEach((item, index) => {
                         const topElement = getTopAloneElement(item);
-                        html += removeEmbed(topElement);
+                        if (isRefText && index === 0) {
+                            const cloneElement = topElement.cloneNode(true) as HTMLElement
+                            const cloneEditElement = getContenteditableElement(cloneElement)
+                            if (cloneEditElement) {
+                                cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${topElement.getAttribute("data-node-id")}">*</span>`)
+                            }
+                            html += removeEmbed(cloneElement);
+                            selectElements[0].removeAttribute("data-reftext")
+                        } else {
+                            html += removeEmbed(topElement);
+                        }
                     });
                 }
             } else {
@@ -557,10 +578,10 @@ export class WYSIWYG {
                     mouseElement = newMouseElement;
                 }
                 hideElements(["select"], protyle);
-                let firstElement
+                let firstElement;
                 if (moveEvent.clientY > y) {
                     firstElement = startFirstElement || document.elementFromPoint(newLeft - 1, newTop);
-                    endLastElement = undefined
+                    endLastElement = undefined;
                 } else {
                     firstElement = document.elementFromPoint(newLeft - 1, newTop);
                     startFirstElement = undefined;
@@ -571,20 +592,21 @@ export class WYSIWYG {
                 if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") || firstElement.classList.contains("sb") || firstElement.classList.contains("bq")) {
                     firstElement = document.elementFromPoint(newLeft - 1, newTop + 16);
                 }
-                if (!firstElement || firstElement.classList.contains("protyle-wysiwyg")) {
+                if (!firstElement) {
                     return;
                 }
-                if (moveEvent.clientY > y && !startFirstElement) {
-                    startFirstElement = firstElement;
-                }
-                const firstBlockElement = hasClosestBlock(firstElement);
-                if (!firstBlockElement) {
-                    return;
+                let firstBlockElement = hasClosestBlock(firstElement);
+                if (moveEvent.clientY > y) {
+                    if (!startFirstElement) {
+                        startFirstElement = firstElement;
+                    }
+                } else if (!firstBlockElement) {
+                    firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
                 }
                 let selectElements: Element[] = [];
                 let currentElement: Element | boolean = firstBlockElement;
                 let hasJump = false;
-                const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight)
+                const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight);
                 while (currentElement) {
                     if (currentElement && !currentElement.classList.contains("protyle-attr")) {
                         const currentRect = currentElement.getBoundingClientRect();
@@ -627,7 +649,7 @@ export class WYSIWYG {
                     }
                 }
                 if (moveEvent.clientY <= y && !endLastElement) {
-                    endLastElement = selectElements[selectElements.length - 1]
+                    endLastElement = selectElements[selectElements.length - 1];
                 }
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中

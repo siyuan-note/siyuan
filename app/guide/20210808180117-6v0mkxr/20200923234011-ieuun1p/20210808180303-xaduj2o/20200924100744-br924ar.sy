@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230202231916"
+		"updated": "20230203183434"
 	},
 	"Children": [
 		{
@@ -724,7 +724,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231731-bdh7lab",
-				"updated": "20230202231916"
+				"updated": "20230203183434"
 			},
 			"Children": [
 				{
@@ -736,7 +736,7 @@
 					},
 					"Properties": {
 						"id": "20230202231732-n7z8jth",
-						"updated": "20230202231916"
+						"updated": "20230203183347"
 					},
 					"Children": [
 						{
@@ -744,12 +744,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231732-f3jkj7p",
-								"updated": "20230202231916"
+								"updated": "20230203183347"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When installing Tesseract OCR, you need to check the language pack you need, and add the installed Tesseract-OCR directory path to the environment variable PATH, so that SiYuan can directly call the "
+									"Data": "When installing Tesseract OCR, you need to check the language pack you need, and add the installed Tesseract-OCR directory path to the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, so that SiYuan can directly call the "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -782,7 +791,7 @@
 					},
 					"Properties": {
 						"id": "20230202231800-z8hswmk",
-						"updated": "20230202231819"
+						"updated": "20230203183434"
 					},
 					"Children": [
 						{
@@ -790,12 +799,93 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231800-c3x45ky",
-								"updated": "20230202231819"
+								"updated": "20230203183434"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Do not install too many language packs, otherwise it will cause OCR to be slow or even timeout to return empty results, and take up too many system resources"
+									"Data": "SiYuan does not enable all installed language packs, because too many language packs will cause OCR to be slow or even timeout and return empty results, and take up too many system resources, so by default only "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eng"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "chi*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "fra"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "spa"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "deu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "rus"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "osd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ will be enabled at most, if you need more accurate language support, you can specify the language pack by configuring the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS=chi_sim+eng "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

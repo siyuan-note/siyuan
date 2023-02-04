@@ -233,6 +233,11 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 		return nil, 0, errors.New(Conf.Language(0))
 	}
 
+	boxConf := box.GetConf()
+	if util.SortModeFileTree != boxConf.SortMode {
+		sortMode = boxConf.SortMode
+	}
+
 	var files []*FileInfo
 	start := time.Now()
 	files, totals, err = box.Ls(path)

@@ -927,6 +927,7 @@ func syncRepo(exit, byHand bool) (err error) {
 		}
 		return
 	}
+
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
@@ -1185,7 +1186,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 
 	ignoreLines := getIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.Repo.Key, ignoreLines, cloudRepo)
+	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.System.ID, Conf.Repo.Key, ignoreLines, cloudRepo)
 	if nil != err {
 		logging.LogErrorf("init data repo failed: %s", err)
 		return
@@ -1360,6 +1361,16 @@ func subscribeEvents() {
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadRef, func(context map[string]interface{}, ref string) {
 		msg := fmt.Sprintf(Conf.Language(171), ref)
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtCloudLock, func(context map[string]interface{}) {
+		msg := fmt.Sprintf(Conf.Language(186))
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtCloudUnlock, func(context map[string]interface{}) {
+		msg := fmt.Sprintf(Conf.Language(187))
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})

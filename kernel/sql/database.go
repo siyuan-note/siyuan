@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -1267,6 +1268,7 @@ func closeDatabase() (err error) {
 	}
 
 	err = db.Close()
+	debug.FreeOSMemory()
 	runtime.GC() // 没有这句的话文件句柄不会释放，后面就无法删除文件
 	return
 }

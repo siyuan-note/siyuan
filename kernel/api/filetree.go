@@ -517,7 +517,7 @@ func lockFile(c *gin.Context) {
 	}
 }
 
-func getDocNameTemplate(c *gin.Context) {
+func getDocCreateSavePath(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -528,22 +528,22 @@ func getDocNameTemplate(c *gin.Context) {
 
 	notebook := arg["notebook"].(string)
 	box := model.Conf.Box(notebook)
-	nameTemplate := model.Conf.FileTree.CreateDocNameTemplate
+	docCreateSavePathTpl := model.Conf.FileTree.DocCreateSavePath
 	if nil != box {
-		nameTemplate = box.GetConf().CreateDocNameTemplate
+		docCreateSavePathTpl = box.GetConf().DocCreateSavePath
 	}
-	if "" == nameTemplate {
-		nameTemplate = model.Conf.FileTree.CreateDocNameTemplate
+	if "" == docCreateSavePathTpl {
+		docCreateSavePathTpl = model.Conf.FileTree.DocCreateSavePath
 	}
 
-	name, err := model.RenderGoTemplate(nameTemplate)
+	p, err := model.RenderGoTemplate(docCreateSavePathTpl)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = map[string]interface{}{
-		"name": name,
+		"path": p,
 	}
 }
 
@@ -639,10 +639,6 @@ func listDocsByPath(c *gin.Context) {
 		"path":  p,
 		"files": files,
 	}
-
-	// 持久化文档面板排序
-	model.Conf.FileTree.Sort = sortMode
-	model.Conf.Save()
 }
 
 func getDoc(c *gin.Context) {

@@ -11,7 +11,7 @@ import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {Constants} from "../constants";
 import {validateName} from "../editor/rename";
 
-export const newFile = (notebookId?: string, currentPath?: string, open?: boolean, paths?: string[]) => {
+export const newFile = (notebookId?: string, currentPath?: string, paths?: string[], useSavePath = false) => {
     if (getOpenNotebookCount() === 0) {
         showMessage(window.siyuan.languages.newFileTip);
         return;
@@ -22,7 +22,11 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
             const currentElement = item.parent.headElement;
             if (currentElement.classList.contains("item--focus")) {
                 notebookId = item.editor.protyle.notebookId;
-                currentPath = pathPosix().dirname(item.editor.protyle.path);
+                if (useSavePath) {
+                    currentPath = item.editor.protyle.path;
+                } else {
+                    currentPath = pathPosix().dirname(item.editor.protyle.path);
+                }
                 if (hasClosestByClassName(currentElement, "layout__wnd--active")) {
                     return true;
                 }
@@ -38,7 +42,11 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
                         notebookId = topElement.getAttribute("data-url");
                     }
                     const selectPath = currentElement.getAttribute("data-path");
-                    currentPath = pathPosix().dirname(selectPath);
+                    if (useSavePath) {
+                        currentPath = selectPath;
+                    } else {
+                        currentPath = pathPosix().dirname(selectPath);
+                    }
                 }
             }
         }
@@ -53,28 +61,57 @@ export const newFile = (notebookId?: string, currentPath?: string, open?: boolea
             }
         });
     }
-    fetchPost("/api/filetree/getDocNameTemplate", {notebook: notebookId}, (data) => {
-        const id = Lute.NewNodeID();
-        const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy");
-        if (paths) {
-            paths[paths.indexOf(undefined)] = newPath;
-        }
-        if (!validateName(data.data.name)) {
-            return;
-        }
-        fetchPost("/api/filetree/createDoc", {
-            notebook: notebookId,
-            path: newPath,
-            title: data.data.name || "Untitled",
-            md: "",
-            sorts: paths
-        }, () => {
-            /// #if !MOBILE
-            if (open) {
-                openFileById({id, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: notebookId}, (data) => {
+        if (data.data.path.indexOf("/") > -1 && useSavePath) {
+            if (data.data.path.startsWith("/") || currentPath === "/") {
+                fetchPost("/api/filetree/createDocWithMd", {
+                    notebook: notebookId,
+                    path: data.data.path,
+                    markdown: ""
+                }, response => {
+                    /// #if !MOBILE
+                    openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                    /// #endif
+                });
+            } else {
+                fetchPost("/api/filetree/getHPathByPath", {
+                    notebook: notebookId,
+                    path: currentPath.endsWith(".sy") ? currentPath : currentPath + ".sy"
+                }, (responseHPath) => {
+                    fetchPost("/api/filetree/createDocWithMd", {
+                        notebook: notebookId,
+                        path: pathPosix().join(responseHPath.data, data.data.path),
+                        markdown: ""
+                    }, response => {
+                        /// #if !MOBILE
+                        openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                        /// #endif
+                    });
+                });
             }
-            /// #endif
-        });
+        } else {
+            let title = data.data.path || "Untitled";
+            title = title.substring(title.lastIndexOf("/") + 1);
+            if (!validateName(title)) {
+                return;
+            }
+            const id = Lute.NewNodeID();
+            const newPath = pathPosix().join(getDisplayName(currentPath, false, true), id + ".sy");
+            if (paths) {
+                paths[paths.indexOf(undefined)] = newPath;
+            }
+            fetchPost("/api/filetree/createDoc", {
+                notebook: notebookId,
+                path: newPath,
+                title,
+                md: "",
+                sorts: paths
+            }, () => {
+                /// #if !MOBILE
+                openFileById({id, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                /// #endif
+            });
+        }
     });
 };
 

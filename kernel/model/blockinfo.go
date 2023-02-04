@@ -94,8 +94,10 @@ func GetBlockRefText(id string) string {
 }
 
 func getNodeRefText(node *ast.Node) string {
-	if name := node.IALAttr("name"); "" != name {
-		return name
+	if ret := node.IALAttr("name"); "" != ret {
+		ret = strings.TrimSpace(ret)
+		ret = util.EscapeHTML(ret)
+		return ret
 	}
 
 	switch node.Type {

@@ -55,12 +55,15 @@ func HookDesktopUIProcJob() {
 	}
 
 	if 0 < util.CountSessions() {
+		// 如果存在活动的会话则说明 UI 进程还在运行
 		return
 	}
 
 	uiProcNames := []string{"siyuan", "electron"}
 	uiProcessCount := 0
 	util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
+		// 从 UI 进程 ID 列表中找到 UI 进程
+
 		uiProcessCount++
 		uiProcID, err := strconv.Atoi(uiProcIDArg.(string))
 		if nil != err {
@@ -89,8 +92,24 @@ func HookDesktopUIProcJob() {
 		}
 		return true
 	})
+
 	if 1 > uiProcessCount {
-		noUIProcCount++
+		// 如果 UI 进程 ID 列表中没有找到 UI 进程则从完整的进程列表中找
+		procs, _ := goPS.Processes()
+		for _, proc := range procs {
+			procName := strings.ToLower(proc.Executable())
+			uiProcOk := false
+			for _, name := range uiProcNames {
+				uiProcOk = strings.Contains(procName, name)
+			}
+			if uiProcOk {
+				uiProcessCount++
+			}
+		}
+
+		if 1 > uiProcessCount {
+			noUIProcCount++
+		}
 	}
 
 	if 0 < noUIProcCount {

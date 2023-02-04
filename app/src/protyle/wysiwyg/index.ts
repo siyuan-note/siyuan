@@ -557,10 +557,10 @@ export class WYSIWYG {
                     mouseElement = newMouseElement;
                 }
                 hideElements(["select"], protyle);
-                let firstElement
+                let firstElement;
                 if (moveEvent.clientY > y) {
                     firstElement = startFirstElement || document.elementFromPoint(newLeft - 1, newTop);
-                    endLastElement = undefined
+                    endLastElement = undefined;
                 } else {
                     firstElement = document.elementFromPoint(newLeft - 1, newTop);
                     startFirstElement = undefined;
@@ -585,7 +585,7 @@ export class WYSIWYG {
                 let selectElements: Element[] = [];
                 let currentElement: Element | boolean = firstBlockElement;
                 let hasJump = false;
-                const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight)
+                const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight);
                 while (currentElement) {
                     if (currentElement && !currentElement.classList.contains("protyle-attr")) {
                         const currentRect = currentElement.getBoundingClientRect();
@@ -628,7 +628,7 @@ export class WYSIWYG {
                     }
                 }
                 if (moveEvent.clientY <= y && !endLastElement) {
-                    endLastElement = selectElements[selectElements.length - 1]
+                    endLastElement = selectElements[selectElements.length - 1];
                 }
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中

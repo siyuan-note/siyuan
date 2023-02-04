@@ -101,14 +101,14 @@ export const showDiff = (data: { id: string, time: string }[]) => {
     if (data.length !== 2) {
         return;
     }
-    let left
-    let right
+    let left;
+    let right;
     if (data[0].time > data[1].time) {
-        left = data[1].id
-        right = data[0].id
+        left = data[1].id;
+        right = data[0].id;
     } else {
-        left = data[0].id
-        right = data[1].id
+        left = data[0].id;
+        right = data[1].id;
     }
     fetchPost("/api/repo/diffRepoSnapshots", {left, right}, (response) => {
         const dialog = new Dialog({

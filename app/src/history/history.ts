@@ -460,7 +460,7 @@ export const openHistory = () => {
                         if (id === item.id) {
                             idJSON.splice(index, 1);
                         }
-                    })
+                    });
                 } else {
                     target.classList.add("b3-list-item--focus");
                     while (idJSON.length > 1) {

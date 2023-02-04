@@ -82,7 +82,7 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
                 });
             }
         } else {
-            let title = data.data.path || "Untitled"
+            let title = data.data.path || "Untitled";
             title = title.substring(title.lastIndexOf("/") + 1);
             if (!validateName(title)) {
                 return;

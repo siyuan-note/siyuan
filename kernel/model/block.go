@@ -155,6 +155,9 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 		}
 	}
 
+	refreshUpdated(defNode)
+	refreshUpdated(refNode)
+
 	refPivot := treenode.NewParagraph()
 	refNode.InsertBefore(refPivot)
 
@@ -215,13 +218,11 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	}
 	refPivot.Unlink()
 
-	treenode.IndexBlockTree(refTree)
-	if err = writeJSONQueue(refTree); nil != err {
+	if err = indexWriteJSONQueue(refTree); nil != err {
 		return
 	}
 	if !sameTree {
-		treenode.IndexBlockTree(defTree)
-		if err = writeJSONQueue(defTree); nil != err {
+		if err = indexWriteJSONQueue(defTree); nil != err {
 			return
 		}
 	}

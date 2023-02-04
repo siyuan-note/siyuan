@@ -521,7 +521,6 @@ func fullReindex() {
 	go func() {
 		time.Sleep(3 * time.Second)
 		util.PushClearMsg(msgId)
-		util.PushStatusBar(Conf.Language(108))
 	}()
 }
 

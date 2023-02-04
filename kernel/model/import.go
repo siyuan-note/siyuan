@@ -31,7 +31,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
@@ -700,7 +700,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 	IncSync()
 	util.ReloadUI()
-	runtime.GC()
+	debug.FreeOSMemory()
 	return
 }
 

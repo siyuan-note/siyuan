@@ -17,7 +17,7 @@
 package sql
 
 import (
-	"runtime"
+	"runtime/debug"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -45,7 +45,7 @@ func DisableCache() {
 
 func ClearBlockCache() {
 	memCache.Clear()
-	runtime.GC()
+	debug.FreeOSMemory()
 }
 
 func putBlockCache(block *Block) {

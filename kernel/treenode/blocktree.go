@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -380,7 +381,7 @@ func InitBlockTree(force bool) {
 	waitGroup.Wait()
 	p.Release()
 
-	runtime.GC()
+	debug.FreeOSMemory()
 	elapsed := time.Since(start).Seconds()
 	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes((size)), util.BlockTreePath, elapsed)
 	return

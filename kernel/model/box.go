@@ -25,7 +25,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
+	"runtime/debug"
 	"sort"
 	"strings"
 	"sync"
@@ -517,11 +517,10 @@ func fullReindex() {
 	sql.EnableCache()
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
-	runtime.GC()
+	debug.FreeOSMemory()
 	go func() {
 		time.Sleep(3 * time.Second)
 		util.PushClearMsg(msgId)
-		util.PushStatusBar(Conf.Language(108))
 	}()
 }
 

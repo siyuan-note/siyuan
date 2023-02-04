@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
-	"runtime"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -128,12 +128,12 @@ func FlushQueue() {
 		}
 
 		if 16 < i && 0 == i%128 {
-			runtime.GC()
+			debug.FreeOSMemory()
 		}
 	}
 
 	if 128 < len(ops) {
-		runtime.GC()
+		debug.FreeOSMemory()
 	}
 
 	elapsed := time.Now().Sub(start).Milliseconds()

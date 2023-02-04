@@ -40,12 +40,14 @@ import {exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
+import {hideElements} from "../protyle/ui/hideElements";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const refBlockId = element.getAttribute("data-id");
     const id = nodeElement.getAttribute("data-node-id");
     let oldHTML = nodeElement.outerHTML;
@@ -494,6 +496,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     const imgElement = assetElement.querySelector("img");
     const titleElement = assetElement.querySelector(".protyle-action__title") as HTMLElement;
@@ -680,6 +683,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     const html = nodeElement.outerHTML;
     const linkAddress = linkElement.getAttribute("data-href");
@@ -854,6 +858,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     if (!nodeElement) {
         return;
     }
+    hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     let html = nodeElement.outerHTML;
     window.siyuan.menus.menu.append(new MenuItem({

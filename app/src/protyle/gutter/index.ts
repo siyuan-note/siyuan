@@ -673,7 +673,7 @@ export class Gutter {
     }
 
     public renderMenu(protyle: IProtyle, buttonElement: Element) {
-        hideElements(["hint"], protyle);
+        hideElements(["util", "toolbar", "hint"], protyle);
         window.siyuan.menus.menu.remove();
         const id = buttonElement.getAttribute("data-node-id");
         const selectsElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");

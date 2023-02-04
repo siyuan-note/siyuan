@@ -270,7 +270,7 @@ func IndexBlockTree(tree *parse.Tree) {
 		slice.m.Unlock()
 
 		if nil != bt {
-			if bt.Updated != n.IALAttr("updated") {
+			if bt.Updated != n.IALAttr("updated") || bt.Path != tree.Path || bt.BoxID != tree.Box || bt.HPath != tree.HPath {
 				children := ChildBlockNodes(n) // 需要考虑子块，因为一些操作（比如移动块）后需要同时更新子块
 				changedNodes = append(changedNodes, children...)
 			}

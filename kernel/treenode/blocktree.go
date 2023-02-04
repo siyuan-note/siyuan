@@ -305,9 +305,13 @@ func updateBtSlice(n *ast.Node, tree *parse.Tree) {
 	slice.m.Unlock()
 }
 
-func InitBlockTree(force bool) {
-	start := time.Now()
+var blockTreeLock = sync.Mutex{}
 
+func InitBlockTree(force bool) {
+	blockTreeLock.Lock()
+	defer blockTreeLock.Unlock()
+
+	start := time.Now()
 	if force {
 		err := os.RemoveAll(util.BlockTreePath)
 		if nil != err {
@@ -387,6 +391,9 @@ func SaveBlockTreeJob() {
 }
 
 func SaveBlockTree(force bool) {
+	blockTreeLock.Lock()
+	defer blockTreeLock.Unlock()
+
 	start := time.Now()
 	os.MkdirAll(util.BlockTreePath, 0755)
 

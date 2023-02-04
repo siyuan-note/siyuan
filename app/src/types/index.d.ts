@@ -157,6 +157,7 @@ interface INotebook {
     closed: boolean
     icon: string
     sort: number
+    sortMode: number
 }
 
 interface ISiyuan {

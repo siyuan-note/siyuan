@@ -3,7 +3,7 @@ import {escapeHtml} from "../../util/escape";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
-import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
+import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
@@ -11,7 +11,6 @@ import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
 import {newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {MenuItem} from "../../menus/Menu";
 import {newFile} from "../../util/newFile";
 
 export class MobileFiles extends Model {
@@ -213,7 +212,7 @@ export class MobileFiles extends Model {
 
     private genSort(event: MouseEvent) {
         window.siyuan.menus.menu.remove();
-        const clickEvent = (sort: number) => {
+        sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort: number) => {
             window.siyuan.config.fileTree.sort = sort;
             fetchPost("/api/setting/setFiletree", {
                 sort: window.siyuan.config.fileTree.sort,
@@ -227,115 +226,7 @@ export class MobileFiles extends Model {
                     this.init(false);
                 });
             });
-        };
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 0 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.fileNameASC,
-            click: () => {
-                clickEvent(0);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 1 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.fileNameDESC,
-            click: () => {
-                clickEvent(1);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 4 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.fileNameNatASC,
-            click: () => {
-                clickEvent(4);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 5 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.fileNameNatDESC,
-            click: () => {
-                clickEvent(5);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            type: "separator"
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 9 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.createdASC,
-            click: () => {
-                clickEvent(9);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 10 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.createdDESC,
-            click: () => {
-                clickEvent(10);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 2 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.modifiedASC,
-            click: () => {
-                clickEvent(2);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 3 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.modifiedDESC,
-            click: () => {
-                clickEvent(3);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 7 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.refCountASC,
-            click: () => {
-                clickEvent(7);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 8 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.refCountDESC,
-            click: () => {
-                clickEvent(8);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 11 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.docSizeASC,
-            click: () => {
-                clickEvent(11);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 12 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.docSizeDESC,
-            click: () => {
-                clickEvent(12);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 13 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.subDocCountASC,
-            click: () => {
-                clickEvent(13);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 14 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.subDocCountDESC,
-            click: () => {
-                clickEvent(14);
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.fileTree.sort === 6 ? "iconSelect" : undefined,
-            label: window.siyuan.languages.customSort,
-            click: () => {
-                clickEvent(6);
-            }
-        }).element);
+        })
         window.siyuan.menus.menu.element.style.zIndex = "310";
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }
@@ -354,7 +245,7 @@ export class MobileFiles extends Model {
     </span>
 </li>`;
         } else {
-            return `<ul class="b3-list b3-list--background" data-url="${item.id}">
+            return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sortmode="${item.sortMode}">
 <li class="b3-list-item" data-type="navigation-root" data-path="/">
     <span class="b3-list-item__toggle${item.closed ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>

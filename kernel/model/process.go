@@ -104,6 +104,7 @@ func HookDesktopUIProcJob() {
 			}
 			if uiProcOk {
 				uiProcessCount++
+				break
 			}
 		}
 

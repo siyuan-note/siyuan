@@ -165,7 +165,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 			continue
 		}
 		cachedTrees[b.RootID] = tree
-		b.RefText = getBlockRefText(id, tree)
+		b.RefText = getBlockRefText(b.ID, tree)
 
 		hitFirstChildID := false
 		if b.IsContainerBlock() {

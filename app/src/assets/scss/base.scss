@@ -35,11 +35,12 @@
 // 需小于 ctrl+p https://github.com/siyuan-note/siyuan/issues/7174
 .protyle-util: 4
 
-// 需小于 .block__popover https://github.com/siyuan-note/siyuan/issues/3515
-ctrl+p 搜索: 199
-
 // 引用提示需小于 .block__popover
 .protyle-hint: 201
+
+// 需小于 .block__popover https://github.com/siyuan-note/siyuan/issues/3515
+// 需大于 .protyle-hint https://github.com/siyuan-note/siyuan/pull/7247
+ctrl+p 搜索: 202
 
 // 需小于 .b3-menu 悬浮窗点击更多
 // 需小于 .b3-dialog https://ld246.com/article/1637204682648

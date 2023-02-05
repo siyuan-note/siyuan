@@ -22,7 +22,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sort"
 	"strings"
 	"unicode/utf8"
 
@@ -77,44 +76,6 @@ func LastID(p string) (name, id string) {
 		id = id[len(id)-22:]
 	}
 	return
-}
-
-func LatestTmpFile(p string) string {
-	dir, base := filepath.Split(p)
-	files, err := os.ReadDir(dir)
-	if nil != err {
-		logging.LogErrorf("read dir [%s] failed: %s", dir, err)
-		return ""
-	}
-
-	var tmps []os.DirEntry
-	for _, f := range files {
-		if f.IsDir() {
-			continue
-		}
-		if strings.HasSuffix(f.Name(), ".tmp") && strings.HasPrefix(f.Name(), base) && len(base)+7+len(".tmp") == len(f.Name()) {
-			tmps = append(tmps, f)
-		}
-	}
-
-	if 1 > len(tmps) {
-		return ""
-	}
-
-	sort.Slice(tmps, func(i, j int) bool {
-		info1, err := tmps[i].Info()
-		if nil != err {
-			logging.LogErrorf("read file info [%s] failed: %s", tmps[i].Name(), err)
-			return false
-		}
-		info2, err := tmps[j].Info()
-		if nil != err {
-			logging.LogErrorf("read file info [%s] failed: %s", tmps[j].Name(), err)
-			return false
-		}
-		return info1.ModTime().After(info2.ModTime())
-	})
-	return filepath.Join(dir, tmps[0].Name())
 }
 
 func IsCorruptedSYData(data []byte) bool {

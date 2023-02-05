@@ -24,7 +24,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
@@ -45,10 +44,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	}
 	ret = parseJSON2Tree(boxID, p, data, luteEngine)
 	if nil == ret {
-		ret = recoverParseJSON2Tree(boxID, p, filePath, luteEngine)
-		if nil == ret {
-			return nil, errors.New("parse tree failed")
-		}
+		return nil, errors.New("parse tree failed")
 	}
 	ret.Path = p
 	ret.Root.Path = p
@@ -183,47 +179,6 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 func afterWriteTree(tree *parse.Tree) {
 	docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
 	cache.PutDocIAL(tree.Path, docIAL)
-}
-
-func recoverParseJSON2Tree(boxID, p, filePath string, luteEngine *lute.Lute) (ret *parse.Tree) {
-	// 尝试从临时文件恢复
-	tmp := util.LatestTmpFile(filePath)
-	if "" == tmp {
-		logging.LogWarnf("recover tree [%s] not found tmp", filePath)
-		return
-	}
-
-	stat, err := os.Stat(filePath)
-	if nil != err {
-		logging.LogErrorf("stat tmp [%s] failed: %s", tmp, err)
-		return
-	}
-
-	if stat.ModTime().Before(time.Now().Add(-time.Hour * 24)) {
-		logging.LogWarnf("tmp [%s] is too old, remove it", tmp)
-		os.RemoveAll(tmp)
-		return
-	}
-
-	data, err := filelock.ReadFile(tmp)
-	if nil != err {
-		logging.LogErrorf("recover tree read from tmp [%s] failed: %s", tmp, err)
-		return
-	}
-	if err = filelock.WriteFile(filePath, data); nil != err {
-		logging.LogErrorf("recover tree write [%s] from tmp [%s] failed: %s", filePath, tmp, err)
-		return
-	}
-
-	ret = parseJSON2Tree(boxID, p, data, luteEngine)
-	if nil == ret {
-		logging.LogErrorf("recover tree from tmp [%s] parse failed, remove it", tmp)
-		os.RemoveAll(tmp)
-		return
-	}
-	logging.LogInfof("recovered tree [%s] from [%s]", filePath, tmp)
-	os.RemoveAll(tmp)
-	return
 }
 
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree) {

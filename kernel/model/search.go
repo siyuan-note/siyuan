@@ -118,16 +118,33 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 }
 
 func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, newDoc bool) {
+	cachedTrees := map[string]*parse.Tree{}
+
 	if "" == keyword {
 		// 查询为空时默认的块引排序规则按最近使用优先 https://github.com/siyuan-note/siyuan/issues/3218
 		refs := sql.QueryRefsRecent()
 		for _, ref := range refs {
-			sqlBlock := sql.GetBlock(ref.DefBlockID)
-			block := fromSQLBlock(sqlBlock, "", beforeLen)
-			if nil == block {
+			tree := cachedTrees[ref.RootID]
+			if nil == tree {
+				tree, _ = loadTreeByBlockID(ref.RootID)
+			}
+			if nil == tree {
 				continue
 			}
-			block.RefText = sql.GetRefText(block.ID)
+			cachedTrees[ref.RootID] = tree
+
+			node := treenode.GetNodeInTree(tree, ref.DefBlockID)
+			if nil == node {
+				continue
+			}
+
+			sqlBlock := sql.BuildBlockFromNode(node, tree)
+			if nil == sqlBlock {
+				return
+			}
+
+			block := fromSQLBlock(sqlBlock, "", 0)
+			block.RefText = getNodeRefText(node)
 			block.RefText = maxContent(block.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 			ret = append(ret, block)
 		}
@@ -139,18 +156,24 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 
 	ret = fullTextSearchRefBlock(keyword, beforeLen)
 	tmp := ret[:0]
-	trees := map[string]*parse.Tree{}
 	for _, b := range ret {
-		hitFirstChildID := false
-		b.RefText = sql.GetRefText(b.ID)
-		b.RefText = maxContent(b.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
-		if b.IsContainerBlock() {
+		tree := cachedTrees[b.RootID]
+		if nil == tree {
+			tree, _ = loadTreeByBlockID(b.RootID)
+		}
+		if nil == tree {
+			continue
+		}
+		cachedTrees[b.RootID] = tree
+		b.RefText = getBlockRefText(id, tree)
 
+		hitFirstChildID := false
+		if b.IsContainerBlock() {
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
-			tree := trees[b.RootID]
+			tree := cachedTrees[b.RootID]
 			if nil == tree {
 				tree, _ = loadTreeByBlockID(b.RootID)
-				trees[b.RootID] = tree
+				cachedTrees[b.RootID] = tree
 			}
 			if nil != tree {
 				bNode := treenode.GetNodeInTree(tree, b.ID)

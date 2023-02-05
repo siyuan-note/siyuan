@@ -261,6 +261,7 @@ func getRefText(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	model.WaitForWritingFiles()
 	ret.Data = model.GetBlockRefText(id)
 }
 

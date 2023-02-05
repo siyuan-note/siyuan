@@ -74,8 +74,6 @@ func GetDocInfo(rootID string) (ret *BlockInfo) {
 }
 
 func GetBlockRefText(id string) string {
-	WaitForWritingFiles()
-
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return ErrBlockNotFound.Error()
@@ -91,6 +89,22 @@ func GetBlockRefText(id string) string {
 		return ErrBlockNotFound.Error()
 	}
 	return getNodeRefText(node)
+}
+
+func getBlockRefText(id string, tree *parse.Tree) (ret string) {
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	sqlBlock := sql.BuildBlockFromNode(node, tree)
+	if nil == sqlBlock {
+		return
+	}
+
+	ret = getNodeRefText(node)
+	ret = maxContent(ret, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
+	return
 }
 
 func getNodeRefText(node *ast.Node) string {

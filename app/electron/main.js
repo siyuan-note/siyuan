@@ -810,11 +810,20 @@ app.whenReady().then(() => {
           }
         } else {
           if (mainWindow.isVisible()) {
-            mainWindow.hide()
+            if (1 === workspaces.length) { // 改进 `Alt+M` 激活窗口 https://github.com/siyuan-note/siyuan/issues/7258
+              if (!mainWindow.isFocused()) {
+                mainWindow.show()
+              } else {
+                mainWindow.hide()
+              }
+            } else {
+              mainWindow.hide()
+            }
           } else {
             mainWindow.show()
           }
         }
+
         if ('win32' === process.platform || 'linux' === process.platform) {
           resetTrayMenu(item.tray, data.languages, mainWindow)
         }

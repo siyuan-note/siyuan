@@ -22,6 +22,11 @@ const loadThirdIcon = (iconURL: string, data: IAppearance) => {
 };
 
 export const loadAssets = (data: IAppearance) => {
+    const htmlElement = document.getElementsByTagName("html")[0]
+    htmlElement.setAttribute("lang",window.siyuan.config.appearance.lang);
+    htmlElement.setAttribute("data-theme-mode",getThemeMode());
+    htmlElement.setAttribute("data-light-theme",window.siyuan.config.appearance.themeLight);
+    htmlElement.setAttribute("data-dark-theme",window.siyuan.config.appearance.themeDark);
     const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     if (window.siyuan.config.appearance.modeOS && (
         (window.siyuan.config.appearance.mode === 1 && OSTheme === "light") ||
@@ -292,3 +297,12 @@ const updateMobileTheme = (OSTheme: string) => {
         }, 500); // 移动端需要加载完才可以获取到颜色
     }
 };
+
+export const getThemeMode = () => {
+    const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    if (window.siyuan.config.appearance.modeOS) {
+        return OSTheme;
+    } else {
+        return window.siyuan.config.appearance.mode === 0 ? "light" : "dark";
+    }
+}

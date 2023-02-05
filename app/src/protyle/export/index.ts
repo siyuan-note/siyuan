@@ -8,7 +8,7 @@ import * as path from "path";
 import {afterExport} from "./util";
 /// #endif
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {setInlineStyle} from "../../util/assets";
+import {getThemeMode, setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {lockFile} from "../../dialog/processSystem";
@@ -79,7 +79,8 @@ const renderPDF = (id: string) => {
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    const html = `<!DOCTYPE html><html>
+    const html = `<!DOCTYPE html>
+<html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -553,7 +554,8 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/${themeName}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    const html = `<!DOCTYPE html><html>
+    const html = `<!DOCTYPE html>
+<html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">

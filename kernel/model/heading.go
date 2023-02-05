@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -118,7 +119,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 			return
 		}
 
-		os.Remove(subDir) // 移除空文件夹不会有副作用
+		if removeErr := os.Remove(subDir); nil != removeErr { // 移除空文件夹不会有副作用
+			logging.LogWarnf("remove empty dir [%s] failed: %s", subDir, removeErr)
+		}
 	}
 
 	targetTree, _ := loadTreeByBlockID(targetID)
@@ -160,9 +163,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	tags := strings.Split(tagIAL, ",")
 	srcTree.Root.RemoveIALAttr("tags")
 	heading := &ast.Node{ID: srcTree.Root.ID, Type: ast.NodeHeading, HeadingLevel: headingLevel, KramdownIAL: srcTree.Root.KramdownIAL}
+	heading.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(srcTree.Root.IALAttr("title"))})
-	heading.Box = targetTree.Box
-	heading.Path = targetTree.Path
+	heading.Box, heading.Path = targetTree.Box, targetTree.Path
 	if "" != tagIAL && 0 < len(tags) {
 		// 带标签的文档块转换为标题块时将标签移动到标题块下方 https://github.com/siyuan-note/siyuan/issues/6550
 
@@ -221,12 +224,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		contentPivot.Unlink()
 	}
 
-	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path
-	srcTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	if err = indexWriteJSONQueue(srcTree); nil != err {
-		return
-	}
-
+	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path // 返回旧的文档块位置，前端后续会删除旧的文档块
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	err = indexWriteJSONQueue(targetTree)
 	IncSync()

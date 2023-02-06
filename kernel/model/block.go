@@ -128,6 +128,8 @@ func TransferBlockRef(fromID, toID string) (err error) {
 	}
 	toRefText := getNodeRefText(toNode)
 
+	util.PushMsg(Conf.Language(116), 7000)
+
 	refIDs, _ := sql.QueryRefIDsByDefID(fromID, false)
 	for _, refID := range refIDs {
 		tree, _ := loadTreeByBlockID(refID)
@@ -150,6 +152,7 @@ func TransferBlockRef(fromID, toID string) (err error) {
 		}
 	}
 
+	sql.WaitForWritingDatabase()
 	util.ReloadUI()
 	return
 }

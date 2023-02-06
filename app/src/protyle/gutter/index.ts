@@ -37,6 +37,8 @@ import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {movePathTo} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
 import {makeCard} from "../../card/makeCard";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1374,6 +1376,39 @@ export class Gutter {
                     insertEmptyBlock(protyle, "afterend", id);
                 }
             }).element);
+            const countElement = nodeElement.lastElementChild.querySelector(".protyle-attr--refcount")
+            if (countElement && countElement.textContent) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.backlinkTurnTo,
+                    click() {
+                        const renameDialog = new Dialog({
+                            title: window.siyuan.languages.backlinkTurnTo,
+                            content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" placeholder="ID"></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                            width: isMobile() ? "80vw" : "520px",
+                        });
+                        const inputElement = renameDialog.element.querySelector("input") as HTMLInputElement;
+                        const btnsElement = renameDialog.element.querySelectorAll(".b3-button");
+                        renameDialog.bindInput(inputElement, () => {
+                            (btnsElement[1] as HTMLButtonElement).click();
+                        });
+                        inputElement.focus();
+                        btnsElement[0].addEventListener("click", () => {
+                            renameDialog.destroy();
+                        });
+                        btnsElement[1].addEventListener("click", () => {
+                            fetchPost("/api/block/transferBlockRef", {
+                                fromID: id,
+                                toID: inputElement.value,
+                            });
+                            renameDialog.destroy();
+                        });
+                    }
+                }).element);
+            }
         }
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.jumpToParentNext,

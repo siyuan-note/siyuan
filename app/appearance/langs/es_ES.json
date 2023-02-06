@@ -1,7 +1,8 @@
 {
   "backlinkTurnTo": "Transferencia de referencia",
   "sortByFiletree": "Usar reglas de clasificación del árbol de documentos",
-  "tabToWindow": "Mover a una nueva ventana",
+  "tabToWindow": "Mover a una Nueva Ventana",
+  "openByNewWindow": "Abrir con Nueva Ventana",
   "exitFocus": "Salir del enfoque",
   "pointExchangeSize": "Intercambio de puntos",
   "panels": "Paneles",

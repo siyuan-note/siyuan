@@ -32,6 +32,7 @@ import {deleteFile} from "../../editor/deleteFile";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
+import {transferBlockRef} from "../../menus/block";
 
 export class Title {
     public element: HTMLElement;
@@ -307,6 +308,10 @@ export class Title {
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                const countElement = this.element.lastElementChild.querySelector(".protyle-attr--refcount")
+                if (countElement && countElement.textContent) {
+                    transferBlockRef(protyle.block.rootID);
+                }
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,
                     accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),

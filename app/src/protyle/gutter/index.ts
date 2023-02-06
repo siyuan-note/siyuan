@@ -1381,7 +1381,7 @@ export class Gutter {
                             title: window.siyuan.languages.transferBlockRef,
                             content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" placeholder="ID">
-    <div class="b3-label__text">${window.siyuan.languages.transferBlockRef}</div>
+    <div class="b3-label__text">${window.siyuan.languages.transferBlockRefTip}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>

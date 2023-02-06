@@ -1,4 +1,5 @@
 {
+  "transferBlockRefTip": "將該塊的所有引用轉移到目標塊上",
   "transferBlockRef": "轉移引用",
   "sortByFiletree": "使用文檔樹排序規則",
   "tabToWindow": "移動到新窗口",

@@ -1,4 +1,5 @@
 {
+  "transferBlockRefTip": "Transférer toutes les références de ce bloc vers le bloc cible",
   "transferBlockRef": "Référence de transfert",
   "sortByFiletree": "Utiliser les règles de tri de l'arborescence des documents",
   "tabToWindow": "Passer à une nouvelle fenêtre",

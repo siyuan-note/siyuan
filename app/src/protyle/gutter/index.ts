@@ -1,9 +1,4 @@
-import {
-    hasClosestBlock,
-    hasClosestByAttribute,
-    hasClosestByMatchTag,
-    hasClosestByTag
-} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByMatchTag, hasClosestByTag} from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
@@ -11,7 +6,8 @@ import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuIte
 import {copyPlainText, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     transaction,
-    turnsIntoOneTransaction, turnsIntoTransaction,
+    turnsIntoOneTransaction,
+    turnsIntoTransaction,
     updateBatchTransaction,
     updateTransaction
 } from "../wysiwyg/transaction";
@@ -1379,13 +1375,13 @@ export class Gutter {
             const countElement = nodeElement.lastElementChild.querySelector(".protyle-attr--refcount")
             if (countElement && countElement.textContent) {
                 window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.backlinkTurnTo,
+                    label: window.siyuan.languages.transferBlockRef,
                     click() {
                         const renameDialog = new Dialog({
-                            title: window.siyuan.languages.backlinkTurnTo,
+                            title: window.siyuan.languages.transferBlockRef,
                             content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" placeholder="ID">
-    <div class="b3-label__text">${window.siyuan.languages.backlinkTurnTo}</div>
+    <div class="b3-label__text">${window.siyuan.languages.transferBlockRef}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>

@@ -506,7 +506,6 @@ func ReloadUI() {
 
 func FullReindex() {
 	task.PrependTask(task.DatabaseIndexFull, fullReindex)
-	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 }
 
 func fullReindex() {
@@ -527,6 +526,7 @@ func fullReindex() {
 	sql.EnableCache()
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
+	IndexRefs()
 	debug.FreeOSMemory()
 	util.ReloadUI()
 }

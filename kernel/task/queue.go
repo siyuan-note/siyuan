@@ -100,11 +100,10 @@ func Contain(action string, moreActions ...string) bool {
 
 func StatusJob() {
 	tasks := taskQueue
-	data := map[string]interface{}{}
 	var items []map[string]interface{}
 	count := map[string]int{}
+	actionLangs := util.TaskActionLangs[util.Lang]
 	for _, task := range tasks {
-		actionLangs := util.TaskActionLangs[util.Lang]
 		action := task.Action
 		if c := count[action]; 2 < c {
 			//logging.LogWarnf("too many tasks [%s], ignore show its status", action)
@@ -123,12 +122,17 @@ func StatusJob() {
 	}
 
 	if "" != currentTaskAction {
-		items = append([]map[string]interface{}{map[string]interface{}{"action": currentTaskAction}}, items...)
+		if nil != actionLangs {
+			if label := actionLangs[currentTaskAction]; nil != label {
+				items = append([]map[string]interface{}{map[string]interface{}{"action": label.(string)}}, items...)
+			}
+		}
 	}
 
 	if 1 > len(items) {
 		items = []map[string]interface{}{}
 	}
+	data := map[string]interface{}{}
 	data["tasks"] = items
 	util.PushBackgroundTask(data)
 }

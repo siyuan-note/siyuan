@@ -64,12 +64,17 @@ func IsTesseractExtractable(p string) bool {
 	return strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg")
 }
 
+// tesseractOCRLock 用于 Tesseract OCR 加锁串行执行提升稳定性 https://github.com/siyuan-note/siyuan/issues/7265
+var tesseractOCRLock = sync.Mutex{}
+
 func Tesseract(imgAbsPath string) string {
 	if ContainerStd != Container || !TesseractEnabled {
 		return ""
 	}
 
 	defer logging.Recover()
+	tesseractOCRLock.Lock()
+	defer tesseractOCRLock.Unlock()
 
 	if !IsTesseractExtractable(imgAbsPath) {
 		return ""

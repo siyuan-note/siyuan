@@ -1,21 +1,18 @@
 package model
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"runtime/debug"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
-	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -33,15 +30,7 @@ func autoOCRAssets() {
 	assetsPath := util.GetDataAssetsAbsPath()
 	assets := getUnOCRAssetsAbsPaths()
 	if 0 < len(assets) {
-		poolSize := runtime.NumCPU()
-		if 2 < poolSize {
-			poolSize = 2
-		}
-		waitGroup := &sync.WaitGroup{}
-		p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
-			defer waitGroup.Done()
-
-			assetAbsPath := arg.(string)
+		for i, assetAbsPath := range assets {
 			text := util.Tesseract(assetAbsPath)
 			p := strings.TrimPrefix(assetAbsPath, assetsPath)
 			p = "assets" + filepath.ToSlash(p)
@@ -49,19 +38,11 @@ func autoOCRAssets() {
 			util.AssetsTexts[p] = text
 			util.AssetsTextsLock.Unlock()
 			util.AssetsTextsChanged = true
-		})
 
-		for i, assetAbsPath := range assets {
-			waitGroup.Add(1)
-			p.Invoke(assetAbsPath)
-
-			if 63 <= i { // 一次任务中最多处理 64 张图片，防止卡顿
+			if 16 <= i { // 一次任务中最多处理 16 张图片，防止卡顿
 				break
 			}
 		}
-
-		waitGroup.Wait()
-		p.Release()
 	}
 
 	cleanNotExistAssetsTexts()

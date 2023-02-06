@@ -115,6 +115,45 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	return
 }
 
+func TransferBlockRef(fromID, toID string) (err error) {
+	toTree, _ := loadTreeByBlockID(toID)
+	if nil == toTree {
+		err = ErrBlockNotFound
+		return
+	}
+	toNode := treenode.GetNodeInTree(toTree, toID)
+	if nil == toNode {
+		err = ErrBlockNotFound
+		return
+	}
+	toRefText := getNodeRefText(toNode)
+
+	refIDs, _ := sql.QueryRefIDsByDefID(fromID, false)
+	for _, refID := range refIDs {
+		tree, _ := loadTreeByBlockID(refID)
+		if nil == tree {
+			continue
+		}
+		node := treenode.GetNodeInTree(tree, refID)
+		textMarks := node.ChildrenByType(ast.NodeTextMark)
+		for _, textMark := range textMarks {
+			if textMark.IsTextMarkType("block-ref") && textMark.TextMarkBlockRefID == fromID {
+				textMark.TextMarkBlockRefID = toID
+				if "d" == textMark.TextMarkBlockRefSubtype {
+					textMark.TextMarkTextContent = toRefText
+				}
+			}
+		}
+
+		if err = indexWriteJSONQueue(tree); nil != err {
+			return
+		}
+	}
+
+	util.ReloadUI()
+	return
+}
+
 func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	refTree, err := loadTreeByBlockID(refID)
 	if nil != err {

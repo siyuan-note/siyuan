@@ -30,6 +30,26 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func transferBlockRef(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	fromID := arg["fromID"].(string)
+	toID := arg["toID"].(string)
+	err := model.TransferBlockRef(fromID, toID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+}
+
 func swapBlockRef(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

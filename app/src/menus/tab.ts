@@ -204,7 +204,7 @@ export const initTabMenu = (tab: Tab) => {
     /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.tabToWindow,
-        icon: "iconMove",
+        icon: "iconOpenWindow",
         click: () => {
             openNewWindow(tab);
         }

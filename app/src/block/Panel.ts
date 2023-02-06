@@ -302,7 +302,7 @@ export class BlockPanel {
         let openHTML = "";
         /// #if !BROWSER
         if (this.nodeIds.length === 1) {
-            openHTML = `<span data-type="open" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg style="width: 10px"><use xlink:href="#iconMove"></use></svg></span>
+            openHTML = `<span data-type="open" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg><use xlink:href="#iconOpenWindow"></use></svg></span>
 <span class="fn__space"></span>`;
         }
         /// #endif

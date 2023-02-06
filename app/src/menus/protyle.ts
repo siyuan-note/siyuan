@@ -153,7 +153,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openByNewWindow,
-        icon: "iconMove",
+        icon: "iconOpenWindow",
         click() {
             openNewWindowById(refBlockId);
         }

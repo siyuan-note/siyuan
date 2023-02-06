@@ -1383,7 +1383,10 @@ export class Gutter {
                     click() {
                         const renameDialog = new Dialog({
                             title: window.siyuan.languages.backlinkTurnTo,
-                            content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" placeholder="ID"></div>
+                            content: `<div class="b3-dialog__content">
+    <input class="b3-text-field fn__block" placeholder="ID">
+    <div class="b3-label__text">${window.siyuan.languages.backlinkTurnTo}</div>
+</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>

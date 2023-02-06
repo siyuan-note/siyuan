@@ -226,7 +226,7 @@ export class MobileFiles extends Model {
                     this.init(false);
                 });
             });
-        })
+        });
         window.siyuan.menus.menu.element.style.zIndex = "310";
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }

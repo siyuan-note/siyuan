@@ -981,7 +981,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                         this.init(false);
                     });
                 });
-            })
+            });
         }
         return window.siyuan.menus.menu;
     }

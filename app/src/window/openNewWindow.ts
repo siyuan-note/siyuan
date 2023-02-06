@@ -31,7 +31,7 @@ export const openNewWindowById = (id: string) => {
                 mode: "wysiwyg",
                 instance: "Editor",
             }
-        }
+        };
         if (response.data.rootID === id) {
             fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
                 json.children.scrollAttr = JSON.parse(attrResponse.data.scroll || "{}");
@@ -48,7 +48,7 @@ export const openNewWindowById = (id: string) => {
                 focusId: id,
                 focusStart: 0,
                 focusEnd: 0
-            }
+            };
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`);
             /// #endif

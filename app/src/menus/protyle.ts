@@ -155,7 +155,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         label: window.siyuan.languages.openByNewWindow,
         icon: "iconMove",
         click() {
-            openNewWindowById(refBlockId)
+            openNewWindowById(refBlockId);
         }
     }).element);
     /// #endif

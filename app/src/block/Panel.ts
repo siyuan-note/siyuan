@@ -226,7 +226,7 @@ export class BlockPanel {
                         }
                     } else if (type === "open") {
                         /// #if !BROWSER
-                        openNewWindowById(this.nodeIds[0])
+                        openNewWindowById(this.nodeIds[0]);
                         /// #endif
                     }
                     event.preventDefault();
@@ -265,9 +265,9 @@ export class BlockPanel {
                 });
                 // 浮窗完整文档面包屑应不显示 退出聚焦
                 if (editor.protyle.breadcrumb && editor.protyle.block.id === editor.protyle.block.rootID) {
-                    const exitFocusElement = editor.protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]')
-                    exitFocusElement.classList.add("fn__none")
-                    exitFocusElement.nextElementSibling.classList.add("fn__none")
+                    const exitFocusElement = editor.protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
+                    exitFocusElement.classList.add("fn__none");
+                    exitFocusElement.nextElementSibling.classList.add("fn__none");
                 }
             }
         });
@@ -299,11 +299,11 @@ export class BlockPanel {
             this.destroy();
             return;
         }
-        let openHTML = ""
+        let openHTML = "";
         /// #if !BROWSER
         if (this.nodeIds.length === 1) {
             openHTML = `<span data-type="open" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg style="width: 10px"><use xlink:href="#iconMove"></use></svg></span>
-<span class="fn__space"></span>`
+<span class="fn__space"></span>`;
         }
         /// #endif
         let html = `<div class="block__icons block__icons--border">

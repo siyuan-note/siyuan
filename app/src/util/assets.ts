@@ -22,7 +22,7 @@ const loadThirdIcon = (iconURL: string, data: IAppearance) => {
 };
 
 export const loadAssets = (data: IAppearance) => {
-    const htmlElement = document.getElementsByTagName("html")[0]
+    const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang",window.siyuan.config.appearance.lang);
     htmlElement.setAttribute("data-theme-mode",getThemeMode());
     htmlElement.setAttribute("data-light-theme",window.siyuan.config.appearance.themeLight);
@@ -305,4 +305,4 @@ export const getThemeMode = () => {
     } else {
         return window.siyuan.config.appearance.mode === 0 ? "light" : "dark";
     }
-}
+};

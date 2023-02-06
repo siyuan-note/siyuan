@@ -2,8 +2,6 @@ import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
-import {showMessage} from "../../dialog/message";
-import {updateHotkeyTip} from "../util/compatibility";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 

@@ -214,18 +214,18 @@ export class WYSIWYG {
             let html = "";
             let textPlain = "";
             if (selectElements.length > 0) {
-                const isRefText = selectElements[0].getAttribute("data-reftext") === "true"
+                const isRefText = selectElements[0].getAttribute("data-reftext") === "true";
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
                     selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     if (isRefText) {
-                        const cloneElement = selectElements[0].parentElement.cloneNode(true) as HTMLElement
-                        const cloneEditElement = getContenteditableElement(cloneElement)
+                        const cloneElement = selectElements[0].parentElement.cloneNode(true) as HTMLElement;
+                        const cloneEditElement = getContenteditableElement(cloneElement);
                         if (cloneEditElement) {
-                            cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${cloneElement.getAttribute("data-node-id")}">*</span>`)
+                            cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${cloneElement.getAttribute("data-node-id")}">*</span>`);
                         }
                         html = cloneElement.outerHTML;
-                        selectElements[0].removeAttribute("data-reftext")
+                        selectElements[0].removeAttribute("data-reftext");
                     } else {
                         html = selectElements[0].parentElement.outerHTML;
                     }
@@ -233,13 +233,13 @@ export class WYSIWYG {
                     selectElements.forEach((item, index) => {
                         const topElement = getTopAloneElement(item);
                         if (isRefText && index === 0) {
-                            const cloneElement = topElement.cloneNode(true) as HTMLElement
-                            const cloneEditElement = getContenteditableElement(cloneElement)
+                            const cloneElement = topElement.cloneNode(true) as HTMLElement;
+                            const cloneEditElement = getContenteditableElement(cloneElement);
                             if (cloneEditElement) {
-                                cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${topElement.getAttribute("data-node-id")}">*</span>`)
+                                cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${topElement.getAttribute("data-node-id")}">*</span>`);
                             }
                             html += removeEmbed(cloneElement);
-                            selectElements[0].removeAttribute("data-reftext")
+                            selectElements[0].removeAttribute("data-reftext");
                         } else {
                             html += removeEmbed(topElement);
                         }

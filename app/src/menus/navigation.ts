@@ -11,7 +11,7 @@ import {dialog as remoteDialog} from "@electron/remote";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, getTopPaths, pathPosix, setNoteBook} from "../util/pathName";
+import {getDisplayName, getNotebookName, getTopPaths, pathPosix} from "../util/pathName";
 import {hideMessage, showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
@@ -111,7 +111,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
                 }
             });
             return true;
-        })
+        });
     }
     /// #if !MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
@@ -541,7 +541,7 @@ export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, click
             click: () => {
                 clickEvent(15);
             }
-        })
+        });
     }
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconSort",
@@ -549,4 +549,4 @@ export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, click
         type: "submenu",
         submenu,
     }).element);
-}
+};

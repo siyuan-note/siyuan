@@ -37,4 +37,4 @@ export const transferBlockRef = (id:string) => {
             });
         }
     }).element);
-}
+};

@@ -139,7 +139,7 @@ func TransferBlockRef(fromID, toID string) (err error) {
 		for _, textMark := range textMarks {
 			if textMark.IsTextMarkType("block-ref") && textMark.TextMarkBlockRefID == fromID {
 				textMark.TextMarkBlockRefID = toID
-				if "s" == textMark.TextMarkBlockRefSubtype {
+				if "d" == textMark.TextMarkBlockRefSubtype {
 					textMark.TextMarkTextContent = toRefText
 				}
 			}
@@ -149,6 +149,7 @@ func TransferBlockRef(fromID, toID string) (err error) {
 			return
 		}
 	}
+	util.ReloadUI()
 	return
 }
 

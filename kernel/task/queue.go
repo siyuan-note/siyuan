@@ -121,6 +121,11 @@ func StatusJob() {
 		item := map[string]interface{}{"action": action}
 		items = append(items, item)
 	}
+
+	if "" != currentTaskAction {
+		items = append([]map[string]interface{}{map[string]interface{}{"action": currentTaskAction}}, items...)
+	}
+
 	if 1 > len(items) {
 		items = []map[string]interface{}{}
 	}
@@ -140,6 +145,8 @@ func ExecTaskJob() {
 
 	execTask(task)
 }
+
+var currentTaskAction string
 
 func popTask() (ret *Task) {
 	queueLock.Lock()
@@ -165,6 +172,8 @@ func execTask(task *Task) {
 			args[i] = reflect.ValueOf(v)
 		}
 	}
+
+	currentTaskAction = task.Action
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()

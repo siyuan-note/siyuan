@@ -149,6 +149,7 @@ func TransferBlockRef(fromID, toID string) (err error) {
 			return
 		}
 	}
+
 	util.ReloadUI()
 	return
 }

@@ -5,6 +5,9 @@ import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";
 import {hideElements} from "../protyle/ui/hideElements";
 import {Constants} from "../constants";
+/// #if !BROWSER
+import {openNewWindowById} from "../window/openNewWindow";
+/// #endif
 import {disabledProtyle} from "../protyle/util/onGet";
 
 export class BlockPanel {
@@ -221,6 +224,10 @@ export class BlockPanel {
                             target.setAttribute("aria-label", window.siyuan.languages.unpin);
                             this.element.setAttribute("data-pin", "true");
                         }
+                    } else if (type === "open") {
+                        /// #if !BROWSER
+                        openNewWindowById(this.nodeIds[0])
+                        /// #endif
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -256,6 +263,12 @@ export class BlockPanel {
                 editorElement.addEventListener("mouseleave", () => {
                     hideElements(["gutter"], editor.protyle);
                 });
+                // 浮窗完整文档面包屑应不显示 退出聚焦
+                if (editor.protyle.breadcrumb && editor.protyle.block.id === editor.protyle.block.rootID) {
+                    const exitFocusElement = editor.protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]')
+                    exitFocusElement.classList.add("fn__none")
+                    exitFocusElement.nextElementSibling.classList.add("fn__none")
+                }
             }
         });
         this.editors.push(editor);
@@ -286,8 +299,15 @@ export class BlockPanel {
             this.destroy();
             return;
         }
+        let openHTML = ""
+        /// #if !BROWSER
+        if (this.nodeIds.length === 1) {
+            openHTML = `<span data-type="open" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg style="width: 10px"><use xlink:href="#iconMove"></use></svg></span>
+<span class="fn__space"></span>`
+        }
+        /// #endif
         let html = `<div class="block__icons block__icons--border">
-    <span class="fn__space fn__flex-1"></span>
+    <span class="fn__space fn__flex-1"></span>${openHTML}
     <span data-type="pin" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="close" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></span>

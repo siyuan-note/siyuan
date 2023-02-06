@@ -1380,7 +1380,7 @@ export class Gutter {
                         const renameDialog = new Dialog({
                             title: window.siyuan.languages.transferBlockRef,
                             content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" placeholder="ID">
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.targetBlockID}">
     <div class="b3-label__text">${window.siyuan.languages.transferBlockRefTip}</div>
 </div>
 <div class="b3-dialog__action">

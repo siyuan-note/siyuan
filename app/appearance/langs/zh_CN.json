@@ -1,4 +1,5 @@
 {
+  "targetBlockID": "目标块 ID",
   "transferBlockRefTip": "将该块的所有引用转移到目标块上",
   "transferBlockRef": "转移引用",
   "sortByFiletree": "使用文档树排序规则",

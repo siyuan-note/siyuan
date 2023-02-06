@@ -1,4 +1,5 @@
 {
+  "targetBlockID": "Id. de bloque objetivo",
   "transferBlockRefTip": "Transferir todas las referencias de este bloque al bloque de destino",
   "transferBlockRef": "Transferencia de referencia",
   "sortByFiletree": "Usar reglas de clasificación del árbol de documentos",

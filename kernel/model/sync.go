@@ -97,7 +97,9 @@ func SyncData(boot, exit, byHand bool) {
 func syncData(boot, exit, byHand bool) {
 	defer logging.Recover()
 
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if !checkSync(boot, exit, byHand) {
+		util.BroadcastByType("main", "syncing", 1, "", nil)
 		return
 	}
 
@@ -118,7 +120,6 @@ func syncData(boot, exit, byHand bool) {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	err := syncRepo(exit, byHand)
 	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
 	if nil == err {

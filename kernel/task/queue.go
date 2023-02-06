@@ -79,6 +79,7 @@ const (
 	DatabaseIndexCommit     = "task.database.index.commit"     // 数据库索引提交
 	DatabaseIndexRef        = "task.database.index.ref"        // 数据库索引引用
 	DatabaseIndexFix        = "task.database.index.fix"        // 数据库索引订正
+	DatabaseCache           = "task.database.cache"            // 数据库缓存
 	OCRImage                = "task.ocr.image"                 // 图片 OCR 提取文本
 	HistoryGenerateDoc      = "task.history.generateDoc"       // 生成文件历史
 	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块
@@ -105,8 +106,8 @@ func StatusJob() {
 	for _, task := range tasks {
 		actionLangs := util.TaskActionLangs[util.Lang]
 		action := task.Action
-		if c := count[action]; 3 < c {
-			logging.LogWarnf("too many tasks [%s], ignore show its status", action)
+		if c := count[action]; 2 < c {
+			//logging.LogWarnf("too many tasks [%s], ignore show its status", action)
 			continue
 		}
 		count[action]++
@@ -165,7 +166,7 @@ func execTask(task *Task) {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*7)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 	ch := make(chan bool, 1)
 	go func() {
@@ -175,7 +176,7 @@ func execTask(task *Task) {
 
 	select {
 	case <-ctx.Done():
-		//logging.LogWarnf("task [%s] timeout", task.Action)
+		logging.LogWarnf("task [%s] timeout", task.Action)
 	case <-ch:
 		//logging.LogInfof("task [%s] done", task.Action)
 	}

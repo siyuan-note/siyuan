@@ -41,11 +41,13 @@ import (
 func FixIndexJob() {
 	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
 	sql.WaitForWritingDatabase()
+
 	task.AppendTask(task.DatabaseIndexFix, fixBlockTreeByFileSys)
 	sql.WaitForWritingDatabase()
-	task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
 
+	task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
 	sql.WaitForWritingDatabase()
+
 	util.PushStatusBar(Conf.Language(185))
 	debug.FreeOSMemory()
 }

@@ -1,6 +1,6 @@
 {
   "name": "SiYuan",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "Build Your Eternal Digital Garden",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",

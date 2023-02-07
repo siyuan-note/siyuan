@@ -1,3 +1,55 @@
+## v2.7.3 / 2023-02-07
+
+### 改进功能
+
+* [支持笔记本设置独立的排序规则](https://github.com/siyuan-note/siyuan/issues/3623)
+* [支持转移引用](https://github.com/siyuan-note/siyuan/issues/4025)
+* [浮窗为文档块时支持动态加载](https://github.com/siyuan-note/siyuan/issues/4350)
+* [`新建文档名模板` 改为 `新建文档存放位置` 并支持设置路径](https://github.com/siyuan-note/siyuan/issues/4494)
+* [支持划选复制并标注 `文本 *` 引用](https://github.com/siyuan-note/siyuan/issues/6115)
+* [使用鼠标跨屏选择块](https://github.com/siyuan-note/siyuan/issues/6814)
+* [桌面端浮窗和引用菜单添加 `在新窗口打开` 按钮](https://github.com/siyuan-note/siyuan/issues/7198)
+* [改进浏览器剪藏扩展处理带 `title` 的图片](https://github.com/siyuan-note/siyuan/issues/7223)
+* [改进浏览器剪藏扩展拉取图片](https://github.com/siyuan-note/siyuan/issues/7224)
+* [内核 API 校验 ID 格式](https://github.com/siyuan-note/siyuan/issues/7228)
+* [改进字体颜色设置背景颜色](https://github.com/siyuan-note/siyuan/issues/7229)
+* [支持插入 `.ms` 和一些国家域名后缀超链接](https://github.com/siyuan-note/siyuan/issues/7230)
+* [IFrame 块、视频块、音频块、超链接和图片的输入选框支持拉伸](https://github.com/siyuan-note/siyuan/issues/7232)
+* [行级备注内容仅保留文本内容](https://github.com/siyuan-note/siyuan/issues/7233)
+* [表格删除行时不应该进行缩放](https://github.com/siyuan-note/siyuan/issues/7236)
+* [改进复制以便其他应用识别并移除 `复制 HTML`](https://github.com/siyuan-note/siyuan/issues/7239)
+* [改进块树数据索引稳定性](https://github.com/siyuan-note/siyuan/issues/7240)
+* [Tesseract OCR 语言包支持通过环境变量设置](https://github.com/siyuan-note/siyuan/issues/7242)
+* [改进数据同步算法](https://github.com/siyuan-note/siyuan/issues/7243)
+* [数据快照对比右边为最新版本](https://github.com/siyuan-note/siyuan/issues/7244)
+* [改进多设备同时同步数据的可靠性](https://github.com/siyuan-note/siyuan/issues/7245)
+* [数据同步忽略最近文档存储](https://github.com/siyuan-note/siyuan/issues/7246)
+* [搜索时隐藏编辑器块引候选列表](https://github.com/siyuan-note/siyuan/pull/7247)
+* [避免图片等菜单、公式块等输入框、提示、行内元素菜单同时显示](https://github.com/siyuan-note/siyuan/issues/7253)
+* [改进 `Alt+M` 激活窗口](https://github.com/siyuan-note/siyuan/issues/7258)
+* [为页面 `html` 标签添加属性 lang、data-theme-mode、data-light-theme、data-dark-theme ](https://github.com/siyuan-note/siyuan/issues/7259)
+* [不再自动从临时文件中恢复数据文件](https://github.com/siyuan-note/siyuan/issues/7260)
+* [改进块引搜索的性能](https://github.com/siyuan-note/siyuan/issues/7262)
+* [改进标题转换文档的性能](https://github.com/siyuan-note/siyuan/issues/7263)
+* [Tesseract OCR 加锁串行执行提升稳定性](https://github.com/siyuan-note/siyuan/issues/7265)
+* [降低重建索引内存占用](https://github.com/siyuan-note/siyuan/issues/7268)
+* [后台任务按任务加入先后顺序去重执行](https://github.com/siyuan-note/siyuan/issues/7270)
+* [浮窗中上下文和退出聚焦交互改进](https://github.com/siyuan-note/siyuan/issues/7272)
+* [引用计数浮窗传递型折叠改进](https://github.com/siyuan-note/siyuan/issues/7273)
+
+### 修复缺陷
+
+* [反链面板和浮窗的面包屑上 Ctrl+Click 跳转后没有退出聚焦的按钮](https://github.com/siyuan-note/siyuan/issues/7225)
+* [移动文档后打开文档滚动触发动态加载后会关闭页签](https://github.com/siyuan-note/siyuan/issues/7231)
+* [聚焦列表后反向缩进触发状态异常](https://github.com/siyuan-note/siyuan/issues/7234)
+* [Android 端返回桌面白屏](https://github.com/siyuan-note/siyuan/issues/7235)
+* [上传资源文件到云端图床统计重复](https://github.com/siyuan-note/siyuan/issues/7237)
+* [重复执行 `重建索引` 导致内核崩溃](https://github.com/siyuan-note/siyuan/issues/7238)
+* [取消超级块后撤销超级块外观相关设置丢失](https://github.com/siyuan-note/siyuan/issues/7250)
+* [搜索处于折叠状态的块时未聚焦显示结果](https://github.com/siyuan-note/siyuan/issues/7252)
+* [存在命名的块复制为引用时未转义命名文本](https://github.com/siyuan-note/siyuan/issues/7254)
+* [笔记本间移动文档后块可读路径未跟随](https://github.com/siyuan-note/siyuan/issues/7271)
+
 ## v2.7.2 / 2023-02-01
 
 ### 改进功能

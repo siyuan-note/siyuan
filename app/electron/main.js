@@ -635,6 +635,12 @@ app.whenReady().then(() => {
     tray.setContextMenu(contextMenu)
   }
 
+  const hideWindow = (wnd) => {
+    // 通过 `Alt+M` 最小化后焦点回到先前的窗口 https://github.com/siyuan-note/siyuan/issues/7275
+    wnd.minimize()
+    wnd.hide()
+  }
+
   const showHideWindow = (tray, lang, mainWindow) => {
     if (!mainWindow.isVisible()) {
       if (mainWindow.isMinimized()) {
@@ -642,7 +648,7 @@ app.whenReady().then(() => {
       }
       mainWindow.show()
     } else {
-      mainWindow.hide()
+      hideWindow(mainWindow)
     }
 
     resetTrayMenu(tray, lang, mainWindow)
@@ -657,7 +663,7 @@ app.whenReady().then(() => {
   ipcMain.on('siyuan-config-tray', (event, data) => {
     workspaces.find(item => {
       if (item.id === data.id) {
-        item.browserWindow.hide()
+        hideWindow(item.browserWindow)
         if ('win32' === process.platform || 'linux' === process.platform) {
           resetTrayMenu(item.tray, data.languages, item.browserWindow)
         }
@@ -814,10 +820,10 @@ app.whenReady().then(() => {
               if (!mainWindow.isFocused()) {
                 mainWindow.show()
               } else {
-                mainWindow.hide()
+                hideWindow(mainWindow)
               }
             } else {
-              mainWindow.hide()
+              hideWindow(mainWindow)
             }
           } else {
             mainWindow.show()

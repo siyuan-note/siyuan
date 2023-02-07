@@ -62,6 +62,10 @@ func BootSyncData() {
 		return
 	}
 
+	if !util.IsOnline() {
+		return
+	}
+
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
@@ -97,9 +101,13 @@ func SyncData(boot, exit, byHand bool) {
 func syncData(boot, exit, byHand bool) {
 	defer logging.Recover()
 
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	if !checkSync(boot, exit, byHand) {
-		util.BroadcastByType("main", "syncing", 1, "", nil)
+		return
+	}
+
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
+	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
 
@@ -171,11 +179,6 @@ func checkSync(boot, exit, byHand bool) bool {
 		logging.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
 		util.PushErrMsg(Conf.Language(125), 1000*60*60)
 		planSyncAfter(64 * time.Minute)
-		return false
-	}
-
-	if !util.IsOnline() {
-		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return false
 	}
 	return true

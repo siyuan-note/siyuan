@@ -54,7 +54,7 @@ func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
 		md = FormatNode(node, luteEngine)
 	}
 	hpath := tree.HPath
-	data := tree.Path + hpath + string(ial) + md
+	data := tree.Box + tree.Path + hpath + string(ial) + md
 	return fmt.Sprintf("%x", sha256.Sum256(gulu.Str.ToBytes(data)))[:7]
 }
 

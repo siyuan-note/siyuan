@@ -210,4 +210,6 @@ func execTask(task *Task) {
 	case <-ch:
 		//logging.LogInfof("task [%s] done", task.Action)
 	}
+
+	currentTaskAction = ""
 }

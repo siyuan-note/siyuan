@@ -120,7 +120,7 @@ func FlushQueue() {
 		if err = execOp(op, tx, context); nil != err {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
-			return
+			continue
 		}
 
 		if err = commitTx(tx); nil != err {

@@ -36,16 +36,11 @@ export class Breadcrumb {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
         const isFocus = protyle.options.action.includes(Constants.CB_GET_ALL) && !isMobile();
-        let html = `<div class="protyle-breadcrumb__bar"></div>
+        element.innerHTML = `<div class="protyle-breadcrumb__bar"></div>
 <span class="protyle-breadcrumb__space"></span>
 <button class="block__icon block__icon--show ft__smaller fn__flex-center${isFocus ? "" : " fn__none"}" style="line-height: 14px" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
 <span class="fn__space${isFocus ? "" : " fn__none"}"></span>
 <button class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
-        if (protyle.options.render.breadcrumbContext) {
-            html += `<span class="fn__space"></span>
-<div class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></div>`;
-        }
-        element.innerHTML = html;
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
@@ -77,18 +72,8 @@ export class Breadcrumb {
                     break;
                 } else if (target.getAttribute("data-type") === "context") {
                     event.preventDefault();
-                    if (protyle.block.rootID === protyle.options.blockId) {
-                        target.classList.toggle("block__icon--active")
-                        return;
-                    }
                     if (target.classList.contains("block__icon--active")) {
-                        fetchPost("/api/filetree/getDoc", {
-                            id: protyle.options.blockId,
-                            mode: 0,
-                            size: window.siyuan.config.editor.dynamicLoadBlocks,
-                        }, getResponse => {
-                            onGet(getResponse, protyle, [Constants.CB_GET_ALL]);
-                        });
+                        zoomOut(protyle, protyle.options.blockId);
                         target.classList.remove("block__icon--active");
                     } else {
                         fetchPost("/api/filetree/getDoc", {
@@ -97,6 +82,9 @@ export class Breadcrumb {
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
                             onGet(getResponse, protyle, [Constants.CB_GET_HL]);
+                            const exitFocusElement = this.element.parentElement.querySelector('[data-type="exit-focus"]');
+                            exitFocusElement.classList.add("fn__none");
+                            exitFocusElement.nextElementSibling.classList.add("fn__none");
                         });
                         target.classList.add("block__icon--active");
                     }

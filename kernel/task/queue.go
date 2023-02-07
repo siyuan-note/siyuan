@@ -39,27 +39,20 @@ type Task struct {
 	Created time.Time
 }
 
-func PrependTask(action string, handler interface{}, args ...interface{}) {
-	queueLock.Lock()
-	defer queueLock.Unlock()
-
-	if util.IsExiting {
-		//logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
-		return
-	}
-
-	taskQueue = append([]*Task{newTask(action, handler, args...)}, taskQueue...)
-}
-
 func AppendTask(action string, handler interface{}, args ...interface{}) {
-	queueLock.Lock()
-	defer queueLock.Unlock()
-
 	if util.IsExiting {
 		//logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
 		return
 	}
 
+	currentActions := getCurrentActions()
+	if gulu.Str.Contains(action, currentActions) && gulu.Str.Contains(action, uniqueActions) {
+		//logging.LogWarnf("task [%s] is already in queue, will be ignored", action)
+		return
+	}
+
+	queueLock.Lock()
+	defer queueLock.Unlock()
 	taskQueue = append(taskQueue, newTask(action, handler, args...))
 }
 
@@ -70,6 +63,20 @@ func newTask(action string, handler interface{}, args ...interface{}) *Task {
 		Args:    args,
 		Created: time.Now(),
 	}
+}
+
+func getCurrentActions() (ret []string) {
+	queueLock.Lock()
+	defer queueLock.Unlock()
+
+	if "" != currentTaskAction {
+		ret = append(ret, currentTaskAction)
+	}
+
+	for _, task := range taskQueue {
+		ret = append(ret, task.Action)
+	}
+	return
 }
 
 const (
@@ -85,6 +92,17 @@ const (
 	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块
 	ReloadUI                = "task.reload.ui"                 // 重载 UI
 )
+
+// uniqueActions 描述了唯一的任务，即队列中只能存在一个在执行的任务。
+var uniqueActions = []string{
+	RepoCheckout,
+	DatabaseIndexFull,
+	DatabaseIndexCommit,
+	DatabaseIndexFix,
+	OCRImage,
+	HistoryGenerateDoc,
+	DatabaseIndexEmbedBlock,
+}
 
 func Contain(action string, moreActions ...string) bool {
 	actions := append(moreActions, action)
@@ -106,7 +124,7 @@ func StatusJob() {
 	for _, task := range tasks {
 		action := task.Action
 		if c := count[action]; 2 < c {
-			//logging.LogWarnf("too many tasks [%s], ignore show its status", action)
+			logging.LogWarnf("too many tasks [%s], ignore show its status", action)
 			continue
 		}
 		count[action]++

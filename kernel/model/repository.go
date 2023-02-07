@@ -504,7 +504,7 @@ func InitRepoKey() (err error) {
 }
 
 func CheckoutRepo(id string) {
-	task.PrependTask(task.RepoCheckout, checkoutRepo, id)
+	task.AppendTask(task.RepoCheckout, checkoutRepo, id)
 }
 
 func checkoutRepo(id string) {

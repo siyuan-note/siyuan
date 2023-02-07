@@ -505,7 +505,7 @@ func ReloadUI() {
 }
 
 func FullReindex() {
-	task.PrependTask(task.DatabaseIndexFull, fullReindex)
+	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseCache, sql.EnableCache)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	task.AppendTask(task.ReloadUI, util.ReloadUI)

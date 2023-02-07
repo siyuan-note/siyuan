@@ -1256,7 +1256,7 @@ func removeDoc(box *Box, p string) {
 	}
 	util.PushEvent(evt)
 
-	task.PrependTask(task.DatabaseIndex, removeDoc0, box, p, childrenDir)
+	task.AppendTask(task.DatabaseIndex, removeDoc0, box, p, childrenDir)
 }
 
 func removeDoc0(box *Box, p, childrenDir string) {

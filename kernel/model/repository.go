@@ -49,7 +49,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -523,7 +522,6 @@ func checkoutRepo(id string) {
 
 	util.PushEndlessProgress(Conf.Language(63))
 	WaitForWritingFiles()
-	sql.WaitForWritingDatabase()
 	CloseWatchAssets()
 	defer WatchAssets()
 
@@ -941,7 +939,6 @@ func syncRepo(exit, byHand bool) (err error) {
 		// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
 
 		luteEngine := NewLute()
-		waitTx := false
 		for _, file := range mergeResult.Conflicts {
 			if !strings.HasSuffix(file.Path, ".sy") {
 				continue
@@ -964,10 +961,6 @@ func syncRepo(exit, byHand bool) (err error) {
 
 			resetTree(tree, "Conflicted")
 			createTreeTx(tree)
-			waitTx = true
-		}
-		if waitTx {
-			sql.WaitForWritingDatabase()
 		}
 	}
 

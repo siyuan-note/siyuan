@@ -98,7 +98,6 @@ var uniqueActions = []string{
 	RepoCheckout,
 	DatabaseIndexFull,
 	DatabaseIndexCommit,
-	DatabaseIndexFix,
 	OCRImage,
 	HistoryGenerateDoc,
 	DatabaseIndexEmbedBlock,
@@ -197,7 +196,7 @@ func execTask(task *Task) {
 
 	currentTaskAction = task.Action
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	ch := make(chan bool, 1)
 	go func() {

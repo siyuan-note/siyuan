@@ -39,20 +39,27 @@ import (
 
 // FixIndexJob 自动校验数据库索引 https://github.com/siyuan-note/siyuan/issues/7016
 func FixIndexJob() {
-	task.AppendTask(task.DatabaseIndexFix, autoFixIndex)
+	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
+	sql.WaitForWritingDatabase()
+	task.AppendTask(task.DatabaseIndexFix, fixBlockTreeByFileSys)
+	sql.WaitForWritingDatabase()
+	task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
+
+	sql.WaitForWritingDatabase()
+	util.PushStatusBar(Conf.Language(185))
+	debug.FreeOSMemory()
 }
 
 var autoFixLock = sync.Mutex{}
 
-func autoFixIndex() {
+// removeDuplicateDatabaseIndex 删除重复的数据库索引。
+func removeDuplicateDatabaseIndex() {
 	defer logging.Recover()
 
 	autoFixLock.Lock()
 	defer autoFixLock.Unlock()
 
 	util.PushStatusBar(Conf.Language(58))
-
-	// 去除重复的数据库块记录
 	duplicatedRootIDs := sql.GetDuplicatedRootIDs("blocks")
 	if 1 > len(duplicatedRootIDs) {
 		duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts")
@@ -87,11 +94,16 @@ func autoFixIndex() {
 	if 0 < deletes {
 		logging.LogWarnf("exist more than one tree duplicated [%d], reindex it", deletes)
 	}
+}
+
+// fixBlockTreeByFileSys 通过文件系统订正块树。
+func fixBlockTreeByFileSys() {
+	defer logging.Recover()
+
+	autoFixLock.Lock()
+	defer autoFixLock.Unlock()
 
 	util.PushStatusBar(Conf.Language(58))
-	sql.WaitForWritingDatabase()
-	util.PushStatusBar(Conf.Language(58))
-	// 根据文件系统补全块树
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
 		boxPath := filepath.Join(util.DataDir, box.ID)
@@ -130,26 +142,23 @@ func autoFixIndex() {
 		}
 	}
 
-	util.PushStatusBar(Conf.Language(58))
-	sql.WaitForWritingDatabase()
-	util.PushStatusBar(Conf.Language(58))
 	// 清理已关闭的笔记本块树
 	boxes = Conf.GetClosedBoxes()
 	for _, box := range boxes {
 		treenode.RemoveBlockTreesByBoxID(box.ID)
 	}
+}
 
-	// 对比块树和数据库并订正数据库
+// fixDatabaseIndexByBlockTree 通过块树订正数据库索引。
+func fixDatabaseIndexByBlockTree() {
+	defer logging.Recover()
+
+	util.PushStatusBar(Conf.Language(58))
 	rootUpdatedMap := treenode.GetRootUpdated()
 	dbRootUpdatedMap, err := sql.GetRootUpdated()
 	if nil == err {
 		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap)
 	}
-
-	util.PushStatusBar(Conf.Language(58))
-	sql.WaitForWritingDatabase()
-	util.PushStatusBar(Conf.Language(185))
-	debug.FreeOSMemory()
 }
 
 func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {

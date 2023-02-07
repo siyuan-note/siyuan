@@ -91,7 +91,7 @@ func IsBlockFolded(id string) bool {
 	for i := 0; i < 32; i++ {
 		b, _ := getBlock(id, nil)
 		if nil == b {
-			return true
+			return false
 		}
 
 		if "1" == b.IAL["fold"] {

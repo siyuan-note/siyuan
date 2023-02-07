@@ -76,13 +76,18 @@ export class Breadcrumb {
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-type") === "context") {
+                    event.preventDefault();
+                    if (protyle.block.rootID === protyle.options.blockId) {
+                        target.classList.toggle("block__icon--active")
+                        return;
+                    }
                     if (target.classList.contains("block__icon--active")) {
                         fetchPost("/api/filetree/getDoc", {
                             id: protyle.options.blockId,
                             mode: 0,
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
-                            onGet(getResponse, protyle);
+                            onGet(getResponse, protyle, [Constants.CB_GET_ALL]);
                         });
                         target.classList.remove("block__icon--active");
                     } else {
@@ -95,7 +100,6 @@ export class Breadcrumb {
                         });
                         target.classList.add("block__icon--active");
                     }
-                    event.preventDefault();
                     break;
                 }
                 target = target.parentElement;

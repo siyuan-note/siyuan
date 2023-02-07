@@ -378,7 +378,6 @@ interface IOptions {
         scroll?: boolean
         breadcrumb?: boolean
         breadcrumbDocName?: boolean
-        breadcrumbContext?: boolean
     }
     /** 内部调试时使用 */
     _lutePath?: string;

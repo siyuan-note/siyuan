@@ -9,6 +9,9 @@ import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
 import {disabledProtyle} from "../protyle/util/onGet";
+import {fetchPost} from "../util/fetch";
+import {lockFile} from "../dialog/processSystem";
+import {showMessage} from "../dialog/message";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -241,37 +244,49 @@ export class BlockPanel {
 
     private initProtyle(editorElement: HTMLElement) {
         const index = parseInt(editorElement.getAttribute("data-index"));
-        const action = [Constants.CB_GET_ALL];
-        if (this.targetElement.classList.contains("protyle-attr--refcount") ||
-            this.targetElement.classList.contains("counter")) {
-            action.push(Constants.CB_GET_BACKLINK);
-        }
-        const editor = new Protyle(editorElement, {
-            blockId: this.nodeIds[index],
-            defId: this.defIds[index] || this.defIds[0] || "",
-            action,
-            render: {
-                gutter: true,
-                breadcrumbDocName: true,
-                breadcrumbContext: true
-            },
-            typewriterMode: false,
-            after: (editor) => {
-                if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
-                    disabledProtyle(editor.protyle);
-                }
-                editorElement.addEventListener("mouseleave", () => {
-                    hideElements(["gutter"], editor.protyle);
-                });
-                // 浮窗完整文档面包屑应不显示 退出聚焦
-                if (editor.protyle.breadcrumb && editor.protyle.block.id === editor.protyle.block.rootID) {
-                    const exitFocusElement = editor.protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
-                    exitFocusElement.classList.add("fn__none");
-                    exitFocusElement.nextElementSibling.classList.add("fn__none");
-                }
+        fetchPost("api/block/getBlockInfo", {id: this.nodeIds[index]}, (response) => {
+            if (response.code === 2) {
+                // 文件被锁定
+                lockFile(response.data);
+                return false;
             }
-        });
-        this.editors.push(editor);
+            if (response.code === 3) {
+                showMessage(response.msg);
+                return;
+            }
+            const action = [];
+            if (response.data.rootID !== this.nodeIds[index]) {
+                action.push(Constants.CB_GET_ALL);
+            }
+            if (this.targetElement.classList.contains("protyle-attr--refcount") ||
+                this.targetElement.classList.contains("counter")) {
+                action.push(Constants.CB_GET_BACKLINK);
+            }
+            const editor = new Protyle(editorElement, {
+                blockId: this.nodeIds[index],
+                defId: this.defIds[index] || this.defIds[0] || "",
+                action,
+                render: {
+                    scroll: true,
+                    gutter: true,
+                    breadcrumbDocName: true,
+                },
+                typewriterMode: false,
+                after: (editor) => {
+                    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+                        disabledProtyle(editor.protyle);
+                    }
+                    editorElement.addEventListener("mouseleave", () => {
+                        hideElements(["gutter"], editor.protyle);
+                    });
+                    if (response.data.rootID !== this.nodeIds[index]) {
+                        editor.protyle.breadcrumb.element.parentElement.insertAdjacentHTML("beforeend", `<span class="fn__space"></span>
+<div class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></div>`)
+                    }
+                }
+            });
+            this.editors.push(editor);
+        })
     }
 
     public destroy() {

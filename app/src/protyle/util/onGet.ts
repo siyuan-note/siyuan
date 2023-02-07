@@ -16,6 +16,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
 import {restoreScroll} from "../scroll/saveScroll";
 import {removeLoading} from "../ui/initUI";
+import {isMobile} from "../../util/functions";
 
 export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: IScrollAttr, renderTitle = false) => {
     protyle.wysiwyg.element.removeAttribute("data-top");
@@ -283,8 +284,13 @@ const setHTML = (options: {
         protyle.options.defId = undefined;
     }
     // https://ld246.com/article/1653639418266
-    if (protyle.element.classList.contains("block__edit") && (protyle.element.nextElementSibling || protyle.element.previousElementSibling)) {
-        protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight, window.innerHeight / 3) + "px";
+    if (protyle.element.classList.contains("block__edit")) {
+        if (protyle.element.nextElementSibling || protyle.element.previousElementSibling) {
+            protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight, window.innerHeight / 3) + "px";
+        }
+        // 49 = 16（上图标）+16（下图标）+8（padding）+9（底部距离）
+        // @ts-ignore
+        protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${protyle.contentElement.clientHeight - 49}px;${isMobile() ? "" : "right:10px"}`);
     }
     // 屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
     if (!protyle.scroll.element.classList.contains("fn__none") &&

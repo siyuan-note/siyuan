@@ -4,16 +4,18 @@
 @import "search";
 
 .protyle-scroll {
+  --b3-dynamicscroll-width: 200px;
   position: absolute;
   right: 0;
-  height: 100%;
-  top: 0;
+  top: 30px;
   width: 16px;
   padding: 0 8px;
+  bottom: 9px; // 下图标 hover 时，需要留出一定的空间
 
   svg {
     height: 16px;
     width: 16px;
+    display: block;
   }
 
   &__down,
@@ -23,7 +25,6 @@
     opacity: 0;
     cursor: pointer;
     color: var(--b3-border-color);
-    margin-left: -0.5px;
 
     &:hover {
       color: var(--b3-theme-on-surface);
@@ -31,11 +32,11 @@
   }
 
   &__up {
-    top: calc(50% - 114px);
+    top: calc(50% - var(--b3-dynamicscroll-width) / 2 - 20px);
   }
 
   &__down {
-    bottom: calc(50% - 135px);
+    bottom: calc(50% - var(--b3-dynamicscroll-width) / 2 - 20px);
   }
 
   &:hover {
@@ -47,13 +48,14 @@
 
   &__bar {
     position: absolute;
-    right: -89px;
-    top: 50%;
+    right: calc(11px - var(--b3-dynamicscroll-width) / 2);
+    top: calc(50% - 8px);
     transform: rotate(90deg);
     z-index: 1;
 
     .b3-slider {
-      width: 200px;
+      width: var(--b3-dynamicscroll-width);
+      display: block;
     }
   }
 }

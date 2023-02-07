@@ -43,7 +43,6 @@ const renderCompare = (element: HTMLElement) => {
                 gutter: false,
                 breadcrumb: false,
                 breadcrumbDocName: false,
-                breadcrumbContext: false,
             },
             typewriterMode: false
         });
@@ -57,7 +56,6 @@ const renderCompare = (element: HTMLElement) => {
                 gutter: false,
                 breadcrumb: false,
                 breadcrumbDocName: false,
-                breadcrumbContext: false,
             },
             typewriterMode: false
         });

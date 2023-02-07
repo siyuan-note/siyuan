@@ -15,7 +15,6 @@ export class Options {
             scroll: false,
             breadcrumb: true,
             breadcrumbDocName: false,
-            breadcrumbContext: false
         },
         action: [],
         after: undefined,

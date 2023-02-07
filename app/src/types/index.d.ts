@@ -435,7 +435,7 @@ declare interface IConfig {
         autoLaunch: boolean
     }
     localIPs: string[]
-    readonly: boolean
+    readonly: boolean   // 全局只读
     uiLayout: Record<string, any>
     langs: { label: string, name: string }[]
     appearance: IAppearance

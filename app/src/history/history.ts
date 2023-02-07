@@ -342,7 +342,6 @@ export const openHistory = () => {
             gutter: false,
             breadcrumb: false,
             breadcrumbDocName: false,
-            breadcrumbContext: false,
         },
         typewriterMode: false,
     });

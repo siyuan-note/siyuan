@@ -39,7 +39,7 @@ import (
 )
 
 func (box *Box) Unindex() {
-	task.PrependTask(task.DatabaseIndex, unindex, box.ID)
+	task.AppendTask(task.DatabaseIndex, unindex, box.ID)
 }
 
 func unindex(boxID string) {
@@ -49,7 +49,7 @@ func unindex(boxID string) {
 }
 
 func (box *Box) Index() {
-	task.PrependTask(task.DatabaseIndex, index, box.ID)
+	task.AppendTask(task.DatabaseIndex, index, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 }
 

@@ -876,6 +876,7 @@
     "task.database.index.commit": "執行數據庫索引提交",
     "task.database.index.ref": "執行數據庫索引引用",
     "task.database.index.fix": "執行數據庫索引訂正",
+    "task.database.cache": "執行數據庫緩存",
     "task.ocr.image": "執行圖片 OCR 提取文本",
     "task.history.generateDoc": "執行生成文件歷史",
     "task.database.index.embedBlock": "執行數據庫索引嵌入塊",

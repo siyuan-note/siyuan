@@ -505,7 +505,10 @@ func ReloadUI() {
 }
 
 func FullReindex() {
-	task.PrependTask(task.DatabaseIndexFull, fullReindex)
+	task.AppendTask(task.DatabaseIndexFull, fullReindex)
+	task.AppendTask(task.DatabaseCache, sql.EnableCache)
+	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+	task.AppendTask(task.ReloadUI, util.ReloadUI)
 }
 
 func fullReindex() {
@@ -523,12 +526,9 @@ func fullReindex() {
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)
 	}
-	sql.EnableCache()
 	treenode.SaveBlockTree(true)
 	LoadFlashcards()
-	IndexRefs()
 	debug.FreeOSMemory()
-	util.ReloadUI()
 }
 
 func ChangeBoxSort(boxIDs []string) {

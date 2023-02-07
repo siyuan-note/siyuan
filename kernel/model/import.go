@@ -441,7 +441,6 @@ func ImportData(zipPath string) (err error) {
 
 	IncSync()
 	FullReindex()
-	ReloadUI()
 	return
 }
 

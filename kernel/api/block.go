@@ -40,7 +40,14 @@ func transferBlockRef(c *gin.Context) {
 	}
 
 	fromID := arg["fromID"].(string)
+	if util.InvalidIDPattern(fromID, ret) {
+		return
+	}
 	toID := arg["toID"].(string)
+	if util.InvalidIDPattern(toID, ret) {
+		return
+	}
+
 	err := model.TransferBlockRef(fromID, toID)
 	if nil != err {
 		ret.Code = -1

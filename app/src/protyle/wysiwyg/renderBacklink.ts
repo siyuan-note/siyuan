@@ -49,7 +49,7 @@ export const foldPassiveType = (expand: boolean, element: HTMLElement | Document
             }
         });
     }
-}
+};
 
 const setBacklinkFold = (html: string, expand: boolean) => {
     const tempDom = document.createElement("template");

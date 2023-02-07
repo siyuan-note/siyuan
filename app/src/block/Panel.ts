@@ -281,12 +281,12 @@ export class BlockPanel {
                     });
                     if (response.data.rootID !== this.nodeIds[index]) {
                         editor.protyle.breadcrumb.element.parentElement.insertAdjacentHTML("beforeend", `<span class="fn__space"></span>
-<div class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></div>`)
+<div class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></div>`);
                     }
                 }
             });
             this.editors.push(editor);
-        })
+        });
     }
 
     public destroy() {

@@ -118,6 +118,7 @@ func FlushQueue() {
 		context["current"] = i
 		context["total"] = total
 		if err = execOp(op, tx, context); nil != err {
+			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
 			return
 		}

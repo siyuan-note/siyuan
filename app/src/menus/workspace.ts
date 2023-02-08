@@ -15,6 +15,7 @@ import {getAllDocks} from "../layout/getAll";
 import {getDockByType} from "../layout/util";
 import {lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
+import {unicode2Emoji} from "../emoji";
 
 export const workspaceMenu = (rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
@@ -95,6 +96,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                     if (!item.closed) {
                         submenu.push({
                             label: item.name,
+                            iconHTML: unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-menu__icon", true),
                             accelerator: window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] === item.id ? window.siyuan.config.keymap.general.dailyNote.custom : "",
                             click: () => {
                                 fetchPost("/api/filetree/createDailyNote", {

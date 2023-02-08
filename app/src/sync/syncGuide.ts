@@ -142,14 +142,25 @@ export const syncGuide = (element?: Element) => {
         return;
     }
     const manualDialog = new Dialog({
-        title: window.siyuan.languages.syncMod3,
+        title: window.siyuan.languages.syncMode3,
         content: `<div class="b3-dialog__content">
-<label>
-    <input type="radio" name="upload" value="true"> upload
-</label>
-<label>
-    <input type="radio" name="upload" value="false"> download
-</label>
+    <label class="fn__flex b3-label">
+        <input type="radio" name="upload" value="true">
+        <span class="fn__space"></span>
+        <div>
+            upload
+            <div class="b3-label__text">xxxx</div>
+        </div>
+    </label>
+    <label class="fn__flex b3-label">
+        <input type="radio" name="upload" value="false">
+        <span class="fn__space"></span>
+        <div>
+            download
+            <div class="b3-label__text">xxxx</div>
+        </div>
+    </label>
+</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>

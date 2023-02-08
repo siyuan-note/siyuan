@@ -708,6 +708,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 window.siyuan.dragElement = undefined;
                 event.preventDefault();
             } else {
+                event.dataTransfer.setData(Constants.SIYUAN_DROP_GUTTER, target.parentElement.getAttribute("data-node-id"));
                 window.siyuan.dragElement = target.parentElement;
             }
             return;
@@ -846,6 +847,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        // TODO !event.dataTransfer.types.includes(Constants.SIYUAN_DROP_GUTTER) https://github.com/siyuan-note/siyuan/issues/7284
         if (!window.siyuan.dragElement) {
             // https://github.com/siyuan-note/siyuan/issues/6436
             event.preventDefault();
@@ -865,7 +867,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!targetElement) {
             return;
         }
-        const fileTreeIds = window.siyuan.dragElement.innerText;
+        const fileTreeIds = window.siyuan.dragElement ? window.siyuan.dragElement.innerText || "";
         if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
@@ -901,7 +903,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
-
         if (window.siyuan.dragElement.parentElement?.classList.contains("protyle-gutters") ||
             // 列表项之前的点
             window.siyuan.dragElement.getAttribute("data-type") === "NodeListItem") {

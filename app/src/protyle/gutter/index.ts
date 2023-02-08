@@ -58,6 +58,7 @@ export class Gutter {
             }
             event.target.style.opacity = "0.1";
             window.siyuan.dragElement = event.target;
+            event.dataTransfer.setData(Constants.SIYUAN_DROP_GUTTER, selectIds.toString());
             window.siyuan.dragElement.setAttribute("data-selected-ids", selectIds.toString());
         });
         this.element.addEventListener("dragend", () => {

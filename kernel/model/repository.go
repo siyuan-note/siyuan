@@ -1069,7 +1069,7 @@ func syncRepo(exit, byHand bool) (err error) {
 }
 
 func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dejavu.MergeResult) {
-	logSyncMergeResult(mergeResult)
+	//logSyncMergeResult(mergeResult)
 
 	if 0 < len(mergeResult.Conflicts) && Conf.Sync.GenerateConflictDoc {
 		// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687

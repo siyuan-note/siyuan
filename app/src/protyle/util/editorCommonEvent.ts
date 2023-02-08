@@ -867,7 +867,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!targetElement) {
             return;
         }
-        const fileTreeIds = window.siyuan.dragElement ? window.siyuan.dragElement.innerText || "";
+        const fileTreeIds = window.siyuan.dragElement ? window.siyuan.dragElement.innerText : "";
         if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();

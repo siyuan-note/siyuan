@@ -72,13 +72,18 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
             tempElement.remove();
         }
         element.parentElement.insertAdjacentHTML("afterend", setBacklinkFold(getResponse.data.content, true));
-        processRender(protyle.wysiwyg.element);
-        highlightRender(protyle.wysiwyg.element);
-        blockRender(protyle, protyle.wysiwyg.element);
+        processRender(element.parentElement.parentElement);
+        highlightRender(element.parentElement.parentElement);
+        blockRender(protyle, element.parentElement.parentElement);
         if (getResponse.data.isSyncing) {
             disabledForeverProtyle(protyle);
         } else if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
             disabledProtyle(protyle);
+        } else if (element.parentElement.parentElement.classList.contains("protyle-wysiwyg__embed")) {
+            // 嵌入块
+            element.parentElement.parentElement.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
+                item.setAttribute("contenteditable", "false");
+            });
         }
     });
 };

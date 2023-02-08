@@ -139,7 +139,7 @@
     --b3-protyle-inline-mark-color: #202124;
     --b3-protyle-inline-tag-color: #5f6368;
     --b3-protyle-inline-blockref-color: #8250df;
-    --b3-protyle-inline-fileref-color: #21862e;
+    --b3-protyle-inline-fileref-color: var(--b3-theme-secondary);
 
     /* PDF */
     --b3-pdf-selection: #d0e9c8;

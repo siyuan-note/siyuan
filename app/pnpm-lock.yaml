@@ -15,7 +15,7 @@ specifiers:
   clean-webpack-plugin: ^4.0.0
   css-loader: ^6.7.1
   dayjs: ^1.11.5
-  electron: 22.1.0
+  electron: 23.0.0
   electron-builder: ^23.3.3
   electron-fetch: ^1.7.4
   encoding: ^0.1.13
@@ -39,7 +39,7 @@ specifiers:
   webpack-cli: ^4.10.0
 
 dependencies:
-  '@electron/remote': 2.0.9_electron@22.1.0
+  '@electron/remote': 2.0.9_electron@23.0.0
   electron-fetch: 1.7.4
   pnpm: 7.9.3
 
@@ -57,7 +57,7 @@ devDependencies:
   clean-webpack-plugin: 4.0.0_webpack@5.73.0
   css-loader: 6.7.1_webpack@5.73.0
   dayjs: 1.11.5
-  electron: 22.1.0
+  electron: 23.0.0
   electron-builder: 23.3.3
   encoding: 0.1.13
   eslint: 8.19.0
@@ -1273,12 +1273,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@electron/remote/2.0.9_electron@22.1.0:
+  /@electron/remote/2.0.9_electron@23.0.0:
     resolution: {integrity: sha512-LR0W0ID6WAKHaSs0x5LX9aiG+5pFBNAJL6eQAJfGkCuZPUa6nZz+czZLdlTDETG45CgF/0raSvCtYOYUpr6c+A==}
     peerDependencies:
       electron: '>= 13.0.0'
     dependencies:
-      electron: 22.1.0
+      electron: 23.0.0
     dev: false
 
   /@electron/universal/1.2.1:
@@ -1928,10 +1928,10 @@ packages:
     resolution: {integrity: sha512-m0+M53+HYMzqKxwNQZT143K7WwXEGUy9LY31l8dJphXx2P/FQod615mVbxHyqbDCG4J5bHdWm21qZ0e2DVY6CQ==}
     engines: {node: '>=14.0.0'}
     dependencies:
+      7zip-bin: 5.1.1
       '@develar/schema-utils': 2.6.5
       '@electron/universal': 1.2.1
       '@malept/flatpak-bundler': 0.4.0
-      7zip-bin: 5.1.1
       async-exit-hook: 2.0.1
       bluebird-lst: 1.0.9
       builder-util: 23.3.3
@@ -2215,9 +2215,9 @@ packages:
   /builder-util/23.3.3:
     resolution: {integrity: sha512-MJZlUiq2PY5hjYv9+XNaoYdsITqvLgRDoHSFg/4nzpInbNxNjLQOolL04Zsyp+hgfcbFvMC4h0KkR1CMPHLWbA==}
     dependencies:
+      7zip-bin: 5.1.1
       '@types/debug': 4.1.7
       '@types/fs-extra': 9.0.13
-      7zip-bin: 5.1.1
       app-builder-bin: 4.0.0
       bluebird-lst: 1.0.9
       builder-util-runtime: 9.0.3
@@ -2861,8 +2861,8 @@ packages:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
     dev: true
 
-  /electron/22.1.0:
-    resolution: {integrity: sha512-wz5s4N6V7zyKm4YQmXJImFoxO1Doai32ShYm0FzOLPBMwLMdQBV+REY+j1opRx0KJ9xJEIdjYgcA8OSw6vx3pA==}
+  /electron/23.0.0:
+    resolution: {integrity: sha512-S6hVtTAjauMiiWP9sBVR5RpcUC464cNZ06I2EMUjeZBq+KooS6tLmNsfw0zLpAXDp1qosjlBP3v71NTZ3gd9iA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true

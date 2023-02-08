@@ -15,7 +15,7 @@ import {newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
-import {hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {isTouchDevice} from "../../util/functions";
 
 export class Files extends Model {
@@ -372,7 +372,14 @@ export class Files extends Model {
                 event.preventDefault();
                 return;
             }
-            if (window.siyuan.config.fileTree.sort === 6 &&
+            const notebookElement = hasClosestByAttribute(liElement, "data-sortmode", null);
+            if (!notebookElement) {
+                return;
+            }
+            const notebookSort = notebookElement.getAttribute("data-sortmode");
+            if ((
+                    notebookSort === "6" || (window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")
+                ) &&
                 // 防止文档拖拽到笔记本外
                 !(!sourceOnlyRoot && targetType === "navigation-root")) {
                 const nodeRect = liElement.getBoundingClientRect();
@@ -462,7 +469,10 @@ export class Files extends Model {
                     toPath,
                 });
             }
-            if ((newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) && window.siyuan.config.fileTree.sort === 6) {
+            const ulSort = newUlElement.getAttribute("data-sortmode");
+            if ((newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) &&
+                (ulSort === "6" || (window.siyuan.config.fileTree.sort === 6 && ulSort === "15"))
+            ) {
                 if (selectRootElements.length > 0 && newElement.getAttribute("data-path") === "/") {
                     if (newElement.classList.contains("dragover__top")) {
                         selectRootElements.forEach(item => {

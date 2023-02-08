@@ -202,8 +202,8 @@
       transition: var(--b3-transition);
     }
 
-    span[data-type~="file-annotation-ref"]:before {
-      content: "🔖 ";
+    span[data-type~="file-annotation-ref"] {
+      color: var(--b3-protyle-inline-fileref-color);
     }
 
     &.render-node {

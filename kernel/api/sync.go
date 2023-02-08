@@ -57,7 +57,21 @@ func performSync(c *gin.Context) {
 		}
 	}
 
-	model.SyncData(false, false, true)
+	if 3 != model.Conf.Sync.Mode {
+		model.SyncData(false, false, true)
+		return
+	}
+
+	// 云端同步模式支持 `完全手动同步` 模式 https://github.com/siyuan-note/siyuan/issues/7295
+	upload := true
+	if uploadArg := arg["upload"]; nil != uploadArg {
+		upload = uploadArg.(bool)
+	}
+	if upload {
+		model.SyncDataUpload()
+	} else {
+		model.SyncDataDownload()
+	}
 }
 
 func performBootSync(c *gin.Context) {

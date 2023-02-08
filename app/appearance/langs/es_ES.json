@@ -315,6 +315,7 @@
   "syncModeTip": "El modo de sincronización se puede seguir seleccionando después de habilitar la sincronización en la nube",
   "syncMode1": "Auto (sincronización cada 30 segundos después de que los datos dejen de cambiar)",
   "syncMode2": "Manual (automático sólo una vez cuando se inicia y se cierra el software, otras veces hay que activarlo manualmente)",
+  "syncMode3": "Manual",
   "cloudSync": "Sincronización en la nube",
   "cloudSyncDir": "Destino de sincronización en la nube",
   "emptyCloudSyncList": "La lista de sincronización con la nube está vacía",

@@ -315,6 +315,7 @@
   "syncModeTip": "启用云端同步后可进一步选择同步模式",
   "syncMode1": "自动同步（数据不再变动后 30 秒进行一次同步）",
   "syncMode2": "手动同步（仅启动和关闭软件时自动同步一次，其他时候需要手动触发同步）",
+  "syncMode3": "手动同步",
   "cloudSync": "云端同步",
   "cloudSyncDir": "云端同步目录",
   "emptyCloudSyncList": "云端同步列表为空",

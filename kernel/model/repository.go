@@ -772,6 +772,137 @@ func IsSyncingFile(rootID string) (ret bool) {
 	return
 }
 
+func syncRepoDownload() (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		planSyncAfter(fixSyncInterval)
+
+		msg := Conf.Language(26)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		err = errors.New(msg)
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		planSyncAfter(fixSyncInterval)
+
+		msg := fmt.Sprintf("sync repo failed: %s", err)
+		logging.LogErrorf(msg)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		return
+	}
+
+	start := time.Now()
+	err = indexRepoBeforeCloudSync(repo)
+	if nil != err {
+		planSyncAfter(fixSyncInterval)
+		return
+	}
+
+	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
+	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+		// 重置仓库并再次尝试同步
+		if _, resetErr := resetRepository(repo); nil == resetErr {
+			mergeResult, trafficStat, err = repo.SyncDownload(syncContext)
+		}
+	}
+	elapsed := time.Since(start)
+	if nil != err {
+		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo download failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			}
+		}
+		Conf.Sync.Stat = msg
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		return
+	}
+
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	Conf.Sync.Synced = util.CurrentTimeMillis()
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	Conf.Sync.Stat = msg
+	syncDownloadErrCount = 0
+	logging.LogInfof("synced data repo download [provider=%d, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
+		Conf.Sync.Provider, trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
+
+	processSyncMergeResult(false, true, start, mergeResult)
+	return
+}
+
+func syncRepoUpload() (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		planSyncAfter(fixSyncInterval)
+
+		msg := Conf.Language(26)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		err = errors.New(msg)
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		planSyncAfter(fixSyncInterval)
+
+		msg := fmt.Sprintf("sync repo failed: %s", err)
+		logging.LogErrorf(msg)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		return
+	}
+
+	start := time.Now()
+	err = indexRepoBeforeCloudSync(repo)
+	if nil != err {
+		planSyncAfter(fixSyncInterval)
+		return
+	}
+
+	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	trafficStat, err := repo.SyncUpload(syncContext)
+	if errors.Is(err, dejavu.ErrRepoFatalErr) {
+		// 重置仓库并再次尝试同步
+		if _, resetErr := resetRepository(repo); nil == resetErr {
+			trafficStat, err = repo.SyncUpload(syncContext)
+		}
+	}
+	elapsed := time.Since(start)
+	if nil != err {
+		planSyncAfter(fixSyncInterval)
+
+		logging.LogErrorf("sync data repo upload failed: %s", err)
+		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
+			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
+				msg = fmt.Sprintf(Conf.Language(68), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
+			}
+		}
+		Conf.Sync.Stat = msg
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		return
+	}
+
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	Conf.Sync.Synced = util.CurrentTimeMillis()
+	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)))
+	Conf.Sync.Stat = msg
+	logging.LogInfof("synced data repo upload [provider=%d, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
+		Conf.Sync.Provider, trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
+	return
+}
+
 func bootSyncRepo() (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		syncDownloadErrCount++
@@ -933,6 +1064,11 @@ func syncRepo(exit, byHand bool) (err error) {
 	logging.LogInfof("synced data repo [provider=%d, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
 		Conf.Sync.Provider, trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
 
+	processSyncMergeResult(exit, byHand, start, mergeResult)
+	return
+}
+
+func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dejavu.MergeResult) {
 	logSyncMergeResult(mergeResult)
 
 	if 0 < len(mergeResult.Conflicts) && Conf.Sync.GenerateConflictDoc {
@@ -1028,14 +1164,13 @@ func syncRepo(exit, byHand bool) (err error) {
 		ReloadUI()
 	}
 
-	elapsed = time.Since(start)
+	elapsed := time.Since(start)
 	if !exit {
 		go func() {
 			time.Sleep(2 * time.Second)
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 		}()
 	}
-	return
 }
 
 func logSyncMergeResult(mergeResult *dejavu.MergeResult) {

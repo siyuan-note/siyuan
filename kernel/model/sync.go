@@ -37,6 +37,79 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func SyncDataDownload() {
+	defer logging.Recover()
+
+	if !checkSync(false, false, true) {
+		return
+	}
+
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
+	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
+		return
+	}
+
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	now := util.CurrentTimeMillis()
+	Conf.Sync.Synced = now
+
+	err := syncRepoDownload()
+	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
+	if nil == err {
+		synced += Conf.Sync.Stat
+	} else {
+		synced += fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+	}
+	msg := fmt.Sprintf(Conf.Language(82), synced)
+	Conf.Sync.Stat = msg
+	Conf.Save()
+	code := 1
+	if nil != err {
+		code = 2
+	}
+	util.BroadcastByType("main", "syncing", code, msg, nil)
+}
+
+func SyncDataUpload() {
+	defer logging.Recover()
+
+	if !checkSync(false, false, true) {
+		return
+	}
+
+	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
+	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
+		return
+	}
+
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
+	now := util.CurrentTimeMillis()
+	Conf.Sync.Synced = now
+
+	err := syncRepoUpload()
+	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
+	if nil == err {
+		synced += Conf.Sync.Stat
+	} else {
+		synced += fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+	}
+	msg := fmt.Sprintf(Conf.Language(82), synced)
+	Conf.Sync.Stat = msg
+	Conf.Save()
+	code := 1
+	if nil != err {
+		code = 2
+	}
+	util.BroadcastByType("main", "syncing", code, msg, nil)
+	return
+}
+
 var (
 	syncSameCount        = 0
 	syncDownloadErrCount = 0
@@ -147,7 +220,11 @@ func syncData(boot, exit, byHand bool) {
 }
 
 func checkSync(boot, exit, byHand bool) bool {
-	if !boot && !exit && 2 == Conf.Sync.Mode && !byHand {
+	if 2 == Conf.Sync.Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
+		return false
+	}
+
+	if 3 == Conf.Sync.Mode && !byHand { // 完全手动模式下只有手动进行同步
 		return false
 	}
 

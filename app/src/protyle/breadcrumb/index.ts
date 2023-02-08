@@ -67,7 +67,7 @@ export class Breadcrumb {
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-type") === "exit-focus") {
-                    zoomOut(protyle, protyle.block.rootID);
+                    zoomOut(protyle, protyle.block.rootID, protyle.block.id);
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-type") === "context") {

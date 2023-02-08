@@ -1,8 +1,8 @@
 {
   "chooseSyncDirection": "Choisir la direction de synchronisation",
-  "uploadData2Cloud": "\uD83D\uDCE4 Télécharger des données dans le cloud",
+  "uploadData2Cloud": "⬆️ Télécharger des données dans le cloud",
   "uploadData2CloudTip": "Écraser les données cloud basées sur les données locales",
-  "downloadDataFromCloud": "\uD83D\uDCE5 Télécharger des données depuis le cloud",
+  "downloadDataFromCloud": "⬇️ Télécharger des données depuis le cloud",
   "downloadDataFromCloudTip": "Écraser les données locales basées sur les données du cloud",
   "targetBlockID": "Identifiant du bloc cible",
   "transferBlockRefTip": "Transférer toutes les références de ce bloc vers le bloc cible",

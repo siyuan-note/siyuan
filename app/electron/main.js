@@ -1006,11 +1006,11 @@ powerMonitor.on('resume', async () => {
   writeLog('system resume')
   const isOnline = async () => {
     try {
-      const result = await fetch('https://icanhazip.com', {timeout: 1000})
+      const result = await fetch('https://www.baidu.com', {timeout: 1000})
       return 200 === result.status
     } catch (e) {
       try {
-        const result = await fetch('https://www.baidu.com', {timeout: 1000})
+        const result = await fetch('https://icanhazip.com', {timeout: 1000})
         return 200 === result.status
       } catch (e) {
         return false

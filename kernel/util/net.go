@@ -31,14 +31,14 @@ import (
 
 func IsOnline() bool {
 	c := req.C().SetTimeout(1 * time.Second)
-	resp, err := c.R().Get("https://icanhazip.com")
+	resp, err := c.R().Head("https://www.baidu.com")
 	if nil != err {
-		resp, err = c.R().Get("https://api.ipify.org")
+		resp, err = c.R().Head("https://icanhazip.com")
 		if nil != err {
-			resp, err = c.R().Get("https://www.baidu.com")
+			resp, err = c.R().Head("https://api.ipify.org")
 		}
 	}
-	return nil == err && nil != resp && 200 == resp.StatusCode
+	return nil == err && nil != resp && nil != resp.Response
 }
 
 func GetRemoteAddr(session *melody.Session) string {

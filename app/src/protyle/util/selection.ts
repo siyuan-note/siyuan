@@ -103,6 +103,8 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                         lastChild = lastChild.lastChild as HTMLElement;
                     }
                 }
+                // 列表回车后，左键全选无法选中
+                focusByRange(range);
                 protyle.toolbar.render(protyle, range);
                 countSelectWord(range, protyle.block.rootID);
                 return true;

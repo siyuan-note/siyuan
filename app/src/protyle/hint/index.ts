@@ -370,7 +370,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (!nodeElement) {
             return;
         }
-        this.enableExtend = false
+        this.enableExtend = false;
         let id = "";
         if (nodeElement) {
             id = nodeElement.getAttribute("data-node-id");

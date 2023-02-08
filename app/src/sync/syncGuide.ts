@@ -172,10 +172,10 @@ export const syncGuide = (element?: Element) => {
         manualDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        const uploadElement = manualDialog.element.querySelector("input[name=upload]:checked") as HTMLInputElement
+        const uploadElement = manualDialog.element.querySelector("input[name=upload]:checked") as HTMLInputElement;
         if (!uploadElement) {
-            showMessage(window.siyuan.languages.plsChoose)
-            return
+            showMessage(window.siyuan.languages.plsChoose);
+            return;
         }
         fetchPost("/api/sync/performSync", {upload: uploadElement.value === "true"});
         manualDialog.destroy();

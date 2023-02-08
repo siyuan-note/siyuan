@@ -175,7 +175,7 @@ const JSONToDock = (json: any) => {
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom});
 };
 
-export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => {
+export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isStart = false) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
         if (!layout) {
@@ -278,23 +278,28 @@ export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model) => 
     if (json.children) {
         if (Array.isArray(json.children)) {
             json.children.forEach((item: any, index: number) => {
-                JSONToCenter(item, layout ? child : window.siyuan.layout.layout);
+                JSONToCenter(item, layout ? child : window.siyuan.layout.layout, isStart);
                 if (item.instance === "Tab" && index === json.children.length - 1) {
                     const activeTabElement = (child as Wnd).headersElement.querySelector('[data-init-active="true"]') as HTMLElement;
                     if (activeTabElement) {
-                        activeTabElement.removeAttribute("data-init-active");
-                        (child as Wnd).switchTab(activeTabElement, false, false);
+                        if (window.siyuan.config.fileTree.closeTabsOnStart && isStart &&
+                            !item.pin && item.title) {
+                            // 启动时关闭所有页签就不应该再初始化它
+                        } else {
+                            activeTabElement.removeAttribute("data-init-active");
+                            (child as Wnd).switchTab(activeTabElement, false, false);
+                        }
                     }
                 }
             });
         } else {
-            JSONToCenter(json.children, child);
+            JSONToCenter(json.children, child, isStart);
         }
     }
 };
 
 export const JSONToLayout = (isStart: boolean) => {
-    JSONToCenter(window.siyuan.config.uiLayout.layout);
+    JSONToCenter(window.siyuan.config.uiLayout.layout, undefined, isStart);
     JSONToDock(window.siyuan.config.uiLayout);
     // 启动时不打开页签，需要移除没有钉住的页签
     if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {

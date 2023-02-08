@@ -1,4 +1,9 @@
 {
+  "chooseSyncDirection": "Elegir dirección de sincronización",
+  "uploadData2Cloud": "\uD83D\uDCE4 Subir datos a la nube",
+  "uploadData2CloudTip": "Sobrescribir datos en la nube basados ​​en datos locales",
+  "downloadDataFromCloud": "\uD83D\uDCE5 Descargar datos de la nube",
+  "downloadDataFromCloudTip": "Sobrescribir datos locales basados ​​en datos de la nube",
   "targetBlockID": "Id. de bloque objetivo",
   "transferBlockRefTip": "Transferir todas las referencias de este bloque al bloque de destino",
   "transferBlockRef": "Transferencia de referencia",

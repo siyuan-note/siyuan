@@ -142,22 +142,22 @@ export const syncGuide = (element?: Element) => {
         return;
     }
     const manualDialog = new Dialog({
-        title: window.siyuan.languages.syncMode3,
+        title: window.siyuan.languages.chooseSyncDirection,
         content: `<div class="b3-dialog__content">
     <label class="fn__flex b3-label">
         <input type="radio" name="upload" value="true">
         <span class="fn__space"></span>
         <div>
-            upload
-            <div class="b3-label__text">xxxx</div>
+            ${window.siyuan.languages.uploadData2Cloud}
+            <div class="b3-label__text">${window.siyuan.languages.uploadData2CloudTip}</div>
         </div>
     </label>
     <label class="fn__flex b3-label">
         <input type="radio" name="upload" value="false">
         <span class="fn__space"></span>
         <div>
-            download
-            <div class="b3-label__text">xxxx</div>
+            ${window.siyuan.languages.downloadDataFromCloud}
+            <div class="b3-label__text">${window.siyuan.languages.downloadDataFromCloudTip}</div>
         </div>
     </label>
 </div>

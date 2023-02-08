@@ -1074,6 +1074,7 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 	if 0 < len(mergeResult.Conflicts) && Conf.Sync.GenerateConflictDoc {
 		// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
 
+		historyDir := filepath.Join(util.HistoryDir, mergeResult.Time.Format("2006-01-02-150405")+"-sync")
 		luteEngine := NewLute()
 		for _, file := range mergeResult.Conflicts {
 			if !strings.HasSuffix(file.Path, ".sy") {
@@ -1097,6 +1098,7 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 
 			resetTree(tree, "Conflicted")
 			createTreeTx(tree)
+			indexHistoryDir(filepath.Base(historyDir), luteEngine)
 		}
 	}
 

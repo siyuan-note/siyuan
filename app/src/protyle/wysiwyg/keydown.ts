@@ -576,7 +576,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // 上下左右光标移动
         if (!event.altKey && !event.shiftKey && !isCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
-            protyle.hint.enableEmoji = false;
             // 需使用 editabled，否则代码块会把语言字数算入
             const nodeEditableElement = getContenteditableElement(nodeElement) || nodeElement;
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
@@ -1156,7 +1155,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 !protyle.hint.element.classList.contains("fn__none") ||
                 !protyle.toolbar.subElement.classList.contains("fn__none")) {
                 hideElements(["toolbar", "hint", "util"], protyle);
-                protyle.hint.enableEmoji = false;
+                protyle.hint.enableExtend = false;
             } else if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
                 hideElements(["select"], protyle);
                 countBlockWord([], protyle.block.rootID);

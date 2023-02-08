@@ -36,7 +36,8 @@ export class Hint {
     public timeId: number;
     public element: HTMLDivElement;
     public enableSlash = true;
-    public enableEmoji = false;
+    private enableEmoji = true;
+    public enableExtend = false;
     public splitChar = "";
     public lastIndex = -1;
 
@@ -122,6 +123,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             clearTimeout(this.timeId);
             return;
         }
+        if (!this.enableExtend) {
+            clearTimeout(this.timeId);
+            return;
+        }
         protyle.toolbar.range = getSelection().getRangeAt(0);
         const start = getSelectionOffset(protyle.toolbar.range.startContainer as HTMLElement, protyle.wysiwyg.element).start;
         const currentLineValue = protyle.toolbar.range.startContainer.textContent.substring(0, start) || "";
@@ -194,7 +199,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         data.forEach((hintData, i) => {
             // https://github.com/siyuan-note/siyuan/issues/1229 提示时，新建文件不应默认选中
             let focusClass = "";
-            if ((i === 1 && data[i].focus ) ||
+            if ((i === 1 && data[i].focus) ||
                 (i === 0 && (data.length === 1 || !data[1].focus))) {
                 focusClass = " b3-list-item--focus";
             }
@@ -327,7 +332,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 panelElement.nextElementSibling.classList.remove("fn__none");
             }
         } else {
-            this.element.innerHTML = `<div class="emojis" style="height: auto;">
+            this.element.innerHTML = `<div class="emojis">
 <div class="emojis__panel">${filterEmoji(value, 256, true)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     <div data-type="0" class="emojis__type" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50", true)}</div>
@@ -365,6 +370,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (!nodeElement) {
             return;
         }
+        this.enableExtend = false
         let id = "";
         if (nodeElement) {
             id = nodeElement.getAttribute("data-node-id");
@@ -466,6 +472,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             blockRender(protyle, protyle.wysiwyg.element);
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
+            this.enableExtend = true;
             if (value === "((" || value === "{{") {
                 if (value === "((") {
                     hintRef("", protyle);
@@ -533,7 +540,6 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 range.deleteContents();
                 range.insertNode(document.createTextNode(":"));
                 range.collapse(false);
-                this.enableEmoji = true;
                 this.genEmojiHTML(protyle);
                 return;
             } else if (value.indexOf("style") > -1) {
@@ -774,11 +780,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             return undefined;
         }
         // 冒号前为数字或冒号不进行emoji提示
-        if (this.splitChar === ":" && (
-            /\d/.test(currentLineValue.substr(this.lastIndex - 1, 1)) ||
-            currentLineValue.substr(this.lastIndex - 1, 2) === "::"
-        )) {
-            this.enableEmoji = false;
+        if (this.splitChar === ":") {
+            this.enableEmoji = !(/\d/.test(currentLineValue.substr(this.lastIndex - 1, 1)) ||
+                currentLineValue.substr(this.lastIndex - 1, 2) === "::");
+
         }
         const lineArray = currentLineValue.split(this.splitChar);
         const lastItem = lineArray[lineArray.length - 1];

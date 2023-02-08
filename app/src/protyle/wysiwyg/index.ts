@@ -1415,8 +1415,8 @@ export class WYSIWYG {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
                 });
             } else {
-                if (event.data === ":") {
-                    protyle.hint.enableEmoji = true;
+                if ([":", "(", "【", "（", "[", "{", "「", "#", "/", "、"].includes(event.data)) {
+                    protyle.hint.enableExtend = true;
                 }
                 input(protyle, blockElement, range, true);
             }
@@ -1906,7 +1906,7 @@ export class WYSIWYG {
                 pushBack(protyle, newRange);
                 /// #endif
             }, (isMobile() || window.webkit?.messageHandlers) ? 520 : 0); // Android/iPad 双击慢了出不来
-            protyle.hint.enableEmoji = false;
+            protyle.hint.enableExtend = false;
             if (window.siyuan.shiftIsPressed) {
                 event.preventDefault();
                 event.stopPropagation();

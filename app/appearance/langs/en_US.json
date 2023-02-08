@@ -1,4 +1,9 @@
 {
+  "chooseSyncDirection": "Choose sync direction",
+  "uploadData2Cloud": "\uD83D\uDCE4 Upload data to cloud",
+  "uploadData2CloudTip": "Overwrite cloud data based on local data",
+  "downloadDataFromCloud": "\uD83D\uDCE5 Download data from cloud",
+  "downloadDataFromCloudTip": "Overwrite local data based on cloud data",
   "targetBlockID": "Target Block ID",
   "transferBlockRefTip": "Transfer all references from this block to the target block",
   "transferBlockRef": "Transfer Reference",

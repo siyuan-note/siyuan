@@ -1,4 +1,9 @@
 {
+  "chooseSyncDirection": "選擇同步方向",
+  "uploadData2Cloud": "\uD83D\uDCE4 將數據上傳到雲端",
+  "uploadData2CloudTip": "以本地數據為準覆蓋雲端數據",
+  "downloadDataFromCloud": "\uD83D\uDCE5 從雲端下載數據",
+  "downloadDataFromCloudTip": "以雲端數據為準覆蓋本地數據",
   "targetBlockID": "目標塊 ID",
   "transferBlockRefTip": "將該塊的所有引用轉移到目標塊上",
   "transferBlockRef": "轉移引用",

@@ -227,7 +227,7 @@ export const showPopover = async () => {
             return true;
         }
     });
-    if (!hasPin &&
+    if (!hasPin && popoverTargetElement.parentElement &&
         popoverTargetElement.parentElement.style.opacity !== "0.1" // 反向面板图标拖拽时不应该弹层
     ) {
         window.siyuan.blockPanels.push(new BlockPanel({

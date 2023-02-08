@@ -399,7 +399,8 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	WaitForWritingFiles()
 
 	if !force {
-		if Conf.Sync.Enabled && ((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
+		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
+			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
 			syncData(false, true, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1

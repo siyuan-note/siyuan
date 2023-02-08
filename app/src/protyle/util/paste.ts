@@ -166,7 +166,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     });
     const code = processPasteCode(textHTML, textPlain);
     const range = getEditorRange(protyle.wysiwyg.element);
-    if (siyuanHTML) {
+    if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+        // 粘贴在代码位置
+        insertHTML(textPlain, protyle);
+        return;
+    } else if (siyuanHTML) {
         // 编辑器内部粘贴
         const tempElement = document.createElement("div");
         tempElement.innerHTML = siyuanHTML;
@@ -188,10 +192,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         const tempInnerHTML = tempElement.innerHTML;
         insertHTML(tempInnerHTML, protyle, isBlock);
         filterClipboardHint(protyle, tempInnerHTML);
-    } else if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
-        // 粘贴在代码位置
-        insertHTML(textPlain, protyle);
-        return;
     } else if (code) {
         if (!code.startsWith('<div data-type="NodeCodeBlock" class="code-block" data-node-id="')) {
             const wbrElement = document.createElement("wbr");

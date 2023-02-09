@@ -1403,6 +1403,9 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            if ([":", "(", "【", "（", "[", "{", "「", "#", "/", "、"].includes(event.data)) {
+                protyle.hint.enableExtend = true;
+            }
             if (event.isComposing || isComposition ||
                 // https://github.com/siyuan-note/siyuan/issues/337 编辑器内容拖拽问题
                 event.inputType === "deleteByDrag" || event.inputType === "insertFromDrop"
@@ -1415,9 +1418,6 @@ export class WYSIWYG {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
                 });
             } else {
-                if ([":", "(", "【", "（", "[", "{", "「", "#", "/", "、"].includes(event.data)) {
-                    protyle.hint.enableExtend = true;
-                }
                 input(protyle, blockElement, range, true);
             }
             event.stopPropagation();

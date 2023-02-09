@@ -882,7 +882,6 @@
     "task.database.index.commit": "Execute database index commit",
     "task.database.index.ref": "Execute database index reference",
     "task.database.index.fix": "Execute database index fix",
-    "task.database.cache": "Execute database cache",
     "task.ocr.image": "Execute image OCR to extract text",
     "task.history.generateDoc": "Execute GenerateDoc History",
     "task.database.index.embedBlock": "Execute database index embed block",

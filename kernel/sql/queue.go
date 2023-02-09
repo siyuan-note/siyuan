@@ -105,6 +105,11 @@ func FlushQueue() {
 
 	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	total := len(ops)
+	if 512 < total {
+		disableCache()
+		defer enableCache()
+	}
+
 	for i, op := range ops {
 		if util.IsExiting {
 			return

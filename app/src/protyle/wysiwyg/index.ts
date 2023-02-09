@@ -12,7 +12,8 @@ import {
     focusByWbr,
     focusSideBlock,
     getEditorRange,
-    getSelectionOffset, setLastNodeRange,
+    getSelectionOffset,
+    setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {getSearch, isMobile} from "../../util/functions";
@@ -25,10 +26,12 @@ import {dropEvent} from "../util/editorCommonEvent";
 import {input} from "./input";
 import {
     getContenteditableElement,
-    getLastBlock, getNextBlock,
+    getLastBlock,
+    getNextBlock,
     getPreviousHeading,
     getTopAloneElement,
-    hasNextSibling, hasPreviousSibling,
+    hasNextSibling,
+    hasPreviousSibling,
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
@@ -567,6 +570,9 @@ export class WYSIWYG {
                         newTop = moveEvent.clientY;
                     }
                     newHeight = y - newTop;
+                }
+                if (newHeight < 4) {
+                    return;
                 }
                 protyle.selectElement.setAttribute("style", `background-color: ${protyle.selectElement.style.backgroundColor};top:${newTop}px;height:${newHeight}px;left:${newLeft + 2}px;width:${newWidth - 2}px;`);
                 const newMouseElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);

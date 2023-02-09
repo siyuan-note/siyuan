@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {setStorageVal} from "../../protyle/util/compatibility";
+
 const DEFAULT_VIEW_HISTORY_CACHE_SIZE = 20;
 
 /**
@@ -62,14 +64,17 @@ class ViewHistory {
       sessionStorage.setItem("pdfjs.history", databaseStr);
       return;
     }
-    localStorage.setItem("pdfjs.history", databaseStr);
+    // NOTE
+    window.siyuan.storage["pdfjs.history"] = databaseStr
+    setStorageVal("pdfjs.history", databaseStr)
   }
 
   async _readFromStorage() {
     if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) {
       return sessionStorage.getItem("pdfjs.history");
     }
-    return localStorage.getItem("pdfjs.history");
+    // NOTE
+    return window.siyuan.storage["pdfjs.history"];
   }
 
   async set(name, val) {

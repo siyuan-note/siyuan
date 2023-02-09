@@ -68,8 +68,8 @@ func InitDatabase(forceRebuild bool) (err error) {
 	defer initDatabaseLock.Unlock()
 
 	ClearBlockCache()
-	DisableCache()
-	defer EnableCache()
+	disableCache()
+	defer enableCache()
 
 	util.IncBootProgress(2, "Initializing database...")
 

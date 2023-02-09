@@ -131,9 +131,6 @@ func index(boxID string) {
 }
 
 func IndexRefs() {
-	sql.EnableCache()
-	defer sql.ClearBlockCache()
-
 	start := time.Now()
 	util.SetBootDetails("Resolving refs...")
 	util.PushStatusBar(Conf.Language(54))

@@ -506,7 +506,6 @@ func ReloadUI() {
 
 func FullReindex() {
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
-	task.AppendTask(task.DatabaseCache, sql.EnableCache)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	task.AppendTask(task.ReloadUI, util.ReloadUI)
 }
@@ -521,7 +520,6 @@ func fullReindex() {
 	}
 	treenode.InitBlockTree(true)
 
-	sql.DisableCache()
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
 		index(openedBox.ID)

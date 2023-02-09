@@ -29,17 +29,17 @@ import (
 )
 
 var memCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 800000,
-	MaxCost:     1000 * 1000 * 100,
+	NumCounters: 10240,
+	MaxCost:     1024,
 	BufferItems: 64,
 })
 var disabled = true
 
-func EnableCache() {
+func enableCache() {
 	disabled = false
 }
 
-func DisableCache() {
+func disableCache() {
 	disabled = true
 }
 

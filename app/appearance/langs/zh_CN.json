@@ -882,7 +882,6 @@
     "task.database.index.commit": "执行数据库索引提交",
     "task.database.index.ref": "执行数据库索引引用",
     "task.database.index.fix": "执行数据库索引订正",
-    "task.database.cache": "执行数据库缓存",
     "task.ocr.image": "执行图片 OCR 提取文本",
     "task.history.generateDoc": "执行生成文件历史",
     "task.database.index.embedBlock": "执行数据库索引嵌入块",

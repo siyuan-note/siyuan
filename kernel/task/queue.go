@@ -86,7 +86,6 @@ const (
 	DatabaseIndexCommit     = "task.database.index.commit"     // 数据库索引提交
 	DatabaseIndexRef        = "task.database.index.ref"        // 数据库索引引用
 	DatabaseIndexFix        = "task.database.index.fix"        // 数据库索引订正
-	DatabaseCache           = "task.database.cache"            // 数据库缓存
 	OCRImage                = "task.ocr.image"                 // 图片 OCR 提取文本
 	HistoryGenerateDoc      = "task.history.generateDoc"       // 生成文件历史
 	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块

@@ -1,3 +1,44 @@
+## v2.7.4 / 2023-02-09
+
+### 改进功能
+
+* [改进标签、引用、嵌入、表情和斜杆提示交互](https://github.com/siyuan-note/siyuan/issues/7052)
+* [通过 `Alt+M` 最小化后焦点回到先前的窗口](https://github.com/siyuan-note/siyuan/issues/7275)
+* [去掉数据同步增量索引时的界面遮罩](https://github.com/siyuan-note/siyuan/issues/7278)
+* [改进 `退出聚焦` 后的定位](https://github.com/siyuan-note/siyuan/issues/7280)
+* [PDF 页签保存上次浏览位置](https://github.com/siyuan-note/siyuan/issues/7283)
+* [降低检查网络连通性所需时间](https://github.com/siyuan-note/siyuan/issues/7287)
+* [去掉 PDF 标注引用元素伪元素图标并调整颜色](https://github.com/siyuan-note/siyuan/issues/7293)
+* [云端同步模式支持 `完全手动同步` 模式](https://github.com/siyuan-note/siyuan/issues/7295)
+* [为新建日记添加笔记本图标](https://github.com/siyuan-note/siyuan/issues/7297)
+* [文档树拖拽遵循排序规则](https://github.com/siyuan-note/siyuan/issues/7302)
+* [页签和新窗口同步修改文档图标](https://github.com/siyuan-note/siyuan/issues/7313)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/7286)
+
+### 移除功能
+
+* [Android 端去掉保活用的通知栏](https://github.com/siyuan-note/siyuan/issues/7306)
+
+### 修复缺陷
+
+* [查询嵌入块点击面包屑后不应该出现可编辑状态](https://github.com/siyuan-note/siyuan/issues/6200)
+* [关系图点击标签节点报错](https://github.com/siyuan-note/siyuan/issues/7176)
+* [非折叠块搜索跳转不应该聚焦](https://github.com/siyuan-note/siyuan/issues/7276)
+* [未登录状态云端同步状态图标显示错误](https://github.com/siyuan-note/siyuan/issues/7277)
+* [导入 Markdown 时解析报错](https://github.com/siyuan-note/siyuan/issues/7279)
+* [代码块剪切后粘贴渲染不全](https://github.com/siyuan-note/siyuan/issues/7285)
+* [在代码块中复制粘贴不应该携带 HTML](https://github.com/siyuan-note/siyuan/issues/7290)
+* [设置启动时关闭所有页签后重启界面异常](https://github.com/siyuan-note/siyuan/issues/7298)
+* [点击文末空白时导致全选](https://github.com/siyuan-note/siyuan/issues/7299)
+* [数据同步后冲突文件未生成文件历史索引](https://github.com/siyuan-note/siyuan/issues/7303)
+* [使用或移除命名查询后搜索方式的悬浮提示信息没有更新](https://github.com/siyuan-note/siyuan/issues/7307)
+* [Android 端返回桌面后再次进入白屏](https://github.com/siyuan-note/siyuan/issues/7308)
+* [Android 端返回桌面时自动同步请求连接泄露](https://github.com/siyuan-note/siyuan/issues/7309)
+* [桌面端系统睡眠唤醒后内核可能会自动退出](https://github.com/siyuan-note/siyuan/issues/7314)
+
 ## v2.7.3 / 2023-02-07
 
 ### 改进功能

@@ -286,7 +286,7 @@ func skipNewVerInstallPkg() bool {
 	if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() && !gulu.OS.IsLinux() {
 		return true
 	}
-	if util.ISMicrosoftStore {
+	if util.ISMicrosoftStore || util.ContainerStd != util.Container {
 		return true
 	}
 	if !Conf.System.DownloadInstallPkg {

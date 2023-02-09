@@ -24,7 +24,7 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="autoLaunch" type="checkbox"${window.siyuan.config.system.autoLaunch ? " checked" : ""}>
 </label>
-<label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore ? " fn__none" : ""}">
+<label class="fn__flex b3-label${isBrowser() || window.siyuan.config.system.isMicrosoftStore || window.siyuan.config.system.container !== "std" ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.autoDownloadUpdatePkg}
         <div class="b3-label__text">${window.siyuan.languages.autoDownloadUpdatePkgTip}</div>

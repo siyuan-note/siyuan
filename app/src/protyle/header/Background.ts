@@ -3,7 +3,13 @@ import {getRandom, isMobile} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
 import {fetchPost} from "../../util/fetch";
-import {getRandomEmoji, openEmojiPanel, unicode2Emoji, updateFileTreeEmoji, updateOutlineEmoji} from "../../emoji";
+import {
+    getRandomEmoji,
+    openEmojiPanel,
+    unicode2Emoji,
+    updateFileTreeEmoji,
+    updateOutlineEmoji
+} from "../../emoji";
 import {upDownHint} from "../../util/upDownHint";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../search/util";
@@ -259,8 +265,6 @@ export class Background {
                 } else if (type === "icon") {
                     const emoji = getRandomEmoji();
                     if (emoji) {
-                        this.ial.icon = emoji;
-                        this.render(this.ial, protyle.block.rootID);
                         updateFileTreeEmoji(emoji, protyle.block.rootID);
                         updateOutlineEmoji(emoji, protyle.block.rootID);
                         fetchPost("/api/attr/setBlockAttrs", {

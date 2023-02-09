@@ -450,6 +450,20 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             }
             protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
             protyle.wysiwyg.renderCustom(attrsResult);
+            if (data.new.icon !== data.old.icon) {
+                /// #if MOBILE
+                if (window.siyuan.mobile.editor.protyle.background.ial.icon !== data.new.icon) {
+                    window.siyuan.mobile.editor.protyle.background.ial.icon = data.new.icon;
+                    window.siyuan.mobile.editor.protyle.background.render(window.siyuan.mobile.editor.protyle.background.ial, window.siyuan.mobile.editor.protyle.block.rootID);
+                }
+                /// #else
+                if (protyle.background.ial.icon !== data.new.icon) {
+                    protyle.background.ial.icon = data.new.icon;
+                    protyle.background.render(protyle.background.ial, protyle.block.rootID);
+                    protyle.model?.parent.setDocIcon(data.new.icon);
+                }
+                /// #endif
+            }
             return;
         }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
@@ -618,7 +632,12 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
     }
 };
 
-export const turnsIntoOneTransaction = (options: { protyle: IProtyle, selectsElement: Element[], type: string, level?: string }) => {
+export const turnsIntoOneTransaction = (options: {
+    protyle: IProtyle,
+    selectsElement: Element[],
+    type: string,
+    level?: string
+}) => {
     let parentElement: Element;
     const id = Lute.NewNodeID();
     if (options.type === "BlocksMergeSuperBlock") {

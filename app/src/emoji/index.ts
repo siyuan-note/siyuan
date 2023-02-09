@@ -269,7 +269,6 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
                     window.siyuan.menus.menu.remove();
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
-                    updateFileEmoji(unicode, id);
                     updateOutlineEmoji(unicode, id);
                 });
             }
@@ -359,7 +358,6 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }, () => {
                     window.siyuan.menus.menu.remove();
                     updateFileTreeEmoji("", id);
-                    updateFileEmoji("", id);
                     updateOutlineEmoji("", id);
                 });
             }
@@ -389,7 +387,6 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 }, () => {
                     addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
-                    updateFileEmoji(unicode, id);
                     updateOutlineEmoji(unicode, id);
                 });
             }
@@ -413,11 +410,14 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     /// #if MOBILE
     emojiElement = document.querySelector(`#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`);
     /// #else
-    const files = getDockByType("file").data.file as Files;
-    if (icon === "iconFile") {
-        emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
-    } else {
-        emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
+    const dockFile = getDockByType("file")
+    if (dockFile) {
+        const files = dockFile.data.file as Files;
+        if (icon === "iconFile") {
+            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`);
+        } else {
+            emojiElement = files.element.querySelector(`[data-node-id="${id}"] .b3-list-item__icon`) || files.element.querySelector(`[data-url="${id}"] .b3-list-item__icon`) || files.closeElement.querySelector(`[data-url="${id}"] .b3-list-item__icon`);
+        }
     }
     /// #endif
     if (emojiElement) {
@@ -426,22 +426,4 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     if (icon !== "iconFile") {
         setNoteBook();
     }
-};
-
-const updateFileEmoji = (unicode: string, id: string) => {
-    /// #if MOBILE
-    if (window.siyuan.mobile.editor.protyle.block.rootID === id) {
-        window.siyuan.mobile.editor.protyle.background.ial.icon = unicode;
-        window.siyuan.mobile.editor.protyle.background.render(window.siyuan.mobile.editor.protyle.background.ial, window.siyuan.mobile.editor.protyle.block.rootID);
-    }
-    /// #else
-    getAllModels().editor.find(item => {
-        if (item.editor.protyle.block.rootID === id) {
-            item.editor.protyle.background.ial.icon = unicode;
-            item.editor.protyle.background.render(item.editor.protyle.background.ial, item.editor.protyle.block.rootID);
-            item.parent.setDocIcon(unicode);
-            return true;
-        }
-    });
-    /// #endif
 };

@@ -172,10 +172,8 @@ func IndexRefs() {
 						return ast.WalkContinue
 					}
 
-					if n.IsTextMarkType("block-ref") {
-						defBlockIDs = append(defBlockIDs, n.TextMarkBlockRefID)
-					} else if n.IsTextMarkType("file-annotation-ref") {
-						defBlockIDs = append(defBlockIDs, n.TextMarkFileAnnotationRefID)
+					if treenode.IsBlockRef(n) || treenode.IsFileAnnotationRef(n) {
+						defBlockIDs = append(defBlockIDs, tree.Root.ID)
 					}
 					return ast.WalkContinue
 				})

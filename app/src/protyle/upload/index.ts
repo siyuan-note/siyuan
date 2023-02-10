@@ -110,8 +110,8 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         }
     });
     const range = getEditorRange(protyle.wysiwyg.element);
-    if (!succFileText.startsWith("<") && range.toString() === "" && range.startContainer.nodeType === 3 && protyle.toolbar.getCurrentType(range).length > 0) {
-        // 防止链接插入其他元素中
+    if (range.toString() === "" && range.startContainer.nodeType === 3 && protyle.toolbar.getCurrentType(range).length > 0) {
+        // 防止链接插入其他元素中 https://ld246.com/article/1676003478664
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }

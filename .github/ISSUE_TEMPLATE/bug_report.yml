@@ -24,6 +24,17 @@ body:
             我能够在默认主题下重现该问题
             I was able to reproduce the issue with the default theme
           required: true
+  - type: checkboxes
+    attributes:
+      label: 该问题是否可能是由于扩展功能导致？ Could the issue be due to extensions?
+      description: |
+        请注意主题、代码片段、挂件或者其他扩展功能可能会导致问题。
+        Be aware that themes, code snippets, widgets, or other extensions may cause problems.
+      options:
+        - label: |
+            我已经排除了扩展导致问题的可能性
+            I've ruled out the possibility that the extension is causing the problem.
+          required: true
   - type: textarea
     attributes:
       label: 描述问题 Describe the problem

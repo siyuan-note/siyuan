@@ -42,6 +42,12 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	if nil != err {
 		return
 	}
+
+	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
+	return
+}
+
+func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	ret = parseJSON2Tree(boxID, p, data, luteEngine)
 	if nil == ret {
 		return nil, errors.New("parse tree failed")
@@ -88,7 +94,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 
 		ial := ReadDocIAL(parentData)
 		if 1 > len(ial) {
-			logging.LogWarnf("tree [%s] is corrupted", filePath)
+			logging.LogWarnf("tree [%s] is corrupted", filepath.Join(boxID, p))
 		}
 		title := ial["title"]
 		if "" == title {

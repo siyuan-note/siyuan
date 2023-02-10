@@ -105,5 +105,5 @@ func generateFormatHistory(tree *parse.Tree) {
 		return
 	}
 
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 }

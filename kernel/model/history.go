@@ -482,7 +482,7 @@ func (box *Box) generateDocHistory0() {
 		}
 	}
 
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	return
 }
 
@@ -593,7 +593,7 @@ func ReindexHistory() (err error) {
 	defer util.PushClearProgress()
 
 	sql.InitHistoryDatabase(true)
-	lutEngine := NewLute()
+	lutEngine := util.NewLute()
 	for _, historyDir := range historyDirs {
 		if !historyDir.IsDir() {
 			continue

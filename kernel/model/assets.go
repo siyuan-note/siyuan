@@ -434,7 +434,7 @@ func RemoveUnusedAssets() (ret []string) {
 		IncSync()
 	}
 
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	cache.LoadAssets()
 	return
 }
@@ -468,7 +468,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	ret = absPath
 	IncSync()
 
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	cache.RemoveAsset(p)
 	return
 }
@@ -504,7 +504,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 		return
 	}
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 
@@ -562,7 +562,7 @@ func UnusedAssets() (ret []string) {
 	if nil != err {
 		return
 	}
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		dests := map[string]bool{}
 

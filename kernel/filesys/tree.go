@@ -40,6 +40,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)
 	if nil != err {
+		logging.LogErrorf("load tree [%s] failed: %s", p, err)
 		return
 	}
 
@@ -50,7 +51,9 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	ret = parseJSON2Tree(boxID, p, data, luteEngine)
 	if nil == ret {
-		return nil, errors.New("parse tree failed")
+		logging.LogErrorf("parse tree [%s] failed", p)
+		err = errors.New("parse tree failed")
+		return
 	}
 	ret.Path = p
 	ret.Root.Path = p

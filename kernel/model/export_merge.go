@@ -19,6 +19,7 @@ package model
 import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 )
 
 func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
@@ -74,7 +75,8 @@ func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
 }
 
 func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error) {
-	tree, err := LoadTree(box, p)
+	luteEngine := NewLute()
+	tree, err := filesys.LoadTree(box, p, luteEngine)
 	if nil != err {
 		return
 	}

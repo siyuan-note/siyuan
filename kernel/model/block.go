@@ -294,7 +294,7 @@ func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error
 	nodes = append(nodes, treenode.HeadingChildren(node)...)
 
 	transaction = &Transaction{}
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	for _, n := range nodes {
 		op := &Operation{}
 		op.ID = n.ID
@@ -347,7 +347,7 @@ func GetHeadingChildrenDOM(id string) (ret string) {
 	nodes := append([]*ast.Node{}, heading)
 	children := treenode.HeadingChildren(heading)
 	nodes = append(nodes, children...)
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	ret = renderBlockDOMByNodes(nodes, luteEngine)
 	return
 }
@@ -383,7 +383,7 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 	}
 
 	transaction = &Transaction{}
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	for _, c := range childrenHeadings {
 		op := &Operation{}
 		op.ID = c.ID

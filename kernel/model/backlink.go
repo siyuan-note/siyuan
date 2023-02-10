@@ -665,7 +665,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 	}
 	blocks := fromSQLBlocks(&sqlBlocks, strings.Join(terms, search.TermSep), beforeLen)
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	var tmp []*Block
 	for _, b := range blocks {
 		tree := parse.Parse("", gulu.Str.ToBytes(b.Markdown), luteEngine.ParseOptions)

@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"math"
 	"strings"
 	"unicode/utf8"
@@ -693,7 +694,7 @@ func query2Stmt(queryStr string) (ret string) {
 		buf.WriteString("id = '" + queryStr + "'")
 	} else {
 		var tags []string
-		luteEngine := NewLute()
+		luteEngine := util.NewLute()
 		t := parse.Inline("", []byte(queryStr), luteEngine.ParseOptions)
 		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {

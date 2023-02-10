@@ -53,7 +53,7 @@ import (
 
 func HTML2Markdown(htmlStr string) (markdown string, err error) {
 	assetDirPath := filepath.Join(util.DataDir, "assets")
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	luteEngine.SetProtyleWYSIWYG(false)
 	tree := luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -387,7 +387,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		absPath := filepath.Join(targetDir, treePath)
 		p := strings.TrimPrefix(absPath, boxAbsPath)
 		p = filepath.ToSlash(p)
-		tree, err := LoadTree(boxID, p)
+		tree, err := filesys.LoadTree(boxID, p, luteEngine)
 		if nil != err {
 			logging.LogErrorf("load tree [%s] failed: %s", treePath, err)
 			continue

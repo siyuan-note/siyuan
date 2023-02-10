@@ -290,7 +290,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	}
 	headingNode.RemoveIALAttr("fold")
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	newTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument, ID: srcHeadingID}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	children = treenode.HeadingChildren(headingNode)
 	for _, c := range children {

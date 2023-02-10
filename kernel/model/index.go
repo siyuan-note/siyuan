@@ -17,18 +17,22 @@
 package model
 
 import (
+	"bytes"
 	"fmt"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
-	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/eventbus"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -68,7 +72,7 @@ func index(boxID string) {
 	bootProgressPart := 30.0 / float64(boxLen) / float64(len(files))
 
 	start := time.Now()
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	var treeCount int
 	var treeSize int64
 	i := 0
@@ -135,53 +139,72 @@ func IndexRefs() {
 	util.SetBootDetails("Resolving refs...")
 	util.PushStatusBar(Conf.Language(54))
 
-	// 引用入库
 	util.SetBootDetails("Indexing refs...")
-	refBlocks := sql.GetRefExistedBlocks()
-	refTreeIDs := hashset.New()
-	for _, refBlock := range refBlocks {
-		refTreeIDs.Add(refBlock.RootID)
-	}
 
-	i := 0
-	if 0 < refTreeIDs.Size() {
-		luteEngine := NewLute()
-		bootProgressPart := 10.0 / float64(refTreeIDs.Size())
-		for _, box := range Conf.GetOpenedBoxes() {
-			sql.DeleteBoxRefsQueue(box.ID)
+	var defBlockIDs []string
+	luteEngine := util.NewLute()
+	boxes := Conf.GetOpenedBoxes()
+	for _, box := range boxes {
+		sql.DeleteBoxRefsQueue(box.ID)
 
-			files := box.ListFiles("/")
-			for _, file := range files {
-				if file.isdir || !strings.HasSuffix(file.name, ".sy") {
+		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)
+		for _, paths := range pages {
+			for _, treeAbsPath := range paths {
+				data, readErr := filelock.ReadFile(treeAbsPath)
+				if nil != readErr {
+					logging.LogWarnf("get data [path=%s] failed: %s", treeAbsPath, readErr)
 					continue
 				}
 
-				if file.isdir || !strings.HasSuffix(file.name, ".sy") {
+				if !bytes.Contains(data, []byte("TextMarkBlockRefID")) && !bytes.Contains(data, []byte("TextMarkFileAnnotationRefID")) {
 					continue
 				}
 
-				id := strings.TrimSuffix(file.name, ".sy")
-				if !refTreeIDs.Contains(id) {
+				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, box.ID)))
+				tree, parseErr := filesys.LoadTreeByData(data, box.ID, p, luteEngine)
+				if nil != parseErr {
+					logging.LogWarnf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
 					continue
 				}
 
-				util.IncBootProgress(bootProgressPart, "Indexing ref "+util.ShortPathForBootingDisplay(file.path))
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering {
+						return ast.WalkContinue
+					}
 
-				tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
-				if nil != err {
-					logging.LogErrorf("parse box [%s] tree [%s] failed", box.ID, file.path)
-					continue
-				}
-
-				sql.InsertRefsTreeQueue(tree)
-				if 1 < i && 0 == i%64 {
-					util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
-				}
-				i++
+					if n.IsTextMarkType("block-ref") {
+						defBlockIDs = append(defBlockIDs, n.TextMarkBlockRefID)
+					} else if n.IsTextMarkType("file-annotation-ref") {
+						defBlockIDs = append(defBlockIDs, n.TextMarkFileAnnotationRefID)
+					}
+					return ast.WalkContinue
+				})
 			}
 		}
 	}
-	logging.LogInfof("resolved refs [%d] in [%dms]", len(refBlocks), time.Now().Sub(start).Milliseconds())
+
+	defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+
+	i := 0
+	size := len(defBlockIDs)
+	if 0 < size {
+		bootProgressPart := 10.0 / float64(size)
+
+		for _, defBlockID := range defBlockIDs {
+			defTree, loadErr := LoadTreeByID(defBlockID)
+			if nil != loadErr {
+				continue
+			}
+
+			util.IncBootProgress(bootProgressPart, "Indexing ref "+defTree.ID)
+			sql.InsertRefsTreeQueue(defTree)
+			if 1 < i && 0 == i%64 {
+				util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
+			}
+			i++
+		}
+	}
+	logging.LogInfof("resolved refs [%d] in [%dms]", size, time.Now().Sub(start).Milliseconds())
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
 }
 

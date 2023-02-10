@@ -23,11 +23,11 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-func GetOSPlatform() (ret string) {
-	ret, _, _, err := host.PlatformInformation()
+func GetOSPlatform() (plat, ver string) {
+	plat, _, ver, err := host.PlatformInformation()
 	if nil != err {
 		logging.LogWarnf("get os platform failed: %s", err)
-		return "Unknown"
+		return "Unknown", ""
 	}
 	return
 }

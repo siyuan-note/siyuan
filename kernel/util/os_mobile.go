@@ -18,12 +18,12 @@
 
 package util
 
-func GetOSPlatform() (ret string) {
+func GetOSPlatform() (plat, ver string) {
 	if ContainerIOS == Container {
-		return "iOS"
+		return "iOS", ""
 	}
 	if ContainerAndroid == Container {
-		return "Android"
+		return "Android", ""
 	}
-	return "Unknown"
+	return "Unknown", ""
 }

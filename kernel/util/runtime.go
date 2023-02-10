@@ -46,6 +46,11 @@ const (
 var IsExiting = false
 
 func logBootInfo() {
+	plat, platVer := GetOSPlatform()
+	osInfo := plat
+	if "" != platVer {
+		osInfo += "/" + platVer
+	}
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
@@ -57,7 +62,7 @@ func logBootInfo() {
 		"    * container [%s]\n"+
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s]",
-		Ver, runtime.GOARCH, GetOSPlatform(), os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
+		Ver, runtime.GOARCH, osInfo, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
 }
 
 func IsMutexLocked(m *sync.Mutex) bool {

@@ -613,6 +613,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
 };
 
 const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: Element, event: MouseEvent) => {
+    const criteria = await fetchSyncPost("/api/storage/getCriteria");
     window.siyuan.menus.menu.remove();
     const sortMenu = [{
         label: window.siyuan.languages.type,
@@ -788,7 +789,6 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             });
         }
     }).element);
-    const criteria = await fetchSyncPost("/api/storage/getCriteria");
     const searchSubMenu: IMenu[] = [];
     criteria.data.forEach((item: ISearchOption) => {
         searchSubMenu.push({

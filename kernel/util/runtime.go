@@ -49,7 +49,7 @@ func logBootInfo() {
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
-		"    * os [%s] "+
+		"    * os [%s]\n"+
 		"    * pid [%d]\n"+
 		"    * runtime mode [%s]\n"+
 		"    * working directory [%s]\n"+

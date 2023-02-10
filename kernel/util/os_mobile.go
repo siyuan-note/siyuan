@@ -25,5 +25,5 @@ func GetOSPlatform() (ret string) {
 	if ContainerAndroid == Container {
 		return "Android"
 	}
-	return
+	return "Unknown"
 }

@@ -23,10 +23,10 @@ const loadThirdIcon = (iconURL: string, data: IAppearance) => {
 
 export const loadAssets = (data: IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
-    htmlElement.setAttribute("lang",window.siyuan.config.appearance.lang);
-    htmlElement.setAttribute("data-theme-mode",getThemeMode());
-    htmlElement.setAttribute("data-light-theme",window.siyuan.config.appearance.themeLight);
-    htmlElement.setAttribute("data-dark-theme",window.siyuan.config.appearance.themeDark);
+    htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
+    htmlElement.setAttribute("data-theme-mode", getThemeMode());
+    htmlElement.setAttribute("data-light-theme", window.siyuan.config.appearance.themeLight);
+    htmlElement.setAttribute("data-dark-theme", window.siyuan.config.appearance.themeDark);
     const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     if (window.siyuan.config.appearance.modeOS && (
         (window.siyuan.config.appearance.mode === 1 && OSTheme === "light") ||
@@ -172,6 +172,7 @@ export const addGA = () => {
             version: Constants.SIYUAN_VERSION,
             container: window.siyuan.config.system.container,
             os: window.siyuan.config.system.os,
+            osPlatform: window.siyuan.config.system.osPlatform,
             isLoggedIn: false,
             subscriptionStatus: -1,
             subscriptionPlan: -1,

@@ -24,6 +24,7 @@ type System struct {
 	ID               string `json:"id"`
 	KernelVersion    string `json:"kernelVersion"`
 	OS               string `json:"os"`
+	OSPlatform       string `json:"osPlatform"`
 	Container        string `json:"container"` // docker, android, ios, std
 	IsMicrosoftStore bool   `json:"isMicrosoftStore"`
 	IsInsider        bool   `json:"isInsider"`

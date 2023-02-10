@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/lex"
@@ -34,6 +35,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -419,8 +421,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	}
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
-	luteEngine := NewLute()
-	subTree := luteEngine.BlockDOM2Tree(data)
+	subTree := tx.luteEngine.BlockDOM2Tree(data)
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
@@ -507,8 +508,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	}
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
-	luteEngine := NewLute()
-	subTree := luteEngine.BlockDOM2Tree(data)
+	subTree := tx.luteEngine.BlockDOM2Tree(data)
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
@@ -720,8 +720,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	}
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
-	luteEngine := NewLute()
-	subTree := luteEngine.BlockDOM2Tree(data)
+	subTree := tx.luteEngine.BlockDOM2Tree(data)
 
 	p := block.Path
 	assets := getAssetsDir(filepath.Join(util.DataDir, block.BoxID), filepath.Dir(filepath.Join(util.DataDir, block.BoxID, p)))
@@ -870,8 +869,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	luteEngine := NewLute()
-	subTree := luteEngine.BlockDOM2Tree(data)
+	subTree := tx.luteEngine.BlockDOM2Tree(data)
 	subTree.ID, subTree.Box, subTree.Path = tree.ID, tree.Box, tree.Path
 	oldNode := treenode.GetNodeInTree(tree, id)
 	if nil == oldNode {
@@ -1034,6 +1032,8 @@ type Transaction struct {
 
 	trees map[string]*parse.Tree
 	nodes map[string]*ast.Node
+
+	luteEngine *lute.Lute
 }
 
 func (tx *Transaction) begin() (err error) {
@@ -1042,6 +1042,7 @@ func (tx *Transaction) begin() (err error) {
 	}
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
+	tx.luteEngine = util.NewLute()
 	return
 }
 
@@ -1077,7 +1078,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 		return
 	}
 
-	ret, err = LoadTree(box, p)
+	ret, err = filesys.LoadTree(box, p, tx.luteEngine)
 	if nil != err {
 		return
 	}

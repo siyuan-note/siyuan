@@ -38,6 +38,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -386,12 +387,13 @@ func (box *Box) renameSubTrees(tree *parse.Tree) {
 func (box *Box) moveTrees0(files []*FileInfo) {
 	totals := len(files) + 5
 	showProgress := 64 < totals
+	luteEngine := util.NewLute()
 	for i, subFile := range files {
 		if !strings.HasSuffix(subFile.path, ".sy") {
 			continue
 		}
 
-		subTree, err := LoadTree(box.ID, subFile.path) // LoadTree 会重新构造 HPath
+		subTree, err := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
 		if nil != err {
 			continue
 		}

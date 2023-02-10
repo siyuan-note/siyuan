@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -267,6 +268,7 @@ func incReindex(upserts, removes []string) {
 	msg := fmt.Sprintf(Conf.Language(35))
 	util.PushStatusBar(msg)
 
+	luteEngine := util.NewLute()
 	// 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
 	bootProgressPart := 10 / float64(len(removes))
 	for _, removeFile := range removes {
@@ -311,7 +313,7 @@ func incReindex(upserts, removes []string) {
 		util.IncBootProgress(bootProgressPart, msg)
 		util.PushStatusBar(msg)
 
-		tree, err0 := LoadTree(box, p)
+		tree, err0 := filesys.LoadTree(box, p, luteEngine)
 		if nil != err0 {
 			continue
 		}

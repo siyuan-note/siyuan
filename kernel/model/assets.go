@@ -40,6 +40,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -433,7 +434,7 @@ func RemoveUnusedAssets() (ret []string) {
 		IncSync()
 	}
 
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	cache.LoadAssets()
 	return
 }
@@ -467,7 +468,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	ret = absPath
 	IncSync()
 
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	cache.RemoveAsset(p)
 	return
 }
@@ -503,6 +504,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 		return
 	}
 
+	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 
@@ -528,11 +530,10 @@ func RenameAsset(oldPath, newName string) (err error) {
 				}
 
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, notebook.ID)))
-				tree, parseErr := LoadTree(notebook.ID, p)
+				tree, parseErr := filesys.LoadTreeByData(data, notebook.ID, p, luteEngine)
 				if nil != parseErr {
-					logging.LogErrorf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
-					err = parseErr
-					return
+					logging.LogWarnf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
+					continue
 				}
 
 				treenode.IndexBlockTree(tree)
@@ -561,7 +562,7 @@ func UnusedAssets() (ret []string) {
 	if nil != err {
 		return
 	}
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		dests := map[string]bool{}
 

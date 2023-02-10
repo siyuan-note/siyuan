@@ -164,19 +164,8 @@ func loadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 
 		return nil, ErrBlockNotFound
 	}
-	ret, err = LoadTree(bt.BoxID, bt.Path)
-	if nil != err {
-		return
-	}
-	return
-}
 
-func LoadTree(boxID, p string) (*parse.Tree, error) {
-	luteEngine := NewLute()
-	tree, err := filesys.LoadTree(boxID, p, luteEngine)
-	if nil != err {
-		logging.LogErrorf("load tree [%s] failed: %s", boxID+p, err)
-		return nil, err
-	}
-	return tree, nil
+	luteEngine := util.NewLute()
+	ret, err = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	return
 }

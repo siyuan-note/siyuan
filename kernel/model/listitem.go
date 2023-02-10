@@ -76,7 +76,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 		children = append(children, newNode)
 	}
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	newTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument, ID: srcListItemID}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	for _, c := range children {
 		newTree.Root.AppendChild(c)

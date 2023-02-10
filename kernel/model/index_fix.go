@@ -27,10 +27,12 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -107,6 +109,7 @@ func fixBlockTreeByFileSys() {
 
 	util.PushStatusBar(Conf.Language(58))
 	boxes := Conf.GetOpenedBoxes()
+	luteEngine := lute.New()
 	for _, box := range boxes {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
@@ -133,7 +136,7 @@ func fixBlockTreeByFileSys() {
 				continue
 			}
 
-			reindexTreeByPath(box.ID, p, i, size)
+			reindexTreeByPath(box.ID, p, i, size, luteEngine)
 			if util.IsExiting {
 				break
 			}
@@ -166,6 +169,7 @@ func fixDatabaseIndexByBlockTree() {
 func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 	i := -1
 	size := len(rootUpdatedMap)
+	luteEngine := util.NewLute()
 	for rootID, updated := range rootUpdatedMap {
 		i++
 
@@ -176,13 +180,13 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 		rootUpdated := dbRootUpdatedMap[rootID]
 		if "" == rootUpdated {
 			//logging.LogWarnf("not found tree [%s] in database, reindex it", rootID)
-			reindexTree(rootID, i, size)
+			reindexTree(rootID, i, size, luteEngine)
 			continue
 		}
 
 		if "" == updated {
 			// BlockTree 迁移，v2.6.3 之前没有 updated 字段
-			reindexTree(rootID, i, size)
+			reindexTree(rootID, i, size, luteEngine)
 			continue
 		}
 
@@ -190,7 +194,7 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 		dbUpdated, _ := time.Parse("20060102150405", rootUpdated)
 		if dbUpdated.Before(btUpdated.Add(-10 * time.Minute)) {
 			logging.LogWarnf("tree [%s] is not up to date, reindex it", rootID)
-			reindexTree(rootID, i, size)
+			reindexTree(rootID, i, size, luteEngine)
 			continue
 		}
 
@@ -231,8 +235,8 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 	sql.BatchRemoveTreeQueue(toRemoveRootIDs)
 }
 
-func reindexTreeByPath(box, p string, i, size int) {
-	tree, err := LoadTree(box, p)
+func reindexTreeByPath(box, p string, i, size int, luteEngine *lute.Lute) {
+	tree, err := filesys.LoadTree(box, p, luteEngine)
 	if nil != err {
 		return
 	}
@@ -240,14 +244,14 @@ func reindexTreeByPath(box, p string, i, size int) {
 	reindexTree0(tree, i, size)
 }
 
-func reindexTree(rootID string, i, size int) {
+func reindexTree(rootID string, i, size int, luteEngine *lute.Lute) {
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
 		logging.LogWarnf("root block [%s] not found", rootID)
 		return
 	}
 
-	tree, err := LoadTree(root.BoxID, root.Path)
+	tree, err := filesys.LoadTree(root.BoxID, root.Path, luteEngine)
 	if nil != err {
 		if os.IsNotExist(err) {
 			// 文件系统上没有找到该 .sy 文件，则订正块树

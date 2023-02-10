@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"math"
 	"os"
 	"path"
@@ -31,6 +30,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
@@ -44,6 +44,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -378,7 +379,7 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 }
 
 func ContentStat(content string) (ret *util.BlockStatResult) {
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	tree := luteEngine.BlockDOM2Tree(content)
 	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
 	return &util.BlockStatResult{
@@ -393,6 +394,7 @@ func ContentStat(content string) (ret *util.BlockStatResult) {
 func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 	ret = &util.BlockStatResult{}
 	trees := map[string]*parse.Tree{} // 缓存
+	luteEngine := util.NewLute()
 	for _, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
@@ -402,7 +404,7 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 
 		tree := trees[bt.RootID]
 		if nil == tree {
-			tree, _ = LoadTree(bt.BoxID, bt.Path)
+			tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
 			if nil == tree {
 				continue
 			}
@@ -927,7 +929,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 		return
 	}
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
 	tree, err = createDoc(box.ID, p, title, dom)
 	if nil != err {
@@ -946,7 +948,7 @@ func CreateWithMarkdown(boxID, hPath, md string) (id string, err error) {
 	}
 
 	WaitForWritingFiles()
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
 	id, _, err = createDocsByHPath(box.ID, hPath, dom)
 	return
@@ -958,7 +960,8 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 		return
 	}
 
-	tree, err := LoadTree(boxID, p)
+	luteEngine := util.NewLute()
+	tree, err := filesys.LoadTree(boxID, p, luteEngine)
 	if nil != err {
 		return
 	}
@@ -1038,8 +1041,9 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 	}
 
 	WaitForWritingFiles()
+	luteEngine := util.NewLute()
 	for fromPath, fromBox := range pathsBoxes {
-		_, err = moveDoc(fromBox, fromPath, toBox, toPath)
+		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine)
 		if nil != err {
 			return
 		}
@@ -1055,7 +1059,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 	return
 }
 
-func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath string, err error) {
+func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute) (newPath string, err error) {
 	isSameBox := fromBox.ID == toBox.ID
 
 	if isSameBox {
@@ -1070,7 +1074,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 		}
 	}
 
-	tree, err := LoadTree(fromBox.ID, fromPath)
+	tree, err := filesys.LoadTree(fromBox.ID, fromPath, luteEngine)
 	if nil != err {
 		err = ErrBlockNotFound
 		return
@@ -1083,9 +1087,9 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 	if !moveToRoot {
 		var toTree *parse.Tree
 		if isSameBox {
-			toTree, err = LoadTree(fromBox.ID, toPath)
+			toTree, err = filesys.LoadTree(fromBox.ID, toPath, luteEngine)
 		} else {
-			toTree, err = LoadTree(toBox.ID, toPath)
+			toTree, err = filesys.LoadTree(toBox.ID, toPath, luteEngine)
 		}
 		if nil != err {
 			err = ErrBlockNotFound
@@ -1136,7 +1140,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 			return
 		}
 
-		tree, err = LoadTree(fromBox.ID, newPath)
+		tree, err = filesys.LoadTree(fromBox.ID, newPath, luteEngine)
 		if nil != err {
 			return
 		}
@@ -1152,7 +1156,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string) (newPath 
 			return
 		}
 
-		tree, err = LoadTree(toBox.ID, newPath)
+		tree, err = filesys.LoadTree(toBox.ID, newPath, luteEngine)
 		if nil != err {
 			return
 		}
@@ -1180,7 +1184,8 @@ func RemoveDoc(boxID, p string) {
 	}
 
 	WaitForWritingFiles()
-	removeDoc(box, p)
+	luteEngine := util.NewLute()
+	removeDoc(box, p, luteEngine)
 	IncSync()
 	return
 }
@@ -1192,14 +1197,15 @@ func RemoveDocs(paths []string) {
 	paths = util.FilterSelfChildDocs(paths)
 	pathsBoxes := getBoxesByPaths(paths)
 	WaitForWritingFiles()
+	luteEngine := util.NewLute()
 	for p, box := range pathsBoxes {
-		removeDoc(box, p)
+		removeDoc(box, p, luteEngine)
 	}
 	return
 }
 
-func removeDoc(box *Box, p string) {
-	tree, _ := LoadTree(box.ID, p)
+func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
+	tree, _ := filesys.LoadTree(box.ID, p, luteEngine)
 	if nil == tree {
 		return
 	}
@@ -1231,7 +1237,7 @@ func removeDoc(box *Box, p string) {
 			return
 		}
 	}
-	indexHistoryDir(filepath.Base(historyDir), NewLute())
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
 	if existChildren {
 		if err = box.Remove(childrenDir); nil != err {
@@ -1274,7 +1280,8 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 
 	WaitForWritingFiles()
-	tree, err := LoadTree(box.ID, p)
+	luteEngine := util.NewLute()
+	tree, err := filesys.LoadTree(box.ID, p, luteEngine)
 	if nil != err {
 		return
 	}
@@ -1370,7 +1377,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		if nil == err {
 			tree.Root.FirstChild.Unlink()
 
-			luteEngine := NewLute()
+			luteEngine := util.NewLute()
 			newTree := luteEngine.BlockDOM2Tree(dom)
 			var children []*ast.Node
 			for c := newTree.Root.FirstChild; nil != c; c = c.Next {
@@ -1450,7 +1457,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 		return
 	}
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	tree = luteEngine.BlockDOM2Tree(dom)
 	tree.Box = boxID
 	tree.Path = p

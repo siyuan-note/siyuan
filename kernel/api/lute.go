@@ -62,7 +62,7 @@ func html2BlockDOM(c *gin.Context) {
 		return
 	}
 
-	luteEngine := model.NewLute()
+	luteEngine := util.NewLute()
 	var unlinks []*ast.Node
 	tree := parse.Parse("", []byte(markdown), luteEngine.ParseOptions)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

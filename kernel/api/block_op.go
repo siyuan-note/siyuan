@@ -17,14 +17,15 @@
 package api
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"net/http"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -44,7 +45,7 @@ func appendBlock(c *gin.Context) {
 		return
 	}
 	if "markdown" == dataType {
-		luteEngine := model.NewLute()
+		luteEngine := util.NewLute()
 		data = dataBlockDOM(data, luteEngine)
 	}
 
@@ -89,7 +90,7 @@ func prependBlock(c *gin.Context) {
 		return
 	}
 	if "markdown" == dataType {
-		luteEngine := model.NewLute()
+		luteEngine := util.NewLute()
 		data = dataBlockDOM(data, luteEngine)
 	}
 
@@ -150,7 +151,7 @@ func insertBlock(c *gin.Context) {
 	}
 
 	if "markdown" == dataType {
-		luteEngine := model.NewLute()
+		luteEngine := util.NewLute()
 		data = dataBlockDOM(data, luteEngine)
 	}
 
@@ -197,7 +198,7 @@ func updateBlock(c *gin.Context) {
 		return
 	}
 
-	luteEngine := model.NewLute()
+	luteEngine := util.NewLute()
 	if "markdown" == dataType {
 		data = dataBlockDOM(data, luteEngine)
 	}
@@ -217,7 +218,7 @@ func updateBlock(c *gin.Context) {
 
 	var transactions []*model.Transaction
 	if "NodeDocument" == block.Type {
-		oldTree, err := model.LoadTree(block.Box, block.Path)
+		oldTree, err := filesys.LoadTree(block.Box, block.Path, luteEngine)
 		if nil != err {
 			ret.Code = -1
 			ret.Msg = "load tree failed: " + err.Error()

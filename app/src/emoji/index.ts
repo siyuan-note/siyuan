@@ -17,13 +17,13 @@ export const getRandomEmoji = () => {
     return emojis.items[getRandom(0, emojis.items.length - 1)].unicode;
 };
 
-export const unicode2Emoji = (unicode: string, assic = false, className = "", needSpan = false) => {
+export const unicode2Emoji = (unicode: string, assic = false, className = "", needSpan = false, lazy = false) => {
     if (!unicode) {
         return "";
     }
     let emoji = "";
     if (unicode.indexOf(".") > -1) {
-        emoji = `<img class="${className}" src="/emojis/${unicode}"/>`;
+        emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/emojis/${unicode}"/>`;
     } else if (isMobile() || window.siyuan.config.appearance.nativeEmoji || assic) {
         try {
             unicode.split("-").forEach(item => {
@@ -66,6 +66,21 @@ ${unicode2Emoji(emoji.unicode, assic)}</button>`;
     });
 };
 
+export const lazyLoadEmojiImg = (element: Element) => {
+    const emojiIntersectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
+            const src = entrie.target.getAttribute("data-src");
+            if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && src) {
+                entrie.target.src = src;
+                entrie.target.removeAttribute("data-src");
+            }
+        });
+    });
+    element.querySelectorAll("img").forEach((panelElement) => {
+        emojiIntersectionObserver.observe(panelElement);
+    });
+}
+
 export const filterEmoji = (key = "", max?: number, assic = false) => {
     let html = "";
     const recentEmojis: {
@@ -107,7 +122,7 @@ export const filterEmoji = (key = "", max?: number, assic = false) => {
                         customStore.push(emoji);
                     } else {
                         keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode, assic)}</button>`;
+${unicode2Emoji(emoji.unicode, assic, undefined, false, true)}</button>`;
                     }
                     maxCount++;
                 }
@@ -117,7 +132,7 @@ ${unicode2Emoji(emoji.unicode, assic)}</button>`;
                 }
                 if (index < 2) {
                     html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode, assic)}</button>`;
+${unicode2Emoji(emoji.unicode, assic, undefined, false, true)}</button>`;
                 }
             }
         });
@@ -142,7 +157,7 @@ ${unicode2Emoji(emoji.unicode, assic)}</button>`;
             return 0;
         }).forEach(item => {
             html += `<button data-unicode="${item.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? item.description_zh_cn : item.description}">
-${unicode2Emoji(item.unicode, assic)}</button>`;
+${unicode2Emoji(item.unicode, assic, undefined, false, true)}</button>`;
         });
         html = html + keyHTML + "</div>";
     }
@@ -153,7 +168,7 @@ ${unicode2Emoji(item.unicode, assic)}</button>`;
             const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
             if (emoji[0]) {
                 recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji[0].description_zh_cn : emoji[0].description}">
-${unicode2Emoji(emoji[0].unicode, assic)}
+${unicode2Emoji(emoji[0].unicode, assic, undefined, false, true)}
 </button>`;
             }
         });
@@ -222,6 +237,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         if (inputElement.value === "") {
             lazyLoadEmoji(window.siyuan.menus.menu.element);
         }
+        lazyLoadEmojiImg(window.siyuan.menus.menu.element);
     });
     inputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
@@ -238,6 +254,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         if (inputElement.value === "") {
             lazyLoadEmoji(window.siyuan.menus.menu.element);
         }
+        lazyLoadEmojiImg(window.siyuan.menus.menu.element);
     });
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -316,6 +333,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         inputElement.focus();
     }
     lazyLoadEmoji(window.siyuan.menus.menu.element);
+    lazyLoadEmojiImg(window.siyuan.menus.menu.element);
     // 不能使用 getEventName 否则 https://github.com/siyuan-note/siyuan/issues/5472
     window.siyuan.menus.menu.element.firstElementChild.addEventListener("click", (event) => {
         const eventTarget = event.target as HTMLElement;

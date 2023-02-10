@@ -20,7 +20,7 @@ import {imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
-import {addEmoji, filterEmoji, lazyLoadEmoji, unicode2Emoji} from "../../emoji";
+import {addEmoji, filterEmoji, lazyLoadEmoji, lazyLoadEmojiImg, unicode2Emoji} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {blockRender} from "../markdown/blockRender";
 import {uploadFiles} from "../upload";
@@ -331,6 +331,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             } else {
                 panelElement.nextElementSibling.classList.remove("fn__none");
             }
+            lazyLoadEmojiImg(panelElement);
         } else {
             this.element.innerHTML = `<div class="emojis">
 <div class="emojis__panel">${filterEmoji(value, 256, true)}</div>
@@ -348,6 +349,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
 </div>
 </div>`;
             lazyLoadEmoji(this.element, true);
+            lazyLoadEmojiImg(this.element);
         }
         const firstEmojiElement = this.element.querySelector(".emojis__item");
         if (firstEmojiElement) {

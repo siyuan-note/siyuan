@@ -6,7 +6,7 @@
   "main": "./electron/main.js",
   "packageManager": "pnpm@7.26.1",
   "scripts": {
-    "lint": "eslint . --fix --ext .ts",
+    "lint": "eslint . --fix --cache",
     "dev": "webpack --mode development",
     "dev:mobile": "webpack --mode development --config webpack.mobile.js",
     "dev:desktop": "webpack --mode development --config webpack.desktop.js",

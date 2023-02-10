@@ -3,4 +3,6 @@ dist
 electron
 node_modules
 public
-*.js
+src/asset/pdf
+stage
+appearance

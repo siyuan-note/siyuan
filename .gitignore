@@ -7,6 +7,7 @@
 *.jar
 *.syso
 .DS_Store
+.eslintcache
 app/node_modules
 app/stage/build
 app/build

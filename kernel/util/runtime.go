@@ -45,11 +45,14 @@ const (
 // IsExiting 是否正在退出程序。
 var IsExiting = false
 
+// MobileOSVer 移动端操作系统版本。
+var MobileOSVer string
+
 func logBootInfo() {
 	plat, platVer := GetOSPlatform()
 	osInfo := plat
 	if "" != platVer {
-		osInfo += "/" + platVer
+		osInfo += " " + platVer
 	}
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+

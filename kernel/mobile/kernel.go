@@ -18,13 +18,13 @@ package mobile
 
 import (
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/job"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -36,10 +36,10 @@ func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
 	go server.Serve(true)
 }
 
-func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang string) {
+func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
-
+	util.MobileOSVer = osVer
 	util.LocalIPs = strings.Split(localIPs, ",")
 	util.BootMobile(container, appDir, workspaceBaseDir, lang)
 

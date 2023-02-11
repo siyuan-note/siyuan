@@ -1,0 +1,20 @@
+name: Make sure new PRs are sent to dev
+
+on:
+  pull_request_target:
+    types: [opened, edited]
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Vankka/pr-target-branch-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          target: master
+          exclude: dev
+          change-to: dev
+          comment: |
+              Your PR was set to target `master`, PRs should be target `dev`
+              The base branch of this PR has been automatically changed to `dev`, please check that there are no merge conflicts

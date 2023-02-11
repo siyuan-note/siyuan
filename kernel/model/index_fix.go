@@ -44,6 +44,8 @@ func FixIndexJob() {
 	task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
 	sql.WaitForWritingDatabase()
 
+	task.AppendTask(task.DatabaseIndexFix, resetDuplicateTrees)
+
 	task.AppendTask(task.DatabaseIndexFix, fixBlockTreeByFileSys)
 	sql.WaitForWritingDatabase()
 
@@ -97,6 +99,82 @@ func removeDuplicateDatabaseIndex() {
 
 	if 0 < deletes {
 		logging.LogWarnf("exist more than one tree duplicated [%d], reindex it", deletes)
+	}
+}
+
+// resetDuplicateTrees 重置重复 ID 的文档树。 https://github.com/siyuan-note/siyuan/issues/7340
+func resetDuplicateTrees() {
+	defer logging.Recover()
+
+	autoFixLock.Lock()
+	defer autoFixLock.Unlock()
+
+	util.PushStatusBar(Conf.Language(58))
+	boxes := Conf.GetBoxes()
+	luteEngine := lute.New()
+
+	type TreePath struct {
+		box     *Box
+		path    string
+		absPath string
+	}
+
+	var paths []*TreePath
+	for _, box := range boxes {
+		boxPath := filepath.Join(util.DataDir, box.ID)
+		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+			if !info.IsDir() && filepath.Ext(path) == ".sy" && !strings.Contains(filepath.ToSlash(path), "/assets/") {
+				p := path[len(boxPath):]
+				p = filepath.ToSlash(p)
+				paths = append(paths, &TreePath{box, p, path})
+			}
+			return nil
+		})
+	}
+
+	names := map[string]bool{}
+	var duplicatedPaths []*TreePath
+	for _, treePath := range paths {
+		p := treePath.path
+		absPath := treePath.absPath
+		name := path.Base(p)
+		if !ast.IsNodeIDPattern(strings.TrimSuffix(name, ".sy")) {
+			logging.LogWarnf("invalid .sy file name [%s]", p)
+			treePath.box.moveCorruptedData(absPath)
+			continue
+		}
+
+		if !names[name] {
+			names[name] = true
+			continue
+		}
+
+		duplicatedPaths = append(duplicatedPaths, treePath)
+	}
+
+	for _, duplicatedPath := range duplicatedPaths {
+		p := duplicatedPath.path
+		absPath := duplicatedPath.absPath
+		box := duplicatedPath.box
+		logging.LogWarnf("exist more than one file with same id [%s], reset it", p)
+
+		tree, loadErr := filesys.LoadTree(box.ID, p, luteEngine)
+		if nil != loadErr {
+			logging.LogWarnf("load tree [%s] failed: %s", p, loadErr)
+			box.moveCorruptedData(absPath)
+			continue
+		}
+
+		resetTree(tree, "")
+		createTreeTx(tree)
+		if gulu.File.IsDir(strings.TrimSuffix(absPath, ".sy")) {
+			// 重命名子文档文件夹
+			if renameErr := os.Rename(strings.TrimSuffix(absPath, ".sy"), filepath.Join(filepath.Dir(absPath), tree.ID)); nil != renameErr {
+				logging.LogWarnf("rename [%s] failed: %s", absPath, renameErr)
+				continue
+			}
+		}
+		os.RemoveAll(absPath)
 	}
 }
 

@@ -130,7 +130,7 @@ class App {
         fetchPost("/api/system/getConf", {}, response => {
             window.siyuan.config = response.data.conf;
             // 历史数据兼容，202306后可删除
-            if (!window.siyuan.config.uiLayout.left.data) {
+            if (window.siyuan.config.uiLayout.left && !window.siyuan.config.uiLayout.left.data) {
                 window.siyuan.config.uiLayout.left = {
                     pin: true,
                     data: response.data.conf.uiLayout.left

@@ -1171,6 +1171,11 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 		go func() {
 			time.Sleep(2 * time.Second)
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+
+			if 0 < len(mergeResult.Conflicts) {
+				// 数据同步发生冲突时在界面上进行提醒 https://github.com/siyuan-note/siyuan/issues/7332
+				util.PushMsg(Conf.Language(108), 7000)
+			}
 		}()
 	}
 }

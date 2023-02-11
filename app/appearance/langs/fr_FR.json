@@ -1006,7 +1006,7 @@
     "105": "Le référentiel de données corrompu a été automatiquement réinitialisé",
     "106": "La longueur maximale est limitée à 512 caractères",
     "107": "Déplacement du document [%s]",
-    "108": "TODO",
+    "108": "La synchronisation des données a trouvé des conflits, vous pouvez afficher le contenu du conflit généré dans [Historique des données]",
     "109": "Supprimer le rappel terminé [%s]",
     "110": "Renommer...",
     "111": "Enregistrement du document [%s]...",

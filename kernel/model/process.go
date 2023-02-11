@@ -105,7 +105,9 @@ func getAttachedUIProcCount() (ret int) {
 		procName := strings.ToLower(proc.Executable())
 		uiProcOk := false
 		for _, name := range uiProcNames {
-			uiProcOk = strings.Contains(procName, name)
+			if uiProcOk = strings.Contains(procName, name); uiProcOk {
+				break
+			}
 		}
 		if uiProcOk {
 			ret++
@@ -122,7 +124,9 @@ func getUIProcCount() (ret int) {
 		procName := strings.ToLower(proc.Executable())
 		uiProcOk := false
 		for _, name := range uiProcNames {
-			uiProcOk = strings.Contains(procName, name)
+			if uiProcOk = strings.Contains(procName, name); uiProcOk {
+				break
+			}
 		}
 		if uiProcOk {
 			ret++

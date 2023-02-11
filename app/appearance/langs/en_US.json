@@ -1006,7 +1006,7 @@
     "105": "Corrupted data repo have been automatically reset",
     "106": "Maximum length is limited to 512 characters",
     "107": "Moving document [%s]",
-    "108": "TODO",
+    "108": "Data sync found conflicts, you can view the generated conflict content in [Data History]",
     "109": "Remove reminder completed [%s]",
     "110": "Renaming...",
     "111": "Saving document [%s]...",

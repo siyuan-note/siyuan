@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20230203182839"
+		"updated": "20230211103308"
 	},
 	"Children": [
 		{
@@ -750,7 +750,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231309-pcjl7c2",
-				"updated": "20230203182839"
+				"updated": "20230211103308"
 			},
 			"Children": [
 				{
@@ -762,7 +762,7 @@
 					},
 					"Properties": {
 						"id": "20230202231311-7qdk1za",
-						"updated": "20230202231842"
+						"updated": "20230211103308"
 					},
 					"Children": [
 						{
@@ -770,7 +770,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231311-n1pf7in",
-								"updated": "20230203182342"
+								"updated": "20230211103308"
 							},
 							"Children": [
 								{
@@ -817,7 +817,7 @@
 					},
 					"Properties": {
 						"id": "20230202231321-q1b1tza",
-						"updated": "20230203182839"
+						"updated": "20230211103207"
 					},
 					"Children": [
 						{
@@ -825,7 +825,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231321-5ugmgf0",
-								"updated": "20230203182839"
+								"updated": "20230211103207"
 							},
 							"Children": [
 								{
@@ -912,6 +912,80 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102440-0qik4dd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102440-0qik4dd",
+						"updated": "20230211102642"
+					},
+					"Children": [
+						{
+							"ID": "20230211102440-09cmf75",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102440-09cmf75",
+								"updated": "20230211102642"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅支持 png 和 jpg 格式的图片"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102601-ifl3ojm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102601-ifl3ojm",
+						"updated": "20230211102744"
+					},
+					"Children": [
+						{
+							"ID": "20230211102601-npe6hvh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102601-npe6hvh",
+								"updated": "20230211102744"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "默认只对 2MB 以下的图片进行处理，如果需要调整，可以通过环境变量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 设置，值的单位是字节，比如："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE=4000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将上限调整为 4MB"
 								}
 							]
 						}

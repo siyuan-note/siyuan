@@ -1071,35 +1071,38 @@ func syncRepo(exit, byHand bool) (err error) {
 func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dejavu.MergeResult) {
 	//logSyncMergeResult(mergeResult)
 
-	if 0 < len(mergeResult.Conflicts) && Conf.Sync.GenerateConflictDoc {
-		// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
+	if 0 < len(mergeResult.Conflicts) {
+		luteEngine := util.NewLute()
+		if Conf.Sync.GenerateConflictDoc {
+			// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
+
+			for _, file := range mergeResult.Conflicts {
+				if !strings.HasSuffix(file.Path, ".sy") {
+					continue
+				}
+
+				parts := strings.Split(file.Path[1:], "/")
+				if 2 > len(parts) {
+					continue
+				}
+				boxID := parts[0]
+
+				absPath := filepath.Join(util.TempDir, "repo", "sync", "conflicts", mergeResult.Time.Format("2006-01-02-150405"), file.Path)
+				tree, loadTreeErr := loadTree(absPath, luteEngine)
+				if nil != loadTreeErr {
+					logging.LogErrorf("load conflicted file [%s] failed: %s", absPath, loadTreeErr)
+					continue
+				}
+				tree.Box = boxID
+				tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
+
+				resetTree(tree, "Conflicted")
+				createTreeTx(tree)
+			}
+		}
 
 		historyDir := filepath.Join(util.HistoryDir, mergeResult.Time.Format("2006-01-02-150405")+"-sync")
-		luteEngine := util.NewLute()
-		for _, file := range mergeResult.Conflicts {
-			if !strings.HasSuffix(file.Path, ".sy") {
-				continue
-			}
-
-			parts := strings.Split(file.Path[1:], "/")
-			if 2 > len(parts) {
-				continue
-			}
-			boxID := parts[0]
-
-			absPath := filepath.Join(util.TempDir, "repo", "sync", "conflicts", mergeResult.Time.Format("2006-01-02-150405"), file.Path)
-			tree, loadTreeErr := loadTree(absPath, luteEngine)
-			if nil != loadTreeErr {
-				logging.LogErrorf("load conflicted file [%s] failed: %s", absPath, loadTreeErr)
-				continue
-			}
-			tree.Box = boxID
-			tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
-
-			resetTree(tree, "Conflicted")
-			createTreeTx(tree)
-			indexHistoryDir(filepath.Base(historyDir), luteEngine)
-		}
+		indexHistoryDir(filepath.Base(historyDir), luteEngine)
 	}
 
 	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) && 1 > len(mergeResult.Conflicts) { // 没有数据变更
@@ -1171,6 +1174,21 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 		go func() {
 			time.Sleep(2 * time.Second)
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+
+			if 0 < len(mergeResult.Conflicts) {
+				syConflict := false
+				for _, file := range mergeResult.Conflicts {
+					if strings.HasSuffix(file.Path, ".sy") {
+						syConflict = true
+						break
+					}
+				}
+
+				if syConflict {
+					// 数据同步发生冲突时在界面上进行提醒 https://github.com/siyuan-note/siyuan/issues/7332
+					util.PushMsg(Conf.Language(108), 7000)
+				}
+			}
 		}()
 	}
 }

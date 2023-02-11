@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230203183434"
+		"updated": "20230211103249"
 	},
 	"Children": [
 		{
@@ -724,7 +724,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231731-bdh7lab",
-				"updated": "20230203183434"
+				"updated": "20230211103249"
 			},
 			"Children": [
 				{
@@ -736,7 +736,7 @@
 					},
 					"Properties": {
 						"id": "20230202231732-n7z8jth",
-						"updated": "20230203183347"
+						"updated": "20230211103249"
 					},
 					"Children": [
 						{
@@ -744,7 +744,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231732-f3jkj7p",
-								"updated": "20230203183347"
+								"updated": "20230211103249"
 							},
 							"Children": [
 								{
@@ -791,7 +791,7 @@
 					},
 					"Properties": {
 						"id": "20230202231800-z8hswmk",
-						"updated": "20230203183434"
+						"updated": "20230211103154"
 					},
 					"Children": [
 						{
@@ -799,7 +799,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230202231800-c3x45ky",
-								"updated": "20230203183434"
+								"updated": "20230211103154"
 							},
 							"Children": [
 								{
@@ -881,11 +881,84 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS=chi_sim+eng "
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS=chi_sim+eng"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102830-9azqf9m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102830-9azqf9m"
+					},
+					"Children": [
+						{
+							"ID": "20230211102830-sbchex4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102830-sbchex4",
+								"updated": "20230211102832"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Only images in png and jpg formats are supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102834-fx3o5su",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102834-fx3o5su",
+						"updated": "20230211102928"
+					},
+					"Children": [
+						{
+							"ID": "20230211102834-3jzjdrv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102834-3jzjdrv",
+								"updated": "20230211102928"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "By default, only images below 2MB are processed. If you need to adjust, you can set the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, the unit of value is bytes, for example: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE=4000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ adjust the upper limit to 4MB"
 								}
 							]
 						}

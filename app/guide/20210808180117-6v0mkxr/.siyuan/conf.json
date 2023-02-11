@@ -4,7 +4,8 @@
   "icon": "1f4d4",
   "closed": false,
   "refCreateSavePath": "",
-  "createDocNameTemplate": "",
+  "docCreateSavePath": "",
   "dailyNoteSavePath": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}",
-  "dailyNoteTemplatePath": ""
+  "dailyNoteTemplatePath": "",
+  "sortMode": 15
 }

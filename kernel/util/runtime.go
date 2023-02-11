@@ -45,10 +45,19 @@ const (
 // IsExiting 是否正在退出程序。
 var IsExiting = false
 
+// MobileOSVer 移动端操作系统版本。
+var MobileOSVer string
+
 func logBootInfo() {
+	plat, platVer := GetOSPlatform()
+	osInfo := plat
+	if "" != platVer {
+		osInfo += " " + platVer
+	}
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
+		"    * os [%s]\n"+
 		"    * pid [%d]\n"+
 		"    * runtime mode [%s]\n"+
 		"    * working directory [%s]\n"+
@@ -56,7 +65,7 @@ func logBootInfo() {
 		"    * container [%s]\n"+
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s]",
-		Ver, runtime.GOARCH, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
+		Ver, runtime.GOARCH, osInfo, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
 }
 
 func IsMutexLocked(m *sync.Mutex) bool {

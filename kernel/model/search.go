@@ -97,7 +97,7 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 	}
 
 	// 嵌入块支持搜索 https://github.com/siyuan-note/siyuan/issues/7112
-	task.AppendTask(task.DatabaseIndexEmbedBlock, updateEmbedBlockContent, embedBlockID, ret)
+	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, updateEmbedBlockContent, embedBlockID, ret)
 
 	// 添加笔记本名称
 	var boxIDs []string

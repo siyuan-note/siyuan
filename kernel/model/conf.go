@@ -236,6 +236,7 @@ func InitConf() {
 		logging.LogInfof("using Microsoft Store edition")
 	}
 	Conf.System.OS = runtime.GOOS
+	Conf.System.OSPlatform, _ = util.GetOSPlatform()
 	Conf.Newbie = util.IsNewbie
 
 	if "" != Conf.UserData {

@@ -1,25 +1,24 @@
-const path = require('path')
-const webpack = require('webpack')
-const pkg = require('./package.json')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const {CleanWebpackPlugin} = require('clean-webpack-plugin')
-const BundleAnalyzerPlugin = require(
-  'webpack-bundle-analyzer').BundleAnalyzerPlugin
-const TerserPlugin = require('terser-webpack-plugin')
+const path = require("path");
+const webpack = require("webpack");
+const pkg = require("./package.json");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+// const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = (env, argv) => {
   return {
-    mode: argv.mode || 'development',
-    watch: argv.mode !== 'production',
-    devtool: argv.mode !== 'production' ? 'eval' : false,
+    mode: argv.mode || "development",
+    watch: argv.mode !== "production",
+    devtool: argv.mode !== "production" ? "eval" : false,
     output: {
-      publicPath: '',
-      filename: '[name].[chunkhash].js',
-      path: path.resolve(__dirname, 'stage/build/mobile'),
+      publicPath: "",
+      filename: "[name].[chunkhash].js",
+      path: path.resolve(__dirname, "stage/build/mobile"),
     },
     entry: {
-      'main': './src/mobile/index.ts',
+      "main": "./src/mobile/index.ts",
     },
     optimization: {
       minimize: true,
@@ -36,32 +35,32 @@ module.exports = (env, argv) => {
     },
     resolve: {
       fallback: {
-        'path': require.resolve('path-browserify'),
+        "path": require.resolve("path-browserify"),
       },
-      extensions: ['.ts', '.js', '.tpl', '.scss'],
+      extensions: [".ts", ".js", ".tpl", ".scss"],
     },
     module: {
       rules: [
         {
           test: /\.tpl/,
           include: [
-            path.resolve(__dirname, 'src/assets/template/mobile/index.tpl')],
-          loader: 'html-loader',
+            path.resolve(__dirname, "src/assets/template/mobile/index.tpl")],
+          loader: "html-loader",
           options: {
             sources: false,
           },
         },
         {
           test: /\.ts(x?)$/,
-          include: [path.resolve(__dirname, 'src')],
+          include: [path.resolve(__dirname, "src")],
           use: [
             {
-              loader: 'ts-loader',
+              loader: "ts-loader",
             },
             {
-              loader: 'ifdef-loader',
+              loader: "ifdef-loader",
               options: {
-                'ifdef-verbose': false,
+                "ifdef-verbose": false,
                 BROWSER: true,
                 MOBILE: true,
               },
@@ -71,33 +70,33 @@ module.exports = (env, argv) => {
         {
           test: /\.scss$/,
           include: [
-            path.resolve(__dirname, 'src/assets/scss'),
+            path.resolve(__dirname, "src/assets/scss"),
           ],
           use: [
             MiniCssExtractPlugin.loader,
             {
-              loader: 'css-loader', // translates CSS into CommonJS
+              loader: "css-loader", // translates CSS into CommonJS
             },
             {
-              loader: 'sass-loader', // compiles Sass to CSS
+              loader: "sass-loader", // compiles Sass to CSS
             },
           ],
         },
         {
           test: /\.woff$/,
-          type: 'asset/resource',
+          type: "asset/resource",
           generator: {
-            filename: '../fonts/JetBrainsMono-Regular.woff',
+            filename: "../fonts/JetBrainsMono-Regular.woff",
           },
         },
         {
           test: /\.(png|svg)$/,
           use: [
             {
-              loader: 'file-loader',
+              loader: "file-loader",
               options: {
-                name: '[name].[ext]',
-                outputPath: '../../',
+                name: "[name].[ext]",
+                outputPath: "../../",
               },
             },
           ],
@@ -109,21 +108,21 @@ module.exports = (env, argv) => {
       new CleanWebpackPlugin({
         cleanStaleWebpackAssets: false,
         cleanOnceBeforeBuildPatterns: [
-          path.join(__dirname, 'stage/build/mobile')],
+          path.join(__dirname, "stage/build/mobile")],
       }),
       new webpack.DefinePlugin({
         SIYUAN_VERSION: JSON.stringify(pkg.version),
         NODE_ENV: JSON.stringify(argv.mode),
       }),
       new MiniCssExtractPlugin({
-        filename: 'base.[contenthash].css',
+        filename: "base.[contenthash].css",
       }),
       new HtmlWebpackPlugin({
-        inject: 'head',
-        chunks: ['main'],
-        filename: 'index.html',
-        template: 'src/assets/template/mobile/index.tpl',
+        inject: "head",
+        chunks: ["main"],
+        filename: "index.html",
+        template: "src/assets/template/mobile/index.tpl",
       }),
     ],
-  }
-}
+  };
+};

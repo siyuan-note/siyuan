@@ -23,17 +23,20 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/logging"
 )
 
 var (
 	TesseractBin       = "tesseract"
 	TesseractEnabled   bool
+	TesseractMaxSize   = 2 * 1000 * uint64(1000)
 	AssetsTexts        = map[string]string{}
 	AssetsTextsLock    = sync.Mutex{}
 	AssetsTextsChanged = false
@@ -85,6 +88,10 @@ func Tesseract(imgAbsPath string) string {
 		return ""
 	}
 
+	if TesseractMaxSize < uint64(info.Size()) {
+		return ""
+	}
+
 	defer logging.Recover()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
@@ -124,8 +131,15 @@ func initTesseract() {
 		return
 	}
 
+	maxSizeVal := os.Getenv("SIYUAN_TESSERACT_MAX_SIZE")
+	if "" != maxSizeVal {
+		if maxSize, parseErr := strconv.ParseUint(maxSizeVal, 10, 64); nil == parseErr {
+			TesseractMaxSize = maxSize
+		}
+	}
+
 	TesseractLangs = filterTesseractLangs(langs)
-	logging.LogInfof("tesseract-ocr enabled [ver=%s, langs=%s]", ver, strings.Join(TesseractLangs, "+"))
+	logging.LogInfof("tesseract-ocr enabled [ver=%s, maxSize=%s, langs=%s]", ver, humanize.Bytes(TesseractMaxSize), strings.Join(TesseractLangs, "+"))
 }
 
 func filterTesseractLangs(langs []string) (ret []string) {

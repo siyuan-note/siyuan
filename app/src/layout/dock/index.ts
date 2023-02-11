@@ -88,9 +88,9 @@ export class Dock {
                     this.pin = !target.classList.contains("dock__item--pin");
                     if (!this.pin) {
                         if (this.position === "Left" || this.position === "Right") {
-                            this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:${this.layout.element.clientWidth}px; top: ${1 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px; bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + 1}px;`);
+                            this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:${this.element.clientWidth + .5}px; top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px; bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + .5}px;`);
                         } else {
-                            this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;left:0;right:0;${this.position === "Top" ? ("top:" + (1 + this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px") : ("bottom:" + (this.element.clientHeight + document.getElementById("status").clientHeight) + "px")};`);
+                            this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;left:0;right:0;${this.position === "Top" ? ("top:" + (.5 + this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px") : ("bottom:" + (.5 + this.element.clientHeight + document.getElementById("status").clientHeight) + "px")};`);
                         }
                         target.setAttribute("aria-label", window.siyuan.languages.pin);
                     } else {
@@ -129,7 +129,7 @@ export class Dock {
         if (!this.pin) {
             setTimeout(() => {
                 if (this.position === "Left" || this.position === "Right") {
-                    this.layout.element.setAttribute("style", `opacity:0px;width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:-${this.layout.element.clientWidth}px; top: ${1 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px; bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + 1}px;`);
+                    this.layout.element.setAttribute("style", `opacity:0px;width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:-${this.layout.element.clientWidth}px; top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px; bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + .5}px;`);
                 } else {
                     this.layout.element.setAttribute("style", `opacity:0px;height:${this.layout.element.clientHeight}px;left:0;right:0;${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeight}px;`);
                 }

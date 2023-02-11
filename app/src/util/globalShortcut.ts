@@ -126,12 +126,12 @@ export const globalShortcut = () => {
 
         if (event.clientY < 75) {
             if (!window.siyuan.layout.topDock.pin && window.siyuan.layout.topDock.layout.element.style.opacity !== "1") {
-                window.siyuan.layout.topDock.layout.element.style.top = (document.getElementById("dockTop").clientHeight + document.getElementById("toolbar").clientHeight + 1) + "px";
+                window.siyuan.layout.topDock.layout.element.style.top = (document.getElementById("dockTop").clientHeight + document.getElementById("toolbar").clientHeight + .5) + "px";
                 window.siyuan.layout.topDock.layout.element.style.opacity = "1";
             }
         } else if (event.clientY > window.innerHeight - 73) {
             if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.style.opacity !== "1") {
-                window.siyuan.layout.bottomDock.layout.element.style.bottom = (document.getElementById("dockBottom").clientHeight + document.getElementById("status").clientHeight + 1) + "px";
+                window.siyuan.layout.bottomDock.layout.element.style.bottom = (document.getElementById("dockBottom").clientHeight + document.getElementById("status").clientHeight + .5) + "px";
                 window.siyuan.layout.bottomDock.layout.element.style.opacity = "1";
             }
         }

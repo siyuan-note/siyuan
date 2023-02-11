@@ -39,7 +39,16 @@ export const initStatus = (isWindow = false) => {
 <div id="statusHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
-
+    if (!isWindow) {
+        // 由于点击切换时需隐藏菜单，因此不可使用 CSS
+        const dockElement = document.getElementById("barDock");
+        dockElement.addEventListener("mousemove", () => {
+            dockElement.querySelector(".b3-menu").classList.remove("fn__none");
+        });
+        dockElement.addEventListener("mouseleave", () => {
+            dockElement.querySelector(".b3-menu").classList.add("fn__none");
+        });
+    }
     document.querySelector("#status").addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target.id !== "status") {
@@ -55,13 +64,9 @@ export const initStatus = (isWindow = false) => {
                 }
                 document.querySelectorAll(".dock").forEach(item => {
                     if (dockIsShow) {
-                        if (item.querySelector(".dock__item")) {
-                            item.classList.add("fn__none");
-                        }
-                    } else {
-                        if (item.querySelector(".dock__item")) {
-                            item.classList.remove("fn__none");
-                        }
+                        item.classList.add("fn__none");
+                    } else if (item.querySelectorAll(".dock__item").length > 1) {
+                        item.classList.remove("fn__none");
                     }
                 });
                 resizeTabs();
@@ -212,7 +217,13 @@ export const clearCounter = () => {
     document.querySelector("#status .status__counter").innerHTML = "";
 };
 
-export const renderStatusbarCounter = (stat: { runeCount: number, wordCount: number, linkCount: number, imageCount: number, refCount: number }) => {
+export const renderStatusbarCounter = (stat: {
+    runeCount: number,
+    wordCount: number,
+    linkCount: number,
+    imageCount: number,
+    refCount: number
+}) => {
     let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
 <span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`;
     if (0 < stat.linkCount) {

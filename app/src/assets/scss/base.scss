@@ -29,7 +29,7 @@
 @import "viewer";
 
 /*
-.status: 2
+.status: 3
 
 // 需小于 .block__popover
 // 需小于 ctrl+p https://github.com/siyuan-note/siyuan/issues/7174
@@ -283,7 +283,7 @@ progressLoading: 400
 .status {
   background-color: var(--b3-theme-surface);
   box-sizing: border-box;
-  z-index: 2;
+  z-index: 3;
   height: 32px;
   line-height: 32px;
   border-top: .5px solid var(--b3-border-color);
@@ -338,14 +338,8 @@ progressLoading: 400
     }
   }
 
-  #barDock {
-    &:hover .b3-menu {
-      display: block !important;
-    }
-
-    .b3-menu__item:hover {
-      background-color: var(--b3-list-hover);
-    }
+  #barDock .b3-menu__item:hover {
+    background-color: var(--b3-list-hover);
   }
 
   .fn__space:last-child {

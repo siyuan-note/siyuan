@@ -11,6 +11,7 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
+import {resetFloatDockSize} from "./dock/util";
 
 export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
@@ -65,6 +66,7 @@ export const initStatus = (isWindow = false) => {
                 });
                 resizeTabs();
                 target.querySelector(".b3-menu").classList.add("fn__none");
+                resetFloatDockSize();
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("status__backgroundtask")) {

@@ -59,7 +59,7 @@ export class Menus {
                     break;
                 }
 
-                if (target.classList.contains("dock__item")) {
+                if (target.classList.contains("dock__item") && target.getAttribute("data-type")) {
                     initDockMenu(target).popup({x: event.clientX, y: event.clientY});
                     event.stopPropagation();
                     break;

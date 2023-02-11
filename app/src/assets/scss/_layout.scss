@@ -13,9 +13,9 @@
 
   &--float {
     position: fixed;
-    z-index: 2;
+    z-index: 3;
     min-height: auto;
-    transition: left .15s cubic-bezier(0, 0.88, 0.42, 0.74) 0ms, opacity .15s cubic-bezier(0, 0.88, 0.42, 0.74) 0ms;
+    transition: var(--b3-transition);
   }
 
   &__tab--active {

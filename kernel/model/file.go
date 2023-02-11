@@ -292,7 +292,7 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 	}
 	elapsed = time.Now().Sub(start).Milliseconds()
 	if 500 < elapsed {
-		logging.LogWarnf("build docs elapsed [%dms]", elapsed)
+		logging.LogWarnf("build docs [%d] elapsed [%dms]", len(docs), elapsed)
 	}
 
 	start = time.Now()

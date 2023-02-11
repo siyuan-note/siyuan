@@ -27,7 +27,6 @@ specifiers:
   ifdef-loader: ^2.3.2
   mini-css-extract-plugin: 2.3.0
   path-browserify: ^1.0.1
-  pnpm: 7.9.3
   safer-buffer: ^2.1.2
   sass: ^1.53.0
   sass-loader: ^12.6.0
@@ -41,7 +40,6 @@ specifiers:
 dependencies:
   '@electron/remote': 2.0.9_electron@21.4.1
   electron-fetch: 1.7.4
-  pnpm: 7.9.3
 
 devDependencies:
   '@babel/core': 7.18.6
@@ -4268,12 +4266,6 @@ packages:
       base64-js: 1.5.1
       xmlbuilder: 9.0.7
     dev: true
-
-  /pnpm/7.9.3:
-    resolution: {integrity: sha512-0hpAD1vtILw0i9gTN4ffagnScWMW9/avfZIKllBUd++fAvCss+hVgPPDd0HS9XcOT675gid4H9esGkbLdaFy+w==}
-    engines: {node: '>=14.6'}
-    hasBin: true
-    dev: false
 
   /postcss-modules-extract-imports/3.0.0_postcss@8.4.14:
     resolution: {integrity: sha512-bdHleFnP3kZ4NYDhuGlVK+CMrQ/pqUm8bx/oGL93K6gVwiclvX5x0n76fYMKuIGKzlABOy13zsvqjb0f92TEXw==}

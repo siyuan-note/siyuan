@@ -4,14 +4,14 @@
   "description": "Build Your Eternal Digital Garden",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@7.26.1",
+  "packageManager": "pnpm@7.27.0",
   "scripts": {
     "lint": "eslint . --fix --ext .ts",
     "dev": "webpack --mode development",
     "dev:mobile": "webpack --mode development --config webpack.mobile.js",
     "dev:desktop": "webpack --mode development --config webpack.desktop.js",
     "dev:export": "webpack --mode development --config webpack.export.js",
-    "build": "webpack --mode production && pnpm run build:mobile && pnpm run build:desktop && pnpm run build:export",
+    "build": "webpack --mode production && pnpm run '/build:.*/'",
     "build:mobile": "webpack --mode production --config webpack.mobile.js",
     "build:desktop": "webpack --mode production --config webpack.desktop.js",
     "build:export": "webpack --mode production --config webpack.export.js",
@@ -81,7 +81,6 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.9",
-    "electron-fetch": "^1.7.4",
-    "pnpm": "7.9.3"
+    "electron-fetch": "^1.7.4"
   }
 }

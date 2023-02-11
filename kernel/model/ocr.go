@@ -21,7 +21,7 @@ func OCRAssetsJob() {
 		return
 	}
 
-	task.AppendTask(task.OCRImage, autoOCRAssets)
+	task.AppendTaskWithTimeout(task.OCRImage, 7*time.Second, autoOCRAssets)
 }
 
 func autoOCRAssets() {
@@ -39,7 +39,7 @@ func autoOCRAssets() {
 			util.AssetsTextsLock.Unlock()
 			util.AssetsTextsChanged = true
 
-			if 16 <= i { // 一次任务中最多处理 16 张图片，防止卡顿
+			if 4 <= i { // 一次任务中最多处理 4 张图片，防止卡顿
 				break
 			}
 		}

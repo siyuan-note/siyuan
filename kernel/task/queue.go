@@ -37,9 +37,14 @@ type Task struct {
 	Handler reflect.Value
 	Args    []interface{}
 	Created time.Time
+	Timeout time.Duration
 }
 
 func AppendTask(action string, handler interface{}, args ...interface{}) {
+	AppendTaskWithTimeout(action, 24*time.Hour, handler, args...)
+}
+
+func AppendTaskWithTimeout(action string, timeout time.Duration, handler interface{}, args ...interface{}) {
 	if util.IsExiting {
 		//logging.LogWarnf("task queue is paused, action [%s] will be ignored", action)
 		return
@@ -53,16 +58,13 @@ func AppendTask(action string, handler interface{}, args ...interface{}) {
 
 	queueLock.Lock()
 	defer queueLock.Unlock()
-	taskQueue = append(taskQueue, newTask(action, handler, args...))
-}
-
-func newTask(action string, handler interface{}, args ...interface{}) *Task {
-	return &Task{
+	taskQueue = append(taskQueue, &Task{
 		Action:  action,
+		Timeout: timeout,
 		Handler: reflect.ValueOf(handler),
 		Args:    args,
 		Created: time.Now(),
-	}
+	})
 }
 
 func getCurrentActions() (ret []string) {
@@ -166,8 +168,6 @@ func ExecTaskJob() {
 	execTask(task)
 }
 
-var currentTaskAction string
-
 func popTask() (ret *Task) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
@@ -180,6 +180,8 @@ func popTask() (ret *Task) {
 	taskQueue = taskQueue[1:]
 	return
 }
+
+var currentTaskAction string
 
 func execTask(task *Task) {
 	defer logging.Recover()
@@ -195,7 +197,7 @@ func execTask(task *Task) {
 
 	currentTaskAction = task.Action
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), task.Timeout)
 	defer cancel()
 	ch := make(chan bool, 1)
 	go func() {

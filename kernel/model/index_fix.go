@@ -128,6 +128,12 @@ func resetDuplicateTrees() {
 		duplicatedPaths := map[string]string{}
 		for p, absPath := range paths {
 			name := path.Base(p)
+			if !ast.IsNodeIDPattern(strings.TrimSuffix(name, ".sy")) {
+				logging.LogWarnf("invalid .sy file name [%s]", p)
+				box.moveCorruptedData(absPath)
+				continue
+			}
+
 			if !names[name] {
 				names[name] = true
 				continue

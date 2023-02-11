@@ -1478,7 +1478,7 @@ export class WYSIWYG {
         let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             hideElements(["hint", "util"], protyle);
-            const ctrlIsPressed = event.metaKey || event.ctrlKey
+            const ctrlIsPressed = event.metaKey || event.ctrlKey;
             /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {

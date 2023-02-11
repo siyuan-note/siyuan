@@ -903,19 +903,19 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     }
     (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
     (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
-    let methodTip = window.siyuan.languages.searchMethod + " "
+    let methodTip = window.siyuan.languages.searchMethod + " ";
     switch (item.method) {
         case 0:
             methodTip += window.siyuan.languages.keyword;
             break;
         case 1:
-            methodTip += window.siyuan.languages.querySyntax
+            methodTip += window.siyuan.languages.querySyntax;
             break;
         case 2:
-            methodTip += "SQL"
+            methodTip += "SQL";
             break;
         case 3:
-            methodTip += window.siyuan.languages.regex
+            methodTip += window.siyuan.languages.regex;
             break;
     }
     element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", methodTip);

@@ -138,7 +138,7 @@ const dockToJSON = (dock: Dock) => {
     return {
         pin: dock.pin,
         data: json
-    }
+    };
 };
 
 export const resetLayout = () => {

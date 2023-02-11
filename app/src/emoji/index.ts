@@ -79,7 +79,7 @@ export const lazyLoadEmojiImg = (element: Element) => {
     element.querySelectorAll("img").forEach((panelElement) => {
         emojiIntersectionObserver.observe(panelElement);
     });
-}
+};
 
 export const filterEmoji = (key = "", max?: number, assic = false) => {
     let html = "";
@@ -428,7 +428,7 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     /// #if MOBILE
     emojiElement = document.querySelector(`#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`);
     /// #else
-    const dockFile = getDockByType("file")
+    const dockFile = getDockByType("file");
     if (dockFile) {
         const files = dockFile.data.file as Files;
         if (icon === "iconFile") {

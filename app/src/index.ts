@@ -134,19 +134,19 @@ class App {
                 window.siyuan.config.uiLayout.left = {
                     pin: true,
                     data: response.data.conf.uiLayout.left
-                }
+                };
                 window.siyuan.config.uiLayout.right = {
                     pin: true,
                     data: response.data.conf.uiLayout.right
-                }
+                };
                 window.siyuan.config.uiLayout.top = {
                     pin: true,
                     data: response.data.conf.uiLayout.top
-                }
+                };
                 window.siyuan.config.uiLayout.bottom = {
                     pin: true,
                     data: response.data.conf.uiLayout.bottom
-                }
+                };
             }
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {

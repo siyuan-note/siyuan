@@ -19,9 +19,10 @@ export class Dock {
     public layout: Layout;
     private position: TDockPosition;
     public resizeElement: HTMLElement;
+    public pin = true;
     public data: { [key: string]: Model | boolean };
 
-    constructor(options: { data: IDockTab[][], position: TDockPosition }) {
+    constructor(options: { data: { pin: boolean, data: IDockTab[][] }, position: TDockPosition }) {
         switch (options.position) {
             case "Left":
                 this.layout = window.siyuan.layout.layout.children[1].children[0] as Layout;
@@ -44,16 +45,16 @@ export class Dock {
         const dockClass = (options.position === "Bottom" || options.position === "Top") ? ' class="fn__flex"' : "";
         this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1"></div><div${dockClass}></div>`;
         this.position = options.position;
+        this.pin = options.data.pin
         this.data = {};
-        if (options.data.length === 0) {
+        if (options.data.data.length === 0) {
             this.element.classList.add("fn__none");
         } else {
-            this.genButton(options.data[0], 0);
-            if (options.data[1]) {
-                this.genButton(options.data[1], 1);
+            this.genButton(options.data.data[0], 0);
+            if (options.data.data[1]) {
+                this.genButton(options.data.data[1], 1);
             }
         }
-
         const activeElements = this.element.querySelectorAll(".dock__item--active");
 
         // 初始化文件树
@@ -71,7 +72,6 @@ export class Dock {
                 this.toggleModel(item.getAttribute("data-type") as TDockType, true);
             });
         }
-
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
@@ -80,16 +80,54 @@ export class Dock {
                     this.toggleModel(type, false, true);
                     event.preventDefault();
                     break;
+                } else if (target.classList.contains("dock__item")) {
+                    this.pin = !target.classList.contains("dock__item--pin");
+                    if (!this.pin) {
+                        const layoutRect = this.layout.element.getBoundingClientRect();
+                        this.layout.element.setAttribute("style", `left:${layoutRect.left}px; top: ${layoutRect.top}px; bottom: ${window.innerHeight - layoutRect.bottom}px; width: ${layoutRect.width}px;`);
+                    }
+                    target.classList.toggle("dock__item--pin");
+                    this.layout.element.classList.toggle("layout--float");
+                    this.resizeElement.classList.toggle("fn__none");
+                    event.preventDefault();
+                    break;
                 }
                 target = target.parentElement;
             }
         });
+        this.layout.element.addEventListener("mouseleave", (event) => {
+            if (this.pin) {
+                return
+            }
+            if (this.position === "Left" && event.clientX < 43) {
+                return;
+            }
+            this.hideDock()
+        })
         if (window.siyuan.config.uiLayout.hideDock) {
             this.element.classList.add("fn__none");
+        }
+        if (!this.pin) {
+            setTimeout(() => {
+                const layoutRect = this.layout.element.getBoundingClientRect();
+                this.layout.element.setAttribute("style", `width:${layoutRect.width}px;opacity:0px;left:-${layoutRect.width}px; top: ${layoutRect.top}px; bottom: ${window.innerHeight - layoutRect.bottom}px;`);
+                this.layout.element.classList.add("layout--float");
+                this.resizeElement.classList.add("fn__none");
+            }, 1000);
+        }
+    }
+
+    public hideDock() {
+        if (this.layout.element.style.opacity === "1") {
+            this.layout.element.style.left = -this.layout.element.clientWidth + "px";
+            this.layout.element.style.opacity = "0";
         }
     }
 
     public toggleModel(type: TDockType, show = false, close = false) {
+        if (!type) {
+            return;
+        }
         const target = this.element.querySelector(`[data-type="${type}"]`) as HTMLElement;
         if (show && target.classList.contains("dock__item--active")) {
             target.classList.remove("dock__item--active", "dock__item--activefocus");
@@ -395,7 +433,9 @@ export class Dock {
     }
 
     private genButton(data: IDockTab[], index: number) {
-        let html = "";
+        let html = index ? "" : `<span class="dock__item ${this.pin ? "dock__item--pin " : ""}b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${window.siyuan.languages.pin}">
+    <svg><use xlink:href="#iconPin"></use></svg>
+</span>`;
         data.forEach(item => {
             html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkeylangid="${item.hotkeyLangId}" class="dock__item${item.show ? " dock__item--active" : ""} b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${window.siyuan.languages[item.hotkeyLangId] + " " + updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}${window.siyuan.languages.dockTip}">
     <svg><use xlink:href="#${item.icon}"></use></svg>

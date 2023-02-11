@@ -315,62 +315,74 @@ export abstract class Constants {
                 }]
             }]
         },
-        top: [],
-        bottom: [],
-        left: [
-            [{
-                type: "file",
-                size: {width: 240, height: 0},
-                show: true,
-                icon: "iconFiles",
-                hotkeyLangId: "fileTree",
-            }, {
-                type: "outline",
-                size: {width: 240, height: 0},
-                show: false,
-                icon: "iconAlignCenter",
-                hotkeyLangId: "outline",
-            }, {
-                type: "inbox",
-                size: {width: 252, height: 0},
-                show: false,
-                icon: "iconInbox",
-                hotkeyLangId: "inbox",
-            }], [{
-                type: "bookmark",
-                size: {width: 240, height: 0},
-                show: false,
-                icon: "iconBookmark",
-                hotkeyLangId: "bookmark",
-            }, {
-                type: "tag",
-                size: {width: 240, height: 0},
-                show: false,
-                icon: "iconTags",
-                hotkeyLangId: "tag",
-            }]
-        ],
-        right: [
-            [{
-                type: "graph",
-                size: {width: 360, height: 0},
-                show: false,
-                icon: "iconGraph",
-                hotkeyLangId: "graphView",
-            }, {
-                type: "globalGraph",
-                size: {width: 360, height: 0},
-                show: false,
-                icon: "iconGlobalGraph",
-                hotkeyLangId: "globalGraph",
-            }], [{
-                type: "backlink",
-                size: {width: 360, height: 0},
-                show: false,
-                icon: "iconLink",
-                hotkeyLangId: "backlinks",
-            }]
-        ]
+        top: {
+            pin: true,
+            data: []
+        },
+        bottom: {
+            pin: true,
+            data: []
+        },
+        left: {
+            pin: true,
+            data: [
+                [{
+                    type: "file",
+                    size: {width: 240, height: 0},
+                    show: true,
+                    icon: "iconFiles",
+                    hotkeyLangId: "fileTree",
+                }, {
+                    type: "outline",
+                    size: {width: 240, height: 0},
+                    show: false,
+                    icon: "iconAlignCenter",
+                    hotkeyLangId: "outline",
+                }, {
+                    type: "inbox",
+                    size: {width: 252, height: 0},
+                    show: false,
+                    icon: "iconInbox",
+                    hotkeyLangId: "inbox",
+                }], [{
+                    type: "bookmark",
+                    size: {width: 240, height: 0},
+                    show: false,
+                    icon: "iconBookmark",
+                    hotkeyLangId: "bookmark",
+                }, {
+                    type: "tag",
+                    size: {width: 240, height: 0},
+                    show: false,
+                    icon: "iconTags",
+                    hotkeyLangId: "tag",
+                }]
+            ]
+        },
+        right: {
+            pin: true,
+            data: [
+                [{
+                    type: "graph",
+                    size: {width: 360, height: 0},
+                    show: false,
+                    icon: "iconGraph",
+                    hotkeyLangId: "graphView",
+                }, {
+                    type: "globalGraph",
+                    size: {width: 360, height: 0},
+                    show: false,
+                    icon: "iconGlobalGraph",
+                    hotkeyLangId: "globalGraph",
+                }], [{
+                    type: "backlink",
+                    size: {width: 360, height: 0},
+                    show: false,
+                    icon: "iconLink",
+                    hotkeyLangId: "backlinks",
+                }]
+            ]
+        }
     };
 
     // image

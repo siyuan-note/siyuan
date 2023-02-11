@@ -135,7 +135,10 @@ const dockToJSON = (dock: Dock) => {
     if (data2.length > 0) {
         json.push(data2);
     }
-    return json;
+    return {
+        pin: dock.pin,
+        data: json
+    }
 };
 
 export const resetLayout = () => {
@@ -169,10 +172,47 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
 
 const JSONToDock = (json: any) => {
     window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[1].children[1] as Layout;
-    window.siyuan.layout.topDock = new Dock({position: "Top", data: json.top});
-    window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left});
-    window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right});
-    window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom});
+    // 历史数据兼容，202306后可删除
+    let topData: { pin: boolean, data: IDockTab[][] }
+    if (!json.top.data) {
+        topData = {
+            pin: true,
+            data: json.top
+        }
+    } else {
+        topData = json.top;
+    }
+    let bottomData: { pin: boolean, data: IDockTab[][] }
+    if (!json.bottom.data) {
+        bottomData = {
+            pin: true,
+            data: json.bottom
+        }
+    } else {
+        bottomData = json.bottom;
+    }
+    let rightData: { pin: boolean, data: IDockTab[][] }
+    if (!json.right.data) {
+        rightData = {
+            pin: true,
+            data: json.right
+        }
+    } else {
+        rightData = json.right;
+    }
+    let leftData: { pin: boolean, data: IDockTab[][] }
+    if (!json.left.data) {
+        leftData = {
+            pin: true,
+            data: json.left
+        }
+    } else {
+        leftData = json.left;
+    }
+    window.siyuan.layout.topDock = new Dock({position: "Top", data: topData});
+    window.siyuan.layout.leftDock = new Dock({position: "Left", data: leftData});
+    window.siyuan.layout.rightDock = new Dock({position: "Right", data: rightData});
+    window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: bottomData});
 };
 
 export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isStart = false) => {

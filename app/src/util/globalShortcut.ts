@@ -96,6 +96,23 @@ export const globalShortcut = () => {
             window.siyuan.hideBreadcrumb = false;
         }
 
+        if (event.clientX < 43) {
+            if (!window.siyuan.layout.leftDock.pin) {
+                if (event.clientY > 32 &&
+                    (window.siyuan.config.appearance.hideStatusBar ||
+                        (!window.siyuan.config.appearance.hideStatusBar && event.clientY < window.innerHeight - 32))
+                ) {
+                    if (!hasClosestByClassName(event.target as HTMLElement, "b3-menu") &&
+                        window.siyuan.layout.leftDock.layout.element.style.opacity !== "1") {
+                        window.siyuan.layout.leftDock.layout.element.style.left = (window.siyuan.layout.leftDock.element.clientWidth + .5) + "px"
+                        window.siyuan.layout.leftDock.layout.element.style.opacity = "1"
+                    }
+                } else {
+                    window.siyuan.layout.leftDock.hideDock();
+                }
+            }
+        }
+
         const eventPath0 = event.composedPath()[0] as HTMLElement;
         if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("protyle-wysiwyg") && eventPath0.style.paddingLeft) {
             // 光标在编辑器右边也需要进行显示

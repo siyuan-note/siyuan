@@ -67,22 +67,22 @@ export const getAllTabs = () => {
 
 export const getAllDocks = () => {
     const docks: IDockTab[] = [];
-    window.siyuan.config.uiLayout.left.forEach((item: IDockTab[]) => {
+    window.siyuan.config.uiLayout.left.data.forEach((item: IDockTab[]) => {
         item.forEach((dock: IDockTab) => {
             docks.push(dock);
         });
     });
-    window.siyuan.config.uiLayout.right.forEach((item: IDockTab[]) => {
+    window.siyuan.config.uiLayout.right.data.forEach((item: IDockTab[]) => {
         item.forEach((dock: IDockTab) => {
             docks.push(dock);
         });
     });
-    window.siyuan.config.uiLayout.top.forEach((item: IDockTab[]) => {
+    window.siyuan.config.uiLayout.top.data.forEach((item: IDockTab[]) => {
         item.forEach((dock: IDockTab) => {
             docks.push(dock);
         });
     });
-    window.siyuan.config.uiLayout.bottom.forEach((item: IDockTab[]) => {
+    window.siyuan.config.uiLayout.bottom.data.forEach((item: IDockTab[]) => {
         item.forEach((dock: IDockTab) => {
             docks.push(dock);
         });

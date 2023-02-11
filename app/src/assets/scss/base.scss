@@ -338,8 +338,14 @@ progressLoading: 400
     }
   }
 
-  #barDock .b3-menu__item:hover {
-    background-color: var(--b3-list-hover);
+  #barDock {
+    &:hover .b3-menu {
+      display: block !important;
+    }
+
+    .b3-menu__item:hover {
+      background-color: var(--b3-list-hover);
+    }
   }
 
   .fn__space:last-child {

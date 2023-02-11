@@ -38,15 +38,6 @@ export const initStatus = (isWindow = false) => {
 <div id="statusHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
-    if (!isWindow) {
-        const dockElement = document.getElementById("barDock");
-        dockElement.addEventListener("mousemove", () => {
-            dockElement.querySelector(".b3-menu").classList.remove("fn__none");
-        });
-        dockElement.addEventListener("mouseleave", () => {
-            dockElement.querySelector(".b3-menu").classList.add("fn__none");
-        });
-    }
 
     document.querySelector("#status").addEventListener("click", (event) => {
         let target = event.target as HTMLElement;

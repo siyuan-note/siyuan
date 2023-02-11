@@ -100,7 +100,7 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement, path: HTMLElemen
         // 移动到弹窗的 loading 元素上，但经过 settimeout 后 loading 已经被移除了
         // https://ld246.com/article/1673596577519/comment/1673767749885#comments
         let targetElement = event.target;
-        if (!targetElement.parentElement && event.path[1]) {
+        if (!targetElement.parentElement && event.path && event.path[1]) {
             targetElement = event.path[1];
         }
         const blockElement = hasClosestByClassName(targetElement, "block__popover", true);

@@ -114,7 +114,7 @@ func fixBlockTreeByFileSys() {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
-			if !info.IsDir() && filepath.Ext(path) == ".sy" {
+			if !info.IsDir() && filepath.Ext(path) == ".sy" && !strings.Contains(filepath.ToSlash(path), "/assets/") {
 				p := path[len(boxPath):]
 				p = filepath.ToSlash(p)
 				paths = append(paths, p)

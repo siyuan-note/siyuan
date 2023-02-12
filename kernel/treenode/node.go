@@ -225,6 +225,13 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 			if n.IsTextMarkType("tag") {
 				buf.WriteByte('#')
 			}
+			if n.IsTextMarkType("a") {
+				// 搜索不到超链接元素的 URL 和标题 https://github.com/siyuan-note/siyuan/issues/7352
+				if "" != n.TextMarkATitle {
+					buf.WriteString(" " + n.TextMarkATitle)
+				}
+				buf.WriteString(" " + n.TextMarkAHref)
+			}
 		case ast.NodeBackslash:
 			buf.WriteByte(lex.ItemBackslash)
 		case ast.NodeBackslashContent:

@@ -134,6 +134,7 @@ func getMobileWorkspaces(c *gin.Context) {
 		return
 	}
 
+	ret.Data = []string{}
 	var paths []string
 	for _, dir := range dirs {
 		if dir.IsDir() {

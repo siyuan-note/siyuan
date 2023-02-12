@@ -478,10 +478,11 @@ ${accountHTML}
                             event.stopPropagation();
                             break;
                         } else if (target.getAttribute("data-type") === "remove") {
-                            const p = target.parentElement.getAttribute("data-path");
-                            fetchPost("/api/system/removeWorkspaceDir", {path: p}, () => {
-                                genWorkspace(workspaceDirElement);
-                            });
+                            confirmDialog(window.siyuan.languages.remove, window.siyuan.languages.removeWorkspaceTip, () => {
+                                fetchPost("/api/system/removeWorkspaceDir", {path: target.parentElement.getAttribute("data-path")}, () => {
+                                    genWorkspace(workspaceDirElement);
+                                });
+                            })
                             event.preventDefault();
                             event.stopPropagation();
                             break;

@@ -121,6 +121,10 @@ func getAttachedUIProcCount() (ret int) {
 func getUIProcCount() (ret int) {
 	procs, _ := goPS.Processes()
 	for _, proc := range procs {
+		if proc.Pid() == os.Getpid() {
+			continue
+		}
+
 		procName := strings.ToLower(proc.Executable())
 		uiProcOk := false
 		for _, name := range uiProcNames {

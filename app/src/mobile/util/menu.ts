@@ -666,6 +666,10 @@ const initAbout = () => {
                     });
                     btnsElement[1].addEventListener("click", () => {
                         const openPath = openWorkspaceDialog.element.querySelector("select").value;
+                        if (openPath === window.siyuan.config.system.workspaceDir) {
+                            openWorkspaceDialog.destroy();
+                            return;
+                        }
                         confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(openPath)}?`, () => {
                             fetchPost("/api/system/setWorkspaceDir", {
                                 path: openPath

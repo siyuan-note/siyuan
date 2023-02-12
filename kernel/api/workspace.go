@@ -134,17 +134,18 @@ func getMobileWorkspaces(c *gin.Context) {
 		return
 	}
 
-	var names []string
+	var paths []string
 	for _, dir := range dirs {
 		if dir.IsDir() {
-			if isInvalidWorkspacePath(filepath.Join(root, dir.Name())) {
+			absPath := filepath.Join(root, dir.Name())
+			if isInvalidWorkspacePath(absPath) {
 				continue
 			}
 
-			names = append(names, dir.Name())
+			paths = append(paths, absPath)
 		}
 	}
-	ret.Data = names
+	ret.Data = paths
 }
 
 func getWorkspaces(c *gin.Context) {

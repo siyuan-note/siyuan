@@ -91,8 +91,8 @@
     --b3-font-background13: var(--b3-theme-on-background);
 
     /* 动画效果 */
-    --b3-transition: all .15s cubic-bezier(0, 0, .2, 1) 0ms;
-    --b3-width-transition: width .15s cubic-bezier(0, 0, .2, 1) 0ms;
+    --b3-transition: all .2s cubic-bezier(0, 0, .2, 1) 0ms;
+    --b3-width-transition: width .2s cubic-bezier(0, 0, .2, 1) 0ms;
 
     /* 阴影 */
     --b3-point-shadow: 0 3px 6px rgba(140,149,159,0.15);

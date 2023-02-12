@@ -46,6 +46,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, setNetworkProxy)
 	ginServer.Handle("POST", "/api/system/setWorkspaceDir", model.CheckAuth, setWorkspaceDir)
 	ginServer.Handle("POST", "/api/system/getWorkspaces", model.CheckAuth, getWorkspaces)
+	ginServer.Handle("POST", "/api/system/getMobileWorkspaces", model.CheckAuth, getMobileWorkspaces)
 	ginServer.Handle("POST", "/api/system/createWorkspaceDir", model.CheckAuth, createWorkspaceDir)
 	ginServer.Handle("POST", "/api/system/removeWorkspaceDir", model.CheckAuth, removeWorkspaceDir)
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)

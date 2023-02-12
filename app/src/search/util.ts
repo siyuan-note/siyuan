@@ -12,7 +12,7 @@ import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../util/pathName";
 import {Protyle} from "../protyle";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {addLoading, setPadding} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
@@ -188,6 +188,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             breadcrumbDocName: true
         },
     });
+    if (window.siyuan.config.editor.readOnly) {
+        disabledProtyle(edit.protyle);
+    }
     if (closeCB) {
         if (data.layout === 1) {
             if (data.col) {

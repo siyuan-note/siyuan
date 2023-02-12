@@ -117,6 +117,36 @@ type Workspace struct {
 	Closed bool   `json:"closed"`
 }
 
+func getMobileWorkspaces(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if util.ContainerIOS != util.Container && util.ContainerAndroid != util.Container {
+		return
+	}
+
+	root := filepath.Dir(util.WorkspaceDir)
+	dirs, err := os.ReadDir(root)
+	if nil != err {
+		logging.LogErrorf("read dir [%s] failed: %s", root, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	var names []string
+	for _, dir := range dirs {
+		if dir.IsDir() {
+			if isInvalidWorkspacePath(filepath.Join(root, dir.Name())) {
+				continue
+			}
+
+			names = append(names, dir.Name())
+		}
+	}
+	ret.Data = names
+}
+
 func getWorkspaces(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

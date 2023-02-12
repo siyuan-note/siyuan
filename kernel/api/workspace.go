@@ -52,16 +52,12 @@ func createWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	if gulu.File.IsExist(absPath) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(78)
-		return
-	}
-
-	if err := os.MkdirAll(absPath, 0755); nil != err {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf("create workspace dir [%s] failed: %s", absPath, err)
-		return
+	if !gulu.File.IsExist(absPath) {
+		if err := os.MkdirAll(absPath, 0755); nil != err {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("create workspace dir [%s] failed: %s", absPath, err)
+			return
+		}
 	}
 
 	workspacePaths, err := util.ReadWorkspacePaths()

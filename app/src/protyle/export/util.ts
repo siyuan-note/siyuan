@@ -96,7 +96,7 @@ export const exportImage = (id: string) => {
         highlightRender(previewElement);
         previewElement.querySelectorAll("table").forEach((item: HTMLElement) => {
             if (item.clientWidth > item.parentElement.clientWidth) {
-                item.setAttribute("style", `transform: scale(${item.parentElement.clientWidth / item.clientWidth});transform-origin: top left;`);
+                item.setAttribute("style", `margin-bottom:${item.parentElement.clientWidth * item.clientHeight / item.clientWidth - item.parentElement.clientHeight + 1}px;transform: scale(${item.parentElement.clientWidth / item.clientWidth});transform-origin: top left;`);
                 item.parentElement.style.overflow = "hidden";
             }
         });

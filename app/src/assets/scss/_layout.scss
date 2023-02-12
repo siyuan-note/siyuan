@@ -275,6 +275,7 @@
   padding: 0 42px;
   user-select: none;
   background-color: var(--b3-theme-surface);
+  box-sizing: border-box;
 
   &#dockLeft {
     border-right: .5px solid var(--b3-border-color);

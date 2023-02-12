@@ -91,18 +91,19 @@ export class Dock {
                         if (this.position === "Left" || this.position === "Right") {
                             this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
 opacity: ${hasActive ? 1 : 0};
-${this.position === "Right" ? "right" : "left"}:${this.element.clientWidth + .5}px;
-top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px;
-bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + 1}px;`);
+${this.position === "Right" ? "right" : "left"}:${this.element.clientWidth}px;
+top: ${document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px;
+bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight}px;`);
                         } else {
                             this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;
 opacity: ${hasActive ? 1 : 0};
 left:0;
 right:0;
-${this.position === "Top" ? ("top:" + (.5 + this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px") : ("bottom:" + (1 + this.element.clientHeight + document.getElementById("status").clientHeight) + "px")};`);
+${this.position === "Top" ? ("top:" + (this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px") : ("bottom:" + (this.element.clientHeight + document.getElementById("status").clientHeight) + "px")};`);
                         }
                         target.setAttribute("aria-label", window.siyuan.languages.pin);
                         this.resizeElement.classList.add("fn__none");
+                        resizeTabs();
                     } else {
                         target.setAttribute("aria-label", window.siyuan.languages.unpin);
                         this.layout.element.style.opacity = "";
@@ -144,8 +145,8 @@ ${this.position === "Top" ? ("top:" + (.5 + this.element.clientHeight + document
                 if (this.position === "Left" || this.position === "Right") {
                     this.layout.element.setAttribute("style", `opacity:0px;
 width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:-${this.layout.element.clientWidth}px;
-top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px;
-bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + 1}px;`);
+top: ${document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px;
+bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight}px;`);
                 } else {
                     this.layout.element.setAttribute("style", `
 opacity:0px;
@@ -174,13 +175,13 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
         }
         this.layout.element.style.opacity = "1";
         if (this.position === "Left") {
-            window.siyuan.layout.leftDock.layout.element.style.left = (window.siyuan.layout.leftDock.element.clientWidth + .5) + "px";
+            this.layout.element.style.left = this.element.clientWidth + "px";
         } else if (this.position === "Right") {
-            this.layout.element.style.right = (window.siyuan.layout.rightDock.element.clientWidth + .5) + "px";
+            this.layout.element.style.right = this.element.clientWidth + "px";
         } else if (this.position === "Top") {
-            this.layout.element.style.top = (document.getElementById("dockTop").clientHeight + document.getElementById("toolbar").clientHeight + .5) + "px";
+            this.layout.element.style.top = (this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px";
         } else if (this.position === "Bottom") {
-            this.layout.element.style.bottom = (document.getElementById("dockBottom").clientHeight + document.getElementById("status").clientHeight + 1) + "px";
+            this.layout.element.style.bottom = (this.element.clientHeight + document.getElementById("status").clientHeight) + "px";
         }
     }
 

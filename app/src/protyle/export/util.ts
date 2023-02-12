@@ -96,8 +96,8 @@ export const exportImage = (id: string) => {
         highlightRender(previewElement);
         previewElement.querySelectorAll("table").forEach((item: HTMLElement) => {
             if (item.clientWidth > item.parentElement.clientWidth) {
-                // @ts-ignore
-                item.style.zoom = item.parentElement.clientWidth / item.clientWidth;
+                item.setAttribute("style", `transform: scale(${item.parentElement.clientWidth / item.clientWidth});transform-origin: top left;`);
+                item.parentElement.style.overflow = "hidden";
             }
         });
         previewElement.querySelectorAll(".li > .protyle-action > svg").forEach(item => {

@@ -86,11 +86,20 @@ export class Dock {
                     break;
                 } else if (target.classList.contains("dock__item")) {
                     this.pin = !target.classList.contains("dock__item--pin");
+                    const hasActive = this.element.querySelector(".dock__item--active");
                     if (!this.pin) {
                         if (this.position === "Left" || this.position === "Right") {
-                            this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:${this.element.clientWidth + .5}px; top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px; bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + .5}px;`);
+                            this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
+opacity: ${hasActive?1:0};
+${this.position === "Right" ? "right" : "left"}:${this.element.clientWidth + .5}px;
+top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px;
+bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + 1}px;`);
                         } else {
-                            this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;left:0;right:0;${this.position === "Top" ? ("top:" + (.5 + this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px") : ("bottom:" + (.5 + this.element.clientHeight + document.getElementById("status").clientHeight) + "px")};`);
+                            this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;
+opacity: ${hasActive?1:0};
+left:0;
+right:0;
+${this.position === "Top" ? ("top:" + (.5 + this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px") : ("bottom:" + (1 + this.element.clientHeight + document.getElementById("status").clientHeight) + "px")};`);
                         }
                         target.setAttribute("aria-label", window.siyuan.languages.pin);
                     } else {
@@ -98,7 +107,13 @@ export class Dock {
                     }
                     target.classList.toggle("dock__item--pin");
                     this.layout.element.classList.toggle("layout--float");
-                    this.resizeElement.classList.toggle("fn__none");
+                    if (this.pin) {
+                        if (hasActive) {
+                            this.resizeElement.classList.remove("fn__none");
+                        }
+                    } else {
+                        this.resizeElement.classList.add("fn__none");
+                    }
                     event.preventDefault();
                     break;
                 }
@@ -129,9 +144,17 @@ export class Dock {
         if (!this.pin) {
             setTimeout(() => {
                 if (this.position === "Left" || this.position === "Right") {
-                    this.layout.element.setAttribute("style", `opacity:0px;width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:-${this.layout.element.clientWidth}px; top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px; bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + .5}px;`);
+                    this.layout.element.setAttribute("style", `opacity:0px;
+width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:-${this.layout.element.clientWidth}px;
+top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px;
+bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + 1}px;`);
                 } else {
-                    this.layout.element.setAttribute("style", `opacity:0px;height:${this.layout.element.clientHeight}px;left:0;right:0;${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeight}px;`);
+                    this.layout.element.setAttribute("style", `
+opacity:0px;
+height:${this.layout.element.clientHeight}px;
+left:0;
+right:0;
+${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeight}px;`);
                 }
                 this.layout.element.classList.add("layout--float");
                 this.resizeElement.classList.add("fn__none");
@@ -311,7 +334,9 @@ export class Dock {
                 document.querySelector("body").classList.contains("body--win32") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag").classList.add("fn__hidden");
             }
-            this.resizeElement.classList.remove("fn__none");
+            if (this.pin) {
+                this.resizeElement.classList.remove("fn__none");
+            }
         }
 
         // dock 中两个面板的显示关系

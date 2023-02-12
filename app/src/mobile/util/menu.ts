@@ -646,8 +646,8 @@ const initAbout = () => {
             } else if (target.id === "openWorkspace") {
                 fetchPost("/api/system/getMobileWorkspaces", {}, (response) => {
                     let selectHTML = ""
-                    response.data.forEach((item: string, index:number) => {
-                        selectHTML += `<option value="${item}" selected="selected">${item}</option>`
+                    response.data.forEach((item: string, index: number) => {
+                        selectHTML += `<option value="${item}"${index === 0 ? ' selected="selected"' : ""}>${pathPosix().basename(item)}</option>`
                     })
                     const openWorkspaceDialog = new Dialog({
                         title: window.siyuan.languages.openBy,
@@ -665,10 +665,10 @@ const initAbout = () => {
                         openWorkspaceDialog.destroy();
                     });
                     btnsElement[1].addEventListener("click", () => {
-                        const openName = openWorkspaceDialog.element.querySelector("select").value;
-                        confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${openName}?`, () => {
+                        const openPath = openWorkspaceDialog.element.querySelector("select").value;
+                        confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(openPath)}?`, () => {
                             fetchPost("/api/system/setWorkspaceDir", {
-                                path: target.getAttribute("data-path")
+                                path: openPath
                             }, () => {
                                 exitSiYuan();
                             });

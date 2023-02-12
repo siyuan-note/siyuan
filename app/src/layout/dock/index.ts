@@ -105,7 +105,7 @@ ${this.position === "Top" ? ("top:" + (.5 + this.element.clientHeight + document
                         this.resizeElement.classList.add("fn__none");
                     } else {
                         target.setAttribute("aria-label", window.siyuan.languages.unpin);
-                        this.layout.element.style.opacity = ""
+                        this.layout.element.style.opacity = "";
                         if (hasActive) {
                             this.resizeElement.classList.remove("fn__none");
                         }
@@ -168,12 +168,10 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
             this.layout.element.clientWidth === 0 && this.layout.element.style.width.startsWith("0")) {
             return;
         }
-        console.log(2, this.layout.element.clientHeight, this.layout.element.style.height)
         if ((this.position === "Top" || this.position === "Bottom") &&
             this.layout.element.clientHeight === 0 && this.layout.element.style.height.startsWith("0")) {
             return;
         }
-        console.log(3)
         this.layout.element.style.opacity = "1";
         if (this.position === "Left") {
             window.siyuan.layout.leftDock.layout.element.style.left = (window.siyuan.layout.leftDock.element.clientWidth + .5) + "px";
@@ -225,7 +223,7 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
                     }
                 });
                 if (needFocus) {
-                    this.showDock()
+                    this.showDock();
                     return;
                 }
             }
@@ -356,13 +354,12 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
             } else {
                 this.layout.element.style.height = this.getMaxSize() + "px";
             }
-            console.log(this.layout.element.style.height, this.layout.element.clientHeight)
             if ((type === "graph" || type === "globalGraph") &&
                 document.querySelector("body").classList.contains("body--win32") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag").classList.add("fn__hidden");
             }
             if (this.pin) {
-                this.layout.element.style.opacity = ""
+                this.layout.element.style.opacity = "";
                 this.resizeElement.classList.remove("fn__none");
             }
         }

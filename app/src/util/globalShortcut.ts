@@ -124,7 +124,7 @@ export const globalShortcut = () => {
         if (event.clientY < 75) {
             window.siyuan.layout.topDock.showDock();
         } else if (event.clientY > window.innerHeight - 73) {
-            window.siyuan.layout.bottomDock.showDock()
+            window.siyuan.layout.bottomDock.showDock();
         }
 
         const eventPath0 = event.composedPath()[0] as HTMLElement;

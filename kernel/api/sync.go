@@ -63,10 +63,13 @@ func performSync(c *gin.Context) {
 	}
 
 	// 云端同步模式支持 `完全手动同步` 模式 https://github.com/siyuan-note/siyuan/issues/7295
-	upload := true
-	if uploadArg := arg["upload"]; nil != uploadArg {
-		upload = uploadArg.(bool)
+	uploadArg := arg["upload"]
+	if nil == uploadArg {
+		// 必须传入同步方向，未传的话不执行同步
+		return
 	}
+
+	upload := uploadArg.(bool)
 	if upload {
 		model.SyncDataUpload()
 	} else {

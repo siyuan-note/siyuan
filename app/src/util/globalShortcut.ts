@@ -821,6 +821,27 @@ export const globalShortcut = () => {
                 window.siyuan.menus.menu.remove();
             }
         }
+        // dock float 时，点击空白处，隐藏 dock
+        const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float")
+        if (floatDockLayoutElement) {
+            if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.topDock.layout.element)) {
+                window.siyuan.layout.topDock.hideDock();
+            }
+            if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.bottomDock.layout.element)) {
+                window.siyuan.layout.bottomDock.hideDock();
+            }
+            if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.leftDock.layout.element)) {
+                window.siyuan.layout.leftDock.hideDock();
+            }
+            if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.rightDock.layout.element)) {
+                window.siyuan.layout.rightDock.hideDock();
+            }
+        } else {
+            window.siyuan.layout.topDock.hideDock();
+            window.siyuan.layout.bottomDock.hideDock();
+            window.siyuan.layout.leftDock.hideDock();
+            window.siyuan.layout.rightDock.hideDock();
+        }
         if (!hasClosestByClassName(event.target, "pdf__outer")) {
             document.querySelectorAll(".pdf__util").forEach(item => {
                 item.classList.add("fn__none");

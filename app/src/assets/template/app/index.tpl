@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="position: fixed;top: 0;right: 0;left: 0;">
 <head>
     <meta charset="UTF-8">
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag

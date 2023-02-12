@@ -199,6 +199,8 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
         } else if (this.position === "Bottom") {
             this.layout.element.style.bottom = -this.layout.element.clientHeight + "px";
         }
+        this.element.querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
+        this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
     }
 
     public toggleModel(type: TDockType, show = false, close = false) {

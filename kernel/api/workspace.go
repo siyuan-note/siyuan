@@ -249,5 +249,6 @@ func isInvalidWorkspacePath(absPath string) bool {
 	if 16 < utf8.RuneCountInString(name) {
 		return true
 	}
-	return "siyuan" == name || "conf" == name || "home" == name || "data" == name || "temp" == name
+	toLower := strings.ToLower(name)
+	return gulu.Str.Contains(toLower, []string{"conf", "home", "data", "temp"})
 }

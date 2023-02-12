@@ -90,30 +90,28 @@ export class Dock {
                     if (!this.pin) {
                         if (this.position === "Left" || this.position === "Right") {
                             this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
-opacity: ${hasActive?1:0};
+opacity: ${hasActive ? 1 : 0};
 ${this.position === "Right" ? "right" : "left"}:${this.element.clientWidth + .5}px;
 top: ${.5 + document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight}px;
 bottom: ${document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight + 1}px;`);
                         } else {
                             this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;
-opacity: ${hasActive?1:0};
+opacity: ${hasActive ? 1 : 0};
 left:0;
 right:0;
 ${this.position === "Top" ? ("top:" + (.5 + this.element.clientHeight + document.getElementById("toolbar").clientHeight) + "px") : ("bottom:" + (1 + this.element.clientHeight + document.getElementById("status").clientHeight) + "px")};`);
                         }
                         target.setAttribute("aria-label", window.siyuan.languages.pin);
+                        this.resizeElement.classList.add("fn__none");
                     } else {
                         target.setAttribute("aria-label", window.siyuan.languages.unpin);
-                    }
-                    target.classList.toggle("dock__item--pin");
-                    this.layout.element.classList.toggle("layout--float");
-                    if (this.pin) {
+                        this.layout.element.style.opacity = ""
                         if (hasActive) {
                             this.resizeElement.classList.remove("fn__none");
                         }
-                    } else {
-                        this.resizeElement.classList.add("fn__none");
                     }
+                    target.classList.toggle("dock__item--pin");
+                    this.layout.element.classList.toggle("layout--float");
                     event.preventDefault();
                     break;
                 }
@@ -162,8 +160,34 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
         }
     }
 
+    public showDock() {
+        if (this.pin || !this.element.querySelector(".dock__item--active") || this.layout.element.style.opacity === "1") {
+            return;
+        }
+        if ((this.position === "Left" || this.position === "Right") &&
+            this.layout.element.clientWidth === 0 && this.layout.element.style.width.startsWith("0")) {
+            return;
+        }
+        console.log(2, this.layout.element.clientHeight, this.layout.element.style.height)
+        if ((this.position === "Top" || this.position === "Bottom") &&
+            this.layout.element.clientHeight === 0 && this.layout.element.style.height.startsWith("0")) {
+            return;
+        }
+        console.log(3)
+        this.layout.element.style.opacity = "1";
+        if (this.position === "Left") {
+            window.siyuan.layout.leftDock.layout.element.style.left = (window.siyuan.layout.leftDock.element.clientWidth + .5) + "px";
+        } else if (this.position === "Right") {
+            this.layout.element.style.right = (window.siyuan.layout.rightDock.element.clientWidth + .5) + "px";
+        } else if (this.position === "Top") {
+            this.layout.element.style.top = (document.getElementById("dockTop").clientHeight + document.getElementById("toolbar").clientHeight + .5) + "px";
+        } else if (this.position === "Bottom") {
+            this.layout.element.style.bottom = (document.getElementById("dockBottom").clientHeight + document.getElementById("status").clientHeight + 1) + "px";
+        }
+    }
+
     public hideDock() {
-        if (this.layout.element.style.opacity === "0") {
+        if (this.layout.element.style.opacity === "0" || this.pin) {
             return;
         }
         this.layout.element.style.opacity = "0";
@@ -201,6 +225,7 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
                     }
                 });
                 if (needFocus) {
+                    this.showDock()
                     return;
                 }
             }
@@ -217,6 +242,7 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
                     document.getElementById("drag").classList.remove("fn__hidden");
                 }
                 this.resizeElement.classList.add("fn__none");
+                this.hideDock();
             }
         } else {
             this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).forEach(item => {
@@ -330,11 +356,13 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
             } else {
                 this.layout.element.style.height = this.getMaxSize() + "px";
             }
+            console.log(this.layout.element.style.height, this.layout.element.clientHeight)
             if ((type === "graph" || type === "globalGraph") &&
                 document.querySelector("body").classList.contains("body--win32") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag").classList.add("fn__hidden");
             }
             if (this.pin) {
+                this.layout.element.style.opacity = ""
                 this.resizeElement.classList.remove("fn__none");
             }
         }
@@ -393,6 +421,7 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
             anotherWnd.element.style.width = "";
         }
         resizeTabs();
+        this.showDock();
     }
 
     public add(index: number, sourceElement: Element) {
@@ -478,7 +507,7 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
         this.element.querySelectorAll(".dock__item--active").forEach((item) => {
             let size;
             if (this.position === "Left" || this.position === "Right") {
-                size = parseInt(item.getAttribute("data-width")) || 240; // 240 兼容历史数据
+                size = parseInt(item.getAttribute("data-width")) || 240;
             } else {
                 size = parseInt(item.getAttribute("data-height")) || 240;
             }

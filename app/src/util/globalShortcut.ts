@@ -101,10 +101,8 @@ export const globalShortcut = () => {
                 if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
                     event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
                     if (!hasClosestByClassName(event.target as HTMLElement, "b3-menu") &&
-                        !hasClosestByClassName(event.target as HTMLElement, "layout--float") &&
-                        window.siyuan.layout.leftDock.layout.element.style.opacity !== "1") {
-                        window.siyuan.layout.leftDock.layout.element.style.left = (window.siyuan.layout.leftDock.element.clientWidth + .5) + "px";
-                        window.siyuan.layout.leftDock.layout.element.style.opacity = "1";
+                        !hasClosestByClassName(event.target as HTMLElement, "layout--float")) {
+                        window.siyuan.layout.leftDock.showDock();
                     }
                 } else {
                     window.siyuan.layout.leftDock.hideDock();
@@ -114,9 +112,8 @@ export const globalShortcut = () => {
             if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0) {
                 if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
                     event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
-                    if (!hasClosestByClassName(event.target as HTMLElement, "layout--float") && window.siyuan.layout.rightDock.layout.element.style.opacity !== "1") {
-                        window.siyuan.layout.rightDock.layout.element.style.right = (window.siyuan.layout.rightDock.element.clientWidth + .5) + "px";
-                        window.siyuan.layout.rightDock.layout.element.style.opacity = "1";
+                    if (!hasClosestByClassName(event.target as HTMLElement, "layout--float")) {
+                        window.siyuan.layout.rightDock.showDock();
                     }
                 } else {
                     window.siyuan.layout.rightDock.hideDock();
@@ -125,15 +122,9 @@ export const globalShortcut = () => {
         }
 
         if (event.clientY < 75) {
-            if (!window.siyuan.layout.topDock.pin && window.siyuan.layout.topDock.layout.element.clientHeight > 0 && window.siyuan.layout.topDock.layout.element.style.opacity !== "1") {
-                window.siyuan.layout.topDock.layout.element.style.top = (document.getElementById("dockTop").clientHeight + document.getElementById("toolbar").clientHeight + .5) + "px";
-                window.siyuan.layout.topDock.layout.element.style.opacity = "1";
-            }
+            window.siyuan.layout.topDock.showDock();
         } else if (event.clientY > window.innerHeight - 73) {
-            if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.clientHeight > 0 && window.siyuan.layout.bottomDock.layout.element.style.opacity !== "1") {
-                window.siyuan.layout.bottomDock.layout.element.style.bottom = (document.getElementById("dockBottom").clientHeight + document.getElementById("status").clientHeight + 1) + "px";
-                window.siyuan.layout.bottomDock.layout.element.style.opacity = "1";
-            }
+            window.siyuan.layout.bottomDock.showDock()
         }
 
         const eventPath0 = event.composedPath()[0] as HTMLElement;

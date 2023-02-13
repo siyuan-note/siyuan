@@ -117,6 +117,7 @@ ${this.position === "Top" ? ("top:" + (this.element.offsetHeight + document.getE
                     } else {
                         target.setAttribute("aria-label", window.siyuan.languages.unpin);
                         this.layout.element.style.opacity = "";
+                        this.layout.element.style.transition = "var(--b3-width-transition)";
                         if (hasActive) {
                             this.resizeElement.classList.remove("fn__none");
                         }

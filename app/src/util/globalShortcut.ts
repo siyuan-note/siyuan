@@ -95,7 +95,7 @@ export const globalShortcut = () => {
             });
             window.siyuan.hideBreadcrumb = false;
         }
-        if (!isWindow() && !hasClosestByClassName(event.target, "b3-dialog")) {
+        if (!isWindow() && !hasClosestByClassName(event.target, "b3-dialog") && !hasClosestByClassName(event.target, "b3-menu")) {
             if (event.clientX < 43) {
                 if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0) {
                     if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&

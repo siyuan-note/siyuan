@@ -198,10 +198,14 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
                 if (!parentElement) {
                     parentElement = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement;
                 }
-                while (!parentElement.getClientRects || (parentElement.getClientRects && parentElement.getClientRects().length === 0)) {
-                    parentElement = parentElement.parentElement;
+                if (!parentElement) {
+                    cursorRect = range.getBoundingClientRect();
+                } else {
+                    while (!parentElement.getClientRects || (parentElement.getClientRects && parentElement.getClientRects().length === 0)) {
+                        parentElement = parentElement.parentElement;
+                    }
+                    cursorRect = parentElement.getClientRects()[0];
                 }
-                cursorRect = parentElement.getClientRects()[0];
             }
         }
     } else {

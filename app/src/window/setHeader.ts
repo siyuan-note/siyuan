@@ -31,18 +31,21 @@ export const setTabPosition = () => {
             // @ts-ignore
             dragElement.style.WebkitAppRegion = "";
         }
+        const headersLastElement = headerElement.lastElementChild as HTMLElement
         if ("darwin" === window.siyuan.config.system.os) {
             if (rect.top <= 0 && rect.left <= 0 && !getCurrentWindow().isFullScreen()) {
                 item.headersElement.style.paddingLeft = "69px";
+                headersLastElement.style.paddingRight = "42px";
             } else {
                 item.headersElement.style.paddingLeft = "";
+                headersLastElement.style.paddingRight = "";
             }
         } else {
             // 显示器缩放后像素存在小数点偏差 https://github.com/siyuan-note/siyuan/issues/7355
             if (rect.top <= 0 && rect.right + 8 >= window.innerWidth) {
-                (headerElement.lastElementChild as HTMLElement).style.paddingRight = (42 * 3) + "px";
+                headersLastElement.style.paddingRight = (42 * 4) + "px";
             } else {
-                (headerElement.lastElementChild as HTMLElement).style.paddingRight = "";
+                headersLastElement.style.paddingRight = "";
             }
         }
     });

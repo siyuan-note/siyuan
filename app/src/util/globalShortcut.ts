@@ -836,7 +836,7 @@ export const globalShortcut = () => {
             if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.rightDock.layout.element)) {
                 window.siyuan.layout.rightDock.hideDock();
             }
-        } else if (!hasClosestByClassName(event.target, "dock")) {
+        } else if (!hasClosestByClassName(event.target, "dock") && !isWindow()) {
             window.siyuan.layout.topDock.hideDock();
             window.siyuan.layout.bottomDock.hideDock();
             window.siyuan.layout.leftDock.hideDock();

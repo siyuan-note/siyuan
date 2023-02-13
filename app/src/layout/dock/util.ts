@@ -87,12 +87,8 @@ export const openOutline = (protyle: IProtyle) => {
 };
 
 export const resetFloatDockSize = () => {
-    if (!window.siyuan.layout.leftDock.pin) {
-        window.siyuan.layout.leftDock.layout.element.style.top = (document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight) + "px";
-        window.siyuan.layout.leftDock.layout.element.style.bottom = (document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight) + "px";
-        if (window.siyuan.layout.leftDock.layout.element.style.opacity === "1") {
+    if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.style.opacity === "1") {
             window.siyuan.layout.leftDock.layout.element.style.left = window.siyuan.layout.leftDock.element.clientWidth + "px";
-        }
     }
     if (!window.siyuan.layout.rightDock.pin) {
         window.siyuan.layout.rightDock.layout.element.style.top = (document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight) + "px";

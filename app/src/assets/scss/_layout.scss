@@ -16,6 +16,29 @@
     z-index: 3;
     min-height: auto;
     transition: var(--b3-transition);
+
+    &.layout--floatl {
+      border-radius: 0 8px 8px 0;
+      border: 1px solid var(--b3-border-color);
+      border-left: 0;
+      overflow: hidden;
+      box-shadow: 8px 0 24px rgb(140 149 159 / 20%);
+    }
+
+    &.layout--floatr {
+      border-left: 1px solid var(--b3-border-color);
+      box-shadow: -8px 0px 24px rgb(140 149 159 / 20%);
+    }
+
+    &.layout--floatt {
+      border-bottom: 1px solid var(--b3-border-color);
+      box-shadow: var(--b3-dialog-shadow);
+    }
+
+    &.layout--floatb {
+      border-top: 1px solid var(--b3-border-color);
+      box-shadow: 0 -8px 24px rgb(140 149 159 / 20%);
+    }
   }
 
   &__tab--active {

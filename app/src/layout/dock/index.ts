@@ -28,18 +28,22 @@ export class Dock {
             case "Left":
                 this.layout = window.siyuan.layout.layout.children[1].children[0] as Layout;
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
+                this.layout.element.classList.add("layout--floatl")
                 break;
             case "Right":
                 this.layout = window.siyuan.layout.layout.children[1].children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
+                this.layout.element.classList.add("layout--floatr")
                 break;
             case "Top":
                 this.layout = window.siyuan.layout.layout.children[0] as Layout;
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
+                this.layout.element.classList.add("layout--floatt")
                 break;
             case "Bottom":
                 this.layout = window.siyuan.layout.layout.children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
+                this.layout.element.classList.add("layout--floatb")
                 break;
         }
         this.element = document.getElementById("dock" + options.position);
@@ -88,10 +92,16 @@ export class Dock {
                     this.pin = !target.classList.contains("dock__item--pin");
                     const hasActive = this.element.querySelector(".dock__item--active");
                     if (!this.pin) {
-                        if (this.position === "Left" || this.position === "Right") {
+                        if (this.position === "Left" ) {
                             this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
 opacity: ${hasActive ? 1 : 0};
-${this.position === "Right" ? "right" : "left"}:${this.element.clientWidth}px;
+left:${this.element.clientWidth}px;
+top: 112px;
+bottom: 82px;`);
+                        } else if ( this.position === "Right") {
+                            this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
+opacity: ${hasActive ? 1 : 0};
+"right":${this.element.clientWidth}px;
 top: ${document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight}px;
 bottom: ${document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight}px;`);
                         } else {
@@ -142,9 +152,16 @@ ${this.position === "Top" ? ("top:" + (this.element.offsetHeight + document.getE
         }
         if (!this.pin) {
             setTimeout(() => {
-                if (this.position === "Left" || this.position === "Right") {
+                if (this.position === "Left") {
                     this.layout.element.setAttribute("style", `opacity:0px;
-width:${this.layout.element.clientWidth}px;${this.position === "Right" ? "right" : "left"}:-${this.layout.element.clientWidth}px;
+width:${this.layout.element.clientWidth}px;
+left:-${this.layout.element.clientWidth}px;
+top:112px;
+bottom: 82px;`);
+                } else if ( this.position === "Right") {
+                    this.layout.element.setAttribute("style", `opacity:0px;
+width:${this.layout.element.clientWidth}px;
+right:-${this.layout.element.clientWidth}px;
 top: ${document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight}px;
 bottom: ${document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight}px;`);
                 } else {

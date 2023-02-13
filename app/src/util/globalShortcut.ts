@@ -95,7 +95,38 @@ export const globalShortcut = () => {
             });
             window.siyuan.hideBreadcrumb = false;
         }
+        if (!isWindow() && !hasClosestByClassName(event.target, "b3-dialog")) {
+            if (event.clientX < 43) {
+                if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0) {
+                    if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
+                        event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
+                        if (!hasClosestByClassName(event.target, "b3-menu") &&
+                            !hasClosestByClassName(event.target, "layout--float")) {
+                            window.siyuan.layout.leftDock.showDock();
+                        }
+                    } else {
+                        window.siyuan.layout.leftDock.hideDock();
+                    }
+                }
+            } else if (event.clientX > window.innerWidth - 41) {
+                if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0) {
+                    if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
+                        event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
+                        if (!hasClosestByClassName(event.target, "layout--float")) {
+                            window.siyuan.layout.rightDock.showDock();
+                        }
+                    } else {
+                        window.siyuan.layout.rightDock.hideDock();
+                    }
+                }
+            }
 
+            if (event.clientY < 75) {
+                window.siyuan.layout.topDock.showDock();
+            } else if (event.clientY > window.innerHeight - 73) {
+                window.siyuan.layout.bottomDock.showDock();
+            }
+        }
         const eventPath0 = event.composedPath()[0] as HTMLElement;
         if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("protyle-wysiwyg") && eventPath0.style.paddingLeft) {
             // 光标在编辑器右边也需要进行显示
@@ -214,40 +245,6 @@ export const globalShortcut = () => {
                     resizeElement.setAttribute("style", `height:${tableHeight}px;left: ${Math.round(cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
                 }
             }
-        }
-
-        if (isWindow() || hasClosestByClassName(event.target, "b3-dialog")) {
-            return;
-        }
-        if (event.clientX < 43) {
-            if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0) {
-                if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
-                    event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
-                    if (!hasClosestByClassName(event.target, "b3-menu") &&
-                        !hasClosestByClassName(event.target, "layout--float")) {
-                        window.siyuan.layout.leftDock.showDock();
-                    }
-                } else {
-                    window.siyuan.layout.leftDock.hideDock();
-                }
-            }
-        } else if (event.clientX > window.innerWidth - 41) {
-            if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0) {
-                if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
-                    event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
-                    if (!hasClosestByClassName(event.target, "layout--float")) {
-                        window.siyuan.layout.rightDock.showDock();
-                    }
-                } else {
-                    window.siyuan.layout.rightDock.hideDock();
-                }
-            }
-        }
-
-        if (event.clientY < 75) {
-            window.siyuan.layout.topDock.showDock();
-        } else if (event.clientY > window.innerHeight - 73) {
-            window.siyuan.layout.bottomDock.showDock();
         }
     });
 

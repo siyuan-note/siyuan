@@ -38,7 +38,8 @@ export const setTabPosition = () => {
                 item.headersElement.style.paddingLeft = "";
             }
         } else {
-            if (rect.top <= 0 && rect.right >= window.innerWidth) {
+            // 显示器缩放后像素存在小数点偏差 https://github.com/siyuan-note/siyuan/issues/7355
+            if (rect.top <= 0 && rect.right + 8 >= window.innerWidth) {
                 (headerElement.lastElementChild as HTMLElement).style.paddingRight = (42 * 3) + "px";
             } else {
                 (headerElement.lastElementChild as HTMLElement).style.paddingRight = "";

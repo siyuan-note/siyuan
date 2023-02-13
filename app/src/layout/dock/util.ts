@@ -88,23 +88,23 @@ export const openOutline = (protyle: IProtyle) => {
 
 export const resetFloatDockSize = () => {
     if (!window.siyuan.layout.leftDock.pin) {
-        window.siyuan.layout.leftDock.layout.element.style.top = (document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight) + "px";
-        window.siyuan.layout.leftDock.layout.element.style.bottom = (document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight) + "px";
+        window.siyuan.layout.leftDock.layout.element.style.top = (document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight) + "px";
+        window.siyuan.layout.leftDock.layout.element.style.bottom = (document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight) + "px";
         if (window.siyuan.layout.leftDock.layout.element.style.opacity === "1") {
             window.siyuan.layout.leftDock.layout.element.style.left = window.siyuan.layout.leftDock.element.clientWidth + "px";
         }
     }
     if (!window.siyuan.layout.rightDock.pin) {
-        window.siyuan.layout.rightDock.layout.element.style.top = (document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight) + "px";
-        window.siyuan.layout.rightDock.layout.element.style.bottom = (document.getElementById("status").clientHeight + document.getElementById("dockBottom").clientHeight) + "px";
+        window.siyuan.layout.rightDock.layout.element.style.top = (document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight) + "px";
+        window.siyuan.layout.rightDock.layout.element.style.bottom = (document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight) + "px";
         if (window.siyuan.layout.rightDock.layout.element.style.opacity === "1") {
             window.siyuan.layout.rightDock.layout.element.style.right = window.siyuan.layout.rightDock.element.clientWidth + "px";
         }
     }
     if (!window.siyuan.layout.topDock.pin && window.siyuan.layout.topDock.layout.element.style.opacity === "1") {
-        window.siyuan.layout.topDock.layout.element.style.top = (document.getElementById("dockTop").clientHeight + document.getElementById("toolbar").clientHeight) + "px";
+        window.siyuan.layout.topDock.layout.element.style.top = (document.getElementById("dockTop").offsetHeight + document.getElementById("toolbar").offsetHeight) + "px";
     }
     if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
-        window.siyuan.layout.bottomDock.layout.element.style.bottom = (document.getElementById("dockBottom").clientHeight + document.getElementById("status").clientHeight) + "px";
+        window.siyuan.layout.bottomDock.layout.element.style.bottom = (document.getElementById("dockBottom").offsetHeight + document.getElementById("status").offsetHeight) + "px";
     }
 };

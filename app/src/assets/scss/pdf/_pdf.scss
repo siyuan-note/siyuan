@@ -319,6 +319,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  overflow: initial;
 
   #findInput {
     width: 120px;

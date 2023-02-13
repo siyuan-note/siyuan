@@ -106,7 +106,7 @@ const genWorkspace = (workspaceDirElement: Element) => {
             html += `<li data-path="${item.path}" class="b3-list-item b3-list-item--narrow${window.siyuan.config.system.workspaceDir === item.path ? " b3-list-item--focus" : ""}">
     <span class="b3-list-item__text">${pathPosix().basename(item.path)}</span>
     <span data-type="remove" class="b3-list-item__action">
-        <svg><use xlink:href="#iconTrashcan"></use></svg>
+        <svg><use xlink:href="#iconMin"></use></svg>
     </span>
 </li>`;
         });

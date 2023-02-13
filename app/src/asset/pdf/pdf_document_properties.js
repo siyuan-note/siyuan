@@ -240,10 +240,10 @@ class PDFDocumentProperties {
     // NOTE
     if (mb >= 1) {
       return `${mb >= 1 && (+mb.toPrecision(
-        3)).toLocaleString()} MB ${fileSize.toLocaleString()} bytes)`
+        3)).toLocaleString()} MB ${fileSize.toLocaleString()} bytes`
     }
     return `${mb < 1 && (+kb.toPrecision(
-      3)).toLocaleString()} KB (${fileSize.toLocaleString()} bytes)`
+      3)).toLocaleString()} KB (${fileSize.toLocaleString()} bytes`
   }
 
   async #parsePageSize(pageSizeInches, pagesRotation) {

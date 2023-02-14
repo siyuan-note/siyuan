@@ -1087,6 +1087,7 @@
     "186": "Locking cloud sync directory",
     "187": "Unlocking cloud sync directory",
     "188": "Failed to lock the cloud sync directory, please try again later",
-    "189": "Cloud sync directory is still locked by other devices, please try again later"
+    "189": "Cloud sync directory is still locked by other devices, please try again later",
+    "190": "A problem was found while validating the index, which has been automatically fixed"
   }
 }

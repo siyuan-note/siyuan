@@ -25,6 +25,7 @@ import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
 import {getDockByType} from "../layout/util";
 import {Files} from "../layout/dock/Files";
+import {openNewWindowById} from "../window/openNewWindow";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -342,6 +343,15 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             }
         });
     }
+    /// #if !BROWSER
+    openSubmenus.push({
+        label: window.siyuan.languages.openByNewWindow,
+        icon: "iconOpenWindow",
+        click() {
+            openNewWindowById(id);
+        }
+    })
+    /// #endif
     openSubmenus.push({type: "separator"});
     openSubmenus.push({
         icon: "iconPreview",

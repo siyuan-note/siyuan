@@ -525,7 +525,7 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
         this.element.querySelectorAll(".dock__item--active").forEach((item) => {
             let size;
             if (this.position === "Left" || this.position === "Right") {
-                size = parseInt(item.getAttribute("data-width")) || 240;
+                size = parseInt(item.getAttribute("data-width")) || (["graph", "globalGraph", "backlink"].includes(item.getAttribute("data-type")) ? 320 : 240);
             } else {
                 size = parseInt(item.getAttribute("data-height")) || 240;
             }

@@ -83,7 +83,9 @@ export class MobileBookmarks {
                         });
                     }
                 } else {
-                    openMobileFileById(id, [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
+                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                        openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                    });
                 }
             },
             blockExtHTML: '<span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>',

@@ -128,7 +128,28 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             return;
         }
         protyle.toolbar.range = getSelection().getRangeAt(0);
-        const start = getSelectionOffset(protyle.toolbar.range.startContainer as HTMLElement, protyle.wysiwyg.element).start;
+        // 粘贴后 range.startContainer 为空 https://github.com/siyuan-note/siyuan/issues/7360
+        if (protyle.toolbar.range.startContainer.nodeType === 3 && protyle.toolbar.range.startContainer.textContent === "") {
+            const lastSibling = hasPreviousSibling(protyle.toolbar.range.startContainer) as Text;
+            if (lastSibling && lastSibling.nodeType === 3) {
+                if (lastSibling.wholeText !== lastSibling.textContent) {
+                    let previousSibling = lastSibling.previousSibling;
+                    while (previousSibling && previousSibling.nodeType === 3) {
+                        if (previousSibling.textContent === "") {
+                            previousSibling = previousSibling.previousSibling;
+                            previousSibling.nextSibling.remove();
+                        } else {
+                            lastSibling.textContent = previousSibling.textContent + lastSibling.textContent;
+                            previousSibling.remove();
+                            break;
+                        }
+                    }
+                }
+                protyle.toolbar.range.setStart(lastSibling, lastSibling.textContent.length);
+                protyle.toolbar.range.collapse(true);
+            }
+        }
+        const start = getSelectionOffset(protyle.toolbar.range.startContainer, protyle.wysiwyg.element).start;
         const currentLineValue = protyle.toolbar.range.startContainer.textContent.substring(0, start) || "";
         const key = this.getKey(currentLineValue, protyle.options.hint.extend);
         if (typeof key === "undefined" ||

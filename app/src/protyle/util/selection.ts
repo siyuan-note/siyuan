@@ -219,7 +219,7 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
     };
 };
 
-export const getSelectionOffset = (selectElement: Element, editorElement?: Element, range?: Range) => {
+export const getSelectionOffset = (selectElement: Node, editorElement?: Element, range?: Range) => {
     const position = {
         end: 0,
         start: 0,

@@ -699,7 +699,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     const html = nodeElement.outerHTML;
     const linkAddress = linkElement.getAttribute("data-href");
     window.siyuan.menus.menu.append(new MenuItem({
-        label: `<div class="fn__hr--small"></div><textarea rows="1" style="width: 360px" class="b3-text-field" placeholder="${window.siyuan.languages.link}"></textarea><div class="fn__hr--small"></div>`,
+        label: `<div class="fn__hr--small"></div><textarea rows="1" style="width: ${isMobile() ? "200" : "360"}px" class="b3-text-field" placeholder="${window.siyuan.languages.link}"></textarea><div class="fn__hr--small"></div>`,
         bind(element) {
             const inputElement = element.querySelector("textarea");
             inputElement.value = linkAddress || "";
@@ -719,7 +719,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: `<div class="fn__hr--small"></div><textarea style="width: 360px" rows="1" class="b3-text-field" placeholder="${window.siyuan.languages.anchor}"></textarea><div class="fn__hr--small"></div>`,
+        label: `<div class="fn__hr--small"></div><textarea style="width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field" placeholder="${window.siyuan.languages.anchor}"></textarea><div class="fn__hr--small"></div>`,
         bind(element) {
             const inputElement = element.querySelector("textarea");
             // https://github.com/siyuan-note/siyuan/issues/6798
@@ -761,7 +761,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: `<div class="fn__hr--small"></div><textarea style="width: 360px" rows="1" class="b3-text-field" placeholder="${window.siyuan.languages.title}"></textarea><div class="fn__hr--small"></div>`,
+        label: `<div class="fn__hr--small"></div><textarea style="width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field" placeholder="${window.siyuan.languages.title}"></textarea><div class="fn__hr--small"></div>`,
         bind(element) {
             const inputElement = element.querySelector("textarea");
             inputElement.value = Lute.UnEscapeHTMLStr(linkElement.getAttribute("data-title") || "");

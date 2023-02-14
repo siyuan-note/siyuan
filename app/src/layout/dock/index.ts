@@ -92,13 +92,13 @@ export class Dock {
                     this.pin = !target.classList.contains("dock__item--pin");
                     const hasActive = this.element.querySelector(".dock__item--active");
                     if (!this.pin) {
-                        if (this.position === "Left" ) {
+                        if (this.position === "Left") {
                             this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
 opacity: ${hasActive ? 1 : 0};
 left:${this.element.clientWidth}px;
 top: 112px;
 bottom: 82px;`);
-                        } else if ( this.position === "Right") {
+                        } else if (this.position === "Right") {
                             this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
 opacity: ${hasActive ? 1 : 0};
 "right":${this.element.clientWidth}px;
@@ -130,8 +130,8 @@ ${this.position === "Top" ? ("top:" + (this.element.offsetHeight + document.getE
                 target = target.parentElement;
             }
         });
-        this.layout.element.addEventListener("mouseleave", (event) => {
-            if (this.pin) {
+        this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
+            if (this.pin || event.toElement.classList.contains("b3-menu")) {
                 return;
             }
             if (this.position === "Left" && event.clientX < 43) {
@@ -159,7 +159,7 @@ width:${this.layout.element.clientWidth}px;
 left:-${this.layout.element.clientWidth}px;
 top:112px;
 bottom: 82px;`);
-                } else if ( this.position === "Right") {
+                } else if (this.position === "Right") {
                     this.layout.element.setAttribute("style", `opacity:0px;
 width:${this.layout.element.clientWidth}px;
 right:-${this.layout.element.clientWidth}px;

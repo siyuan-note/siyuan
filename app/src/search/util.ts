@@ -1122,12 +1122,21 @@ const getArticle = (options: {
             k: options.k,
             mode: foldResponse.data ? 0 : 3,
             size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
+            zoom: foldResponse.data,
         }, getResponse => {
             onGet(getResponse, options.edit.protyle, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML]);
             const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`);
             if (matchElement) {
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+            }
+            const exitFocusElement = options.edit.protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
+            if (!foldResponse.data) {
+                exitFocusElement.classList.add("fn__none");
+                exitFocusElement.nextElementSibling.classList.add("fn__none");
+            } else {
+                exitFocusElement.classList.remove("fn__none");
+                exitFocusElement.nextElementSibling.classList.remove("fn__none");
             }
         });
     });

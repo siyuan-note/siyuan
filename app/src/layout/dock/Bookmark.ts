@@ -81,6 +81,7 @@ export class Bookmark extends Model {
                     openFileById({
                         id,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                        zoomIn: foldResponse.data
                     });
                 });
             },

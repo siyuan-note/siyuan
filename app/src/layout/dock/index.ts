@@ -101,7 +101,7 @@ bottom: 82px;`);
                         } else if (this.position === "Right") {
                             this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
 opacity: ${hasActive ? 1 : 0};
-"right":${this.element.clientWidth}px;
+right:${this.element.clientWidth}px;
 top: ${document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight}px;
 bottom: ${document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight}px;`);
                         } else {
@@ -113,7 +113,6 @@ ${this.position === "Top" ? ("top:" + (this.element.offsetHeight + document.getE
                         }
                         target.setAttribute("aria-label", window.siyuan.languages.pin);
                         this.resizeElement.classList.add("fn__none");
-                        resizeTabs();
                     } else {
                         target.setAttribute("aria-label", window.siyuan.languages.unpin);
                         this.layout.element.style.opacity = "";
@@ -124,6 +123,7 @@ ${this.position === "Top" ? ("top:" + (this.element.offsetHeight + document.getE
                     }
                     target.classList.toggle("dock__item--pin");
                     this.layout.element.classList.toggle("layout--float");
+                    resizeTabs();
                     event.preventDefault();
                     break;
                 }

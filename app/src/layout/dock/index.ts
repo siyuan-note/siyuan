@@ -156,13 +156,13 @@ ${this.position === "Top" ? ("top:" + (this.element.offsetHeight + document.getE
                 if (this.position === "Left") {
                     this.layout.element.setAttribute("style", `opacity:0px;
 width:${this.layout.element.clientWidth}px;
-left:-${this.layout.element.clientWidth}px;
+left:-${this.layout.element.clientWidth + 8}px;
 top:112px;
 bottom: 82px;`);
                 } else if (this.position === "Right") {
                     this.layout.element.setAttribute("style", `opacity:0px;
 width:${this.layout.element.clientWidth}px;
-right:-${this.layout.element.clientWidth}px;
+right:-${this.layout.element.clientWidth + 8}px;
 top: ${document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight}px;
 bottom: ${document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight}px;`);
                 } else {
@@ -171,7 +171,7 @@ opacity:0px;
 height:${this.layout.element.clientHeight}px;
 left:0;
 right:0;
-${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeight}px;`);
+${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeight + 8}px;`);
                 }
                 this.layout.element.classList.add("layout--float");
                 this.resizeElement.classList.add("fn__none");
@@ -209,13 +209,13 @@ ${this.position === "Top" ? "top" : "bottom"}:-${this.layout.element.clientHeigh
         }
         this.layout.element.style.opacity = "0";
         if (this.position === "Left") {
-            this.layout.element.style.left = -this.layout.element.clientWidth + "px";
+            this.layout.element.style.left = -this.layout.element.clientWidth - 8 + "px";
         } else if (this.position === "Right") {
-            this.layout.element.style.right = -this.layout.element.clientWidth + "px";
+            this.layout.element.style.right = -this.layout.element.clientWidth - 8 + "px";
         } else if (this.position === "Top") {
-            this.layout.element.style.top = -this.layout.element.clientHeight + "px";
+            this.layout.element.style.top = -this.layout.element.clientHeight - 8 + "px";
         } else if (this.position === "Bottom") {
-            this.layout.element.style.bottom = -this.layout.element.clientHeight + "px";
+            this.layout.element.style.bottom = -this.layout.element.clientHeight - 8 + "px";
         }
         this.element.querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");

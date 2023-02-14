@@ -93,8 +93,8 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 
 	var sqlBlocks []*sql.Block
 	var rootID string
-	if "NodeDocument" == block.Type {
-		sqlBlocks = sql.GetAllChildBlocks(block.ID, stmt)
+	if ast.NodeDocument == node.Type {
+		sqlBlocks = sql.GetAllChildBlocks([]string{block.ID}, stmt)
 		rootID = block.ID
 	} else {
 		sqlBlocks = sql.GetChildBlocks(block.ID, stmt)
@@ -106,22 +106,30 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 		if nil != rootBlock {
 			// 按引用处理
 			sqlRootDefs := sql.QueryDefRootBlocksByRefRootID(rootID)
-			for _, sqlRootDef := range sqlRootDefs {
-				rootDef := fromSQLBlock(sqlRootDef, "", 0)
+			rootDefBlocks := fromSQLBlocks(&sqlRootDefs, "", 0)
+			var rootIDs []string
+			for _, rootDef := range rootDefBlocks {
 				blocks = append(blocks, rootDef)
+				rootIDs = append(rootIDs, rootDef.ID)
+			}
 
-				sqlRootRefs := sql.QueryRefRootBlocksByDefRootID(sqlRootDef.ID)
-				rootRefs := fromSQLBlocks(&sqlRootRefs, "", 0)
-				rootDef.Refs = append(rootDef.Refs, rootRefs...)
+			sqlRootRefBlocks := sql.QueryRefRootBlocksByDefRootIDs(rootIDs)
+			for defRootID, sqlRefBlocks := range sqlRootRefBlocks {
+				rootBlock := getBlockIn(rootDefBlocks, defRootID)
+				if nil == rootBlock {
+					continue
+				}
+
+				refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
+				rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
 			}
 
 			// 按定义处理
-			sqlRootRefs := sql.QueryRefRootBlocksByDefRootID(rootID)
-			for _, sqlRootRef := range sqlRootRefs {
-				rootRef := fromSQLBlock(sqlRootRef, "", 0)
-				blocks = append(blocks, rootRef)
-
-				rootBlock.Refs = append(rootBlock.Refs, rootRef)
+			sqlRootRefBlocks = sql.QueryRefRootBlocksByDefRootIDs([]string{rootID})
+			for _, sqlRefBlocks := range sqlRootRefBlocks {
+				blocks = append(blocks, rootBlock)
+				refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
+				rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
 			}
 		}
 	}
@@ -157,22 +165,29 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 	if 0 < len(roots) {
 		boxID = roots[0].Box
 	}
+	var rootIDs []string
 	for _, root := range roots {
-		sqlBlocks := sql.GetAllChildBlocks(root.ID, stmt)
-		treeBlocks := fromSQLBlocks(&sqlBlocks, "", 0)
-		genTreeNodes(treeBlocks, &nodes, &links, false, style)
-		blocks = append(blocks, treeBlocks...)
+		rootIDs = append(rootIDs, root.ID)
+	}
+	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 
-		// 文档块关联
-		rootBlock := getBlockIn(treeBlocks, root.ID)
+	sqlBlocks := sql.GetAllChildBlocks(rootIDs, stmt)
+	treeBlocks := fromSQLBlocks(&sqlBlocks, "", 0)
+	genTreeNodes(treeBlocks, &nodes, &links, false, style)
+	blocks = append(blocks, treeBlocks...)
+
+	// 文档块关联
+	sqlRootRefBlocks := sql.QueryRefRootBlocksByDefRootIDs(rootIDs)
+	for defRootID, sqlRefBlocks := range sqlRootRefBlocks {
+		rootBlock := getBlockIn(treeBlocks, defRootID)
 		if nil == rootBlock {
 			continue
 		}
 
-		sqlRootRefs := sql.QueryRefRootBlocksByDefRootID(root.ID)
-		rootRefs := fromSQLBlocks(&sqlRootRefs, "", 0)
-		rootBlock.Refs = append(rootBlock.Refs, rootRefs...)
+		refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
+		rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
 	}
+
 	growTreeGraph(&forwardlinks, &backlinks, &nodes)
 	blocks = append(blocks, forwardlinks...)
 	blocks = append(blocks, backlinks...)
@@ -651,6 +666,7 @@ func graphDailyNoteFilter(local bool) string {
 		return ""
 	}
 
+	dailyNotesPaths = gulu.Str.RemoveDuplicatedElem(dailyNotesPaths)
 	buf := bytes.Buffer{}
 	for _, p := range dailyNotesPaths {
 		buf.WriteString(" AND ref.hpath NOT LIKE '" + p + "%'")

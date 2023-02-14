@@ -157,16 +157,28 @@ func QueryDefRootBlocksByRefRootID(refRootID string) (ret []*Block) {
 	return
 }
 
-func QueryRefRootBlocksByDefRootID(defRootID string) (ret []*Block) {
-	rows, err := query("SELECT * FROM blocks WHERE id IN (SELECT DISTINCT root_id FROM refs WHERE def_block_root_id = ?)", defRootID)
+func QueryRefRootBlocksByDefRootIDs(defRootIDs []string) (ret map[string][]*Block) {
+	ret = map[string][]*Block{}
+
+	stmt := "SELECT r.def_block_root_id, b.* FROM refs AS r, blocks AS b ON r.def_block_root_id IN ('" + strings.Join(defRootIDs, "','") + "')" + " AND b.id = r.root_id"
+	rows, err := query(stmt)
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			ret = append(ret, block)
+		var block Block
+		var defRootID string
+		if err := rows.Scan(&defRootID, &block.ID, &block.ParentID, &block.RootID, &block.Hash, &block.Box, &block.Path, &block.HPath, &block.Name, &block.Alias, &block.Memo, &block.Tag, &block.Content, &block.FContent, &block.Markdown, &block.Length, &block.Type, &block.SubType, &block.IAL, &block.Sort, &block.Created, &block.Updated); nil != err {
+			logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
+			return
+		}
+
+		if nil == ret[defRootID] {
+			ret[defRootID] = []*Block{}
+		} else {
+			ret[defRootID] = append(ret[defRootID], &block)
 		}
 	}
 	return

@@ -535,13 +535,13 @@ func GetChildBlocks(parentID, condition string) (ret []*Block) {
 	return
 }
 
-func GetAllChildBlocks(rootID, condition string) (ret []*Block) {
+func GetAllChildBlocks(rootIDs []string, condition string) (ret []*Block) {
 	ret = []*Block{}
-	sqlStmt := "SELECT * FROM blocks AS ref WHERE ref.root_id = ?"
+	sqlStmt := "SELECT * FROM blocks AS ref WHERE ref.root_id IN ('" + strings.Join(rootIDs, "','") + "')"
 	if "" != condition {
 		sqlStmt += " AND " + condition
 	}
-	rows, err := query(sqlStmt, rootID)
+	rows, err := query(sqlStmt)
 	if nil != err {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return

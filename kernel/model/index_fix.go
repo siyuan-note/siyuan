@@ -113,6 +113,7 @@ func resetDuplicateBlocksOnFileSys() {
 	boxes := Conf.GetBoxes()
 	luteEngine := lute.New()
 	blockIDs := map[string]bool{}
+	needRefreshUI := false
 	for _, box := range boxes {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
@@ -158,6 +159,7 @@ func resetDuplicateBlocksOnFileSys() {
 					// 如果是文档根节点，则直接重置这颗树
 					logging.LogWarnf("exist more than one tree with the same id [%s], reset it", box.ID+p)
 					recreateTree(tree, path)
+					needRefreshUI = true
 					return ast.WalkStop
 				}
 
@@ -165,6 +167,7 @@ func resetDuplicateBlocksOnFileSys() {
 				needOverwrite = true
 				n.ID = ast.NewNodeID()
 				n.SetIALAttr("id", n.ID)
+				needRefreshUI = true
 				return ast.WalkContinue
 			})
 
@@ -176,6 +179,14 @@ func resetDuplicateBlocksOnFileSys() {
 			}
 			return nil
 		})
+	}
+
+	if needRefreshUI {
+		util.ReloadUI()
+		go func() {
+			time.Sleep(time.Second * 3)
+			util.PushMsg(Conf.Language(190), 5000)
+		}()
 	}
 }
 

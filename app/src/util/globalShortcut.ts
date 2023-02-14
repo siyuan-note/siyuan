@@ -97,7 +97,9 @@ export const globalShortcut = () => {
         }
         if (!isWindow() && !hasClosestByClassName(event.target, "b3-dialog") && !hasClosestByClassName(event.target, "b3-menu")) {
             if (event.clientX < 43) {
-                if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0) {
+                if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0 &&
+                    // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
+                    (window.siyuan.layout.leftDock.element.clientWidth > 0 || (window.siyuan.layout.leftDock.element.clientWidth === 0 && event.clientX < 8))) {
                     if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
                         event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
                         if (!hasClosestByClassName(event.target, "b3-menu") &&
@@ -109,7 +111,8 @@ export const globalShortcut = () => {
                     }
                 }
             } else if (event.clientX > window.innerWidth - 41) {
-                if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0) {
+                if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0 &&
+                    (window.siyuan.layout.rightDock.element.clientWidth > 0 || (window.siyuan.layout.rightDock.element.clientWidth === 0 && event.clientX > window.innerWidth - 8))) {
                     if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
                         event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
                         if (!hasClosestByClassName(event.target, "layout--float")) {

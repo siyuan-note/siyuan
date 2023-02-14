@@ -131,7 +131,7 @@ ${this.position === "Top" ? ("top:" + (this.element.offsetHeight + document.getE
             }
         });
         this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
-            if (this.pin || event.toElement.classList.contains("b3-menu")) {
+            if (this.pin || event.toElement?.classList.contains("b3-menu")) {
                 return;
             }
             if (this.position === "Left" && event.clientX < 43) {

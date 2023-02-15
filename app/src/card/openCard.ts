@@ -71,7 +71,7 @@ export const openCard = () => {
         </div>
     </div>
 </div>`,
-                width: isMobile() ? "96vw" : "768px",
+                width: isMobile() ? "96vw" : "80vw",
                 height: "70vh",
             });
             dialog.element.querySelector("input").focus();

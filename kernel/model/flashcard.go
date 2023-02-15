@@ -43,18 +43,26 @@ var deckLock = sync.Mutex{}
 
 func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
-	deck := Decks[deckID]
-	if nil == deck {
-		return
-	}
-
-	const pageSize = 20
 	var allBlockIDs []string
-	for bID, _ := range deck.BlockCard {
-		allBlockIDs = append(allBlockIDs, bID)
-	}
-	sort.Strings(allBlockIDs)
+	const pageSize = 20
+	if "" == deckID {
+		for _, deck := range Decks {
+			for bID, _ := range deck.BlockCard {
+				allBlockIDs = append(allBlockIDs, bID)
+			}
+		}
+	} else {
+		deck := Decks[deckID]
+		if nil == deck {
+			return
+		}
 
+		for bID, _ := range deck.BlockCard {
+			allBlockIDs = append(allBlockIDs, bID)
+		}
+	}
+
+	sort.Strings(allBlockIDs)
 	start := (page - 1) * pageSize
 	end := page * pageSize
 	if start > len(allBlockIDs) {

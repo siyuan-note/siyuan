@@ -653,10 +653,10 @@ export const addResize = (obj: Layout | Wnd) => {
                     if (previousNowSize < 8 || nextNowSize < 8) {
                         return;
                     }
-                    if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) && previousNowSize < 188) {
+                    if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) && previousNowSize < 220) {
                         return;
                     }
-                    if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) && nextNowSize < 188) {
+                    if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) && nextNowSize < 320) {
                         return;
                     }
                     previousElement.style[direction === "lr" ? "width" : "height"] = previousNowSize + "px";

@@ -59,7 +59,7 @@ export const makeCard = (nodeElement: Element[]) => {
             html += genCardItem(item);
         });
         const dialog = new Dialog({
-            width: isMobile() ? "90vw" : "50vw",
+            width: isMobile() ? "90vw" : "768px",
             height: "70vh",
             title: window.siyuan.languages.riffCard,
             content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing: border-box;height: 100%">
@@ -79,7 +79,7 @@ export const makeCard = (nodeElement: Element[]) => {
             }
         });
         dialog.element.setAttribute("data-key", "makeCard");
-        dialog.element.style.zIndex = "199";
+        dialog.element.style.zIndex = "200";
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {

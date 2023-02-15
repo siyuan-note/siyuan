@@ -374,6 +374,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		tree = parse.Parse("", []byte(""), luteEngine.ParseOptions)
 		tree.Root.FirstChild.InsertBefore(node)
 	}
+	tree.HPath = bt.HPath
 
 	if merge {
 		var mergeErr error
@@ -492,6 +493,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		tree = parse.Parse("", []byte(""), luteEngine.ParseOptions)
 		tree.Root.FirstChild.InsertBefore(node)
 	}
+	tree.HPath = bt.HPath
 
 	if merge {
 		var mergeErr error

@@ -367,7 +367,7 @@ export class Breadcrumb {
                 type: "submenu",
                 submenu: editSubmenu
             }).element);
-            window.siyuan.menus.menu.append(exportMd(protyle.block.parentID));
+            window.siyuan.menus.menu.append(exportMd(protyle.block.id));
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 iconHTML: Constants.ZWSP,

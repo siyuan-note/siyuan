@@ -4,7 +4,8 @@ import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {viewCards} from "./viewCards";
 
 export const openCard = () => {
     const exit = window.siyuan.dialogs.find(item => {
@@ -33,7 +34,12 @@ export const openCard = () => {
                 content: `<div class="fn__flex-column b3-dialog__content" style="box-sizing: border-box;max-height: 100%">
     <div class="fn__flex">
         <select class="b3-select fn__flex-1">${decksHTML}</select>
-        <div style="margin-left: 8px" class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}" data-type="count">${countHTML}</div>
+        <span class="fn__space"></span>
+        <span data-type="view" class="block__icon block__icon--show">
+            <svg><use xlink:href="#iconEye"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <div class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}" data-type="count">${countHTML}</div>
     </div>
     <div class="fn__hr--b"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="b3-dialog__cardblock b3-dialog__cardblock--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
@@ -65,7 +71,7 @@ export const openCard = () => {
         </div>
     </div>
 </div>`,
-                width: isMobile() ? "96vw" : "50vw",
+                width: isMobile() ? "96vw" : "768px",
                 height: "70vh",
             });
             dialog.element.querySelector("input").focus();
@@ -123,6 +129,13 @@ export const openCard = () => {
                 });
             });
             dialog.element.addEventListener("click", (event) => {
+                const viewElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "view");
+                if (viewElement) {
+                    viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 let type = "";
                 if (typeof event.detail === "string") {
                     if (event.detail === "a") {

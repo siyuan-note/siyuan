@@ -148,10 +148,10 @@ export const query = {
         </label>
         <label class="fn__flex">
             <div class="fn__flex-1">
-                ${window.siyuan.languages.custom}
+                ${window.siyuan.languages.allAttrs}
             </div>
             <span class="fn__space"></span>
-            <input class="b3-switch" id="custom" type="checkbox"${window.siyuan.config.search.custom ? " checked" : ""}/>
+            <input class="b3-switch" id="ial" type="checkbox"${window.siyuan.config.search.ial ? " checked" : ""}/>
         </label>
     </div>
 </div>
@@ -272,7 +272,7 @@ export const query = {
                     name: (query.element.querySelector("#name") as HTMLInputElement).checked,
                     alias: (query.element.querySelector("#alias") as HTMLInputElement).checked,
                     memo: (query.element.querySelector("#memo") as HTMLInputElement).checked,
-                    custom: (query.element.querySelector("#custom") as HTMLInputElement).checked,
+                    ial: (query.element.querySelector("#ial") as HTMLInputElement).checked,
                     limit: parseInt((query.element.querySelector("#limit") as HTMLInputElement).value),
                     caseSensitive: (query.element.querySelector("#caseSensitive") as HTMLInputElement).checked,
                     backlinkMentionName: (query.element.querySelector("#backlinkMentionName") as HTMLInputElement).checked,

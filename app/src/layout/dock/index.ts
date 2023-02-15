@@ -157,9 +157,7 @@ top: 112px;bottom: 82px;left:0`);
         } else if (this.position === "Right") {
             this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;
 opacity:${show ? 1 : 0};
-right:0;
-top: ${document.getElementById("toolbar").offsetHeight + document.getElementById("dockTop").offsetHeight}px;
-bottom: ${document.getElementById("status").offsetHeight + document.getElementById("dockBottom").offsetHeight}px;`);
+right:0;top: 112px;bottom: 82px;`);
         } else {
             this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;
 opacity:${show ? 1 : 0};

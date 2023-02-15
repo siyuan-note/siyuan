@@ -26,8 +26,11 @@
     }
 
     &.layout--floatr {
-      border-left: 1px solid var(--b3-border-color);
+      border: 1px solid var(--b3-border-color);
       box-shadow: -8px 0px 24px rgb(140 149 159 / 20%);
+      border-right: 0;
+      border-radius: 8px 0 0 8px;
+      overflow: hidden;
     }
 
     &.layout--floatt {

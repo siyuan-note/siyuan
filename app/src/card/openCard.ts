@@ -74,6 +74,7 @@ export const openCard = () => {
                 width: isMobile() ? "96vw" : "80vw",
                 height: "70vh",
             });
+            (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
             dialog.element.querySelector("input").focus();
             const editor = new Protyle(dialog.element.querySelector("[data-type='render']") as HTMLElement, {
                 blockId: "",

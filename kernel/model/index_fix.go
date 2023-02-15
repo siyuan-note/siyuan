@@ -115,9 +115,26 @@ func resetDuplicateBlocksOnFileSys() {
 	blockIDs := map[string]bool{}
 	needRefreshUI := false
 	for _, box := range boxes {
+		// 校验索引阶段自动删除历史遗留的笔记本 history 文件夹
+		legacyHistory := filepath.Join(util.DataDir, box.ID, ".siyuan", "history")
+		if gulu.File.IsDir(legacyHistory) {
+			if removeErr := os.RemoveAll(legacyHistory); nil != removeErr {
+				logging.LogErrorf("remove legacy history failed: %s", removeErr)
+			} else {
+				logging.LogInfof("removed legacy history [%s]", legacyHistory)
+			}
+		}
+
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
-			if info.IsDir() || filepath.Ext(path) != ".sy" || strings.Contains(filepath.ToSlash(path), "/assets/") {
+			if info.IsDir() {
+				if strings.HasPrefix(info.Name(), ".") {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+
+			if filepath.Ext(path) != ".sy" || strings.Contains(filepath.ToSlash(path), "/assets/") {
 				return nil
 			}
 
@@ -217,11 +234,20 @@ func fixBlockTreeByFileSys() {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
-			if !info.IsDir() && filepath.Ext(path) == ".sy" && !strings.Contains(filepath.ToSlash(path), "/assets/") {
-				p := path[len(boxPath):]
-				p = filepath.ToSlash(p)
-				paths = append(paths, p)
+			if info.IsDir() {
+				if strings.HasPrefix(info.Name(), ".") {
+					return filepath.SkipDir
+				}
+				return nil
 			}
+
+			if filepath.Ext(path) != ".sy" || strings.Contains(filepath.ToSlash(path), "/assets/") {
+				return nil
+			}
+
+			p := path[len(boxPath):]
+			p = filepath.ToSlash(p)
+			paths = append(paths, p)
 			return nil
 		})
 

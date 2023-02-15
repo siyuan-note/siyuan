@@ -683,6 +683,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
+	stmt += customIALFilter(query)
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
 	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
@@ -714,6 +715,7 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE `" + table + "` MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
+	stmt += customIALFilter(query)
 	result, _ := sql.Query(stmt)
 	if 1 > len(result) {
 		return
@@ -721,6 +723,20 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 	matchedBlockCount = int(result[0]["matches"].(int64))
 	matchedRootCount = int(result[0]["docs"].(int64))
 	return
+}
+
+// customIALFilter 用于组装自定义属性过滤条件。
+// 打开自定义属性搜索选项后出现多余搜索结果 https://github.com/siyuan-note/siyuan/issues/7367
+func customIALFilter(query string) string {
+	if !Conf.Search.Custom {
+		return ""
+	}
+
+	reg := strings.TrimPrefix(query, "\"")
+	reg = strings.TrimSuffix(reg, "\"")
+	reg = regexp.QuoteMeta(reg)
+	reg = "custom\\-.*" + reg + ".*"
+	return " AND ial REGEXP '" + reg + "'"
 }
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {

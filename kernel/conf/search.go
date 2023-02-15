@@ -108,9 +108,6 @@ func (s *Search) NAMFilter(keyword string) string {
 	if s.Memo {
 		buf.WriteString(" OR memo LIKE '%" + keyword + "%'")
 	}
-	if s.Custom {
-		buf.WriteString(" OR ial LIKE '%=%" + keyword + "%'")
-	}
 	return buf.String()
 }
 

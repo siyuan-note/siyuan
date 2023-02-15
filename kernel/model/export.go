@@ -46,6 +46,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -360,7 +361,19 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 }
 
 func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string) {
-	tree, _ := loadTreeByBlockID(id)
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+
+	var tree *parse.Tree
+	luteEngine := NewLute()
+	tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	if "d" != bt.Type {
+		node := treenode.GetNodeInTree(tree, id)
+		tree = parse.Parse("", []byte(""), luteEngine.ParseOptions)
+		tree.Root.FirstChild.InsertBefore(node)
+	}
 
 	if merge {
 		var mergeErr error
@@ -435,7 +448,6 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
-	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
@@ -466,7 +478,20 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 
 func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, dom string) {
 	savePath = strings.TrimSpace(savePath)
-	tree, _ := loadTreeByBlockID(id)
+
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+
+	var tree *parse.Tree
+	luteEngine := NewLute()
+	tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	if "d" != bt.Type {
+		node := treenode.GetNodeInTree(tree, id)
+		tree = parse.Parse("", []byte(""), luteEngine.ParseOptions)
+		tree.Root.FirstChild.InsertBefore(node)
+	}
 
 	if merge {
 		var mergeErr error
@@ -531,7 +556,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 	}
 
-	luteEngine := NewLute()
 	if !pdf && "" != savePath { // 导出 HTML 需要复制静态资源
 		srcs := []string{"stage/build/export", "stage/build/fonts", "stage/protyle"}
 		for _, src := range srcs {

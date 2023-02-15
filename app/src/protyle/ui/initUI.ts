@@ -124,7 +124,6 @@ export const setPadding = (protyle: IProtyle) => {
     } else {
         protyle.wysiwyg.element.style.padding = `16px ${min16}px ${bottomHeight} ${min24}px`;
     }
-    protyle.wysiwyg.element.style.transition = ""; // addWnd 时防止向右分屏，左侧文档抖动，移除动画
     if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
         setTimeout(() => { // https://github.com/siyuan-note/siyuan/issues/5612
             protyle.wysiwyg.element.querySelectorAll('.code-block [contenteditable="true"]').forEach((block: HTMLElement) => {

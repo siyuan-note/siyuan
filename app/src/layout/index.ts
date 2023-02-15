@@ -81,10 +81,14 @@ export class Layout {
                     item.element.classList.add("fn__flex-1");
                     if (this.direction === "lr") {
                         // 向右分屏，左侧文档抖动，移除动画和边距
-                        item.element.querySelectorAll(".protyle-wysiwyg").forEach((element: HTMLElement) => {
-                            element.style.transition = "none";
-                            element.style.paddingRight = "16px";
-                            element.style.paddingLeft = "24px";
+                        item.element.querySelectorAll(".protyle-content").forEach((element: HTMLElement) => {
+                            if (!element.parentElement.classList.contains("fn__none")) {
+                                element.classList.remove("protyle-content--transition");
+                                const wysiwygElement = element.querySelector(".protyle-wysiwyg") as HTMLElement;
+                                wysiwygElement.style.paddingRight = "16px";
+                                wysiwygElement.style.paddingLeft = "24px";
+                                element.classList.add("protyle-content--transition");
+                            }
                         });
                     }
                     item.element.after(child.element);

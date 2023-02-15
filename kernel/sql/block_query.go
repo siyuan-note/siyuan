@@ -247,7 +247,11 @@ func queryAliases() (ret []string) {
 func queryDocIDsByTitle(title string, excludeIDs []string) (ret []string) {
 	ret = []string{}
 	notIn := "('" + strings.Join(excludeIDs, "','") + "')"
-	sqlStmt := "SELECT id FROM blocks WHERE type = 'd' AND content = ? AND id NOT IN " + notIn + " LIMIT ?"
+
+	sqlStmt := "SELECT id FROM blocks WHERE type = 'd' AND content LIKE ? AND id NOT IN " + notIn + " LIMIT ?"
+	if caseSensitive {
+		sqlStmt = "SELECT id FROM blocks WHERE type = 'd' AND content = ? AND id NOT IN " + notIn + " LIMIT ?"
+	}
 	rows, err := query(sqlStmt, title, 32)
 	if nil != err {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)

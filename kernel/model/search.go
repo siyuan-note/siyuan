@@ -735,7 +735,7 @@ func customIALFilter(query string) string {
 	reg := strings.TrimPrefix(query, "\"")
 	reg = strings.TrimSuffix(reg, "\"")
 	reg = regexp.QuoteMeta(reg)
-	reg = "custom\\-.*" + reg + ".*\\=.*" + reg + ".*\""
+	reg = "custom\\-.*" + reg + ".*"
 	return " AND ial REGEXP '" + reg + "'"
 }
 

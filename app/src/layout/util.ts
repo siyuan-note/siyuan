@@ -598,113 +598,112 @@ export const getInstanceById = (id: string, layout = window.siyuan.layout.center
 };
 
 export const addResize = (obj: Layout | Wnd) => {
-    if (obj.resize) {
-        const resizeWnd = (resizeElement: HTMLElement, direction: string) => {
-            const setSize = (item: HTMLElement, direction: string) => {
-                if (item.classList.contains("fn__flex-1")) {
-                    if (direction === "lr") {
-                        item.style.width = item.clientWidth + "px";
-                    } else {
-                        item.style.height = item.clientHeight + "px";
+    if (!obj.resize) {
+        return
+    }
+    const resizeWnd = (resizeElement: HTMLElement, direction: string) => {
+        const setSize = (item: HTMLElement, direction: string) => {
+            if (item.classList.contains("fn__flex-1")) {
+                if (direction === "lr") {
+                    item.style.width = item.clientWidth + "px";
+                } else {
+                    item.style.height = item.clientHeight + "px";
+                }
+                item.classList.remove("fn__flex-1");
+            }
+        };
+
+        let range: Range;
+        resizeElement.addEventListener("mousedown", (event: MouseEvent) => {
+            getAllModels().editor.forEach((item) => {
+                if (item.editor && item.editor.protyle && item.element.parentElement) {
+                    hideElements(["gutter"], item.editor.protyle);
+                }
+            });
+
+            if (getSelection().rangeCount > 0) {
+                range = getSelection().getRangeAt(0);
+            }
+            const documentSelf = document;
+            const nextElement = resizeElement.nextElementSibling as HTMLElement;
+            const previousElement = resizeElement.previousElementSibling as HTMLElement;
+            nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
+            previousElement.style.overflow = "auto";
+            if (!nextElement.nextElementSibling) {
+                if (!previousElement.previousElementSibling) {
+                    setSize(previousElement, direction);
+                } else {
+                    setSize(nextElement, direction);
+                }
+            } else if (nextElement.nextElementSibling?.nextElementSibling &&
+                nextElement.parentElement.lastElementChild.isSameNode(nextElement.nextElementSibling.nextElementSibling)) {
+                setSize(previousElement, direction);
+            }
+            const x = event[direction === "lr" ? "clientX" : "clientY"];
+            const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
+            const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
+
+            documentSelf.ondragstart = () => {
+                // 文件树拖拽会产生透明效果
+                document.querySelectorAll(".sy__file .b3-list-item").forEach((item: HTMLElement) => {
+                    if (item.style.opacity === "0.1") {
+                        item.style.opacity = "";
                     }
-                    item.classList.remove("fn__flex-1");
+                });
+                return false;
+            };
+
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+                const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+                if (previousNowSize < 8 || nextNowSize < 8) {
+                    return;
+                }
+                if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) && previousNowSize < 220) {
+                    return;
+                }
+                if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) && nextNowSize < 320) {
+                    return;
+                }
+                if (!previousElement.classList.contains("fn__flex-1")) {
+                    previousElement.style[direction === "lr" ? "width" : "height"] = previousNowSize + "px";
+                }
+                if (!nextElement.classList.contains("fn__flex-1")) {
+                    nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
                 }
             };
 
-            let range: Range;
-            resizeElement.addEventListener("mousedown", (event: MouseEvent) => {
-                getAllModels().editor.forEach((item) => {
-                    if (item.editor && item.editor.protyle && item.element.parentElement) {
-                        hideElements(["gutter"], item.editor.protyle);
-                    }
-                });
-
-                if (getSelection().rangeCount > 0) {
-                    range = getSelection().getRangeAt(0);
+            documentSelf.onmouseup = () => {
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+                resizeTabs();
+                if (!isWindow()) {
+                    window.siyuan.layout.leftDock.setSize();
+                    window.siyuan.layout.topDock.setSize();
+                    window.siyuan.layout.bottomDock.setSize();
+                    window.siyuan.layout.rightDock.setSize();
                 }
-                const documentSelf = document;
-                const nextElement = resizeElement.nextElementSibling as HTMLElement;
-                const previousElement = resizeElement.previousElementSibling as HTMLElement;
-                nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
-                previousElement.style.overflow = "auto";
-                setSize(nextElement, direction);
-                setSize(previousElement, direction);
-                const x = event[direction === "lr" ? "clientX" : "clientY"];
-                const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
-                const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
+                if (range) {
+                    focusByRange(range);
+                }
+                nextElement.style.overflow = "";
+                previousElement.style.overflow = "";
+            };
+        });
+    };
 
-                documentSelf.ondragstart = () => {
-                    // 文件树拖拽会产生透明效果
-                    document.querySelectorAll(".sy__file .b3-list-item").forEach((item: HTMLElement) => {
-                        if (item.style.opacity === "0.1") {
-                            item.style.opacity = "";
-                        }
-                    });
-                    return false;
-                };
-
-                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    moveEvent.preventDefault();
-                    moveEvent.stopPropagation();
-                    const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
-                    const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
-                    if (previousNowSize < 8 || nextNowSize < 8) {
-                        return;
-                    }
-                    if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) && previousNowSize < 220) {
-                        return;
-                    }
-                    if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) && nextNowSize < 320) {
-                        return;
-                    }
-                    previousElement.style[direction === "lr" ? "width" : "height"] = previousNowSize + "px";
-                    nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
-                };
-
-                documentSelf.onmouseup = () => {
-                    documentSelf.onmousemove = null;
-                    documentSelf.onmouseup = null;
-                    documentSelf.ondragstart = null;
-                    documentSelf.onselectstart = null;
-                    documentSelf.onselect = null;
-
-                    if (!nextElement.nextElementSibling) {
-                        if (!previousElement.previousElementSibling) {
-                            nextElement.style[direction === "lr" ? "width" : "height"] = "";
-                            nextElement.classList.add("fn__flex-1");
-                        } else {
-                            previousElement.style[direction === "lr" ? "width" : "height"] = "";
-                            previousElement.classList.add("fn__flex-1");
-                        }
-                    } else if (nextElement.nextElementSibling?.nextElementSibling &&
-                        nextElement.parentElement.lastElementChild.isSameNode(nextElement.nextElementSibling.nextElementSibling)) {
-                        nextElement.style[direction === "lr" ? "width" : "height"] = "";
-                        nextElement.classList.add("fn__flex-1");
-                    }
-                    resizeTabs();
-                    if (!isWindow()) {
-                        window.siyuan.layout.leftDock.setSize();
-                        window.siyuan.layout.topDock.setSize();
-                        window.siyuan.layout.bottomDock.setSize();
-                        window.siyuan.layout.rightDock.setSize();
-                    }
-                    if (range) {
-                        focusByRange(range);
-                    }
-                    nextElement.style.overflow = "";
-                    previousElement.style.overflow = "";
-                };
-            });
-        };
-
-        const resizeElement = document.createElement("div");
-        if (obj.resize === "lr") {
-            resizeElement.classList.add("layout__resize--lr");
-        }
-        resizeElement.classList.add("layout__resize");
-        obj.element.insertAdjacentElement("beforebegin", resizeElement);
-        resizeWnd(resizeElement, obj.resize);
+    const resizeElement = document.createElement("div");
+    if (obj.resize === "lr") {
+        resizeElement.classList.add("layout__resize--lr");
     }
+    resizeElement.classList.add("layout__resize");
+    obj.element.insertAdjacentElement("beforebegin", resizeElement);
+    resizeWnd(resizeElement, obj.resize);
 };
 
 export const newCenterEmptyTab = () => {

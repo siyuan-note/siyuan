@@ -72,6 +72,13 @@ progressLoading: 400
 .b3-snackbar: 503
 */
 
+html {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
 .inbox {
   &__details {
     position: absolute;

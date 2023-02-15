@@ -15,7 +15,7 @@
     position: fixed;
     z-index: 3;
     min-height: auto;
-    transition: var(--b3-transition);
+    transition: transform .2s cubic-bezier(0, 0, .2, 1) 0ms, opacity .2s cubic-bezier(0, 0, .2, 1) 0ms;
 
     &.layout--floatl {
       border-radius: 0 8px 8px 0;

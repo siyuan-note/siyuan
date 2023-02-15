@@ -825,7 +825,7 @@ export const globalShortcut = () => {
             }
         }
         // dock float 时，点击空白处，隐藏 dock
-        const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float")
+        const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float", true);
         if (floatDockLayoutElement) {
             if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.topDock.layout.element)) {
                 window.siyuan.layout.topDock.hideDock();

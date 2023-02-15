@@ -591,6 +591,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + quotedKeyword + ")' AND type IN " + Conf.Search.TypeFilter()
+	stmt = customIALFilter(quotedKeyword)
 	orderBy := ` order by case
              when name = '${keyword}' then 10
              when alias = '${keyword}' then 20
@@ -681,9 +682,10 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 		"tag, " +
 		"highlight(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
-	stmt += boxFilter + pathFilter
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += customIALFilter(query)
+	stmt += ") AND type IN " + typeFilter
+	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
 	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
@@ -713,9 +715,10 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 		table = "blocks_fts_case_insensitive"
 	}
 
-	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE `" + table + "` MATCH '" + columnFilter() + ":(" + query + ")' AND type IN " + typeFilter
-	stmt += boxFilter + pathFilter
+	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += customIALFilter(query)
+	stmt += ") AND type IN " + typeFilter
+	stmt += boxFilter + pathFilter
 	result, _ := sql.Query(stmt)
 	if 1 > len(result) {
 		return
@@ -735,8 +738,8 @@ func customIALFilter(query string) string {
 	reg := strings.TrimPrefix(query, "\"")
 	reg = strings.TrimSuffix(reg, "\"")
 	reg = regexp.QuoteMeta(reg)
-	reg = "custom\\-.*" + reg + ".*"
-	return " AND ial REGEXP '" + reg + "'"
+	reg = "custom-.*" + reg + ".*"
+	return " OR ial REGEXP '" + reg + "'"
 }
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
@@ -902,9 +905,6 @@ func columnFilter() string {
 	}
 	if Conf.Search.Memo {
 		buf.WriteString(" memo")
-	}
-	if Conf.Search.Custom {
-		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")
 	return buf.String()

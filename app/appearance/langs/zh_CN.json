@@ -1,4 +1,5 @@
 {
+  "allAttrs": "所有属性名和属性值",
   "chooseSyncDirection": "选择同步方向",
   "uploadData2Cloud": "⬆️ 将数据上传到云端",
   "uploadData2CloudTip": "以本地数据为准覆盖云端数据",

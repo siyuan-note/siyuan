@@ -466,7 +466,7 @@ declare interface IConfig {
         name: boolean
         alias: boolean
         memo: boolean
-        custom: boolean
+        ial: boolean
         limit: number
         caseSensitive: boolean
         backlinkMentionName: boolean

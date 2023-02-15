@@ -866,7 +866,7 @@ func fieldRegexp(regexp string) string {
 		buf.WriteString(regexp)
 		buf.WriteString("'")
 	}
-	if Conf.Search.Custom {
+	if Conf.Search.IAL {
 		buf.WriteString(" OR ial REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
@@ -889,7 +889,7 @@ func columnFilter() string {
 	if Conf.Search.Memo {
 		buf.WriteString(" memo")
 	}
-	if Conf.Search.Custom {
+	if Conf.Search.IAL {
 		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")

@@ -1,4 +1,5 @@
 {
+  "allAttrs": "Tous les noms d'attributs et les valeurs d'attributs",
   "chooseSyncDirection": "Choisir la direction de synchronisation",
   "uploadData2Cloud": "⬆️ Télécharger des données dans le cloud",
   "uploadData2CloudTip": "Écraser les données cloud basées sur les données locales",

@@ -693,9 +693,7 @@ export const addResize = (obj: Layout | Wnd) => {
                     if (range) {
                         focusByRange(range);
                     }
-                    nextElement.style.transition = "var(--b3-width-transition)";
                     nextElement.style.overflow = "";
-                    previousElement.style.transition = "var(--b3-width-transition)";
                     previousElement.style.overflow = "";
                 };
             });
@@ -707,8 +705,6 @@ export const addResize = (obj: Layout | Wnd) => {
         }
         resizeElement.classList.add("layout__resize");
         obj.element.insertAdjacentElement("beforebegin", resizeElement);
-        obj.element.style.transition = "var(--b3-width-transition)";
-        (resizeElement.previousElementSibling as HTMLElement).style.transition = "var(--b3-width-transition)";
         resizeWnd(resizeElement, obj.resize);
     }
 };

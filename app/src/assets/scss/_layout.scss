@@ -11,11 +11,18 @@
     }
   }
 
+  &--floatl,
+  &--floatr,
+  &--floatt,
+  &--floatb {
+    transition: var(--b3-width-transition);
+  }
+
   &--float {
     position: fixed;
     z-index: 3;
     min-height: auto;
-    transition: transform .2s cubic-bezier(0, 0, .2, 1) 0ms, opacity .2s cubic-bezier(0, 0, .2, 1) 0ms;
+    transition: transform .2s cubic-bezier(0, 0, .2, 1) 0ms, opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
 
     &.layout--floatl {
       border-radius: 0 8px 8px 0;

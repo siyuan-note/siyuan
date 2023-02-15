@@ -591,7 +591,6 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + quotedKeyword + ")' AND type IN " + Conf.Search.TypeFilter()
-	stmt = customIALFilter(quotedKeyword)
 	orderBy := ` order by case
              when name = '${keyword}' then 10
              when alias = '${keyword}' then 20
@@ -609,7 +608,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
              else 65535 end ASC, sort ASC, length ASC`
 	orderBy = strings.ReplaceAll(orderBy, "${keyword}", keyword)
 	stmt += orderBy + " LIMIT " + strconv.Itoa(Conf.Search.Limit)
-	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
+	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -645,7 +644,7 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy stri
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
-	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
+	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -683,7 +682,6 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 		"highlight(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
-	stmt += customIALFilter(query)
 	stmt += ") AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
@@ -716,7 +714,6 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 	}
 
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
-	stmt += customIALFilter(query)
 	stmt += ") AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
 	result, _ := sql.Query(stmt)
@@ -726,20 +723,6 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 	matchedBlockCount = int(result[0]["matches"].(int64))
 	matchedRootCount = int(result[0]["docs"].(int64))
 	return
-}
-
-// customIALFilter 用于组装自定义属性过滤条件。
-// 打开自定义属性搜索选项后出现多余搜索结果 https://github.com/siyuan-note/siyuan/issues/7367
-func customIALFilter(query string) string {
-	if !Conf.Search.Custom {
-		return ""
-	}
-
-	reg := strings.TrimPrefix(query, "\"")
-	reg = strings.TrimSuffix(reg, "\"")
-	reg = regexp.QuoteMeta(reg)
-	reg = "custom-.*" + reg + ".*"
-	return " OR ial REGEXP '" + reg + "'"
 }
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
@@ -905,6 +888,9 @@ func columnFilter() string {
 	}
 	if Conf.Search.Memo {
 		buf.WriteString(" memo")
+	}
+	if Conf.Search.Custom {
+		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")
 	return buf.String()

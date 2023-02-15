@@ -366,15 +366,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		return
 	}
 
-	var tree *parse.Tree
-	luteEngine := NewLute()
-	tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-	if "d" != bt.Type {
-		node := treenode.GetNodeInTree(tree, id)
-		tree = parse.Parse("", []byte(""), luteEngine.ParseOptions)
-		tree.Root.FirstChild.InsertBefore(node)
-	}
-	tree.HPath = bt.HPath
+	tree := prepareExportTree(bt)
 
 	if merge {
 		var mergeErr error
@@ -449,6 +441,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
+	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
@@ -485,15 +478,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		return
 	}
 
-	var tree *parse.Tree
-	luteEngine := NewLute()
-	tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-	if "d" != bt.Type {
-		node := treenode.GetNodeInTree(tree, id)
-		tree = parse.Parse("", []byte(""), luteEngine.ParseOptions)
-		tree.Root.FirstChild.InsertBefore(node)
-	}
-	tree.HPath = bt.HPath
+	tree := prepareExportTree(bt)
 
 	if merge {
 		var mergeErr error
@@ -558,6 +543,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 	}
 
+	luteEngine := NewLute()
 	if !pdf && "" != savePath { // 导出 HTML 需要复制静态资源
 		srcs := []string{"stage/build/export", "stage/build/fonts", "stage/protyle"}
 		for _, src := range srcs {
@@ -609,6 +595,29 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	luteEngine.SetSanitize(false)
 	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
+	return
+}
+
+func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
+	luteEngine := NewLute()
+	ret, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	if "d" != bt.Type {
+		node := treenode.GetNodeInTree(ret, bt.ID)
+		nodes := []*ast.Node{node}
+		if "h" == bt.Type {
+			children := treenode.HeadingChildren(node)
+			for _, child := range children {
+				nodes = append(nodes, child)
+			}
+		}
+
+		ret = parse.Parse("", []byte(""), luteEngine.ParseOptions)
+		first := ret.Root.FirstChild
+		for _, node := range nodes {
+			first.InsertBefore(node)
+		}
+	}
+	ret.HPath = bt.HPath
 	return
 }
 
@@ -1499,6 +1508,11 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 				unlinks = append(unlinks, n)
 				return ast.WalkContinue
 			}
+		}
+
+		// 导出时去掉内容块闪卡样式 https://github.com/siyuan-note/siyuan/issues/7374
+		if n.IsBlock() {
+			n.RemoveIALAttr("custom-riff-decks")
 		}
 
 		switch n.Type {

@@ -113,23 +113,26 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 				rootIDs = append(rootIDs, rootDef.ID)
 			}
 
-			sqlRootRefBlocks := sql.QueryRefRootBlocksByDefRootIDs(rootIDs)
-			for defRootID, sqlRefBlocks := range sqlRootRefBlocks {
+			sqlRefBlocks := sql.QueryRefRootBlocksByDefRootIDs(rootIDs)
+			for defRootID, sqlRefBlocks := range sqlRefBlocks {
 				rootBlock := getBlockIn(rootDefBlocks, defRootID)
 				if nil == rootBlock {
 					continue
 				}
 
-				refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
-				rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
-			}
-
-			// 按定义处理
-			sqlRootRefBlocks = sql.QueryRefRootBlocksByDefRootIDs([]string{rootID})
-			for _, sqlRefBlocks := range sqlRootRefBlocks {
 				blocks = append(blocks, rootBlock)
 				refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
 				rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
+				blocks = append(blocks, refBlocks...)
+			}
+
+			// 按定义处理
+			sqlRefBlocks = sql.QueryRefRootBlocksByDefRootIDs([]string{rootID})
+			for _, sqlRefBlocks := range sqlRefBlocks {
+				blocks = append(blocks, rootBlock)
+				refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
+				rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
+				blocks = append(blocks, refBlocks...)
 			}
 		}
 	}

@@ -293,6 +293,9 @@ func InitConf() {
 	if 1 > Conf.Search.Limit {
 		Conf.Search.Limit = 64
 	}
+	if 32 > Conf.Search.Limit {
+		Conf.Search.Limit = 32
+	}
 	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
 		Conf.Search.BacklinkMentionKeywordsLimit = 512
 	}

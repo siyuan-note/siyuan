@@ -242,7 +242,7 @@ export const query = {
          <div class="b3-label__text">${window.siyuan.languages.searchLimit2}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="limit" type="number" min="1" max="10240" value="${window.siyuan.config.search.limit}">
+    <input class="b3-text-field fn__flex-center fn__size200" id="limit" type="number" min="32" max="10240" value="${window.siyuan.config.search.limit}">
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">

@@ -18,25 +18,18 @@ package model
 
 import (
 	"bytes"
+	"regexp"
+	"sort"
+	"strings"
+
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dgraph-io/ristretto"
-	"github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
-	"os"
-	"path/filepath"
-	"regexp"
-	"runtime"
-	"sort"
-	"strings"
-	"sync"
 )
 
 // virtualBlockRefCache 用于保存块关联的虚拟引用关键字。
@@ -48,8 +41,20 @@ var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
 })
 
 func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
-	val, _ := virtualBlockRefCache.Get(root.ID)
-	if nil == val {
+	val, ok := virtualBlockRefCache.Get(root.ID)
+	if !ok {
+		buf := bytes.Buffer{}
+		ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			content := treenode.NodeStaticContent(n, nil)
+			buf.WriteString(content)
+			return ast.WalkContinue
+		})
+		content := buf.String()
+		putBlockVirtualRefKeywords(content, root.ID, root.IALAttr("title"))
 		return
 	}
 	ret = val.([]string)
@@ -88,80 +93,12 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) {
 
 func CacheVirtualBlockRefJob() {
 	virtualBlockRefCache.Del("virtual_ref")
-
 	if !Conf.Editor.VirtualBlockRef {
 		return
 	}
 
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
-
-	boxes := Conf.GetOpenedBoxes()
-	luteEngine := lute.New()
-	for _, box := range boxes {
-		boxPath := filepath.Join(util.DataDir, box.ID)
-		var paths []string
-		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
-			if boxPath == path {
-				// 跳过根路径（笔记本文件夹）
-				return nil
-			}
-
-			if info.IsDir() {
-				if strings.HasPrefix(info.Name(), ".") {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-
-			if filepath.Ext(path) != ".sy" || strings.Contains(filepath.ToSlash(path), "/assets/") {
-				return nil
-			}
-
-			p := path[len(boxPath):]
-			p = filepath.ToSlash(p)
-			paths = append(paths, p)
-			return nil
-		})
-
-		poolSize := runtime.NumCPU()
-		if 8 < poolSize {
-			poolSize = 8
-		}
-		i := 0
-		waitGroup := &sync.WaitGroup{}
-		pool, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
-			defer waitGroup.Done()
-
-			p := arg.(string)
-			tree, loadErr := filesys.LoadTree(box.ID, p, luteEngine)
-			if nil != loadErr {
-				return
-			}
-
-			treeTitle := tree.Root.IALAttr("title")
-			buf := bytes.Buffer{}
-			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				content := treenode.NodeStaticContent(n, nil)
-				buf.WriteString(content)
-				return ast.WalkContinue
-			})
-			content := buf.String()
-			putBlockVirtualRefKeywords(content, tree.ID, treeTitle)
-			i++
-			logging.LogInfof("cached virtual block ref for tree [%s, %d/%d]", tree.ID, i, len(paths))
-		})
-		for _, p := range paths {
-			waitGroup.Add(1)
-			pool.Invoke(p)
-		}
-		waitGroup.Wait()
-		pool.Release()
-	}
 }
 
 func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeywords []string, refCount map[string]int, luteEngine *lute.Lute) bool {

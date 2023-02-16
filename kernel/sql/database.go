@@ -1142,7 +1142,7 @@ func beginTx() (tx *sql.Tx, err error) {
 	return
 }
 
-func BeginHistoryTx() (tx *sql.Tx, err error) {
+func beginHistoryTx() (tx *sql.Tx, err error) {
 	if tx, err = historyDB.Begin(); nil != err {
 		logging.LogErrorf("begin history tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
@@ -1152,7 +1152,7 @@ func BeginHistoryTx() (tx *sql.Tx, err error) {
 	return
 }
 
-func CommitHistoryTx(tx *sql.Tx) (err error) {
+func commitHistoryTx(tx *sql.Tx) (err error) {
 	if nil == tx {
 		logging.LogErrorf("tx is nil")
 		return errors.New("tx is nil")

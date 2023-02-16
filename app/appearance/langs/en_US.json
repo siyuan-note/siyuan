@@ -885,6 +885,7 @@
     "task.database.index.fix": "Execute database index fix",
     "task.ocr.image": "Execute image OCR to extract text",
     "task.history.generateDoc": "Execute GenerateDoc History",
+    "task.history.database.index.commit": "Execute history database index commit",
     "task.database.index.embedBlock": "Execute database index embed block",
     "task.reload.ui": "Execute reload UI"
   },
@@ -1089,6 +1090,7 @@
     "187": "Unlocking cloud sync directory",
     "188": "Failed to lock the cloud sync directory, please try again later",
     "189": "Cloud sync directory is still locked by other devices, please try again later",
-    "190": "A problem was found while validating the index, which has been automatically fixed"
+    "190": "A problem was found while validating the index, which has been automatically fixed",
+    "191": "[%d/%d] Created historical data index"
   }
 }

@@ -885,6 +885,7 @@
     "task.database.index.fix": "执行数据库索引订正",
     "task.ocr.image": "执行图片 OCR 提取文本",
     "task.history.generateDoc": "执行生成文件历史",
+    "task.history.database.index.commit": "执行历史数据库索引提交",
     "task.database.index.embedBlock": "执行数据库索引嵌入块",
     "task.reload.ui": "执行重载界面"
   },
@@ -1089,6 +1090,7 @@
     "187": "正在解锁云端同步目录",
     "188": "锁定云端同步目录失败，请稍后再试",
     "189": "云端同步目录还在被其他设备锁定，请稍后再试",
-    "190": "校验索引时发现一个问题，已经自动修复"
+    "190": "校验索引时发现一个问题，已经自动修复",
+    "191": "[%d/%d] 已经建立条历史数据索引"
   }
 }

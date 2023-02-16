@@ -70,15 +70,12 @@ func generateDocHistory() {
 	clearOutdatedHistoryDir(historyDir)
 
 	// 以下部分是老版本的历史数据，不再保留
-
 	for _, box := range Conf.GetBoxes() {
 		historyDir = filepath.Join(util.DataDir, box.ID, ".siyuan", "history")
 		os.RemoveAll(historyDir)
 	}
-
 	historyDir = filepath.Join(util.DataDir, "assets", ".siyuan", "history")
 	os.RemoveAll(historyDir)
-
 	historyDir = filepath.Join(util.DataDir, ".siyuan", "history")
 	os.RemoveAll(historyDir)
 }
@@ -517,23 +514,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 		//logging.LogInfof("auto removed history dir [%s]", dir)
 
 		// 清理历史库
-
-		tx, txErr := sql.BeginHistoryTx()
-		if nil != txErr {
-			logging.LogErrorf("begin history tx failed: %s", txErr)
-			return
-		}
-
-		p := strings.TrimPrefix(dir, util.HistoryDir)
-		p = filepath.ToSlash(p[1:])
-		if txErr = sql.DeleteHistoriesByPathPrefix(tx, dir); nil != txErr {
-			logging.LogErrorf("delete history [%s] failed: %s", dir, txErr)
-			return
-		}
-		if txErr = sql.CommitHistoryTx(tx); nil != txErr {
-			logging.LogErrorf("commit history tx failed: %s", txErr)
-			return
-		}
+		sql.DeleteHistoriesByPathPrefixQueue(dir)
 	}
 }
 
@@ -678,19 +659,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		})
 	}
 
-	tx, txErr := sql.BeginHistoryTx()
-	if nil != txErr {
-		logging.LogErrorf("begin transaction failed: %s", txErr)
-		return
-	}
-	if err := sql.InsertHistories(tx, histories); nil != err {
-		logging.LogErrorf("insert histories failed: %s", err)
-		return
-	}
-	if err := sql.CommitHistoryTx(tx); nil != err {
-		logging.LogErrorf("commit transaction failed: %s", err)
-		return
-	}
+	sql.IndexHistoriesQueue(histories)
 	return
 }
 

@@ -286,4 +286,16 @@ func init() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
+
+	eventbus.Subscribe(eventbus.EvtSQLInsertHistory, func(context map[string]interface{}) {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			return
+		}
+
+		current := context["current"].(int) + 1
+		total := context["total"]
+		msg := fmt.Sprintf(Conf.Language(191), current, total)
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
 }

@@ -127,7 +127,9 @@ export class Wnd {
                 target = target.parentElement;
             }
         });
-        this.headersElement.parentElement.addEventListener("dragover", function (event: DragEvent & { target: HTMLElement }) {
+        this.headersElement.parentElement.addEventListener("dragover", function (event: DragEvent & {
+            target: HTMLElement
+        }) {
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 event.preventDefault();
@@ -193,7 +195,9 @@ export class Wnd {
             const it = this as HTMLElement;
             it.classList.remove("layout-tab-bars--drag");
         });
-        this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & { target: HTMLElement }) {
+        this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
+            target: HTMLElement
+        }) {
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽
@@ -210,15 +214,15 @@ export class Wnd {
                 it.classList.remove("layout-tab-bars--drag");
                 return;
             }
-            const tabId = event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB);
-            let oldTab = getInstanceById(tabId) as Tab;
+            const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB))
+            let oldTab = getInstanceById(tabData.id) as Tab;
             const wnd = getInstanceById(it.parentElement.getAttribute("data-id")) as Wnd;
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
                 if (wnd instanceof Wnd) {
-                    JSONToCenter(JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TABTOWINDOW)), wnd);
+                    JSONToCenter(tabData, wnd);
                     oldTab = wnd.children[wnd.children.length - 1];
-                    ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabId);
+                    ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabData.id);
                     it.querySelector("li[data-clone='true']").remove();
                     wnd.switchTab(oldTab.headElement);
                 }
@@ -320,13 +324,13 @@ export class Wnd {
             dragElement.classList.add("fn__none");
             const targetWndElement = event.target.parentElement.parentElement;
             const targetWnd = getInstanceById(targetWndElement.getAttribute("data-id")) as Wnd;
-            const tabId = event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB);
-            let oldTab = getInstanceById(tabId) as Tab;
+            const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB))
+            let oldTab = getInstanceById(tabData.id) as Tab;
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
-                JSONToCenter(JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TABTOWINDOW)), this);
+                JSONToCenter(tabData, this);
                 oldTab = this.children[this.children.length - 1];
-                ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabId);
+                ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabData.id);
             }
             /// #endif
             if (!oldTab) {
@@ -370,7 +374,7 @@ export class Wnd {
                 return;
             }
 
-            if (targetWndElement.contains(document.querySelector(`[data-id="${tabId}"]`))) {
+            if (targetWndElement.contains(document.querySelector(`[data-id="${tabData.id}"]`))) {
                 return;
             }
             if (targetWnd) {

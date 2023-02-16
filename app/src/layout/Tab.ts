@@ -79,10 +79,9 @@ export class Tab {
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     event.dataTransfer.setData("text/html", tabElement.outerHTML);
-                    event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, this.id);
-                    const modeJSON = {};
+                    const modeJSON = {id:this.id};
                     layoutToJSON(this, modeJSON);
-                    event.dataTransfer.setData(Constants.SIYUAN_DROP_TABTOWINDOW, JSON.stringify(modeJSON));
+                    event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, JSON.stringify(modeJSON));
                     event.dataTransfer.dropEffect = "move";
                     tabElement.style.opacity = "0.1";
                     window.siyuan.dragElement = this.headElement;

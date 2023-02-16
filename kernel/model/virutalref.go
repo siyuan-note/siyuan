@@ -54,20 +54,19 @@ func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 			return ast.WalkContinue
 		})
 		content := buf.String()
-		putBlockVirtualRefKeywords(content, root.ID, root.IALAttr("title"))
+		ret = putBlockVirtualRefKeywords(content, root.ID, root.IALAttr("title"))
 		return
 	}
 	ret = val.([]string)
 	return
 }
 
-func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) {
+func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []string) {
 	keywords := getVirtualRefKeywords(docTitle)
 	if 1 > len(keywords) {
 		return
 	}
 
-	var hitKeywords []string
 	contentTmp := blockContent
 	if !Conf.Search.CaseSensitive {
 		contentTmp = strings.ToLower(blockContent)
@@ -79,16 +78,17 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) {
 		}
 
 		if strings.Contains(contentTmp, keywordTmp) {
-			hitKeywords = append(hitKeywords, keyword)
+			ret = append(ret, keyword)
 		}
 	}
 
-	if 1 > len(hitKeywords) {
+	if 1 > len(ret) {
 		return
 	}
 
-	hitKeywords = gulu.Str.RemoveDuplicatedElem(hitKeywords)
-	virtualBlockRefCache.Set(blockID, hitKeywords, 1)
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	virtualBlockRefCache.Set(blockID, ret, 1)
+	return
 }
 
 func CacheVirtualBlockRefJob() {

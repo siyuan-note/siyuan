@@ -28,28 +28,29 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-var memCache, _ = ristretto.NewCache(&ristretto.Config{
+var cacheDisabled = true
+
+func enableCache() {
+	cacheDisabled = false
+}
+
+func disableCache() {
+	cacheDisabled = true
+}
+
+var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 	NumCounters: 10240,
 	MaxCost:     1024,
 	BufferItems: 64,
 })
-var disabled = true
 
-func enableCache() {
-	disabled = false
-}
-
-func disableCache() {
-	disabled = true
-}
-
-func ClearBlockCache() {
-	memCache.Clear()
+func ClearCache() {
+	blockCache.Clear()
 	debug.FreeOSMemory()
 }
 
 func putBlockCache(block *Block) {
-	if disabled {
+	if cacheDisabled {
 		return
 	}
 
@@ -58,15 +59,15 @@ func putBlockCache(block *Block) {
 		logging.LogErrorf("clone block failed: %v", err)
 		return
 	}
-	memCache.Set(cloned.ID, cloned, 1)
+	blockCache.Set(cloned.ID, cloned, 1)
 }
 
 func getBlockCache(id string) (ret *Block) {
-	if disabled {
+	if cacheDisabled {
 		return
 	}
 
-	b, _ := memCache.Get(id)
+	b, _ := blockCache.Get(id)
 	if nil != b {
 		ret = b.(*Block)
 	}
@@ -74,39 +75,8 @@ func getBlockCache(id string) (ret *Block) {
 }
 
 func removeBlockCache(id string) {
-	memCache.Del(id)
+	blockCache.Del(id)
 	removeRefCacheByDefID(id)
-}
-
-var virtualRefKeywordsCacheTime = time.Now()
-
-func getVirtualRefKeywordsCache() ([]string, bool) {
-	if disabled {
-		return nil, false
-	}
-
-	// 虚拟引用关键字缓存调整为 10 分钟 https://github.com/siyuan-note/siyuan/issues/6602
-	if 10 < time.Now().Sub(virtualRefKeywordsCacheTime).Minutes() {
-		ClearVirtualRefKeywords()
-		return nil, false
-	}
-
-	if val, ok := memCache.Get("virtual_ref"); ok {
-		return val.([]string), true
-	}
-	return nil, false
-}
-
-func setVirtualRefKeywords(keywords []string) {
-	if disabled {
-		return
-	}
-
-	memCache.Set("virtual_ref", keywords, 1)
-}
-
-func ClearVirtualRefKeywords() {
-	memCache.Del("virtual_ref")
 }
 
 var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute) // [defBlockID]map[refBlockID]*Ref

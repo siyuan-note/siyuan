@@ -69,18 +69,18 @@ func generateDocHistory() {
 	historyDir := util.HistoryDir
 	clearOutdatedHistoryDir(historyDir)
 
-	// 以下部分是老版本的清理逻辑，暂时保留
+	// 以下部分是老版本的历史数据，不再保留
 
 	for _, box := range Conf.GetBoxes() {
 		historyDir = filepath.Join(util.DataDir, box.ID, ".siyuan", "history")
-		clearOutdatedHistoryDir(historyDir)
+		os.RemoveAll(historyDir)
 	}
 
 	historyDir = filepath.Join(util.DataDir, "assets", ".siyuan", "history")
-	clearOutdatedHistoryDir(historyDir)
+	os.RemoveAll(historyDir)
 
 	historyDir = filepath.Join(util.DataDir, ".siyuan", "history")
-	clearOutdatedHistoryDir(historyDir)
+	os.RemoveAll(historyDir)
 }
 
 func ChangeHistoryTick(minutes int) {

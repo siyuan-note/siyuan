@@ -167,7 +167,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 					return ast.WalkContinue
 				}
 
-				markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine)
+				markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine)
 				return ast.WalkContinue
 			})
 
@@ -690,7 +690,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			continue
 		}
 
-		newText := markReplaceSpanWithSplit(text, mentionKeywords, getMarkSpanStart(searchMarkDataType), getMarkSpanEnd())
+		newText := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
 		if text != newText {
 			tmp = append(tmp, b)
 		}

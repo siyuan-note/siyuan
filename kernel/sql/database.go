@@ -67,7 +67,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
-	ClearBlockCache()
+	ClearCache()
 	disableCache()
 	defer enableCache()
 
@@ -888,7 +888,7 @@ func deleteBlocksByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = execStmtTx(tx, stmt, box); nil != err {
 		return
 	}
-	ClearBlockCache()
+	ClearCache()
 	return
 }
 
@@ -1012,7 +1012,7 @@ func deleteByRootID(tx *sql.Tx, rootID string, context map[string]interface{}) (
 	if err = execStmtTx(tx, stmt, rootID); nil != err {
 		return
 	}
-	ClearBlockCache()
+	ClearCache()
 	eventbus.Publish(eventbus.EvtSQLDeleteBlocks, context, rootID)
 	return
 }
@@ -1048,7 +1048,7 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]inter
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
-	ClearBlockCache()
+	ClearCache()
 	eventbus.Publish(eventbus.EvtSQLDeleteBlocks, context, fmt.Sprintf("%d", len(rootIDs)))
 	return
 }
@@ -1082,7 +1082,7 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); nil != err {
 		return
 	}
-	ClearBlockCache()
+	ClearCache()
 	return
 }
 
@@ -1099,7 +1099,7 @@ func batchUpdateHPath(tx *sql.Tx, boxID, rootID, oldHPath, newHPath string) (err
 	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID, oldHPath); nil != err {
 		return
 	}
-	ClearBlockCache()
+	ClearCache()
 	return
 }
 

@@ -34,7 +34,10 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
             // 右键
             return;
         }
-        const canvasRect = pdf.pdfViewer._getVisiblePages().first.view.canvas.getBoundingClientRect();
+        let canvasRect = pdf.pdfViewer._getVisiblePages().first.view.canvas.getBoundingClientRect();
+        if (event.clientX > canvasRect.right) {
+            canvasRect = pdf.pdfViewer._getVisiblePages().last.view.canvas.getBoundingClientRect();
+        }
         const containerRet = pdfConfig.mainContainer.getBoundingClientRect();
         const mostLeft = canvasRect.left;
         const mostRight = canvasRect.right;

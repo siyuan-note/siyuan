@@ -7,6 +7,7 @@ import {Constants} from "../../constants";
 import {onGet} from "../util/onGet";
 import {saveScroll} from "../scroll/saveScroll";
 import {hideElements} from "../ui/hideElements";
+import {hasClosestByClassName} from "../util/hasClosest";
 
 export const netImg2LocalAssets = (protyle: IProtyle) => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
@@ -61,6 +62,17 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         } else {
             btnElement.querySelector("use").setAttribute("xlink:href", "#iconContract");
         }
+        const dockLayoutElement = hasClosestByClassName(element, "layout--float")
+        if (dockLayoutElement) {
+            if (isFullscreen) {
+                dockLayoutElement.setAttribute("data-temp", dockLayoutElement.style.transform)
+                dockLayoutElement.style.transform = "none"
+            } else {
+                dockLayoutElement.style.transform = dockLayoutElement.getAttribute("data-temp")
+                dockLayoutElement.removeAttribute("data-temp")
+            }
+        }
+        return;
     }
     /// #if !MOBILE
     if (element.classList.contains("protyle")) {

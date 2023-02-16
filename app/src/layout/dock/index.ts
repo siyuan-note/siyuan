@@ -164,7 +164,9 @@ ${this.position === "Top" ? "top" : "bottom"}:0`);
     }
 
     public hideDock(reset = false) {
-        if (!reset && (this.layout.element.style.opacity === "0" || this.pin)) {
+        if (!reset && (this.layout.element.style.opacity === "0" || this.pin) ||
+            this.layout.element.querySelector(".fullscreen")    // 关系图全屏不应该退出
+        ) {
             return;
         }
         if (this.position === "Left") {

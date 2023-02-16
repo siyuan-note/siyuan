@@ -410,7 +410,7 @@ ${this.position === "Top" ? "top" : "bottom"}:0`);
         sourceElement.setAttribute("data-width", "");
         const type = sourceElement.getAttribute("data-type") as TDockType;
         const sourceDock = getDockByType(type);
-        if (sourceDock.element.querySelectorAll(".dock__item").length === 2) {
+        if (sourceDock.element.querySelectorAll(".dock__item").length === 1) {
             sourceDock.element.classList.add("fn__none");
         }
         const sourceWnd = sourceDock.layout.children[parseInt(sourceElement.getAttribute("data-index"))] as Wnd;

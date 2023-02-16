@@ -53,9 +53,6 @@ export class Dock {
         this.pin = options.data.pin;
         this.data = {};
         if (options.data.data.length === 0) {
-            this.element.firstElementChild.innerHTML = `<span class="dock__item ${this.pin ? "dock__item--pin " : ""}b3-tooltips b3-tooltips__${this.getClassDirect(0)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
-    <svg><use xlink:href="#iconPin"></use></svg>
-</span>`;
             this.element.classList.add("fn__none");
         } else {
             this.genButton(options.data.data[0], 0);
@@ -86,31 +83,6 @@ export class Dock {
                 const type = target.getAttribute("data-type") as TDockType;
                 if (type) {
                     this.toggleModel(type, false, true);
-                    event.preventDefault();
-                    break;
-                } else if (target.classList.contains("dock__item")) {
-                    this.pin = !target.classList.contains("dock__item--pin");
-                    const hasActive = this.element.querySelector(".dock__item--active");
-                    if (!this.pin) {
-                        this.resetDockPosition(hasActive ? true : false);
-                        target.setAttribute("aria-label", window.siyuan.languages.pin);
-                        this.resizeElement.classList.add("fn__none");
-                        if (hasActive) {
-                            this.showDock(true);
-                        } else {
-                            this.hideDock(true);
-                        }
-                    } else {
-                        target.setAttribute("aria-label", window.siyuan.languages.unpin);
-                        this.layout.element.style.opacity = "";
-                        this.layout.element.style.transform = "";
-                        if (hasActive) {
-                            this.resizeElement.classList.remove("fn__none");
-                        }
-                    }
-                    target.classList.toggle("dock__item--pin");
-                    this.layout.element.classList.toggle("layout--float");
-                    resizeTabs();
                     event.preventDefault();
                     break;
                 }
@@ -528,9 +500,7 @@ ${this.position === "Top" ? "top" : "bottom"}:0`);
     }
 
     private genButton(data: IDockTab[], index: number) {
-        let html = index ? "" : `<span class="dock__item ${this.pin ? "dock__item--pin " : ""}b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
-    <svg><use xlink:href="#iconPin"></use></svg>
-</span>`;
+        let html = ""
         data.forEach(item => {
             html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkeylangid="${item.hotkeyLangId}" class="dock__item${item.show ? " dock__item--active" : ""} b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${window.siyuan.languages[item.hotkeyLangId] + " " + updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}${window.siyuan.languages.dockTip}">
     <svg><use xlink:href="#${item.icon}"></use></svg>

@@ -128,8 +128,25 @@ func resetDuplicateBlocksOnFileSys() {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
+				if boxPath == path {
+					// 跳过根路径（笔记本文件夹）
+					return nil
+				}
+
 				if strings.HasPrefix(info.Name(), ".") {
 					return filepath.SkipDir
+				}
+
+				if !ast.IsNodeIDPattern(info.Name()) {
+					return nil
+				}
+
+				if util.IsEmptyDir(filepath.Join(path)) {
+					// 删除空的子文档文件夹
+					if removeErr := os.RemoveAll(path); nil != removeErr {
+						logging.LogErrorf("remove empty folder failed: %s", removeErr)
+					}
+					return nil
 				}
 				return nil
 			}
@@ -234,6 +251,11 @@ func fixBlockTreeByFileSys() {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+			if boxPath == path {
+				// 跳过根路径（笔记本文件夹）
+				return nil
+			}
+
 			if info.IsDir() {
 				if strings.HasPrefix(info.Name(), ".") {
 					return filepath.SkipDir

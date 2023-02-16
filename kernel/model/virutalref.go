@@ -48,8 +48,8 @@ var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
 })
 
 func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
-	val, ok := virtualBlockRefCache.Get(root.ID)
-	if !ok {
+	val, _ := virtualBlockRefCache.Get(root.ID)
+	if nil == val {
 		return
 	}
 	ret = val.([]string)

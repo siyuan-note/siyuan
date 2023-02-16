@@ -1383,7 +1383,9 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
 const panelTreeKeydown = (event: KeyboardEvent) => {
     // 面板折叠展开操作
     const target = event.target as HTMLElement;
-    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || hasClosestByAttribute(target, "contenteditable", null)) {
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+        hasClosestByAttribute(target, "contenteditable", null) ||
+        hasClosestByClassName(target, "protyle", true)) {
         return false;
     }
     if (!matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) &&

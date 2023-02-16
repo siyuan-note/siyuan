@@ -915,9 +915,9 @@ func stringQuery(query string) string {
 func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
 	text := n.Content()
 	if ast.NodeText == n.Type {
-		text = search.EncloseHighlighting(text, keywords, getMarkSpanStart(markSpanDataType), getMarkSpanEnd(), Conf.Search.CaseSensitive)
+		text = search.EncloseHighlighting(text, keywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive)
 		n.Tokens = gulu.Str.ToBytes(text)
-		if bytes.Contains(n.Tokens, []byte(searchMarkDataType)) {
+		if bytes.Contains(n.Tokens, []byte(search.MarkDataType)) {
 			linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 			var children []*ast.Node
 			for c := linkTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
@@ -935,10 +935,10 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 			return false
 		}
 
-		startTag := getMarkSpanStart(markSpanDataType)
-		text = search.EncloseHighlighting(text, keywords, startTag, getMarkSpanEnd(), Conf.Search.CaseSensitive)
-		if strings.Contains(text, searchMarkDataType) {
-			dataType := getMarkSpanStart(n.TextMarkType + " " + searchMarkDataType)
+		startTag := search.GetMarkSpanStart(markSpanDataType)
+		text = search.EncloseHighlighting(text, keywords, startTag, search.GetMarkSpanEnd(), Conf.Search.CaseSensitive)
+		if strings.Contains(text, search.MarkDataType) {
+			dataType := search.GetMarkSpanStart(n.TextMarkType + " " + search.MarkDataType)
 			text = strings.ReplaceAll(text, startTag, dataType)
 			tokens := gulu.Str.ToBytes(text)
 			linkTree := parse.Inline("", tokens, luteEngine.ParseOptions)

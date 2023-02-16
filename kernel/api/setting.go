@@ -221,7 +221,6 @@ func setSearch(c *gin.Context) {
 	if s.CaseSensitive != oldCaseSensitive {
 		model.FullReindex()
 	}
-	sql.ClearVirtualRefKeywords()
 	ret.Data = s
 }
 

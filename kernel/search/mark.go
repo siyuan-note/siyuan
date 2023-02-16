@@ -17,6 +17,7 @@
 package search
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -98,4 +99,17 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + s + closeMark })
 	}
 	return
+}
+
+const (
+	MarkDataType            = "search-mark"
+	VirtualBlockRefDataType = "virtual-block-ref"
+)
+
+func GetMarkSpanStart(dataType string) string {
+	return fmt.Sprintf("<span data-type=\"%s\">", dataType)
+}
+
+func GetMarkSpanEnd() string {
+	return "</span>"
 }

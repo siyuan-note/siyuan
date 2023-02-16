@@ -440,19 +440,6 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 	}
 }
 
-const (
-	searchMarkDataType      = "search-mark"
-	virtualBlockRefDataType = "virtual-block-ref"
-)
-
-func getMarkSpanStart(dataType string) string {
-	return fmt.Sprintf("<span data-type=\"%s\">", dataType)
-}
-
-func getMarkSpanEnd() string {
-	return "</span>"
-}
-
 func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int, isBacklink bool) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, isBacklinkExpand bool, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
@@ -618,7 +605,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	}
 
 	refCount := sql.QueryRootChildrenRefCount(rootID)
-	virtualBlockRefKeywords := getVirtualRefKeywords(tree.Root.IALAttr("title"))
+	virtualBlockRefKeywords := getBlockVirtualRefKeywords(tree.Root)
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
@@ -659,7 +646,7 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 					}
 				}
 				if hitBlock {
-					if markReplaceSpan(n, &unlinks, keywords, searchMarkDataType, luteEngine) {
+					if markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine) {
 						return ast.WalkContinue
 					}
 				}

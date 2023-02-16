@@ -493,7 +493,7 @@ export class Graph extends Model {
             return;
         }
         clearTimeout(this.timeout);
-        addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.0.4`, "protyleVisScript").then(() => {
+        addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.2`, "protyleVisScript").then(() => {
             this.timeout = window.setTimeout(() => {
                 this.graphElement.firstElementChild.classList.remove("fn__none");
                 this.graphElement.firstElementChild.firstElementChild.setAttribute("style", "width:3%");

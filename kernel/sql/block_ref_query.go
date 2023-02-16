@@ -170,7 +170,7 @@ func QueryRefRootBlocksByDefRootIDs(defRootIDs []string) (ret map[string][]*Bloc
 		}
 
 		if nil == ret[defRootID] {
-			ret[defRootID] = []*Block{}
+			ret[defRootID] = []*Block{&block}
 		} else {
 			ret[defRootID] = append(ret[defRootID], &block)
 		}

@@ -50,23 +50,7 @@ var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
 func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 	val, ok := virtualBlockRefCache.Get(root.ID)
 	if !ok {
-		treeTitle := root.IALAttr("title")
-		buf := bytes.Buffer{}
-		ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || !n.IsBlock() {
-				return ast.WalkContinue
-			}
-
-			content := treenode.NodeStaticContent(n, nil)
-			buf.WriteString(content)
-			return ast.WalkContinue
-		})
-		content := buf.String()
-		putBlockVirtualRefKeywords(content, root.ID, treeTitle)
-		val, ok = virtualBlockRefCache.Get(root.ID)
-		if !ok {
-			return
-		}
+		return
 	}
 	ret = val.([]string)
 	return
@@ -141,8 +125,8 @@ func CacheVirtualBlockRefJob() {
 		})
 
 		poolSize := runtime.NumCPU()
-		if 4 < poolSize {
-			poolSize = 4
+		if 8 < poolSize {
+			poolSize = 8
 		}
 		i := 0
 		waitGroup := &sync.WaitGroup{}

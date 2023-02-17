@@ -59,6 +59,7 @@ require (
 require (
 	dmitri.shuralyov.com/font/woff2 v0.0.0-20180220214647-957792cbbdab // indirect
 	github.com/BobuSumisu/aho-corasick v1.0.3 // indirect
+	github.com/ClarkThan/ahocorasick v0.0.0-20230216061320-bccdb98581a3 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect

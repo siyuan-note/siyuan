@@ -27,7 +27,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	ahocorasick "github.com/BobuSumisu/aho-corasick"
+	ahocorasick "github.com/ClarkThan/ahocorasick"
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -82,10 +82,11 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []s
 		}
 	}
 
-	trie := ahocorasick.NewTrieBuilder().AddStrings(keywordsTmp).Build()
-	hits := trie.MatchString(contentTmp)
+	m := ahocorasick.NewMatcher()
+	m.BuildWithPatterns(keywordsTmp)
+	hits := m.Search(contentTmp)
 	for _, hit := range hits {
-		ret = append(ret, hit.MatchString())
+		ret = append(ret, hit)
 	}
 
 	if 1 > len(ret) {

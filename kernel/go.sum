@@ -19,6 +19,8 @@ github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1/go.mod h1:U
 github.com/BobuSumisu/aho-corasick v1.0.3 h1:uuf+JHwU9CHP2Vx+wAy6jcksJThhJS9ehR8a+4nPE9g=
 github.com/BobuSumisu/aho-corasick v1.0.3/go.mod h1:hm4jLcvZKI2vRF2WDU1N4p/jpWtpOzp3nLmi9AzX/XE=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
+github.com/ClarkThan/ahocorasick v0.0.0-20230216061320-bccdb98581a3 h1:JsUUbdK1JdhsJt2ebcQFFfeO3jpzh6Vv7pmCph6qeik=
+github.com/ClarkThan/ahocorasick v0.0.0-20230216061320-bccdb98581a3/go.mod h1:a3CzWIqeRxiODAscAIfZ4wbFRXxywBrdCwTENVAWB2g=
 github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732 h1:0EDePskeF4vNFCk70ATaFHQzjmwXsk+VImnMJttecNU=
 github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732/go.mod h1:krTLO7JWu6g8RMxG8sl+T1Hf8W93XQacBKJmqFZ2MFY=
 github.com/Masterminds/goutils v1.1.1 h1:5nUrii3FMTL5diU80unEVvNevw1nH4+ZV4DSLVJLSYI=

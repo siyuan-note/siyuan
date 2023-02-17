@@ -27,7 +27,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	ahocorasick "github.com/ClarkThan/ahocorasick"
+	"github.com/ClarkThan/ahocorasick"
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"

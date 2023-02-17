@@ -214,12 +214,25 @@ func setSearch(c *gin.Context) {
 	}
 
 	oldCaseSensitive := model.Conf.Search.CaseSensitive
+	oldVirtualRefName := model.Conf.Search.VirtualRefName
+	oldVirtualRefAlias := model.Conf.Search.VirtualRefAlias
+	oldVirtualRefAnchor := model.Conf.Search.VirtualRefAnchor
+	oldVirtualRefDoc := model.Conf.Search.VirtualRefDoc
+	oldVirtualRefKeywordsLimit := model.Conf.Search.VirtualRefKeywordsLimit
 
 	model.Conf.Search = s
 	model.Conf.Save()
 	sql.SetCaseSensitive(s.CaseSensitive)
 	if s.CaseSensitive != oldCaseSensitive {
 		model.FullReindex()
+	}
+
+	if oldVirtualRefName != s.VirtualRefName ||
+		oldVirtualRefAlias != s.VirtualRefAlias ||
+		oldVirtualRefAnchor != s.VirtualRefAnchor ||
+		oldVirtualRefDoc != s.VirtualRefDoc ||
+		oldVirtualRefKeywordsLimit != s.VirtualRefKeywordsLimit {
+		model.CacheVirtualBlockRefJob()
 	}
 	ret.Data = s
 }

@@ -18,6 +18,8 @@ package model
 
 import (
 	"bytes"
+	goahocorasick "github.com/anknown/ahocorasick"
+	"github.com/siyuan-note/logging"
 	"regexp"
 	"sort"
 	"strings"
@@ -27,7 +29,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/cloudflare/ahocorasick"
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -70,22 +71,38 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []s
 	}
 
 	contentTmp := blockContent
-	keywordsTmp := keywords
+	var keywordsTmp [][]rune
 	if !Conf.Search.CaseSensitive {
 		contentTmp = strings.ToLower(blockContent)
-		for i, keyword := range keywordsTmp {
-			keywordsTmp[i] = strings.ToLower(keyword)
+		for _, keyword := range keywords {
+			keywordsTmp = append(keywordsTmp, []rune(strings.ToLower(keyword)))
+		}
+	} else {
+		for _, keyword := range keywords {
+			keywordsTmp = append(keywordsTmp, []rune(keyword))
 		}
 	}
 
 	if 1024*1024 < len(contentTmp) {
-		matcher := ahocorasick.NewStringMatcher(keywords)
-		hits := matcher.Match([]byte(contentTmp))
-		for _, hit := range hits {
-			ret = append(ret, keywords[hit])
+		m := goahocorasick.Machine{}
+		buildErr := m.Build(keywordsTmp)
+		if nil != buildErr {
+			logging.LogWarnf("build virtual ref keywords AC matcher failed: %s", buildErr)
+			for _, keywordRunes := range keywordsTmp {
+				keyword := string(keywordRunes)
+				if strings.Contains(contentTmp, keyword) {
+					ret = append(ret, keyword)
+				}
+			}
+		} else {
+			hits := m.MultiPatternSearch([]rune(contentTmp), false)
+			for _, hit := range hits {
+				ret = append(ret, string(hit.Word))
+			}
 		}
 	} else {
-		for _, keyword := range keywordsTmp {
+		for _, keywordRunes := range keywordsTmp {
+			keyword := string(keywordRunes)
 			if strings.Contains(contentTmp, keyword) {
 				ret = append(ret, keyword)
 			}

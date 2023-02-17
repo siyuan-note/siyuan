@@ -57,14 +57,15 @@ export class Gutter {
                 event.dataTransfer.setDragImage(protyle.wysiwyg.element.querySelector(`[data-node-id="${selectIds[0]}"]`), 0, 0);
             }
             event.target.style.opacity = "0.1";
-            window.siyuan.dragElement = event.target;
-            event.dataTransfer.setData(Constants.SIYUAN_DROP_GUTTER, selectIds.toString());
-            window.siyuan.dragElement.setAttribute("data-selected-ids", selectIds.toString());
+            window.siyuan.dragElement = protyle.wysiwyg.element;
+            event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${event.target.getAttribute("data-type")}${Constants.ZWSP}${event.target.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}`,
+                protyle.wysiwyg.element.innerHTML);
         });
         this.element.addEventListener("dragend", () => {
             if (window.siyuan.dragElement) {
-                window.siyuan.dragElement.removeAttribute("data-selected-ids");
-                window.siyuan.dragElement.style.opacity = "";
+                this.element.querySelectorAll("button").forEach((item) => {
+                    item.style.opacity = "";
+                })
                 window.siyuan.dragElement = undefined;
             }
         });

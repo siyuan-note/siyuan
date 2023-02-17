@@ -19,6 +19,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/siyuan-note/eventbus"
 	"io/fs"
 	"math"
 	"os"
@@ -575,13 +576,15 @@ func ReindexHistory() (err error) {
 
 	sql.InitHistoryDatabase(true)
 	lutEngine := util.NewLute()
+
+	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress}
 	for _, historyDir := range historyDirs {
 		if !historyDir.IsDir() {
 			continue
 		}
 
 		name := historyDir.Name()
-		indexHistoryDir(name, lutEngine)
+		indexHistoryDirWithContext(name, lutEngine, context)
 	}
 
 	sql.WaitForWritingHistoryDatabase()
@@ -597,6 +600,10 @@ const (
 )
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) {
+	indexHistoryDirWithContext(name, luteEngine, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
+}
+
+func indexHistoryDirWithContext(name string, luteEngine *lute.Lute, context map[string]interface{}) {
 	defer logging.Recover()
 
 	op := name[strings.LastIndex(name, "-")+1:]
@@ -660,7 +667,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		})
 	}
 
-	sql.IndexHistoriesQueue(histories)
+	sql.IndexHistoriesQueue(histories, context)
 	return
 }
 

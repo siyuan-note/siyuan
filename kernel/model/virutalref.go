@@ -27,6 +27,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/cloudflare/ahocorasick"
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -69,17 +70,25 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []s
 	}
 
 	contentTmp := blockContent
+	keywordsTmp := keywords
 	if !Conf.Search.CaseSensitive {
 		contentTmp = strings.ToLower(blockContent)
-	}
-	for _, keyword := range keywords {
-		keywordTmp := keyword
-		if !Conf.Search.CaseSensitive {
-			keywordTmp = strings.ToLower(keyword)
+		for i, keyword := range keywordsTmp {
+			keywordsTmp[i] = strings.ToLower(keyword)
 		}
+	}
 
-		if strings.Contains(contentTmp, keywordTmp) {
-			ret = append(ret, keyword)
+	if 1024*1024 < len(contentTmp) {
+		matcher := ahocorasick.NewStringMatcher(keywords)
+		hits := matcher.Match([]byte(contentTmp))
+		for _, hit := range hits {
+			ret = append(ret, keywords[hit])
+		}
+	} else {
+		for _, keyword := range keywordsTmp {
+			if strings.Contains(contentTmp, keyword) {
+				ret = append(ret, keyword)
+			}
 		}
 	}
 

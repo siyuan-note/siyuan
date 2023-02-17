@@ -65,6 +65,7 @@ require (
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
 	github.com/aws/aws-sdk-go v1.44.199 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cloudflare/ahocorasick v0.0.0-20210425175752-730270c3e184 // indirect
 	github.com/dlclark/regexp2 v1.8.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

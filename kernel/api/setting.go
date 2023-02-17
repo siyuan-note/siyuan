@@ -91,11 +91,21 @@ func setEditor(c *gin.Context) {
 		editor.KaTexMacros = "{}"
 	}
 
+	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
+	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
+	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude
+
 	model.Conf.Editor = editor
 	model.Conf.Save()
 
 	if oldGenerateHistoryInterval != model.Conf.Editor.GenerateHistoryInterval {
 		model.ChangeHistoryTick(editor.GenerateHistoryInterval)
+	}
+
+	if oldVirtualBlockRef != model.Conf.Editor.VirtualBlockRef ||
+		oldVirtualBlockRefInclude != model.Conf.Editor.VirtualBlockRefInclude ||
+		oldVirtualBlockRefExclude != model.Conf.Editor.VirtualBlockRefExclude {
+		model.ResetVirtualBlockRefCache()
 	}
 
 	ret.Data = model.Conf.Editor
@@ -232,7 +242,7 @@ func setSearch(c *gin.Context) {
 		oldVirtualRefAnchor != s.VirtualRefAnchor ||
 		oldVirtualRefDoc != s.VirtualRefDoc ||
 		oldVirtualRefKeywordsLimit != s.VirtualRefKeywordsLimit {
-		model.CacheVirtualBlockRefJob()
+		model.ResetVirtualBlockRefCache()
 	}
 	ret.Data = s
 }

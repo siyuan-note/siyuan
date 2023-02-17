@@ -18,8 +18,6 @@ package model
 
 import (
 	"bytes"
-	goahocorasick "github.com/anknown/ahocorasick"
-	"github.com/siyuan-note/logging"
 	"regexp"
 	"sort"
 	"strings"
@@ -29,6 +27,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	ahocorasick "github.com/BobuSumisu/aho-corasick"
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -71,42 +70,22 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []s
 	}
 
 	contentTmp := blockContent
-	var keywordsTmp [][]rune
+	var keywordsTmp []string
 	if !Conf.Search.CaseSensitive {
 		contentTmp = strings.ToLower(blockContent)
 		for _, keyword := range keywords {
-			keywordsTmp = append(keywordsTmp, []rune(strings.ToLower(keyword)))
+			keywordsTmp = append(keywordsTmp, strings.ToLower(keyword))
 		}
 	} else {
 		for _, keyword := range keywords {
-			keywordsTmp = append(keywordsTmp, []rune(keyword))
+			keywordsTmp = append(keywordsTmp, keyword)
 		}
 	}
 
-	if 1024*1024 < len(contentTmp) {
-		m := goahocorasick.Machine{}
-		buildErr := m.Build(keywordsTmp)
-		if nil != buildErr {
-			logging.LogWarnf("build virtual ref keywords AC matcher failed: %s", buildErr)
-			for _, keywordRunes := range keywordsTmp {
-				keyword := string(keywordRunes)
-				if strings.Contains(contentTmp, keyword) {
-					ret = append(ret, keyword)
-				}
-			}
-		} else {
-			hits := m.MultiPatternSearch([]rune(contentTmp), false)
-			for _, hit := range hits {
-				ret = append(ret, string(hit.Word))
-			}
-		}
-	} else {
-		for _, keywordRunes := range keywordsTmp {
-			keyword := string(keywordRunes)
-			if strings.Contains(contentTmp, keyword) {
-				ret = append(ret, keyword)
-			}
-		}
+	trie := ahocorasick.NewTrieBuilder().AddStrings(keywordsTmp).Build()
+	hits := trie.MatchString(contentTmp)
+	for _, hit := range hits {
+		ret = append(ret, hit.MatchString())
 	}
 
 	if 1 > len(ret) {
@@ -126,6 +105,11 @@ func CacheVirtualBlockRefJob() {
 
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
+}
+
+func ResetVirtualBlockRefCache() {
+	virtualBlockRefCache.Clear()
+	CacheVirtualBlockRefJob()
 }
 
 func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeywords []string, refCount map[string]int, luteEngine *lute.Lute) bool {

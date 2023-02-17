@@ -230,8 +230,8 @@ func initHistoryDBConnection() {
 	if nil != err {
 		logging.LogFatalf("create database failed: %s", err)
 	}
-	historyDB.SetMaxIdleConns(1)
-	historyDB.SetMaxOpenConns(1)
+	historyDB.SetMaxIdleConns(3)
+	historyDB.SetMaxOpenConns(3)
 	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
 }
 

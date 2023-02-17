@@ -28,22 +28,22 @@ export class Dock {
             case "Left":
                 this.layout = window.siyuan.layout.layout.children[1].children[0] as Layout;
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatl")
+                this.layout.element.classList.add("layout--floatl");
                 break;
             case "Right":
                 this.layout = window.siyuan.layout.layout.children[1].children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatr")
+                this.layout.element.classList.add("layout--floatr");
                 break;
             case "Top":
                 this.layout = window.siyuan.layout.layout.children[0] as Layout;
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatt")
+                this.layout.element.classList.add("layout--floatt");
                 break;
             case "Bottom":
                 this.layout = window.siyuan.layout.layout.children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatb")
+                this.layout.element.classList.add("layout--floatb");
                 break;
         }
         this.element = document.getElementById("dock" + options.position);
@@ -112,7 +112,7 @@ export class Dock {
         }
         if (!this.pin) {
             setTimeout(() => {
-                this.resetDockPosition(false)
+                this.resetDockPosition(false);
                 this.hideDock(true);
                 this.layout.element.classList.add("layout--float");
                 this.resizeElement.classList.add("fn__none");
@@ -502,7 +502,7 @@ ${this.position === "Top" ? "top" : "bottom"}:0`);
     }
 
     private genButton(data: IDockTab[], index: number) {
-        let html = ""
+        let html = "";
         data.forEach(item => {
             html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkeylangid="${item.hotkeyLangId}" class="dock__item${item.show ? " dock__item--active" : ""} b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${window.siyuan.languages[item.hotkeyLangId] + " " + updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}${window.siyuan.languages.dockTip}">
     <svg><use xlink:href="#${item.icon}"></use></svg>

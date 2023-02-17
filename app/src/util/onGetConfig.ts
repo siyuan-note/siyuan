@@ -469,15 +469,15 @@ export const initWindow = () => {
         <use xlink:href="#iconPin"></use>
     </svg>
 </div></div>`);
-        const pinElement = document.getElementById("pinWindow")
+        const pinElement = document.getElementById("pinWindow");
         pinElement.addEventListener("click", () => {
-            pinElement.classList.toggle("toolbar__item--active")
+            pinElement.classList.toggle("toolbar__item--active");
             if (pinElement.classList.contains("toolbar__item--active")) {
                 pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
-                currentWindow.setAlwaysOnTop(true, "pop-up-menu")
+                currentWindow.setAlwaysOnTop(true, "pop-up-menu");
             } else {
                 pinElement.setAttribute("aria-label", window.siyuan.languages.pin);
-                currentWindow.setAlwaysOnTop(false)
+                currentWindow.setAlwaysOnTop(false);
             }
         });
     }

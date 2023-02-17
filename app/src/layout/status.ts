@@ -1,6 +1,4 @@
 /// #if !MOBILE
-import {getAllDocks} from "./getAll";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {getDockByType, resizeTabs} from "./util";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";

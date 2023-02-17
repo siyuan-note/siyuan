@@ -214,7 +214,7 @@ export class Wnd {
                 it.classList.remove("layout-tab-bars--drag");
                 return;
             }
-            const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB))
+            const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB));
             let oldTab = getInstanceById(tabData.id) as Tab;
             const wnd = getInstanceById(it.parentElement.getAttribute("data-id")) as Wnd;
             /// #if !BROWSER
@@ -324,7 +324,7 @@ export class Wnd {
             dragElement.classList.add("fn__none");
             const targetWndElement = event.target.parentElement.parentElement;
             const targetWnd = getInstanceById(targetWndElement.getAttribute("data-id")) as Wnd;
-            const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB))
+            const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB));
             let oldTab = getInstanceById(tabData.id) as Tab;
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口

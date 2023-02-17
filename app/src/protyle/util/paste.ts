@@ -220,7 +220,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             insertHTML(code, protyle, true);
             highlightRender(protyle.wysiwyg.element);
         }
-        hideElements(["hint"], protyle)
+        hideElements(["hint"], protyle);
     } else {
         let isHTML = false;
         if (textHTML.replace("<!--StartFragment--><!--EndFragment-->", "").trim() !== "") {

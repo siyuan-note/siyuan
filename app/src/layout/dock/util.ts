@@ -94,9 +94,9 @@ export const resetFloatDockSize = () => {
         window.siyuan.layout.rightDock.showDock(true);
     }
     if (!window.siyuan.layout.topDock.pin && window.siyuan.layout.topDock.layout.element.style.opacity === "1") {
-        window.siyuan.layout.topDock.showDock(true)
+        window.siyuan.layout.topDock.showDock(true);
     }
     if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
-        window.siyuan.layout.bottomDock.showDock(true)
+        window.siyuan.layout.bottomDock.showDock(true);
     }
 };

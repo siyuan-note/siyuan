@@ -31,7 +31,7 @@ export const setTabPosition = () => {
             // @ts-ignore
             dragElement.style.WebkitAppRegion = "";
         }
-        const headersLastElement = headerElement.lastElementChild as HTMLElement
+        const headersLastElement = headerElement.lastElementChild as HTMLElement;
         if ("darwin" === window.siyuan.config.system.os) {
             if (rect.top <= 0 && rect.left <= 0 && !getCurrentWindow().isFullScreen()) {
                 item.headersElement.style.paddingLeft = "69px";

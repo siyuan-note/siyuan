@@ -350,7 +350,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         click() {
             openNewWindowById(id);
         }
-    })
+    });
     /// #endif
     openSubmenus.push({type: "separator"});
     openSubmenus.push({

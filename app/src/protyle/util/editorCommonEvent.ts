@@ -737,7 +737,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (gutterType) {
             // gutter 或反链面板拖拽
             const sourceElements: Element[] = [];
-            const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)
+            const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             const selectedIds = gutterTypes[2].split(",");
             if (event.altKey) {
                 focusByRange(document.caretRangeFromPoint(event.clientX, event.clientY));
@@ -756,9 +756,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
                 blockRender(protyle, protyle.wysiwyg.element);
             } else if (targetElement) {
-                let queryClass = ''
+                let queryClass = "";
                 selectedIds.forEach(item => {
-                    queryClass = `[data-node-id="${item}"],`
+                    queryClass = `[data-node-id="${item}"],`;
                 });
                 if (window.siyuan.dragElement) {
                     window.siyuan.dragElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
@@ -768,7 +768,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     });
                 } else {    // 跨窗口拖拽
-                    const targetProtyleElement = document.createElement("template")
+                    const targetProtyleElement = document.createElement("template");
                     targetProtyleElement.innerHTML = event.dataTransfer.getData(gutterType);
                     targetProtyleElement.content.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
                         if (elementItem.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
@@ -932,7 +932,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             disabledPosition = "";
             // gutter 文档内拖拽限制
             // 排除自己及子孙
-            const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)
+            const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             const isSelf = gutterTypes[2].split(",").find((item: string) => {
                 if (item && hasClosestByAttribute(targetElement, "data-node-id", item)) {
                     return true;

@@ -184,7 +184,7 @@ const syncNow = () => {
         fetchPost("/api/sync/performSync", {upload: uploadElement.value === "true"});
         manualDialog.destroy();
     });
-}
+};
 
 const setSync = (key?: string, dialog?: Dialog) => {
     if (key) {

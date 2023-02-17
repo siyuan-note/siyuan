@@ -44,8 +44,8 @@ const togglePinDock = (dock: Dock, icon: string) => {
             dock.layout.element.classList.toggle("layout--float");
             resizeTabs();
         }
-    }
-}
+    };
+};
 
 export const workspaceMenu = (rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&

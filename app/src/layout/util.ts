@@ -599,7 +599,7 @@ export const getInstanceById = (id: string, layout = window.siyuan.layout.center
 
 export const addResize = (obj: Layout | Wnd) => {
     if (!obj.resize) {
-        return
+        return;
     }
     const resizeWnd = (resizeElement: HTMLElement, direction: string) => {
         const setSize = (item: HTMLElement, direction: string) => {

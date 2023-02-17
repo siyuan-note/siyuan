@@ -65,7 +65,7 @@ export class Gutter {
             if (window.siyuan.dragElement) {
                 this.element.querySelectorAll("button").forEach((item) => {
                     item.style.opacity = "";
-                })
+                });
                 window.siyuan.dragElement = undefined;
             }
         });

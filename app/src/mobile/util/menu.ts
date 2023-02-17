@@ -645,10 +645,10 @@ const initAbout = () => {
                 break;
             } else if (target.id === "openWorkspace") {
                 fetchPost("/api/system/getMobileWorkspaces", {}, (response) => {
-                    let selectHTML = ""
+                    let selectHTML = "";
                     response.data.forEach((item: string, index: number) => {
-                        selectHTML += `<option value="${item}"${index === 0 ? ' selected="selected"' : ""}>${pathPosix().basename(item)}</option>`
-                    })
+                        selectHTML += `<option value="${item}"${index === 0 ? ' selected="selected"' : ""}>${pathPosix().basename(item)}</option>`;
+                    });
                     const openWorkspaceDialog = new Dialog({
                         title: window.siyuan.languages.openBy,
                         content: `<div class="b3-dialog__content">
@@ -678,7 +678,7 @@ const initAbout = () => {
                             });
                         });
                     });
-                })
+                });
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -746,4 +746,4 @@ const initAbout = () => {
             exitSiYuan();
         });
     });
-}
+};

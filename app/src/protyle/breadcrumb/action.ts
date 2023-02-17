@@ -62,14 +62,14 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         } else {
             btnElement.querySelector("use").setAttribute("xlink:href", "#iconContract");
         }
-        const dockLayoutElement = hasClosestByClassName(element, "layout--float")
+        const dockLayoutElement = hasClosestByClassName(element, "layout--float");
         if (dockLayoutElement) {
             if (isFullscreen) {
-                dockLayoutElement.setAttribute("data-temp", dockLayoutElement.style.transform)
-                dockLayoutElement.style.transform = "none"
+                dockLayoutElement.setAttribute("data-temp", dockLayoutElement.style.transform);
+                dockLayoutElement.style.transform = "none";
             } else {
-                dockLayoutElement.style.transform = dockLayoutElement.getAttribute("data-temp")
-                dockLayoutElement.removeAttribute("data-temp")
+                dockLayoutElement.style.transform = dockLayoutElement.getAttribute("data-temp");
+                dockLayoutElement.removeAttribute("data-temp");
             }
         }
         return;

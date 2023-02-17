@@ -217,7 +217,7 @@ export class Protyle {
                 }
             });
         }
-        this.protyle.contentElement.classList.add("protyle-content--transition")
+        this.protyle.contentElement.classList.add("protyle-content--transition");
     }
 
     private init() {

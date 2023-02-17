@@ -346,7 +346,9 @@ ${this.position === "Top" ? "top" : "bottom"}:0`);
             }
             if (this.pin) {
                 this.layout.element.style.opacity = "";
-                this.resizeElement.classList.remove("fn__none");
+                setTimeout(() => {
+                    this.resizeElement.classList.remove("fn__none");
+                }, 200);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
             }
         }
 

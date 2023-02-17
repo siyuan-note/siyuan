@@ -39,8 +39,7 @@ var (
 
 type historyDBQueueOperation struct {
 	inQueueTime time.Time
-	action      string                 // index/deletePathPrefix
-	context     map[string]interface{} // 消息推送上下文
+	action      string // index/deletePathPrefix
 
 	histories  []*History // index
 	pathPrefix string     // deletePathPrefix
@@ -71,9 +70,10 @@ func FlushHistoryQueue() {
 			return
 		}
 
-		op.context["current"] = i
-		op.context["total"] = total
-		if err = execHistoryOp(op, tx); nil != err {
+		context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+		context["current"] = i
+		context["total"] = total
+		if err = execHistoryOp(op, tx, context); nil != err {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
 			continue
@@ -99,12 +99,12 @@ func FlushHistoryQueue() {
 	}
 }
 
-func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx) (err error) {
+func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx, context map[string]interface{}) (err error) {
 	switch op.action {
 	case "index":
-		err = insertHistories(tx, op.histories, op.context)
+		err = insertHistories(tx, op.histories, context)
 	case "deletePathPrefix":
-		err = deleteHistoriesByPathPrefix(tx, op.pathPrefix, op.context)
+		err = deleteHistoriesByPathPrefix(tx, op.pathPrefix, context)
 	default:
 		msg := fmt.Sprintf("unknown history operation [%s]", op.action)
 		logging.LogErrorf(msg)
@@ -117,17 +117,15 @@ func DeleteHistoriesByPathPrefixQueue(pathPrefix string) {
 	historyDBQueueLock.Lock()
 	defer historyDBQueueLock.Unlock()
 
-	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "deletePathPrefix", pathPrefix: pathPrefix,
-		context: map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}}
+	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "deletePathPrefix", pathPrefix: pathPrefix}
 	historyOperationQueue = append(historyOperationQueue, newOp)
 }
 
-func IndexHistoriesQueue(histories []*History, context map[string]interface{}) {
+func IndexHistoriesQueue(histories []*History) {
 	historyDBQueueLock.Lock()
 	defer historyDBQueueLock.Unlock()
 
-	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "index", histories: histories,
-		context: context}
+	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "index", histories: histories}
 	historyOperationQueue = append(historyOperationQueue, newOp)
 }
 

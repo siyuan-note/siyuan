@@ -212,8 +212,6 @@ func BuildTags() (ret *Tags) {
 	WaitForWritingFiles()
 	if !sql.IsEmptyQueue() {
 		sql.WaitForWritingDatabase()
-	} else {
-		util.RandomSleep(200, 500)
 	}
 
 	ret = &Tags{}

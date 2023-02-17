@@ -76,7 +76,7 @@ func Export2Liandi(id string) (err error) {
 		result := gulu.Ret.NewResult()
 		request := httpclient.NewCloudRequest30s()
 		resp, getErr := request.
-			SetResult(result).
+			SetSuccessResult(result).
 			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 			Get(util.LiandiServer + "/api/v2/article/update/" + articleId)
 		if nil != getErr {
@@ -115,7 +115,7 @@ func Export2Liandi(id string) (err error) {
 	result := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	request = request.
-		SetResult(result).
+		SetSuccessResult(result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		SetBody(map[string]interface{}{
 			"articleTitle":   title,

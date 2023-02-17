@@ -606,7 +606,7 @@ export const openHistory = () => {
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);
                 break;
             } else if (type === "rebuildIndex") {
-                fetchPost("/api/history/reindexHistory", {});
+                fetchPost("/api/history/reindexHistory");
                 dialog.destroy();
                 break;
             } else if (type === "compare") {

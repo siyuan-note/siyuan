@@ -582,8 +582,9 @@ func ReindexHistory() (err error) {
 
 		name := historyDir.Name()
 		indexHistoryDir(name, lutEngine)
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(40), name))
 	}
+
+	sql.WaitForWritingHistoryDatabase()
 	return
 }
 

@@ -137,6 +137,8 @@ func BootSyncData() {
 	}
 
 	if !util.IsOnline() {
+		BootSyncSucc = 1
+		util.PushErrMsg(Conf.Language(28), 7000)
 		return
 	}
 

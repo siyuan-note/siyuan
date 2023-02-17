@@ -21,11 +21,13 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/ClarkThan/ahocorasick"
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -68,18 +70,23 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []s
 	}
 
 	contentTmp := blockContent
+	var keywordsTmp []string
 	if !Conf.Search.CaseSensitive {
 		contentTmp = strings.ToLower(blockContent)
+		for _, keyword := range keywords {
+			keywordsTmp = append(keywordsTmp, strings.ToLower(keyword))
+		}
+	} else {
+		for _, keyword := range keywords {
+			keywordsTmp = append(keywordsTmp, keyword)
+		}
 	}
-	for _, keyword := range keywords {
-		keywordTmp := keyword
-		if !Conf.Search.CaseSensitive {
-			keywordTmp = strings.ToLower(keyword)
-		}
 
-		if strings.Contains(contentTmp, keywordTmp) {
-			ret = append(ret, keyword)
-		}
+	m := ahocorasick.NewMatcher()
+	m.BuildWithPatterns(keywordsTmp)
+	hits := m.Search(contentTmp)
+	for _, hit := range hits {
+		ret = append(ret, hit)
 	}
 
 	if 1 > len(ret) {
@@ -87,7 +94,7 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []s
 	}
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	virtualBlockRefCache.Set(blockID, ret, 1)
+	virtualBlockRefCache.SetWithTTL(blockID, ret, 1, 10*time.Minute)
 	return
 }
 
@@ -99,6 +106,11 @@ func CacheVirtualBlockRefJob() {
 
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
+}
+
+func ResetVirtualBlockRefCache() {
+	virtualBlockRefCache.Clear()
+	CacheVirtualBlockRefJob()
 }
 
 func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeywords []string, refCount map[string]int, luteEngine *lute.Lute) bool {

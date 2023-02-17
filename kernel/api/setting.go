@@ -91,11 +91,21 @@ func setEditor(c *gin.Context) {
 		editor.KaTexMacros = "{}"
 	}
 
+	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
+	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
+	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude
+
 	model.Conf.Editor = editor
 	model.Conf.Save()
 
 	if oldGenerateHistoryInterval != model.Conf.Editor.GenerateHistoryInterval {
 		model.ChangeHistoryTick(editor.GenerateHistoryInterval)
+	}
+
+	if oldVirtualBlockRef != model.Conf.Editor.VirtualBlockRef ||
+		oldVirtualBlockRefInclude != model.Conf.Editor.VirtualBlockRefInclude ||
+		oldVirtualBlockRefExclude != model.Conf.Editor.VirtualBlockRefExclude {
+		model.ResetVirtualBlockRefCache()
 	}
 
 	ret.Data = model.Conf.Editor
@@ -214,12 +224,25 @@ func setSearch(c *gin.Context) {
 	}
 
 	oldCaseSensitive := model.Conf.Search.CaseSensitive
+	oldVirtualRefName := model.Conf.Search.VirtualRefName
+	oldVirtualRefAlias := model.Conf.Search.VirtualRefAlias
+	oldVirtualRefAnchor := model.Conf.Search.VirtualRefAnchor
+	oldVirtualRefDoc := model.Conf.Search.VirtualRefDoc
+	oldVirtualRefKeywordsLimit := model.Conf.Search.VirtualRefKeywordsLimit
 
 	model.Conf.Search = s
 	model.Conf.Save()
 	sql.SetCaseSensitive(s.CaseSensitive)
 	if s.CaseSensitive != oldCaseSensitive {
 		model.FullReindex()
+	}
+
+	if oldVirtualRefName != s.VirtualRefName ||
+		oldVirtualRefAlias != s.VirtualRefAlias ||
+		oldVirtualRefAnchor != s.VirtualRefAnchor ||
+		oldVirtualRefDoc != s.VirtualRefDoc ||
+		oldVirtualRefKeywordsLimit != s.VirtualRefKeywordsLimit {
+		model.ResetVirtualBlockRefCache()
 	}
 	ret.Data = s
 }

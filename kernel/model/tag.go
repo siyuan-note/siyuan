@@ -41,7 +41,7 @@ func RemoveTag(label string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 	util.RandomSleep(1000, 2000)
 
-	tags := sql.QueryTagSpansByKeyword(label, 102400)
+	tags := sql.QueryTagSpansByLabel(label)
 	treeBlocks := map[string][]string{}
 	for _, tag := range tags {
 		if blocks, ok := treeBlocks[tag.RootID]; !ok {
@@ -126,7 +126,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	util.RandomSleep(500, 1000)
 
-	tags := sql.QueryTagSpansByKeyword(oldLabel, 102400)
+	tags := sql.QueryTagSpansByLabel(oldLabel)
 	treeBlocks := map[string][]string{}
 	for _, tag := range tags {
 		if blocks, ok := treeBlocks[tag.RootID]; !ok {
@@ -212,8 +212,6 @@ func BuildTags() (ret *Tags) {
 	WaitForWritingFiles()
 	if !sql.IsEmptyQueue() {
 		sql.WaitForWritingDatabase()
-	} else {
-		util.RandomSleep(200, 500)
 	}
 
 	ret = &Tags{}
@@ -310,7 +308,7 @@ func labelBlocksByKeyword(keyword string) (ret map[string]TagBlocks) {
 func labelTags() (ret map[string]Tags) {
 	ret = map[string]Tags{}
 
-	tagSpans := sql.QueryTagSpans("", 10240)
+	tagSpans := sql.QueryTagSpans("")
 	for _, tagSpan := range tagSpans {
 		label := tagSpan.Content
 		if _, ok := ret[label]; ok {

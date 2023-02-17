@@ -230,8 +230,8 @@ func initHistoryDBConnection() {
 	if nil != err {
 		logging.LogFatalf("create database failed: %s", err)
 	}
-	historyDB.SetMaxIdleConns(1)
-	historyDB.SetMaxOpenConns(1)
+	historyDB.SetMaxIdleConns(3)
+	historyDB.SetMaxOpenConns(3)
 	historyDB.SetConnMaxLifetime(365 * 24 * time.Hour)
 }
 
@@ -1142,7 +1142,7 @@ func beginTx() (tx *sql.Tx, err error) {
 	return
 }
 
-func BeginHistoryTx() (tx *sql.Tx, err error) {
+func beginHistoryTx() (tx *sql.Tx, err error) {
 	if tx, err = historyDB.Begin(); nil != err {
 		logging.LogErrorf("begin history tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
@@ -1152,7 +1152,7 @@ func BeginHistoryTx() (tx *sql.Tx, err error) {
 	return
 }
 
-func CommitHistoryTx(tx *sql.Tx) (err error) {
+func commitHistoryTx(tx *sql.Tx) (err error) {
 	if nil == tx {
 		logging.LogErrorf("tx is nil")
 		return errors.New("tx is nil")

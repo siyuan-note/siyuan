@@ -885,6 +885,7 @@
     "task.database.index.fix": "執行數據庫索引訂正",
     "task.ocr.image": "執行圖片 OCR 提取文本",
     "task.history.generateDoc": "執行生成文件歷史",
+    "task.history.database.index.commit": "執行歷史數據庫索引提交",
     "task.database.index.embedBlock": "執行數據庫索引嵌入塊",
     "task.reload.ui": "執行重載界面"
   },
@@ -1089,6 +1090,7 @@
     "187": "正在解鎖雲端同步目錄",
     "188": "鎖定雲端同步目錄失敗，請稍後再試",
     "189": "雲端同步目錄還在被其他設備鎖定，請稍後再試",
-    "190": "校驗索引時發現一個問題，已經自動修復"
+    "190": "校驗索引時發現一個問題，已經自動修復",
+    "191": "[%d/%d] 已经建立条历史数据索引"
   }
 }

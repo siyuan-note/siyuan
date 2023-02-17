@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 )
 
@@ -102,7 +103,7 @@ func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
 	return historyDB.Query(query, args...)
 }
 
-func DeleteHistoriesByPathPrefix(tx *sql.Tx, pathPrefix string) (err error) {
+func deleteHistoriesByPathPrefix(tx *sql.Tx, pathPrefix string, context map[string]interface{}) (err error) {
 	stmt := "DELETE FROM histories_fts_case_insensitive WHERE path LIKE ?"
 	if err = execStmtTx(tx, stmt, pathPrefix+"%"); nil != err {
 		return
@@ -115,7 +116,7 @@ const (
 	HistoriesPlaceholder              = "(?, ?, ?, ?, ?, ?)"
 )
 
-func InsertHistories(tx *sql.Tx, histories []*History) (err error) {
+func insertHistories(tx *sql.Tx, histories []*History, context map[string]interface{}) (err error) {
 	if 1 > len(histories) {
 		return
 	}
@@ -127,20 +128,20 @@ func InsertHistories(tx *sql.Tx, histories []*History) (err error) {
 			continue
 		}
 
-		if err = insertHistories0(tx, bulk); nil != err {
+		if err = insertHistories0(tx, bulk, context); nil != err {
 			return
 		}
 		bulk = []*History{}
 	}
 	if 0 < len(bulk) {
-		if err = insertHistories0(tx, bulk); nil != err {
+		if err = insertHistories0(tx, bulk, context); nil != err {
 			return
 		}
 	}
 	return
 }
 
-func insertHistories0(tx *sql.Tx, bulk []*History) (err error) {
+func insertHistories0(tx *sql.Tx, bulk []*History, context map[string]interface{}) (err error) {
 	valueStrings := make([]string, 0, len(bulk))
 	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(HistoriesPlaceholder, "?"))
 	for _, b := range bulk {
@@ -157,5 +158,7 @@ func insertHistories0(tx *sql.Tx, bulk []*History) (err error) {
 	if err = prepareExecInsertTx(tx, stmt, valueArgs); nil != err {
 		return
 	}
+
+	eventbus.Publish(eventbus.EvtSQLInsertHistory, context)
 	return
 }

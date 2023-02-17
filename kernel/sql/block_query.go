@@ -274,8 +274,8 @@ func queryDocIDsByTitle(title string, excludeIDs []string) (ret []string) {
 
 func queryDocTitles() (ret []string) {
 	ret = []string{}
-	sqlStmt := "SELECT content FROM blocks WHERE type = 'd' LIMIT ?"
-	rows, err := query(sqlStmt, 10240)
+	sqlStmt := "SELECT content FROM blocks WHERE type = 'd'"
+	rows, err := query(sqlStmt)
 	if nil != err {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return

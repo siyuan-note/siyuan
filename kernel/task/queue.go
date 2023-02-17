@@ -82,16 +82,17 @@ func getCurrentActions() (ret []string) {
 }
 
 const (
-	RepoCheckout            = "task.repo.checkout"             // 从快照中检出
-	DatabaseIndexFull       = "task.database.index.full"       // 重建索引
-	DatabaseIndex           = "task.database.index"            // 数据库索引
-	DatabaseIndexCommit     = "task.database.index.commit"     // 数据库索引提交
-	DatabaseIndexRef        = "task.database.index.ref"        // 数据库索引引用
-	DatabaseIndexFix        = "task.database.index.fix"        // 数据库索引订正
-	OCRImage                = "task.ocr.image"                 // 图片 OCR 提取文本
-	HistoryGenerateDoc      = "task.history.generateDoc"       // 生成文件历史
-	DatabaseIndexEmbedBlock = "task.database.index.embedBlock" // 数据库索引嵌入块
-	ReloadUI                = "task.reload.ui"                 // 重载 UI
+	RepoCheckout               = "task.repo.checkout"                 // 从快照中检出
+	DatabaseIndexFull          = "task.database.index.full"           // 重建索引
+	DatabaseIndex              = "task.database.index"                // 数据库索引
+	DatabaseIndexCommit        = "task.database.index.commit"         // 数据库索引提交
+	DatabaseIndexRef           = "task.database.index.ref"            // 数据库索引引用
+	DatabaseIndexFix           = "task.database.index.fix"            // 数据库索引订正
+	OCRImage                   = "task.ocr.image"                     // 图片 OCR 提取文本
+	HistoryGenerateDoc         = "task.history.generateDoc"           // 生成文件历史
+	HistoryDatabaseIndexCommit = "task.history.database.index.commit" // 历史数据库索引提交
+	DatabaseIndexEmbedBlock    = "task.database.index.embedBlock"     // 数据库索引嵌入块
+	ReloadUI                   = "task.reload.ui"                     // 重载 UI
 )
 
 // uniqueActions 描述了唯一的任务，即队列中只能存在一个在执行的任务。
@@ -101,6 +102,7 @@ var uniqueActions = []string{
 	DatabaseIndexCommit,
 	OCRImage,
 	HistoryGenerateDoc,
+	HistoryDatabaseIndexCommit,
 	DatabaseIndexEmbedBlock,
 }
 

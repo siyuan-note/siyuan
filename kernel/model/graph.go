@@ -205,7 +205,7 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 }
 
 func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p string, style map[string]string) {
-	tagSpans := sql.QueryTagSpans(p, 1024)
+	tagSpans := sql.QueryTagSpans(p)
 	if 1 > len(tagSpans) {
 		return
 	}

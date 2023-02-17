@@ -158,8 +158,6 @@ func BuildBookmark() (ret *Bookmarks) {
 	WaitForWritingFiles()
 	if !sql.IsEmptyQueue() {
 		sql.WaitForWritingDatabase()
-	} else {
-		util.RandomSleep(200, 500)
 	}
 
 	ret = &Bookmarks{}

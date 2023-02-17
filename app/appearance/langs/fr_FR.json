@@ -885,6 +885,7 @@
     "task.database.index.fix": "Effectuer la correction de l'index de la base de données",
     "task.ocr.image": "Exécute l'OCR d'image pour extraire le texte",
     "task.history.generateDoc": "Exécuter l'historique de GenerateDoc",
+    "task.history.database.index.commit": "Effectuer la validation de l'index de la base de données d'historique",
     "task.database.index.embedBlock": "Exécuter le bloc d'intégration d'index de base de données",
     "task.reload.ui": "Interface utilisateur de rechargement de tâche"
   },
@@ -1089,6 +1090,7 @@
     "187": "Déverrouillage du répertoire de synchronisation cloud",
     "188": "Échec du verrouillage du répertoire de synchronisation cloud, veuillez réessayer plus tard",
     "189": "Le répertoire de synchronisation cloud est toujours verrouillé par d'autres appareils, veuillez réessayer plus tard",
-    "190": "Un problème a été trouvé lors de la validation de l'index, qui a été automatiquement corrigé"
+    "190": "Un problème a été trouvé lors de la validation de l'index, qui a été automatiquement corrigé",
+    "191": "[%d/%d] Création d'un index de données historiques"
   }
 }

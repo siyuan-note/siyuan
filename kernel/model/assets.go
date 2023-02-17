@@ -356,7 +356,7 @@ func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
 		requestResult := gulu.Ret.NewResult()
 		request := httpclient.NewCloudFileRequest2m()
 		resp, reqErr := request.
-			SetResult(requestResult).
+			SetSuccessResult(requestResult).
 			SetFile("file[]", absAsset).
 			SetCookies(&http.Cookie{Name: "symphony", Value: uploadToken}).
 			SetHeader("meta-type", metaType).

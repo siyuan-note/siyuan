@@ -286,7 +286,7 @@ export class Breadcrumb {
                         }
                     }
                 }).element);
-                if (!needSubscribe("")) {
+                if (window.siyuan.user) { // 登录链滴账号后即可使用 `分享到链滴` https://github.com/siyuan-note/siyuan/issues/7392
                     window.siyuan.menus.menu.append(new MenuItem({
                         label: window.siyuan.languages.share2Liandi,
                         icon: "iconLiandi",

@@ -20,11 +20,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/siyuan-note/eventbus"
 	"runtime/debug"
 	"sync"
 	"time"
 
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"

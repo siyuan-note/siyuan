@@ -21,6 +21,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -87,7 +88,7 @@ func putBlockVirtualRefKeywords(blockContent, blockID, docTitle string) (ret []s
 	}
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	virtualBlockRefCache.Set(blockID, ret, 1)
+	virtualBlockRefCache.SetWithTTL(blockID, ret, 1, 10*time.Minute)
 	return
 }
 

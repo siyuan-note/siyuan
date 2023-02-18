@@ -31,8 +31,8 @@ export const openCard = () => {
             }
             const dialog = new Dialog({
                 title: window.siyuan.languages.riffCard,
-                content: `<div class="fn__flex-column b3-dialog__content" style="box-sizing: border-box;max-height: 100%">
-    <div class="fn__flex">
+                content: `<div class="fn__flex-column" style="box-sizing: border-box;max-height: 100%;padding: 0 0 16px 0;">
+    <div class="fn__flex b3-dialog__content">
         <select class="b3-select fn__flex-1">${decksHTML}</select>
         <span class="fn__space"></span>
         <span data-type="view" class="block__icon block__icon--show">
@@ -41,7 +41,6 @@ export const openCard = () => {
         <span class="fn__space"></span>
         <div class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}" data-type="count">${countHTML}</div>
     </div>
-    <div class="fn__hr--b"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="b3-dialog__cardblock b3-dialog__cardblock--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
     <div class="b3-dialog__cardempty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">${window.siyuan.languages.noDueCard}</div>
     <div class="fn__flex b3-dialog__cardaction${blocks.length === 0 ? " fn__none" : ""}">
@@ -71,11 +70,10 @@ export const openCard = () => {
         </div>
     </div>
 </div>`,
-                width: isMobile() ? "96vw" : "80vw",
-                height: "70vh",
+                width: isMobile() ? "98vw" : "80vw",
+                height: isMobile() ? "80vh" : "70vh",
             });
             (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
-            dialog.element.querySelector("input").focus();
             const editor = new Protyle(dialog.element.querySelector("[data-type='render']") as HTMLElement, {
                 blockId: "",
                 action: [Constants.CB_GET_ALL],

@@ -36,7 +36,7 @@ func getTreeRiffCards(c *gin.Context) {
 		return
 	}
 
-	rootID := arg["rootID"].(string)
+	rootID := arg["id"].(string)
 	page := int(arg["page"].(float64))
 	blockIDs, total, pageCount := model.GetTreeFlashcards(rootID, page)
 	ret.Data = map[string]interface{}{
@@ -55,7 +55,7 @@ func getRiffCards(c *gin.Context) {
 		return
 	}
 
-	deckID := arg["deckID"].(string)
+	deckID := arg["id"].(string)
 	page := int(arg["page"].(float64))
 	blockIDs, total, pageCount := model.GetFlashcards(deckID, page)
 	ret.Data = map[string]interface{}{

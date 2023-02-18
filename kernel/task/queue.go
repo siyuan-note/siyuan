@@ -144,7 +144,7 @@ func StatusJob() {
 	if "" != currentTaskAction {
 		if nil != actionLangs {
 			if label := actionLangs[currentTaskAction]; nil != label {
-				items = append([]map[string]interface{}{map[string]interface{}{"action": label.(string)}}, items...)
+				items = append([]map[string]interface{}{{"action": label.(string)}}, items...)
 			}
 		}
 	}

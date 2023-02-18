@@ -122,6 +122,56 @@ type Flashcard struct {
 	NextDues map[riff.Rating]string `json:"nextDues"`
 }
 
+func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		logging.LogWarnf("builtin deck not found")
+		return
+	}
+
+	tree, err := loadTreeByBlockID(rootID)
+	if nil != err {
+		return
+	}
+
+	blockIDs := map[string]bool{}
+	for n := tree.Root.FirstChild; nil != n; n = n.Next {
+		blockIDs[n.ID] = true
+	}
+
+	cards := deck.Dues()
+	now := time.Now()
+	for _, card := range cards {
+		blockID := card.BlockID()
+		if !blockIDs[blockID] {
+			continue
+		}
+
+		nextDues := map[riff.Rating]string{}
+		for rating, due := range card.NextDues() {
+			nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+		}
+
+		ret = append(ret, &Flashcard{
+			DeckID:   builtinDeckID,
+			BlockID:  blockID,
+			NextDues: nextDues,
+		})
+	}
+	if 1 > len(ret) {
+		ret = []*Flashcard{}
+	}
+	return
+}
+
 func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
@@ -286,6 +336,19 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 	return
 }
 
+func AddTreeFlashcards(rootID string) (err error) {
+	tree, err := loadTreeByBlockID(rootID)
+	if nil != err {
+		return
+	}
+
+	var blockIDs []string
+	for n := tree.Root.FirstChild; nil != n; n = n.Next {
+		blockIDs = append(blockIDs, n.ID)
+	}
+	return AddFlashcards(builtinDeckID, blockIDs)
+}
+
 func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
@@ -295,7 +358,6 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 		return
 	}
 
-	var rootIDs []string
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
 		bt := treenode.GetBlockTree(blockID)
@@ -303,10 +365,8 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 			continue
 		}
 
-		rootIDs = append(rootIDs, bt.RootID)
 		blockRoots[blockID] = bt.RootID
 	}
-	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 
 	trees := map[string]*parse.Tree{}
 	for _, blockID := range blockIDs {
@@ -353,16 +413,19 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	}
 
 	deck := Decks[deckID]
-	if nil != deck {
-		for _, blockID := range blockIDs {
-			cardID := ast.NewNodeID()
-			deck.AddCard(cardID, blockID)
-		}
-		err = deck.Save()
-		if nil != err {
-			logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
-			return
-		}
+	if nil == deck {
+		logging.LogWarnf("deck [%s] not found", deckID)
+		return
+	}
+
+	for _, blockID := range blockIDs {
+		cardID := ast.NewNodeID()
+		deck.AddCard(cardID, blockID)
+	}
+	err = deck.Save()
+	if nil != err {
+		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
+		return
 	}
 	return
 }
@@ -408,7 +471,24 @@ func LoadFlashcards() {
 			Decks[deck.ID] = deck
 		}
 	}
+
+	// 支持基于文档复习闪卡 https://github.com/siyuan-note/siyuan/issues/7057
+	foudBuiltinDeck := false
+	for _, deck := range Decks {
+		if builtinDeckID == deck.ID {
+			foudBuiltinDeck = true
+			break
+		}
+	}
+	if !foudBuiltinDeck {
+		deck, createErr := createDeck0("Built-in Deck", builtinDeckID)
+		if nil == createErr {
+			Decks[deck.ID] = deck
+		}
+	}
 }
+
+const builtinDeckID = "20230218211946-2kw8jgx"
 
 func RenameDeck(deckID, name string) (err error) {
 	deckLock.Lock()
@@ -469,8 +549,13 @@ func createDeck(name string) (deck *riff.Deck, err error) {
 		return
 	}
 
-	riffSavePath := getRiffDir()
 	deckID := ast.NewNodeID()
+	deck, err = createDeck0(name, deckID)
+	return
+}
+
+func createDeck0(name string, deckID string) (deck *riff.Deck, err error) {
+	riffSavePath := getRiffDir()
 	deck, err = riff.LoadDeck(riffSavePath, deckID)
 	if nil != err {
 		logging.LogErrorf("load deck [%s] failed: %s", deckID, err)
@@ -491,6 +576,10 @@ func GetDecks() (decks []*riff.Deck) {
 	defer deckLock.Unlock()
 
 	for _, deck := range Decks {
+		if deck.ID == builtinDeckID {
+			continue
+		}
+
 		decks = append(decks, deck)
 	}
 	if 1 > len(decks) {

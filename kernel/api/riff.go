@@ -66,6 +66,33 @@ func reviewRiffCard(c *gin.Context) {
 	}
 }
 
+func getTreeRiffDueCards(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID := arg["rootID"].(string)
+	err := model.AddTreeFlashcards(rootID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	cards, err := model.GetTreeDueFlashcards(rootID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = cards
+}
+
 func getRiffDueCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -126,7 +126,9 @@ export const makeCard = (nodeElement: Element[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "view") {
-                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.querySelector(".b3-list-item__text").textContent, target.parentElement);
+                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.querySelector(".b3-list-item__text").textContent, (removeResponse) => {
+                        target.parentElement.outerHTML = genCardItem(removeResponse.data);
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;

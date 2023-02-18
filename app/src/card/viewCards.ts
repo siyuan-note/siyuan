@@ -9,9 +9,8 @@ import {unicode2Emoji} from "../emoji";
 import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
-import {genCardItem} from "./makeCard";
 
-export const viewCards = (deckID: string, title: string, sourceElement?: HTMLElement, isDoc = false) => {
+export const viewCards = (deckID: string, title: string, cb:(response:IWebSocketData)=>void,isDoc = false) => {
     let pageIndex = 1;
     let edit: Protyle;
     fetchPost(isDoc ? "/api/riff/getTreeRiffCards" : "/api/riff/getRiffCards", {
@@ -117,7 +116,7 @@ export const viewCards = (deckID: string, title: string, sourceElement?: HTMLEle
                     break;
                 } else if (type === "remove") {
                     fetchPost("/api/riff/removeRiffCards", {
-                        deckID,
+                        deckID: isDoc ? "20230218211946-2kw8jgx" : deckID,
                         blockIDs: [target.getAttribute("data-id")]
                     }, (removeResponse) => {
                         let nextElment = target.parentElement.nextElementSibling;
@@ -135,9 +134,7 @@ export const viewCards = (deckID: string, title: string, sourceElement?: HTMLEle
                             nextElment.classList.add("b3-list-item--focus");
                         }
                         target.parentElement.remove();
-                        if (sourceElement) {
-                            sourceElement.outerHTML = genCardItem(removeResponse.data);
-                        }
+                        cb(removeResponse)
                     });
                     event.stopPropagation();
                     event.preventDefault();

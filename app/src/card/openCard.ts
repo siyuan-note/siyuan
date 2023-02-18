@@ -38,7 +38,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         <svg><use xlink:href="#iconEye"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <div class="ft__on-surface ft__smaller"><span>1</span>/${blocks.length}</div>
+    <div class="ft__on-surface ft__smaller"><span>1</span>/<span>${blocks.length}</span></div>
 </div>`;
     }
     const dialog = new Dialog({
@@ -111,10 +111,14 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         const viewElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "view");
         if (viewElement) {
             if (selectElement) {
-                viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text);
+                viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text, (removeResponse) => {
+                    countElement.lastElementChild.lastElementChild.innerHTML = removeResponse.data.size.toString();
+                });
             } else {
                 viewCards(countElement.previousElementSibling.getAttribute("data-id"),
-                    countElement.previousElementSibling.textContent, undefined, true);
+                    countElement.previousElementSibling.textContent, (removeResponse) => {
+                        countElement.lastElementChild.lastElementChild.innerHTML = removeResponse.data.size.toString();
+                    }, true);
             }
             event.preventDefault();
             event.stopPropagation();

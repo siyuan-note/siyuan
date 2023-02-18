@@ -41,6 +41,76 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
+func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCount int) {
+	blocks = []*Block{}
+
+	tree, err := loadTreeByBlockID(rootID)
+	if nil != err {
+		return
+	}
+
+	treeBlockIDs := map[string]bool{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+
+		treeBlockIDs[n.ID] = true
+		return ast.WalkContinue
+	})
+
+	var allBlockIDs []string
+	const pageSize = 20
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+
+	for bID, _ := range deck.BlockCard {
+		if _, ok := treeBlockIDs[bID]; !ok {
+			continue
+		}
+
+		allBlockIDs = append(allBlockIDs, bID)
+	}
+
+	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
+	sort.Strings(allBlockIDs)
+
+	start := (page - 1) * pageSize
+	end := page * pageSize
+	if start > len(allBlockIDs) {
+		start = len(allBlockIDs)
+	}
+	if end > len(allBlockIDs) {
+		end = len(allBlockIDs)
+	}
+	blockIDs := allBlockIDs[start:end]
+	total = len(allBlockIDs)
+	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
+	if 1 > len(blockIDs) {
+		blocks = []*Block{}
+		return
+	}
+
+	sqlBlocks := sql.GetBlocks(blockIDs)
+	blocks = fromSQLBlocks(&sqlBlocks, "", 36)
+	if 1 > len(blocks) {
+		blocks = []*Block{}
+		return
+	}
+
+	for i, b := range blocks {
+		if nil == b {
+			blocks[i] = &Block{
+				ID:      blockIDs[i],
+				Content: Conf.Language(180),
+			}
+		}
+	}
+	return
+}
+
 func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	var allBlockIDs []string
@@ -62,7 +132,9 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 		}
 	}
 
+	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
 	sort.Strings(allBlockIDs)
+
 	start := (page - 1) * pageSize
 	end := page * pageSize
 	if start > len(allBlockIDs) {

@@ -27,6 +27,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getTreeRiffCards(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID := arg["rootID"].(string)
+	page := int(arg["page"].(float64))
+	blockIDs, total, pageCount := model.GetTreeFlashcards(rootID, page)
+	ret.Data = map[string]interface{}{
+		"blocks":    blockIDs,
+		"total":     total,
+		"pageCount": pageCount,
+	}
+}
+
 func getRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

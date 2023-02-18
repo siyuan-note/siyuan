@@ -35,7 +35,7 @@ export const openCard = () => {
     <div class="fn__flex b3-dialog__content">
         <select class="b3-select fn__flex-1">${decksHTML}</select>
         <span class="fn__space"></span>
-        <span data-type="view" class="block__icon block__icon--show">
+        <span data-type="view" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardPreview}">
             <svg><use xlink:href="#iconEye"></use></svg>
         </span>
         <span class="fn__space"></span>

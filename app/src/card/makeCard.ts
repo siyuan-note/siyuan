@@ -23,7 +23,7 @@ export const genCardItem = (item: ICard) => {
 <span data-type="delete" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
-<span data-type="view" class="b3-list-item__action">
+<span data-type="view" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardPreview}">
     <svg><use xlink:href="#iconEye"></use></svg>
 </span>
 <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${item.size}</span>

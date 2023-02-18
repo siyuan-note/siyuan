@@ -13,7 +13,7 @@ import {genCardItem} from "./makeCard";
 
 export const viewCards = (deckID: string, title: string, sourceElement?: HTMLElement) => {
     let pageIndex = 1;
-    let edit:Protyle;
+    let edit: Protyle;
     fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (response) => {
         const dialog = new Dialog({
             title,
@@ -29,7 +29,7 @@ export const viewCards = (deckID: string, title: string, sourceElement?: HTMLEle
         <div class="fn__flex-1"></div>
     </div>
     <div class="fn__hr"></div>
-    <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1">
+    <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1" style="min-height: auto">
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
             ${renderViewItem(response.data.blocks)}
         </ul>
@@ -37,8 +37,8 @@ export const viewCards = (deckID: string, title: string, sourceElement?: HTMLEle
         <div class="fn__flex-1 b3-dialog__cardempty">${window.siyuan.languages.emptyContent}</div>
     </div>
 </div>`,
-            width: isMobile() ? "90vw" : "80vw",
-            height: "80vh",
+            width: isMobile() ? "98vw" : "80vw",
+            height: isMobile() ? "80vh" : "70vh",
             destroyCallback() {
                 if (edit) {
                     edit.destroy();

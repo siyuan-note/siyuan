@@ -110,6 +110,12 @@ func FlushQueue() {
 		defer enableCache()
 	}
 
+	groupOpsTotal := map[string]int{}
+	for _, op := range ops {
+		groupOpsTotal[op.action]++
+	}
+
+	groupOpsCurrent := map[string]int{}
 	for i, op := range ops {
 		if util.IsExiting {
 			return
@@ -120,8 +126,9 @@ func FlushQueue() {
 			return
 		}
 
-		context["current"] = i
-		context["total"] = total
+		groupOpsCurrent[op.action]++
+		context["current"] = groupOpsCurrent[op.action]
+		context["total"] = groupOpsTotal[op.action]
 		if err = execOp(op, tx, context); nil != err {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)

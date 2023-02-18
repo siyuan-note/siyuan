@@ -268,7 +268,7 @@ func init() {
 			return
 		}
 
-		current := context["current"].(int) + 1
+		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
 		util.SetBootDetails(msg)
@@ -280,7 +280,7 @@ func init() {
 			return
 		}
 
-		current := context["current"].(int) + 1
+		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
 		util.SetBootDetails(msg)
@@ -292,7 +292,7 @@ func init() {
 			return
 		}
 
-		current := context["current"].(int) + 1
+		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(191), current, total)
 		util.SetBootDetails(msg)

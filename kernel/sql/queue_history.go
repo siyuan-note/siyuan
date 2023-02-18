@@ -59,7 +59,13 @@ func FlushHistoryQueue() {
 	defer txLock.Unlock()
 	start := time.Now()
 
-	total := len(ops)
+	groupOpsTotal := map[string]int{}
+	for _, op := range ops {
+		groupOpsTotal[op.action]++
+	}
+
+	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	groupOpsCurrent := map[string]int{}
 	for i, op := range ops {
 		if util.IsExiting {
 			return
@@ -70,9 +76,10 @@ func FlushHistoryQueue() {
 			return
 		}
 
-		context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-		context["current"] = i
-		context["total"] = total
+		groupOpsCurrent[op.action]++
+		context["current"] = groupOpsCurrent[op.action]
+		context["total"] = groupOpsTotal[op.action]
+
 		if err = execHistoryOp(op, tx, context); nil != err {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)

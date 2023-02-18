@@ -1,4 +1,6 @@
 {
+  "addToDeck": "Add to Deck...",
+  "quickMakeCard": "Quick make card",
   "allAttrs": "All attribute names and attribute values",
   "chooseSyncDirection": "Choose sync direction",
   "uploadData2Cloud": "⬆️ Upload data to cloud",

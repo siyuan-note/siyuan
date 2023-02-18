@@ -1,4 +1,6 @@
 {
+  "addToDeck": "Agregar a la plataforma...",
+  "quickMakeCard": "Tarjeta de creación rápida",
   "allAttrs": "Todos los nombres de atributos y valores de atributos",
   "chooseSyncDirection": "Elegir dirección de sincronización",
   "uploadData2Cloud": "⬆️ Subir datos a la nube",

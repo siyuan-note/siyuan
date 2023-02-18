@@ -1,4 +1,6 @@
 {
+  "addToDeck": "Ajouter au deck...",
+  "quickMakeCard": "Carte de création rapide",
   "allAttrs": "Tous les noms d'attributs et les valeurs d'attributs",
   "chooseSyncDirection": "Choisir la direction de synchronisation",
   "uploadData2Cloud": "⬆️ Télécharger des données dans le cloud",

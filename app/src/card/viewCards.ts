@@ -11,10 +11,13 @@ import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
 import {genCardItem} from "./makeCard";
 
-export const viewCards = (deckID: string, title: string, sourceElement?: HTMLElement) => {
+export const viewCards = (deckID: string, title: string, sourceElement?: HTMLElement, isDoc = false) => {
     let pageIndex = 1;
     let edit: Protyle;
-    fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (response) => {
+    fetchPost(isDoc ? "/api/riff/getTreeRiffCards" : "/api/riff/getRiffCards", {
+        id: deckID,
+        page: pageIndex
+    }, (response) => {
         const dialog = new Dialog({
             content: `<div class="fn__flex-column" style="height: 100%">
     <div class="fn__flex b3-form__space--small">
@@ -73,7 +76,7 @@ export const viewCards = (deckID: string, title: string, sourceElement?: HTMLEle
                     if (pageIndex <= 1) {
                         previousElement.setAttribute("disabled", "disabled");
                     }
-                    fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (cardsResponse) => {
+                    fetchPost("/api/riff/getRiffCards", {id: deckID, page: pageIndex}, (cardsResponse) => {
                         if (pageIndex === cardsResponse.data.pageCount) {
                             nextElement.setAttribute("disabled", "disabled");
                         } else if (cardsResponse.data.pageCount > 1) {
@@ -92,7 +95,7 @@ export const viewCards = (deckID: string, title: string, sourceElement?: HTMLEle
                     }
                     pageIndex++;
                     previousElement.removeAttribute("disabled");
-                    fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (cardsResponse) => {
+                    fetchPost("/api/riff/getRiffCards", {id: deckID, page: pageIndex}, (cardsResponse) => {
                         if (pageIndex === cardsResponse.data.pageCount) {
                             nextElement.setAttribute("disabled", "disabled");
                         } else if (cardsResponse.data.pageCount > 1) {

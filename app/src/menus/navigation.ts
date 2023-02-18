@@ -26,6 +26,8 @@ import {deleteFiles} from "../editor/deleteFile";
 import {getDockByType} from "../layout/util";
 import {Files} from "../layout/dock/Files";
 import {openNewWindowById} from "../window/openNewWindow";
+import {openCardByData} from "../card/openCard";
+import {escapeHtml} from "../util/escape";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -295,7 +297,15 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 });
             }
         }).element);
-
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.riffCard,
+            icon: "iconRiffCard",
+            click: () => {
+                fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
+                    openCardByData(response.data, `<span data-id="${id}" class="fn__flex-center">${escapeHtml(name)}</span>`);
+                });
+            }
+        }).element);
         /// #if !MOBILE
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.search,

@@ -361,7 +361,7 @@ export class Title {
                 icon: "iconRiffCard",
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(response.data, `<span class="fn__flex-center">${escapeHtml(this.editElement.textContent)}</span>`);
+                        openCardByData(response.data, `<span data-id="${protyle.block.rootID}"  class="fn__flex-center">${escapeHtml(this.editElement.textContent)}</span>`);
                     });
                 }
             }).element);

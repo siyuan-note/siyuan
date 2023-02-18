@@ -49,7 +49,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     </div>
     <div class="b3-dialog__cardblock b3-dialog__cardblock--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
     <div class="b3-dialog__cardempty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
-        <div>🎉</div>
+        <div>🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
     <div class="fn__flex b3-dialog__cardaction${blocks.length === 0 ? " fn__none" : ""}">
@@ -110,8 +110,12 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     dialog.element.addEventListener("click", (event) => {
         const viewElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "view");
         if (viewElement) {
-            // TODO 文档卡
-            viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text);
+            if (selectElement) {
+                viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text);
+            } else {
+                viewCards(countElement.previousElementSibling.getAttribute("data-id"),
+                    countElement.previousElementSibling.textContent, undefined, true);
+            }
             event.preventDefault();
             event.stopPropagation();
             return;

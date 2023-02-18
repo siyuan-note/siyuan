@@ -76,13 +76,6 @@ func getTreeRiffDueCards(c *gin.Context) {
 	}
 
 	rootID := arg["rootID"].(string)
-	err := model.AddTreeFlashcards(rootID)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
 	cards, err := model.GetTreeDueFlashcards(rootID)
 	if nil != err {
 		ret.Code = -1

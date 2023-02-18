@@ -143,9 +143,14 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 	}
 
 	blockIDs := map[string]bool{}
-	for n := tree.Root.FirstChild; nil != n; n = n.Next {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+
 		blockIDs[n.ID] = true
-	}
+		return ast.WalkContinue
+	})
 
 	cards := deck.Dues()
 	now := time.Now()
@@ -334,19 +339,6 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 		}
 	}
 	return
-}
-
-func AddTreeFlashcards(rootID string) (err error) {
-	tree, err := loadTreeByBlockID(rootID)
-	if nil != err {
-		return
-	}
-
-	var blockIDs []string
-	for n := tree.Root.FirstChild; nil != n; n = n.Next {
-		blockIDs = append(blockIDs, n.ID)
-	}
-	return AddFlashcards(builtinDeckID, blockIDs)
 }
 
 func AddFlashcards(deckID string, blockIDs []string) (err error) {

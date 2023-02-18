@@ -118,17 +118,25 @@
     flex-direction: column;
     flex: 1;
     text-align: center;
-    color: var(--b3-theme-on-surface);
     background-color: var(--b3-theme-background);
     font-size: 16px;
+
+    & > div {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
   }
 
-  &__cardaction > div > span {
-    display: block;
-    color: var(--b3-theme-on-surface);
-    text-align: center;
-    line-height: 15px;
-    font-size: 10px;
+  &__cardaction {
+    padding: 16px 24px;
+
+    & > div > span {
+      display: block;
+      color: var(--b3-theme-on-surface);
+      text-align: center;
+      line-height: 15px;
+      font-size: 10px;
+    }
   }
 
   &__cardblock {

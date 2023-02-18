@@ -7,7 +7,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {hideElements} from "../protyle/ui/hideElements";
 import {viewCards} from "./viewCards";
 
-export const genCardItem = (item: ICard) => {
+export const genCardItem = (item: ICardPackage) => {
     return `<li data-id="${item.id}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">${item.name}</span>
 <span class="counter b3-tooltips b3-tooltips__w${isMobile() ? "" : " fn__none"}" aria-label="${window.siyuan.languages.riffCard}">${item.size}</span>
@@ -48,7 +48,7 @@ export const makeCard = (nodeElement: Element[]) => {
             }
             ids.push(item.getAttribute("data-node-id"));
         });
-        response.data.forEach((item: ICard) => {
+        response.data.forEach((item: ICardPackage) => {
             html += genCardItem(item);
         });
         const dialog = new Dialog({
@@ -169,6 +169,20 @@ export const makeCard = (nodeElement: Element[]) => {
         });
     });
 };
+
+export const quickMakeCard = (nodeElement: Element[]) => {
+    const ids: string[] = [];
+    nodeElement.forEach(item => {
+        if (item.getAttribute("data-type") === "NodeThematicBreak") {
+            return;
+        }
+        ids.push(item.getAttribute("data-node-id"));
+    });
+    fetchPost("/api/riff/addRiffCards", {
+        deckID: "20230218211946-2kw8jgx",
+        blockIDs: ids
+    });
+}
 
 
 

@@ -33,6 +33,7 @@ import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
 import {transferBlockRef} from "../../menus/block";
+import {openCardByData} from "../../card/openCard";
 
 export class Title {
     public element: HTMLElement;
@@ -230,7 +231,9 @@ export class Title {
             }).element);
             window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
         });
-        this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+        this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & {
+            target: HTMLElement
+        }) => {
             fetchPost("/api/block/getDocInfo", {
                 id: protyle.block.rootID
             }, (response) => {
@@ -351,6 +354,15 @@ export class Title {
                 icon: "iconMp",
                 click() {
                     openFileWechatNotify(protyle);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.riffCard,
+                icon: "iconRiffCard",
+                click: () => {
+                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
+                        openCardByData(response.data, `<span class="fn__flex-center">${escapeHtml(this.editElement.textContent)}</span>`);
+                    });
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

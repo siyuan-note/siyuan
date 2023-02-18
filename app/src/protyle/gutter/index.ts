@@ -32,7 +32,7 @@ import {mathRender} from "../markdown/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {movePathTo} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
-import {makeCard} from "../../card/makeCard";
+import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {transferBlockRef} from "../../menus/block";
 
 export class Gutter {
@@ -667,7 +667,15 @@ export class Gutter {
         this.genWidths(selectsElement, protyle);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.riffCard,
+            label: window.siyuan.languages.quickMakeCard,
+            iconHTML:`<svg class="b3-menu__icon"><use xlink:href="#iconRiffCard"></use></svg>`,
+            icon: "iconRiffCard",
+            click() {
+                quickMakeCard(selectsElement);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.addToDeck,
             icon: "iconRiffCard",
             click() {
                 makeCard(selectsElement);
@@ -1431,7 +1439,15 @@ export class Gutter {
         }
         if (type !== "NodeThematicBreak") {
             window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.riffCard,
+                label: window.siyuan.languages.quickMakeCard,
+                iconHTML:`<svg class="b3-menu__icon"><use xlink:href="#iconRiffCard"></use></svg>`,
+                icon: "iconRiffCard",
+                click() {
+                    quickMakeCard([nodeElement]);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.addToDeck,
                 icon: "iconRiffCard",
                 click() {
                     makeCard([nodeElement]);

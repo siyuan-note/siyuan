@@ -16,19 +16,17 @@ export const viewCards = (deckID: string, title: string, sourceElement?: HTMLEle
     let edit: Protyle;
     fetchPost("/api/riff/getRiffCards", {deckID, page: pageIndex}, (response) => {
         const dialog = new Dialog({
-            title,
             content: `<div class="fn__flex-column" style="height: 100%">
-    <div class="fn__hr"></div>
-    <div class="fn__flex">
+    <div class="fn__flex b3-form__space--small">
+        <span class="fn__flex-center">${title}</span>
+        <div class="fn__flex-1"></div>
         <span class="fn__space"></span>
         <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
         <span class="fn__space"></span>
         <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
         <span class="fn__space"></span>
         <span class="fn__flex-center ft__on-surface">${pageIndex}/${response.data.pageCount || 1}</span>
-        <div class="fn__flex-1"></div>
     </div>
-    <div class="fn__hr"></div>
     <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1" style="min-height: auto">
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
             ${renderViewItem(response.data.blocks)}

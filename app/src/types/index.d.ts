@@ -59,11 +59,17 @@ interface IWorkspace {
     closed: boolean
 }
 
-interface ICard {
+interface ICardPackage {
     id: string
     updated: string
     name: string
     size: number
+}
+
+interface ICard {
+    blockID: string
+    deckID: string
+    nextDues: IObject
 }
 
 interface ISearchOption {

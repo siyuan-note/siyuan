@@ -310,6 +310,10 @@
   background-color: var(--b3-theme-surface);
   box-sizing: border-box;
 
+  &:hover .dock__item--pin {
+    opacity: 1;
+  }
+
   &#dockLeft {
     border-right: .5px solid var(--b3-border-color);
   }
@@ -355,6 +359,11 @@
     display: flex;
     border-radius: 6px;
     margin: 5px;
+
+    &--pin {
+      opacity: 0;
+      transition: var(--b3-transition);
+    }
 
     &:hover,
     &--active {

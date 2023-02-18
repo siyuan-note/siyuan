@@ -45,7 +45,7 @@ export const initStatus = (isWindow = false) => {
                 document.querySelectorAll(".dock").forEach(item => {
                     if (dockIsShow) {
                         item.classList.add("fn__none");
-                    } else if (item.querySelectorAll(".dock__item").length > 0) {
+                    } else if (item.querySelectorAll(".dock__item").length > 1) {
                         item.classList.remove("fn__none");
                     }
                 });

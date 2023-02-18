@@ -24,25 +24,7 @@ const togglePinDock = (dock: Dock, icon: string) => {
         icon,
         current: !dock.pin,
         click() {
-            dock.pin = !dock.pin;
-            const hasActive = dock.element.querySelector(".dock__item--active");
-            if (!dock.pin) {
-                dock.resetDockPosition(hasActive ? true : false);
-                dock.resizeElement.classList.add("fn__none");
-                if (hasActive) {
-                    dock.showDock(true);
-                } else {
-                    dock.hideDock(true);
-                }
-            } else {
-                dock.layout.element.style.opacity = "";
-                dock.layout.element.style.transform = "";
-                if (hasActive) {
-                    dock.resizeElement.classList.remove("fn__none");
-                }
-            }
-            dock.layout.element.classList.toggle("layout--float");
-            resizeTabs();
+            dock.togglePin();
         }
     };
 };

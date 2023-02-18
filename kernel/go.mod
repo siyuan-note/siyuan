@@ -6,7 +6,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
 	github.com/88250/gulu v1.2.3-0.20221117052724-cd06804db798
-	github.com/88250/lute v1.7.6-0.20230214102328-e0c90a284170
+	github.com/88250/lute v1.7.6-0.20230218053657-5e19a7237c01
 	github.com/88250/pdfcpu v0.3.13
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20230216061320-bccdb98581a3
@@ -41,11 +41,11 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.23.1
-	github.com/siyuan-note/dejavu v0.0.0-20230212031819-32964d704bd2
+	github.com/siyuan-note/dejavu v0.0.0-20230218054009-995bd41a222a
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
-	github.com/siyuan-note/httpclient v0.0.0-20230211023949-b9d36c2da3ea
+	github.com/siyuan-note/httpclient v0.0.0-20230218053845-2012e19a593c
 	github.com/siyuan-note/logging v0.0.0-20221031125421-9b7234d79d8a
 	github.com/siyuan-note/riff v0.0.0-20221228031102-17d458a1217b
 	github.com/steambap/captcha v1.4.1
@@ -64,7 +64,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.203 // indirect
+	github.com/aws/aws-sdk-go v1.44.204 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dlclark/regexp2 v1.8.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -101,7 +101,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/onsi/ginkgo/v2 v2.8.1 // indirect
+	github.com/onsi/ginkgo/v2 v2.8.2 // indirect
 	github.com/open-spaced-repetition/go-fsrs v0.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

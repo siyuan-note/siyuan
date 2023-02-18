@@ -214,7 +214,7 @@ func initHistoryDBConnection() {
 		historyDB.Close()
 	}
 
-	dsn := util.HistoryDBPath + "?_journal_mode=OFF" +
+	dsn := util.DBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_mmap_size=2684354560" +
 		"&_secure_delete=OFF" +
@@ -223,8 +223,7 @@ func initHistoryDBConnection() {
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
 		"&_temp_store=MEMORY" +
-		"&_case_sensitive_like=OFF" +
-		"&_locking_mode=EXCLUSIVE"
+		"&_case_sensitive_like=OFF"
 	var err error
 	historyDB, err = sql.Open("sqlite3_extended", dsn)
 	if nil != err {

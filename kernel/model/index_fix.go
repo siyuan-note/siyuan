@@ -126,6 +126,7 @@ func resetDuplicateBlocksOnFileSys() {
 		}
 
 		boxPath := filepath.Join(util.DataDir, box.ID)
+		var duplicatedTrees []*parse.Tree
 		filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
 				if boxPath == path {
@@ -190,10 +191,9 @@ func resetDuplicateBlocksOnFileSys() {
 				// 存在重复的块 ID
 
 				if ast.NodeDocument == n.Type {
-					// 如果是文档根节点，则直接重置这颗树
-					logging.LogWarnf("exist more than one tree with the same id [%s], reset it", box.ID+p)
-					recreateTree(tree, path)
-					needRefreshUI = true
+					// 如果是文档根节点，则重置这颗树
+					// 这里不能在迭代中重置，因为如果这个文档存在子文档的话，重置时会重命名子文档文件夹，后续迭代可能会导致子文档 ID 重复
+					duplicatedTrees = append(duplicatedTrees, tree)
 					return ast.WalkStop
 				}
 
@@ -213,6 +213,13 @@ func resetDuplicateBlocksOnFileSys() {
 			}
 			return nil
 		})
+
+		for _, tree := range duplicatedTrees {
+			absPath := filepath.Join(boxPath, tree.Path)
+			logging.LogWarnf("exist more than one tree with the same id [%s], reset it", absPath)
+			recreateTree(tree, absPath)
+			needRefreshUI = true
+		}
 	}
 
 	if needRefreshUI {
@@ -225,16 +232,30 @@ func resetDuplicateBlocksOnFileSys() {
 }
 
 func recreateTree(tree *parse.Tree, absPath string) {
+	// 删除关于该树的所有块树数据，后面会调用 fixBlockTreeByFileSys() 进行订正补全
+	treenode.RemoveBlockTreesByPathPrefix(strings.TrimSuffix(tree.Path, ".sy"))
+	treenode.RemoveBlockTreesByRootID(tree.ID)
+
 	resetTree(tree, "")
-	createTreeTx(tree)
+	if err := filesys.WriteTree(tree); nil != err {
+		logging.LogWarnf("write tree [%s] failed: %s", tree.Path, err)
+		return
+	}
+
 	if gulu.File.IsDir(strings.TrimSuffix(absPath, ".sy")) {
 		// 重命名子文档文件夹
-		if renameErr := os.Rename(strings.TrimSuffix(absPath, ".sy"), filepath.Join(filepath.Dir(absPath), tree.ID)); nil != renameErr {
-			logging.LogWarnf("rename [%s] failed: %s", absPath, renameErr)
+		from := strings.TrimSuffix(absPath, ".sy")
+		to := filepath.Join(filepath.Dir(absPath), tree.ID)
+		if renameErr := os.Rename(from, to); nil != renameErr {
+			logging.LogWarnf("rename [%s] failed: %s", from, renameErr)
 			return
 		}
 	}
-	os.RemoveAll(absPath)
+
+	if err := os.RemoveAll(absPath); nil != err {
+		logging.LogWarnf("remove [%s] failed: %s", absPath, err)
+		return
+	}
 }
 
 // fixBlockTreeByFileSys 通过文件系统订正块树。

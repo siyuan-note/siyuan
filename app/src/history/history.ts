@@ -606,9 +606,8 @@ export const openHistory = () => {
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);
                 break;
             } else if (type === "rebuildIndex") {
-                fetchPost("/api/history/reindexHistory", {}, () => {
-                    renderDoc(firstPanelElement, 1);
-                });
+                fetchPost("/api/history/reindexHistory");
+                dialog.destroy();
                 break;
             } else if (type === "compare") {
                 showDiff(JSON.parse(target.getAttribute("data-ids") || "[]"));

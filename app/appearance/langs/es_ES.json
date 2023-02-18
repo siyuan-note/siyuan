@@ -1091,6 +1091,7 @@
     "188": "Error al bloquear el directorio de sincronizaci\u00f3n en la nube, int\u00e1ntelo de nuevo m\u00e1s tarde",
     "189": "El directorio de sincronización en la nube todavía está bloqueado por otros dispositivos, inténtalo de nuevo más tarde",
     "190": "Se encontro un problema al validar el indice, el cual se soluciono automaticamente",
-    "191": "[%d/%d] Índice de datos históricos creado"
+    "191": "[%d/%d] Índice de datos históricos creado",
+    "192": "Reconstruyendo el índice de datos históricos, espere..."
   }
 }

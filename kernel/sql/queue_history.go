@@ -59,7 +59,6 @@ func FlushHistoryQueue() {
 	defer txLock.Unlock()
 	start := time.Now()
 
-	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress}
 	total := len(ops)
 	for i, op := range ops {
 		if util.IsExiting {
@@ -71,6 +70,7 @@ func FlushHistoryQueue() {
 			return
 		}
 
+		context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 		context["current"] = i
 		context["total"] = total
 		if err = execHistoryOp(op, tx, context); nil != err {

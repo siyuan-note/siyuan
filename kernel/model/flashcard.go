@@ -18,7 +18,6 @@ package model
 
 import (
 	"errors"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"math"
 	"os"
 	"path/filepath"
@@ -34,6 +33,8 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -49,15 +50,34 @@ func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCou
 		return
 	}
 
-	treeBlockIDs := map[string]bool{}
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() {
-			return ast.WalkContinue
+	trees := []*parse.Tree{tree}
+	box := Conf.Box(tree.Box)
+	luteEngine := util.NewLute()
+	files := box.ListFiles(tree.Path)
+	for _, subFile := range files {
+		if !strings.HasSuffix(subFile.path, ".sy") {
+			continue
 		}
 
-		treeBlockIDs[n.ID] = true
-		return ast.WalkContinue
-	})
+		subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, luteEngine)
+		if nil != loadErr {
+			continue
+		}
+
+		trees = append(trees, subTree)
+	}
+
+	treeBlockIDs := map[string]bool{}
+	for _, t := range trees {
+		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			treeBlockIDs[n.ID] = true
+			return ast.WalkContinue
+		})
+	}
 
 	var allBlockIDs []string
 	const pageSize = 20

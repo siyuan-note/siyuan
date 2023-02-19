@@ -93,7 +93,7 @@ export abstract class Constants {
         fr_FR: "20210808180117-6v0mkxr",
     };
 
-    public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx"
+    public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 
     public static readonly KEYCODE: { [key: string]: string[] } = {
         "186": [";", ":"],

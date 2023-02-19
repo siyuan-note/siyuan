@@ -185,7 +185,7 @@ export const quickMakeCard = (nodeElement: Element[]) => {
         deckID: Constants.QUICK_DECK_ID,
         blockIDs: ids
     });
-}
+};
 
 
 

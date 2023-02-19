@@ -134,7 +134,7 @@ export const viewCards = (deckID: string, title: string, cb:(response:IWebSocket
                             nextElment.classList.add("b3-list-item--focus");
                         }
                         target.parentElement.remove();
-                        cb(removeResponse)
+                        cb(removeResponse);
                     });
                     event.stopPropagation();
                     event.preventDefault();

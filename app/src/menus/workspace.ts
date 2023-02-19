@@ -12,7 +12,7 @@ import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
-import {getDockByType, resizeTabs} from "../layout/util";
+import {getDockByType} from "../layout/util";
 import {lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 import {unicode2Emoji} from "../emoji";

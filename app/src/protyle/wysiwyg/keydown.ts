@@ -995,7 +995,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-            const selectElement: Element[] = []
+            const selectElement: Element[] = [];
             nodeElement.classList.add("protyle-wysiwyg--select");
             let isRemove = true;
             const removeIds: string[] = [];
@@ -1012,7 +1012,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 fetchPost("/api/riff/removeRiffCards", {
                     deckID: Constants.QUICK_DECK_ID,
                     blockIDs: removeIds
-                }, (removeResponse) => {
                 });
             } else {
                 quickMakeCard(selectElement);

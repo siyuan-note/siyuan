@@ -23,7 +23,7 @@ export const openCard = () => {
             decksHTML += `<option value="${deck.id}">${deck.name}</option>`;
         });
         fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-            openCardByData(cardsResponse.data, `<select class="b3-select">${decksHTML}</select>`)
+            openCardByData(cardsResponse.data, `<select class="b3-select">${decksHTML}</select>`);
         });
     });
 };
@@ -189,7 +189,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     });
     const selectElement = dialog.element.querySelector("select");
     if (!selectElement) {
-        return
+        return;
     }
     selectElement.addEventListener("change", () => {
         fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {
@@ -219,4 +219,4 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             }
         });
     });
-}
+};

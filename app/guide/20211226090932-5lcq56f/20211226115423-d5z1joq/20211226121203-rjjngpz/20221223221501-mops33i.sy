@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
-		"updated": "20221229111623"
+		"updated": "20230219092941"
 	},
 	"Children": [
 		{
@@ -63,32 +63,194 @@
 			]
 		},
 		{
-			"ID": "20221229111606-kwmh3f1",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20230219092911-xk65zqb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20221229111606-kwmh3f1",
-				"updated": "20221229111623"
+				"id": "20230219092911-xk65zqb",
+				"updated": "20230219092911"
 			},
 			"Children": [
 				{
-					"ID": "20221229111606-92hkjay",
+					"Type": "NodeText",
+					"Data": "內容塊"
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-yxwh91v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219092911-yxwh91v",
+				"updated": "20230219092911"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在開始正式製卡之前，我們先介紹一些制卡的基本規則："
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-8074ovh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219092911-8074ovh",
+				"updated": "20230219092911"
+			},
+			"Children": [
+				{
+					"ID": "20230219092911-r97cxkq",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221229111606-92hkjay",
-						"updated": "20221229111615"
+						"id": "20230219092911-r97cxkq",
+						"updated": "20230219092911"
 					},
 					"Children": [
 						{
-							"ID": "20221229111606-eh5ev9r",
+							"ID": "20230219092911-ne0d1fm",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20221229111606-eh5ev9r",
-								"updated": "20221229111615"
+								"id": "20230219092911-ne0d1fm",
+								"updated": "20230219092911"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "標記"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 元素會被視作挖空的答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092911-k399zf9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092911-k399zf9",
+						"updated": "20230219092911"
+					},
+					"Children": [
+						{
+							"ID": "20230219092911-5enl43r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092911-5enl43r",
+								"updated": "20230219092911"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果將超級塊設置為閃卡，則該超級塊的第一個子塊會被視作問題，其餘子塊會被視作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092911-ez3j9t1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092911-ez3j9t1",
+						"updated": "20230219092911"
+					},
+					"Children": [
+						{
+							"ID": "20230219092911-x89zk5a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092911-x89zk5a",
+								"updated": "20230219092911"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果將列表或者列表項設置為閃卡，則非子列表會被視問題，子列表會被視作答案"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-wh5sgd8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219092911-wh5sgd8",
+				"updated": "20230219092911"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基於卡包"
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-ol65uqs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219092911-ol65uqs",
+				"updated": "20230219092911"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基於卡包的使用方式可以將不同文檔中的內容塊制卡後放到統一的卡包中復習。"
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-u7jucj7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219092911-u7jucj7",
+				"updated": "20230219092928"
+			},
+			"Children": [
+				{
+					"ID": "20230219092911-s4dh6g1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092911-s4dh6g1",
+						"updated": "20230219092922"
+					},
+					"Children": [
+						{
+							"ID": "20230219092911-9cn6n81",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092911-9cn6n81",
+								"updated": "20230219092922"
 							},
 							"Children": [
 								{
@@ -98,110 +260,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "閃卡"
+									"TextMarkTextContent": "添加到卡包..."
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，然後選擇將該內容塊添加到一個卡包中"
-								}
-							]
-						},
-						{
-							"ID": "20221229111606-jsk0whs",
-							"Type": "NodeList",
-							"ListData": {},
-							"Properties": {
-								"id": "20221229111606-jsk0whs",
-								"updated": "20221229111606"
-							},
-							"Children": [
-								{
-									"ID": "20221229111606-ir6cz09",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20221229111606-ir6cz09",
-										"updated": "20221229111606"
-									},
-									"Children": [
-										{
-											"ID": "20221229111606-51p41j7",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20221229111606-51p41j7",
-												"updated": "20221229111606"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "內容塊中的 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "mark",
-													"TextMarkTextContent": "標記"
-												},
-												{
-													"Type": "NodeText",
-													"Data": " 元素會被視作挖空的答案"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20221229111606-qq7gaqu",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20221229111606-qq7gaqu",
-										"updated": "20221229111606"
-									},
-									"Children": [
-										{
-											"ID": "20221229111606-o45nneg",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20221229111606-o45nneg",
-												"updated": "20221229111606"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "如果將超級塊設置為閃卡，則該超級塊的第一個子塊會被視作問題，其餘子塊會被視作答案"
-												}
-											]
-										}
-									]
+									"Data": "​，然後將該內容塊添加到一個卡包中完成製卡"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20221229111606-e13cee3",
+					"ID": "20230219092911-lxrxhy6",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221229111606-e13cee3",
-						"updated": "20221229111623"
+						"id": "20230219092911-lxrxhy6",
+						"updated": "20230219092928"
 					},
 					"Children": [
 						{
-							"ID": "20221229111606-9v3d8sc",
+							"ID": "20230219092911-05ghbty",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20221229111606-9v3d8sc",
-								"updated": "20221229111623"
+								"id": "20230219092911-05ghbty",
+								"updated": "20230219092928"
 							},
 							"Children": [
 								{
@@ -215,7 +301,121 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 可進入複習界面"
+									"Data": "​ 進入複習"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-kawl9n2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219092911-kawl9n2",
+				"updated": "20230219092911"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基於文檔"
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-vfi7z5z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219092911-vfi7z5z",
+				"updated": "20230219092911"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基於文檔的使用方式可以不必關注卡包，並且支持父子文檔複習。"
+				}
+			]
+		},
+		{
+			"ID": "20230219092911-jluw0db",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219092911-jluw0db",
+				"updated": "20230219092941"
+			},
+			"Children": [
+				{
+					"ID": "20230219092911-4j7zdh5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092911-4j7zdh5",
+						"updated": "20230219092934"
+					},
+					"Children": [
+						{
+							"ID": "20230219092911-5swg3v3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092911-5swg3v3",
+								"updated": "20230219092934"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在塊標菜單中選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速制卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 完成製卡"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092911-i1eqodd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092911-i1eqodd",
+						"updated": "20230219092941"
+					},
+					"Children": [
+						{
+							"ID": "20230219092911-5sewtmn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092911-5sewtmn",
+								"updated": "20230219092941"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在文檔樹面板中右擊文檔或者在編輯器中點擊文檔塊標 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "閃卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 進入複習"
 								}
 							]
 						}

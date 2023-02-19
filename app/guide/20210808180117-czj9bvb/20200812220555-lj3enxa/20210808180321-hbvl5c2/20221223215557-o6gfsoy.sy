@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20221229111221"
+		"updated": "20230219092526"
 	},
 	"Children": [
 		{
@@ -63,12 +63,178 @@
 			]
 		},
 		{
+			"ID": "20230219085616-p18ujkc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219085616-p18ujkc",
+				"updated": "20230219085902"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内容块"
+				}
+			]
+		},
+		{
+			"ID": "20230219085733-8mj65zz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219085733-8mj65zz",
+				"updated": "20230219085752"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在开始正式制卡之前，我们先介绍一些制卡的基本规则："
+				}
+			]
+		},
+		{
+			"ID": "20230219085658-xnrf7rf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219085658-xnrf7rf",
+				"updated": "20230219092140"
+			},
+			"Children": [
+				{
+					"ID": "20221223220707-il9wt7t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223220707-il9wt7t",
+						"updated": "20230219085710"
+					},
+					"Children": [
+						{
+							"ID": "20221223220707-v0oxdls",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223220707-v0oxdls",
+								"updated": "20221223221347"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "标记"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 元素会被视作挖空的答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221229110953-e7fm7vg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221229110953-e7fm7vg",
+						"updated": "20221229111221"
+					},
+					"Children": [
+						{
+							"ID": "20221229110953-fwtd0u1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221229110953-fwtd0u1",
+								"updated": "20221229111221"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果将超级块设置为闪卡，则该超级块的第一个子块会被视作问题，其余子块会被视作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092035-8ekf01l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092035-8ekf01l",
+						"updated": "20230219092140"
+					},
+					"Children": [
+						{
+							"ID": "20230219092035-p9ybzf1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092035-p9ybzf1",
+								"updated": "20230219092140"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果将列表或者列表项设置为闪卡，则非子列表会被视问题，子列表会被视作答案"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230219084417-qgvd9bn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219084417-qgvd9bn",
+				"updated": "20230219090057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基于卡包"
+				}
+			]
+		},
+		{
+			"ID": "20230219090359-1b55hzy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219090359-1b55hzy",
+				"updated": "20230219092526"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基于卡包的使用方式可以将不同文档中的内容块制卡后放到统一的卡包中复习。"
+				}
+			]
+		},
+		{
 			"ID": "20221223215834-z8ny593",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
 				"id": "20221223215834-z8ny593",
-				"updated": "20221229111221"
+				"updated": "20230219091828"
 			},
 			"Children": [
 				{
@@ -80,7 +246,7 @@
 					},
 					"Properties": {
 						"id": "20221229111046-50w42e3",
-						"updated": "20221229111221"
+						"updated": "20230219091828"
 					},
 					"Children": [
 						{
@@ -88,7 +254,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221229111046-fh0iyx1",
-								"updated": "20221229111046"
+								"updated": "20230219091828"
 							},
 							"Children": [
 								{
@@ -98,87 +264,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "闪卡"
+									"TextMarkTextContent": "添加到卡包..."
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，然后选择将该内容块添加到一个卡包中"
-								}
-							]
-						},
-						{
-							"ID": "20221229111119-i5mqtf1",
-							"Type": "NodeList",
-							"ListData": {},
-							"Properties": {
-								"id": "20221229111119-i5mqtf1",
-								"updated": "20221229111221"
-							},
-							"Children": [
-								{
-									"ID": "20221223220707-il9wt7t",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20221223220707-il9wt7t",
-										"updated": "20221223221347"
-									},
-									"Children": [
-										{
-											"ID": "20221223220707-v0oxdls",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20221223220707-v0oxdls",
-												"updated": "20221223221347"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "内容块中的 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "mark",
-													"TextMarkTextContent": "标记"
-												},
-												{
-													"Type": "NodeText",
-													"Data": " 元素会被视作挖空的答案"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20221229110953-e7fm7vg",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20221229110953-e7fm7vg",
-										"updated": "20221229111221"
-									},
-									"Children": [
-										{
-											"ID": "20221229110953-fwtd0u1",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20221229110953-fwtd0u1",
-												"updated": "20221229111221"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "如果将超级块设置为闪卡，则该超级块的第一个子块会被视作问题，其余子块会被视作答案"
-												}
-											]
-										}
-									]
+									"Data": "​，然后将该内容块添加到一个卡包中完成制卡"
 								}
 							]
 						}
@@ -192,7 +282,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221223220710-o4y8jae"
+						"id": "20221223220710-o4y8jae",
+						"updated": "20230219085236"
 					},
 					"Children": [
 						{
@@ -200,7 +291,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221223220710-n98j2n8",
-								"updated": "20221223220711"
+								"updated": "20230219085236"
 							},
 							"Children": [
 								{
@@ -214,7 +305,121 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 可进入复习界面"
+									"Data": "​ 进入复习"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230219085352-7ma2lg2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219085352-7ma2lg2",
+				"updated": "20230219090055"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基于文档"
+				}
+			]
+		},
+		{
+			"ID": "20230219090448-88z0ib9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219090448-88z0ib9",
+				"updated": "20230219090740"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基于文档的使用方式可以不必关注卡包，并且支持父子文档复习。"
+				}
+			]
+		},
+		{
+			"ID": "20230219085352-sqkbh7t",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219085352-sqkbh7t",
+				"updated": "20230219091934"
+			},
+			"Children": [
+				{
+					"ID": "20230219085352-ewh3aqy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219085352-ewh3aqy",
+						"updated": "20230219090109"
+					},
+					"Children": [
+						{
+							"ID": "20230219085352-0sgkiz2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219085352-0sgkiz2",
+								"updated": "20230219090109"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在块标菜单中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速制卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 完成制卡"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219085352-nd4oy5s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219085352-nd4oy5s",
+						"updated": "20230219091934"
+					},
+					"Children": [
+						{
+							"ID": "20230219085352-vl7lwth",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219085352-vl7lwth",
+								"updated": "20230219091934"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在文档树面板中右击文档或者在编辑器中点击文档块标 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "闪卡"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 进入复习"
 								}
 							]
 						}

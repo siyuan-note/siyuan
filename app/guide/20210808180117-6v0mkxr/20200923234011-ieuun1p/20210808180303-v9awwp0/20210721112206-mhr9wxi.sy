@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
-		"updated": "20221009104451"
+		"updated": "20230219121759"
 	},
 	"Children": [
 		{
@@ -185,13 +185,17 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "Note"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ": If the amount of data is large, it is recommended to export the data package through "
+					"Data": "​: If the amount of data is large, it is recommended to export the data package through "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -200,7 +204,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the settings, and then send the data package to the new device by manual copying or other methods, and export the data package on the new device. Go to "
+					"Data": "​ in the settings, and then send the data package to the new device by manual copying or other methods, and export the data package on the new device. Go to "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -209,22 +213,307 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", and finally configure synchronization."
+					"Data": "​, and finally configure synchronization."
 				}
 			]
 		},
 		{
-			"ID": "20210721112403-v7hwt54",
+			"ID": "20230219121305-3yj6w9y",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210721112403-v7hwt54",
-				"updated": "20210721113330"
+				"id": "20230219121305-3yj6w9y",
+				"updated": "20230219121305"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Working principle"
+					"Data": "Synchronous mode"
+				}
+			]
+		},
+		{
+			"ID": "20230219121305-p0gorey",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219121305-p0gorey",
+				"updated": "20230219121334"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Three synchronization modes are supported in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud Sync Mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20230219121305-c1bb9y3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219121305-c1bb9y3",
+				"updated": "20230219121414"
+			},
+			"Children": [
+				{
+					"ID": "20230219121305-e5kvdxk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219121305-e5kvdxk",
+						"updated": "20230219121414"
+					},
+					"Children": [
+						{
+							"ID": "20230219121305-00ui5br",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219121305-00ui5br",
+								"updated": "20230219121414"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Auto"
+								}
+							]
+						},
+						{
+							"ID": "20230219121305-8v43t1f",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230219121305-8v43t1f",
+								"updated": "20230219121305"
+							},
+							"Children": [
+								{
+									"ID": "20230219121305-oeasqmw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219121305-oeasqmw",
+										"updated": "20230219121305"
+									},
+									"Children": [
+										{
+											"ID": "20230219121305-0tp4568",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219121305-0tp4568",
+												"updated": "20230219121305"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "A synchronization will be performed when starting and exiting, and a synchronization will be performed 30 seconds after the data in use is no longer changed"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230219121305-1v7emdo",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219121305-1v7emdo",
+										"updated": "20230219121305"
+									},
+									"Children": [
+										{
+											"ID": "20230219121305-zbe6x4l",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219121305-zbe6x4l",
+												"updated": "20230219121305"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Data merging and overwriting are determined by the synchronization algorithm, please refer to the following working principle introduction"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219121305-vta8cue",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219121305-vta8cue",
+						"updated": "20230219121408"
+					},
+					"Children": [
+						{
+							"ID": "20230219121305-h4ukuxr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219121305-h4ukuxr",
+								"updated": "20230219121408"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Manual"
+								}
+							]
+						},
+						{
+							"ID": "20230219121305-loytnxh",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230219121305-loytnxh",
+								"updated": "20230219121305"
+							},
+							"Children": [
+								{
+									"ID": "20230219121305-zwmdofi",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219121305-zwmdofi",
+										"updated": "20230219121305"
+									},
+									"Children": [
+										{
+											"ID": "20230219121305-c0jme5p",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219121305-c0jme5p",
+												"updated": "20230219121305"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Only one synchronization is performed when starting and exiting, and manual triggering of synchronization is required during use"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230219121305-etdc7gq",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219121305-etdc7gq",
+										"updated": "20230219121305"
+									},
+									"Children": [
+										{
+											"ID": "20230219121305-75n6qwb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219121305-75n6qwb",
+												"updated": "20230219121305"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Data merging and overwriting are determined by the synchronization algorithm, please refer to the following working principle introduction"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219121305-j74bgog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219121305-j74bgog",
+						"updated": "20230219121305"
+					},
+					"Children": [
+						{
+							"ID": "20230219121305-0nmt7gd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219121305-0nmt7gd",
+								"updated": "20230219121305"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Full manual sync: no sync at startup and exit, fully manual control of sync timing and sync direction"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230219121305-n0v0nlb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230219121305-n0v0nlb",
+				"updated": "20230219121539"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How Auto/Manual mode works"
 				}
 			]
 		},
@@ -381,12 +670,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220703232248-f48ijwk",
-				"updated": "20220703232248"
+				"updated": "20230219121759"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Synchronization occurs automatically at regular intervals, and the time interval algorithm is described as follows:"
+					"Data": "The automatic synchronization time interval algorithm is described as follows:"
 				}
 			]
 		},

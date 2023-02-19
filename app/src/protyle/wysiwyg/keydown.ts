@@ -70,6 +70,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {getSavePath} from "../../util/newFile";
 import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
+import {quickMakeCard} from "../../card/makeCard";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
@@ -993,6 +994,33 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
 
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+            const selectElement: Element[] = []
+            nodeElement.classList.add("protyle-wysiwyg--select");
+            let isRemove = true;
+            const removeIds: string[] = [];
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                selectElement.push(item);
+                item.classList.remove("protyle-wysiwyg--select");
+                removeIds.push(item.getAttribute("data-node-id"));
+                if ((item.getAttribute("custom-riff-decks") || "").indexOf(Constants.QUICK_DECK_ID) > -1) {
+                    isRemove = false;
+                }
+            });
+
+            if (isRemove) {
+                fetchPost("/api/riff/removeRiffCards", {
+                    deckID: Constants.QUICK_DECK_ID,
+                    blockIDs: removeIds
+                }, (removeResponse) => {
+                });
+            } else {
+                quickMakeCard(selectElement);
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {
             const topElement = getTopAloneElement(nodeElement);
             if (selectText === "") {

@@ -116,7 +116,7 @@ export const viewCards = (deckID: string, title: string, cb:(response:IWebSocket
                     break;
                 } else if (type === "remove") {
                     fetchPost("/api/riff/removeRiffCards", {
-                        deckID: isDoc ? "20230218211946-2kw8jgx" : deckID,
+                        deckID: isDoc ? Constants.QUICK_DECK_ID : deckID,
                         blockIDs: [target.getAttribute("data-id")]
                     }, (removeResponse) => {
                         let nextElment = target.parentElement.nextElementSibling;

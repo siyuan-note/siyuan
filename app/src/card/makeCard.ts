@@ -6,6 +6,7 @@ import {hideMessage, showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {hideElements} from "../protyle/ui/hideElements";
 import {viewCards} from "./viewCards";
+import {Constants} from "../constants";
 
 export const genCardItem = (item: ICardPackage) => {
     return `<li data-id="${item.id}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
@@ -181,7 +182,7 @@ export const quickMakeCard = (nodeElement: Element[]) => {
         ids.push(item.getAttribute("data-node-id"));
     });
     fetchPost("/api/riff/addRiffCards", {
-        deckID: "20230218211946-2kw8jgx",
+        deckID: Constants.QUICK_DECK_ID,
         blockIDs: ids
     });
 }

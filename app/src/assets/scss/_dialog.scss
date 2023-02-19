@@ -149,6 +149,10 @@
         display: none;
       }
 
+      .li > .list {
+        display: none;
+      }
+
       span[data-type~=mark] {
         transition: var(--b3-transition);
         color: transparent !important;

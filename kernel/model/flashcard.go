@@ -45,40 +45,7 @@ var deckLock = sync.Mutex{}
 func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 
-	tree, err := loadTreeByBlockID(rootID)
-	if nil != err {
-		return
-	}
-
-	trees := []*parse.Tree{tree}
-	box := Conf.Box(tree.Box)
-	luteEngine := util.NewLute()
-	files := box.ListFiles(tree.Path)
-	for _, subFile := range files {
-		if !strings.HasSuffix(subFile.path, ".sy") {
-			continue
-		}
-
-		subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, luteEngine)
-		if nil != loadErr {
-			continue
-		}
-
-		trees = append(trees, subTree)
-	}
-
-	treeBlockIDs := map[string]bool{}
-	for _, t := range trees {
-		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || !n.IsBlock() || ast.NodeDocument == n.Type {
-				return ast.WalkContinue
-			}
-
-			treeBlockIDs[n.ID] = true
-			return ast.WalkContinue
-		})
-	}
-
+	treeBlockIDs := getTreeSubTreeChildBlocks(rootID)
 	var allBlockIDs []string
 	const pageSize = 20
 	deck := Decks[builtinDeckID]
@@ -229,26 +196,12 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 		return
 	}
 
-	tree, err := loadTreeByBlockID(rootID)
-	if nil != err {
-		return
-	}
-
-	blockIDs := map[string]bool{}
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() {
-			return ast.WalkContinue
-		}
-
-		blockIDs[n.ID] = true
-		return ast.WalkContinue
-	})
-
+	treeBlockIDs := getTreeSubTreeChildBlocks(rootID)
 	cards := deck.Dues()
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
-		if !blockIDs[blockID] {
+		if !treeBlockIDs[blockID] {
 			continue
 		}
 
@@ -265,6 +218,44 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
+	}
+	return
+}
+
+func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDs map[string]bool) {
+	treeBlockIDs = map[string]bool{}
+
+	tree, err := loadTreeByBlockID(rootID)
+	if nil != err {
+		return
+	}
+
+	trees := []*parse.Tree{tree}
+	box := Conf.Box(tree.Box)
+	luteEngine := util.NewLute()
+	files := box.ListFiles(tree.Path)
+	for _, subFile := range files {
+		if !strings.HasSuffix(subFile.path, ".sy") {
+			continue
+		}
+
+		subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, luteEngine)
+		if nil != loadErr {
+			continue
+		}
+
+		trees = append(trees, subTree)
+	}
+
+	for _, t := range trees {
+		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() || ast.NodeDocument == n.Type {
+				return ast.WalkContinue
+			}
+
+			treeBlockIDs[n.ID] = true
+			return ast.WalkContinue
+		})
 	}
 	return
 }

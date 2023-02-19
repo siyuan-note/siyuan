@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721103420-vn6g2yy",
 		"title": "数据同步",
-		"updated": "20221009104351"
+		"updated": "20230219121719"
 	},
 	"Children": [
 		{
@@ -200,13 +200,17 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：如果数据量较大，建议通过设置中的 "
+					"Data": "​：如果数据量较大，建议通过设置中的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -215,7 +219,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 导出数据包，然后将该数据包通过手动拷贝或者其他方式发送到新设备上，并在新设备上 "
+					"Data": "​ 导出数据包，然后将该数据包通过手动拷贝或者其他方式发送到新设备上，并在新设备上 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -224,7 +228,288 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，最后再配置同步。"
+					"Data": "​，最后再配置同步。"
+				}
+			]
+		},
+		{
+			"ID": "20230219120242-0jycumw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230219120242-0jycumw",
+				"updated": "20230219120246"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同步模式"
+				}
+			]
+		},
+		{
+			"ID": "20230219120246-g1pmstm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219120246-g1pmstm",
+				"updated": "20230219120420"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "云端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "云端同步模式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中支持三种同步模式："
+				}
+			]
+		},
+		{
+			"ID": "20230219120421-7jlp79u",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219120421-7jlp79u",
+				"updated": "20230219121049"
+			},
+			"Children": [
+				{
+					"ID": "20230219120422-qykfpz7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219120422-qykfpz7",
+						"updated": "20230219121045"
+					},
+					"Children": [
+						{
+							"ID": "20230219120422-j4jbj39",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219120422-j4jbj39",
+								"updated": "20230219121007"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自动同步"
+								}
+							]
+						},
+						{
+							"ID": "20230219121008-u2qruvg",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230219121008-u2qruvg",
+								"updated": "20230219121045"
+							},
+							"Children": [
+								{
+									"ID": "20230219121007-g1kev7z",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219121007-g1kev7z"
+									},
+									"Children": [
+										{
+											"ID": "20230219121007-mne44lx",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219121007-mne44lx"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "启动和退出时会进行一次同步，使用中数据不再变动后 30 秒进行一次同步"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230219121009-jz6wk10",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219121009-jz6wk10",
+										"updated": "20230219121045"
+									},
+									"Children": [
+										{
+											"ID": "20230219121009-oirf2tu",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219121009-oirf2tu",
+												"updated": "20230219121045"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "由同步算法决定数据合并和覆盖，请参考下述工作原理介绍"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219120728-ruo6ckc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219120728-ruo6ckc",
+						"updated": "20230219121049"
+					},
+					"Children": [
+						{
+							"ID": "20230219120728-wsze3pv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219120728-wsze3pv",
+								"updated": "20230219120922"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "手动同步"
+								}
+							]
+						},
+						{
+							"ID": "20230219120922-eka7jq5",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230219120922-eka7jq5",
+								"updated": "20230219121049"
+							},
+							"Children": [
+								{
+									"ID": "20230219120922-x6wetp7",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219120922-x6wetp7"
+									},
+									"Children": [
+										{
+											"ID": "20230219120922-qvlh4xr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219120922-qvlh4xr",
+												"updated": "20230219120927"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "仅启动和退出时进行一次同步，使用中需要手动触发同步"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230219120928-qpj3zcu",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230219120928-qpj3zcu",
+										"updated": "20230219121049"
+									},
+									"Children": [
+										{
+											"ID": "20230219120928-9i2jpu5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230219120928-9i2jpu5",
+												"updated": "20230219121049"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "由同步算法决定数据合并和覆盖，请参考下述工作原理介绍"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219120825-gmpjqom",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219120825-gmpjqom"
+					},
+					"Children": [
+						{
+							"ID": "20230219120825-59crgmd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219120825-59crgmd",
+								"updated": "20230219120848"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "完全手动同步：启动和退出时均不同步，完全手动控制同步时机和同步方向"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -234,12 +519,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721103656-afjj0tm",
-				"updated": "20210721103752"
+				"updated": "20230219121525"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "工作原理"
+					"Data": "自动/手动同步模式工作原理"
 				}
 			]
 		},
@@ -395,12 +680,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220510104118-7cotqs7",
-				"updated": "20220703230821"
+				"updated": "20230219121719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "同步每隔一段时间自动进行，时间间隔算法描述如下："
+					"Data": "自动同步时间间隔算法描述如下："
 				}
 			]
 		},
@@ -477,12 +762,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220307092026-nnexqjs",
-				"updated": "20220307092100"
+				"updated": "20230219120510"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "场景例举"
+					"Data": "自动同步模式场景例举"
 				}
 			]
 		},

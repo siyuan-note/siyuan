@@ -10,7 +10,7 @@ import {
 } from "../util/selection";
 import {
     hasClosestBlock,
-    hasClosestByAttribute,
+    hasClosestByAttribute, hasClosestByClassName,
     hasClosestByMatchTag,
     hasTopClosestByAttribute
 } from "../util/hasClosest";
@@ -996,14 +996,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
             const selectElement: Element[] = [];
-            nodeElement.classList.add("protyle-wysiwyg--select");
+            if (!hasClosestByClassName(nodeElement, "protyle-wysiwyg--select")) {
+                nodeElement.classList.add("protyle-wysiwyg--select");
+            }
             let isRemove = true;
             const removeIds: string[] = [];
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 selectElement.push(item);
                 item.classList.remove("protyle-wysiwyg--select");
                 removeIds.push(item.getAttribute("data-node-id"));
-                if ((item.getAttribute("custom-riff-decks") || "").indexOf(Constants.QUICK_DECK_ID) > -1) {
+                if ((item.getAttribute("custom-riff-decks") || "").indexOf(Constants.QUICK_DECK_ID) === -1) {
                     isRemove = false;
                 }
             });

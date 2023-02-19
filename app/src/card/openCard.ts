@@ -6,6 +6,7 @@ import {Constants} from "../constants";
 import {onGet} from "../protyle/util/onGet";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {viewCards} from "./viewCards";
+import {hideElements} from "../protyle/ui/hideElements";
 
 export const openCard = () => {
     const exit = window.siyuan.dialogs.find(item => {
@@ -149,6 +150,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         }
         event.preventDefault();
         event.stopPropagation();
+        hideElements(["toolbar", "hint", "util"], editor.protyle);
         if (type === "-1") {
             editor.protyle.element.classList.remove("b3-dialog__cardblock--hide");
             actionElements[0].classList.add("fn__none");

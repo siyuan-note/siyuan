@@ -534,7 +534,6 @@ export const bazaar = {
                     // switch tab
                     bazaar.element.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
                     target.classList.add("item--focus");
-                    const type = target.getAttribute("data-type");
                     bazaar.element.querySelectorAll(".bazaarPanel").forEach(item => {
                         if (type === item.getAttribute("data-type")) {
                             item.classList.remove("fn__none");
@@ -581,14 +580,15 @@ export const bazaar = {
                 if (selectElement.id === "bazaarSelect") {
                     // theme select
                     bazaar.element.querySelectorAll("#configBazaarTheme .b3-card").forEach((item) => {
+                       const dataObj = JSON.parse(item.getAttribute("data-obj"));
                         if (selectElement.value === "0") {
-                            if (item.getAttribute("data-type").indexOf("light") > -1) {
+                            if (dataObj.themeMode.indexOf("light") > -1) {
                                 item.classList.remove("fn__none");
                             } else {
                                 item.classList.add("fn__none");
                             }
                         } else if (selectElement.value === "1") {
-                            if (item.getAttribute("data-type").indexOf("dark") > -1) {
+                            if (dataObj.themeMode.indexOf("dark") > -1) {
                                 item.classList.remove("fn__none");
                             } else {
                                 item.classList.add("fn__none");
@@ -604,13 +604,13 @@ export const bazaar = {
                     let html = "";
                     if (selectElement.value === "0") { // 更新时间降序
                         Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
-                            return b.getAttribute("data-updated") < a.getAttribute("data-updated") ? -1 : 1;
+                            return JSON.parse(b.getAttribute("data-obj")).updated < JSON.parse(a.getAttribute("data-obj")).updated ? -1 : 1;
                         }).forEach((item) => {
                             html += item.outerHTML;
                         });
                     } else if (selectElement.value === "1") { // 更新时间升序
                         Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
-                            return b.getAttribute("data-updated") < a.getAttribute("data-updated") ? 1 : -1;
+                            return JSON.parse(b.getAttribute("data-obj")).updated < JSON.parse(a.getAttribute("data-obj")).updated ? 1 : -1;
                         }).forEach((item) => {
                             html += item.outerHTML;
                         });
@@ -661,7 +661,7 @@ export const bazaar = {
         if (localSort[bazaarType.replace("s", "")] === "1") {
             html = "";
             Array.from(element.querySelectorAll(".b3-card")).sort((a, b) => {
-                return b.getAttribute("data-updated") < a.getAttribute("data-updated") ? 1 : -1;
+                return JSON.parse(b.getAttribute("data-obj")).updated < JSON.parse(a.getAttribute("data-obj")).updated ? 1 : -1;
             }).forEach((item) => {
                 html += item.outerHTML;
             });

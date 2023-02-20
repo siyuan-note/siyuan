@@ -666,7 +666,6 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 	})
 
 	bms := map[string]*pdfcpu.Bookmark{}
-	footnotes := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
 		b := sql.GetBlock(linkID)
@@ -684,10 +683,6 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 		bms[linkID] = bm
 	}
 
-	if 1 > len(bms) && 1 > len(footnotes) {
-		return
-	}
-
 	tree, _ := loadTreeByBlockID(id)
 	if nil == tree {
 		return
@@ -702,50 +697,100 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 	}
 
 	var headings []*ast.Node
+	var assetDests []string
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsTextMarkType("a") {
+			dest := n.TextMarkAHref
+			if util.IsAssetLinkDest([]byte(dest)) {
+				assetDests = append(assetDests, dest)
+			}
+		} else if ast.NodeLinkDest == n.Type {
+			if util.IsAssetLinkDest(n.Tokens) {
+				assetDests = append(assetDests, string(n.Tokens))
+			}
+		}
+
+		if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
 			headings = append(headings, n)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
 	})
 
-	var topBms []*pdfcpu.Bookmark
-	stack := linkedliststack.New()
-	for _, h := range headings {
-	L:
-		for ; ; stack.Pop() {
-			cur, ok := stack.Peek()
-			if !ok {
-				bm := bms[h.ID]
-				if nil == bm {
+	if 0 < len(bms) {
+		var topBms []*pdfcpu.Bookmark
+		stack := linkedliststack.New()
+		for _, h := range headings {
+		L:
+			for ; ; stack.Pop() {
+				cur, ok := stack.Peek()
+				if !ok {
+					bm := bms[h.ID]
+					if nil == bm {
+						break L
+					}
+					bm.Level = h.HeadingLevel
+					stack.Push(bm)
+					topBms = append(topBms, bm)
 					break L
 				}
-				bm.Level = h.HeadingLevel
-				stack.Push(bm)
-				topBms = append(topBms, bm)
-				break L
-			}
 
-			tip := cur.(*pdfcpu.Bookmark)
-			if tip.Level < h.HeadingLevel {
-				bm := bms[h.ID]
-				bm.Level = h.HeadingLevel
-				bm.Parent = tip
-				tip.Children = append(tip.Children, bm)
-				stack.Push(bm)
-				break L
+				tip := cur.(*pdfcpu.Bookmark)
+				if tip.Level < h.HeadingLevel {
+					bm := bms[h.ID]
+					bm.Level = h.HeadingLevel
+					bm.Parent = tip
+					tip.Children = append(tip.Children, bm)
+					stack.Push(bm)
+					break L
+				}
 			}
+		}
+
+		outFile := inFile + ".tmp"
+		err = api.AddBookmarksFile(inFile, outFile, topBms, nil)
+		if nil != err {
+			logging.LogErrorf("add bookmark failed: %s", err)
+			return
+		}
+
+		err = os.Rename(outFile, inFile)
+		if nil != err {
+			return
 		}
 	}
 
-	outFile := inFile + ".tmp"
-	err = api.AddBookmarksFile(inFile, outFile, topBms, nil)
-	if nil != err {
-		logging.LogErrorf("add bookmark failed: %s", err)
-		return
-	}
-	err = os.Rename(outFile, inFile)
+	//var assetAbsPaths []string
+	//for _, dest := range assetDests {
+	//	absPath, _ := GetAssetAbsPath(dest)
+	//	if "" != absPath {
+	//		assetAbsPaths = append(assetAbsPaths, absPath)
+	//	}
+	//}
+	//
+	//if 0 < len(assetAbsPaths) {
+	//	outFile := inFile + ".tmp"
+	//	err = api.AddAttachmentsFile(inFile, outFile, assetAbsPaths, false, nil)
+	//	if nil != err {
+	//		logging.LogErrorf("add attachment failed: %s", err)
+	//		return
+	//	}
+	//
+	//	err = os.Rename(outFile, inFile)
+	//	if nil != err {
+	//		return
+	//	}
+	//}
+	//
+	//assetLinks, err := api.ListAssetLinks(inFile)
+	//if nil == err {
+	//	logging.LogInfof("pdf annotation: %+v", assetLinks)
+	//}
+
 	return
 }
 

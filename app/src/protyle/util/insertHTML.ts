@@ -2,7 +2,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./h
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
-import {focusBlock, getEditorRange, focusByWbr, fixTableRange} from "./selection";
+import {fixTableRange, focusBlock, focusByWbr, getEditorRange} from "./selection";
 import {mathRender} from "../markdown/mathRender";
 import {Constants} from "../../constants";
 import {highlightRender} from "../markdown/highlightRender";
@@ -75,7 +75,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => 
         });
     }
     const tempElement = document.createElement("template");
-    // 老板说不论什么情况都需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
+    // 需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
     tempElement.innerHTML = protyle.lute.SpinBlockDOM(html);
     const editableElement = getContenteditableElement(blockElement);
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部

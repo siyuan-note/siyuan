@@ -19,7 +19,7 @@ import {Dock} from "./dock";
 import {focusByRange} from "../protyle/util/selection";
 import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
-import {hasClosestBlock} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {Constants} from "../constants";
 import {openSearch} from "../search/spread";
@@ -610,6 +610,20 @@ export const addResize = (obj: Layout | Wnd) => {
     if (!obj.resize) {
         return;
     }
+
+    const getMinSize = (element: HTMLElement) => {
+        let minSize = 220;
+        Array.from(element.querySelectorAll('.file-tree')).find((item) => {
+            if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
+                || item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) {
+                if (!item.classList.contains("fn__none") && !hasClosestByClassName(item, "fn__none")) {
+                    minSize = 320
+                    return true;
+                }
+            }
+        })
+        return minSize
+    }
     const resizeWnd = (resizeElement: HTMLElement, direction: string) => {
         const setSize = (item: HTMLElement, direction: string) => {
             if (item.classList.contains("fn__flex-1")) {
@@ -670,10 +684,12 @@ export const addResize = (obj: Layout | Wnd) => {
                 if (previousNowSize < 8 || nextNowSize < 8) {
                     return;
                 }
-                if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) && previousNowSize < 220) {
+                if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) &&
+                    previousNowSize < getMinSize(previousElement)) {
                     return;
                 }
-                if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) && nextNowSize < 320) {
+                if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) &&
+                    nextNowSize < getMinSize(nextElement)) {
                     return;
                 }
                 if (!previousElement.classList.contains("fn__flex-1")) {

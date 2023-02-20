@@ -758,7 +758,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (targetElement) {
                 let queryClass = "";
                 selectedIds.forEach(item => {
-                    queryClass = `[data-node-id="${item}"],`;
+                    queryClass += `[data-node-id="${item}"],`;
                 });
                 if (window.siyuan.dragElement) {
                     window.siyuan.dragElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
@@ -970,9 +970,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
         const nodeElement = hasClosestBlock(event.target);
         if (nodeElement) {
-            nodeElement.removeAttribute("select-start");
-            nodeElement.removeAttribute("select-end");
-            nodeElement.classList.remove("protyle-wysiwyg--select", "dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
+            let gutterType = "";
+            for (const item of event.dataTransfer.items) {
+                if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                    gutterType = item.type;
+                }
+            }
+            if (gutterType.indexOf(nodeElement.getAttribute("data-node-id")) === -1) {
+                // 选中的元素不应移除，否则拖拽 gutter 经过选中的元素，该元素就会被取消选中
+                nodeElement.classList.remove("protyle-wysiwyg--select");
+                nodeElement.removeAttribute("select-start");
+                nodeElement.removeAttribute("select-end");
+            }
+            nodeElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
         }
     });
 };

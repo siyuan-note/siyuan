@@ -62,12 +62,10 @@ export class Gutter {
                 protyle.wysiwyg.element.innerHTML);
         });
         this.element.addEventListener("dragend", () => {
-            if (window.siyuan.dragElement) {
-                this.element.querySelectorAll("button").forEach((item) => {
-                    item.style.opacity = "";
-                });
-                window.siyuan.dragElement = undefined;
-            }
+            this.element.querySelectorAll("button").forEach((item) => {
+                item.style.opacity = "";
+            });
+            window.siyuan.dragElement = undefined;
         });
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");

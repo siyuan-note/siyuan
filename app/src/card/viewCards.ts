@@ -8,7 +8,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 
 export const viewCards = (deckID: string, title: string, cb:(response:IWebSocketData)=>void,isDoc = false) => {
     let pageIndex = 1;
@@ -55,6 +55,9 @@ export const viewCards = (deckID: string, title: string, cb:(response:IWebSocket
                 breadcrumbDocName: true
             },
         });
+        if (window.siyuan.config.editor.readOnly) {
+            disabledProtyle(edit.protyle);
+        }
         getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         const previousElement = dialog.element.querySelector('[data-type="previous"]');
         const nextElement = dialog.element.querySelector('[data-type="next"]');

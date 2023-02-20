@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
-import {onGet} from "../protyle/util/onGet";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {viewCards} from "./viewCards";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -95,6 +95,9 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         },
         typewriterMode: false
     });
+    if (window.siyuan.config.editor.readOnly) {
+        disabledProtyle(editor.protyle);
+    }
     if (blocks.length > 0) {
         fetchPost("/api/filetree/getDoc", {
             id: blocks[index].blockID,

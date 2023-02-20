@@ -41,7 +41,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/shirou/gopsutil/v3 v3.23.1
-	github.com/siyuan-note/dejavu v0.0.0-20230218054009-995bd41a222a
+	github.com/siyuan-note/dejavu v0.0.0-20230220015315-3ef79d7929d4
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20221117095924-e1947438a35e
@@ -101,7 +101,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/onsi/ginkgo/v2 v2.8.2 // indirect
+	github.com/onsi/ginkgo/v2 v2.8.3 // indirect
 	github.com/open-spaced-repetition/go-fsrs v0.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

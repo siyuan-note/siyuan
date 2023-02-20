@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20230219121811"
+		"updated": "20230220103721"
 	},
 	"Children": [
 		{
@@ -194,25 +194,92 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：如果數據量較大，建議通過設置中的 "
+					"Data": "​​："
+				}
+			]
+		},
+		{
+			"ID": "20230220103637-v3wy8lv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230220103637-v3wy8lv",
+				"updated": "20230220103721"
+			},
+			"Children": [
+				{
+					"ID": "20230220103642-bba2hvw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230220103642-bba2hvw",
+						"updated": "20230220103721"
+					},
+					"Children": [
+						{
+							"ID": "20230220103642-jkqyctc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230220103642-jkqyctc",
+								"updated": "20230220103721"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "啟用同步前，請確保參與同步的所有設備系統時間一致"
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "導出 - Data"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 導出數據包，然後將該數據包通過手動拷貝或者其他方式發送到新設備上，並在新設備上 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "導入 - Data"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​，最後再配置同步。"
+					"ID": "20230220103640-opmw3uo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230220103640-opmw3uo",
+						"updated": "20230220103640"
+					},
+					"Children": [
+						{
+							"ID": "20230220103640-gpbn39m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230220103640-gpbn39m",
+								"updated": "20230220103641"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果數據量較大，建議通過設置中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "導出 - Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 導出數據包，然後將該數據包通過手動拷貝或者其他方式發送到新設備上，並在新設備上 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "導入 - Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，最後再配置同步"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

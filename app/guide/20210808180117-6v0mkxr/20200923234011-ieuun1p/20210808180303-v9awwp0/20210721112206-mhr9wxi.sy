@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
-		"updated": "20230219121759"
+		"updated": "20230220103712"
 	},
 	"Children": [
 		{
@@ -195,25 +195,92 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​: If the amount of data is large, it is recommended to export the data package through "
+					"Data": "​​: "
+				}
+			]
+		},
+		{
+			"ID": "20230220103708-l6sdi3r",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230220103708-l6sdi3r",
+				"updated": "20230220103712"
+			},
+			"Children": [
+				{
+					"ID": "20230220103711-5uo9kru",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230220103711-5uo9kru",
+						"updated": "20230220103712"
+					},
+					"Children": [
+						{
+							"ID": "20230220103711-ur0xszr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230220103711-ur0xszr",
+								"updated": "20230220103712"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Before enabling synchronization, please ensure that the system time of all devices participating in the synchronization is consistent"
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Export-Data"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ in the settings, and then send the data package to the new device by manual copying or other methods, and export the data package on the new device. Go to "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Import - Data"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​, and finally configure synchronization."
+					"ID": "20230220103708-fmphm6k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230220103708-fmphm6k",
+						"updated": "20230220103708"
+					},
+					"Children": [
+						{
+							"ID": "20230220103708-ml52xbc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230220103708-ml52xbc",
+								"updated": "20230220103710"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If the amount of data is large, it is recommended to export the data package through "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export-Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the settings, and then send the data package to the new device by manual copying or other methods, and export the data package on the new device. Go to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Import - Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, and finally configure synchronization"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

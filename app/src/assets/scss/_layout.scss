@@ -239,7 +239,7 @@
           background-color: var(--b3-theme-background-light);
         }
 
-        &--unupdate {
+        &--unupdate:not(.item--pin) {
           font-style: italic;
           color: var(--b3-theme-on-surface);
         }

@@ -214,8 +214,8 @@ github.com/mssola/user_agent v0.5.3 h1:lBRPML9mdFuIZgI2cmlQ+atbpJdLdeVl2IDodjBR5
 github.com/mssola/user_agent v0.5.3/go.mod h1:TTPno8LPY3wAIEKRpAtkdMT0f8SE24pLRGPahjCH4uw=
 github.com/olahol/melody v1.1.1 h1:amgBhR7pDY0rA0JHWprgLF0LnVztognAwEQgf/WYLVM=
 github.com/olahol/melody v1.1.1/go.mod h1:GgkTl6Y7yWj/HtfD48Q5vLKPVoZOH+Qqgfa7CvJgJM4=
-github.com/onsi/ginkgo/v2 v2.8.2 h1:rWe/YULhcr//R7U3kN11ISrlT7aVPW9K/AbXbGakXqY=
-github.com/onsi/ginkgo/v2 v2.8.2/go.mod h1:88PAUAEownL21VmApu+QCg9mlPSt7W8fnb6LsLfV9Eg=
+github.com/onsi/ginkgo/v2 v2.8.3 h1:RpbK1G8nWPNaCVFBWsOGnEQQGgASi6b8fxcWBvDYjxQ=
+github.com/onsi/ginkgo/v2 v2.8.3/go.mod h1:6OaUA8BCi0aZfmzYT/q9AacwTzDpNbxILUT+TlBq6MY=
 github.com/onsi/gomega v1.27.0 h1:QLidEla4bXUuZVFa4KX6JHCsuGgbi85LC/pCHrt/O08=
 github.com/open-spaced-repetition/go-fsrs v0.1.0 h1:6H1nCuxuR9p/GmKji0zET1uT5KDwOmW++k7jgr8L0Gk=
 github.com/open-spaced-repetition/go-fsrs v0.1.0/go.mod h1:H07GOB0A1OBeu3401x8qWKGaa43QjfrDoWy9nba7QCc=
@@ -267,8 +267,8 @@ github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5g
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
-github.com/siyuan-note/dejavu v0.0.0-20230218054009-995bd41a222a h1:tKUq/k29oDWUx8uu6hfVtC1ihb855scMfl/ItJyItDg=
-github.com/siyuan-note/dejavu v0.0.0-20230218054009-995bd41a222a/go.mod h1:NPdIkEzOxCYs4YQvdAWble6mTQM9I7++I0OxpIQUgPM=
+github.com/siyuan-note/dejavu v0.0.0-20230220015315-3ef79d7929d4 h1:J9bDUdn+ZjPUnUbOwrFMdqabEg+vrakdj/QhPBpiesA=
+github.com/siyuan-note/dejavu v0.0.0-20230220015315-3ef79d7929d4/go.mod h1:NPdIkEzOxCYs4YQvdAWble6mTQM9I7++I0OxpIQUgPM=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b h1:828lTUW2C0uNiolODqoACu7J8sDUzswD4Xo04mUombg=

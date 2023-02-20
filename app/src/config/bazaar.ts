@@ -128,23 +128,31 @@ export const bazaar = {
 <div id="configBazaarReadme" class="config-bazaar__readme"></div>
 </div>`;
     },
-    getHTML(item: IBazaarItem, bazaarType: TBazaarType) {
+    _genCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
         let hide = false;
-        let type = "";
+        let themeMode = "";
         if (bazaarType === "themes") {
             const themeValue = (bazaar.element.querySelector("#bazaarSelect") as HTMLSelectElement).value;
             if ((themeValue === "0" && item.modes.includes("dark")) ||
                 themeValue === "1" && item.modes.includes("light")) {
                 hide = true;
             }
-            type = item.modes.toString();
+            themeMode = item.modes.toString();
         }
         let showSwitch = false;
         if (["icons", "themes"].includes(bazaarType)) {
             showSwitch = true;
         }
-
-        return `<div data-bazaar="${bazaarType}" class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}" data-type="${type}" data-updated="${item.updated}">
+        const dataObj = {
+            bazaarType,
+            themeMode: themeMode,
+            updated: item.updated,
+            name: item.name,
+            repoURL: item.repoURL,
+            repoHash: item.repoHash,
+            downloaded: false,
+        }
+        return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
     <div class="b3-card__info fn__flex">
         <span class="fn__flex-center fn__ellipsis">${item.name}</span>
@@ -154,7 +162,7 @@ export const bazaar = {
         <span class="fn__space"></span>
         <span class="fn__flex-center">${item.downloads}</span>
     </div>
-    <div class="b3-card__actions" data-name="${item.name}" data-url="${item.repoURL}" data-hash="${item.repoHash}">
+    <div class="b3-card__actions">
         <div class="fn__flex-1"></div>
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
@@ -186,12 +194,21 @@ export const bazaar = {
                 showSwitch = true;
             }
             response.data.packages.forEach((item: IBazaarItem) => {
-                html += `<div data-bazaar="${bazaarType}" data-type="${item.modes?.toString()}" data-downloaded="true" class="b3-card${item.current ? " b3-card--current" : ""}">
+                const dataObj = {
+                    bazaarType,
+                    themeMode: item.modes?.toString(),
+                    updated: item.updated,
+                    name: item.name,
+                    repoURL: item.repoURL,
+                    repoHash: item.repoHash,
+                    downloaded: true
+                }
+                html += `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
     <div class="b3-card__info">
         ${item.name}
     </div>
-    <div class="b3-card__actions" data-url="${item.repoURL}" data-name="${item.name}" data-hash="${item.repoHash}">
+    <div class="b3-card__actions">
         <div class="fn__flex-1"></div>
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
@@ -211,23 +228,22 @@ export const bazaar = {
     </div>
 </div>`;
             });
-            bazaar.data.downloaded = response.data.packages;
+            bazaar._data.downloaded = response.data.packages;
             bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = html ? `<div class="b3-cards">${html}</div>` : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
     },
-    data: {
+    _data: {
         themes: [] as IBazaarItem[],
         templates: [] as IBazaarItem[],
         icons: [] as IBazaarItem[],
         widgets: [] as IBazaarItem[],
         downloaded: [] as IBazaarItem[],
     },
-    renderReadme(cardElement: HTMLElement, bazaarType: TBazaarType) {
-        const isDownloaded = cardElement.getAttribute("data-downloaded") === "true";
-        const repoURL = cardElement.querySelector(".b3-card__actions").getAttribute("data-url");
+    _renderReadme(cardElement: HTMLElement, bazaarType: TBazaarType) {
+        const dataObj = JSON.parse(cardElement.getAttribute("data-obj"));
         let data: IBazaarItem;
-        (isDownloaded ? bazaar.data.downloaded : bazaar.data[bazaarType]).find((item: IBazaarItem) => {
-            if (item.repoURL === repoURL) {
+        (dataObj.downloaded ? bazaar._data.downloaded : bazaar._data[bazaarType]).find((item: IBazaarItem) => {
+            if (item.repoURL === dataObj.repoURL) {
                 data = item;
                 return true;
             }
@@ -247,7 +263,15 @@ export const bazaar = {
         } else if (bazaarType === "templates") {
             navTitle = window.siyuan.languages.template;
         }
-        readmeElement.innerHTML = ` <div class="item__side">
+        const dataObj1 = {
+            bazaarType,
+            themeMode: data.modes?.toString(),
+            name: data.name,
+            repoURL: data.repoURL,
+            repoHash: data.repoHash,
+            downloaded: true
+        }
+        readmeElement.innerHTML = ` <div class="item__side" data-obj='${JSON.stringify(dataObj1)}'>
     <div class="fn__flex">
         <button class="b3-button b3-button--outline" data-type="goBack" title="Go back"><svg><use xlink:href="#iconLeft"></use></svg></button>
         <div class="item__nav">${navTitle}</div>
@@ -261,17 +285,20 @@ export const bazaar = {
     <div class="fn__hr--b"></div>
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${data.version}</div>
     <div class="fn__hr"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${isDownloaded ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${isDownloaded ? data.hInstallDate : data.hUpdated}</div>
+    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${dataObj.downloaded ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${dataObj.downloaded ? data.hInstallDate : data.hUpdated}</div>
     <div class="fn__hr"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${isDownloaded ? window.siyuan.languages.installSize : window.siyuan.languages.pkgSize}<br>${isDownloaded ? data.hInstallSize : data.hSize}</div>
+    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${dataObj.downloaded ? window.siyuan.languages.installSize : window.siyuan.languages.pkgSize}<br>${dataObj.downloaded ? data.hInstallSize : data.hSize}</div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
-    <div class="${(data.installed || isDownloaded) ? "fn__none" : ""}" data-type="${data.modes?.toString()}">
-        <button class="b3-button" style="width: 168px" data-hash="${data.repoHash}" data-name="${data.name}" data-bazaar="${bazaarType}" data-url="${data.repoURL}" data-type="install">${window.siyuan.languages.download}</button>
+    <div${(data.installed || dataObj.downloaded) ? ' class="fn__none"' : ""}>
+        <button class="b3-button" style="width: 168px"  data-type="install">${window.siyuan.languages.download}</button>
     </div>
-    <div class="fn__hr--b${isDownloaded ? " fn__none" : ""}"></div>
-    <div class="fn__hr--b${isDownloaded ? " fn__none" : ""}"></div>
-    <div class="fn__flex${isDownloaded ? " fn__none" : ""}" style="justify-content: center;">
+    <div${(data.outdated && (data.installed || dataObj.downloaded)) ? "" : ' class="fn__none"'}>
+        <button class="b3-button" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
+    </div>
+    <div class="fn__hr--b${dataObj.downloaded ? " fn__none" : ""}"></div>
+    <div class="fn__hr--b${dataObj.downloaded ? " fn__none" : ""}"></div>
+    <div class="fn__flex${dataObj.downloaded ? " fn__none" : ""}" style="justify-content: center;">
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGithub"></use></svg>
         <span class="fn__space"></span>
         <a href="${data.repoURL}" target="_blank" title="GitHub Repo">Repo</a>
@@ -299,7 +326,7 @@ export const bazaar = {
         <img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">
     </div>
 </div>`;
-        if (isDownloaded) {
+        if (dataObj.downloaded) {
             const mdElement = readmeElement.querySelector(".item__readme");
             mdElement.innerHTML = data.readme;
             highlightRender(mdElement);
@@ -317,8 +344,8 @@ export const bazaar = {
     },
     bindEvent() {
         fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
-            bazaar.onBazaar(response, "themes", false);
-            bazaar.data.themes = response.data.packages;
+            bazaar._onBazaar(response, "themes", false);
+            bazaar._data.themes = response.data.packages;
         });
         bazaar.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
@@ -326,11 +353,12 @@ export const bazaar = {
                 const type = target.getAttribute("data-type");
                 if (type === "open") {
                     /// #if !BROWSER
-                    const dirName = target.parentElement.parentElement.getAttribute("data-bazaar");
+                    const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"));
+                    const dirName = dataObj.bazaarType;
                     if (dirName === "icons" || dirName === "themes") {
-                        shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", dirName, target.parentElement.getAttribute("data-name")));
+                        shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", dirName, dataObj.name));
                     } else {
-                        shell.openPath(path.join(window.siyuan.config.system.dataDir, dirName, target.parentElement.getAttribute("data-name")));
+                        shell.openPath(path.join(window.siyuan.config.system.dataDir, dirName, dataObj.name));
                     }
                     /// #endif
                     event.preventDefault();
@@ -357,7 +385,8 @@ export const bazaar = {
                     break;
                 } else if (type === "install") {
                     if (!target.classList.contains("b3-button--progress")) {
-                        const bazaarType = target.getAttribute("data-bazaar") as TBazaarType;
+                        const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"));
+                        const bazaarType = dataObj.bazaarType as TBazaarType;
                         let url = "/api/bazaar/installBazaarTemplate";
                         if (bazaarType === "themes") {
                             url = "/api/bazaar/installBazaarTheme";
@@ -367,74 +396,69 @@ export const bazaar = {
                             url = "/api/bazaar/installBazaarWidget";
                         }
                         fetchPost(url, {
-                            repoURL: target.getAttribute("data-url"),
-                            packageName: target.getAttribute("data-name"),
-                            repoHash: target.getAttribute("data-hash"),
-                            mode: target.parentElement.getAttribute("data-type") === "dark" ? 1 : 0,
+                            repoURL: dataObj.repoURL,
+                            packageName: dataObj.name,
+                            repoHash: dataObj.repoHash,
+                            mode: dataObj.themeMode === "dark" ? 1 : 0,
                         }, response => {
                             if (window.siyuan.config.appearance.themeJS && bazaarType === "themes") {
                                 exportLayout(true);
                                 return;
                             }
-                            bazaar.onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
+                            bazaar._genMyHTML(bazaarType);
+                            bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                         });
                     }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "install-t") {
-                    confirmDialog(window.siyuan.languages.update, window.siyuan.languages.exportTplTip, () => {
-                        const cardElement = hasClosestByClassName(target, "b3-card");
-                        let bazaarType: TBazaarType = "themes";
-                        if (cardElement) {
-                            bazaarType = cardElement.getAttribute("data-bazaar") as TBazaarType;
-                        }
-                        let url = "/api/bazaar/installBazaarTemplate";
-                        if (bazaarType === "themes") {
-                            url = "/api/bazaar/installBazaarTheme";
-                        } else if (bazaarType === "icons") {
-                            url = "/api/bazaar/installBazaarIcon";
-                        } else if (bazaarType === "widgets") {
-                            url = "/api/bazaar/installBazaarWidget";
-                        }
-                        target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
-                        const name = target.parentElement.getAttribute("data-name");
-                        fetchPost(url, {
-                            repoURL: target.parentElement.getAttribute("data-url"),
-                            packageName: name,
-                            repoHash: target.parentElement.getAttribute("data-hash"),
-                            mode: target.parentElement.parentElement.getAttribute("data-type") === "dark" ? 1 : 0,
-                            update: true,
-                        }, response => {
-                            // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
-                            if (cardElement && cardElement.getAttribute("data-downloaded") === "true") {
+                    if (!target.classList.contains("b3-button--progress")) {
+                        confirmDialog(window.siyuan.languages.update, window.siyuan.languages.exportTplTip, () => {
+                            const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"))
+                            const bazaarType: TBazaarType = dataObj.bazaarType;
+                            let url = "/api/bazaar/installBazaarTemplate";
+                            if (bazaarType === "themes") {
+                                url = "/api/bazaar/installBazaarTheme";
+                            } else if (bazaarType === "icons") {
+                                url = "/api/bazaar/installBazaarIcon";
+                            } else if (bazaarType === "widgets") {
+                                url = "/api/bazaar/installBazaarWidget";
+                            }
+                            if (!target.classList.contains("b3-button")) {
+                                target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
+                            }
+                            fetchPost(url, {
+                                repoURL: dataObj.repoURL,
+                                packageName: dataObj.name,
+                                repoHash: dataObj.repoHash,
+                                mode: dataObj.themeMode === "dark" ? 1 : 0,
+                                update: true,
+                            }, response => {
+                                // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
                                 this._genMyHTML(bazaarType);
-                            } else {
-                                bazaar.onBazaar(response, bazaarType, ["icons"].includes(bazaarType));
-                            }
-                            // https://github.com/siyuan-note/siyuan/issues/5411
-                            if (bazaarType === "themes" && (
-                                (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === name) ||
-                                (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === name)
-                            )) {
-                                if (window.siyuan.config.appearance.themeJS) {
-                                    exportLayout(true);
-                                } else {
-                                    const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
-                                    linkElement.href = linkElement.href + "1";
+                                bazaar._onBazaar(response, bazaarType, ["icons"].includes(bazaarType));
+                                // https://github.com/siyuan-note/siyuan/issues/5411
+                                if (bazaarType === "themes" && (
+                                    (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === dataObj.name) ||
+                                    (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === dataObj.name)
+                                )) {
+                                    if (window.siyuan.config.appearance.themeJS) {
+                                        exportLayout(true);
+                                    } else {
+                                        const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
+                                        linkElement.href = linkElement.href + "1";
+                                    }
                                 }
-                            }
+                            });
                         });
-                    });
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "uninstall") {
-                    const cardElement = hasClosestByClassName(target, "b3-card");
-                    let bazaarType: TBazaarType = "themes";
-                    if (cardElement) {
-                        bazaarType = cardElement.getAttribute("data-bazaar") as TBazaarType;
-                    }
+                    const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"))
+                    const bazaarType: TBazaarType = dataObj.bazaarType;
                     let url = "/api/bazaar/uninstallBazaarTemplate";
                     if (bazaarType === "themes") {
                         url = "/api/bazaar/uninstallBazaarTheme";
@@ -444,7 +468,7 @@ export const bazaar = {
                         url = "/api/bazaar/uninstallBazaarWidget";
                     }
 
-                    const packageName = target.parentElement.getAttribute("data-name");
+                    const packageName = dataObj.name;
                     if (window.siyuan.config.appearance.themeDark === packageName ||
                         window.siyuan.config.appearance.themeLight === packageName ||
                         window.siyuan.config.appearance.icon === packageName) {
@@ -453,70 +477,47 @@ export const bazaar = {
                         fetchPost(url, {
                             packageName
                         }, response => {
-                            if (cardElement && cardElement.getAttribute("data-downloaded") === "true") {
-                                this._genMyHTML(bazaarType);
-                            } else {
-                                bazaar.onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
-                            }
+                            this._genMyHTML(bazaarType);
+                            bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                         });
                     }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "switch") {
-                    const packageName = target.parentElement.getAttribute("data-name");
-                    const cardElement = hasClosestByClassName(target, "b3-card");
-                    let bazaarType: TBazaarType = "themes";
-                    let mode: number;
-                    if (cardElement) {
-                        bazaarType = cardElement.getAttribute("data-bazaar") as TBazaarType;
-                        mode = cardElement.getAttribute("data-type") === "dark" ? 1 : 0;
-                    }
-
+                    const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"))
+                    const bazaarType: TBazaarType = dataObj.bazaarType;
+                    const packageName = dataObj.name;
+                    const mode = dataObj.themeMode === "dark" ? 1 : 0;
                     if (bazaarType === "icons") {
-                        fetchPost("/api/setting/setAppearance",  Object.assign({}, window.siyuan.config.appearance, {
+                        fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
                             icon: packageName,
-                        }), response => {
-                            bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${window.siyuan.config.appearance.icon}"]`).forEach(item => {
-                                item.parentElement.classList.remove("b3-card--current");
-                                const switchElement = item.querySelector('[data-type="switch"]');
-                                switchElement.classList.remove("fn__none");
-                                switchElement.previousElementSibling.classList.remove("fn__none");
+                        }), (appearanceResponse) => {
+                            this._genMyHTML(bazaarType);
+                            fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
+                                response.data.appearance = appearanceResponse.data
+                                bazaar._onBazaar(response, "icons", true);
+                                bazaar._data.icons = response.data.packages;
                             });
-                            bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${packageName}"]`).forEach(item => {
-                                item.parentElement.classList.add("b3-card--current");
-                                const switchElement = item.querySelector('[data-type="switch"]');
-                                switchElement.classList.add("fn__none");
-                                switchElement.previousElementSibling.classList.add("fn__none");
-                            });
-                            appearance.onSetappearance(response.data);
                         });
                     } else if (bazaarType === "themes") {
-                        fetchPost("/api/setting/setAppearance",  Object.assign({}, window.siyuan.config.appearance, {
+                        fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
                             mode,
                             modeOS: false,
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,
                             themeLight: mode === 0 ? packageName : window.siyuan.config.appearance.themeLight,
-                        }), response => {
+                        }), (appearanceResponse) => {
                             if ((mode !== window.siyuan.config.appearance.mode ||
                                     (mode === 1 && window.siyuan.config.appearance.themeDark !== packageName) ||
                                     (mode === 0 && window.siyuan.config.appearance.themeLight !== packageName)) &&
                                 window.siyuan.config.appearance.themeJS) {
                                 exportLayout(true);
                             } else {
-                                const oldTheme = window.siyuan.config.appearance.mode === 1 ? window.siyuan.config.appearance.themeDark : window.siyuan.config.appearance.themeLight;
-                                bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${oldTheme}"]`).forEach(item => {
-                                    item.parentElement.classList.remove("b3-card--current");
-                                    const switchElement = item.querySelector('[data-type="switch"]');
-                                    switchElement.classList.remove("fn__none");
-                                    switchElement.previousElementSibling.classList.remove("fn__none");
-                                });
-                                appearance.onSetappearance(response.data);
-                                bazaar.element.querySelectorAll(`.b3-card__actions[data-name="${packageName}"]`).forEach(item => {
-                                    item.parentElement.classList.add("b3-card--current");
-                                    const switchElement = item.querySelector('[data-type="switch"]');
-                                    switchElement.classList.add("fn__none");
-                                    switchElement.previousElementSibling.classList.add("fn__none");
+                                this._genMyHTML("themes");
+                                fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
+                                    response.data.appearance = appearanceResponse.data
+                                    bazaar._onBazaar(response, "themes", true);
+                                    bazaar._data.themes = response.data.packages;
                                 });
                             }
                         });
@@ -525,7 +526,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("b3-card")) {
-                    bazaar.renderReadme(target, target.getAttribute("data-bazaar") as TBazaarType);
+                    bazaar._renderReadme(target, (JSON.parse(target.getAttribute("data-obj")).bazaarType) as TBazaarType);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -540,18 +541,18 @@ export const bazaar = {
                             if (!item.getAttribute("data-init")) {
                                 if (type === "template") {
                                     fetchPost("/api/bazaar/getBazaarTemplate", {}, response => {
-                                        bazaar.onBazaar(response, "templates", false);
-                                        bazaar.data.templates = response.data.packages;
+                                        bazaar._onBazaar(response, "templates", false);
+                                        bazaar._data.templates = response.data.packages;
                                     });
                                 } else if (type === "icon") {
                                     fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
-                                        bazaar.onBazaar(response, "icons", false);
-                                        bazaar.data.icons = response.data.packages;
+                                        bazaar._onBazaar(response, "icons", false);
+                                        bazaar._data.icons = response.data.packages;
                                     });
                                 } else if (type === "widget") {
                                     fetchPost("/api/bazaar/getBazaarWidget", {}, response => {
-                                        bazaar.onBazaar(response, "widgets", false);
-                                        bazaar.data.widgets = response.data.packages;
+                                        bazaar._onBazaar(response, "widgets", false);
+                                        bazaar._data.widgets = response.data.packages;
                                     });
                                 } else if (type === "downloaded") {
                                     this._genMyHTML("themes");
@@ -633,7 +634,7 @@ export const bazaar = {
             });
         });
     },
-    onBazaar(response: IWebSocketData, bazaarType: TBazaarType, reload: boolean) {
+    _onBazaar(response: IWebSocketData, bazaarType: TBazaarType, reload: boolean) {
         let id = "#configBazaarTemplate";
         if (bazaarType === "themes") {
             id = "#configBazaarTheme";
@@ -651,9 +652,9 @@ export const bazaar = {
         }
         let html = "";
         response.data.packages.forEach((item: IBazaarItem) => {
-            html += this.getHTML(item, bazaarType);
+            html += this._genCardHTML(item, bazaarType);
         });
-        bazaar.data[bazaarType] = response.data.packages;
+        bazaar._data[bazaarType] = response.data.packages;
         element.innerHTML = `<div class="b3-cards">${html}</div>`;
 
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];

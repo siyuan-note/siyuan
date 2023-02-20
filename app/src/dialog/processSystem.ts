@@ -248,7 +248,7 @@ export const progressLoading = (data: IWebSocketData) => {
     }
 };
 
-export const progressBackgroundTask = (tasks:{action:string}[]) => {
+export const progressBackgroundTask = (tasks: { action: string }[]) => {
     const backgroundTaskElement = document.querySelector(".status__backgroundtask");
     if (!backgroundTaskElement) {
         return;
@@ -324,19 +324,22 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     if (!bazzarElement) {
         return;
     }
-    const btnElement = bazzarElement.querySelector(`[data-url="${data.id}"]`) as HTMLElement;
+    const btnElement = bazzarElement.querySelector('[data-type="install"]') as HTMLElement;
     if (btnElement) {
         if (data.percent >= 1) {
             btnElement.parentElement.classList.add("fn__none");
+            btnElement.parentElement.nextElementSibling.classList.add("fn__none");
         } else {
             btnElement.classList.add("b3-button--progress");
+            btnElement.parentElement.nextElementSibling.firstElementChild.classList.add("b3-button--progress");
             btnElement.innerHTML = `<span style="width: ${data.percent * 100}%"></span>`;
+            btnElement.parentElement.nextElementSibling.firstElementChild.innerHTML = `<span style="width: ${data.percent * 100}%"></span>`;
         }
     }
 };
 
 export const processSync = (data?: IWebSocketData) => {
-    const iconElement = document.querySelector(isMobile()?"#menuSyncNow" : "#barSync");
+    const iconElement = document.querySelector(isMobile() ? "#menuSyncNow" : "#barSync");
     if (!iconElement) {
         return;
     }

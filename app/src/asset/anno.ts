@@ -314,7 +314,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
     // https://github.com/siyuan-note/siyuan/issues/5213
     const rangeContents = range.cloneContents();
     Array.from(rangeContents.children).forEach(item => {
-        if (item.tagName === "BR") {
+        if (item.tagName === "BR" && item.previousElementSibling && item.nextElementSibling) {
             const previousText = item.previousElementSibling.textContent;
             const nextText = item.nextElementSibling.textContent;
             if (previousText.endsWith("-") && /^[A-Za-z]$/.test(previousText.substring(previousText.length - 2, previousText.length - 1)) &&

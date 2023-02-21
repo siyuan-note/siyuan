@@ -348,8 +348,15 @@ export class Files extends Model {
                 return;
             }
             liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
-            if (window.siyuan.dragElement?.parentElement?.classList.contains("protyle-gutters")) {
-                if (["NodeListItem", "NodeHeading"].includes(window.siyuan.dragElement.getAttribute("data-type"))) {
+            let gutterType = "";
+            for (const item of event.dataTransfer.items) {
+                if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                    gutterType = item.type;
+                }
+            }
+            if (gutterType) {
+                const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
+                if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
                     // 块标拖拽
                     liElement.classList.add("dragover");
                 }
@@ -416,23 +423,31 @@ export class Files extends Model {
             }
             const toURL = newUlElement.getAttribute("data-url");
             const toPath = newElement.getAttribute("data-path");
-            const gutterType = window.siyuan.dragElement?.getAttribute("data-type");
-            if (newElement.classList.contains("dragover") && ["NodeListItem", "NodeHeading"].includes(gutterType)) {
-                // 块标拖拽
-                if (gutterType === "NodeHeading") {
-                    fetchPost("/api/filetree/heading2Doc", {
-                        targetNoteBook: toURL,
-                        srcHeadingID: window.siyuan.dragElement.getAttribute("data-node-id"),
-                        targetPath: toPath,
-                        pushMode: 0,
-                    });
-                } else {
-                    fetchPost("/api/filetree/li2Doc", {
-                        pushMode: 0,
-                        srcListItemID: window.siyuan.dragElement.getAttribute("data-node-id"),
-                        targetNoteBook: toURL,
-                        targetPath: toPath
-                    });
+            let gutterType = "";
+            for (const item of event.dataTransfer.items) {
+                if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                    gutterType = item.type;
+                }
+            }
+            if (gutterType && newElement.classList.contains("dragover")) {
+                const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)
+                if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
+                    // 块标拖拽
+                    if (gutterType === "nodeheading") {
+                        fetchPost("/api/filetree/heading2Doc", {
+                            targetNoteBook: toURL,
+                            srcHeadingID: gutterTypes[2].split(",")[0],
+                            targetPath: toPath,
+                            pushMode: 0,
+                        });
+                    } else {
+                        fetchPost("/api/filetree/li2Doc", {
+                            pushMode: 0,
+                            srcListItemID: gutterTypes[2].split(",")[0],
+                            targetNoteBook: toURL,
+                            targetPath: toPath
+                        });
+                    }
                 }
                 newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                 window.siyuan.dragElement = undefined;

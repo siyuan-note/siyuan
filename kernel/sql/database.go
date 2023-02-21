@@ -18,6 +18,7 @@ package sql
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -1093,7 +1094,7 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	return
 }
 
-func batchUpdateHPath(tx *sql.Tx, boxID, rootID, newHPath string) (err error) {
+func batchUpdateHPath(tx *sql.Tx, boxID, rootID, newHPath string, context map[string]interface{}) (err error) {
 	stmt := "UPDATE blocks SET hpath = ? WHERE box = ? AND root_id = ?"
 	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
 		return
@@ -1109,6 +1110,8 @@ func batchUpdateHPath(tx *sql.Tx, boxID, rootID, newHPath string) (err error) {
 		}
 	}
 	ClearCache()
+	evtHash := fmt.Sprintf("%x", sha256.Sum256([]byte(rootID)))[:7]
+	eventbus.Publish(eventbus.EvtSQLInsertBlocksFTS, context, 1, evtHash)
 	return
 }
 

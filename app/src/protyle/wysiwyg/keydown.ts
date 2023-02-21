@@ -999,25 +999,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!hasClosestByClassName(nodeElement, "protyle-wysiwyg--select")) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
             }
-            let isRemove = true;
-            const removeIds: string[] = [];
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 selectElement.push(item);
-                item.classList.remove("protyle-wysiwyg--select");
-                removeIds.push(item.getAttribute("data-node-id"));
-                if ((item.getAttribute("custom-riff-decks") || "").indexOf(Constants.QUICK_DECK_ID) === -1) {
-                    isRemove = false;
-                }
             });
-
-            if (isRemove) {
-                fetchPost("/api/riff/removeRiffCards", {
-                    deckID: Constants.QUICK_DECK_ID,
-                    blockIDs: removeIds
-                });
-            } else {
-                quickMakeCard(selectElement);
-            }
+            quickMakeCard(selectElement);
             event.preventDefault();
             event.stopPropagation();
             return true;

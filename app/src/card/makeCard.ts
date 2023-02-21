@@ -174,17 +174,29 @@ export const makeCard = (nodeElement: Element[]) => {
 };
 
 export const quickMakeCard = (nodeElement: Element[]) => {
+    let isRemove = true;
     const ids: string[] = [];
     nodeElement.forEach(item => {
         if (item.getAttribute("data-type") === "NodeThematicBreak") {
             return;
         }
+        item.classList.remove("protyle-wysiwyg--select");
         ids.push(item.getAttribute("data-node-id"));
+        if ((item.getAttribute("custom-riff-decks") || "").indexOf(Constants.QUICK_DECK_ID) === -1) {
+            isRemove = false;
+        }
     });
-    fetchPost("/api/riff/addRiffCards", {
-        deckID: Constants.QUICK_DECK_ID,
-        blockIDs: ids
-    });
+    if (isRemove) {
+        fetchPost("/api/riff/removeRiffCards", {
+            deckID: Constants.QUICK_DECK_ID,
+            blockIDs: ids
+        });
+    } else {
+        fetchPost("/api/riff/addRiffCards", {
+            deckID: Constants.QUICK_DECK_ID,
+            blockIDs: ids
+        });
+    }
 };
 
 

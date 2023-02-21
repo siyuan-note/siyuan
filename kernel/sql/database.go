@@ -869,9 +869,11 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE id IN " + in.String()
-	if err = execStmtTx(tx, stmt); nil != err {
-		return
+	if !caseSensitive {
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE id IN " + in.String()
+		if err = execStmtTx(tx, stmt); nil != err {
+			return
+		}
 	}
 	return
 }
@@ -885,9 +887,11 @@ func deleteBlocksByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = execStmtTx(tx, stmt, box); nil != err {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ?"
-	if err = execStmtTx(tx, stmt, box); nil != err {
-		return
+	if !caseSensitive {
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ?"
+		if err = execStmtTx(tx, stmt, box); nil != err {
+			return
+		}
 	}
 	ClearCache()
 	return
@@ -993,9 +997,11 @@ func deleteByRootID(tx *sql.Tx, rootID string, context map[string]interface{}) (
 	if err = execStmtTx(tx, stmt, rootID); nil != err {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, rootID); nil != err {
-		return
+	if !caseSensitive {
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, rootID); nil != err {
+			return
+		}
 	}
 	stmt = "DELETE FROM spans WHERE root_id = ?"
 	if err = execStmtTx(tx, stmt, rootID); nil != err {
@@ -1029,9 +1035,11 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]inter
 	if err = execStmtTx(tx, stmt); nil != err {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id IN " + ids
-	if err = execStmtTx(tx, stmt); nil != err {
-		return
+	if !caseSensitive {
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id IN " + ids
+		if err = execStmtTx(tx, stmt); nil != err {
+			return
+		}
 	}
 	stmt = "DELETE FROM spans WHERE root_id IN " + ids
 	if err = execStmtTx(tx, stmt); nil != err {
@@ -1063,9 +1071,11 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); nil != err {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); nil != err {
-		return
+	if !caseSensitive {
+		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ? AND path LIKE ?"
+		if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); nil != err {
+			return
+		}
 	}
 	stmt = "DELETE FROM spans WHERE box = ? AND path LIKE ?"
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); nil != err {

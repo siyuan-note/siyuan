@@ -1096,9 +1096,11 @@ func batchUpdateHPath(tx *sql.Tx, boxID, rootID, oldHPath, newHPath string) (err
 	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID, oldHPath); nil != err {
 		return
 	}
-	stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE box = ? AND root_id = ? AND hpath = ?"
-	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID, oldHPath); nil != err {
-		return
+	if !caseSensitive {
+		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE box = ? AND root_id = ? AND hpath = ?"
+		if err = execStmtTx(tx, stmt, newHPath, boxID, rootID, oldHPath); nil != err {
+			return
+		}
 	}
 	ClearCache()
 	return

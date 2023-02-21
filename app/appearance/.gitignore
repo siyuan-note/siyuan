@@ -1,2 +1,4 @@
 themes/*/custom.css
-themes/Comfortably Numb
+themes/*
+!themes/daylight/
+!themes/midnight/

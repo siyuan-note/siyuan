@@ -135,6 +135,10 @@
     flex: 1;
     overflow: auto;
     padding: 8px 0;
+
+    .b3-list-item__text {
+      user-select: none;
+    }
   }
 
   &__path {

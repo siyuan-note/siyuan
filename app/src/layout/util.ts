@@ -488,7 +488,7 @@ export const resizeTabs = () => {
                 if (!item.element.classList.contains("fn__none") && item.editor.protyle.toolbar.range) {
                     let rangeRect = item.editor.protyle.toolbar.range.getBoundingClientRect();
                     if (rangeRect.height === 0) {
-                        const blockElement = hasClosestBlock(item.editor.protyle.toolbar.range.startContainer)
+                        const blockElement = hasClosestBlock(item.editor.protyle.toolbar.range.startContainer);
                         if (blockElement) {
                             rangeRect = blockElement.getBoundingClientRect();
                         }
@@ -613,17 +613,17 @@ export const addResize = (obj: Layout | Wnd) => {
 
     const getMinSize = (element: HTMLElement) => {
         let minSize = 220;
-        Array.from(element.querySelectorAll('.file-tree')).find((item) => {
+        Array.from(element.querySelectorAll(".file-tree")).find((item) => {
             if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
                 || item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) {
                 if (!item.classList.contains("fn__none") && !hasClosestByClassName(item, "fn__none")) {
-                    minSize = 320
+                    minSize = 320;
                     return true;
                 }
             }
-        })
-        return minSize
-    }
+        });
+        return minSize;
+    };
     const resizeWnd = (resizeElement: HTMLElement, direction: string) => {
         const setSize = (item: HTMLElement, direction: string) => {
             if (item.classList.contains("fn__flex-1")) {

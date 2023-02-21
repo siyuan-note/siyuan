@@ -1,7 +1,6 @@
 import {appearance} from "./appearance";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/markdown/highlightRender";
 import {exportLayout} from "../layout/util";
@@ -151,7 +150,7 @@ export const bazaar = {
             repoURL: item.repoURL,
             repoHash: item.repoHash,
             downloaded: false,
-        }
+        };
         return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
     <div class="b3-card__info fn__flex">
@@ -202,7 +201,7 @@ export const bazaar = {
                     repoURL: item.repoURL,
                     repoHash: item.repoHash,
                     downloaded: true
-                }
+                };
                 html += `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
     <div class="b3-card__info">
@@ -270,7 +269,7 @@ export const bazaar = {
             repoURL: data.repoURL,
             repoHash: data.repoHash,
             downloaded: true
-        }
+        };
         readmeElement.innerHTML = ` <div class="item__side" data-obj='${JSON.stringify(dataObj1)}'>
     <div class="fn__flex">
         <button class="b3-button b3-button--outline" data-type="goBack" title="Go back"><svg><use xlink:href="#iconLeft"></use></svg></button>
@@ -415,7 +414,7 @@ export const bazaar = {
                 } else if (type === "install-t") {
                     if (!target.classList.contains("b3-button--progress")) {
                         confirmDialog(window.siyuan.languages.update, window.siyuan.languages.exportTplTip, () => {
-                            const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"))
+                            const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"));
                             const bazaarType: TBazaarType = dataObj.bazaarType;
                             let url = "/api/bazaar/installBazaarTemplate";
                             if (bazaarType === "themes") {
@@ -457,7 +456,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "uninstall") {
-                    const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"))
+                    const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"));
                     const bazaarType: TBazaarType = dataObj.bazaarType;
                     let url = "/api/bazaar/uninstallBazaarTemplate";
                     if (bazaarType === "themes") {
@@ -485,7 +484,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "switch") {
-                    const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"))
+                    const dataObj = JSON.parse(target.parentElement.parentElement.getAttribute("data-obj"));
                     const bazaarType: TBazaarType = dataObj.bazaarType;
                     const packageName = dataObj.name;
                     const mode = dataObj.themeMode === "dark" ? 1 : 0;
@@ -495,7 +494,7 @@ export const bazaar = {
                         }), (appearanceResponse) => {
                             this._genMyHTML(bazaarType);
                             fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
-                                response.data.appearance = appearanceResponse.data
+                                response.data.appearance = appearanceResponse.data;
                                 bazaar._onBazaar(response, "icons", true);
                                 bazaar._data.icons = response.data.packages;
                             });
@@ -515,7 +514,7 @@ export const bazaar = {
                             } else {
                                 this._genMyHTML("themes");
                                 fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
-                                    response.data.appearance = appearanceResponse.data
+                                    response.data.appearance = appearanceResponse.data;
                                     bazaar._onBazaar(response, "themes", true);
                                     bazaar._data.themes = response.data.packages;
                                 });

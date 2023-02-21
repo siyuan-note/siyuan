@@ -50,7 +50,6 @@ type dbQueueOperation struct {
 	removeTreeIDs                 []string    // delete_ids
 	box                           string      // delete_box/delete_box_refs/index
 	renameTree                    *parse.Tree // rename
-	renameTreeOldHPath            string      // rename
 	block                         *Block      // update_block_content
 	removeAssetHashes             []string    // delete_assets
 }
@@ -168,7 +167,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 	case "delete_ids":
 		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
 	case "rename":
-		err = batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTreeOldHPath, op.renameTree.HPath)
+		err = batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTree.HPath)
 		if nil != err {
 			break
 		}
@@ -303,15 +302,15 @@ func UpsertTreeQueue(tree *parse.Tree) {
 	operationQueue = append(operationQueue, newOp)
 }
 
-func RenameTreeQueue(tree *parse.Tree, oldHPath string) {
+func RenameTreeQueue(tree *parse.Tree) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
 	newOp := &dbQueueOperation{
-		renameTree:         tree,
-		renameTreeOldHPath: oldHPath,
-		inQueueTime:        time.Now(),
-		action:             "rename"}
+		renameTree:  tree,
+		inQueueTime: time.Now(),
+		action:      "rename",
+	}
 	for i, op := range operationQueue {
 		if "rename" == op.action && op.renameTree.ID == tree.ID { // 相同树则覆盖
 			operationQueue[i] = newOp

@@ -882,11 +882,11 @@ func indexWriteJSONQueueWithoutChangeTime(tree *parse.Tree) (err error) {
 	return writeJSONQueueWithoutChangeTime(tree)
 }
 
-func renameWriteJSONQueue(tree *parse.Tree, oldHPath string) (err error) {
+func renameWriteJSONQueue(tree *parse.Tree) (err error) {
 	if err = filesys.WriteTree(tree); nil != err {
 		return
 	}
-	sql.RenameTreeQueue(tree, oldHPath)
+	sql.RenameTreeQueue(tree)
 	treenode.IndexBlockTree(tree)
 	return
 }
@@ -1288,12 +1288,10 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 	title = strings.ReplaceAll(title, "/", "")
 
-	oldHPath := tree.HPath
 	tree.HPath = path.Join(path.Dir(tree.HPath), title)
 	tree.Root.SetIALAttr("title", title)
 	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-
-	if err = renameWriteJSONQueue(tree, oldHPath); nil != err {
+	if err = renameWriteJSONQueue(tree); nil != err {
 		return
 	}
 

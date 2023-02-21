@@ -397,7 +397,7 @@ func (box *Box) moveTrees0(files []*FileInfo) {
 		}
 
 		treenode.SetBlockTreePath(subTree)
-		sql.UpsertTreeQueue(subTree)
+		sql.RenameTreeQueue(subTree)
 		msg := fmt.Sprintf(Conf.Language(107), subTree.HPath)
 		util.PushStatusBar(msg)
 	}

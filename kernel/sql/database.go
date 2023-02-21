@@ -1097,18 +1097,18 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	return
 }
 
-func batchUpdateHPath(tx *sql.Tx, boxID, rootID, oldHPath, newHPath string) (err error) {
-	stmt := "UPDATE blocks SET hpath = ? WHERE box = ? AND root_id = ? AND hpath = ?"
-	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID, oldHPath); nil != err {
+func batchUpdateHPath(tx *sql.Tx, boxID, rootID, newHPath string) (err error) {
+	stmt := "UPDATE blocks SET hpath = ? WHERE box = ? AND root_id = ?"
+	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET hpath = ? WHERE box = ? AND root_id = ? AND hpath = ?"
-	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID, oldHPath); nil != err {
+	stmt = "UPDATE blocks_fts SET hpath = ? WHERE box = ? AND root_id = ?"
+	if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
 		return
 	}
 	if !caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE box = ? AND root_id = ? AND hpath = ?"
-		if err = execStmtTx(tx, stmt, newHPath, boxID, rootID, oldHPath); nil != err {
+		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE box = ? AND root_id = ?"
+		if err = execStmtTx(tx, stmt, newHPath, boxID, rootID); nil != err {
 			return
 		}
 	}

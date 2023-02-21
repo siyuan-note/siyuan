@@ -41,7 +41,7 @@ var (
 
 type dbQueueOperation struct {
 	inQueueTime time.Time
-	action      string // upsert/delete/delete_id/rename/delete_box/delete_box_refs/insert_refs/index/delete_ids/update_block_content/delete_assets
+	action      string // upsert/delete/delete_id/rename/rename_sub_tree/delete_box/delete_box_refs/insert_refs/index/delete_ids/update_block_content/delete_assets
 
 	indexPath                     string      // index
 	upsertTree                    *parse.Tree // upsert/insert_refs
@@ -49,7 +49,7 @@ type dbQueueOperation struct {
 	removeTreeIDBox, removeTreeID string      // delete_id
 	removeTreeIDs                 []string    // delete_ids
 	box                           string      // delete_box/delete_box_refs/index
-	renameTree                    *parse.Tree // rename
+	renameTree                    *parse.Tree // rename/rename_sub_tree
 	block                         *Block      // update_block_content
 	removeAssetHashes             []string    // delete_assets
 }
@@ -172,6 +172,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 			break
 		}
 		err = updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)
+	case "rename_sub_tree":
+		err = batchUpdateHPath(tx, op.renameTree.Box, op.renameTree.ID, op.renameTree.HPath)
 	case "delete_box":
 		err = deleteByBoxTx(tx, op.box)
 	case "delete_box_refs":
@@ -313,6 +315,24 @@ func RenameTreeQueue(tree *parse.Tree) {
 	}
 	for i, op := range operationQueue {
 		if "rename" == op.action && op.renameTree.ID == tree.ID { // 相同树则覆盖
+			operationQueue[i] = newOp
+			return
+		}
+	}
+	operationQueue = append(operationQueue, newOp)
+}
+
+func RenameSubTreeQueue(tree *parse.Tree) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	newOp := &dbQueueOperation{
+		renameTree:  tree,
+		inQueueTime: time.Now(),
+		action:      "rename_sub_tree",
+	}
+	for i, op := range operationQueue {
+		if "rename_sub_tree" == op.action && op.renameTree.ID == tree.ID { // 相同树则覆盖
 			operationQueue[i] = newOp
 			return
 		}

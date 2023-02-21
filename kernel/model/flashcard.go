@@ -379,9 +379,11 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 
 		deckAttrs := node.IALAttr("custom-riff-decks")
 		var deckIDs []string
-		for _, dID := range strings.Split(deckAttrs, ",") {
-			if dID != deckID && gulu.Str.Contains(dID, availableDeckIDs) {
-				deckIDs = append(deckIDs, dID)
+		if "" != deckID {
+			for _, dID := range strings.Split(deckAttrs, ",") {
+				if dID != deckID && gulu.Str.Contains(dID, availableDeckIDs) {
+					deckIDs = append(deckIDs, dID)
+				}
 			}
 		}
 
@@ -410,18 +412,30 @@ func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
 		pushBroadcastAttrTransactions(trans)
 	}
 
-	deck := Decks[deckID]
-	if nil != deck {
-		for _, blockID := range blockIDs {
-			deck.RemoveCard(blockID)
+	if "" == deckID { // 支持在 All 卡包中移除闪卡 https://github.com/siyuan-note/siyuan/issues/7425
+		for _, deck := range Decks {
+			removeFlashcard(blockIDs, deck)
 		}
-		err = deck.Save()
-		if nil != err {
-			logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
-			return
-		}
+	} else {
+		removeFlashcard(blockIDs, Decks[deckID])
 	}
 	return
+}
+
+func removeFlashcard(blockIDs []string, deck *riff.Deck) {
+	if nil == deck {
+		logging.LogErrorf("deck is nil")
+		return
+	}
+
+	for _, blockID := range blockIDs {
+		deck.RemoveCard(blockID)
+	}
+
+	err := deck.Save()
+	if nil != err {
+		logging.LogErrorf("save deck [%s] failed: %s", deck.ID, err)
+	}
 }
 
 func AddFlashcards(deckID string, blockIDs []string) (err error) {

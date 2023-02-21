@@ -1006,7 +1006,7 @@
     "104": "El paquete de instalación de la actualización no se pudo descargar, verifique la conexión de red",
     "105": "El repositorio de datos corruptos se ha restablecido automáticamente",
     "106": "La longitud máxima está limitada a 512 caracteres",
-    "107": "Moviendo documento [%s]",
+    "107": "Documento movido [%s]",
     "108": "La sincronizaci\u00f3n de datos encontr\u00f3 en conflictos, puede ver el contenido del conflicto generado en [Historial de datos]",
     "109": "Eliminación de recordatorios completada [%s]",
     "110": "Renombrar...",

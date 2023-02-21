@@ -1006,7 +1006,7 @@
     "104": "The update installation package failed to download, please check the network connection",
     "105": "Corrupted data repo have been automatically reset",
     "106": "Maximum length is limited to 512 characters",
-    "107": "Moving document [%s]",
+    "107": "Moved document [%s]",
     "108": "Data sync found conflicts, you can view the generated conflict content in [Data History]",
     "109": "Remove reminder completed [%s]",
     "110": "Renaming...",

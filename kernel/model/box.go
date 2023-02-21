@@ -385,10 +385,8 @@ func (box *Box) renameSubTrees(tree *parse.Tree) {
 }
 
 func (box *Box) moveTrees0(files []*FileInfo) {
-	totals := len(files) + 5
-	showProgress := 64 < totals
 	luteEngine := util.NewLute()
-	for i, subFile := range files {
+	for _, subFile := range files {
 		if !strings.HasSuffix(subFile.path, ".sy") {
 			continue
 		}
@@ -399,16 +397,9 @@ func (box *Box) moveTrees0(files []*FileInfo) {
 		}
 
 		treenode.SetBlockTreePath(subTree)
-		sql.UpsertTreeQueue(subTree)
-
-		if showProgress {
-			msg := fmt.Sprintf(Conf.Language(107), subTree.HPath)
-			util.PushProgress(util.PushProgressCodeProgressed, i, totals, msg)
-		}
-	}
-
-	if showProgress {
-		util.ClearPushProgress(totals)
+		sql.RenameSubTreeQueue(subTree)
+		msg := fmt.Sprintf(Conf.Language(107), subTree.HPath)
+		util.PushStatusBar(msg)
 	}
 }
 

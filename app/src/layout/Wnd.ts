@@ -681,7 +681,7 @@ export class Wnd {
                 }
                 if (item.headElement) {
                     if (item.headElement.classList.contains("item--focus")) {
-                        let latestHeadElement: HTMLElement
+                        let latestHeadElement: HTMLElement;
                         Array.from(item.headElement.parentElement.children).forEach((headItem: HTMLElement) => {
                             if (!headItem.isSameNode(item.headElement)) {
                                 if (!latestHeadElement) {
@@ -690,7 +690,7 @@ export class Wnd {
                                     latestHeadElement = headItem;
                                 }
                             }
-                        })
+                        });
                         if (latestHeadElement && !closeAll) {
                             this.switchTab(latestHeadElement, true);
                         }

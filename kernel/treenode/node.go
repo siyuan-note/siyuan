@@ -114,12 +114,6 @@ func IsEmbedBlockRef(n *ast.Node) bool {
 	return "" != GetEmbedBlockRef(n)
 }
 
-func NodeStaticMdContent(node *ast.Node, luteEngine *lute.Lute) (md, content string) {
-	md = ExportNodeStdMd(node, luteEngine)
-	content = NodeStaticContent(node, nil)
-	return
-}
-
 func FormatNode(node *ast.Node, luteEngine *lute.Lute) string {
 	markdown, err := lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	if nil != err {
@@ -138,7 +132,7 @@ func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
 	return markdown
 }
 
-func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
+func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL bool) string {
 	if nil == node {
 		return ""
 	}
@@ -225,7 +219,7 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string) string {
 			if n.IsTextMarkType("tag") {
 				buf.WriteByte('#')
 			}
-			if n.IsTextMarkType("a") {
+			if n.IsTextMarkType("a") && includeTextMarkATitleURL {
 				// 搜索不到超链接元素的 URL 和标题 https://github.com/siyuan-note/siyuan/issues/7352
 				if "" != n.TextMarkATitle {
 					buf.WriteString(" " + n.TextMarkATitle)

@@ -1,3 +1,54 @@
+## v2.7.6 / 2023-02-21
+
+### 改进功能
+
+* [支持聚焦导出 图片/PDF/HTML/Word](https://github.com/siyuan-note/siyuan/issues/6607)
+* [支持基于文档复习闪卡](https://github.com/siyuan-note/siyuan/issues/7057)
+* [支持窗口之间拖拽移动内容块](https://github.com/siyuan-note/siyuan/issues/7284)
+* [优化界面动画效果](https://github.com/siyuan-note/siyuan/issues/7363)
+* [移动端链接菜单调窄](https://github.com/siyuan-note/siyuan/issues/7365)
+* [搜索自定义属性改为搜索全部属性](https://github.com/siyuan-note/siyuan/issues/7367)
+* [闪卡界面大小调整及添加预览](https://github.com/siyuan-note/siyuan/issues/7368)
+* [校验索引阶段自动删除历史遗留的笔记本 history 文件夹](https://github.com/siyuan-note/siyuan/issues/7370)
+* [文档名虚拟引用遵循搜索大小写设置](https://github.com/siyuan-note/siyuan/issues/7372)
+* [导出时去掉内容块闪卡样式](https://github.com/siyuan-note/siyuan/issues/7374)
+* [面板菜单中添加钉住菜单，停靠栏钉住按钮悬浮显示](https://github.com/siyuan-note/siyuan/issues/7375)
+* [子文档缺失父文档时自动补全](https://github.com/siyuan-note/siyuan/issues/7376)
+* [移除状态栏中停靠按钮悬浮菜单](https://github.com/siyuan-note/siyuan/issues/7377)
+* [改进打开虚拟引用后加载文档的性能](https://github.com/siyuan-note/siyuan/issues/7378)
+* [导出 PDF data-theme-mode 需固定设置为 light](https://github.com/siyuan-note/siyuan/issues/7379)
+* [PDF 双页视图下支持矩形标注右侧页面](https://github.com/siyuan-note/siyuan/issues/7380)
+* [`搜索结果显示数` 最小限制为 32](https://github.com/siyuan-note/siyuan/issues/7384)
+* [通过队列化索引历史数据以提升数据库稳定性](https://github.com/siyuan-note/siyuan/issues/7386)
+* [升级 vis-network 至 9.1.2](https://github.com/siyuan-note/siyuan/issues/7387)
+* [开启数据同步情况下启动时如果未联网应该提示](https://github.com/siyuan-note/siyuan/issues/7389)
+* [登录链滴账号后即可使用 `分享到链滴`](https://github.com/siyuan-note/siyuan/issues/7392)
+* [Android 端恢复保活用的通知栏](https://github.com/siyuan-note/siyuan/issues/7395)
+* [改进状态栏显示后台任务执行计数](https://github.com/siyuan-note/siyuan/issues/7398)
+* [闪卡复习时编辑工具栏遮挡内容](https://github.com/siyuan-note/siyuan/issues/7399)
+* [支持列表制作闪卡](https://github.com/siyuan-note/siyuan/issues/7400)
+* [面包屑仅有一项时显示不全](https://github.com/siyuan-note/siyuan/issues/7402)
+* [改进数据同步以避免旧的本地数据覆盖云端数据](https://github.com/siyuan-note/siyuan/issues/7403)
+* [钉住的页签不再使用斜体](https://github.com/siyuan-note/siyuan/issues/7404)
+* [停靠栏面板最小宽度改进为根据类型来判断](https://github.com/siyuan-note/siyuan/issues/7407)
+* [改进右分屏打开引用后原文偶尔会滚动错位](https://github.com/siyuan-note/siyuan/issues/7410)
+* [搜索结果条目区禁用复制](https://github.com/siyuan-note/siyuan/issues/7416)
+* [集市包详情界面增加 `更新` 按钮](https://github.com/siyuan-note/siyuan/issues/7421)
+* [更改父文档标题或者移动父文档后使用状态栏推送子文档移动进度](https://github.com/siyuan-note/siyuan/issues/7422)
+* [支持在 All 卡包中移除闪卡](https://github.com/siyuan-note/siyuan/issues/7425)
+* [关闭当前页签后切换到最近打开的页签](https://github.com/siyuan-note/siyuan/issues/7428)
+
+### 修复缺陷
+
+* [右侧点击钉住会出现在左侧](https://github.com/siyuan-note/siyuan/issues/7366)
+* [反链面板上下键会影响编辑且点击后浮动的面板会消失](https://github.com/siyuan-note/siyuan/issues/7381)
+* [关系图部分关联丢失](https://github.com/siyuan-note/siyuan/issues/7383)
+* [编辑器中输入 `#` 后标签搜索提示不全](https://github.com/siyuan-note/siyuan/issues/7391)
+* [校验索引生成冗余的 Untitled 父文档](https://github.com/siyuan-note/siyuan/issues/7394)
+* [导出模板无法保留第一个空段落](https://github.com/siyuan-note/siyuan/issues/7411)
+* [`只读模式` 下闪卡复习和闪卡预览界面可以编辑](https://github.com/siyuan-note/siyuan/issues/7412)
+* [复制含链接的块为引用块异常](https://github.com/siyuan-note/siyuan/issues/7426)
+
 ## v2.7.5 / 2023-02-14
 
 ### 改进功能

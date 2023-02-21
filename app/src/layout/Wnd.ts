@@ -681,12 +681,18 @@ export class Wnd {
                 }
                 if (item.headElement) {
                     if (item.headElement.classList.contains("item--focus")) {
-                        let currentIndex = index + 1;
-                        if (index === this.children.length - 1) {
-                            currentIndex = index - 1;
-                        }
-                        if (this.children[currentIndex] && !closeAll) {
-                            this.switchTab(this.children[currentIndex].headElement, true);
+                        let latestHeadElement: HTMLElement
+                        Array.from(item.headElement.parentElement.children).forEach((headItem: HTMLElement) => {
+                            if (!headItem.isSameNode(item.headElement)) {
+                                if (!latestHeadElement) {
+                                    latestHeadElement = headItem;
+                                } else if (headItem.getAttribute("data-activetime") > latestHeadElement.getAttribute("data-activetime")) {
+                                    latestHeadElement = headItem;
+                                }
+                            }
+                        })
+                        if (latestHeadElement && !closeAll) {
+                            this.switchTab(latestHeadElement, true);
                         }
                     }
                     if (animate) {

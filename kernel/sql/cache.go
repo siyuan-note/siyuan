@@ -17,7 +17,6 @@
 package sql
 
 import (
-	"runtime/debug"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -46,7 +45,6 @@ var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 
 func ClearCache() {
 	blockCache.Clear()
-	debug.FreeOSMemory()
 }
 
 func putBlockCache(block *Block) {

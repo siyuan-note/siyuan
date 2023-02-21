@@ -820,10 +820,6 @@ func heading(node *ast.Node) *ast.Node {
 	return nil
 }
 
-func DeleteBlockByIDs(tx *sql.Tx, ids []string) (err error) {
-	return deleteBlocksByIDs(tx, ids)
-}
-
 func deleteByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = deleteBlocksByBoxTx(tx, box); nil != err {
 		return

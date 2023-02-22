@@ -681,11 +681,11 @@ export const addResize = (obj: Layout | Wnd) => {
                 if (previousNowSize < 8 || nextNowSize < 8) {
                     return;
                 }
-                if (window.siyuan.layout.leftDock?.layout.element.contains(previousElement) &&
+                if (window.siyuan.layout.leftDock?.layout.element.isSameNode(previousElement) &&
                     previousNowSize < getMinSize(previousElement)) {
                     return;
                 }
-                if (window.siyuan.layout.rightDock?.layout.element.contains(nextElement) &&
+                if (window.siyuan.layout.rightDock?.layout.element.isSameNode(nextElement) &&
                     nextNowSize < getMinSize(nextElement)) {
                     return;
                 }

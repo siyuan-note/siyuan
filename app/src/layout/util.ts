@@ -17,7 +17,7 @@ import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
 import {focusByRange} from "../protyle/util/selection";
-import {hideElements} from "../protyle/ui/hideElements";
+import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
@@ -514,10 +514,7 @@ export const resizeTabs = () => {
             });
         });
         pdfResize();
-        document.querySelectorAll(".protyle-gutters").forEach(item => {
-            item.classList.add("fn__none");
-            item.innerHTML = "";
-        });
+        hideAllElements(["gutter"])
     }, 200);
 };
 

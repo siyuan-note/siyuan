@@ -23,7 +23,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     }
     if (protyle.toolbar && panels.includes("toolbar")) {
         protyle.toolbar.element.classList.add("fn__none");
-        protyle.toolbar.element.style.display  = "";
+        protyle.toolbar.element.style.display = "";
     }
     if (protyle.toolbar && panels.includes("util")) {
         const pinElement = protyle.toolbar.subElement.querySelector('[data-type="pin"]');
@@ -43,3 +43,24 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
         });
     }
 };
+
+// "toolbar", "pdfutil", "gutter"
+export const hideAllElements = (types: string[]) => {
+    if (types.includes("toolbar")) {
+        document.querySelectorAll(".protyle-toolbar").forEach((item: HTMLElement) => {
+            item.classList.add("fn__none");
+            item.style.display = "";
+        });
+    }
+    if (types.includes("pdfutil")) {
+        document.querySelectorAll(".pdf__util").forEach(item => {
+            item.classList.add("fn__none");
+        });
+    }
+    if (types.includes("gutter")) {
+        document.querySelectorAll(".protyle-gutters").forEach(item => {
+            item.classList.add("fn__none");
+            item.innerHTML = "";
+        });
+    }
+}

@@ -18,7 +18,7 @@ import {setEditMode} from "../protyle/util/setEditMode";
 import {rename} from "../editor/rename";
 import {Files} from "../layout/dock/Files";
 import {newDailyNote} from "./mount";
-import {hideElements} from "../protyle/ui/hideElements";
+import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "./fetch";
 import {goBack, goForward} from "./backForward";
 import {onGet} from "../protyle/util/onGet";
@@ -825,6 +825,13 @@ export const globalShortcut = () => {
                 window.siyuan.menus.menu.remove();
             }
         }
+        // protyle.toolbar 点击空白处时进行隐藏
+        if (!hasClosestByClassName(event.target, "protyle-toolbar")) {
+            hideAllElements(["toolbar"])
+        }
+        if (!hasClosestByClassName(event.target, "pdf__outer")) {
+            hideAllElements(["pdfutil"])
+        }
         // dock float 时，点击空白处，隐藏 dock
         const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float", true);
         if (floatDockLayoutElement) {
@@ -845,11 +852,6 @@ export const globalShortcut = () => {
             window.siyuan.layout.bottomDock.hideDock();
             window.siyuan.layout.leftDock.hideDock();
             window.siyuan.layout.rightDock.hideDock();
-        }
-        if (!hasClosestByClassName(event.target, "pdf__outer")) {
-            document.querySelectorAll(".pdf__util").forEach(item => {
-                item.classList.add("fn__none");
-            });
         }
         const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
         if (copyElement) {

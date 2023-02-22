@@ -31,6 +31,7 @@ import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
+import {hideAllElements} from "../protyle/ui/hideElements";
 
 export class Wnd {
     public id: string;
@@ -800,6 +801,7 @@ export class Wnd {
         }
         tab.parent = this;
         resizeTabs();
+        hideAllElements(["toolbar"])
     }
 
     public split(direction: TDirection) {

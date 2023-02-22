@@ -331,13 +331,13 @@ export abstract class Constants {
             data: [
                 [{
                     type: "file",
-                    size: {width: 220, height: 0},
+                    size: {width: 224, height: 0},
                     show: true,
                     icon: "iconFiles",
                     hotkeyLangId: "fileTree",
                 }, {
                     type: "outline",
-                    size: {width: 220, height: 0},
+                    size: {width: 224, height: 0},
                     show: false,
                     icon: "iconAlignCenter",
                     hotkeyLangId: "outline",
@@ -349,13 +349,13 @@ export abstract class Constants {
                     hotkeyLangId: "inbox",
                 }], [{
                     type: "bookmark",
-                    size: {width: 220, height: 0},
+                    size: {width: 224, height: 0},
                     show: false,
                     icon: "iconBookmark",
                     hotkeyLangId: "bookmark",
                 }, {
                     type: "tag",
-                    size: {width: 220, height: 0},
+                    size: {width: 224, height: 0},
                     show: false,
                     icon: "iconTags",
                     hotkeyLangId: "tag",

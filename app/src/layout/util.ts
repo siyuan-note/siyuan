@@ -609,7 +609,7 @@ export const addResize = (obj: Layout | Wnd) => {
     }
 
     const getMinSize = (element: HTMLElement) => {
-        let minSize = 220;
+        let minSize = 224;
         Array.from(element.querySelectorAll(".file-tree")).find((item) => {
             if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
                 || item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) {

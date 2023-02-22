@@ -108,6 +108,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         });
     }
     (dialog.element.firstElementChild as HTMLElement).style.zIndex = "200";
+    (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
     dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
     const countElement = dialog.element.querySelector('[data-type="count"]');
     const actionElements = dialog.element.querySelectorAll(".b3-dialog__cardaction");

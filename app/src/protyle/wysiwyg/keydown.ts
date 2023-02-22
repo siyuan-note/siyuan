@@ -970,7 +970,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             const actionElementId = actionElement.getAttribute("data-node-id");
             if (selectText !== "") {
-                writeText(`((${actionElementId} "${selectText}"))`);
+                writeText(`((${actionElementId} "${Lute.EscapeHTMLStr(selectText)}"))`);
             } else {
                 fetchPost("/api/block/getRefText", {id: actionElementId}, (response) => {
                     writeText(`((${actionElementId} '${response.data}'))`);

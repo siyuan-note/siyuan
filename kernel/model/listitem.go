@@ -98,6 +98,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph())
 	}
+	treenode.RemoveBlockTreesByRootID(srcTree.ID)
 	if err = indexWriteJSONQueue(srcTree); nil != err {
 		return "", "", err
 	}

@@ -769,7 +769,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     });
                 } else {    // 跨窗口拖拽
                     const targetProtyleElement = document.createElement("template");
-                    targetProtyleElement.innerHTML = event.dataTransfer.getData(gutterType);
+                    targetProtyleElement.innerHTML = `<div>${event.dataTransfer.getData(gutterType)}</div>`;
                     targetProtyleElement.content.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
                         if (elementItem.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
                             !hasClosestByAttribute(elementItem, "data-type", "NodeBlockQueryEmbed")) {

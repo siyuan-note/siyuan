@@ -224,15 +224,22 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		contentPivot.Unlink()
 	}
 
-	// 推送给前端移除旧文档
+	box := Conf.Box(srcTree.Box)
+	if removeErr := box.Remove(srcTree.Path); nil != removeErr {
+		logging.LogWarnf("remove tree [%s] failed: %s", srcTree.Path, removeErr)
+	}
+	box.removeSort([]string{srcTree.ID})
+	RemoveRecentDoc([]string{srcTree.ID})
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
-		"ids": []string{srcTree.Root.ID},
+		"ids": []string{srcTree.ID},
 	}
 	util.PushEvent(evt)
 
 	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path // 返回旧的文档块位置，前端后续会删除旧的文档块
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	treenode.RemoveBlockTreesByRootID(srcTree.ID)
+	treenode.RemoveBlockTreesByRootID(targetTree.ID)
 	err = indexWriteJSONQueue(targetTree)
 	IncSync()
 	RefreshBacklink(srcTree.ID)
@@ -326,6 +333,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph())
 	}
+	treenode.RemoveBlockTreesByRootID(srcTree.ID)
 	if err = indexWriteJSONQueue(srcTree); nil != err {
 		return "", "", err
 	}

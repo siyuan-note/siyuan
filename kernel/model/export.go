@@ -764,34 +764,201 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 		}
 	}
 
-	//var assetAbsPaths []string
-	//for _, dest := range assetDests {
-	//	absPath, _ := GetAssetAbsPath(dest)
-	//	if "" != absPath {
-	//		assetAbsPaths = append(assetAbsPaths, absPath)
-	//	}
-	//}
-	//
-	//if 0 < len(assetAbsPaths) {
-	//	outFile := inFile + ".tmp"
-	//	err = api.AddAttachmentsFile(inFile, outFile, assetAbsPaths, false, nil)
-	//	if nil != err {
-	//		logging.LogErrorf("add attachment failed: %s", err)
-	//		return
-	//	}
-	//
-	//	err = os.Rename(outFile, inFile)
-	//	if nil != err {
-	//		return
-	//	}
-	//}
-	//
-	//assetLinks, err := api.ListAssetLinks(inFile)
-	//if nil == err {
-	//	logging.LogInfof("pdf annotation: %+v", assetLinks)
-	//}
+	var assetAbsPaths []string
+	for _, dest := range assetDests {
+		absPath, _ := GetAssetAbsPath(dest)
+		if "" != absPath {
+			assetAbsPaths = append(assetAbsPaths, absPath)
+		}
+	}
+
+	if 0 < len(assetAbsPaths) {
+		//outFile := inFile + ".tmp"
+		//err = api.AddAttachmentsFile(inFile, outFile, assetAbsPaths, false, nil)
+		//if nil != err {
+		//	logging.LogErrorf("add attachment failed: %s", err)
+		//	return
+		//}
+		//
+		//err = os.Rename(outFile, inFile)
+		//if nil != err {
+		//	return
+		//}
+
+		assetLinks, listErr := api.ListAssetLinks(inFile)
+		if nil != listErr {
+			logging.LogErrorf("list asset links failed: %s", listErr)
+			return
+		}
+
+		pdfCtx, ctxErr := api.ReadContextFile(inFile)
+		if nil != ctxErr {
+			logging.LogErrorf("read pdf context failed: %s", ctxErr)
+			return
+		}
+
+		linkMap := map[int][]*pdfcpu.IndirectRef{}
+		//pdfCtx.RemoveAnnotations(nil, nil, nil, false)
+
+		for i, link := range assetLinks {
+			link.URI = strings.ReplaceAll(link.URI, "http://127.0.0.1:6806/export/temp/", "")
+			//if 1 > len(linkMap[link.Page]) {
+			//	linkMap[link.Page] = []pdfcpu.Annotation{link}
+			//} else {
+			//	linkMap[link.Page] = append(linkMap[link.Page], link)
+			//}
+
+			absPath, getErr := GetAssetAbsPath(link.URI)
+			if nil != getErr {
+				continue
+			}
+
+			ir, newErr := pdfCtx.XRefTable.NewEmbeddedFileStreamDict(absPath)
+			if nil != newErr {
+				logging.LogWarnf("new embedded file stream dict failed: %s", newErr)
+				continue
+			}
+
+			fn := filepath.Base(absPath)
+			fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, pdfcpu.EncodeUTF16String(fn), "attached by SiYuan", *ir)
+			if nil != newErr {
+				logging.LogWarnf("new file spec dict failed: %s", newErr)
+				continue
+			}
+
+			ir, indErr := pdfCtx.XRefTable.IndRefForNewObject(fileSpecDict)
+			if nil != indErr {
+				logging.LogWarnf("ind ref for new object failed: %s", indErr)
+				continue
+			}
+
+			now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
+			mediaBox := pdfcpu.RectForFormat("A4")
+			r := annotRect(i, mediaBox.Width(), mediaBox.Height(), 30, 80)
+			d := pdfcpu.Dict(
+				map[string]pdfcpu.Object{
+					"Type":         pdfcpu.Name("Annot"),
+					"Subtype":      pdfcpu.Name("FileAttachment"),
+					"Contents":     pdfcpu.StringLiteral("FileAttachment Annotation"),
+					"Rect":         r.Array(),
+					"P":            link.P,
+					"M":            now,
+					"F":            pdfcpu.Integer(0),
+					"Border":       pdfcpu.NewIntegerArray(0, 0, 1),
+					"C":            pdfcpu.NewNumberArray(0.5, 0.0, 0.5),
+					"CA":           pdfcpu.Float(0.95),
+					"CreationDate": now,
+					"Name":         pdfcpu.Name("FileAttachment"),
+					"FS":           *ir,
+					"NM":           pdfcpu.StringLiteral("SoundFileAttachmentAnnot"),
+				},
+			)
+
+			ann, indErr := pdfCtx.XRefTable.IndRefForNewObject(d)
+			if nil != indErr {
+				logging.LogWarnf("ind ref for new object failed: %s", indErr)
+				continue
+			}
+
+			pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(link.Page)
+			if nil != pageErr {
+				logging.LogWarnf("page dict ind ref failed: %s", pageErr)
+				continue
+			}
+
+			d, defErr := pdfCtx.DereferenceDict(*pageDictIndRef)
+			if nil != defErr {
+				logging.LogWarnf("dereference dict failed: %s", defErr)
+				continue
+			}
+
+			if 1 > len(linkMap[link.Page]) {
+				linkMap[link.Page] = []*pdfcpu.IndirectRef{ann}
+			} else {
+				linkMap[link.Page] = append(linkMap[link.Page], ann)
+			}
+		}
+
+		for page, anns := range linkMap {
+			pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(page)
+			if nil != pageErr {
+				logging.LogWarnf("page dict ind ref failed: %s", pageErr)
+				continue
+			}
+
+			pageDict, defErr := pdfCtx.DereferenceDict(*pageDictIndRef)
+			if nil != defErr {
+				logging.LogWarnf("dereference dict failed: %s", defErr)
+				continue
+			}
+
+			array := pdfcpu.Array{}
+			for _, ann := range anns {
+				array = append(array, *ann)
+			}
+
+			obj, found := pageDict.Find("Annots")
+			if !found {
+				pageDict.Insert("Annots", array)
+
+				pdfCtx.EnsureVersionForWriting()
+				continue
+			}
+
+			ir, ok := obj.(pdfcpu.IndirectRef)
+			if !ok {
+				pageDict.Update("Annots", append(obj.(pdfcpu.Array), array...))
+				pdfCtx.EnsureVersionForWriting()
+				continue
+			}
+
+			// Annots array is an IndirectReference.
+
+			o, err := pdfCtx.Dereference(ir)
+			if err != nil || o == nil {
+				continue
+			}
+
+			annots, _ := o.(pdfcpu.Array)
+			entry, ok := pdfCtx.FindTableEntryForIndRef(&ir)
+			if !ok {
+				continue
+			}
+			entry.Object = append(annots, array...)
+			pdfCtx.EnsureVersionForWriting()
+
+			//d.Insert("Annots", array)
+		}
+
+		if writeErr := api.WriteContextFile(pdfCtx, inFile); nil != writeErr {
+			logging.LogErrorf("write pdf context failed: %s", writeErr)
+			return
+		}
+	}
 
 	return
+}
+
+func annotRect(i int, w, h, d, l float64) *pdfcpu.Rectangle {
+	// d..distance between annotation rectangles
+	// l..side length of rectangle
+
+	// max number of rectangles fitting into w
+	xmax := int((w - d) / (l + d))
+
+	// max number of rectangles fitting into h
+	ymax := int((h - d) / (l + d))
+
+	col := float64(i % xmax)
+	row := float64(i / xmax % ymax)
+
+	llx := d + col*(l+d)
+	lly := d + row*(l+d)
+
+	urx := llx + l
+	ury := lly + l
+
+	return pdfcpu.Rect(llx, lly, urx, ury)
 }
 
 func ExportStdMarkdown(id string) string {

@@ -818,10 +818,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         after: targetElement.classList.contains("dragover__bottom"),
                         targetID: targetElement.getAttribute("data-node-id"),
                     });
-                    fetchPost("/api/filetree/removeDoc", {
-                        notebook: response.data.srcTreeBox,
-                        path: response.data.srcTreePath,
-                    });
                 }
             }
             fetchPost("/api/filetree/getDoc", {

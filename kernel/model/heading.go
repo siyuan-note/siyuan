@@ -224,6 +224,13 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		contentPivot.Unlink()
 	}
 
+	// 推送给前端移除旧文档
+	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
+	evt.Data = map[string]interface{}{
+		"ids": []string{srcTree.Root.ID},
+	}
+	util.PushEvent(evt)
+
 	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path // 返回旧的文档块位置，前端后续会删除旧的文档块
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	err = indexWriteJSONQueue(targetTree)

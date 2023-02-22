@@ -77,11 +77,6 @@ export const getAllDocks = () => {
             docks.push(dock);
         });
     });
-    window.siyuan.config.uiLayout.top.data.forEach((item: IDockTab[]) => {
-        item.forEach((dock: IDockTab) => {
-            docks.push(dock);
-        });
-    });
     window.siyuan.config.uiLayout.bottom.data.forEach((item: IDockTab[]) => {
         item.forEach((dock: IDockTab) => {
             docks.push(dock);

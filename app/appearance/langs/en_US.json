@@ -416,8 +416,6 @@
   "moveToLeftBottom": "Move to the Left Bottom",
   "moveToRightTop": "Move to the Right Top",
   "moveToRightBottom": "Move to the Right Bottom",
-  "moveToTopLeft": "Move to the Top Left",
-  "moveToTopRight": "Move to the Top Right",
   "moveToBottomLeft": "Move to the Bottom Left",
   "moveToBottomRight": "Move to the Bottom Right",
   "accountDisplayTitle": "Whether to display the title icon at the top bar",

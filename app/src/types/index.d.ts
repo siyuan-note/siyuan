@@ -204,7 +204,6 @@ interface ISiyuan {
     layout?: {
         layout?: import("../layout").Layout,
         centerLayout?: import("../layout").Layout,
-        topDock?: import("../layout/dock").Dock,
         leftDock?: import("../layout/dock").Dock,
         rightDock?: import("../layout/dock").Dock,
         bottomDock?: import("../layout/dock").Dock,

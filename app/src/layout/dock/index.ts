@@ -26,22 +26,17 @@ export class Dock {
     constructor(options: { data: { pin: boolean, data: IDockTab[][] }, position: TDockPosition }) {
         switch (options.position) {
             case "Left":
-                this.layout = window.siyuan.layout.layout.children[1].children[0] as Layout;
+                this.layout = window.siyuan.layout.layout.children[0].children[0] as Layout;
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout--floatl");
                 break;
             case "Right":
-                this.layout = window.siyuan.layout.layout.children[1].children[2] as Layout;
+                this.layout = window.siyuan.layout.layout.children[0].children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout--floatr");
                 break;
-            case "Top":
-                this.layout = window.siyuan.layout.layout.children[0] as Layout;
-                this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatt");
-                break;
             case "Bottom":
-                this.layout = window.siyuan.layout.layout.children[2] as Layout;
+                this.layout = window.siyuan.layout.layout.children[1] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout--floatb");
                 break;
@@ -474,13 +469,6 @@ export class Dock {
         switch (this.position) {
             case "Right":
                 direct = "w";
-                break;
-            case "Top":
-                if (index === 0) {
-                    direct = "se";
-                } else {
-                    direct = "sw";
-                }
                 break;
             case "Bottom":
                 if (index === 0) {

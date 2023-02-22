@@ -101,7 +101,7 @@ export const globalShortcut = () => {
                 if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0 &&
                     // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
                     (window.siyuan.layout.leftDock.element.clientWidth > 0 || (window.siyuan.layout.leftDock.element.clientWidth === 0 && event.clientX < 8))) {
-                    if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
+                    if (event.clientY > document.getElementById("toolbar").clientHeight &&
                         event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
                         if (!hasClosestByClassName(event.target, "b3-menu") &&
                             !hasClosestByClassName(event.target, "layout--float")) {
@@ -114,7 +114,7 @@ export const globalShortcut = () => {
             } else if (event.clientX > window.innerWidth - 41) {
                 if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0 &&
                     (window.siyuan.layout.rightDock.element.clientWidth > 0 || (window.siyuan.layout.rightDock.element.clientWidth === 0 && event.clientX > window.innerWidth - 8))) {
-                    if (event.clientY > document.getElementById("toolbar").clientHeight + document.getElementById("dockTop").clientHeight &&
+                    if (event.clientY > document.getElementById("toolbar").clientHeight &&
                         event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
                         if (!hasClosestByClassName(event.target, "layout--float")) {
                             window.siyuan.layout.rightDock.showDock();
@@ -125,9 +125,7 @@ export const globalShortcut = () => {
                 }
             }
 
-            if (event.clientY < 75) {
-                window.siyuan.layout.topDock.showDock();
-            } else if (event.clientY > window.innerHeight - 73) {
+            if (event.clientY > window.innerHeight - 73) {
                 window.siyuan.layout.bottomDock.showDock();
             }
         }
@@ -835,9 +833,6 @@ export const globalShortcut = () => {
         // dock float 时，点击空白处，隐藏 dock
         const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float", true);
         if (floatDockLayoutElement) {
-            if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.topDock.layout.element)) {
-                window.siyuan.layout.topDock.hideDock();
-            }
             if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.bottomDock.layout.element)) {
                 window.siyuan.layout.bottomDock.hideDock();
             }
@@ -848,7 +843,6 @@ export const globalShortcut = () => {
                 window.siyuan.layout.rightDock.hideDock();
             }
         } else if (!hasClosestByClassName(event.target, "dock") && !isWindow()) {
-            window.siyuan.layout.topDock.hideDock();
             window.siyuan.layout.bottomDock.hideDock();
             window.siyuan.layout.leftDock.hideDock();
             window.siyuan.layout.rightDock.hideDock();

@@ -64,7 +64,6 @@ export const workspaceMenu = (rect: DOMRect) => {
             dockMenu.push(togglePinDock(window.siyuan.layout.leftDock, "iconLeftTop"));
             dockMenu.push(togglePinDock(window.siyuan.layout.rightDock, "iconRightTop"));
             dockMenu.push(togglePinDock(window.siyuan.layout.bottomDock, "iconBottomLeft"));
-            dockMenu.push(togglePinDock(window.siyuan.layout.topDock, "iconTopLeft"));
         }
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.panels,

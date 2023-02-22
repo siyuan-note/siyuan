@@ -13,7 +13,6 @@
 
   &--floatl,
   &--floatr,
-  &--floatt,
   &--floatb {
     transition: var(--b3-width-transition);
   }
@@ -43,14 +42,6 @@
       overflow: hidden;
       top: 112px;
       bottom: 82px;
-      right: 0;
-    }
-
-    &.layout--floatt {
-      border-bottom: 1px solid var(--b3-border-color);
-      box-shadow: var(--b3-dialog-shadow);
-      left: 0;
-      top: 0;
       right: 0;
     }
 
@@ -332,10 +323,6 @@
 
   &#dockRight {
     border-left: .5px solid var(--b3-border-color);
-  }
-
-  &#dockTop {
-    border-bottom: .5px solid var(--b3-border-color);
   }
 
   &#dockBottom {

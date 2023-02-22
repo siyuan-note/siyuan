@@ -250,20 +250,6 @@ export abstract class Constants {
             "instance": "Layout",
             "children": [{
                 "direction": "lr",
-                "size": "0px",
-                "type": "top",
-                "instance": "Layout",
-                "children": [{
-                    "instance": "Wnd",
-                    "children": []
-                }, {
-                    "instance": "Wnd",
-                    "resize": "lr",
-                    "children": []
-                }]
-            }, {
-                "direction": "lr",
-                "resize": "tb",
                 "size": "auto",
                 "type": "normal",
                 "instance": "Layout",
@@ -317,10 +303,6 @@ export abstract class Constants {
                     "children": []
                 }]
             }]
-        },
-        top: {
-            pin: true,
-            data: []
         },
         bottom: {
             pin: true,

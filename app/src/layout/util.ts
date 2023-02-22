@@ -75,9 +75,6 @@ export const getDockByType = (type: TDockType) => {
     if (window.siyuan.layout.bottomDock.data[type]) {
         return window.siyuan.layout.bottomDock;
     }
-    if (window.siyuan.layout.topDock.data[type]) {
-        return window.siyuan.layout.topDock;
-    }
 };
 
 export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
@@ -155,7 +152,6 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
     const layoutJSON: any = {
         hideDock: useElement.getAttribute("xlink:href") === "#iconDock",
         layout: {},
-        top: dockToJSON(window.siyuan.layout.topDock),
         bottom: dockToJSON(window.siyuan.layout.bottomDock),
         left: dockToJSON(window.siyuan.layout.leftDock),
         right: dockToJSON(window.siyuan.layout.rightDock),
@@ -171,8 +167,7 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
 };
 
 const JSONToDock = (json: any) => {
-    window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[1].children[1] as Layout;
-    window.siyuan.layout.topDock = new Dock({position: "Top", data: json.top});
+    window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[0].children[1] as Layout;
     window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left});
     window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right});
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom});
@@ -706,7 +701,6 @@ export const addResize = (obj: Layout | Wnd) => {
                 resizeTabs();
                 if (!isWindow()) {
                     window.siyuan.layout.leftDock.setSize();
-                    window.siyuan.layout.topDock.setSize();
                     window.siyuan.layout.bottomDock.setSize();
                     window.siyuan.layout.rightDock.setSize();
                 }

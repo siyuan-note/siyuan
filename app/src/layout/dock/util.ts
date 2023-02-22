@@ -93,9 +93,6 @@ export const resetFloatDockSize = () => {
     if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.rightDock.showDock(true);
     }
-    if (!window.siyuan.layout.topDock.pin && window.siyuan.layout.topDock.layout.element.style.opacity === "1") {
-        window.siyuan.layout.topDock.showDock(true);
-    }
     if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.bottomDock.showDock(true);
     }

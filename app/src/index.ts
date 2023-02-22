@@ -139,10 +139,6 @@ class App {
                     pin: true,
                     data: response.data.conf.uiLayout.right
                 };
-                window.siyuan.config.uiLayout.top = {
-                    pin: true,
-                    data: response.data.conf.uiLayout.top
-                };
                 window.siyuan.config.uiLayout.bottom = {
                     pin: true,
                     data: response.data.conf.uiLayout.bottom

@@ -433,7 +433,7 @@ export class Files extends Model {
                 const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)
                 if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
                     // 块标拖拽
-                    if (gutterType === "nodeheading") {
+                    if (gutterTypes[0] === "nodeheading") {
                         fetchPost("/api/filetree/heading2Doc", {
                             targetNoteBook: toURL,
                             srcHeadingID: gutterTypes[2].split(",")[0],

@@ -27,8 +27,6 @@ import (
 )
 
 func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID, newTargetPath string, err error) {
-	WaitForWritingFiles()
-
 	srcTree, _ := loadTreeByBlockID(srcListItemID)
 	if nil == srcTree {
 		err = ErrBlockNotFound

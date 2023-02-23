@@ -311,7 +311,7 @@ func exportHTML(c *gin.Context) {
 	}
 }
 
-func addPDFOutline(c *gin.Context) {
+func processPDF(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -326,7 +326,7 @@ func addPDFOutline(c *gin.Context) {
 	if nil != arg["merge"] {
 		merge = arg["merge"].(bool)
 	}
-	err := model.AddPDFOutline(id, path, merge)
+	err := model.ProcessPDF(id, path, merge)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -654,7 +654,7 @@ func processIFrame(tree *parse.Tree) {
 	}
 }
 
-func AddPDFOutline(id, p string, merge bool) (err error) {
+func ProcessPDF(id, p string, merge bool) (err error) {
 	inFile := p
 	links, err := api.ListToCLinks(inFile)
 	if nil != err {

@@ -801,7 +801,7 @@ export class Wnd {
         }
         tab.parent = this;
         resizeTabs();
-        hideAllElements(["toolbar"])
+        hideAllElements(["toolbar"]);
     }
 
     public split(direction: TDirection) {

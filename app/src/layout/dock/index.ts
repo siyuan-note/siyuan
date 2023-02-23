@@ -30,19 +30,19 @@ export class Dock {
                 this.layout = window.siyuan.layout.layout.children[0].children[0] as Layout;
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout__dockl");
-                this.layout.element.insertAdjacentHTML("beforeend", `<div class="layout__dockresize layout__dockresize--lr"></div>`);
+                this.layout.element.insertAdjacentHTML("beforeend", "<div class=\"layout__dockresize layout__dockresize--lr\"></div>");
                 break;
             case "Right":
                 this.layout = window.siyuan.layout.layout.children[0].children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout__dockr");
-                this.layout.element.insertAdjacentHTML("beforeend", `<div class="layout__dockresize layout__dockresize--lr"></div>`);
+                this.layout.element.insertAdjacentHTML("beforeend", "<div class=\"layout__dockresize layout__dockresize--lr\"></div>");
                 break;
             case "Bottom":
                 this.layout = window.siyuan.layout.layout.children[1] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout__dockb");
-                this.layout.element.insertAdjacentHTML("beforeend", `<div class="layout__dockresize"></div>`);
+                this.layout.element.insertAdjacentHTML("beforeend", "<div class=\"layout__dockresize\"></div>");
                 break;
         }
         this.element = document.getElementById("dock" + options.position);
@@ -121,7 +121,7 @@ export class Dock {
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 moveEvent.preventDefault();
                 moveEvent.stopPropagation();
-                let currentNowSize
+                let currentNowSize;
                 if (this.position === "Left") {
                     currentNowSize = (currentSize + (moveEvent.clientX - x));
                 } else if (this.position === "Right") {
@@ -424,7 +424,7 @@ export class Dock {
             if (anotherIndex === 0) {
                 anotherWnd.element.nextElementSibling.classList.remove("fn__none");
             } else {
-                lastWnd = anotherWnd
+                lastWnd = anotherWnd;
                 anotherWnd.element.previousElementSibling.classList.remove("fn__none");
             }
             const lastActiveElement = this.element.querySelector('.dock__item--active[data-index="1"]');

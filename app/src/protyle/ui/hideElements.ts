@@ -63,4 +63,4 @@ export const hideAllElements = (types: string[]) => {
             item.innerHTML = "";
         });
     }
-}
+};

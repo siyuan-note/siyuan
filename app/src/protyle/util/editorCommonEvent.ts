@@ -813,7 +813,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const ids = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
             for (let i = 0; i < ids.length; i++) {
                 if (ids[i]) {
-                    const response = await fetchSyncPost("/api/filetree/doc2Heading", {
+                    await fetchSyncPost("/api/filetree/doc2Heading", {
                         srcID: ids[i],
                         after: targetElement.classList.contains("dragover__bottom"),
                         targetID: targetElement.getAttribute("data-node-id"),

@@ -509,7 +509,7 @@ export const resizeTabs = () => {
             });
         });
         pdfResize();
-        hideAllElements(["gutter"])
+        hideAllElements(["gutter"]);
     }, 200);
 };
 

@@ -825,10 +825,10 @@ export const globalShortcut = () => {
         }
         // protyle.toolbar 点击空白处时进行隐藏
         if (!hasClosestByClassName(event.target, "protyle-toolbar")) {
-            hideAllElements(["toolbar"])
+            hideAllElements(["toolbar"]);
         }
         if (!hasClosestByClassName(event.target, "pdf__outer")) {
-            hideAllElements(["pdfutil"])
+            hideAllElements(["pdfutil"]);
         }
         // dock float 时，点击空白处，隐藏 dock
         const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float", true);

@@ -430,7 +430,7 @@ export class Files extends Model {
                 }
             }
             if (gutterType && newElement.classList.contains("dragover")) {
-                const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)
+                const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
                 if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
                     // 块标拖拽
                     if (gutterTypes[0] === "nodeheading") {

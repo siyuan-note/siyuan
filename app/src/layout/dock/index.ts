@@ -14,6 +14,7 @@ import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
 import {resetFloatDockSize} from "./util";
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 
 export class Dock {
     public element: HTMLElement;
@@ -28,21 +29,24 @@ export class Dock {
             case "Left":
                 this.layout = window.siyuan.layout.layout.children[0].children[0] as Layout;
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatl");
+                this.layout.element.classList.add("layout__dockl");
+                this.layout.element.insertAdjacentHTML("beforeend", `<div class="layout__dockresize layout__dockresize--lr"></div>`);
                 break;
             case "Right":
                 this.layout = window.siyuan.layout.layout.children[0].children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatr");
+                this.layout.element.classList.add("layout__dockr");
+                this.layout.element.insertAdjacentHTML("beforeend", `<div class="layout__dockresize layout__dockresize--lr"></div>`);
                 break;
             case "Bottom":
                 this.layout = window.siyuan.layout.layout.children[1] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
-                this.layout.element.classList.add("layout--floatb");
+                this.layout.element.classList.add("layout__dockb");
+                this.layout.element.insertAdjacentHTML("beforeend", `<div class="layout__dockresize"></div>`);
                 break;
         }
         this.element = document.getElementById("dock" + options.position);
-        const dockClass = (options.position === "Bottom" || options.position === "Top") ? ' class="fn__flex"' : "";
+        const dockClass = options.position === "Bottom" ? ' class="fn__flex"' : "";
         this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1"></div><div${dockClass}></div>`;
         this.position = options.position;
         this.pin = options.data.pin;
@@ -57,6 +61,7 @@ export class Dock {
             if (options.data.data[1]) {
                 this.genButton(options.data.data[1], 1);
             }
+            this.element.classList.remove("fn__none");
         }
         const activeElements = this.element.querySelectorAll(".dock__item--active");
 
@@ -93,16 +98,13 @@ export class Dock {
             }
         });
         this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
-            if (this.pin || event.toElement?.classList.contains("b3-menu")) {
+            if (event.buttons !== 0 || this.pin || event.toElement?.classList.contains("b3-menu")) {
                 return;
             }
             if (this.position === "Left" && event.clientX < 43) {
                 return;
             }
-            if (this.position === "Right" && event.clientX > window.innerWidth - 41) {
-                return;
-            }
-            if (this.position === "Top" && event.clientY < 75) {
+            if (this.position === "Right" && event.clientX > window.innerWidth - 43) {
                 return;
             }
             if (this.position === "Bottom" && event.clientY > window.innerHeight - 73) {
@@ -110,6 +112,52 @@ export class Dock {
             }
             this.hideDock();
         });
+
+        this.layout.element.querySelector(".layout__dockresize").addEventListener("mousedown", (event: MouseEvent) => {
+            const documentSelf = document;
+            const direction = this.position === "Bottom" ? "tb" : "lr";
+            const x = event[direction === "lr" ? "clientX" : "clientY"];
+            const currentSize = direction === "lr" ? this.layout.element.clientWidth : this.layout.element.clientHeight;
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                let currentNowSize
+                if (this.position === "Left") {
+                    currentNowSize = (currentSize + (moveEvent.clientX - x));
+                } else if (this.position === "Right") {
+                    currentNowSize = (currentSize + (x - moveEvent.clientX));
+                } else {
+                    currentNowSize = (currentSize + (x - moveEvent.clientY));
+                }
+                let minSize = 227;
+                Array.from(this.layout.element.querySelectorAll(".file-tree")).find((item) => {
+                    if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
+                        || item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) {
+                        if (!item.classList.contains("fn__none") && !hasClosestByClassName(item, "fn__none")) {
+                            minSize = 320;
+                            return true;
+                        }
+                    }
+                });
+                if (currentNowSize < minSize && direction === "lr" ) {
+                    return;
+                }
+                if (currentNowSize < 64 && direction === "tb" ) {
+                    return;
+                }
+                this.layout.element.style[direction === "lr" ? "width" : "height"] = currentNowSize + "px";
+            };
+
+            documentSelf.onmouseup = () => {
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+                this.setSize();
+            };
+        });
+
         if (window.siyuan.config.uiLayout.hideDock) {
             this.element.classList.add("fn__none");
         }
@@ -163,7 +211,7 @@ export class Dock {
             this.layout.element.clientWidth === 0 && this.layout.element.style.width.startsWith("0")) {
             return;
         }
-        if (!reset && (this.position === "Top" || this.position === "Bottom") &&
+        if (!reset && this.position === "Bottom" &&
             this.layout.element.clientHeight === 0 && this.layout.element.style.height.startsWith("0")) {
             return;
         }
@@ -174,8 +222,6 @@ export class Dock {
             this.layout.element.style.transform = `translateX(${this.element.clientWidth}px)`;
         } else if (this.position === "Right") {
             this.layout.element.style.transform = `translateX(-${this.element.clientWidth}px)`;
-        } else if (this.position === "Top") {
-            this.layout.element.style.transform = `translateY(${this.element.offsetHeight + document.getElementById("toolbar").offsetHeight}px)`;
         } else if (this.position === "Bottom") {
             this.layout.element.style.transform = `translateY(-${this.element.offsetHeight + document.getElementById("status").offsetHeight}px)`;
         }
@@ -191,8 +237,6 @@ export class Dock {
             this.layout.element.style.transform = `translateX(-${this.layout.element.clientWidth + 8}px)`;
         } else if (this.position === "Right") {
             this.layout.element.style.transform = `translateX(${this.layout.element.clientWidth + 8}px)`;
-        } else if (this.position === "Top") {
-            this.layout.element.style.transform = `translateY(-${this.layout.element.clientHeight + 8}px)`;
         } else if (this.position === "Bottom") {
             this.layout.element.style.transform = `translateY(${this.layout.element.clientHeight + 8}px)`;
         }
@@ -376,25 +420,25 @@ export class Dock {
         const anotherHasActive = this.element.querySelectorAll(`.dock__item--active[data-index="${anotherIndex}"]`).length > 0;
         const hasActive = this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).length > 0;
         if (hasActive && anotherHasActive) {
-            let firstWnd = wnd;
+            let lastWnd = wnd;
             if (anotherIndex === 0) {
-                firstWnd = anotherWnd;
                 anotherWnd.element.nextElementSibling.classList.remove("fn__none");
             } else {
+                lastWnd = anotherWnd
                 anotherWnd.element.previousElementSibling.classList.remove("fn__none");
             }
-            const firstActiveElement = this.element.querySelector('.dock__item--active[data-index="0"]');
+            const lastActiveElement = this.element.querySelector('.dock__item--active[data-index="1"]');
             if (this.position === "Left" || this.position === "Right") {
-                const dataHeight = parseInt(firstActiveElement.getAttribute("data-height"));
+                const dataHeight = parseInt(lastActiveElement.getAttribute("data-height"));
                 if (dataHeight !== 0 && !isNaN(dataHeight)) {
-                    firstWnd.element.style.height = dataHeight + "px";
-                    firstWnd.element.classList.remove("fn__flex-1");
+                    lastWnd.element.style.height = dataHeight + "px";
+                    lastWnd.element.classList.remove("fn__flex-1");
                 }
             } else {
-                const dataWidth = parseInt(firstActiveElement.getAttribute("data-width"));
+                const dataWidth = parseInt(lastActiveElement.getAttribute("data-width"));
                 if (dataWidth !== 0 && !isNaN(dataWidth)) {
-                    firstWnd.element.style.width = dataWidth + "px";
-                    firstWnd.element.classList.remove("fn__flex-1");
+                    lastWnd.element.style.width = dataWidth + "px";
+                    lastWnd.element.classList.remove("fn__flex-1");
                 }
             }
         } else {
@@ -485,12 +529,12 @@ export class Dock {
         const activesElement = this.element.querySelectorAll(".dock__item--active");
         activesElement.forEach((item) => {
             if (this.position === "Left" || this.position === "Right") {
-                if (item.getAttribute("data-index") === "0" && activesElement.length > 1) {
+                if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
                     item.setAttribute("data-height", (this.data[item.getAttribute("data-type")] as Model).parent.parent.element.clientHeight.toString());
                 }
                 item.setAttribute("data-width", this.layout.element.clientWidth.toString());
             } else {
-                if (item.getAttribute("data-index") === "0" && activesElement.length > 1) {
+                if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
                     item.setAttribute("data-width", (this.data[item.getAttribute("data-type")] as Model).parent.parent.element.clientWidth.toString());
                 }
                 item.setAttribute("data-height", this.layout.element.clientHeight.toString());
@@ -503,9 +547,9 @@ export class Dock {
         this.element.querySelectorAll(".dock__item--active").forEach((item) => {
             let size;
             if (this.position === "Left" || this.position === "Right") {
-                size = parseInt(item.getAttribute("data-width")) || (["graph", "globalGraph", "backlink"].includes(item.getAttribute("data-type")) ? 320 : 224);
+                size = parseInt(item.getAttribute("data-width")) || (["graph", "globalGraph", "backlink"].includes(item.getAttribute("data-type")) ? 320 : 227);
             } else {
-                size = parseInt(item.getAttribute("data-height")) || 224;
+                size = parseInt(item.getAttribute("data-height")) || 227;
             }
             if (size > max) {
                 max = size;

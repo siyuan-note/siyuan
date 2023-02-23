@@ -454,13 +454,11 @@
 * `/api/asset/upload`
 * 参数为 HTTP Multipart 表单
 
-    * `assetsDirPath`：资源文件存放的文件夹路径，实参有以下三种情况
+    * `assetsDirPath`：资源文件存放的文件夹路径，以 data 文件夹作为根路径，比如：
+        * `"/assets/"`：工作空间/data/assets/ 文件夹
+        * `"/assets/sub/"`：工作空间/data/assets/sub/ 文件夹
 
-        1. `"/assets/"`：工作空间/data/assets 文件夹
-        2. `"/测试笔记本/assets/"`：`测试笔记本`下的 assets 文件夹
-        3. `"/测试笔记本/foo/assets/"`：`测试笔记本`下 foo 文件夹下的 assets 文件夹
-
-      建议用第一种，统一存放到工作空间资源文件夹下。
+      常规情况下建议用第一种，统一存放到工作空间资源文件夹下。
     * `file[]`：上传的文件列表
 * 返回值
 

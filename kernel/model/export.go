@@ -665,6 +665,8 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 		return links[i].Page < links[j].Page
 	})
 
+	pdfcpu.VersionStr = "SiYuan v" + util.Ver
+
 	bms := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
@@ -798,15 +800,11 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 		}
 
 		linkMap := map[int][]*pdfcpu.IndirectRef{}
-		//pdfCtx.RemoveAnnotations(nil, nil, nil, false)
-
-		for i, link := range assetLinks {
+		pdfCtx.RemoveAnnotations(nil, nil, nil, false)
+		now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
+		for _, link := range assetLinks {
 			link.URI = strings.ReplaceAll(link.URI, "http://127.0.0.1:6806/export/temp/", "")
-			//if 1 > len(linkMap[link.Page]) {
-			//	linkMap[link.Page] = []pdfcpu.Annotation{link}
-			//} else {
-			//	linkMap[link.Page] = append(linkMap[link.Page], link)
-			//}
+			link.URI, _ = url.PathUnescape(link.URI)
 
 			absPath, getErr := GetAssetAbsPath(link.URI)
 			if nil != getErr {
@@ -832,15 +830,17 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 				continue
 			}
 
-			now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
-			mediaBox := pdfcpu.RectForFormat("A4")
-			r := annotRect(i, mediaBox.Width(), mediaBox.Height(), 30, 80)
+			lx := link.Rect.LL.X + link.Rect.Width()
+			ly := link.Rect.LL.Y + link.Rect.Height()/2
+			ux := lx + link.Rect.Height()/2
+			uy := ly + link.Rect.Height()/2
+
 			d := pdfcpu.Dict(
 				map[string]pdfcpu.Object{
 					"Type":         pdfcpu.Name("Annot"),
 					"Subtype":      pdfcpu.Name("FileAttachment"),
-					"Contents":     pdfcpu.StringLiteral("FileAttachment Annotation"),
-					"Rect":         r.Array(),
+					"Contents":     pdfcpu.StringLiteral(""),
+					"Rect":         pdfcpu.Rect(lx, ly, ux, uy).Array(),
 					"P":            link.P,
 					"M":            now,
 					"F":            pdfcpu.Integer(0),
@@ -850,7 +850,7 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 					"CreationDate": now,
 					"Name":         pdfcpu.Name("FileAttachment"),
 					"FS":           *ir,
-					"NM":           pdfcpu.StringLiteral("SoundFileAttachmentAnnot"),
+					"NM":           pdfcpu.StringLiteral(""),
 				},
 			)
 
@@ -900,7 +900,6 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 			obj, found := pageDict.Find("Annots")
 			if !found {
 				pageDict.Insert("Annots", array)
-
 				pdfCtx.EnsureVersionForWriting()
 				continue
 			}
@@ -926,8 +925,6 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 			}
 			entry.Object = append(annots, array...)
 			pdfCtx.EnsureVersionForWriting()
-
-			//d.Insert("Annots", array)
 		}
 
 		if writeErr := api.WriteContextFile(pdfCtx, inFile); nil != writeErr {

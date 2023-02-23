@@ -457,13 +457,12 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 * `/api/asset/upload`
 * The parameter is an HTTP Multipart form
 
-    * `assetsDirPath`: The folder path where the assets are stored. The arguments have the following three cases
+    * `assetsDirPath`: The folder path where assets are stored, with the data folder as the root path, for example:
+        * `"/assets/"`: workspace/data/assets/ folder
+        * `"/assets/sub/"`: workspace/data/assets/sub/ folder
 
-        1. `"/assets/"`: Workspace/data/assets folder
-        2. `"/Test Notebook/assets/"`: Assets folder under `Test Notebook`
-        3. `"/Test Notebook/foo/assets/"`: Assets folder under foo folder under `Test notebook`
-
-      It is recommended to use the first one, which is stored in the workspace assets folder uniformly.
+      Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder
+      of the workspace.
     * `file[]`: Uploaded file list
 * Return value
 
@@ -705,7 +704,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-  * `id`: ID of the block to be got
+    * `id`: ID of the block to be got
 * Return value
 
   ```json
@@ -718,7 +717,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     }
   }
   ```
-  
+
 ## Attributes
 
 ### Set block attributes
@@ -814,8 +813,9 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "path": "F:\\SiYuan\\data\\templates\\foo.md"
   }
   ```
-  * `id`: The ID of the document where the rendering is called
-  * `path`: Template file absolute path
+
+    * `id`: The ID of the document where the rendering is called
+    * `path`: Template file absolute path
 * Return value
 
   ```json

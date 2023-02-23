@@ -654,7 +654,7 @@ func processIFrame(tree *parse.Tree) {
 	}
 }
 
-func ProcessPDF(id, p string, merge bool) (err error) {
+func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 	inFile := p
 	links, err := api.ListToCLinks(inFile)
 	if nil != err {
@@ -664,8 +664,6 @@ func ProcessPDF(id, p string, merge bool) (err error) {
 	sort.Slice(links, func(i, j int) bool {
 		return links[i].Page < links[j].Page
 	})
-
-	pdfcpu.VersionStr = "SiYuan v" + util.Ver
 
 	bms := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
@@ -774,37 +772,50 @@ func ProcessPDF(id, p string, merge bool) (err error) {
 		}
 	}
 
-	if 0 < len(assetAbsPaths) {
-		//outFile := inFile + ".tmp"
-		//err = api.AddAttachmentsFile(inFile, outFile, assetAbsPaths, false, nil)
-		//if nil != err {
-		//	logging.LogErrorf("add attachment failed: %s", err)
-		//	return
-		//}
-		//
-		//err = os.Rename(outFile, inFile)
-		//if nil != err {
-		//	return
-		//}
+	pdfCtx, ctxErr := api.ReadContextFile(inFile)
+	if nil != ctxErr {
+		logging.LogErrorf("read pdf context failed: %s", ctxErr)
+		return
+	}
 
-		assetLinks, listErr := api.ListAssetLinks(inFile)
+	if 0 < len(assetAbsPaths) {
+		assetLinks, otherLinks, listErr := api.ListLinks(inFile)
 		if nil != listErr {
 			logging.LogErrorf("list asset links failed: %s", listErr)
 			return
 		}
 
-		pdfCtx, ctxErr := api.ReadContextFile(inFile)
-		if nil != ctxErr {
-			logging.LogErrorf("read pdf context failed: %s", ctxErr)
-			return
+		if _, removeErr := pdfCtx.RemoveAnnotations(nil, nil, nil, false); nil != removeErr {
+			logging.LogWarnf("remove annotations failed: %s", removeErr)
 		}
 
-		linkMap := map[int][]*pdfcpu.IndirectRef{}
-		pdfCtx.RemoveAnnotations(nil, nil, nil, false)
+		linkMap := map[int][]pdfcpu.AnnotationRenderer{}
+		for _, link := range otherLinks {
+			if 1 > len(linkMap[link.Page]) {
+				linkMap[link.Page] = []pdfcpu.AnnotationRenderer{link}
+			} else {
+				linkMap[link.Page] = append(linkMap[link.Page], link)
+			}
+		}
+
+		attachementMap := map[int][]*pdfcpu.IndirectRef{}
 		now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
 		for _, link := range assetLinks {
 			link.URI = strings.ReplaceAll(link.URI, "http://127.0.0.1:6806/export/temp/", "")
 			link.URI, _ = url.PathUnescape(link.URI)
+
+			if !removeAssets {
+				// 不移除资源文件夹的话将超链接指向资源文件夹
+				if 1 > len(linkMap[link.Page]) {
+					linkMap[link.Page] = []pdfcpu.AnnotationRenderer{link}
+				} else {
+					linkMap[link.Page] = append(linkMap[link.Page], link)
+				}
+
+				continue
+			}
+
+			// 移除资源文件夹的话使用内嵌附件
 
 			absPath, getErr := GetAssetAbsPath(link.URI)
 			if nil != getErr {
@@ -873,13 +884,20 @@ func ProcessPDF(id, p string, merge bool) (err error) {
 			}
 
 			if 1 > len(linkMap[link.Page]) {
-				linkMap[link.Page] = []*pdfcpu.IndirectRef{ann}
+				attachementMap[link.Page] = []*pdfcpu.IndirectRef{ann}
 			} else {
-				linkMap[link.Page] = append(linkMap[link.Page], ann)
+				attachementMap[link.Page] = append(attachementMap[link.Page], ann)
 			}
 		}
 
-		for page, anns := range linkMap {
+		if 0 < len(linkMap) {
+			if _, addErr := pdfCtx.AddAnnotationsMap(linkMap, false); nil != addErr {
+				logging.LogErrorf("add annotations map failed: %s", addErr)
+			}
+		}
+
+		// 添加附件注解指向内嵌的附件
+		for page, anns := range attachementMap {
 			pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(page)
 			if nil != pageErr {
 				logging.LogWarnf("page dict ind ref failed: %s", pageErr)
@@ -926,11 +944,12 @@ func ProcessPDF(id, p string, merge bool) (err error) {
 			entry.Object = append(annots, array...)
 			pdfCtx.EnsureVersionForWriting()
 		}
+	}
 
-		if writeErr := api.WriteContextFile(pdfCtx, inFile); nil != writeErr {
-			logging.LogErrorf("write pdf context failed: %s", writeErr)
-			return
-		}
+	pdfcpu.VersionStr = "SiYuan v" + util.Ver
+	if writeErr := api.WriteContextFile(pdfCtx, inFile); nil != writeErr {
+		logging.LogErrorf("write pdf context failed: %s", writeErr)
+		return
 	}
 
 	return

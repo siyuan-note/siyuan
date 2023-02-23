@@ -326,7 +326,8 @@ func processPDF(c *gin.Context) {
 	if nil != arg["merge"] {
 		merge = arg["merge"].(bool)
 	}
-	err := model.ProcessPDF(id, path, merge)
+	removeAssets := arg["removeAssets"].(bool)
+	err := model.ProcessPDF(id, path, merge, removeAssets)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

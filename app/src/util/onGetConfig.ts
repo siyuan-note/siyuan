@@ -421,7 +421,8 @@ export const initWindow = () => {
                         fetchPost("/api/export/processPDF", {
                             id: ipcData.rootId,
                             merge: ipcData.mergeSubdocs,
-                            path: pdfFilePath
+                            path: pdfFilePath,
+                            removeAssets: ipcData.removeAssets,
                         }, () => {
                             afterExport(pdfFilePath, msgId);
                             if (ipcData.removeAssets) {

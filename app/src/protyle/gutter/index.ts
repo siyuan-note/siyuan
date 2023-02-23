@@ -667,7 +667,7 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.quickMakeCard,
             accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-            iconHTML: "<svg class=\"b3-menu__icon\" style=\"color:var(--b3-theme-primary)\"><use xlink:href=\"#iconRiffCard\"></use></svg>",
+            iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
             icon: "iconRiffCard",
             click() {
                 quickMakeCard(selectsElement);
@@ -1440,7 +1440,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-                iconHTML: "<svg class=\"b3-menu__icon\" style=\"color:var(--b3-theme-primary)\"><use xlink:href=\"#iconRiffCard\"></use></svg>",
+                iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
                 icon: "iconRiffCard",
                 click() {
                     quickMakeCard([nodeElement]);

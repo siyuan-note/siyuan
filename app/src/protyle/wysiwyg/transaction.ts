@@ -448,6 +448,11 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             if (refElement) {
                 nodeAttrHTML += refElement.outerHTML;
             }
+            if (data.new['custom-riff-decks']) {
+                protyle.title.element.setAttribute("custom-riff-decks", data.new['custom-riff-decks']);
+            } else {
+                protyle.title.element.removeAttribute("custom-riff-decks");
+            }
             protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
             protyle.wysiwyg.renderCustom(attrsResult);
             if (data.new.icon !== data.old.icon) {

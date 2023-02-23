@@ -432,6 +432,10 @@
     opacity: 1;
   }
 
+  &[custom-riff-decks] {
+    box-shadow: 3px 0px 0px -1px var(--b3-protyle-inline-mark-background)
+  }
+
   &__icon {
     position: absolute;
     left: -24px;

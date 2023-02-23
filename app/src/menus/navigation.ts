@@ -299,7 +299,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.riffCard,
-            icon: "iconRiffCard",
+            iconHTML: '<svg class="b3-menu__icon" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg>',
             click: () => {
                 fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
                     openCardByData(response.data, `<span data-id="${id}" class="fn__flex-center">${escapeHtml(name)}</span>`);

@@ -92,6 +92,7 @@ export const makeCard = (nodeElement: Element[]) => {
                         });
                     } else {
                         msgId = showMessage(window.siyuan.languages._kernel[142]);
+                        inputElement.focus();
                     }
                     event.stopPropagation();
                     event.preventDefault();

@@ -1,6 +1,6 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
-import {hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestByAttribute} from "../util/hasClosest";
 
 declare const flowchart: {
     parse(text: string): { drawSVG: (type: Element) => void };
@@ -19,22 +19,22 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     }
     addScript(`${cdn}/js/flowchart.js/flowchart.min.js?v=0.0.0`, "protyleFlowchartScript").then(() => {
         if (flowchartElements[0].firstElementChild.clientWidth === 0) {
-            const tabElement = hasClosestByClassName(flowchartElements[0], "protyle", true);
-            if (!tabElement) {
+            const hideElement = hasClosestByAttribute(flowchartElements[0], "fold", "1");
+            if (!hideElement) {
                 return;
             }
             const observer = new MutationObserver(() => {
                 initFlowchart(flowchartElements);
                 observer.disconnect();
             });
-            observer.observe(tabElement, {attributeFilter: ["class"]});
+            observer.observe(hideElement, {attributeFilter: ["fold"]});
         } else {
             initFlowchart(flowchartElements);
         }
     });
 };
 
-const initFlowchart = (flowchartElements:Element[]) => {
+const initFlowchart = (flowchartElements: Element[]) => {
     flowchartElements.forEach((item: HTMLElement) => {
         if (item.getAttribute("data-render") === "true") {
             return;

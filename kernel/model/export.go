@@ -791,6 +791,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 
 		linkMap := map[int][]pdfcpu.AnnotationRenderer{}
 		for _, link := range otherLinks {
+			link.URI, _ = url.PathUnescape(link.URI)
 			if 1 > len(linkMap[link.Page]) {
 				linkMap[link.Page] = []pdfcpu.AnnotationRenderer{link}
 			} else {
@@ -798,7 +799,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 			}
 		}
 
-		attachementMap := map[int][]*pdfcpu.IndirectRef{}
+		attachmentMap := map[int][]*pdfcpu.IndirectRef{}
 		now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
 		for _, link := range assetLinks {
 			link.URI = strings.ReplaceAll(link.URI, "http://127.0.0.1:6806/export/temp/", "")
@@ -883,10 +884,10 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 				continue
 			}
 
-			if 1 > len(linkMap[link.Page]) {
-				attachementMap[link.Page] = []*pdfcpu.IndirectRef{ann}
+			if 1 > len(attachmentMap[link.Page]) {
+				attachmentMap[link.Page] = []*pdfcpu.IndirectRef{ann}
 			} else {
-				attachementMap[link.Page] = append(attachementMap[link.Page], ann)
+				attachmentMap[link.Page] = append(attachmentMap[link.Page], ann)
 			}
 		}
 
@@ -897,7 +898,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 		}
 
 		// 添加附件注解指向内嵌的附件
-		for page, anns := range attachementMap {
+		for page, anns := range attachmentMap {
 			pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(page)
 			if nil != pageErr {
 				logging.LogWarnf("page dict ind ref failed: %s", pageErr)

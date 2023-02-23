@@ -7,7 +7,7 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/gulu v1.2.3-0.20221117052724-cd06804db798
 	github.com/88250/lute v1.7.6-0.20230220030205-b0f64d7ba66e
-	github.com/88250/pdfcpu v0.3.14-0.20230223023428-417e2a8897ac
+	github.com/88250/pdfcpu v0.3.14-0.20230223031826-d2ae187e1c38
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20230216061320-bccdb98581a3
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
@@ -141,7 +141,6 @@ replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20
 //replace github.com/siyuan-note/httpclient => D:\88250\httpclient
 //replace github.com/siyuan-note/filelock => D:\88250\filelock
 //replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute
-replace github.com/88250/pdfcpu => D:\88250\pdfcpu
-
+//replace github.com/88250/pdfcpu => D:\88250\pdfcpu
 //replace github.com/88250/gulu => D:\88250\gulu
 //replace github.com/mattn/go-sqlite3 => D:\88250\go-sqlite3

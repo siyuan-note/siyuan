@@ -674,6 +674,10 @@ func GetDecks() (decks []*riff.Deck) {
 	if 1 > len(decks) {
 		decks = []*riff.Deck{}
 	}
+
+	sort.Slice(decks, func(i, j int) bool {
+		return decks[i].Updated > decks[j].Updated
+	})
 	return
 }
 

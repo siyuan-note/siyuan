@@ -130,9 +130,11 @@ func Upload(c *gin.Context) {
 		docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
 		assetsDirPath = getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
 	}
+
+	relAssetsDirPath := "assets"
 	if nil != form.Value["assetsDirPath"] {
-		assetsDirPath = form.Value["assetsDirPath"][0]
-		assetsDirPath = filepath.Join(util.DataDir, assetsDirPath)
+		relAssetsDirPath = form.Value["assetsDirPath"][0]
+		assetsDirPath = filepath.Join(util.DataDir, relAssetsDirPath)
 	}
 	if !gulu.File.IsExist(assetsDirPath) {
 		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
@@ -187,7 +189,7 @@ func Upload(c *gin.Context) {
 				break
 			}
 			f.Close()
-			succMap[baseName] = "assets/" + fName
+			succMap[baseName] = path.Join(relAssetsDirPath, fName)
 		}
 	}
 

@@ -3,7 +3,7 @@ import {exportLayout, getInstanceById, JSONToLayout, resetLayout, resizeDrag, re
 import {hotKey2Electron, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
-import {webFrame, ipcRenderer, OpenDialogReturnValue} from "electron";
+import {ipcRenderer, OpenDialogReturnValue, webFrame} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
@@ -418,10 +418,11 @@ export const initWindow = () => {
                         const pdfFilePath = path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
                         fs.writeFileSync(pdfFilePath, pdfData);
                         window.siyuan.printWin.destroy();
-                        fetchPost("/api/export/addPDFOutline", {
+                        fetchPost("/api/export/processPDF", {
                             id: ipcData.rootId,
                             merge: ipcData.mergeSubdocs,
-                            path: pdfFilePath
+                            path: pdfFilePath,
+                            removeAssets: ipcData.removeAssets,
                         }, () => {
                             afterExport(pdfFilePath, msgId);
                             if (ipcData.removeAssets) {

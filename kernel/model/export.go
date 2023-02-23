@@ -654,7 +654,7 @@ func processIFrame(tree *parse.Tree) {
 	}
 }
 
-func AddPDFOutline(id, p string, merge bool) (err error) {
+func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 	inFile := p
 	links, err := api.ListToCLinks(inFile)
 	if nil != err {
@@ -764,34 +764,218 @@ func AddPDFOutline(id, p string, merge bool) (err error) {
 		}
 	}
 
-	//var assetAbsPaths []string
-	//for _, dest := range assetDests {
-	//	absPath, _ := GetAssetAbsPath(dest)
-	//	if "" != absPath {
-	//		assetAbsPaths = append(assetAbsPaths, absPath)
-	//	}
-	//}
-	//
-	//if 0 < len(assetAbsPaths) {
-	//	outFile := inFile + ".tmp"
-	//	err = api.AddAttachmentsFile(inFile, outFile, assetAbsPaths, false, nil)
-	//	if nil != err {
-	//		logging.LogErrorf("add attachment failed: %s", err)
-	//		return
-	//	}
-	//
-	//	err = os.Rename(outFile, inFile)
-	//	if nil != err {
-	//		return
-	//	}
-	//}
-	//
-	//assetLinks, err := api.ListAssetLinks(inFile)
-	//if nil == err {
-	//	logging.LogInfof("pdf annotation: %+v", assetLinks)
-	//}
+	var assetAbsPaths []string
+	for _, dest := range assetDests {
+		absPath, _ := GetAssetAbsPath(dest)
+		if "" != absPath {
+			assetAbsPaths = append(assetAbsPaths, absPath)
+		}
+	}
+
+	pdfCtx, ctxErr := api.ReadContextFile(inFile)
+	if nil != ctxErr {
+		logging.LogErrorf("read pdf context failed: %s", ctxErr)
+		return
+	}
+
+	if 0 < len(assetAbsPaths) {
+		assetLinks, otherLinks, listErr := api.ListLinks(inFile)
+		if nil != listErr {
+			logging.LogErrorf("list asset links failed: %s", listErr)
+			return
+		}
+
+		if _, removeErr := pdfCtx.RemoveAnnotations(nil, nil, nil, false); nil != removeErr {
+			logging.LogWarnf("remove annotations failed: %s", removeErr)
+		}
+
+		linkMap := map[int][]pdfcpu.AnnotationRenderer{}
+		for _, link := range otherLinks {
+			link.URI, _ = url.PathUnescape(link.URI)
+			if 1 > len(linkMap[link.Page]) {
+				linkMap[link.Page] = []pdfcpu.AnnotationRenderer{link}
+			} else {
+				linkMap[link.Page] = append(linkMap[link.Page], link)
+			}
+		}
+
+		attachmentMap := map[int][]*pdfcpu.IndirectRef{}
+		now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
+		for _, link := range assetLinks {
+			link.URI = strings.ReplaceAll(link.URI, "http://127.0.0.1:6806/export/temp/", "")
+			link.URI, _ = url.PathUnescape(link.URI)
+
+			if !removeAssets {
+				// 不移除资源文件夹的话将超链接指向资源文件夹
+				if 1 > len(linkMap[link.Page]) {
+					linkMap[link.Page] = []pdfcpu.AnnotationRenderer{link}
+				} else {
+					linkMap[link.Page] = append(linkMap[link.Page], link)
+				}
+
+				continue
+			}
+
+			// 移除资源文件夹的话使用内嵌附件
+
+			absPath, getErr := GetAssetAbsPath(link.URI)
+			if nil != getErr {
+				continue
+			}
+
+			ir, newErr := pdfCtx.XRefTable.NewEmbeddedFileStreamDict(absPath)
+			if nil != newErr {
+				logging.LogWarnf("new embedded file stream dict failed: %s", newErr)
+				continue
+			}
+
+			fn := filepath.Base(absPath)
+			fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, pdfcpu.EncodeUTF16String(fn), "attached by SiYuan", *ir)
+			if nil != newErr {
+				logging.LogWarnf("new file spec dict failed: %s", newErr)
+				continue
+			}
+
+			ir, indErr := pdfCtx.XRefTable.IndRefForNewObject(fileSpecDict)
+			if nil != indErr {
+				logging.LogWarnf("ind ref for new object failed: %s", indErr)
+				continue
+			}
+
+			lx := link.Rect.LL.X + link.Rect.Width()
+			ly := link.Rect.LL.Y + link.Rect.Height()/2
+			ux := lx + link.Rect.Height()/2
+			uy := ly + link.Rect.Height()/2
+
+			d := pdfcpu.Dict(
+				map[string]pdfcpu.Object{
+					"Type":         pdfcpu.Name("Annot"),
+					"Subtype":      pdfcpu.Name("FileAttachment"),
+					"Contents":     pdfcpu.StringLiteral(""),
+					"Rect":         pdfcpu.Rect(lx, ly, ux, uy).Array(),
+					"P":            link.P,
+					"M":            now,
+					"F":            pdfcpu.Integer(0),
+					"Border":       pdfcpu.NewIntegerArray(0, 0, 1),
+					"C":            pdfcpu.NewNumberArray(0.5, 0.0, 0.5),
+					"CA":           pdfcpu.Float(0.95),
+					"CreationDate": now,
+					"Name":         pdfcpu.Name("FileAttachment"),
+					"FS":           *ir,
+					"NM":           pdfcpu.StringLiteral(""),
+				},
+			)
+
+			ann, indErr := pdfCtx.XRefTable.IndRefForNewObject(d)
+			if nil != indErr {
+				logging.LogWarnf("ind ref for new object failed: %s", indErr)
+				continue
+			}
+
+			pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(link.Page)
+			if nil != pageErr {
+				logging.LogWarnf("page dict ind ref failed: %s", pageErr)
+				continue
+			}
+
+			d, defErr := pdfCtx.DereferenceDict(*pageDictIndRef)
+			if nil != defErr {
+				logging.LogWarnf("dereference dict failed: %s", defErr)
+				continue
+			}
+
+			if 1 > len(attachmentMap[link.Page]) {
+				attachmentMap[link.Page] = []*pdfcpu.IndirectRef{ann}
+			} else {
+				attachmentMap[link.Page] = append(attachmentMap[link.Page], ann)
+			}
+		}
+
+		if 0 < len(linkMap) {
+			if _, addErr := pdfCtx.AddAnnotationsMap(linkMap, false); nil != addErr {
+				logging.LogErrorf("add annotations map failed: %s", addErr)
+			}
+		}
+
+		// 添加附件注解指向内嵌的附件
+		for page, anns := range attachmentMap {
+			pageDictIndRef, pageErr := pdfCtx.PageDictIndRef(page)
+			if nil != pageErr {
+				logging.LogWarnf("page dict ind ref failed: %s", pageErr)
+				continue
+			}
+
+			pageDict, defErr := pdfCtx.DereferenceDict(*pageDictIndRef)
+			if nil != defErr {
+				logging.LogWarnf("dereference dict failed: %s", defErr)
+				continue
+			}
+
+			array := pdfcpu.Array{}
+			for _, ann := range anns {
+				array = append(array, *ann)
+			}
+
+			obj, found := pageDict.Find("Annots")
+			if !found {
+				pageDict.Insert("Annots", array)
+				pdfCtx.EnsureVersionForWriting()
+				continue
+			}
+
+			ir, ok := obj.(pdfcpu.IndirectRef)
+			if !ok {
+				pageDict.Update("Annots", append(obj.(pdfcpu.Array), array...))
+				pdfCtx.EnsureVersionForWriting()
+				continue
+			}
+
+			// Annots array is an IndirectReference.
+
+			o, err := pdfCtx.Dereference(ir)
+			if err != nil || o == nil {
+				continue
+			}
+
+			annots, _ := o.(pdfcpu.Array)
+			entry, ok := pdfCtx.FindTableEntryForIndRef(&ir)
+			if !ok {
+				continue
+			}
+			entry.Object = append(annots, array...)
+			pdfCtx.EnsureVersionForWriting()
+		}
+	}
+
+	pdfcpu.VersionStr = "SiYuan v" + util.Ver
+	if writeErr := api.WriteContextFile(pdfCtx, inFile); nil != writeErr {
+		logging.LogErrorf("write pdf context failed: %s", writeErr)
+		return
+	}
 
 	return
+}
+
+func annotRect(i int, w, h, d, l float64) *pdfcpu.Rectangle {
+	// d..distance between annotation rectangles
+	// l..side length of rectangle
+
+	// max number of rectangles fitting into w
+	xmax := int((w - d) / (l + d))
+
+	// max number of rectangles fitting into h
+	ymax := int((h - d) / (l + d))
+
+	col := float64(i % xmax)
+	row := float64(i / xmax % ymax)
+
+	llx := d + col*(l+d)
+	lly := d + row*(l+d)
+
+	urx := llx + l
+	ury := lly + l
+
+	return pdfcpu.Rect(llx, lly, urx, ury)
 }
 
 func ExportStdMarkdown(id string) string {

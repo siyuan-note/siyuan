@@ -39,8 +39,9 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 		}
 	}
 
-	// 如果找不到非空段落，则使用第一个段落作为插入点
+	// 导出空文档 Word 和 PDF 时合并子文档失败 https://github.com/siyuan-note/siyuan/issues/7429
 	if nil == insertPoint {
+		// 如果找不到非空段落，则使用第一个段落作为插入点
 		insertPoint = rootTree.Root.FirstChild
 		if nil == insertPoint {
 			// 如果文档为空，则创建一个空段落作为插入点

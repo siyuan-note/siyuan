@@ -61,22 +61,22 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     <div class="fn__flex b3-dialog__cardaction fn__none">
         <div>
             <span></span>
-            <button data-type="0" class="b3-button b3-button--error">Again (A)</button>
+            <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">Again</button>
         </div>
         <span class="fn__flex-1"></span>
         <div>
             <span></span>
-            <button data-type="1" class="b3-button b3-button--warning">Hard (H)</button>
+            <button data-type="1" aria-label="2 / k" class="b3-button b3-button--warning b3-tooltips__s b3-tooltips">Hard</button>
         </div>
         <span class="fn__flex-1"></span>
         <div>
             <span></span>
-            <button data-type="2" class="b3-button b3-button--info">Good (G)</button>
+            <button data-type="2" aria-label="3 / l" class="b3-button b3-button--info b3-tooltips__s b3-tooltips">Good</button>
         </div>
         <span class="fn__flex-1"></span>
         <div>
             <span></span>
-            <button data-type="3" class="b3-button b3-button--success">Easy (E)</button>
+            <button data-type="3" aria-label="4 / ;" class="b3-button b3-button--success b3-tooltips__s b3-tooltips">Easy</button>
         </div>
     </div>
 </div>`,
@@ -131,13 +131,13 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         }
         let type = "";
         if (typeof event.detail === "string") {
-            if (event.detail === "a") {
+            if (event.detail === "1" || event.detail === "j") {
                 type = "0";
-            } else if (event.detail === "h") {
+            } else if (event.detail === "2" || event.detail === "k") {
                 type = "1";
-            } else if (event.detail === "g") {
+            } else if (event.detail === "3" || event.detail === "l") {
                 type = "2";
-            } else if (event.detail === "e") {
+            } else if (event.detail === "4" || event.detail === ";") {
                 type = "3";
             } else if (event.detail === "s") {
                 type = "-1";

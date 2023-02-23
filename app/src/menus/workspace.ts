@@ -136,7 +136,7 @@ export const workspaceMenu = (rect: DOMRect) => {
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.riffCard,
-                icon: "iconRiffCard",
+                iconHTML: '<svg class="b3-menu__icon" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg>',
                 accelerator: window.siyuan.config.keymap.general.riffCard.custom,
                 click: () => {
                     openCard();

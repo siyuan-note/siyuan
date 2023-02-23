@@ -142,7 +142,7 @@ export const popMenu = () => {
     <svg class="b3-list-item__graphic"><use xlink:href="#iconCalendar"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dailyNote}</span>
 </div>
 <div id="menuCard" class="b3-list-item b3-list-item--big">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>
+    <svg class="b3-list-item__graphic" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>
 </div>
 <div class="b3-list-item b3-list-item--big" id="menuNewNotebook">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>

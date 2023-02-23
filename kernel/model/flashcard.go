@@ -249,7 +249,7 @@ func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDs map[string]bool) {
 
 	for _, t := range trees {
 		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || !n.IsBlock() || ast.NodeDocument == n.Type {
+			if !entering || !n.IsBlock() {
 				return ast.WalkContinue
 			}
 

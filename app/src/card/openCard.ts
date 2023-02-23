@@ -84,6 +84,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         height: isMobile() ? "80vh" : "70vh",
     });
     (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
+    (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
     const editor = new Protyle(dialog.element.querySelector("[data-type='render']") as HTMLElement, {
         blockId: "",
         action: [Constants.CB_GET_ALL],
@@ -108,7 +109,6 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         });
     }
     (dialog.element.firstElementChild as HTMLElement).style.zIndex = "200";
-    (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
     dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
     const countElement = dialog.element.querySelector('[data-type="count"]');
     const actionElements = dialog.element.querySelectorAll(".b3-dialog__cardaction");

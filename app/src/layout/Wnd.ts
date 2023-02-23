@@ -47,7 +47,7 @@ export class Wnd {
         this.element = document.createElement("div");
         this.element.classList.add("fn__flex-1", "fn__flex");
         let dragHTML = '<div class="layout-tab-container__drag fn__none"></div>';
-        if (parentType === "left" || parentType === "right" || parentType === "top" || parentType === "bottom") {
+        if (parentType === "left" || parentType === "right" || parentType === "bottom") {
             dragHTML = "";
         }
         this.element.innerHTML = `<div data-type="wnd" data-id="${this.id}" class="fn__flex-column fn__flex fn__flex-1">
@@ -657,7 +657,7 @@ export class Wnd {
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);
                     this.children = [];
-                    if (["top", "bottom", "left", "right"].includes(this.parent.type)) {
+                    if (["bottom", "left", "right"].includes(this.parent.type)) {
                         item.panelElement.remove();
                     } else {
                         this.remove();

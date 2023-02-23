@@ -1,4 +1,4 @@
-type TLayout = "normal" | "top" | "bottom" | "left" | "right" | "center"
+type TLayout = "normal" | "bottom" | "left" | "right" | "center"
 type TSearchFilter = "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading"
     | "list" | "listItem" | "codeBlock" | "htmlBlock"
 type TDirection = "lr" | "tb"
@@ -12,7 +12,7 @@ type TDockType =
     | "backlink"
     | "backlinkOld"
     | "inbox"
-type TDockPosition = "Left" | "Right" | "Top" | "Bottom"
+type TDockPosition = "Left" | "Right" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
 type TEditorMode = "preview" | "wysiwyg"
 type TOperation =

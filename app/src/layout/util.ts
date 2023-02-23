@@ -402,9 +402,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
 
     if (layout instanceof Layout || layout instanceof Wnd) {
         if (layout instanceof Layout &&
-            (layout.type === "top" || layout.type === "bottom" || layout.type === "left" || layout.type === "right")) {
+            (layout.type === "bottom" || layout.type === "left" || layout.type === "right")) {
             // 四周布局使用默认值，清空内容，重置时使用 dock 数据
-            if (layout.type === "top" || layout.type === "bottom") {
+            if (layout.type === "bottom") {
                 json.children = [{
                     "instance": "Wnd",
                     "children": []
@@ -604,7 +604,7 @@ export const addResize = (obj: Layout | Wnd) => {
     }
 
     const getMinSize = (element: HTMLElement) => {
-        let minSize = 224;
+        let minSize = 227;
         Array.from(element.querySelectorAll(".file-tree")).find((item) => {
             if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
                 || item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) {
@@ -644,14 +644,9 @@ export const addResize = (obj: Layout | Wnd) => {
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
             nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
             previousElement.style.overflow = "auto";
-            if (!nextElement.nextElementSibling) {
-                if (!previousElement.previousElementSibling) {
-                    setSize(previousElement, direction);
-                } else {
-                    setSize(nextElement, direction);
-                }
-            } else if (nextElement.nextElementSibling?.nextElementSibling &&
-                nextElement.parentElement.lastElementChild.isSameNode(nextElement.nextElementSibling.nextElementSibling)) {
+            if (!nextElement.nextElementSibling || nextElement.nextElementSibling.classList.contains("layout__dockresize")) {
+                setSize(nextElement, direction);
+            } else {
                 setSize(previousElement, direction);
             }
             const x = event[direction === "lr" ? "clientX" : "clientY"];
@@ -682,6 +677,10 @@ export const addResize = (obj: Layout | Wnd) => {
                 }
                 if (window.siyuan.layout.rightDock?.layout.element.isSameNode(nextElement) &&
                     nextNowSize < getMinSize(nextElement)) {
+                    return;
+                }
+                if (window.siyuan.layout.bottomDock?.layout.element.isSameNode(nextElement) &&
+                    nextNowSize < 64) {
                     return;
                 }
                 if (!previousElement.classList.contains("fn__flex-1")) {

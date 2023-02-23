@@ -1,7 +1,7 @@
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {OpenDialogReturnValue, ipcRenderer} from "electron";
+import {ipcRenderer, OpenDialogReturnValue} from "electron";
 import {app, BrowserWindow, dialog, getCurrentWindow} from "@electron/remote";
 import * as fs from "fs";
 import * as path from "path";
@@ -33,14 +33,14 @@ export const saveExport = (option: { type: string, id: string }) => {
             content: `<div class="b3-dialog__content">
     <label class="fn__flex b3-label">
         <div class="fn__flex-1">
-            ${window.siyuan.languages.exportPDF4}
+            ${window.siyuan.languages.removeAssetsFolder}
         </div>
         <span class="fn__space"></span>
         <input id="removeAssets" class="b3-switch" type="checkbox" ${localData.removeAssets ? "checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
         <div class="fn__flex-1">
-            ${window.siyuan.languages.exportPDF6}
+            ${window.siyuan.languages.mergeSubdocs}
         </div>
         <span class="fn__space"></span>
         <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
@@ -215,7 +215,7 @@ const renderPDF = (id: string) => {
     </label>
     <label class="b3-label">
         <div>
-            ${window.siyuan.languages.exportPDF6}
+            ${window.siyuan.languages.mergeSubdocs}
         </div>
         <span class="fn__hr"></span>
         <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>

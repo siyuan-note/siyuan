@@ -1870,7 +1870,7 @@ export class WYSIWYG {
                     const lastEditElement = getContenteditableElement(getLastBlock(this.element.lastElementChild));
                     if (!lastEditElement ||
                         (this.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
-                        (this.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).textContent !== "")) {
+                        (this.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== "")) {
                         const emptyElement = genEmptyElement(false, false);
                         this.element.insertAdjacentElement("beforeend", emptyElement);
                         transaction(protyle, [{

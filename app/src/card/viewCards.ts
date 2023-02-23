@@ -129,14 +129,16 @@ export const viewCards = (deckID: string, title: string, cb:(response:IWebSocket
                         if (!nextElment && target.parentElement.parentElement.childElementCount > 1) {
                             nextElment = target.parentElement.parentElement.firstElementChild;
                         }
+
                         if (!nextElment) {
                             getArticle(edit, "");
+                            listElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`
                         } else {
                             getArticle(edit, nextElment.getAttribute("data-id"));
                             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                             nextElment.classList.add("b3-list-item--focus");
+                            target.parentElement.remove();
                         }
-                        target.parentElement.remove();
                         cb(removeResponse);
                     });
                     event.stopPropagation();

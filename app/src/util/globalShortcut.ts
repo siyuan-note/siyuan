@@ -88,6 +88,11 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
 };
 
 export const globalShortcut = () => {
+    document.body.addEventListener("mouseleave", (event) => {
+        window.siyuan.layout.leftDock.hideDock();
+        window.siyuan.layout.rightDock.hideDock();
+        window.siyuan.layout.bottomDock.hideDock();
+    });
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
         if (window.siyuan.hideBreadcrumb) {
             document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {

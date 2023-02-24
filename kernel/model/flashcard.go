@@ -155,6 +155,9 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 	return
 }
 
+// 每次调用复习时都先缓存一下卡片，以便在复习时支持撤销。
+var reviewCardCache = map[string]riff.Card{}
+
 func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
@@ -165,17 +168,33 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 	}
 
 	deck := Decks[deckID]
+	card := deck.GetCard(blockID)
+	if nil == card {
+		logging.LogErrorf("card not found [%s]", blockID)
+		return
+	}
+
+	// 缓存卡片以便撤销
+	reviewCardCache[card.ID()] = card
+
 	deck.Review(blockID, rating)
 	err = deck.Save()
 	if nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
+
+	dueCards := getDueFlashcards(deckID)
+	if 1 > len(dueCards) {
+		// 这个卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存
+		reviewCardCache = map[string]riff.Card{}
+	}
 	return
 }
 
 type Flashcard struct {
 	DeckID   string                 `json:"deckID"`
+	CardID   string                 `json:"cardID"`
 	BlockID  string                 `json:"blockID"`
 	NextDues map[riff.Rating]string `json:"nextDues"`
 }
@@ -211,6 +230,7 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 
 		ret = append(ret, &Flashcard{
 			DeckID:   builtinDeckID,
+			CardID:   card.ID(),
 			BlockID:  blockID,
 			NextDues: nextDues,
 		})
@@ -269,10 +289,21 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	}
 
 	if "" == deckID {
-		return getAllDueFlashcards()
+		ret = getAllDueFlashcards()
+		return
 	}
 
+	ret = getDueFlashcards(deckID)
+	return
+}
+
+func getDueFlashcards(deckID string) (ret []*Flashcard) {
 	deck := Decks[deckID]
+	if nil == deck {
+		logging.LogWarnf("deck not found [%s]", deckID)
+		return
+	}
+
 	cards := deck.Dues()
 	now := time.Now()
 	for _, card := range cards {
@@ -289,6 +320,7 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 
 		ret = append(ret, &Flashcard{
 			DeckID:   deckID,
+			CardID:   card.ID(),
 			BlockID:  blockID,
 			NextDues: nextDues,
 		})
@@ -299,7 +331,7 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	return
 }
 
-func getAllDueFlashcards() (ret []*Flashcard, err error) {
+func getAllDueFlashcards() (ret []*Flashcard) {
 	blockIDs := map[string]bool{}
 	now := time.Now()
 	for _, deck := range Decks {
@@ -321,6 +353,7 @@ func getAllDueFlashcards() (ret []*Flashcard, err error) {
 
 			ret = append(ret, &Flashcard{
 				DeckID:   deck.ID,
+				CardID:   card.ID(),
 				BlockID:  blockID,
 				NextDues: nextDues,
 			})

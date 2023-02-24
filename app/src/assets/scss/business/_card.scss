@@ -15,14 +15,32 @@
   }
 
   &__action {
-    padding: 16px 24px;
+    padding: 8px 16px;
 
-    & > div > span {
+    .b3-button {
+      padding: 8px;
       display: block;
-      color: var(--b3-theme-on-surface);
-      text-align: center;
-      line-height: 15px;
-      font-size: 10px;
+      margin: 0 auto;
+      width: 90%;
+
+      & > div {
+        font-size: 46px;
+        display: block;
+        line-height: 46px;
+        margin-bottom: 4px;
+      }
+    }
+
+    & > div {
+      flex: 1;
+
+      & > span {
+        display: block;
+        color: var(--b3-theme-on-surface);
+        text-align: center;
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
     }
   }
 
@@ -46,8 +64,6 @@
       }
     }
   }
-
-
 }
 
 

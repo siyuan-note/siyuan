@@ -54,32 +54,36 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         ${window.siyuan.languages.noDueCard}
     </div>
     <div class="fn__flex card__action${blocks.length === 0 ? " fn__none" : ""}">
-        <span class="fn__flex-1"></span>
-        <button data-type="-1" class="b3-button">Show (S)</button>
-        <span class="fn__flex-1"></span>
+        <button data-type="-1" class="b3-button fn__flex-1">Show (S)</button>
     </div>
     <div class="fn__flex card__action fn__none">
         <div>
             <span></span>
             <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
-                <span class="">❌</span>
+                <div>❌</div>
                 Again
             </button>
         </div>
-        <span class="fn__flex-1"></span>
         <div>
             <span></span>
-            <button data-type="1" aria-label="2 / k" class="b3-button b3-button--warning b3-tooltips__s b3-tooltips">Hard</button>
+            <button data-type="1" aria-label="2 / k" class="b3-button b3-button--warning b3-tooltips__s b3-tooltips">
+                <div>😬</div>
+                Hard
+            </button>
         </div>
-        <span class="fn__flex-1"></span>
         <div>
             <span></span>
-            <button data-type="2" aria-label="3 / l" class="b3-button b3-button--info b3-tooltips__s b3-tooltips">Good</button>
+            <button data-type="2" aria-label="3 / l" class="b3-button b3-button--info b3-tooltips__s b3-tooltips">
+                <div>😊</div>
+                Good
+            </button>
         </div>
-        <span class="fn__flex-1"></span>
         <div>
             <span></span>
-            <button data-type="3" aria-label="4 / ;" class="b3-button b3-button--success b3-tooltips__s b3-tooltips">Easy</button>
+            <button data-type="3" aria-label="4 / ;" class="b3-button b3-button--success b3-tooltips__s b3-tooltips">
+                <div>🌈</div>
+                Easy
+            </button>
         </div>
     </div>
 </div>`,

@@ -60,6 +60,8 @@ type Block struct {
 	Sort     int               `json:"sort"`
 	Created  string            `json:"created"`
 	Updated  string            `json:"updated"`
+
+	RiffCardID string `json:"riffCardID"`
 }
 
 func (block *Block) IsContainerBlock() bool {

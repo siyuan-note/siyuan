@@ -43,8 +43,6 @@ var deckLock = sync.Mutex{}
 
 func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
-
-	const pageSize = 20
 	deck := Decks[builtinDeckID]
 	if nil == deck {
 		return
@@ -59,49 +57,19 @@ func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCou
 		}
 	}
 	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
-	sort.Strings(allBlockIDs)
+	cards := deck.GetCardsByBlockIDs(allBlockIDs)
 
-	start := (page - 1) * pageSize
-	end := page * pageSize
-	if start > len(allBlockIDs) {
-		start = len(allBlockIDs)
-	}
-	if end > len(allBlockIDs) {
-		end = len(allBlockIDs)
-	}
-	blockIDs := allBlockIDs[start:end]
-	total = len(allBlockIDs)
-	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
-	if 1 > len(blockIDs) {
-		blocks = []*Block{}
-		return
-	}
-
-	sqlBlocks := sql.GetBlocks(blockIDs)
-	blocks = fromSQLBlocks(&sqlBlocks, "", 36)
-	if 1 > len(blocks) {
-		blocks = []*Block{}
-		return
-	}
-
-	for i, b := range blocks {
-		if nil == b {
-			blocks[i] = &Block{
-				ID:      blockIDs[i],
-				Content: Conf.Language(180),
-			}
-		}
-	}
+	blocks, total, pageCount = getCardsBlocks(cards, page)
 	return
 }
 
 func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
-	var allBlockIDs []string
-	const pageSize = 20
+	var cards []riff.Card
 	if "" == deckID {
 		for _, deck := range Decks {
-			allBlockIDs = append(allBlockIDs, deck.GetBlockIDs()...)
+			blockIDs := deck.GetBlockIDs()
+			cards = append(cards, deck.GetCardsByBlockIDs(blockIDs)...)
 		}
 	} else {
 		deck := Decks[deckID]
@@ -109,27 +77,37 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 			return
 		}
 
-		allBlockIDs = append(allBlockIDs, deck.GetBlockIDs()...)
+		blockIDs := deck.GetBlockIDs()
+		cards = append(cards, deck.GetCardsByBlockIDs(blockIDs)...)
 	}
 
-	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
-	sort.Strings(allBlockIDs)
+	blocks, total, pageCount = getCardsBlocks(cards, page)
+	return
+}
 
+func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCount int) {
+	const pageSize = 20
 	start := (page - 1) * pageSize
 	end := page * pageSize
-	if start > len(allBlockIDs) {
-		start = len(allBlockIDs)
+	if start > len(cards) {
+		start = len(cards)
 	}
-	if end > len(allBlockIDs) {
-		end = len(allBlockIDs)
+	if end > len(cards) {
+		end = len(cards)
 	}
-	blockIDs := allBlockIDs[start:end]
-	total = len(allBlockIDs)
+	cardIDs := cards[start:end]
+	total = len(cards)
 	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
-	if 1 > len(blockIDs) {
+	if 1 > len(cardIDs) {
 		blocks = []*Block{}
 		return
 	}
+
+	var blockIDs []string
+	for _, card := range cards {
+		blockIDs = append(blockIDs, card.BlockID())
+	}
+	sort.Strings(blockIDs)
 
 	sqlBlocks := sql.GetBlocks(blockIDs)
 	blocks = fromSQLBlocks(&sqlBlocks, "", 36)
@@ -144,7 +122,11 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 				ID:      blockIDs[i],
 				Content: Conf.Language(180),
 			}
+
+			continue
 		}
+
+		b.RiffCardID = cards[i].ID()
 	}
 	return
 }

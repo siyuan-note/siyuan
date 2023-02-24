@@ -314,17 +314,12 @@ func getDueFlashcards(deckID string) (ret []*Flashcard) {
 }
 
 func getAllDueFlashcards() (ret []*Flashcard) {
-	blockIDs := map[string]bool{}
 	now := time.Now()
 	for _, deck := range Decks {
 		cards := deck.Dues()
 		for _, card := range cards {
 			blockID := card.BlockID()
 			if nil == treenode.GetBlockTree(blockID) {
-				continue
-			}
-
-			if blockIDs[blockID] {
 				continue
 			}
 
@@ -339,7 +334,6 @@ func getAllDueFlashcards() (ret []*Flashcard) {
 				BlockID:  blockID,
 				NextDues: nextDues,
 			})
-			blockIDs[blockID] = true
 		}
 	}
 	if 1 > len(ret) {

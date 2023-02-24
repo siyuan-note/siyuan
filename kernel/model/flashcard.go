@@ -44,22 +44,20 @@ var deckLock = sync.Mutex{}
 func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 
-	treeBlockIDs := getTreeSubTreeChildBlocks(rootID)
-	var allBlockIDs []string
 	const pageSize = 20
 	deck := Decks[builtinDeckID]
 	if nil == deck {
 		return
 	}
 
-	for bID, _ := range deck.BlockCard {
-		if _, ok := treeBlockIDs[bID]; !ok {
-			continue
+	var allBlockIDs []string
+	deckBlockIDs := deck.GetBlockIDs()
+	treeBlockIDs := getTreeSubTreeChildBlocks(rootID)
+	for _, blockID := range deckBlockIDs {
+		if treeBlockIDs[blockID] {
+			allBlockIDs = append(allBlockIDs, blockID)
 		}
-
-		allBlockIDs = append(allBlockIDs, bID)
 	}
-
 	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
 	sort.Strings(allBlockIDs)
 
@@ -103,9 +101,7 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 	const pageSize = 20
 	if "" == deckID {
 		for _, deck := range Decks {
-			for bID, _ := range deck.BlockCard {
-				allBlockIDs = append(allBlockIDs, bID)
-			}
+			allBlockIDs = append(allBlockIDs, deck.GetBlockIDs()...)
 		}
 	} else {
 		deck := Decks[deckID]
@@ -113,9 +109,7 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 			return
 		}
 
-		for bID, _ := range deck.BlockCard {
-			allBlockIDs = append(allBlockIDs, bID)
-		}
+		allBlockIDs = append(allBlockIDs, deck.GetBlockIDs()...)
 	}
 
 	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
@@ -372,6 +366,84 @@ func getAllDueFlashcards() (ret []*Flashcard) {
 	return
 }
 
+func RemoveFlashcardsByCardIDs(deckID string, cardIDs []string) (err error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	var needRemoveDeckAttrBlockIDs []string
+	if "" == deckID {
+		// 在 All 卡包中移除
+		var affectedBlockIDs []string
+		for _, deck := range Decks {
+			changed := false
+			for _, cardID := range cardIDs {
+				card := deck.GetCard(cardID)
+				if nil == card {
+					continue
+				}
+
+				affectedBlockIDs = append(affectedBlockIDs, card.BlockID())
+				deck.RemoveCard(cardID)
+				changed = true
+			}
+
+			if changed {
+				if err = deck.Save(); nil != err {
+					return
+				}
+			}
+
+			// 检查刚刚移除的卡片关联的块是否还存在更多关联的卡片
+			affectedBlockIDs = gulu.Str.RemoveDuplicatedElem(affectedBlockIDs)
+			for _, blockID := range affectedBlockIDs {
+				moreRelatedCards := deck.GetCardsByBlockID(blockID)
+				if 1 > len(moreRelatedCards) {
+					needRemoveDeckAttrBlockIDs = append(needRemoveDeckAttrBlockIDs, blockID)
+				}
+			}
+		}
+	} else {
+		// 在指定卡包中移除
+		deck := Decks[deckID]
+		if nil == deck {
+			return
+		}
+
+		var affectedBlockIDs []string
+		for _, cardID := range cardIDs {
+			card := deck.GetCard(cardID)
+			if nil == card {
+				continue
+			}
+
+			affectedBlockIDs = append(affectedBlockIDs, card.BlockID())
+			deck.RemoveCard(cardID)
+			if err = deck.Save(); nil != err {
+				return
+			}
+		}
+
+		// 检查刚刚移除的卡片关联的块是否还存在更多关联的卡片
+		affectedBlockIDs = gulu.Str.RemoveDuplicatedElem(affectedBlockIDs)
+		for _, blockID := range affectedBlockIDs {
+			moreRelatedCards := deck.GetCardsByBlockID(blockID)
+			if 1 > len(moreRelatedCards) {
+				needRemoveDeckAttrBlockIDs = append(needRemoveDeckAttrBlockIDs, blockID)
+			}
+		}
+	}
+
+	if err = removeBlocksDeckAttr(needRemoveDeckAttrBlockIDs, deckID); nil != err {
+		return
+	}
+	return
+}
+
 func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
@@ -381,6 +453,21 @@ func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
 		return
 	}
 
+	if err = removeBlocksDeckAttr(blockIDs, deckID); nil != err {
+		return
+	}
+
+	if "" == deckID { // 支持在 All 卡包中移除闪卡 https://github.com/siyuan-note/siyuan/issues/7425
+		for _, deck := range Decks {
+			removeFlashcardsByBlockIDs(blockIDs, deck)
+		}
+	} else {
+		removeFlashcardsByBlockIDs(blockIDs, Decks[deckID])
+	}
+	return
+}
+
+func removeBlocksDeckAttr(blockIDs []string, deckID string) (err error) {
 	var rootIDs []string
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
@@ -394,7 +481,6 @@ func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
 	}
 	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 
-	availableDeckIDs := getDeckIDs()
 	trees := map[string]*parse.Tree{}
 	for _, blockID := range blockIDs {
 		rootID := blockRoots[blockID]
@@ -418,6 +504,7 @@ func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
 		deckAttrs := node.IALAttr("custom-riff-decks")
 		var deckIDs []string
 		if "" != deckID {
+			availableDeckIDs := getDeckIDs()
 			for _, dID := range strings.Split(deckAttrs, ",") {
 				if dID != deckID && gulu.Str.Contains(dID, availableDeckIDs) {
 					deckIDs = append(deckIDs, dID)
@@ -450,31 +537,19 @@ func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
 		pushBroadcastAttrTransactions(trans)
 	}
 
-	if "" == deckID { // 支持在 All 卡包中移除闪卡 https://github.com/siyuan-note/siyuan/issues/7425
-		for _, deck := range Decks {
-			removeFlashcard(blockIDs, deck)
-		}
-	} else {
-		removeFlashcard(blockIDs, Decks[deckID])
-	}
 	return
 }
 
-func removeFlashcard(blockIDs []string, deck *riff.Deck) {
+func removeFlashcardsByBlockIDs(blockIDs []string, deck *riff.Deck) {
 	if nil == deck {
 		logging.LogErrorf("deck is nil")
 		return
 	}
 
-	for _, blockID := range blockIDs {
-		// TODO 这里的代码需要重构，要支持一个块对应多张卡
-		cardID := deck.BlockCard[blockID]
-		if "" == cardID {
-			continue
-		}
-		deck.RemoveCard(cardID)
+	cards := deck.GetCardsByBlockIDs(blockIDs)
+	for _, card := range cards {
+		deck.RemoveCard(card.ID())
 	}
-
 	err := deck.Save()
 	if nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deck.ID, err)

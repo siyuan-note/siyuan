@@ -254,7 +254,7 @@ func deckData(deck *riff.Deck) map[string]interface{} {
 	return map[string]interface{}{
 		"id":      deck.ID,
 		"name":    deck.Name,
-		"size":    len(deck.BlockCard),
+		"size":    deck.CountCards(),
 		"created": time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"),
 		"updated": time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05"),
 	}

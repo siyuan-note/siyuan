@@ -1,4 +1,5 @@
 {
+  "pdfIsLoading": "PDF 正在加载中，请稍后再试",
   "addToDeck": "添加到卡包...",
   "quickMakeCard": "快速制卡",
   "allAttrs": "所有属性名和属性值",

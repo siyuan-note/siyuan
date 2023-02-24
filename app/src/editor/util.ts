@@ -1,7 +1,7 @@
 import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
 import {Wnd} from "../layout/Wnd";
-import {getDockByType, getInstanceById, getWndByLayout} from "../layout/util";
+import {getDockByType, getInstanceById, getWndByLayout, pdfIsLoading} from "../layout/util";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
 import {getDisplayName, pathPosix} from "../util/pathName";
@@ -77,9 +77,11 @@ const openFile = (options: IOpenFileOptions) => {
     if (options.assetPath) {
         const asset = allModels.asset.find((item) => {
             if (item.path == options.assetPath) {
-                item.parent.parent.switchTab(item.parent.headElement);
-                item.parent.parent.showHeading();
-                item.goToPage(options.page);
+                if (!pdfIsLoading(item.parent.parent.element)) {
+                    item.parent.parent.switchTab(item.parent.headElement);
+                    item.parent.parent.showHeading();
+                    item.goToPage(options.page);
+                }
                 return true;
             }
         });
@@ -104,7 +106,9 @@ const openFile = (options: IOpenFileOptions) => {
             editor = activeEditor;
         }
         if (editor) {
-            switchEditor(editor, options, allModels);
+            if (!pdfIsLoading(editor.parent.parent.element)) {
+                switchEditor(editor, options, allModels);
+            }
             return true;
         }
         // 没有初始化的页签无法检测到
@@ -141,6 +145,9 @@ const openFile = (options: IOpenFileOptions) => {
                 });
             }
             if (targetWnd) {
+                if (pdfIsLoading(targetWnd.element)) {
+                    return;
+                }
                 // 在右侧/下侧打开已有页签将进行页签切换 https://github.com/siyuan-note/siyuan/issues/5366
                 let hasEditor = targetWnd.children.find(item => {
                     if (item.model && item.model instanceof Editor && item.model.editor.protyle.block.rootID === options.rootID) {
@@ -157,7 +164,13 @@ const openFile = (options: IOpenFileOptions) => {
             } else {
                 wnd.split(direction).addTab(newTab(options));
             }
-        } else if (options.keepCursor && wnd.children[0].headElement) {
+            wnd.showHeading();
+            return;
+        }
+        if (pdfIsLoading(wnd.element)) {
+            return;
+        }
+        if (options.keepCursor && wnd.children[0].headElement) {
             const tab = newTab(options);
             tab.headElement.setAttribute("keep-cursor", options.id);
             wnd.addTab(tab, options.keepCursor);

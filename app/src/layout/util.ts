@@ -28,6 +28,7 @@ import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {getSearch, isWindow} from "../util/functions";
+import {showMessage} from "../dialog/message";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -578,6 +579,14 @@ export const copyTab = (tab: Tab) => {
         }
     });
 };
+
+export const pdfIsLoading = (element: HTMLElement) => {
+    const isLoading = element.querySelector('.layout-tab-container > [data-loading="true"]') ? true : false
+    if (isLoading) {
+        showMessage(window.siyuan.languages.pdfIsLoading);
+    }
+    return isLoading;
+}
 
 export const getInstanceById = (id: string, layout = window.siyuan.layout.centerLayout) => {
     const _getInstanceById = (item: Layout | Wnd, id: string) => {

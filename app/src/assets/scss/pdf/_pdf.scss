@@ -251,6 +251,7 @@
   border-bottom: 1px solid var(--b3-theme-surface-lighter);
   transition-duration: 200ms;
   transition-timing-function: ease;
+  z-index: 1;
 }
 
 #loadingBar {

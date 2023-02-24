@@ -3,7 +3,7 @@ import {genUUID} from "../util/genID";
 import {
     getInstanceById,
     getWndByLayout, JSONToCenter,
-    newCenterEmptyTab,
+    newCenterEmptyTab, pdfIsLoading,
     resizeTabs,
     setPanelFocus,
     switchWnd
@@ -100,7 +100,7 @@ export class Wnd {
                 } else if (target.classList.contains("item__close") && target.getAttribute("data-type") === "more") {
                     this.renderTabList(event);
                     break;
-                } else if (target.tagName === "LI" && target.getAttribute("data-id")) {
+                } else if (target.tagName === "LI" && target.getAttribute("data-id") && !pdfIsLoading(this.element)) {
                     this.switchTab(target, true);
                     break;
                 }
@@ -441,7 +441,7 @@ export class Wnd {
         if (currentTab && target === currentTab.headElement) {
             if (currentTab.model instanceof Graph) {
                 currentTab.model.onGraph(false);
-            } else if (currentTab.model instanceof Asset && currentTab.model.pdfObject) {
+            } else if (currentTab.model instanceof Asset && currentTab.model.pdfObject && currentTab.model.pdfObject.pdfViewer) {
                 // https://github.com/siyuan-note/siyuan/issues/5655
                 currentTab.model.pdfObject.pdfViewer.container.focus();
             }

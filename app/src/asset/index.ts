@@ -467,14 +467,16 @@ export class Asset extends Model {
                     const observer = new MutationObserver(() => {
                         this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
                             this.element, this.pdfPage, this.pdfId);
+                        this.element.setAttribute("data-loading", "true")
                         observer.disconnect();
                     });
                     observer.observe(this.element, {attributeFilter: ["class"]});
                 } else {
                     this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
                         this.element, this.pdfPage, this.pdfId);
+                    this.element.setAttribute("data-loading", "true")
                 }
-            });
+            }, Constants.TIMEOUT_BLOCKLOAD);
             /// #endif
         }
     }

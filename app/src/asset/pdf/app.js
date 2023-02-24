@@ -80,6 +80,7 @@ import { ViewHistory } from './view_history.js'
 import { Constants } from '../../constants'
 import { GenericExternalServices } from './genericcom'
 import { getPdfInstance, hlPDFRect } from '../anno'
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 
 const DISABLE_AUTO_FETCH_LOADING_BAR_TIMEOUT = 5000 // ms
 const FORCE_PAGES_LOADED_TIMEOUT = 10000 // ms
@@ -1294,6 +1295,11 @@ class PDFViewerApplication {
         // To prevent any future issues, e.g. the document being completely
         // blank on load, always trigger rendering here.
         pdfViewer.update()
+        // NOTE: 没有渲染完就切换页签导致 https://ld246.com/article/1677072688346
+        const tabElement = hasClosestByClassName(pdfViewer.container, "fn__flex-1")
+        if (tabElement) {
+            tabElement.removeAttribute("data-loading")
+        }
       })
     })
 
@@ -1698,6 +1704,10 @@ class PDFViewerApplication {
     this.pdfViewer.cleanup()
     this.pdfThumbnailViewer.cleanup()
 
+    // NOTE: 防止定时任务导致 PDF this.messageHandler.sendWithPromise 报错
+    if (this.pdfLoadingTask.destroyed) {
+      return;
+    }
     if (
       typeof PDFJSDev === 'undefined' ||
       PDFJSDev.test('!PRODUCTION || GENERIC')

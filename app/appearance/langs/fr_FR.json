@@ -1,4 +1,5 @@
 {
+  "pdfIsLoading": "Le PDF est en cours de chargement, veuillez réessayer plus tard",
   "addToDeck": "Ajouter au deck...",
   "quickMakeCard": "Carte de création rapide",
   "allAttrs": "Tous les noms d'attributs et les valeurs d'attributs",

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {hasClosestByAttribute} from "../../protyle/util/hasClosest";
+
 const DEFAULT_SCALE_VALUE = "auto";
 const DEFAULT_SCALE = 1.0;
 const DEFAULT_SCALE_DELTA = 1.1;

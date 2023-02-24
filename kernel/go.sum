@@ -12,6 +12,8 @@ github.com/88250/lute v1.7.6-0.20230223100349-d4c62da413ce h1:PGos/Sz/SRVDPzToUg
 github.com/88250/lute v1.7.6-0.20230223100349-d4c62da413ce/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/pdfcpu v0.3.14-0.20230223050947-68dec81c7661 h1:s8YOfk7TpajM8SBivP0ReIHmNfMQu20hWgEBc98D14w=
 github.com/88250/pdfcpu v0.3.14-0.20230223050947-68dec81c7661/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
+github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390 h1:q2AR33VoQ87WYtvZ4pEvwj5gZkv22HK/yMlPWwF1oyc=
+github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1/go.mod h1:U3pckKQIgxxkmZjV5yXQjHdGxQK0o/vEZeZ6cQsxfHw=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=

@@ -34,7 +34,7 @@ export const viewCards = (deckID: string, title: string, cb:(response:IWebSocket
             ${renderViewItem(response.data.blocks)}
         </ul>
         <div id="cardPreview" class="fn__flex-1 fn__none"></div>
-        <div class="fn__flex-1 b3-dialog__cardempty">${window.siyuan.languages.emptyContent}</div>
+        <div class="fn__flex-1 card__empty">${window.siyuan.languages.emptyContent}</div>
     </div>
 </div>`,
             width: isMobile() ? "98vw" : "80vw",

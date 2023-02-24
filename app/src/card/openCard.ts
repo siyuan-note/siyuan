@@ -48,17 +48,17 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>
         ${html}
     </div>
-    <div class="b3-dialog__cardblock b3-dialog__cardblock--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
-    <div class="b3-dialog__cardempty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
+    <div class="card__block card__block--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
+    <div class="card__empty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
         <div>🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
-    <div class="fn__flex b3-dialog__cardaction${blocks.length === 0 ? " fn__none" : ""}">
+    <div class="fn__flex card__action${blocks.length === 0 ? " fn__none" : ""}">
         <span class="fn__flex-1"></span>
         <button data-type="-1" class="b3-button">Show (S)</button>
         <span class="fn__flex-1"></span>
     </div>
-    <div class="fn__flex b3-dialog__cardaction fn__none">
+    <div class="fn__flex card__action fn__none">
         <div>
             <span></span>
             <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
@@ -114,7 +114,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     (dialog.element.firstElementChild as HTMLElement).style.zIndex = "200";
     dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
     const countElement = dialog.element.querySelector('[data-type="count"]');
-    const actionElements = dialog.element.querySelectorAll(".b3-dialog__cardaction");
+    const actionElements = dialog.element.querySelectorAll(".card__action");
     dialog.element.addEventListener("click", (event) => {
         const viewElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "view");
         if (viewElement) {
@@ -159,7 +159,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         event.stopPropagation();
         hideElements(["toolbar", "hint", "util"], editor.protyle);
         if (type === "-1") {
-            editor.protyle.element.classList.remove("b3-dialog__cardblock--hide");
+            editor.protyle.element.classList.remove("card__block--hide");
             actionElements[0].classList.add("fn__none");
             actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
                 element.previousElementSibling.textContent = blocks[index].nextDues[btnIndex];
@@ -174,7 +174,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 rating: parseInt(type)
             }, () => {
                 index++;
-                editor.protyle.element.classList.add("b3-dialog__cardblock--hide");
+                editor.protyle.element.classList.add("card__block--hide");
                 if (index > blocks.length - 1) {
                     countElement.classList.add("fn__none");
                     editor.protyle.element.classList.add("fn__none");
@@ -204,7 +204,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {
             blocks = cardsChangeResponse.data;
             index = 0;
-            editor.protyle.element.classList.add("b3-dialog__cardblock--hide");
+            editor.protyle.element.classList.add("card__block--hide");
             if (blocks.length > 0) {
                 countElement.lastElementChild.innerHTML = `<span>1</span>/${blocks.length}`;
                 countElement.classList.remove("fn__none");

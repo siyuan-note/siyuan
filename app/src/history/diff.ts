@@ -27,7 +27,7 @@ const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
 let leftEditor: Protyle;
 let rightEditor: Protyle;
 const renderCompare = (element: HTMLElement) => {
-    const listElement = hasClosestByClassName(element, "b3-dialog__diff");
+    const listElement = hasClosestByClassName(element, "history__diff");
     if (!listElement) {
         return;
     }
@@ -112,7 +112,7 @@ export const showDiff = (data: { id: string, time: string }[]) => {
         const dialog = new Dialog({
             title: window.siyuan.languages.compare,
             content: `<div class="fn__flex" style="height: 100%">
-    <div class="b3-dialog__diff">
+    <div class="history__diff">
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
@@ -172,7 +172,7 @@ export const showDiff = (data: { id: string, time: string }[]) => {
                     if (target.classList.contains("b3-list-item--focus")) {
                         return;
                     }
-                    dialog.element.querySelector(".b3-dialog__diff .b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                    dialog.element.querySelector(".history__diff .b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                     target.classList.add("b3-list-item--focus");
                     renderCompare(target);
                 }

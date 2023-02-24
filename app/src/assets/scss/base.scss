@@ -29,6 +29,8 @@
 @import "business/search";
 @import "pickr/pcr";
 @import "viewerjs/viewer";
+@import "business/export";
+@import "business/card";
 
 /*
 .status: 3
@@ -414,6 +416,28 @@ html {
   .b3-list-item__graphic.popover__block {
     align-self: flex-start;
     margin-top: 7px;
+  }
+}
+
+.switch-doc {
+  max-height: 70vh;
+  width: 520px;
+
+  .b3-list:last-child {
+    border-left: 1px solid var(--b3-theme-surface-lighter);
+    max-height: calc(70vh - 35px)
+  }
+
+  &__path {
+    padding: 4px 8px;
+    border-top: 1px solid var(--b3-theme-surface-lighter);
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 18px;
+    min-height: 18px;
   }
 }
 

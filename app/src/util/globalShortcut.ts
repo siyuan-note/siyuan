@@ -474,12 +474,12 @@ export const globalShortcut = () => {
             hideElements(["dialog"]);
             switchDialog = new Dialog({
                 title: window.siyuan.languages.switchTab,
-                content: `<div class="fn__flex-column b3-dialog--switch">
+                content: `<div class="fn__flex-column switch-doc">
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="fn__flex">${dockHtml}
         <ul${!isTabWindow ? "" : ' style="border-left:0"'} class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>
-    <div class="dialog__path"></div>
+    <div class="switch-doc__path"></div>
 </div>`,
                 destroyCallback: () => {
                     if (range && range.getBoundingClientRect().height !== 0) {
@@ -967,12 +967,12 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
         }
         const dialog = new Dialog({
             title: window.siyuan.languages.recentDocs,
-            content: `<div class="fn__flex-column b3-dialog--switch">
+            content: `<div class="fn__flex-column switch-doc">
     <div class="fn__hr"><input style="opacity: 0;height: 1px;box-sizing: border-box"></div>
     <div class="fn__flex">${dockHtml}
         <ul${!isWindow() ? "" : ' style="border-left:0"'} class="b3-list b3-list--background fn__flex-1">${tabHtml}</ul>
     </div>
-    <div class="dialog__path"></div>
+    <div class="switch-doc__path"></div>
 </div>`,
             destroyCallback: () => {
                 if (range && range.getBoundingClientRect().height !== 0) {
@@ -984,10 +984,10 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
             fetchPost("/api/filetree/getFullHPathByID", {
                 id: response.data[0].rootID
             }, (response) => {
-                dialog.element.querySelector(".dialog__path").innerHTML = escapeHtml(response.data);
+                dialog.element.querySelector(".switch-doc__path").innerHTML = escapeHtml(response.data);
             });
         } else {
-            dialog.element.querySelector(".dialog__path").innerHTML = dialog.element.querySelector(".b3-list-item--focus").textContent;
+            dialog.element.querySelector(".switch-doc__path").innerHTML = dialog.element.querySelector(".b3-list-item--focus").textContent;
         }
         dialog.element.querySelector("input").focus();
         dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.recentDocs.custom);

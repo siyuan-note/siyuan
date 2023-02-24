@@ -409,7 +409,7 @@ export class Breadcrumb {
         }
         this.id = id;
         const excludeTypes: string[] = [];
-        if (this.element.parentElement?.parentElement && this.element.parentElement.parentElement.classList.contains("b3-dialog__cardblock")) {
+        if (this.element.parentElement?.parentElement && this.element.parentElement.parentElement.classList.contains("card__block")) {
             // 闪卡面包屑不能显示答案
             excludeTypes.push("NodeTextMark-mark");
         }

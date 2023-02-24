@@ -67,8 +67,9 @@ interface ICardPackage {
 }
 
 interface ICard {
-    blockID: string
     deckID: string
+    cardID: string
+    blockID: string
     nextDues: IObject
 }
 

@@ -174,6 +174,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         if (["0", "1", "2", "3"].includes(type)) {
             fetchPost("/api/riff/reviewRiffCard", {
                 deckID: blocks[index].deckID,
+                cardID: blocks[index].cardID,
                 blockID: blocks[index].blockID,
                 rating: parseInt(type)
             }, () => {

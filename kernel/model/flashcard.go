@@ -158,7 +158,7 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 // reviewCardCache <cardID, card> 用于复习时缓存卡片，以便支持撤销。
 var reviewCardCache = map[string]riff.Card{}
 
-func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err error) {
+func ReviewFlashcard(deckID, cardID, blockID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
@@ -168,9 +168,9 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 	}
 
 	deck := Decks[deckID]
-	card := deck.GetCard(blockID)
+	card := deck.GetCard(cardID)
 	if nil == card {
-		logging.LogErrorf("card not found [%s]", blockID)
+		logging.LogErrorf("card not found [%s]", cardID)
 		return
 	}
 
@@ -467,7 +467,12 @@ func removeFlashcard(blockIDs []string, deck *riff.Deck) {
 	}
 
 	for _, blockID := range blockIDs {
-		deck.RemoveCard(blockID)
+		// TODO 这里的代码需要重构，要支持一个块对应多张卡
+		cardID := deck.BlockCard[blockID]
+		if "" == cardID {
+			continue
+		}
+		deck.RemoveCard(cardID)
 	}
 
 	err := deck.Save()

@@ -70,7 +70,7 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
-func NetImg2LocalAssets(rootID string) (err error) {
+func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 	tree, err := loadTreeByBlockID(rootID)
 	if nil != err {
 		return
@@ -138,6 +138,7 @@ func NetImg2LocalAssets(rootID string) (err error) {
 				}
 				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), u), 15000)
 				request := httpclient.NewBrowserRequest()
+				request.SetHeader("Referer", originalURL) // 改进浏览器剪藏扩展转换本地图片成功率 https://github.com/siyuan-note/siyuan/issues/7464
 				resp, reqErr := request.Get(u)
 				if nil != reqErr {
 					logging.LogErrorf("download net img [%s] failed: %s", u, reqErr)

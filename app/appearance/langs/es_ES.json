@@ -1,5 +1,10 @@
 {
   "pdfIsLoading": "El PDF se está cargando, inténtalo de nuevo más tarde",
+  "cardShowAnswer": "Afficher la réponse",
+  "cardRatingAgain": "Otra vez",
+  "cardRatingHard": "Difícil",
+  "cardRatingGood": "Bueno",
+  "cardRatingEasy": "Fácil",
   "addToDeck": "Agregar a la plataforma...",
   "quickMakeCard": "Tarjeta de creación rápida",
   "allAttrs": "Todos los nombres de atributos y valores de atributos",

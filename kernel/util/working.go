@@ -180,15 +180,12 @@ var (
 	SnippetsPath   string        // 数据目录下的 snippets/ 路径
 
 	UIProcessIDs = sync.Map{} // UI 进程 ID
-
-	IsNewbie bool // 是否是第一次安装
 )
 
 func initWorkspaceDir(workspaceArg string) {
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
 	workspaceConf := filepath.Join(userHomeConfDir, "workspace.json")
 	if !gulu.File.IsExist(workspaceConf) {
-		IsNewbie = ContainerStd == Container // 只有桌面端需要设置新手标识，前端自动挂载帮助文档
 		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
 			log.Printf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
 			os.Exit(ExitCodeCreateConfDirErr)

@@ -1,4 +1,9 @@
 {
+  "cardShowAnswer": "Afficher la réponse",
+  "cardRatingAgain": "Encore",
+  "cardRatingHard": "Difficile",
+  "cardRatingGood": "Bien",
+  "cardRatingEasy": "Facile",
   "pdfIsLoading": "Le PDF est en cours de chargement, veuillez réessayer plus tard",
   "addToDeck": "Ajouter au deck...",
   "quickMakeCard": "Carte de création rapide",

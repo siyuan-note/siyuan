@@ -29,7 +29,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -156,6 +155,9 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 	return
 }
 
+// reviewCardCache <cardID, card> 用于复习时缓存卡片，以便支持撤销。
+var reviewCardCache = map[string]riff.Card{}
+
 func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
@@ -166,17 +168,39 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 	}
 
 	deck := Decks[deckID]
+	card := deck.GetCard(blockID)
+	if nil == card {
+		logging.LogErrorf("card not found [%s]", blockID)
+		return
+	}
+
+	if cachedCard := reviewCardCache[card.ID()]; nil != cachedCard {
+		// 命中缓存说明这张卡片已经复习过了，这次调用复习是撤销后再次复习
+		// 将缓存的卡片重新覆盖回卡包中，以恢复最开始复习前的状态
+		deck.SetCard(cachedCard)
+	} else {
+		// 首次复习该卡片，将卡片缓存以便后续支持撤销后再次复习
+		reviewCardCache[card.ID()] = card
+	}
+
 	deck.Review(blockID, rating)
 	err = deck.Save()
 	if nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
+
+	dueCards := getDueFlashcards(deckID)
+	if 1 > len(dueCards) {
+		// 该卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存
+		reviewCardCache = map[string]riff.Card{}
+	}
 	return
 }
 
 type Flashcard struct {
 	DeckID   string                 `json:"deckID"`
+	CardID   string                 `json:"cardID"`
 	BlockID  string                 `json:"blockID"`
 	NextDues map[riff.Rating]string `json:"nextDues"`
 }
@@ -207,11 +231,12 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 
 		nextDues := map[riff.Rating]string{}
 		for rating, due := range card.NextDues() {
-			nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+			nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
 		}
 
 		ret = append(ret, &Flashcard{
 			DeckID:   builtinDeckID,
+			CardID:   card.ID(),
 			BlockID:  blockID,
 			NextDues: nextDues,
 		})
@@ -270,10 +295,21 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	}
 
 	if "" == deckID {
-		return getAllDueFlashcards()
+		ret = getAllDueFlashcards()
+		return
 	}
 
+	ret = getDueFlashcards(deckID)
+	return
+}
+
+func getDueFlashcards(deckID string) (ret []*Flashcard) {
 	deck := Decks[deckID]
+	if nil == deck {
+		logging.LogWarnf("deck not found [%s]", deckID)
+		return
+	}
+
 	cards := deck.Dues()
 	now := time.Now()
 	for _, card := range cards {
@@ -285,11 +321,12 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 
 		nextDues := map[riff.Rating]string{}
 		for rating, due := range card.NextDues() {
-			nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+			nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
 		}
 
 		ret = append(ret, &Flashcard{
 			DeckID:   deckID,
+			CardID:   card.ID(),
 			BlockID:  blockID,
 			NextDues: nextDues,
 		})
@@ -300,7 +337,7 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	return
 }
 
-func getAllDueFlashcards() (ret []*Flashcard, err error) {
+func getAllDueFlashcards() (ret []*Flashcard) {
 	blockIDs := map[string]bool{}
 	now := time.Now()
 	for _, deck := range Decks {
@@ -317,11 +354,12 @@ func getAllDueFlashcards() (ret []*Flashcard, err error) {
 
 			nextDues := map[riff.Rating]string{}
 			for rating, due := range card.NextDues() {
-				nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+				nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
 			}
 
 			ret = append(ret, &Flashcard{
 				DeckID:   deck.ID,
+				CardID:   card.ID(),
 				BlockID:  blockID,
 				NextDues: nextDues,
 			})

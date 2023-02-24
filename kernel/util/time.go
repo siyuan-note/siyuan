@@ -17,7 +17,11 @@
 package util
 
 import (
+	"math"
+	"strings"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 func Millisecond2Time(t int64) time.Time {
@@ -32,4 +36,38 @@ func CurrentTimeMillis() int64 {
 
 func CurrentTimeSecondsStr() string {
 	return time.Now().Format("20060102150405")
+}
+
+func HumanizeRelTime(a time.Time, b time.Time, lang string) string {
+	_, magnitudes := humanizeTimeMagnitudes(lang)
+	return strings.TrimSpace(humanize.CustomRelTime(a, b, "", "", magnitudes))
+}
+
+func HumanizeTime(then time.Time, lang string) string {
+	labels, magnitudes := humanizeTimeMagnitudes(lang)
+	return strings.TrimSpace(humanize.CustomRelTime(then, time.Now(), labels["albl"].(string), labels["blbl"].(string), magnitudes))
+}
+
+func humanizeTimeMagnitudes(lang string) (labels map[string]interface{}, magnitudes []humanize.RelTimeMagnitude) {
+	labels = TimeLangs[lang]
+	magnitudes = []humanize.RelTimeMagnitude{
+		{time.Second, labels["now"].(string), time.Second},
+		{2 * time.Second, labels["1s"].(string), 1},
+		{time.Minute, labels["xs"].(string), time.Second},
+		{2 * time.Minute, labels["1m"].(string), 1},
+		{time.Hour, labels["xm"].(string), time.Minute},
+		{2 * time.Hour, labels["1h"].(string), 1},
+		{humanize.Day, labels["xh"].(string), time.Hour},
+		{2 * humanize.Day, labels["1d"].(string), 1},
+		{humanize.Week, labels["xd"].(string), humanize.Day},
+		{2 * humanize.Week, labels["1w"].(string), 1},
+		{humanize.Month, labels["xw"].(string), humanize.Week},
+		{2 * humanize.Month, labels["1M"].(string), 1},
+		{humanize.Year, labels["xM"].(string), humanize.Month},
+		{18 * humanize.Month, labels["1y"].(string), 1},
+		{2 * humanize.Year, labels["2y"].(string), 1},
+		{humanize.LongTime, labels["xy"].(string), humanize.Year},
+		{math.MaxInt64, labels["max"].(string), 1},
+	}
+	return
 }

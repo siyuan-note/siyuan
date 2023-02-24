@@ -128,7 +128,7 @@ export const initFramework = () => {
         closePanel();
     });
     initEditorName();
-    if (window.siyuan.config.newbie) {
+    if (window.siyuan.config.openHelp) {
         mountHelp();
     }
     const transactionTipElement = document.getElementById("transactionTip");

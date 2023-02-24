@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -80,7 +81,7 @@ func extensionCopy(c *gin.Context) {
 			continue
 		}
 		fName := path.Base(u.Path)
-		fName = util.FilterUploadFileName(fName)
+
 		f, err := file[0].Open()
 		if nil != err {
 			ret.Code = -1
@@ -96,10 +97,19 @@ func extensionCopy(c *gin.Context) {
 		}
 
 		ext := path.Ext(fName)
-		fName = fName[0 : len(fName)-len(ext)]
+		originalExt := ext
+		if "" == ext || strings.Contains(ext, "!") {
+			// 改进浏览器剪藏扩展转换本地图片后缀 https://github.com/siyuan-note/siyuan/issues/7467
+			if mtype := mimetype.Detect(data); nil != mtype {
+				ext = mtype.Extension()
+			}
+		}
 		if "" == ext && bytes.HasPrefix(data, []byte("<svg ")) && bytes.HasSuffix(data, []byte("</svg>")) {
 			ext = ".svg"
 		}
+
+		fName = fName[0 : len(fName)-len(originalExt)]
+		fName = util.FilterUploadFileName(fName)
 		fName = fName + "-" + ast.NewNodeID() + ext
 		writePath := filepath.Join(assets, fName)
 		if err = filelock.WriteFile(writePath, data); nil != err {

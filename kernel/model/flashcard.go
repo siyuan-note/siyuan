@@ -155,7 +155,7 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 	return
 }
 
-// 每次调用复习时都先缓存一下卡片，以便在复习时支持撤销。
+// reviewCardCache <cardID, card> 用于复习时缓存卡片，以便支持撤销。
 var reviewCardCache = map[string]riff.Card{}
 
 func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err error) {
@@ -174,8 +174,14 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 		return
 	}
 
-	// 缓存卡片以便撤销
-	reviewCardCache[card.ID()] = card
+	if cachedCard := reviewCardCache[card.ID()]; nil != cachedCard {
+		// 命中缓存说明这张卡片已经复习过了，这次调用复习是撤销操作
+		// 将缓存的卡片重新覆盖回卡包中，以恢复上次复习前的状态
+		deck.SetCard(cachedCard)
+	} else {
+		// 缓存卡片以便撤销
+		reviewCardCache[card.ID()] = card
+	}
 
 	deck.Review(blockID, rating)
 	err = deck.Save()
@@ -186,7 +192,7 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 
 	dueCards := getDueFlashcards(deckID)
 	if 1 > len(dueCards) {
-		// 这个卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存
+		// 该卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存
 		reviewCardCache = map[string]riff.Card{}
 	}
 	return

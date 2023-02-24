@@ -61,28 +61,28 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             <span></span>
             <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
                 <div>❌</div>
-                ${window.siyuan.languages.cardRatingAgain}
+                ${window.siyuan.languages.cardRatingAgain} (1)
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="1" aria-label="2 / k" class="b3-button b3-button--warning b3-tooltips__s b3-tooltips">
                 <div>😬</div>
-                ${window.siyuan.languages.cardRatingHard}
+                ${window.siyuan.languages.cardRatingHard} (2)
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="2" aria-label="3 / l" class="b3-button b3-button--info b3-tooltips__s b3-tooltips">
                 <div>😊</div>
-                ${window.siyuan.languages.cardRatingGood}
+                ${window.siyuan.languages.cardRatingGood} (3)
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="3" aria-label="4 / ;" class="b3-button b3-button--success b3-tooltips__s b3-tooltips">
                 <div>🌈</div>
-                ${window.siyuan.languages.cardRatingEasy}
+                ${window.siyuan.languages.cardRatingEasy} (4)
             </button>
         </div>
     </div>

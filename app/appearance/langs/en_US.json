@@ -1,4 +1,8 @@
 {
+  "cardRatingAgain": "Again",
+  "cardRatingHard": "Hard",
+  "cardRatingGood": "Good",
+  "cardRatingEasy": "Easy",
   "addToDeck": "Add to Deck...",
   "quickMakeCard": "Quick make card",
   "allAttrs": "All attribute names and attribute values",

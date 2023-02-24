@@ -1,4 +1,8 @@
 {
+  "cardRatingAgain": "Encore",
+  "cardRatingHard": "Difficile",
+  "cardRatingGood": "Bien",
+  "cardRatingEasy": "Facile",
   "addToDeck": "Ajouter au deck...",
   "quickMakeCard": "Carte de création rapide",
   "allAttrs": "Tous les noms d'attributs et les valeurs d'attributs",

@@ -54,7 +54,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         ${window.siyuan.languages.noDueCard}
     </div>
     <div class="fn__flex card__action${blocks.length === 0 ? " fn__none" : ""}">
-        <button data-type="-1" class="b3-button fn__flex-1">Show (S)</button>
+        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer} (S)</button>
     </div>
     <div class="fn__flex card__action fn__none">
         <div>

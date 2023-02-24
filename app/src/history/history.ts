@@ -7,7 +7,7 @@ import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../util/fetch";
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {showDiff} from "./diff";
 import {setStorageVal} from "../protyle/util/compatibility";
@@ -432,7 +432,7 @@ export const openHistory = () => {
                             iconElement.classList.add("b3-list-item__arrow--open");
                             let html = "";
                             response.data.items.forEach((docItem: { title: string, path: string }) => {
-                                html += `<li title="${escapeHtml(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 44px">
+                                html += `<li title="${escapeAttr(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 44px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">

@@ -1,0 +1,19 @@
+.pcr-app {
+  box-shadow: var(--b3-dialog-shadow);
+  border: 1px solid var(--b3-theme-surface-lighter);
+  border-radius: 4px;
+
+  .pcr-interaction .pcr-result {
+    @extend .b3-text-field;
+    background: transparent;
+    font-size: 12px;
+  }
+
+  .pcr-selection .pcr-picker {
+    height: 16px;
+    width: 16px;
+    border: 1px solid var(--b3-theme-surface-lighter);
+    box-shadow: var(--b3-point-shadow);
+    transition: transform 100ms ease-out;
+  }
+}

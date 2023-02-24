@@ -1575,7 +1575,7 @@ export class Gutter {
             "var(--b3-font-background13)"].forEach((item, index) => {
             styles.push({
                 label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.colorPrimary} ${index + 1}">
-    <span style="background-color:${item};" class="b3-color__square fn__flex-center"></span>
+    <span style="background-color:${item};" class="color__square fn__flex-center"></span>
 </div>`,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
@@ -1589,7 +1589,7 @@ export class Gutter {
         });
         styles.push({
             label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.clearFontStyle}">
-    <span class="b3-color__square fn__flex-center">A</span>
+    <span class="color__square fn__flex-center">A</span>
 </div>`,
             click: () => {
                 this.genClick(nodeElements, protyle, (e: HTMLElement) => {
@@ -1690,7 +1690,7 @@ export class Gutter {
             "var(--b3-font-color13)"].forEach((item, index) => {
             styles.push({
                 label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.colorFont} ${index + 1}">
-    <span style="color:${item};" class="b3-color__square fn__flex-center">A</span>
+    <span style="color:${item};" class="color__square fn__flex-center">A</span>
 </div>`,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
@@ -1710,7 +1710,7 @@ export class Gutter {
         ["error", "warning", "info", "success"].forEach((item) => {
             styles.push({
                 label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages[item + "Style"]}">
-    <span style="color: var(--b3-card-${item}-color);background-color: var(--b3-card-${item}-background);" class="b3-color__square fn__flex-center">A</span>    
+    <span style="color: var(--b3-card-${item}-color);background-color: var(--b3-card-${item}-background);" class="color__square fn__flex-center">A</span>    
 </div>`,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
@@ -1725,7 +1725,7 @@ export class Gutter {
         });
         return styles.concat([{
             label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.hollow}">
-    <span style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;" class="b3-color__square fn__flex-center">A</span>
+    <span style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;" class="color__square fn__flex-center">A</span>
 </div>`,
             click: () => {
                 this.genClick(nodeElements, protyle, (e: HTMLElement) => {
@@ -1735,7 +1735,7 @@ export class Gutter {
             }
         }, {
             label: `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.shadow}">
-    <span style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" class="b3-color__square fn__flex-center">A</span>
+    <span style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" class="color__square fn__flex-center">A</span>
 </div>`,
             click: () => {
                 this.genClick(nodeElements, protyle, (e: HTMLElement) => {

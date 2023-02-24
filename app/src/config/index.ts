@@ -14,7 +14,7 @@ import {Dialog} from "../dialog";
 
 export const openSetting = () => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
-        if (item.element.querySelector(".b3-tab-container")) {
+        if (item.element.querySelector(".config__tab-container")) {
             item.destroy();
             return true;
         }
@@ -40,17 +40,17 @@ export const openSetting = () => {
     <li data-name="repos" class="b3-list-item b3-list-item--big"><svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.cloud}</span></li>
     <li data-name="about" class="b3-list-item b3-list-item--big"><svg class="b3-list-item__graphic"><use xlink:href="#iconInfo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.about}</span></li>
   </ul>
-  <div class="b3-tab-container" style="height:${height}px" data-name="editor">${editor.genHTML()}</div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="filetree"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="image"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="export"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="appearance"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="bazaar"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="search"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px;overflow: scroll" data-name="keymap"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="account"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="repos"></div>
-  <div class="b3-tab-container fn__none" style="height:${height}px" data-name="about"></div>
+  <div class="config__tab-container" style="height:${height}px" data-name="editor">${editor.genHTML()}</div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="filetree"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="image"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="export"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="appearance"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="bazaar"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="search"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px;overflow: scroll" data-name="keymap"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="account"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="repos"></div>
+  <div class="config__tab-container fn__none" style="height:${height}px" data-name="about"></div>
 </div>
 </div>`,
         width: "90vw",
@@ -61,8 +61,8 @@ export const openSetting = () => {
     dialog.element.querySelectorAll(".b3-tab-bar .b3-list-item").forEach(item => {
         item.addEventListener("click", () => {
             const type = item.getAttribute("data-name");
-            const containerElement = dialog.element.querySelector(`.b3-tab-container[data-name="${type}"]`);
-            dialog.element.querySelectorAll(".b3-tab-container").forEach((container) => {
+            const containerElement = dialog.element.querySelector(`.config__tab-container[data-name="${type}"]`);
+            dialog.element.querySelectorAll(".config__tab-container").forEach((container) => {
                 container.classList.add("fn__none");
             });
             dialog.element.querySelector(".b3-tab-bar .b3-list-item.b3-list-item--focus").classList.remove("b3-list-item--focus");
@@ -72,52 +72,52 @@ export const openSetting = () => {
                 switch (type) {
                     case "filetree":
                         containerElement.innerHTML = fileTree.genHTML();
-                        fileTree.element = dialog.element.querySelector('.b3-tab-container[data-name="filetree"]');
+                        fileTree.element = dialog.element.querySelector('.config__tab-container[data-name="filetree"]');
                         fileTree.bindEvent();
                         break;
                     case "image":
                         containerElement.innerHTML = image.genHTML();
-                        image.element = dialog.element.querySelector('.b3-tab-container[data-name="image"]');
+                        image.element = dialog.element.querySelector('.config__tab-container[data-name="image"]');
                         image.bindEvent();
                         break;
                     case "export":
                         containerElement.innerHTML = exportConfig.genHTML();
-                        exportConfig.element = dialog.element.querySelector('.b3-tab-container[data-name="export"]');
+                        exportConfig.element = dialog.element.querySelector('.config__tab-container[data-name="export"]');
                         exportConfig.bindEvent();
                         break;
                     case "appearance":
                         containerElement.innerHTML = appearance.genHTML();
-                        appearance.element = dialog.element.querySelector('.b3-tab-container[data-name="appearance"]');
+                        appearance.element = dialog.element.querySelector('.config__tab-container[data-name="appearance"]');
                         appearance.bindEvent();
                         break;
                     case "keymap":
                         containerElement.innerHTML = keymap.genHTML();
-                        keymap.element = dialog.element.querySelector('.b3-tab-container[data-name="keymap"]');
+                        keymap.element = dialog.element.querySelector('.config__tab-container[data-name="keymap"]');
                         keymap.bindEvent();
                         break;
                     case "bazaar":
-                        bazaar.element = dialog.element.querySelector('.b3-tab-container[data-name="bazaar"]');
+                        bazaar.element = dialog.element.querySelector('.config__tab-container[data-name="bazaar"]');
                         containerElement.innerHTML = bazaar.genHTML();
                         bazaar.bindEvent();
                         break;
                     case "account":
                         containerElement.innerHTML = account.genHTML();
-                        account.element = dialog.element.querySelector('.b3-tab-container[data-name="account"]');
+                        account.element = dialog.element.querySelector('.config__tab-container[data-name="account"]');
                         account.bindEvent(account.element);
                         break;
                     case "repos":
                         containerElement.innerHTML = repos.genHTML();
-                        repos.element = dialog.element.querySelector('.b3-tab-container[data-name="repos"]');
+                        repos.element = dialog.element.querySelector('.config__tab-container[data-name="repos"]');
                         repos.bindEvent();
                         break;
                     case "about":
                         containerElement.innerHTML = about.genHTML();
-                        about.element = dialog.element.querySelector('.b3-tab-container[data-name="about"]');
+                        about.element = dialog.element.querySelector('.config__tab-container[data-name="about"]');
                         about.bindEvent();
                         break;
                     case "search":
                         containerElement.innerHTML = query.genHTML();
-                        query.element = dialog.element.querySelector('.b3-tab-container[data-name="search"]');
+                        query.element = dialog.element.querySelector('.config__tab-container[data-name="search"]');
                         query.bindEvent();
                         break;
                     default:
@@ -126,7 +126,7 @@ export const openSetting = () => {
             }
         });
     });
-    editor.element = dialog.element.querySelector('.b3-tab-container[data-name="editor"]');
+    editor.element = dialog.element.querySelector('.config__tab-container[data-name="editor"]');
     editor.bindEvent();
     return dialog;
 };

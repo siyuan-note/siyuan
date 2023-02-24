@@ -61,7 +61,10 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     <div class="fn__flex b3-dialog__cardaction fn__none">
         <div>
             <span></span>
-            <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">Again</button>
+            <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
+                <span class="">❌</span>
+                Again
+            </button>
         </div>
         <span class="fn__flex-1"></span>
         <div>

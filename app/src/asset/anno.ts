@@ -125,7 +125,7 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
         let target = event.target as HTMLElement;
         while (target && !target.classList.contains("pdf__outer")) {
             const type = target.getAttribute("data-type");
-            if (target.classList.contains("b3-color__square")) {
+            if (target.classList.contains("color__square")) {
                 const color = target.style.backgroundColor;
                 if (rectElement) {
                     const config = getConfig(pdf);

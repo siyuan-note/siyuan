@@ -396,13 +396,13 @@ export class Asset extends Model {
       </div>
       <div class="pdf__util b3-menu fn__none pdf__util--hide">
         <div class="fn__flex" style="padding: 0 4px">
-            <button class="b3-color__square" style="background-color:var(--b3-pdf-background1)"></button>
-            <button class="b3-color__square" style="background-color:var(--b3-pdf-background2)"></button>
-            <button class="b3-color__square" style="background-color:var(--b3-pdf-background3)"></button>
-            <button class="b3-color__square" style="background-color:var(--b3-pdf-background4)"></button>
-            <button class="b3-color__square" style="background-color:var(--b3-pdf-background5)"></button>
-            <button class="b3-color__square" style="background-color:var(--b3-pdf-background6)"></button>
-            <button class="b3-color__square" style="background-color:var(--b3-pdf-background7)"></button>
+            <button class="color__square" style="background-color:var(--b3-pdf-background1)"></button>
+            <button class="color__square" style="background-color:var(--b3-pdf-background2)"></button>
+            <button class="color__square" style="background-color:var(--b3-pdf-background3)"></button>
+            <button class="color__square" style="background-color:var(--b3-pdf-background4)"></button>
+            <button class="color__square" style="background-color:var(--b3-pdf-background5)"></button>
+            <button class="color__square" style="background-color:var(--b3-pdf-background6)"></button>
+            <button class="color__square" style="background-color:var(--b3-pdf-background7)"></button>
         </div>
         <div class="b3-menu__separator pdf__util__hide" style="margin-top: 8px"></div>
         <button class="b3-menu__item pdf__util__hide" data-type="toggle">

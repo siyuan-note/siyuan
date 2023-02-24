@@ -107,7 +107,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             }
         });
 
-        const tabPanelElements = element.querySelectorAll(".b3-tab-container");
+        const tabPanelElements = element.querySelectorAll(".config__tab-container");
         if (currentTabElement) {
             currentTabElement.click();
         } else {

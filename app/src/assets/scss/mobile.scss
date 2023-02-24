@@ -1,27 +1,26 @@
-@import "keyframes";
-@import "mixin";
-@import "chip";
-@import "slider";
-@import "switch";
-@import "dialog";
-@import "button";
-@import "menu";
-@import "snackbar";
-@import "form";
-@import "text-field";
-@import "select";
-@import "list";
-@import "tab";
-@import "graph";
-@import "layout";
-@import "block";
-@import "reset";
-@import "function";
-@import "color";
-// un refactor
-@import "protyle";
-@import "typography";
-@import "viewer";
+@import "util/keyframes";
+@import "util/mixin";
+@import "component/chip";
+@import "component/slider";
+@import "component/switch";
+@import "component/dialog";
+@import "component/button";
+@import "component/menu";
+@import "component/snackbar";
+@import "component/form";
+@import "component/text-field";
+@import "component/select";
+@import "component/list";
+@import "business/graph";
+@import "business/layout";
+@import "business/block";
+@import "util/reset";
+@import "util/function";
+@import "business/history";
+@import "business/color";
+@import "protyle/protyle";
+@import "component/typography";
+@import "viewerjs/viewer";
 
 .block__popover {
   width: 80vw;
@@ -331,4 +330,4 @@
   }
 }
 
-@import "responsive";
+@import "util/responsive";

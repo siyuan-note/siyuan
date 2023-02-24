@@ -1,32 +1,34 @@
-@import "keyframes";
-@import "mixin";
-@import "function";
-@import "chip";
-@import "slider";
-@import "switch";
-@import "scroll";
-@import "tooltips";
-@import "dialog";
-@import "button";
-@import "snackbar";
-@import "form";
+@import "util/keyframes";
+@import "util/mixin";
+@import "util/function";
+@import "business/history";
+@import "component/chip";
+@import "component/slider";
+@import "component/switch";
+@import "util/scroll";
+@import "component/tooltips";
+@import "component/dialog";
+@import "component/button";
+@import "component/snackbar";
+@import "component/form";
 @import "node_modules/@simonwep/pickr/src/scss/themes/nano.scss";
-@import "text-field";
-@import "select";
-@import "list";
-@import "tab";
-@import "graph";
-@import "layout";
-@import "block";
-@import "reset";
-@import "card";
-@import "menu";
-@import "color";
-// un refactor
-@import "protyle";
-@import "typography";
+@import "component/text-field";
+@import "component/select";
+@import "component/list";
+@import "business/graph";
+@import "business/layout";
+@import "business/block";
+@import "util/reset";
+@import "component/card";
+@import "component/menu";
+@import "business/color";
+@import "protyle/protyle";
+@import "component/typography";
 @import "pdf/pdf";
-@import "viewer";
+@import "business/config";
+@import "business/search";
+@import "pickr/pcr";
+@import "viewerjs/viewer";
 
 /*
 .status: 3
@@ -140,26 +142,6 @@ html {
     &::-webkit-scrollbar {
       display: none;
     }
-  }
-}
-
-.pcr-app {
-  box-shadow: var(--b3-dialog-shadow);
-  border: 1px solid var(--b3-theme-surface-lighter);
-  border-radius: 4px;
-
-  .pcr-interaction .pcr-result {
-    @extend .b3-text-field;
-    background: transparent;
-    font-size: 12px;
-  }
-
-  .pcr-selection .pcr-picker {
-    height: 16px;
-    width: 16px;
-    border: 1px solid var(--b3-theme-surface-lighter);
-    box-shadow: var(--b3-point-shadow);
-    transition: transform 100ms ease-out;
   }
 }
 
@@ -355,216 +337,6 @@ html {
   }
 }
 
-.config {
-  &__panel {
-    & > .b3-tab-bar {
-      user-select: none;
-      width: 180px;
-      overflow: auto;
-      padding: 8px 0;
-      box-sizing: border-box
-    }
-  }
-
-  &-query {
-    display: flex;
-    flex-wrap: wrap;
-
-    label {
-      width: 16%;
-      margin: 8px 17% 0 0;
-      color: var(--b3-theme-on-surface);
-      align-items: center;
-    }
-  }
-
-  &-repos__sync {
-    margin: 0 0 -16px 16px;
-    overflow: hidden;
-    max-height: 180px;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 16px;
-  }
-
-  &-account {
-    height: 100%;
-
-    &__center {
-      flex-direction: column;
-      justify-content: center;
-      flex: 1;
-      display: flex;
-      min-width: 1px;
-      align-items: center;
-
-      &--text {
-        background-color: var(--b3-theme-surface);
-        padding: 16px 24px;
-
-        .b3-button--outline {
-          white-space: normal;
-        }
-      }
-    }
-
-    &__form {
-      max-width: 298px;
-      width: 100%;
-    }
-
-    &__bg {
-      position: relative;
-      margin-bottom: 82px;
-      width: 100%;
-      flex: 1;
-      min-height: 128px;
-    }
-
-    &__info {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 16px 24px;
-    }
-
-    &__cover {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center center;
-    }
-
-    &__avatar {
-      position: absolute;
-      bottom: 24px;
-      width: 128px;
-      height: 128px;
-      left: 50%;
-      margin-left: -64px;
-      background-repeat: no-repeat;
-      background-position: 50%;
-      background-size: cover;
-      border-radius: 90px;
-      background-color: rgba(255, 255, 255, 0.8);
-      box-shadow: var(--b3-point-shadow);
-      border: 1px solid var(--b3-theme-surface-lighter);
-    }
-
-    &__name {
-      bottom: -58px;
-      position: absolute;
-      width: 100%;
-      text-align: center;
-    }
-  }
-
-  &-about__logo {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-
-    img {
-      height: 24px;
-      width: 24px;
-      margin-right: 8px;
-    }
-  }
-
-  &-assets {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    box-sizing: border-box;
-
-    #assetsList {
-      overflow: auto;
-      flex: 1;
-    }
-
-    &__preview {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      overflow: auto;
-      flex: 1;
-      margin-top: 8px;
-    }
-  }
-
-  &-keymap li .b3-text-field {
-    width: 124px;
-    text-align: center;
-  }
-
-  &-bazaar__readme {
-    position: absolute;
-    transition: var(--b3-transition);
-    right: -100%;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--b3-theme-background);
-    display: flex;
-    padding: 16px;
-    box-sizing: border-box;
-
-    .item {
-      &__side {
-        text-align: center;
-        width: 260px;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-      }
-
-      &__main {
-        flex: 1;
-        margin-left: 16px;
-        overflow: auto;
-      }
-
-      &__title {
-        font-size: 30px;
-        word-break: break-all;
-        color: var(--b3-theme-on-background);
-      }
-
-      &__nav {
-        text-align: center;
-        flex: 1;
-        line-height: 26px;
-        font-size: 16px;
-        color: var(--b3-theme-on-surface);
-      }
-
-      &__preview {
-        width: 100%;
-        height: 50%;
-        background-position: center center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        border-radius: 4px;
-        margin-bottom: 16px;
-        cursor: pointer;
-        left: 0;
-        top: 0;
-        transition: var(--b3-transition);
-
-        &--fullscreen {
-          position: absolute;
-          z-index: 1;
-          height: 100%;
-          background-size: contain;
-          background-color: var(--b3-mask-background);
-        }
-      }
-    }
-  }
-}
-
 .asset {
   overflow: auto;
   box-sizing: border-box;
@@ -646,4 +418,4 @@ html {
 }
 
 // 需放置最后，否则 https://github.com/siyuan-note/siyuan/issues/7056
-@import "responsive";
+@import "util/responsive";

@@ -1,12 +1,13 @@
-@import "mixin";
-@import "tooltips";
-@import "typography";
-@import "wysiwyg";
-@import "function";
-@import "button";
-@import "select";
-@import "switch";
-@import "slider";
+@import "util/mixin";
+@import "component/tooltips";
+@import "component/typography";
+@import "protyle/wysiwyg";
+@import "util/function";
+@import "business/history";
+@import "component/button";
+@import "component/select";
+@import "component/switch";
+@import "component/slider";
 
 .protyle-wysiwyg {
   font-family: var(--b3-font-family);

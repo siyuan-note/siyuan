@@ -30,7 +30,7 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/goccy/go-json v0.10.0
 	github.com/gofrs/flock v0.8.1
-	github.com/imroc/req/v3 v3.32.1
+	github.com/imroc/req/v3 v3.32.3
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -45,7 +45,7 @@ require (
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20230223100551-200cbe1cf84e
-	github.com/siyuan-note/httpclient v0.0.0-20230223101139-409ed0b4c5ff
+	github.com/siyuan-note/httpclient v0.0.0-20230224113038-40f0e2672f0f
 	github.com/siyuan-note/logging v0.0.0-20230223101545-ec2cbf198ffb
 	github.com/siyuan-note/riff v0.0.0-20230224074237-c16f59420520
 	github.com/steambap/captcha v1.4.1
@@ -128,7 +128,7 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.2.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
-	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb // indirect
+	golang.org/x/exp v0.0.0-20230223210539-50820d90acfd // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect

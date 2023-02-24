@@ -176,7 +176,7 @@ export const onGetConfig = (isStart: boolean) => {
             resizeDrag();
         }, 200);
     });
-    if (window.siyuan.config.newbie) {
+    if (window.siyuan.config.openHelp) {
         mountHelp();
     }
     addGA();

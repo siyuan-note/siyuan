@@ -162,8 +162,8 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			box.SaveConf(boxConf)
 		}
 
-		if Conf.Newbie {
-			Conf.Newbie = false
+		if Conf.OpenHelp {
+			Conf.OpenHelp = false
 			Conf.Save()
 		}
 

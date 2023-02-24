@@ -70,7 +70,7 @@ type AppConf struct {
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
 	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
-	Newbie         bool             `json:"newbie"`         // 是否是安装后第一次启动
+	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
 }
 
 func InitConf() {
@@ -211,7 +211,9 @@ func InitConf() {
 	}
 	if nil == Conf.System {
 		Conf.System = conf.NewSystem()
+		Conf.OpenHelp = true
 	} else {
+		Conf.OpenHelp = Conf.System.KernelVersion != util.Ver
 		Conf.System.KernelVersion = util.Ver
 		Conf.System.IsInsider = util.IsInsider
 	}
@@ -237,7 +239,6 @@ func InitConf() {
 	}
 	Conf.System.OS = runtime.GOOS
 	Conf.System.OSPlatform, _ = util.GetOSPlatform()
-	Conf.Newbie = util.IsNewbie
 
 	if "" != Conf.UserData {
 		Conf.User = loadUserFromConf()

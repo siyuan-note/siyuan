@@ -29,7 +29,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -207,7 +206,7 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 
 		nextDues := map[riff.Rating]string{}
 		for rating, due := range card.NextDues() {
-			nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+			nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
 		}
 
 		ret = append(ret, &Flashcard{
@@ -285,7 +284,7 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 
 		nextDues := map[riff.Rating]string{}
 		for rating, due := range card.NextDues() {
-			nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+			nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
 		}
 
 		ret = append(ret, &Flashcard{
@@ -317,7 +316,7 @@ func getAllDueFlashcards() (ret []*Flashcard, err error) {
 
 			nextDues := map[riff.Rating]string{}
 			for rating, due := range card.NextDues() {
-				nextDues[rating] = strings.TrimSpace(humanize.RelTime(due, now, "", ""))
+				nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
 			}
 
 			ret = append(ret, &Flashcard{

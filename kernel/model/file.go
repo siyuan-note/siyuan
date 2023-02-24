@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"math"
 	"os"
 	"path"
 	"path/filepath"
@@ -93,33 +92,8 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	}
 
 	ret.Mtime = mTime.Unix()
-	ret.HMtime = HumanizeTime(mTime)
+	ret.HMtime = util.HumanizeTime(mTime, Conf.Lang)
 	return
-}
-
-func HumanizeTime(then time.Time) string {
-	labels := util.TimeLangs[Conf.Lang]
-
-	defaultMagnitudes := []humanize.RelTimeMagnitude{
-		{time.Second, labels["now"].(string), time.Second},
-		{2 * time.Second, labels["1s"].(string), 1},
-		{time.Minute, labels["xs"].(string), time.Second},
-		{2 * time.Minute, labels["1m"].(string), 1},
-		{time.Hour, labels["xm"].(string), time.Minute},
-		{2 * time.Hour, labels["1h"].(string), 1},
-		{humanize.Day, labels["xh"].(string), time.Hour},
-		{2 * humanize.Day, labels["1d"].(string), 1},
-		{humanize.Week, labels["xd"].(string), humanize.Day},
-		{2 * humanize.Week, labels["1w"].(string), 1},
-		{humanize.Month, labels["xw"].(string), humanize.Week},
-		{2 * humanize.Month, labels["1M"].(string), 1},
-		{humanize.Year, labels["xM"].(string), humanize.Month},
-		{18 * humanize.Month, labels["1y"].(string), 1},
-		{2 * humanize.Year, labels["2y"].(string), 1},
-		{humanize.LongTime, labels["xy"].(string), humanize.Year},
-		{math.MaxInt64, labels["max"].(string), 1},
-	}
-	return humanize.CustomRelTime(then, time.Now(), labels["albl"].(string), labels["blbl"].(string), defaultMagnitudes)
 }
 
 func (box *Box) docIAL(p string) (ret map[string]string) {

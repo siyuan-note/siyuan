@@ -448,8 +448,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             if (refElement) {
                 nodeAttrHTML += refElement.outerHTML;
             }
-            if (data.new['custom-riff-decks']) {
-                protyle.title.element.setAttribute("custom-riff-decks", data.new['custom-riff-decks']);
+            if (data.new["custom-riff-decks"]) {
+                protyle.title.element.setAttribute("custom-riff-decks", data.new["custom-riff-decks"]);
             } else {
                 protyle.title.element.removeAttribute("custom-riff-decks");
             }

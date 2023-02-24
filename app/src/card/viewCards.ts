@@ -132,7 +132,7 @@ export const viewCards = (deckID: string, title: string, cb:(response:IWebSocket
 
                         if (!nextElment) {
                             getArticle(edit, "");
-                            listElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`
+                            listElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
                         } else {
                             getArticle(edit, nextElment.getAttribute("data-id"));
                             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");

@@ -409,8 +409,8 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
             return false;
         }
         this.element.setAttribute("data-node-id", protyle.block.rootID);
-        if (response.data.ial['custom-riff-decks']) {
-            this.element.setAttribute("custom-riff-decks", response.data.ial['custom-riff-decks']);
+        if (response.data.ial["custom-riff-decks"]) {
+            this.element.setAttribute("custom-riff-decks", response.data.ial["custom-riff-decks"]);
         }
         protyle.background.render(response.data.ial, protyle.block.rootID);
         protyle.wysiwyg.renderCustom(response.data.ial);

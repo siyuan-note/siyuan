@@ -60,7 +60,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         <div>
             <span></span>
             <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
-                <div>❌</div>
+                <div>🙈</div>
                 ${window.siyuan.languages.cardRatingAgain} (1)
             </button>
         </div>

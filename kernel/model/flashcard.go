@@ -175,11 +175,11 @@ func ReviewFlashcard(deckID string, blockID string, rating riff.Rating) (err err
 	}
 
 	if cachedCard := reviewCardCache[card.ID()]; nil != cachedCard {
-		// 命中缓存说明这张卡片已经复习过了，这次调用复习是撤销操作
-		// 将缓存的卡片重新覆盖回卡包中，以恢复上次复习前的状态
+		// 命中缓存说明这张卡片已经复习过了，这次调用复习是撤销后再次复习
+		// 将缓存的卡片重新覆盖回卡包中，以恢复最开始复习前的状态
 		deck.SetCard(cachedCard)
 	} else {
-		// 缓存卡片以便撤销
+		// 首次复习该卡片，将卡片缓存以便后续支持撤销后再次复习
 		reviewCardCache[card.ID()] = card
 	}
 

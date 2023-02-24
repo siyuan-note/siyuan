@@ -142,7 +142,7 @@ func removeRiffCards(c *gin.Context) {
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
 	}
-	err := model.RemoveFlashcards(deckID, blockIDs)
+	err := model.RemoveFlashcardsByBlockIDs(deckID, blockIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

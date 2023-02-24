@@ -372,7 +372,7 @@ func getAllDueFlashcards() (ret []*Flashcard) {
 	return
 }
 
-func RemoveFlashcards(deckID string, blockIDs []string) (err error) {
+func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 

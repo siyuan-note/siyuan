@@ -986,6 +986,9 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 
 // markReplaceSpanWithSplit 用于处理虚拟引用和反链提及高亮。
 func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, replacementEnd string) (ret string) {
+	// 虚拟引用和反链提及关键字按最长匹配优先 https://github.com/siyuan-note/siyuan/issues/7465
+	sort.Slice(keywords, func(i, j int) bool { return len(keywords[i]) > len(keywords[j]) })
+
 	tmp := search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive)
 	parts := strings.Split(tmp, replacementEnd)
 	buf := bytes.Buffer{}

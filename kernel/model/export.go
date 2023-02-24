@@ -816,7 +816,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 	attachmentMap := map[int][]*pdfcpu.IndirectRef{}
 	now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
 	for _, link := range assetLinks {
-		link.URI = strings.ReplaceAll(link.URI, "http://127.0.0.1:6806/export/temp/", "")
+		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/export/temp/", "")
 		link.URI, _ = url.PathUnescape(link.URI)
 
 		if !removeAssets {

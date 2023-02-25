@@ -125,13 +125,9 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         const viewElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "view");
         if (viewElement) {
             if (selectElement) {
-                viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text, (removeResponse) => {
-                    countElement.lastElementChild.lastElementChild.innerHTML = removeResponse.data.size.toString();
-                });
+                viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text);
             } else {
-                viewCards(titleElement.getAttribute("data-id"), titleElement.textContent, (removeResponse) => {
-                    countElement.lastElementChild.lastElementChild.innerHTML = removeResponse.data.size.toString();
-                }, true);
+                viewCards(titleElement.getAttribute("data-id"), titleElement.textContent, undefined, true);
             }
             event.preventDefault();
             event.stopPropagation();

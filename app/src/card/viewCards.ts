@@ -10,7 +10,7 @@ import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 
-export const viewCards = (deckID: string, title: string, cb:(response:IWebSocketData)=>void,isDoc = false) => {
+export const viewCards = (deckID: string, title: string, cb?: (response: IWebSocketData) => void, isDoc = false) => {
     let pageIndex = 1;
     let edit: Protyle;
     fetchPost(isDoc ? "/api/riff/getTreeRiffCards" : "/api/riff/getRiffCards", {
@@ -139,7 +139,9 @@ export const viewCards = (deckID: string, title: string, cb:(response:IWebSocket
                             nextElment.classList.add("b3-list-item--focus");
                             target.parentElement.remove();
                         }
-                        cb(removeResponse);
+                        if (cb) {
+                            cb(removeResponse);
+                        }
                     });
                     event.stopPropagation();
                     event.preventDefault();

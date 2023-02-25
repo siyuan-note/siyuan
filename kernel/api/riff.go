@@ -76,9 +76,8 @@ func reviewRiffCard(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	cardID := arg["cardID"].(string)
-	blockID := arg["blockID"].(string)
 	rating := int(arg["rating"].(float64))
-	err := model.ReviewFlashcard(deckID, cardID, blockID, riff.Rating(rating))
+	err := model.ReviewFlashcard(deckID, cardID, riff.Rating(rating))
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -148,8 +147,10 @@ func removeRiffCards(c *gin.Context) {
 		return
 	}
 
-	deck := model.Decks[deckID]
-	ret.Data = deckData(deck)
+	if "" != deckID {
+		deck := model.Decks[deckID]
+		ret.Data = deckData(deck)
+	}
 }
 
 func addRiffCards(c *gin.Context) {

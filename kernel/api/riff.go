@@ -151,6 +151,7 @@ func removeRiffCards(c *gin.Context) {
 		deck := model.Decks[deckID]
 		ret.Data = deckData(deck)
 	}
+	// All 卡包不返回数据
 }
 
 func addRiffCards(c *gin.Context) {

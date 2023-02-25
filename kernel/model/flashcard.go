@@ -146,7 +146,6 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating) (err error) {
 	deck := Decks[deckID]
 	card := deck.GetCard(cardID)
 	if nil == card {
-		logging.LogErrorf("card not found [%s]", cardID)
 		return
 	}
 

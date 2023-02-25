@@ -602,6 +602,12 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	}
 
 	for _, blockID := range blockIDs {
+		cards := deck.GetCardsByBlockID(blockID)
+		if 0 < len(cards) {
+			// 一个块只能添加生成一张闪卡 https://github.com/siyuan-note/siyuan/issues/7476
+			continue
+		}
+
 		cardID := ast.NewNodeID()
 		deck.AddCard(cardID, blockID)
 	}

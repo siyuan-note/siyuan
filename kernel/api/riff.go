@@ -126,7 +126,6 @@ func getRiffDueCards(c *gin.Context) {
 	ret.Data = cards
 }
 
-// TODO 删除闪卡
 func removeRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -514,7 +514,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 	}
 	paragraphParents := sql.GetBlocks(paragraphParentIDs)
 	for _, p := range paragraphParents {
-		if "i" == p.Type || "h" == p.Type {
+		if "i" == p.Type { // || "h" == p.Type 改进标题下方块引用时的反链定位 https://github.com/siyuan-note/siyuan/issues/7484
 			processedParagraphs.Add(p.ID)
 
 			if !strings.Contains(p.Content, keyword) {

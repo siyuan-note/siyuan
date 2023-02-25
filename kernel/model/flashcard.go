@@ -134,7 +134,7 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 // reviewCardCache <cardID, card> 用于复习时缓存卡片，以便支持撤销。
 var reviewCardCache = map[string]riff.Card{}
 
-func ReviewFlashcard(deckID, cardID, blockID string, rating riff.Rating) (err error) {
+func ReviewFlashcard(deckID, cardID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
@@ -150,16 +150,16 @@ func ReviewFlashcard(deckID, cardID, blockID string, rating riff.Rating) (err er
 		return
 	}
 
-	if cachedCard := reviewCardCache[card.ID()]; nil != cachedCard {
+	if cachedCard := reviewCardCache[cardID]; nil != cachedCard {
 		// 命中缓存说明这张卡片已经复习过了，这次调用复习是撤销后再次复习
 		// 将缓存的卡片重新覆盖回卡包中，以恢复最开始复习前的状态
 		deck.SetCard(cachedCard)
 	} else {
 		// 首次复习该卡片，将卡片缓存以便后续支持撤销后再次复习
-		reviewCardCache[card.ID()] = card
+		reviewCardCache[cardID] = card
 	}
 
-	deck.Review(blockID, rating)
+	deck.Review(cardID, rating)
 	err = deck.Save()
 	if nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
@@ -602,6 +602,12 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 	}
 
 	for _, blockID := range blockIDs {
+		cards := deck.GetCardsByBlockID(blockID)
+		if 0 < len(cards) {
+			// 一个块只能添加生成一张闪卡 https://github.com/siyuan-note/siyuan/issues/7476
+			continue
+		}
+
 		cardID := ast.NewNodeID()
 		deck.AddCard(cardID, blockID)
 	}

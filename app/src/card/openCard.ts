@@ -172,7 +172,6 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             fetchPost("/api/riff/reviewRiffCard", {
                 deckID: blocks[index].deckID,
                 cardID: blocks[index].cardID,
-                blockID: blocks[index].blockID,
                 rating: parseInt(type)
             }, () => {
                 index++;

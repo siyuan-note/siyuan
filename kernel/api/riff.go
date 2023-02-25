@@ -76,9 +76,8 @@ func reviewRiffCard(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	cardID := arg["cardID"].(string)
-	blockID := arg["blockID"].(string)
 	rating := int(arg["rating"].(float64))
-	err := model.ReviewFlashcard(deckID, cardID, blockID, riff.Rating(rating))
+	err := model.ReviewFlashcard(deckID, cardID, riff.Rating(rating))
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -126,7 +125,6 @@ func getRiffDueCards(c *gin.Context) {
 	ret.Data = cards
 }
 
-// TODO 删除闪卡
 func removeRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -149,8 +147,11 @@ func removeRiffCards(c *gin.Context) {
 		return
 	}
 
-	deck := model.Decks[deckID]
-	ret.Data = deckData(deck)
+	if "" != deckID {
+		deck := model.Decks[deckID]
+		ret.Data = deckData(deck)
+	}
+	// All 卡包不返回数据
 }
 
 func addRiffCards(c *gin.Context) {

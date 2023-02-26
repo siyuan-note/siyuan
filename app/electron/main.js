@@ -746,6 +746,7 @@ app.whenReady().then(() => {
             width: mainScreen.size.width * 0.7,
             height: mainScreen.size.height * 0.9,
             minWidth: 493,
+            center: true,
             minHeight: 376,
             fullscreenable: true,
             frame: "darwin" === process.platform,

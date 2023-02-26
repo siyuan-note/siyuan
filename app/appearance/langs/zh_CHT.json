@@ -1,10 +1,11 @@
 {
+  "space": "空格",
   "pdfIsLoading": "PDF 正在加載中，請稍後再試",
   "cardShowAnswer": "顯示答案",
   "cardRatingAgain": "重來",
   "cardRatingHard": "困難",
-  "cardRatingGood": "一般",
-  "cardRatingEasy": "輕鬆",
+  "cardRatingGood": "良好",
+  "cardRatingEasy": "簡單",
   "addToDeck": "添加到卡包...",
   "quickMakeCard": "快速制卡",
   "allAttrs": "所有屬性名和屬性值",

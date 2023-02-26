@@ -49,11 +49,12 @@ func autoOCRAssets() {
 }
 
 func cleanNotExistAssetsTexts() {
-	tmp := util.AssetsTexts
+	util.AssetsTextsLock.Lock()
+	defer util.AssetsTextsLock.Unlock()
 
 	assetsPath := util.GetDataAssetsAbsPath()
 	var toRemoves []string
-	for asset, _ := range tmp {
+	for asset, _ := range util.AssetsTexts {
 		assetAbsPath := strings.TrimPrefix(asset, "assets")
 		assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
 		if !gulu.File.IsExist(assetAbsPath) {
@@ -61,12 +62,10 @@ func cleanNotExistAssetsTexts() {
 		}
 	}
 
-	util.AssetsTextsLock.Lock()
 	for _, asset := range toRemoves {
 		delete(util.AssetsTexts, asset)
 		util.AssetsTextsChanged = true
 	}
-	util.AssetsTextsLock.Unlock()
 	return
 }
 

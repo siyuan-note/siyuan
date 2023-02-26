@@ -15,7 +15,7 @@ specifiers:
   clean-webpack-plugin: ^4.0.0
   css-loader: ^6.7.1
   dayjs: ^1.11.5
-  electron: 21.4.1
+  electron: 21.4.2
   electron-builder: ^23.3.3
   electron-fetch: ^1.7.4
   encoding: ^0.1.13
@@ -38,7 +38,7 @@ specifiers:
   webpack-cli: ^4.10.0
 
 dependencies:
-  '@electron/remote': 2.0.9_electron@21.4.1
+  '@electron/remote': 2.0.9_electron@21.4.2
   electron-fetch: 1.7.4
 
 devDependencies:
@@ -55,7 +55,7 @@ devDependencies:
   clean-webpack-plugin: 4.0.0_webpack@5.73.0
   css-loader: 6.7.1_webpack@5.73.0
   dayjs: 1.11.5
-  electron: 21.4.1
+  electron: 21.4.2
   electron-builder: 23.3.3
   encoding: 0.1.13
   eslint: 8.19.0
@@ -1272,12 +1272,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@electron/remote/2.0.9_electron@21.4.1:
+  /@electron/remote/2.0.9_electron@21.4.2:
     resolution: {integrity: sha512-LR0W0ID6WAKHaSs0x5LX9aiG+5pFBNAJL6eQAJfGkCuZPUa6nZz+czZLdlTDETG45CgF/0raSvCtYOYUpr6c+A==}
     peerDependencies:
       electron: '>= 13.0.0'
     dependencies:
-      electron: 21.4.1
+      electron: 21.4.2
     dev: false
 
   /@electron/universal/1.2.1:
@@ -2814,8 +2814,8 @@ packages:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
     dev: true
 
-  /electron/21.4.1:
-    resolution: {integrity: sha512-uhFf3vpE6th6X2E1NSIy1+dWVeS9gb7W8EWd/cn5MacEiv4aVY3gtypaglTaVhYPfnJfcD+v3Ql6gGvx4Efh6A==}
+  /electron/21.4.2:
+    resolution: {integrity: sha512-AM2MbPUB7el/9O1UXL3xYA8pTDOPDxiT0HrLuXKkX8Oe0yCvjozNRzEac27gIUd1V/hg0BBvQuYjaRU1Rcxhyg==}
     engines: {node: '>= 10.17.0'}
     hasBin: true
     requiresBuild: true

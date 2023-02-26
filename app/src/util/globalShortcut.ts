@@ -88,7 +88,7 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
 };
 
 export const globalShortcut = () => {
-    document.body.addEventListener("mouseleave", (event) => {
+    document.body.addEventListener("mouseleave", () => {
         window.siyuan.layout.leftDock.hideDock();
         window.siyuan.layout.rightDock.hideDock();
         window.siyuan.layout.bottomDock.hideDock();

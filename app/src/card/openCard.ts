@@ -150,7 +150,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 type = "3";
             } else if (event.detail === " ") {
                 type = "-1";
-            }else if (event.detail === "p") {
+            } else if (event.detail === "p") {
                 type = "-2";
             }
         }
@@ -167,6 +167,9 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         event.stopPropagation();
         hideElements(["toolbar", "hint", "util"], editor.protyle);
         if (type === "-1") {
+            if (actionElements[0].classList.contains("fn__none")) {
+                return;
+            }
             editor.protyle.element.classList.remove("card__block--hide");
             actionElements[0].classList.add("fn__none");
             actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
@@ -176,6 +179,9 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             return;
         }
         if (type === "-2") {
+            if (actionElements[0].classList.contains("fn__none")) {
+                return;
+            }
             if (index > 0) {
                 index--;
                 editor.protyle.element.classList.add("card__block--hide");
@@ -185,11 +191,11 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                     actionElements,
                     index,
                     blocks
-                })
+                });
             }
             return;
         }
-        if (["0", "1", "2", "3"].includes(type)) {
+        if (["0", "1", "2", "3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
             fetchPost("/api/riff/reviewRiffCard", {
                 deckID: blocks[index].deckID,
                 cardID: blocks[index].cardID,
@@ -202,10 +208,10 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                         rootID: titleElement.getAttribute("data-id"),
                         deckID: selectElement?.value
                     }, (treeCards) => {
-                        index = 0
-                        blocks = treeCards.data
+                        index = 0;
+                        blocks = treeCards.data;
                         if (treeCards.data.length === 0) {
-                            allDone(countElement, editor, actionElements)
+                            allDone(countElement, editor, actionElements);
                         } else {
                             nextCard({
                                 countElement,
@@ -213,7 +219,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                                 actionElements,
                                 index,
                                 blocks
-                            })
+                            });
                         }
                     });
                     return;
@@ -224,7 +230,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                     actionElements,
                     index,
                     blocks
-                })
+                });
             });
         }
     });
@@ -243,9 +249,9 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                     actionElements,
                     index,
                     blocks
-                })
+                });
             } else {
-                allDone(countElement, editor, actionElements)
+                allDone(countElement, editor, actionElements);
             }
         });
     });
@@ -262,7 +268,7 @@ const nextCard = (options: {
     options.countElement.classList.remove("fn__none");
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
-    } else{
+    } else {
         options.actionElements[0].firstElementChild.removeAttribute("disabled");
     }
     fetchPost("/api/filetree/getDoc", {
@@ -272,7 +278,7 @@ const nextCard = (options: {
     }, (response) => {
         onGet(response, options.editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
     });
-}
+};
 
 const allDone = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>) => {
     countElement.classList.add("fn__none");

@@ -760,9 +760,9 @@ app.whenReady().then(() => {
             },
         });
         win.loadURL(data.url);
-        const targetScreen = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+        const targetScreen = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
         if (mainScreen.id !== targetScreen.id) {
-            win.setBounds(targetScreen.workArea)
+            win.setBounds(targetScreen.workArea);
         }
         require("@electron/remote/main").enable(win.webContents);
     });

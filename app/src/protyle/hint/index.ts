@@ -21,7 +21,6 @@ import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
 import {addEmoji, filterEmoji, lazyLoadEmoji, lazyLoadEmojiImg, unicode2Emoji} from "../../emoji";
-import {escapeHtml} from "../../util/escape";
 import {blockRender} from "../markdown/blockRender";
 import {uploadFiles} from "../upload";
 /// #if !MOBILE

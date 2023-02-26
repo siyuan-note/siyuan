@@ -384,7 +384,7 @@ export const globalShortcut = () => {
 
         if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey &&
             !["INPUT", "TEXTAREA"].includes((event.target as HTMLElement).tagName) &&
-            ["1", "2", "3", "4", "j", "k", "l", ";", "s"].includes(event.key.toLowerCase())) {
+            ["1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p"].includes(event.key.toLowerCase())) {
             const openCardDialog = window.siyuan.dialogs.find(item => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
                     return true;

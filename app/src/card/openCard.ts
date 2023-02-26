@@ -54,6 +54,11 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         ${window.siyuan.languages.noDueCard}
     </div>
     <div class="fn__flex card__action${blocks.length === 0 ? " fn__none" : ""}">
+        <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;min-width: 86px;display: flex">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+            (p)
+        </button>
+        <span class="fn__space"></span>
         <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer} (${window.siyuan.languages.space})</button>
     </div>
     <div class="fn__flex card__action fn__none">
@@ -143,8 +148,10 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 type = "2";
             } else if (event.detail === "4" || event.detail === ";") {
                 type = "3";
-            } else if (event.detail === "s") {
+            } else if (event.detail === " ") {
                 type = "-1";
+            }else if (event.detail === "p") {
+                type = "-2";
             }
         }
         if (!type) {
@@ -166,6 +173,20 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 element.previousElementSibling.textContent = blocks[index].nextDues[btnIndex];
             });
             actionElements[1].classList.remove("fn__none");
+            return;
+        }
+        if (type === "-2") {
+            if (index > 0) {
+                index--;
+                editor.protyle.element.classList.add("card__block--hide");
+                nextCard({
+                    countElement,
+                    editor,
+                    actionElements,
+                    index,
+                    blocks
+                })
+            }
             return;
         }
         if (["0", "1", "2", "3"].includes(type)) {
@@ -239,6 +260,11 @@ const nextCard = (options: {
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
     options.countElement.lastElementChild.innerHTML = `<span>${options.index + 1}</span>/${options.blocks.length}`;
     options.countElement.classList.remove("fn__none");
+    if (options.index === 0) {
+        options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
+    } else{
+        options.actionElements[0].firstElementChild.removeAttribute("disabled");
+    }
     fetchPost("/api/filetree/getDoc", {
         id: options.blocks[options.index].blockID,
         mode: 0,

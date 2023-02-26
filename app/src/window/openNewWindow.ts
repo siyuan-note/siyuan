@@ -1,6 +1,7 @@
 import {layoutToJSON} from "../layout/util";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {Constants} from "../constants";
 import {Tab} from "../layout/Tab";
@@ -12,7 +13,10 @@ export const openNewWindow = (tab: Tab) => {
     const json = {};
     layoutToJSON(tab, json);
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`);
+    ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+        id: getCurrentWindow().id,
+        url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`
+    });
     /// #endif
     tab.parent.removeTab(tab.id);
 };
@@ -47,7 +51,10 @@ export const openNewWindowById = (id: string) => {
             fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
                 json.children.scrollAttr = JSON.parse(attrResponse.data.scroll || "{}");
                 /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`);
+                ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+                    id: getCurrentWindow().id,
+                    url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`
+                });
                 /// #endif
             });
         } else {
@@ -61,7 +68,10 @@ export const openNewWindowById = (id: string) => {
                 focusEnd: 0
             };
             /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`);
+            ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+                id: getCurrentWindow().id,
+                url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${JSON.stringify(json)}`
+            });
             /// #endif
         }
     });

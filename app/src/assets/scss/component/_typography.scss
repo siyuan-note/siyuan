@@ -594,6 +594,11 @@
     word-break: break-all;
     position: relative;
 
+    &--done {
+      color: var(--b3-theme-on-surface-light);
+      text-decoration: line-through;
+    }
+
     input {
       left: -1.5em;
       position: absolute;

@@ -180,6 +180,78 @@ type Flashcard struct {
 	NextDues map[riff.Rating]string `json:"nextDues"`
 }
 
+func newFlashcard(card riff.Card, blockID, deckID string, now time.Time) *Flashcard {
+	nextDues := map[riff.Rating]string{}
+	for rating, due := range card.NextDues() {
+		nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
+	}
+
+	return &Flashcard{
+		DeckID:   deckID,
+		CardID:   card.ID(),
+		BlockID:  blockID,
+		NextDues: nextDues,
+	}
+}
+
+func GetNotebookDueFlashcards(boxID string) (ret []*Flashcard, err error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
+	if nil != err {
+		logging.LogErrorf("read dir failed: %s", err)
+		return
+	}
+
+	var rootIDs []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		if !strings.HasSuffix(entry.Name(), ".sy") {
+			continue
+		}
+
+		rootIDs = append(rootIDs, strings.TrimSuffix(entry.Name(), ".sy"))
+	}
+
+	treeBlockIDs := map[string]bool{}
+	for _, rootID := range rootIDs {
+		blockIDs := getTreeSubTreeChildBlocks(rootID)
+		for blockID, _ := range blockIDs {
+			treeBlockIDs[blockID] = true
+		}
+	}
+
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		logging.LogWarnf("builtin deck not found")
+		return
+	}
+
+	cards := deck.Dues()
+	now := time.Now()
+	for _, card := range cards {
+		blockID := card.BlockID()
+		if !treeBlockIDs[blockID] {
+			continue
+		}
+
+		ret = append(ret, newFlashcard(card, blockID, builtinDeckID, now))
+	}
+	if 1 > len(ret) {
+		ret = []*Flashcard{}
+	}
+	return
+}
+
 func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
@@ -204,17 +276,7 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 			continue
 		}
 
-		nextDues := map[riff.Rating]string{}
-		for rating, due := range card.NextDues() {
-			nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
-		}
-
-		ret = append(ret, &Flashcard{
-			DeckID:   builtinDeckID,
-			CardID:   card.ID(),
-			BlockID:  blockID,
-			NextDues: nextDues,
-		})
+		ret = append(ret, newFlashcard(card, blockID, builtinDeckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -294,17 +356,7 @@ func getDueFlashcards(deckID string) (ret []*Flashcard) {
 			continue
 		}
 
-		nextDues := map[riff.Rating]string{}
-		for rating, due := range card.NextDues() {
-			nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
-		}
-
-		ret = append(ret, &Flashcard{
-			DeckID:   deckID,
-			CardID:   card.ID(),
-			BlockID:  blockID,
-			NextDues: nextDues,
-		})
+		ret = append(ret, newFlashcard(card, blockID, deckID, now))
 	}
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
@@ -322,17 +374,7 @@ func getAllDueFlashcards() (ret []*Flashcard) {
 				continue
 			}
 
-			nextDues := map[riff.Rating]string{}
-			for rating, due := range card.NextDues() {
-				nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
-			}
-
-			ret = append(ret, &Flashcard{
-				DeckID:   deck.ID,
-				CardID:   card.ID(),
-				BlockID:  blockID,
-				NextDues: nextDues,
-			})
+			ret = append(ret, newFlashcard(card, blockID, deck.ID, now))
 		}
 	}
 	if 1 > len(ret) {

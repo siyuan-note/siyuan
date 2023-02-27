@@ -132,7 +132,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.mgmt,
             click: () => {
-                viewCards(notebookId, name, "Notebook");
+                viewCards(notebookId, escapeHtml(name), "Notebook");
             }
         }],
     }).element);

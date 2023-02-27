@@ -8,7 +8,7 @@ const closeTab = (ipcData: IWebSocketData) => {
     if (tab && tab instanceof Tab) {
         tab.parent.removeTab(ipcData.data);
     }
-}
+};
 export const onWindowsMsg = (ipcData: IWebSocketData) => {
     switch (ipcData.cmd) {
         case "closetab":
@@ -26,4 +26,4 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
             }
             break;
     }
-}
+};

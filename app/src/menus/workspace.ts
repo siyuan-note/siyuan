@@ -17,6 +17,8 @@ import {lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 import {unicode2Emoji} from "../emoji";
 import {Dock} from "../layout/dock";
+import {escapeHtml} from "../util/escape";
+import {viewCards} from "../card/viewCards";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -113,7 +115,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                 window.siyuan.notebooks.forEach(item => {
                     if (!item.closed) {
                         submenu.push({
-                            label: item.name,
+                            label: escapeHtml(item.name),
                             iconHTML: unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-menu__icon", true),
                             accelerator: window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] === item.id ? window.siyuan.config.keymap.general.dailyNote.custom : "",
                             click: () => {
@@ -135,12 +137,23 @@ export const workspaceMenu = (rect: DOMRect) => {
                 }).element);
             }
             window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.spaceRepetition,
+                label: window.siyuan.languages.riffCard,
+                type: "submenu",
                 icon: "iconRiffCard",
-                accelerator: window.siyuan.config.keymap.general.riffCard.custom,
-                click: () => {
-                    openCard();
-                }
+                submenu: [{
+                    iconHTML: Constants.ZWSP,
+                    label: window.siyuan.languages.spaceRepetition,
+                    accelerator: window.siyuan.config.keymap.general.riffCard.custom,
+                    click: () => {
+                        openCard();
+                    }
+                }, {
+                    iconHTML: Constants.ZWSP,
+                    label: window.siyuan.languages.mgmt,
+                    click: () => {
+                        viewCards("", window.siyuan.languages.all, "");
+                    }
+                }],
             }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({

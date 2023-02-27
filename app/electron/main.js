@@ -841,14 +841,9 @@ app.whenReady().then(() => {
             });
         });
     });
-    ipcMain.on("siyuan-lock-screen", () => {
+    ipcMain.on("siyuan-send_windows", (event, data) => {
         BrowserWindow.getAllWindows().forEach(item => {
-            item.webContents.send("siyuan-lock-screen");
-        });
-    });
-    ipcMain.on("siyuan-closetab", (event, data) => {
-        BrowserWindow.getAllWindows().forEach(item => {
-            item.webContents.send("siyuan-closetab", data);
+            item.webContents.send("siyuan-send_windows", data);
         });
     });
 

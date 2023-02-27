@@ -1,5 +1,5 @@
 import {openSearch} from "../search/spread";
-import {exportLayout, getInstanceById, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
 import {hotKey2Electron, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
@@ -7,6 +7,7 @@ import {ipcRenderer, OpenDialogReturnValue, webFrame} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
+import {onWindowsMsg} from "../window/onWindowsMsg";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
@@ -30,7 +31,6 @@ import {replaceLocalPath} from "../editor/rename";
 import {workspaceMenu} from "../menus/workspace";
 import {getWorkspaceName} from "./noRelyPCFunction";
 import {setTabPosition} from "../window/setHeader";
-import {Tab} from "../layout/Tab";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -356,18 +356,8 @@ export const initWindow = () => {
             winOnClose(currentWindow, close);
         });
     }
-    ipcRenderer.on(Constants.SIYUAN_CLOSETAB, (e, ipcData) => {
-        const tab = getInstanceById(ipcData);
-        if (tab && tab instanceof Tab) {
-            tab.parent.removeTab(ipcData);
-        }
-    });
-    ipcRenderer.on(Constants.SIYUAN_LOCK_SCREEN, () => {
-        exportLayout(false, () => {
-            fetchPost("/api/system/logoutAuth", {}, () => {
-                window.location.reload();
-            });
-        });
+    ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
+        onWindowsMsg(ipcData);
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
         window.siyuan.printWin.destroy();

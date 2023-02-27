@@ -505,7 +505,7 @@
       return response.json()
     }).then((response) => {
       if (0 === response.code) {
-        window.location.href = '/'
+        window.location.href = window.location.search.replace('?url=', '')
         return
       }
 

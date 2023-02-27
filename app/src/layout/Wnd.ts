@@ -223,7 +223,7 @@ export class Wnd {
                 if (wnd instanceof Wnd) {
                     JSONToCenter(tabData, wnd);
                     oldTab = wnd.children[wnd.children.length - 1];
-                    ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabData.id);
+                    ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data:  tabData.id});
                     it.querySelector("li[data-clone='true']").remove();
                     wnd.switchTab(oldTab.headElement);
                 }
@@ -331,7 +331,7 @@ export class Wnd {
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
                 JSONToCenter(tabData, this);
                 oldTab = this.children[this.children.length - 1];
-                ipcRenderer.send(Constants.SIYUAN_CLOSETAB, tabData.id);
+                ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data: tabData.id});
             }
             /// #endif
             if (!oldTab) {

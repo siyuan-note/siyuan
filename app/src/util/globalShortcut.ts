@@ -89,9 +89,11 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
 
 export const globalShortcut = () => {
     document.body.addEventListener("mouseleave", () => {
-        window.siyuan.layout.leftDock.hideDock();
-        window.siyuan.layout.rightDock.hideDock();
-        window.siyuan.layout.bottomDock.hideDock();
+        if (window.siyuan.layout.leftDock) {
+            window.siyuan.layout.leftDock.hideDock();
+            window.siyuan.layout.rightDock.hideDock();
+            window.siyuan.layout.bottomDock.hideDock();
+        }
     });
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
         if (window.siyuan.hideBreadcrumb) {
@@ -837,7 +839,7 @@ export const globalShortcut = () => {
         }
         // dock float 时，点击空白处，隐藏 dock
         const floatDockLayoutElement = hasClosestByClassName(event.target, "layout--float", true);
-        if (floatDockLayoutElement) {
+        if (floatDockLayoutElement && window.siyuan.layout.leftDock) {
             if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.bottomDock.layout.element)) {
                 window.siyuan.layout.bottomDock.hideDock();
             }
@@ -847,7 +849,7 @@ export const globalShortcut = () => {
             if (!floatDockLayoutElement.isSameNode(window.siyuan.layout.rightDock.layout.element)) {
                 window.siyuan.layout.rightDock.hideDock();
             }
-        } else if (!hasClosestByClassName(event.target, "dock") && !isWindow()) {
+        } else if (!hasClosestByClassName(event.target, "dock") && !isWindow() && window.siyuan.layout.leftDock) {
             window.siyuan.layout.bottomDock.hideDock();
             window.siyuan.layout.leftDock.hideDock();
             window.siyuan.layout.rightDock.hideDock();

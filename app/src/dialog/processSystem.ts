@@ -19,10 +19,10 @@ import {needSubscribe} from "../util/needSubscribe";
 export const lockScreen = () => {
     /// #if BROWSER
     fetchPost("/api/system/logoutAuth", {}, () => {
-        window.location.href = "/";
+        window.location.href = `/check-auth?url=${window.location.href}`;
     });
     /// #else
-    ipcRenderer.send(Constants.SIYUAN_LOCK_SCREEN);
+    ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "lockscreen"});
     /// #endif
 };
 

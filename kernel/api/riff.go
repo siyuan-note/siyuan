@@ -85,6 +85,26 @@ func reviewRiffCard(c *gin.Context) {
 	}
 }
 
+func getNotebookRiffDueCards(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	notebookID := arg["notebook"].(string)
+	cards, err := model.GetNotebookDueFlashcards(notebookID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = cards
+}
+
 func getTreeRiffDueCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -22,7 +22,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/facette/natsort"
@@ -155,12 +154,11 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 					docTags := strings.Split(docTagsVal, ",")
 					var tmp []string
 					for _, docTag := range docTags {
-						if docTag != oldLabel {
+						if strings.HasPrefix(docTag, oldLabel+"/") || docTag == oldLabel {
+							docTag = strings.Replace(docTag, oldLabel, newLabel, 1)
 							tmp = append(tmp, docTag)
-							continue
-						}
-						if !gulu.Str.Contains(newLabel, tmp) {
-							tmp = append(tmp, newLabel)
+						} else {
+							tmp = append(tmp, docTag)
 						}
 					}
 					node.SetIALAttr("tags", strings.Join(tmp, ","))
@@ -172,7 +170,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			for _, nodeTag := range nodeTags {
 				if nodeTag.IsTextMarkType("tag") {
 					if strings.HasPrefix(nodeTag.TextMarkTextContent, oldLabel+"/") || nodeTag.TextMarkTextContent == oldLabel {
-						nodeTag.TextMarkTextContent = strings.ReplaceAll(nodeTag.TextMarkTextContent, oldLabel, newLabel)
+						nodeTag.TextMarkTextContent = strings.Replace(nodeTag.TextMarkTextContent, oldLabel, newLabel, 1)
 					}
 				}
 			}

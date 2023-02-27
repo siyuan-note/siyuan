@@ -228,5 +228,11 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
+	if u := c.Query("url"); "" != u {
+		c.Redirect(302, u)
+		c.Abort()
+		return
+	}
+
 	c.Next()
 }

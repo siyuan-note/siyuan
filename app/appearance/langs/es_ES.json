@@ -1,4 +1,6 @@
 {
+  "mgmt": "Administración",
+  "spaceRepetition": "Repetición Espaciada",
   "space": "Espacio",
   "pdfIsLoading": "El PDF se está cargando, inténtalo de nuevo más tarde",
   "cardShowAnswer": "Afficher la réponse",

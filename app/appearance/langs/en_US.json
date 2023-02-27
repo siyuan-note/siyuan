@@ -1,4 +1,6 @@
 {
+  "mgmt": "Management",
+  "spaceRepetition": "Spaced Repetition",
   "space": "Space",
   "cardShowAnswer": "Show Answer",
   "cardRatingAgain": "Again",

@@ -1,4 +1,6 @@
 {
+  "mgmt": "管理",
+  "spaceRepetition": "間隔重複",
   "space": "空格",
   "pdfIsLoading": "PDF 正在加載中，請稍後再試",
   "cardShowAnswer": "顯示答案",

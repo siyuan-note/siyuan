@@ -231,7 +231,7 @@ export const initBar = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barReadonly") {
-                editor.setMode();
+                editor.setReadonly();
                 event.stopPropagation();
                 break;
             } else if (target.id === "barMode") {

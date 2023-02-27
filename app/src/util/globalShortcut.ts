@@ -576,7 +576,7 @@ export const globalShortcut = () => {
         }
         if (matchHotKey(window.siyuan.config.keymap.general.editMode.custom, event)) {
             event.preventDefault();
-            editor.setMode();
+            editor.setReadonly();
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {

@@ -4,12 +4,11 @@ import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {setPadding} from "../protyle/ui/initUI";
 import {reloadProtyle} from "../protyle/util/reload";
-import {disabledProtyle, enableProtyle} from "../protyle/util/onGet";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const editor = {
     element: undefined as Element,
-    setMode: (readOnly?: boolean) => {
+    setReadonly: (readOnly?: boolean) => {
         const target = document.querySelector("#barReadonly");
         if (typeof readOnly === "undefined") {
             readOnly = target.getAttribute("aria-label") === `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`;
@@ -24,41 +23,7 @@ export const editor = {
             target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
             target.querySelector("use").setAttribute("xlink:href", "#iconEdit");
         }
-        fetchPost("/api/setting/setEditor", window.siyuan.config.editor, () => {
-            const allModels = getAllModels();
-            allModels.editor.forEach(editor => {
-                if (readOnly) {
-                    disabledProtyle(editor.editor.protyle);
-                } else {
-                    enableProtyle(editor.editor.protyle);
-                }
-            });
-            allModels.backlink.forEach(backlink => {
-                backlink.editors.forEach(editor => {
-                    if (readOnly) {
-                        disabledProtyle(editor.protyle);
-                    } else {
-                        enableProtyle(editor.protyle);
-                    }
-                });
-            });
-            allModels.search.forEach(search => {
-                if (readOnly) {
-                    disabledProtyle(search.edit.protyle);
-                } else {
-                    enableProtyle(search.edit.protyle);
-                }
-            });
-            window.siyuan.blockPanels.forEach(item => {
-                item.editors.forEach(editor => {
-                    if (readOnly) {
-                        disabledProtyle(editor.protyle);
-                    } else {
-                        enableProtyle(editor.protyle);
-                    }
-                });
-            });
-        });
+        fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
     },
     genHTML: () => {
         let fontFamilyHTML = "";
@@ -357,7 +322,7 @@ export const editor = {
     },
     onSetEditor: (editorData: IEditor) => {
         if (editorData.readOnly !== window.siyuan.config.editor.readOnly) {
-            editor.setMode(editorData.readOnly);
+            editor.setReadonly(editorData.readOnly);
         }
         window.siyuan.config.editor = editorData;
         getAllModels().editor.forEach((item) => {

@@ -4,8 +4,7 @@ import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
-import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {viewCards} from "./viewCards";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 
 export const openCard = () => {
@@ -34,10 +33,6 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     let index = 0;
     if (blocks.length > 0) {
         html += `<div class="fn__flex" style="align-items: center" data-type="count">
-    <span class="fn__space"></span>
-    <span data-type="view" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardPreview}">
-        <svg><use xlink:href="#iconEye"></use></svg>
-    </span>
     <span class="fn__space"></span>
     <div class="ft__on-surface ft__smaller"><span>1</span>/<span>${blocks.length}</span></div>
 </div>`;
@@ -127,17 +122,6 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     const selectElement = dialog.element.querySelector("select");
     const titleElement = countElement.previousElementSibling;
     dialog.element.addEventListener("click", (event) => {
-        const viewElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "view");
-        if (viewElement) {
-            if (selectElement) {
-                viewCards(selectElement.value, selectElement.options[selectElement.selectedIndex].text);
-            } else {
-                viewCards(titleElement.getAttribute("data-id"), titleElement.textContent, undefined, true);
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
         let type = "";
         if (typeof event.detail === "string") {
             if (event.detail === "1" || event.detail === "j") {
@@ -204,9 +188,11 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 index++;
                 editor.protyle.element.classList.add("card__block--hide");
                 if (index > blocks.length - 1) {
-                    fetchPost(selectElement ? "/api/riff/getRiffDueCards" : "/api/riff/getTreeRiffDueCards", {
+                    fetchPost(selectElement ? "/api/riff/getRiffDueCards" :
+                        (titleElement.getAttribute("data-id") ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
                         rootID: titleElement.getAttribute("data-id"),
-                        deckID: selectElement?.value
+                        deckID: selectElement?.value,
+                        notebook: titleElement.getAttribute("data-notebookid"),
                     }, (treeCards) => {
                         index = 0;
                         blocks = treeCards.data;

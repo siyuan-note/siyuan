@@ -28,6 +28,7 @@ import {Files} from "../layout/dock/Files";
 import {openNewWindowById} from "../window/openNewWindow";
 import {openCardByData} from "../card/openCard";
 import {escapeHtml} from "../util/escape";
+import {makeCard} from "../card/makeCard";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -119,7 +120,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
         iconHTML: '<svg class="b3-menu__icon" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg>',
         click: () => {
             fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                openCardByData(response.data, `<span data-id="${notebookId}" class="fn__flex-center">${escapeHtml(name)}</span>`);
+                openCardByData(response.data, `<span data-notebookid="${notebookId}" class="fn__flex-center">${escapeHtml(name)}</span>`);
             });
         }
     }).element);
@@ -308,12 +309,21 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.riffCard,
-            iconHTML: '<svg class="b3-menu__icon" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg>',
-            click: () => {
-                fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                    openCardByData(response.data, `<span data-id="${id}" class="fn__flex-center">${escapeHtml(name)}</span>`);
-                });
-            }
+            type: "submenu",
+            icon: "iconRiffCard",
+            submenu: [{
+                label: window.siyuan.languages.spaceRepetition,
+                click: () => {
+                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
+                        openCardByData(response.data, `<span data-id="${id}"  class="fn__flex-center">${escapeHtml(name)}</span>`);
+                    });
+                }
+            }, {
+                label: window.siyuan.languages.addToDeck,
+                click: () => {
+                    makeCard([id]);
+                }
+            }],
         }).element);
         /// #if !MOBILE
         window.siyuan.menus.menu.append(new MenuItem({

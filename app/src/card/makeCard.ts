@@ -33,23 +33,15 @@ export const genCardItem = (item: ICardPackage) => {
 </li>`;
 };
 
-export const makeCard = (nodeElement: Element[]) => {
+export const makeCard = (ids: string[]) => {
     window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === "makeCard") {
             hideElements(["dialog"]);
             return true;
         }
     });
-    const range = getEditorRange(nodeElement[0]);
     fetchPost("/api/riff/getRiffDecks", {}, (response) => {
         let html = "";
-        const ids: string[] = [];
-        nodeElement.forEach(item => {
-            if (item.getAttribute("data-type") === "NodeThematicBreak") {
-                return;
-            }
-            ids.push(item.getAttribute("data-node-id"));
-        });
         response.data.forEach((item: ICardPackage) => {
             html += genCardItem(item);
         });
@@ -69,9 +61,6 @@ export const makeCard = (nodeElement: Element[]) => {
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--background fn__flex-1">${html}</ul>
 </div>`,
-            destroyCallback() {
-                focusByRange(range);
-            }
         });
         dialog.element.setAttribute("data-key", "makeCard");
         dialog.element.style.zIndex = "200";

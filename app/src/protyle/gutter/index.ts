@@ -677,7 +677,14 @@ export class Gutter {
             label: window.siyuan.languages.addToDeck,
             icon: "iconRiffCard",
             click() {
-                makeCard(selectsElement);
+                const ids: string[] = [];
+                selectsElement.forEach(item => {
+                    if (item.getAttribute("data-type") === "NodeThematicBreak") {
+                        return;
+                    }
+                    ids.push(item.getAttribute("data-node-id"));
+                });
+                makeCard(ids);
             }
         }).element);
         return window.siyuan.menus.menu;
@@ -1450,7 +1457,7 @@ export class Gutter {
                 label: window.siyuan.languages.addToDeck,
                 icon: "iconRiffCard",
                 click() {
-                    makeCard([nodeElement]);
+                    makeCard([nodeElement.getAttribute("data-node-id")]);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

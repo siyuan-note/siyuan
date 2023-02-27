@@ -41,6 +41,55 @@ import (
 var Decks = map[string]*riff.Deck{}
 var deckLock = sync.Mutex{}
 
+func GetNotebookFlashcards(boxID string, page int) (blocks []*Block, total, pageCount int) {
+	blocks = []*Block{}
+
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
+	if nil != err {
+		logging.LogErrorf("read dir failed: %s", err)
+		return
+	}
+
+	var rootIDs []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		if !strings.HasSuffix(entry.Name(), ".sy") {
+			continue
+		}
+
+		rootIDs = append(rootIDs, strings.TrimSuffix(entry.Name(), ".sy"))
+	}
+
+	treeBlockIDs := map[string]bool{}
+	for _, rootID := range rootIDs {
+		blockIDs := getTreeSubTreeChildBlocks(rootID)
+		for blockID, _ := range blockIDs {
+			treeBlockIDs[blockID] = true
+		}
+	}
+
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+
+	var allBlockIDs []string
+	deckBlockIDs := deck.GetBlockIDs()
+	for _, blockID := range deckBlockIDs {
+		if treeBlockIDs[blockID] {
+			allBlockIDs = append(allBlockIDs, blockID)
+		}
+	}
+	allBlockIDs = gulu.Str.RemoveDuplicatedElem(allBlockIDs)
+	cards := deck.GetCardsByBlockIDs(allBlockIDs)
+
+	blocks, total, pageCount = getCardsBlocks(cards, page)
+	return
+}
+
 func GetTreeFlashcards(rootID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
 	deck := Decks[builtinDeckID]
@@ -263,7 +312,6 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 
 	deck := Decks[builtinDeckID]
 	if nil == deck {
-		logging.LogWarnf("builtin deck not found")
 		return
 	}
 

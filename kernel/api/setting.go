@@ -94,7 +94,7 @@ func setEditor(c *gin.Context) {
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
 	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
 	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude
-	oldReadOnly := editor.ReadOnly
+	oldReadOnly := model.Conf.Editor.ReadOnly
 
 	model.Conf.Editor = editor
 	model.Conf.Save()

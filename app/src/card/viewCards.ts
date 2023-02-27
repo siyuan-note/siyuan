@@ -10,10 +10,10 @@ import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 
-export const viewCards = (deckID: string, title: string, cb?: (response: IWebSocketData) => void, isDoc = false) => {
+export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
     let pageIndex = 1;
     let edit: Protyle;
-    fetchPost(isDoc ? "/api/riff/getTreeRiffCards" : "/api/riff/getRiffCards", {
+    fetchPost(`/api/riff/get${deckType}RiffCards`, {
         id: deckID,
         page: pageIndex
     }, (response) => {
@@ -119,7 +119,7 @@ export const viewCards = (deckID: string, title: string, cb?: (response: IWebSoc
                     break;
                 } else if (type === "remove") {
                     fetchPost("/api/riff/removeRiffCards", {
-                        deckID: isDoc ? Constants.QUICK_DECK_ID : deckID,
+                        deckID: deckType === "" ? deckID : Constants.QUICK_DECK_ID,
                         blockIDs: [target.getAttribute("data-id")]
                     }, (removeResponse) => {
                         let nextElment = target.parentElement.nextElementSibling;

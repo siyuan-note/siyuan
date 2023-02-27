@@ -35,6 +35,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {transferBlockRef} from "../../menus/block";
 import {openCardByData} from "../../card/openCard";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
+import {viewCards} from "../../card/viewCards";
 
 export class Title {
     public element: HTMLElement;
@@ -373,6 +374,12 @@ export class Title {
                         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
                             openCardByData(response.data, `<span data-id="${protyle.block.rootID}"  class="fn__flex-center">${escapeHtml(this.editElement.textContent)}</span>`);
                         });
+                    }
+                }, {
+                    iconHTML: Constants.ZWSP,
+                    label: window.siyuan.languages.mgmt,
+                    click: () => {
+                        viewCards(protyle.block.rootID, escapeHtml(this.editElement.textContent), "Tree");
                     }
                 }, {
                     iconHTML: Constants.ZWSP,

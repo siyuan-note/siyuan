@@ -29,6 +29,7 @@ import {openNewWindowById} from "../window/openNewWindow";
 import {openCardByData} from "../card/openCard";
 import {escapeHtml} from "../util/escape";
 import {makeCard} from "../card/makeCard";
+import {viewCards} from "../card/viewCards";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -126,6 +127,12 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
                 fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
                     openCardByData(response.data, `<span data-notebookid="${notebookId}" class="fn__flex-center">${escapeHtml(name)}</span>`);
                 });
+            }
+        },{
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.mgmt,
+            click: () => {
+                viewCards(notebookId, name, "Notebook");
             }
         }],
     }).element);
@@ -321,8 +328,14 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 label: window.siyuan.languages.spaceRepetition,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                        openCardByData(response.data, `<span data-id="${id}"  class="fn__flex-center">${escapeHtml(name)}</span>`);
+                        openCardByData(response.data, `<span data-id="${id}"  class="fn__flex-center">${name}</span>`);
                     });
+                }
+            }, {
+                iconHTML: Constants.ZWSP,
+                label: window.siyuan.languages.mgmt,
+                click: () => {
+                    viewCards(id, name, "Tree");
                 }
             }, {
                 iconHTML: Constants.ZWSP,

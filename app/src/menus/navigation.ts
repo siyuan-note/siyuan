@@ -117,12 +117,17 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
     }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.riffCard,
-        iconHTML: '<svg class="b3-menu__icon" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg>',
-        click: () => {
-            fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                openCardByData(response.data, `<span data-notebookid="${notebookId}" class="fn__flex-center">${escapeHtml(name)}</span>`);
-            });
-        }
+        type: "submenu",
+        icon: "iconRiffCard",
+        submenu: [{
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.spaceRepetition,
+            click: () => {
+                fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
+                    openCardByData(response.data, `<span data-notebookid="${notebookId}" class="fn__flex-center">${escapeHtml(name)}</span>`);
+                });
+            }
+        }],
     }).element);
     /// #if !MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
@@ -312,6 +317,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             type: "submenu",
             icon: "iconRiffCard",
             submenu: [{
+                iconHTML: Constants.ZWSP,
                 label: window.siyuan.languages.spaceRepetition,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
@@ -319,6 +325,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     });
                 }
             }, {
+                iconHTML: Constants.ZWSP,
                 label: window.siyuan.languages.addToDeck,
                 click: () => {
                     makeCard([id]);

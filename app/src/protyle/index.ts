@@ -94,9 +94,9 @@ export class Protyle {
                             break;
                         case "readonly":
                             if (data.data) {
-                                enableProtyle(this.protyle);
-                            } else {
                                 disabledProtyle(this.protyle);
+                            } else {
+                                enableProtyle(this.protyle);
                             }
                             break;
                         case "heading2doc":

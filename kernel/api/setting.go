@@ -94,6 +94,7 @@ func setEditor(c *gin.Context) {
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
 	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
 	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude
+	oldReadOnly := editor.ReadOnly
 
 	model.Conf.Editor = editor
 	model.Conf.Save()
@@ -106,6 +107,10 @@ func setEditor(c *gin.Context) {
 		oldVirtualBlockRefInclude != model.Conf.Editor.VirtualBlockRefInclude ||
 		oldVirtualBlockRefExclude != model.Conf.Editor.VirtualBlockRefExclude {
 		model.ResetVirtualBlockRefCache()
+	}
+
+	if oldReadOnly != model.Conf.Editor.ReadOnly {
+		util.BroadcastByType("protyle", "readonly", 0, "", model.Conf.Editor.ReadOnly)
 	}
 
 	ret.Data = model.Conf.Editor

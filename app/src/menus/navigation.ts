@@ -28,7 +28,6 @@ import {Files} from "../layout/dock/Files";
 import {openNewWindowById} from "../window/openNewWindow";
 import {openCardByData} from "../card/openCard";
 import {escapeHtml} from "../util/escape";
-import {makeCard} from "../card/makeCard";
 import {viewCards} from "../card/viewCards";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {

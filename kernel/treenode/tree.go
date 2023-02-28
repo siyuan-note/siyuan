@@ -69,7 +69,7 @@ func TreeRoot(node *ast.Node) *ast.Node {
 
 func NewTree(boxID, p, hp, title string) *parse.Tree {
 	id := strings.TrimSuffix(path.Base(p), ".sy")
-	root := &ast.Node{Type: ast.NodeDocument, ID: id}
+	root := &ast.Node{Type: ast.NodeDocument, ID: id, Spec: "1", Box: boxID, Path: p}
 	root.SetIALAttr("title", title)
 	root.SetIALAttr("id", id)
 	root.SetIALAttr("updated", util.TimeFromID(id))
@@ -78,7 +78,7 @@ func NewTree(boxID, p, hp, title string) *parse.Tree {
 	ret.Path = p
 	ret.HPath = hp
 	ret.Root.Spec = "1"
-	newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID()}
+	newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID(), Box: boxID, Path: p}
 	newPara.SetIALAttr("id", newPara.ID)
 	newPara.SetIALAttr("updated", util.TimeFromID(newPara.ID))
 	ret.Root.AppendChild(newPara)

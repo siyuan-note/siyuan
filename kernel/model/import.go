@@ -509,8 +509,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			curRelPath := filepath.ToSlash(strings.TrimPrefix(currentPath, localPath))
 			targetPath := path.Join(baseTargetPath, id)
+			hPath := path.Join(baseHPath, filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
+			hPath = strings.TrimSuffix(hPath, ext)
 			if "" == curRelPath {
 				curRelPath = "/"
+				hPath = "/" + title
 			} else {
 				dirPath := targetPaths[path.Dir(curRelPath)]
 				targetPath = path.Join(dirPath, id)
@@ -519,8 +522,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			targetPath = strings.ReplaceAll(targetPath, ".sy/", "/")
 			targetPath += ".sy"
 			targetPaths[curRelPath] = targetPath
-			hPath := path.Join(baseHPath, filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
-			hPath = strings.TrimSuffix(hPath, ext)
+
 			if info.IsDir() {
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)
 				if err = indexWriteJSONQueue(tree); nil != err {

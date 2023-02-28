@@ -139,10 +139,10 @@ export class Dock {
                         }
                     }
                 });
-                if (currentNowSize < minSize && direction === "lr" ) {
+                if (currentNowSize < minSize && direction === "lr") {
                     return;
                 }
-                if (currentNowSize < 64 && direction === "tb" ) {
+                if (currentNowSize < 64 && direction === "tb") {
                     return;
                 }
                 this.layout.element.style[direction === "lr" ? "width" : "height"] = currentNowSize + "px";
@@ -232,6 +232,10 @@ export class Dock {
         if (!reset && (this.layout.element.style.opacity === "0" || this.pin) ||
             this.layout.element.querySelector(".fullscreen")    // 关系图全屏不应该退出
         ) {
+            return;
+        }
+        // https://github.com/siyuan-note/siyuan/issues/7504
+        if (this.layout.element.contains(document.activeElement) && document.activeElement.classList.contains("b3-text-field")) {
             return;
         }
         if (this.position === "Left") {

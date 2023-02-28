@@ -73,10 +73,7 @@ func NewTree(boxID, p, hp, title string) *parse.Tree {
 	root.SetIALAttr("title", title)
 	root.SetIALAttr("id", id)
 	root.SetIALAttr("updated", util.TimeFromID(id))
-	ret := &parse.Tree{Root: root}
-	ret.Box = boxID
-	ret.Path = p
-	ret.HPath = hp
+	ret := &parse.Tree{Root: root, ID: id, Box: boxID, Path: p, HPath: hp}
 	ret.Root.Spec = "1"
 	newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID(), Box: boxID, Path: p}
 	newPara.SetIALAttr("id", newPara.ID)

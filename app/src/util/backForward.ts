@@ -20,7 +20,7 @@ let previousIsBack = false;
 const focusStack = async (stack: IBackStack) => {
     hideElements(["gutter", "toolbar", "hint", "util", "dialog"], stack.protyle);
     let blockElement: Element;
-    if (!stack.protyle.element.parentElement) {
+    if (!document.contains(stack.protyle.element)) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.protyle.block.rootID});
         if (!response.data) {
             // 页签删除
@@ -74,32 +74,31 @@ const focusStack = async (stack: IBackStack) => {
                 wnd.addTab(tab);
             }
             wnd.showHeading();
-            // 页签关闭
-            setTimeout(() => {
-                const protyle = (tab.model as Editor).editor.protyle;
-                forwardStack.find(item => {
-                    if (!item.protyle.element.parentElement && item.protyle.block.rootID === protyle.block.rootID) {
-                        item.protyle = protyle;
-                    }
-                });
-                window.siyuan.backStack.find(item => {
-                    if (!item.protyle.element.parentElement && item.protyle.block.rootID === protyle.block.rootID) {
-                        item.protyle = protyle;
-                    }
-                });
-                if (protyle.block.rootID === stack.id) {
-                    focusByOffset(protyle.title.editElement, stack.position.start, stack.position.end);
-                } else {
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
-                        if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
-                            blockElement = item;
-                            return true;
-                        }
-                    });
-                    focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-                    scrollCenter(protyle, blockElement);
+            // 替换被关闭的 protyle
+            const protyle = (tab.model as Editor).editor.protyle;
+            stack.protyle = protyle;
+            forwardStack.forEach(item => {
+                if (!document.contains(item.protyle.element) && item.protyle.block.rootID === info.data.rootID) {
+                    item.protyle = protyle;
                 }
-            }, 500);
+            });
+            window.siyuan.backStack.forEach(item => {
+                if (!document.contains(item.protyle.element) && item.protyle.block.rootID === info.data.rootID) {
+                    item.protyle = protyle;
+                }
+            });
+            if (info.data.rootID === stack.id) {
+                focusByOffset(protyle.title.editElement, stack.position.start, stack.position.end);
+            } else {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
+                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                        blockElement = item;
+                        return true;
+                    }
+                });
+                focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+                scrollCenter(protyle, blockElement);
+            }
             return true;
         } else {
             return false;
@@ -193,7 +192,9 @@ export const goBack = async () => {
         return;
     }
     document.querySelector("#barForward")?.classList.remove("toolbar__item--disabled");
-    if (!previousIsBack) {
+    if (!previousIsBack &&
+        // 页签被关闭时应优先打开该页签，页签存在时即可返回上一步，不用再重置光标到该页签上
+        document.contains(window.siyuan.backStack[window.siyuan.backStack.length - 1].protyle.element)) {
         forwardStack.push(window.siyuan.backStack.pop());
     }
     let stack = window.siyuan.backStack.pop();

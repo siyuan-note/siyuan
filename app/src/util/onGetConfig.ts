@@ -180,6 +180,15 @@ export const onGetConfig = (isStart: boolean) => {
         mountHelp();
     }
     addGA();
+    // 如果本地存储有编辑密码,则进入只读模式
+    fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
+        if(typeof response.data["editProtectPassword"] !=="undefined"){
+            console.log(`启动设置编辑保护`)
+            editor.setReadonly(true)
+        }else {
+            console.log(`启动.无密码,不编辑保护`)
+        }
+    })
 };
 
 export const initBar = () => {
@@ -206,6 +215,9 @@ export const initBar = () => {
 <div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.editor.readOnly ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}">
     <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
+<div id="barEditProtect" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.setEditProtect}">
+    <svg><use xlink:href="#iconLock"></use></svg>
+</div>
 <div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.appearanceMode}">
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
 </div>
@@ -231,9 +243,16 @@ export const initBar = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barReadonly") {
-                editor.setReadonly();
+                // 工具栏点击图标,在只读和编辑模式间切换,如果进入编辑且有密码,需要验证
+                editor.setReadonly2();
+                // editor.setReadonly();
                 event.stopPropagation();
                 break;
+            } else if (target.id === "barEditProtect") {
+                // 点击编辑保护图标,设置,修改,删除编辑密码
+                editor.setEditProtect()
+                event.stopPropagation();
+                break
             } else if (target.id === "barMode") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
                     window.siyuan.menus.menu.element.getAttribute("data-name") === "barmode") {

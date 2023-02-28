@@ -4,10 +4,134 @@ import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {setPadding} from "../protyle/ui/initUI";
 import {reloadProtyle} from "../protyle/util/reload";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {Dialog} from "../dialog";
+import {isMobile} from "../util/functions";
+import {Constants} from "../constants";
+import {showMessage} from "../dialog/message";
+
+const unlockEditProtect= (tip:string,cb?:()=>void) => {
+    // 解锁对话框
+    const dialog = new Dialog({
+        title: window.siyuan.languages.unlockEditProtect,
+        content: `<div class="b3-dialog__content">
+    <input class="b3-text-field fn__block" placeholder="" value="">
+    <div class="b3-label__text">${tip}</div>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "80vw" : "520px",
+    });
+    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    dialog.bindInput(inputElement, () => {
+        (btnsElement[1] as HTMLButtonElement).click();
+    });
+    inputElement.select();
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        let pw=inputElement.value
+        // console.log(`用户输入密码为[${pw}]`)
+        fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
+            let real_pw=response.data["editProtectPassword"]
+            if (pw==real_pw) {
+                // console.log(`密码正确,进入一阶段`)
+                showMessage(window.siyuan.languages.editPasswordCorrect,2000)
+                dialog.destroy();
+                if(cb){
+                    cb()
+                }
+            }else {
+                showMessage(window.siyuan.languages.editPasswordWrong,2000,"error")
+                // console.log(`密码错误`);
+            }
+        })
+    });
+};
+
+const setEditProtectPassword= () => {
+    const dialog = new Dialog({
+        title: window.siyuan.languages.setEditPassword,
+        content: `<div class="b3-dialog__content">
+    <input class="b3-text-field fn__block" placeholder="" value="">
+    <div class="b3-label__text">${window.siyuan.languages.setEditPasswordTip}</div>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "80vw" : "520px",
+    });
+    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    dialog.bindInput(inputElement, () => {
+        (btnsElement[1] as HTMLButtonElement).click();
+    });
+    inputElement.select();
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        let pw=inputElement.value
+        // console.log(`用户输入的包含密码为[${pw}]`)
+        if(pw.trim()===""){
+            // 移除密码
+            fetchPost("/api/storage/removeLocalStorageVal", {
+                app: Constants.SIYUAN_APPID,
+                key: "editProtectPassword",
+            });
+            showMessage(window.siyuan.languages.editPasswordDeleted,3000)
+            // console.log(`密码已移除`)
+            dialog.destroy();
+        }else {
+            // 设置密码; 保存到 <workspace>\data\storage\local.json
+            setStorageVal("editProtectPassword",pw.trim())
+            showMessage(`${window.siyuan.languages.setEditPasswordOK}:${pw.trim()}`,3000)
+            dialog.destroy();
+            // console.log(`设置编辑保护密码为:${pw}`)
+        }
+    });
+};
 
 export const editor = {
     element: undefined as Element,
+    checkPasswordAndThen:(tip:string, cb:()=>void)=>{
+        // 检查是否密码,验证成功后调用cb
+        fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
+            let hasPassword=false
+            if(typeof response.data["editProtectPassword"] !=="undefined"){
+                hasPassword=true
+            }
+            if(hasPassword) {
+                // 有密码,验证成功后再调用cb
+                unlockEditProtect(tip,cb)
+            }else {
+                // 无密码,调用cb
+                cb()
+            }
+        })
+    },
+    setEditProtect:(cb?:()=>void)=>{
+        editor.checkPasswordAndThen(window.siyuan.languages.unlockTipWhenSetEditPW,setEditProtectPassword)
+    },
+    // 切换只读和编辑模式,如果有密码,则编辑模式需要验证
+    setReadonly2:(readOnly?: boolean)=>{
+        const target = document.querySelector("#barReadonly");
+        if (typeof readOnly === "undefined") {
+            readOnly = target.getAttribute("aria-label") === `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`;
+        }
+        if(readOnly){
+            editor.setReadonly(readOnly)
+        }else {
+            editor.checkPasswordAndThen(window.siyuan.languages.unlockTipWhenEnableEdit,()=>{
+                editor.setReadonly(readOnly)
+            })
+        }
+    },
     setReadonly: (readOnly?: boolean) => {
         const target = document.querySelector("#barReadonly");
         if (typeof readOnly === "undefined") {

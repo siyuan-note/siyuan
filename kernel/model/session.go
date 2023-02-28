@@ -204,7 +204,7 @@ func CheckAuth(c *gin.Context) {
 		}
 	}
 
-	if strings.HasSuffix(c.Request.RequestURI, "/check-auth") {
+	if "/check-auth" == c.Request.URL.Path { // 跳过访问授权页
 		c.Next()
 		return
 	}
@@ -224,12 +224,6 @@ func CheckAuth(c *gin.Context) {
 		}
 
 		c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed"})
-		c.Abort()
-		return
-	}
-
-	if u := c.Query("url"); "" != u {
-		c.Redirect(302, u)
 		c.Abort()
 		return
 	}

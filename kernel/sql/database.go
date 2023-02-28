@@ -215,7 +215,7 @@ func initHistoryDBConnection() {
 		historyDB.Close()
 	}
 
-	dsn := util.DBPath + "?_journal_mode=WAL" +
+	dsn := util.HistoryDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_mmap_size=2684354560" +
 		"&_secure_delete=OFF" +

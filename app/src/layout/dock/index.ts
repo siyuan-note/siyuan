@@ -218,12 +218,13 @@ export class Dock {
         if (!reset) {
             this.layout.element.style.opacity = "1";
         }
+        this.layout.element.style.transform = "";
         if (this.position === "Left") {
-            this.layout.element.style.transform = `translateX(${this.element.clientWidth}px)`;
+            this.layout.element.style.left = `${this.element.clientWidth}px`;
         } else if (this.position === "Right") {
-            this.layout.element.style.transform = `translateX(-${this.element.clientWidth}px)`;
+            this.layout.element.style.right = `${this.element.clientWidth}px`;
         } else if (this.position === "Bottom") {
-            this.layout.element.style.transform = `translateY(-${this.element.offsetHeight + document.getElementById("status").offsetHeight}px)`;
+            this.layout.element.style.bottom = `${this.element.offsetHeight + document.getElementById("status").offsetHeight}px`;
         }
     }
 
@@ -235,10 +236,13 @@ export class Dock {
         }
         if (this.position === "Left") {
             this.layout.element.style.transform = `translateX(-${this.layout.element.clientWidth + 8}px)`;
+            this.layout.element.style.left = "";
         } else if (this.position === "Right") {
             this.layout.element.style.transform = `translateX(${this.layout.element.clientWidth + 8}px)`;
+            this.layout.element.style.right = "";
         } else if (this.position === "Bottom") {
             this.layout.element.style.transform = `translateY(${this.layout.element.clientHeight + 8}px)`;
+            this.layout.element.style.bottom = "";
         }
         if (reset) {
             return;

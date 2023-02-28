@@ -119,7 +119,7 @@ export const editor = {
         editor.checkPasswordAndThen(window.siyuan.languages.unlockTipWhenSetEditPW,setEditProtectPassword)
     },
     // 切换只读和编辑模式,如果有密码,则编辑模式需要验证
-    setReadonly2:(readOnly?: boolean)=>{
+    setReadonlyCheck:(readOnly?: boolean)=>{
         const target = document.querySelector("#barReadonly");
         if (typeof readOnly === "undefined") {
             readOnly = target.getAttribute("aria-label") === `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`;

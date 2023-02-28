@@ -244,7 +244,7 @@ export const initBar = () => {
                 break;
             } else if (target.id === "barReadonly") {
                 // 工具栏点击图标,在只读和编辑模式间切换,如果进入编辑且有密码,需要验证
-                editor.setReadonly2();
+                editor.setReadonlyCheck();
                 // editor.setReadonly();
                 event.stopPropagation();
                 break;

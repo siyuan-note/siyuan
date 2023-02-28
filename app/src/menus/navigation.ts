@@ -128,7 +128,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
                     openCardByData(response.data, `<span data-notebookid="${notebookId}" class="fn__flex-center">${escapeHtml(name)}</span>`);
                 });
             }
-        },{
+        }, {
             iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.mgmt,
             click: () => {
@@ -336,12 +336,6 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 label: window.siyuan.languages.mgmt,
                 click: () => {
                     viewCards(id, name, "Tree");
-                }
-            }, {
-                iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.addToDeck,
-                click: () => {
-                    makeCard([id]);
                 }
             }],
         }).element);

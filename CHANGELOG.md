@@ -1,3 +1,64 @@
+## v2.7.7 / 2023-02-28
+
+### 改进功能
+
+* [导出 PDF 时支持将资源文件作为附件嵌入](https://github.com/siyuan-note/siyuan/issues/7414)
+* [悬浮面板支持边缘拖拽改变宽度](https://github.com/siyuan-note/siyuan/issues/7431)
+* [编辑器浮动工具栏最多显示一个](https://github.com/siyuan-note/siyuan/issues/7433)
+* [挂件搜索时过滤不相关文件](https://github.com/siyuan-note/siyuan/issues/7434)
+* [按下鼠标时不触发停靠栏浮动面板](https://github.com/siyuan-note/siyuan/issues/7440)
+* [拖动页签分屏后原有页签切换改进](https://github.com/siyuan-note/siyuan/issues/7441)
+* [为闪卡复习界面添加 1024px 的宽度限制](https://github.com/siyuan-note/siyuan/issues/7442)
+* [优化 `添加到卡包` 对话框卡包列表](https://github.com/siyuan-note/siyuan/issues/7448)
+* [点击图片时更新面包屑](https://github.com/siyuan-note/siyuan/issues/7450)
+* [闪卡复习评分支持撤销](https://github.com/siyuan-note/siyuan/issues/7455)
+* [拖拽后布局自适应调整](https://github.com/siyuan-note/siyuan/issues/7458)
+* [调整闪卡评分按钮](https://github.com/siyuan-note/siyuan/issues/7459)
+* [支持文档块制作闪卡](https://github.com/siyuan-note/siyuan/issues/7460)
+* [改进浏览器剪藏扩展转换本地图片成功率](https://github.com/siyuan-note/siyuan/issues/7464)
+* [虚拟引用和反链提及关键字按最长匹配优先](https://github.com/siyuan-note/siyuan/issues/7465)
+* [历史数据列表标题转义处理](https://github.com/siyuan-note/siyuan/issues/7466)
+* [改进浏览器剪藏扩展转换本地图片后缀](https://github.com/siyuan-note/siyuan/issues/7467)
+* [闪卡复习时动态加入到期的卡片](https://github.com/siyuan-note/siyuan/issues/7468)
+* [更新版本后自动打开最新版的用户指南](https://github.com/siyuan-note/siyuan/issues/7469)
+* [当鼠标划出软件时隐藏悬浮面板](https://github.com/siyuan-note/siyuan/issues/7470)
+* [改进 PDF 未加载完时切换页签会空白](https://github.com/siyuan-note/siyuan/issues/7471)
+* [多个行内元素转换为引用时不再保留原有行内元素属性](https://github.com/siyuan-note/siyuan/issues/7477)
+* [改进标题下方块和列表项子块引用时的反链定位](https://github.com/siyuan-note/siyuan/issues/7484)
+* [改进浏览器剪藏扩展超链接 `#hash` 转换绝对路径](https://github.com/siyuan-note/siyuan/issues/7486)
+* [改进任务列表项完成后的样式](https://github.com/siyuan-note/siyuan/issues/7489)
+* [新页签应在拖拽到的显示器中打开](https://github.com/siyuan-note/siyuan/issues/7490)
+* [新窗口需随主界面切换编辑模式](https://github.com/siyuan-note/siyuan/issues/7495)
+* [支持笔记本级闪卡复习](https://github.com/siyuan-note/siyuan/issues/7496)
+* [闪卡复习界面中的预览调整到管理界面中](https://github.com/siyuan-note/siyuan/issues/7497)
+* [锁屏后新窗口也需要进行锁屏](https://github.com/siyuan-note/siyuan/issues/7500)
+* [`闪卡` 菜单加入管理子项](https://github.com/siyuan-note/siyuan/issues/7503)
+* [光标在悬浮面板的输入框中时悬浮面板不进行隐藏](https://github.com/siyuan-note/siyuan/issues/7504)
+* [网络代理协议支持 `HTTP`](https://github.com/siyuan-note/siyuan/pull/7506)
+
+### 开发重构
+
+* [升级 Electron](https://github.com/siyuan-note/siyuan/issues/7488)
+
+### 移除功能
+
+* [移除顶部停靠栏](https://github.com/siyuan-note/siyuan/issues/7449)
+
+### 修复缺陷
+
+* [导出空文档 Word 和 PDF 时合并子文档失败](https://github.com/siyuan-note/siyuan/issues/7429)
+* [文档和标题相互转换失效](https://github.com/siyuan-note/siyuan/issues/7430)
+* [文档转换标题后文档树刷新不正确](https://github.com/siyuan-note/siyuan/issues/7435)
+* [跨窗口拖拽到块底部异常](https://github.com/siyuan-note/siyuan/issues/7438)
+* [选中包含双引号的文本 `Ctrl+Shift+C` 后无法粘贴为引用](https://github.com/siyuan-note/siyuan/issues/7439)
+* [展开包含 mermaid 或 flowchart 图表的折叠块时无法渲染](https://github.com/siyuan-note/siyuan/issues/7453)
+* [API `/asset/upload` 使用子文件夹时返回结果不正确](https://github.com/siyuan-note/siyuan/issues/7454)
+* [重命名父标签误修改子标签](https://github.com/siyuan-note/siyuan/issues/7498)
+* [外部内容粘贴到表格中后编辑导致换行丢失](https://github.com/siyuan-note/siyuan/issues/7501)
+* [API token 绕过校验漏洞](https://github.com/siyuan-note/siyuan/issues/7507)
+* [反链面板悬浮后其编辑区域内浮层错误](https://github.com/siyuan-note/siyuan/issues/7508)
+* [生成文件历史索引报错](https://github.com/siyuan-note/siyuan/issues/7509)
+
 ## v2.7.6 / 2023-02-21
 
 ### 改进功能

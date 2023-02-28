@@ -235,7 +235,7 @@ export class Dock {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/7504
-        if (this.layout.element.contains(document.activeElement) && document.activeElement.classList.contains("b3-text-field")) {
+        if (document.activeElement && this.layout.element.contains(document.activeElement) && document.activeElement.classList.contains("b3-text-field")) {
             return;
         }
         if (this.position === "Left") {

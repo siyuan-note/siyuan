@@ -42,9 +42,10 @@ module.exports = (env, argv) => {
           use: [
             {
               loader: "esbuild-loader",
-              options:{
+              options: {
                 minify: false,
-              }
+                keepNames: true,
+              },
             },
             {
               loader: "ifdef-loader",

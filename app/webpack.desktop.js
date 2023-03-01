@@ -47,7 +47,19 @@ module.exports = (env, argv) => {
           test: /\.js$/,
           include: [path.resolve(__dirname, "src/asset/pdf")],
           use: {
-            loader: "esbuild-loader",
+            loader: "babel-loader",
+            options: {
+              presets: ["@babel/preset-env"],
+              plugins: [
+                [
+                  "@babel/plugin-transform-runtime",
+                  {
+                    helpers: false,
+                    regenerator: true,
+                  },
+                ],
+              ],
+            },
           },
         },
         {
@@ -56,9 +68,10 @@ module.exports = (env, argv) => {
           use: [
             {
               loader: "esbuild-loader",
-              options:{
+              options: {
                 minify: false,
-              }
+                keepNames: true,
+              },
             },
             {
               loader: "ifdef-loader",

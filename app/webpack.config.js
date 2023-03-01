@@ -27,7 +27,7 @@ module.exports = (env, argv) => {
     optimization: {
       minimize: true,
       minimizer: [
-      new EsbuildPlugin(),
+        new EsbuildPlugin(),
       ],
     },
     module: {
@@ -48,6 +48,10 @@ module.exports = (env, argv) => {
           use: [
             {
               loader: "esbuild-loader",
+              options: {
+                minify: false,
+                keepNames: true,
+              },
             },
             {
               loader: "ifdef-loader", options: {

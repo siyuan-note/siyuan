@@ -55,24 +55,7 @@
 <div id="commonMenu" class="b3-menu fn__none"></div>
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
-<div id="keyboardToolbar" class="fn__none">
-    <span class="fn__flex-1"></span>
-    <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
-    <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
-
-    <button data-type="up"><svg><use xlink:href="#iconUp"></use></svg></button>
-    <button data-type="down"><svg><use xlink:href="#iconDown"></use></svg></button>
-
-    <button data-type="before"><svg><use xlink:href="#iconBefore"></use></svg></button>
-    <button data-type="after"><svg><use xlink:href="#iconAfter"></use></svg></button>
-
-    <button data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
-
-    <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
-    <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
-    <span class="fn__flex-1"></span>
-    <button data-type="done"><svg><use xlink:href="#iconRedo"></use></svg></button>
-</div>
+<div id="keyboardToolbar" class="keyboard"></div>
 <div id="transactionTip" class="fn__none"></div>
 </body>
 </html>

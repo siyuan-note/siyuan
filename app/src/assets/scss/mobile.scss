@@ -222,7 +222,7 @@
   border-radius: 4px;
 }
 
-#keyboardToolbar {
+.keyboard {
   position: fixed;
   bottom: 0;
   width: 100%;
@@ -232,7 +232,23 @@
   z-index: 212;
   display: flex;
   border-top: 1px solid var(--b3-theme-surface-lighter);
-  overflow: auto;
+  overflow: hidden;
+
+  &__dynamic {
+    overflow: auto;
+    display: flex;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__split {
+    width: 1px;
+    height: 70%;
+    background: var(--b3-border-color);
+    align-self: center;
+  }
 
   button {
     background: transparent;
@@ -242,8 +258,7 @@
     svg {
       height: 16px;
       width: 16px;
-      padding: 5px;
-      margin: 3px;
+      padding: 12px;
       color: var(--b3-theme-on-surface);
     }
   }

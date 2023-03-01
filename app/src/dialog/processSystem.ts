@@ -193,24 +193,18 @@ export const transactionError = (data: { code: number, data: string }) => {
     });
 };
 
-let progressStatusTimeoutId: number;
 export const progressStatus = (data: IWebSocketData) => {
     const statusElement = document.querySelector("#status") as HTMLElement;
     if (!statusElement) {
         return;
     }
     if (isMobile()) {
-        clearTimeout(progressStatusTimeoutId);
+        if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+            return;
+        }
         statusElement.innerHTML = data.msg;
         statusElement.classList.remove("status--hide");
-        if (document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
-            statusElement.style.bottom = "0";
-        } else {
-            statusElement.style.bottom = "30px";
-        }
-        progressStatusTimeoutId = window.setTimeout(() => {
-            statusElement.style.bottom = "";
-        }, 6000);
+        statusElement.style.bottom = "0";
         return;
     }
     const msgElement = statusElement.querySelector(".status__msg");

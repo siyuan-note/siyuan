@@ -41,6 +41,10 @@ export const hideKeyboardToolbar = () => {
     toolbarElement.classList.add("fn__none");
 };
 
+export const hideKeyboard = () => {
+    (document.activeElement as HTMLElement).blur();
+};
+
 export const initKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.addEventListener("click", (event) => {
@@ -49,12 +53,16 @@ export const initKeyboardToolbar = () => {
         if (!buttonElement || !window.siyuan.mobile.editor) {
             return;
         }
-        if (window.siyuan.mobile.editor.protyle.disabled) {
-            return;
-        }
         event.preventDefault();
         event.stopPropagation();
         const type = buttonElement.getAttribute("data-type");
+        if (type === "done") {
+            hideKeyboard();
+            return;
+        }
+        if (window.siyuan.mobile.editor.protyle.disabled) {
+            return;
+        }
         const protyle = window.siyuan.mobile.editor.protyle;
         if (type === "undo") {
             protyle.undo.undo(protyle);

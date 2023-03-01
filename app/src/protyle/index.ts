@@ -214,8 +214,6 @@ export class Protyle {
                             item.classList.remove("layout__wnd--active");
                         });
                     }
-                    /// #else
-                    showKeyboardToolbar();
                     /// #endif
                 });
                 // 需等渲染完后再回调，用于定位搜索字段 https://github.com/siyuan-note/siyuan/issues/3171

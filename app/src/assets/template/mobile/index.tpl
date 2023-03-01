@@ -71,6 +71,7 @@
     <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
     <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
     <span class="fn__flex-1"></span>
+    <button data-type="done"><svg><use xlink:href="#iconRedo"></use></svg></button>
 </div>
 <div id="transactionTip" class="fn__none"></div>
 </body>

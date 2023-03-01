@@ -227,11 +227,12 @@
   bottom: 0;
   width: 100%;
   box-sizing: border-box;
-  height: 32px;
+  height: 42px;
   background: var(--b3-theme-background);
   z-index: 212;
   display: flex;
   border-top: 1px solid var(--b3-theme-surface-lighter);
+  overflow: auto;
 
   button {
     background: transparent;
@@ -239,10 +240,10 @@
     border: 0;
 
     svg {
-      height: 18px;
-      width: 18px;
-      padding: 4px;
-      margin: 4px;
+      height: 16px;
+      width: 16px;
+      padding: 5px;
+      margin: 3px;
       color: var(--b3-theme-on-surface);
     }
   }

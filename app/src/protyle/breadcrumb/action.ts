@@ -76,7 +76,11 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
     }
     /// #if !MOBILE
     if (element.classList.contains("protyle")) {
-        hideAllElements(["gutter"]);
+        // 等待页面动画结束
+        setTimeout(() => {
+            hideAllElements(["gutter"]);
+        }, Constants.TIMEOUT_TRANSITION);
+
         window.siyuan.editorIsFullscreen = !isFullscreen;
     }
     getAllModels().editor.forEach(item => {

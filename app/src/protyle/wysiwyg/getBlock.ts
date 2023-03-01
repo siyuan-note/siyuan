@@ -1,18 +1,6 @@
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {Constants} from "../../constants";
 
-export const getPreviousHeading = (element: Element) => {
-    let previous = getPreviousBlock(element);
-    while (previous) {
-        if (previous.getAttribute("data-type") === "NodeHeading") {
-            break;
-        } else {
-            previous = getPreviousBlock(previous);
-        }
-    }
-    return previous;
-};
-
 export const getPreviousBlock = (element: Element) => {
     let parentElement = element;
     while (parentElement) {

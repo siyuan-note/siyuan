@@ -19,7 +19,6 @@ import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
 import {Layout} from "../layout";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
-import {getPreviousHeading} from "../protyle/wysiwyg/getBlock";
 import {lockFile, setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
@@ -417,14 +416,7 @@ const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
                         if (protyle.wysiwyg.element.contains(startContainer)) {
                             const currentElement = hasClosestByAttribute(startContainer, "data-node-id", null);
                             if (currentElement) {
-                                if (currentElement.getAttribute("data-type") === "NodeHeading") {
-                                    item.setCurrent(currentElement.getAttribute("data-node-id"));
-                                } else {
-                                    const headingElement = getPreviousHeading(currentElement);
-                                    if (headingElement) {
-                                        item.setCurrent(headingElement.getAttribute("data-node-id"));
-                                    }
-                                }
+                                item.setCurrent(currentElement);
                             }
                         }
                     }

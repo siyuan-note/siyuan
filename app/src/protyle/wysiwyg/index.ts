@@ -28,7 +28,6 @@ import {
     getContenteditableElement,
     getLastBlock,
     getNextBlock,
-    getPreviousHeading,
     getTopAloneElement,
     hasNextSibling,
     hasPreviousSibling,
@@ -175,16 +174,7 @@ export class WYSIWYG {
         if (protyle.model) {
             getAllModels().outline.forEach(item => {
                 if (item.blockId === protyle.block.rootID) {
-                    if (nodeElement.getAttribute("data-type") === "NodeHeading") {
-                        item.setCurrent(nodeElement.getAttribute("data-node-id"));
-                        return;
-                    }
-                    const headingElement = getPreviousHeading(nodeElement);
-                    if (headingElement) {
-                        item.setCurrent(headingElement.getAttribute("data-node-id"));
-                        return;
-                    }
-                    item.setCurrent("");
+                    item.setCurrent(nodeElement)
                 }
             });
         }

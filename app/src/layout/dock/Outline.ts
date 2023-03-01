@@ -11,6 +11,7 @@ import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {onGet} from "../../protyle/util/onGet";
+import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -110,7 +111,9 @@ export class Outline extends Model {
         options.tab.panelElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
             this.tree.collapseAll();
         });
-        options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", (event: MouseEvent & { target: Element }) => {
+        options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", (event: MouseEvent & {
+            target: Element
+        }) => {
             const iconElement = hasClosestByClassName(event.target, "block__icon");
             if (!iconElement) {
                 return;
@@ -215,7 +218,37 @@ export class Outline extends Model {
         }
     }
 
-    public setCurrent(id: string) {
+    public setCurrent(nodeElement: HTMLElement) {
+        if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+            this.setCurrentById(nodeElement.getAttribute("data-node-id"))
+        } else {
+            let previousElement = getPreviousBlock(nodeElement);
+            while (previousElement) {
+                if (previousElement.getAttribute("data-type") === "NodeHeading") {
+                    break;
+                } else {
+                    previousElement = getPreviousBlock(previousElement);
+                }
+            }
+            if (previousElement) {
+                this.setCurrentById(previousElement.getAttribute("data-node-id"))
+            } else {
+                fetchPost("/api/block/getBlockBreadcrumb", {
+                    id: nodeElement.getAttribute("data-node-id"),
+                    excludeTypes: []
+                }, (response) => {
+                    response.data.reverse().find((item: IBreadcrumb) => {
+                        if (item.type === "NodeHeading") {
+                            this.setCurrentById(item.id);
+                            return true;
+                        }
+                    });
+                });
+            }
+        }
+    }
+
+    private setCurrentById(id: string) {
         this.element.querySelectorAll(".b3-list-item.b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");
         });

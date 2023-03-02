@@ -233,7 +233,7 @@ export const globalShortcut = () => {
         }
 
         const target = event.target as Element;
-        const blockElement = hasClosestBlock(target);
+        const blockElement = hasClosestByClassName(target, "table");
         if (blockElement && blockElement.style.cursor !== "col-resize" && !hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
             const cellElement = (hasClosestByMatchTag(target, "TH") || hasClosestByMatchTag(target, "TD")) as HTMLTableCellElement;
             if (cellElement) {

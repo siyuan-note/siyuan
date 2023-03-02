@@ -792,7 +792,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
                 hideElements(["gutter"], protyle);
                 const targetClass = targetElement.className.split(" ");
-                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
                 if (targetElement.className.indexOf("dragover__") === -1) {
                     // 拖拽到属性试图内
                     transaction(protyle, [{
@@ -808,6 +807,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }]);
                     return;
                 }
+                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
                 if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                     targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
                     if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {

@@ -16,12 +16,12 @@
 
 package av
 
-type ColumnText struct {
+type ColumnBlock struct {
 	*BaseColumn
 }
 
-func NewColumnText(name string) *ColumnText {
-	return &ColumnText{
-		BaseColumn: NewBaseColumn(name, ColumnTypeText),
+func NewColumnBlock() *ColumnBlock {
+	return &ColumnBlock{
+		BaseColumn: NewBaseColumn("Block", ColumnTypeBlock),
 	}
 }

@@ -19,6 +19,7 @@ package av
 
 import (
 	"database/sql"
+	"github.com/88250/lute/ast"
 	"path/filepath"
 	"strings"
 
@@ -30,9 +31,9 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	ID      string     `json:"id"`      // 属性视图 ID
-	Columns []Column   `json:"columns"` // 表格列名
-	Rows    [][]string `json:"rows"`    // 表格行记录
+	ID      string   `json:"id"`      // 属性视图 ID
+	Columns []Column `json:"columns"` // 表格列名
+	Rows    [][]Cell `json:"rows"`    // 表格行记录
 
 	Type        AttributeViewType      `json:"type"`        // 属性视图类型
 	Projections []string               `json:"projections"` // 显示的列名，SELECT *
@@ -47,12 +48,34 @@ const (
 	AttributeViewTypeTable AttributeViewType = "table" // 属性视图类型 - 表格
 )
 
+func NewAttributeView() *AttributeView {
+	return &AttributeView{
+		ID:          ast.NewNodeID(),
+		Columns:     []Column{NewColumnBlock()},
+		Rows:        [][]Cell{},
+		Type:        AttributeViewTypeTable,
+		Projections: []string{},
+		Filters:     []*AttributeViewFilter{},
+		Sorts:       []*AttributeViewSort{},
+	}
+}
+
 func (av *AttributeView) GetColumnNames() (ret []string) {
 	ret = []string{}
 	for _, column := range av.Columns {
 		ret = append(ret, column.Name())
 	}
 	return
+}
+
+func (av *AttributeView) InsertColumn(index int, column Column) {
+	if 0 > index || len(av.Columns) == index {
+		av.Columns = append(av.Columns, column)
+		return
+	}
+
+	av.Columns = append(av.Columns[:index+1], av.Columns[index:]...)
+	av.Columns[index] = column
 }
 
 type AttributeViewFilter struct {
@@ -88,46 +111,48 @@ const (
 	SortOrderDesc SortOrder = "DESC"
 )
 
-// SyncAttributeViewTableFromJSON 从 JSON 文件同步属性视图表，用于数据同步后将属性视图 JSON 文件同步到数据库。
-func SyncAttributeViewTableFromJSON(tableID string) (err error) {
-	avJSONPath := getAttributeViewJSONPath(tableID)
+func ParseAttributeView(avID string) (ret *AttributeView, err error) {
+	avJSONPath := getAttributeViewJSONPath(avID)
+	if !gulu.File.IsExist(avJSONPath) {
+		ret = NewAttributeView()
+		return
+	}
+
 	data, err := filelock.ReadFile(avJSONPath)
 	if nil != err {
-		logging.LogErrorf("read attribute view table failed: %s", err)
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
 		return
 	}
 
-	var attributeView AttributeView
-	if err = gulu.JSON.UnmarshalJSON(data, &attributeView); nil != err {
-		logging.LogErrorf("unmarshal attribute view table failed: %s", err)
+	ret = &AttributeView{}
+	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 		return
 	}
-
 	return
 }
 
-// SyncAttributeViewTableToJSON 同步属性视图表到 JSON 文件，用于将数据库中的属性视图持久化到 JSON 文件中。
-func SyncAttributeViewTableToJSON(av *AttributeView) (err error) {
+func SaveAttributeView(av *AttributeView) (err error) {
 	data, err := gulu.JSON.MarshalJSON(av)
 	if nil != err {
-		logging.LogErrorf("marshal attribute view table [%s] failed: %s", av.ID, err)
+		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return
 	}
 
 	avJSONPath := getAttributeViewJSONPath(av.ID)
 	if err = filelock.WriteFile(avJSONPath, data); nil != err {
-		logging.LogErrorf("save attribute view table [%s] failed: %s", av.ID, err)
+		logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 		return
 	}
 	return
 }
 
-func getAttributeViewJSONPath(tableID string) string {
-	return filepath.Join(util.DataDir, "storage", "av", tableID+".json")
+func getAttributeViewJSONPath(avID string) string {
+	return filepath.Join(util.DataDir, "storage", "av", avID+".json")
 }
 
-func dropAttributeViewTableColumn(db *sql.DB, tableID string, column string) (err error) {
-	_, err = db.Exec("ALTER TABLE `av_" + tableID + "` DROP COLUMN `" + column + "`")
+func dropAttributeViewTableColumn(db *sql.DB, avID string, column string) (err error) {
+	_, err = db.Exec("ALTER TABLE `av_" + avID + "` DROP COLUMN `" + column + "`")
 	if nil != err {
 		logging.LogErrorf("drop column [%s] failed: %s", column, err)
 		return
@@ -135,8 +160,8 @@ func dropAttributeViewTableColumn(db *sql.DB, tableID string, column string) (er
 	return
 }
 
-func addAttributeViewTableColumn(db *sql.DB, tableID string, column string) (err error) {
-	_, err = db.Exec("ALTER TABLE `av_" + tableID + "` ADD COLUMN `" + column + "`")
+func addAttributeViewTableColumn(db *sql.DB, avID string, column string) (err error) {
+	_, err = db.Exec("ALTER TABLE `av_" + avID + "` ADD COLUMN `" + column + "`")
 	if nil != err {
 		logging.LogErrorf("add column [%s] failed: %s", column, err)
 		return
@@ -144,19 +169,19 @@ func addAttributeViewTableColumn(db *sql.DB, tableID string, column string) (err
 	return
 }
 
-func dropAttributeViewTable(db *sql.DB, tableID string) (err error) {
-	_, err = db.Exec("DROP TABLE IF EXISTS `av_" + tableID + "`")
+func dropAttributeViewTable(db *sql.DB, avID string) (err error) {
+	_, err = db.Exec("DROP TABLE IF EXISTS `av_" + avID + "`")
 	if nil != err {
-		logging.LogErrorf("drop table [%s] failed: %s", tableID, err)
+		logging.LogErrorf("drop table [%s] failed: %s", avID, err)
 		return
 	}
 	return
 }
 
-func createAttributeViewTable(db *sql.DB, tableID string, column []string) (err error) {
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `av_" + tableID + "` (id, " + strings.Join(column, ", ") + ")")
+func createAttributeViewTable(db *sql.DB, avID string, column []string) (err error) {
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `av_" + avID + "` (id, " + strings.Join(column, ", ") + ")")
 	if nil != err {
-		logging.LogErrorf("create table [%s] failed: %s", tableID, err)
+		logging.LogErrorf("create table [%s] failed: %s", avID, err)
 		return
 	}
 	return

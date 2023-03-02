@@ -16,12 +16,20 @@
 
 package av
 
-type ColumnText struct {
-	*BaseColumn
+type Cell interface {
+
+	// Resolve 根据参数解析单元格的值。
+	Resolve(input interface{}) string
 }
 
-func NewColumnText(name string) *ColumnText {
-	return &ColumnText{
-		BaseColumn: NewBaseColumn(name, ColumnTypeText),
-	}
+type CellBlock struct {
+	Value string `json:"value"`
+}
+
+func NewCellBlock(blockID string) *CellBlock {
+	return &CellBlock{Value: blockID}
+}
+
+func (c *CellBlock) Resolve(blockID interface{}) string {
+	return blockID.(string)
 }

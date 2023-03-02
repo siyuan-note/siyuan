@@ -19,13 +19,13 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/88250/lute/parse"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
-	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -105,12 +105,17 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
+	err = setNodeAttrs(node, tree, nameValues)
+	return
+}
+
+func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
 	oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
 	for name := range nameValues {
 		for i := 0; i < len(name); i++ {
 			if !lex.IsASCIILetterNumHyphen(name[i]) {
-				return errors.New(fmt.Sprintf(Conf.Language(25), id))
+				return errors.New(fmt.Sprintf(Conf.Language(25), node.ID))
 			}
 		}
 	}
@@ -135,10 +140,10 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 
 	IncSync()
-	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
+	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
 	newAttrs := parse.IAL2Map(node.KramdownIAL)
-	doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: id}
+	doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: node.ID}
 	trans := []*Transaction{{
 		DoOperations:   []*Operation{doOp},
 		UndoOperations: []*Operation{},

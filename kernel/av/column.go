@@ -16,6 +16,8 @@
 
 package av
 
+import "github.com/88250/lute/ast"
+
 // Column 描述了属性视图的列。
 type Column interface {
 
@@ -26,14 +28,26 @@ type Column interface {
 	Name() string
 
 	// Type 用于获取列类型。
-	Type() string
+	Type() ColumnType
 }
+
+type ColumnType string
+
+const (
+	ColumnTypeBlock    ColumnType = "block"
+	ColumnTypeDate     ColumnType = "date"
+	ColumnTypeNumber   ColumnType = "number"
+	ColumnTypeRelation ColumnType = "relation"
+	ColumnTypeRollup   ColumnType = "rollup"
+	ColumnTypeSelect   ColumnType = "select"
+	ColumnTypeText     ColumnType = "text"
+)
 
 // BaseColumn 描述了属性视图的基础结构。
 type BaseColumn struct {
-	BaseID   string `json:"id"`   // 列 ID
-	BaseName string `json:"name"` // 列名
-	BaseType string `json:"type"` // 列类型
+	BaseID   string     `json:"id"`   // 列 ID
+	BaseName string     `json:"name"` // 列名
+	BaseType ColumnType `json:"type"` // 列类型
 }
 
 func (c *BaseColumn) ID() string {
@@ -44,13 +58,14 @@ func (c *BaseColumn) Name() string {
 	return c.BaseName
 }
 
-func (c *BaseColumn) Type() string {
+func (c *BaseColumn) Type() ColumnType {
 	return c.BaseType
 }
 
-// ColumnValueResolver 描述了属性视图的列值解析器。
-type ColumnValueResolver interface {
-
-	// Resolve 用于解析列值。
-	Resolve() string
+func NewBaseColumn(name string, columnType ColumnType) *BaseColumn {
+	return &BaseColumn{
+		BaseID:   ast.NewNodeID(),
+		BaseName: name,
+		BaseType: columnType,
+	}
 }

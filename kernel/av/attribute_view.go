@@ -34,11 +34,18 @@ type AttributeView struct {
 	Columns []Column   `json:"columns"` // 表格列名
 	Rows    [][]string `json:"rows"`    // 表格行记录
 
+	Type        AttributeViewType      `json:"type"`        // 属性视图类型
 	Projections []string               `json:"projections"` // 显示的列名，SELECT *
 	Filters     []*AttributeViewFilter `json:"filters"`     // 过滤规则，WHERE ...
 	Sorts       []*AttributeViewSort   `json:"sorts"`       // 排序规则，ORDER BY ...
-
 }
+
+// AttributeViewType 描述了属性视图的类型。
+type AttributeViewType string
+
+const (
+	AttributeViewTypeTable AttributeViewType = "table" // 属性视图类型 - 表格
+)
 
 func (av *AttributeView) GetColumnNames() (ret []string) {
 	ret = []string{}

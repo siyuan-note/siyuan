@@ -213,6 +213,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUnfoldHeading(op)
 		case "setAttrs":
 			ret = tx.setAttrs(op)
+		case "insertAttrViewBlock":
+			ret = tx.insertAttrViewBlock(op)
+		case "removeAttrViewBlock":
+			ret = tx.removeAttrViewBlock(op)
 		}
 
 		if nil != ret {
@@ -229,6 +233,14 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		logging.LogErrorf("commit tx failed: %s", cr)
 		return &TxErr{msg: cr.Error()}
 	}
+	return
+}
+
+func (tx *Transaction) insertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	return
+}
+
+func (tx *Transaction) removeAttrViewBlock(operation *Operation) (ret *TxErr) {
 	return
 }
 
@@ -1021,6 +1033,7 @@ type Operation struct {
 	ParentID   string      `json:"parentID"`
 	PreviousID string      `json:"previousID"`
 	NextID     string      `json:"nextID"`
+	SrcIDs     []string    `json:"srcIDs"` // 用于将块拖拽到属性视图中
 	RetData    interface{} `json:"retData"`
 
 	discard bool // 用于标识是否在事务合并中丢弃

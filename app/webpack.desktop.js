@@ -44,34 +44,11 @@ module.exports = (env, argv) => {
           },
         },
         {
-          test: /\.js$/,
-          include: [path.resolve(__dirname, "src/asset/pdf")],
-          use: {
-            loader: "babel-loader",
-            options: {
-              presets: ["@babel/preset-env"],
-              plugins: [
-                [
-                  "@babel/plugin-transform-runtime",
-                  {
-                    helpers: false,
-                    regenerator: true,
-                  },
-                ],
-              ],
-            },
-          },
-        },
-        {
           test: /\.ts(x?)$/,
           include: [path.resolve(__dirname, "src")],
           use: [
             {
               loader: "esbuild-loader",
-              options: {
-                minify: false,
-                keepNames: true,
-              },
             },
             {
               loader: "ifdef-loader",

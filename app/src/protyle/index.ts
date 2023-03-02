@@ -25,7 +25,6 @@ import {Background} from "./header/Background";
 import {disabledProtyle, enableProtyle, onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
-import {showKeyboardToolbar} from "../mobile/util/showKeyboardToolbar";
 
 export class Protyle {
 

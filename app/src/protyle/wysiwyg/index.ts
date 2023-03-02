@@ -52,7 +52,7 @@ import {pushBack} from "../../util/backForward";
 import {openAsset, openBy, openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
-import {renderKeyboardToolbar} from "../../mobile/util/showKeyboardToolbar";
+import {renderKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
 import {isCtrl, openByMobile} from "../util/compatibility";

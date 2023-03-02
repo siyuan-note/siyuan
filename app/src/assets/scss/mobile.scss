@@ -245,9 +245,10 @@
 
   &__split {
     width: 1px;
-    height: 70%;
+    height: 28px;
     background: var(--b3-border-color);
     align-self: center;
+    flex-shrink: 0;
   }
 
   button {
@@ -258,8 +259,15 @@
     svg {
       height: 16px;
       width: 16px;
+      float: left;
       padding: 12px;
       color: var(--b3-theme-on-surface);
+
+      &.keyboard__svg--big {
+        width: 30px;
+        padding: 4px;
+        height: 32px;
+      }
     }
   }
 }

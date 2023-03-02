@@ -15,7 +15,7 @@ import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
-import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/showKeyboardToolbar";
+import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";

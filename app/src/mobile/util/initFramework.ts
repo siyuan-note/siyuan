@@ -17,7 +17,7 @@ import {hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {MobileBacklinks} from "./MobileBacklinks";
 import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
-import {hideKeyboard, hideKeyboardToolbar, initKeyboardToolbar} from "./showKeyboardToolbar";
+import {hideKeyboard, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardToolbar";
 import {getSearch} from "../../util/functions";
 import {syncGuide} from "../../sync/syncGuide";
 

@@ -16,7 +16,7 @@ import {Dialog} from "../../dialog";
 import {syncGuide} from "../../sync/syncGuide";
 import {openCard} from "../../card/openCard";
 import {pathPosix} from "../../util/pathName";
-import {hideKeyboard, hideKeyboardToolbar} from "./showKeyboardToolbar";
+import {hideKeyboard, hideKeyboardToolbar} from "./keyboardToolbar";
 
 const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) => {
     closePanel();

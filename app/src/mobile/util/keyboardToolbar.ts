@@ -37,24 +37,45 @@ export const showKeyboardToolbar = (bottom = 0) => {
 
 export const renderKeyboardToolbar = (protyle: IProtyle, range: Range) => {
     const toolbarElement = document.getElementById("keyboardToolbar");
-    toolbarElement.innerHTML = `<div class="keyboard__dynamic">
-    <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
-    <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
-    
-    <button data-type="up"><svg><use xlink:href="#iconUp"></use></svg></button>
-    <button data-type="down"><svg><use xlink:href="#iconDown"></use></svg></button>
-    
-    <button data-type="before"><svg><use xlink:href="#iconBefore"></use></svg></button>
-    <button data-type="after"><svg><use xlink:href="#iconAfter"></use></svg></button>
-    
-    <button data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
-    
-    <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
-    <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
-</div>
-<span class="fn__flex-1"></span>
+    const inlineHTML = `<button data-type="indent"><svg><use xlink:href="#iconBack"></use></svg></button>
+<button data-type="indent"><svg><use xlink:href="#iconRef"></use></svg></button>
+<button data-type="block-ref"<use xlink:href="#iconRef"></use></svg></button>
+<button data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
+<button data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
+<button data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
+<button data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
+<button data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>
+<button data-type="s"><svg><use xlink:href="#iconStrike"></use></svg></button>
+<button data-type="mark"><svg><use xlink:href="#iconMark"></use></svg></button>
+<button data-type="sup"><svg><use xlink:href="#iconSup"></use></svg></button>
+<button data-type="sub"><svg><use xlink:href="#iconSub"></use></svg></button>
+<button data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
+<button data-type="code"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
+<button data-type="kbd"<use xlink:href="#iconKeymap"></use></svg></button>
+<button data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
+<button data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
+<button data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
+<button data-type="indent"><svg><use xlink:href="#iconClose"></use></svg></button>`
+    const html = `<button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
+<button data-type="indent"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
+<button data-type="indent"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
 <span class="keyboard__split"></span>
-<button data-type="done"><svg style="width: 36px"><use xlink:href="#iconRedo"></use></svg></button>`
+<button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
+<button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+<button data-type="redo"><svg><use xlink:href="#iconFont"></use></svg></button>
+<button data-type="redo"><svg><use xlink:href="#iconMore"></use></svg></button>
+<span class="keyboard__split"></span>
+<button data-type="undo"><svg><use xlink:href="#iconIndent"></use></svg></button>
+<button data-type="redo"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+<button data-type="redo"><svg><use xlink:href="#iconUp"></use></svg></button>
+<button data-type="redo"><svg><use xlink:href="#iconDown"></use></svg></button>
+`
+    toolbarElement.innerHTML = `<div class="fn__flex-1">
+    <div class="keyboard__dynamic">${html}</div>
+    <div class="fn__none keyboard__dynamic">${inlineHTML}</div>
+</div>
+<span class="keyboard__split"></span>
+<button data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>`
 }
 
 export const hideKeyboardToolbar = () => {

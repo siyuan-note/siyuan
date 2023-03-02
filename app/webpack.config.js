@@ -4,7 +4,7 @@ const pkg = require("./package.json");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
+const { EsbuildPlugin } = require("esbuild-loader");
 
 module.exports = (env, argv) => {
   return {
@@ -27,14 +27,7 @@ module.exports = (env, argv) => {
     optimization: {
       minimize: true,
       minimizer: [
-        new TerserPlugin({
-          terserOptions: {
-            format: {
-              comments: false,
-            },
-          },
-          extractComments: false,
-        }),
+        new EsbuildPlugin(),
       ],
     },
     module: {
@@ -54,7 +47,11 @@ module.exports = (env, argv) => {
           include: [path.resolve(__dirname, "src")],
           use: [
             {
-              loader: "ts-loader",
+              loader: "esbuild-loader",
+              options: {
+                minify: false,
+                keepNames: true,
+              },
             },
             {
               loader: "ifdef-loader", options: {

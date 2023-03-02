@@ -20,8 +20,3 @@ type ColumnRelation struct {
 	*BaseColumn
 	AttributeViewID string `json:"attributeViewId"` // 关联的属性视图 ID
 }
-
-type AttributeViewColumnRollup struct {
-	*BaseColumn
-	RelationID string `json:"relationId"` // 目标关联列 ID
-}

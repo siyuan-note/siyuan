@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package av 是属性视图相关的实现。
+// Package av 包含了属性视图（Attribute View）相关的实现。
 package av
 
 import (

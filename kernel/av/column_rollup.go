@@ -16,41 +16,7 @@
 
 package av
 
-// Column 描述了属性视图的列。
-type Column interface {
-
-	// ID 用于获取列 ID。
-	ID() string
-
-	// Name 用于获取列名。
-	Name() string
-
-	// Type 用于获取列类型。
-	Type() string
-}
-
-// BaseColumn 描述了属性视图的基础结构。
-type BaseColumn struct {
-	BaseID   string `json:"id"`   // 列 ID
-	BaseName string `json:"name"` // 列名
-	BaseType string `json:"type"` // 列类型
-}
-
-func (c *BaseColumn) ID() string {
-	return c.BaseID
-}
-
-func (c *BaseColumn) Name() string {
-	return c.BaseName
-}
-
-func (c *BaseColumn) Type() string {
-	return c.BaseType
-}
-
-// ColumnValueResolver 描述了属性视图的列值解析器。
-type ColumnValueResolver interface {
-
-	// Resolve 用于解析列值。
-	Resolve() string
+type ColumnRollup struct {
+	*BaseColumn
+	RelationColumnID string `json:"relationColumnId"` // 目标关联列 ID
 }

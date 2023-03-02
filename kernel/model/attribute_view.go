@@ -17,6 +17,7 @@
 package model
 
 import (
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -45,11 +46,18 @@ func AddBlockToAttributeView(blockID, avID string) (err error) {
 		return
 	}
 
+	attrs := parse.IAL2Map(node.KramdownIAL)
 	var row []av.Cell
 	row = append(row, av.NewCellBlock(block.ID))
-	for _, col := range attrView.Columns[1:] {
-		// TODO 为块添加列对应的属性
-		_ = col
+	if 1 < len(attrView.Columns) {
+		for _, col := range attrView.Columns[1:] {
+			colName := col.Name()
+			attrs[colName] = ""
+		}
+
+		if err = setNodeAttrs(node, tree, attrs); nil != err {
+			return
+		}
 	}
 
 	attrView.Rows = append(attrView.Rows, row)

@@ -124,6 +124,13 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error) {
 		return
 	}
 
+	// 不允许重复添加相同的块到属性视图中
+	for _, row := range attrView.Rows {
+		if row[0].Value() == blockID {
+			return
+		}
+	}
+
 	var row []av.Cell
 	row = append(row, av.NewCellBlock(block.ID))
 	if 1 < len(attrView.Columns) {

@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -49,9 +48,9 @@ const (
 	AttributeViewTypeTable AttributeViewType = "table" // 属性视图类型 - 表格
 )
 
-func NewAttributeView() *AttributeView {
+func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
-		ID:          ast.NewNodeID(),
+		ID:          id,
 		Columns:     []Column{NewColumnBlock()},
 		Rows:        [][]Cell{},
 		Type:        AttributeViewTypeTable,
@@ -115,7 +114,7 @@ const (
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := getAttributeViewJSONPath(avID)
 	if !gulu.File.IsExist(avJSONPath) {
-		ret = NewAttributeView()
+		ret = NewAttributeView(avID)
 		return
 	}
 

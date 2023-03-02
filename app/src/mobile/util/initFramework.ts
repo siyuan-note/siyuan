@@ -183,9 +183,6 @@ export const initFramework = () => {
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
     inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
-    inputElement.addEventListener("focus", () => {
-        hideKeyboardToolbar();
-    });
     inputElement.addEventListener("blur", () => {
         if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || window.siyuan.mobile.editor.protyle.disabled) {
             return;

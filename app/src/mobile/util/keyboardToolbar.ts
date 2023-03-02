@@ -87,7 +87,30 @@ export const hideKeyboard = () => {
     (document.activeElement as HTMLElement).blur();
 };
 
+const disabledKeyboardToolbar = () => {
+    document.querySelectorAll("#keyboardToolbar button").forEach(item => {
+        if (item.getAttribute("data-type") !== "all") {
+            item.setAttribute("disabled", "disabled");
+        }
+    });
+}
+
+const enKeyboardToolbar = () => {
+    document.querySelectorAll("#keyboardToolbar button").forEach(item => {
+        item.removeAttribute("disabled");
+    });
+}
+
 export const initKeyboardToolbar = () => {
+    window.addEventListener('focus', (event) => {
+        const target = event.target as HTMLElement
+        if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
+            disabledKeyboardToolbar()
+        } else if (target.classList.contains("protyle-wysiwyg")) {
+            enKeyboardToolbar()
+        }
+    }, true);
+
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;

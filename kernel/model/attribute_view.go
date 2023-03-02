@@ -53,5 +53,7 @@ func AddBlockToAttributeView(blockID, avID string) (err error) {
 	}
 
 	attrView.Rows = append(attrView.Rows, row)
+
+	err = av.SaveAttributeView(attrView)
 	return
 }

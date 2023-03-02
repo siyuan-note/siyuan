@@ -19,11 +19,12 @@ package av
 
 import (
 	"database/sql"
-	"github.com/88250/lute/ast"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -133,7 +134,7 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
-	data, err := gulu.JSON.MarshalJSON(av)
+	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t")
 	if nil != err {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return
@@ -147,8 +148,16 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func getAttributeViewJSONPath(avID string) string {
-	return filepath.Join(util.DataDir, "storage", "av", avID+".json")
+func getAttributeViewJSONPath(avID string) (ret string) {
+	av := filepath.Join(util.DataDir, "storage", "av")
+	ret = filepath.Join(av, avID+".json")
+	if !gulu.File.IsDir(av) {
+		if err := os.MkdirAll(av, 0755); nil != err {
+			logging.LogErrorf("create attribute view dir failed: %s", err)
+			return
+		}
+	}
+	return
 }
 
 func dropAttributeViewTableColumn(db *sql.DB, avID string, column string) (err error) {

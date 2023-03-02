@@ -210,7 +210,10 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
         }
     } else {
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
-        cursorRect = rects[rects.length - 1];
+        return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
+            left: rects[rects.length - 1].left,
+            top: rects[0].top
+        }
     }
 
     return {

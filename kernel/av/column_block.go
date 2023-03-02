@@ -16,18 +16,12 @@
 
 package av
 
-import "github.com/88250/lute/ast"
-
 type ColumnBlock struct {
 	*BaseColumn
 }
 
 func NewColumnBlock() *ColumnBlock {
 	return &ColumnBlock{
-		BaseColumn: &BaseColumn{
-			BaseID:   ast.NewNodeID(),
-			BaseName: "Block",
-			BaseType: ColumnTypeBlock,
-		},
+		BaseColumn: NewBaseColumn("Block", ColumnTypeBlock),
 	}
 }

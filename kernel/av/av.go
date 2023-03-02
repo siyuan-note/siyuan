@@ -68,6 +68,16 @@ func (av *AttributeView) GetColumnNames() (ret []string) {
 	return
 }
 
+func (av *AttributeView) InsertColumn(index int, column Column) {
+	if 0 > index || len(av.Columns) == index {
+		av.Columns = append(av.Columns, column)
+		return
+	}
+
+	av.Columns = append(av.Columns[:index+1], av.Columns[index:]...)
+	av.Columns[index] = column
+}
+
 type AttributeViewFilter struct {
 	Column   string         `json:"column"`
 	Operator FilterOperator `json:"operator"`

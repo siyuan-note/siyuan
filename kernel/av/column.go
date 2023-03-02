@@ -16,6 +16,8 @@
 
 package av
 
+import "github.com/88250/lute/ast"
+
 // Column 描述了属性视图的列。
 type Column interface {
 
@@ -58,4 +60,12 @@ func (c *BaseColumn) Name() string {
 
 func (c *BaseColumn) Type() ColumnType {
 	return c.BaseType
+}
+
+func NewBaseColumn(name string, columnType ColumnType) *BaseColumn {
+	return &BaseColumn{
+		BaseID:   ast.NewNodeID(),
+		BaseName: name,
+		BaseType: columnType,
+	}
 }

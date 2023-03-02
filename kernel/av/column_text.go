@@ -19,3 +19,9 @@ package av
 type ColumnText struct {
 	*BaseColumn
 }
+
+func NewColumnText(name string) *ColumnText {
+	return &ColumnText{
+		BaseColumn: NewBaseColumn(name, ColumnTypeText),
+	}
+}

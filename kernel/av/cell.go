@@ -18,18 +18,18 @@ package av
 
 type Cell interface {
 
-	// Resolve 根据参数解析单元格的值。
-	Resolve(input interface{}) string
+	// Value 返回单元格的值。
+	Value() string
 }
 
 type CellBlock struct {
-	Value string `json:"value"`
+	ID string `json:"id"`
 }
 
 func NewCellBlock(blockID string) *CellBlock {
-	return &CellBlock{Value: blockID}
+	return &CellBlock{ID: blockID}
 }
 
-func (c *CellBlock) Resolve(blockID interface{}) string {
-	return blockID.(string)
+func (c *CellBlock) Value() string {
+	return c.ID
 }

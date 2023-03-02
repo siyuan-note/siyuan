@@ -27,6 +27,42 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
+func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	firstSrcID := operation.SrcIDs[0]
+	tree, err := tx.loadTree(firstSrcID)
+	if nil != err {
+		logging.LogErrorf("load tree [%s] failed: %s", firstSrcID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID}
+	}
+
+	avID := operation.ParentID
+	for _, id := range operation.SrcIDs {
+		if err = addAttributeViewBlock(id, avID, tree); nil != err {
+			return &TxErr{code: TxErrWriteAttributeView, id: avID}
+		}
+	}
+	return
+}
+
+func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
+	firstSrcID := operation.SrcIDs[0]
+	tree, err := tx.loadTree(firstSrcID)
+	if nil != err {
+		logging.LogErrorf("load tree [%s] failed: %s", firstSrcID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID}
+	}
+
+	avID := operation.ParentID
+	for _, id := range operation.SrcIDs {
+		if err = removeAttributeViewBlock(id, avID, tree); nil != err {
+			return &TxErr{code: TxErrWriteAttributeView, id: avID}
+		}
+	}
+	return
+
+	return
+}
+
 func AddAttributeViewColumn(name string, typ string, columnIndex int, avID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
@@ -47,12 +83,30 @@ func AddAttributeViewColumn(name string, typ string, columnIndex int, avID strin
 	return
 }
 
-func AddAttributeViewBlock(blockID, avID string) (err error) {
-	tree, err := loadTreeByBlockID(blockID)
+func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error) {
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
+	for i, row := range attrView.Rows {
+		if row[0].Value() == blockID {
+			attrView.Rows = append(attrView.Rows[:i], attrView.Rows[i+1:]...)
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func addAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
 		err = ErrBlockNotFound

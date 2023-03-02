@@ -797,7 +797,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         id: targetElement.getAttribute("data-node-id"),
-                        parentID: targetElement.getAttribute("data-av-type"),
+                        parentID: targetElement.getAttribute("data-av-id"),
                         previousID: "",
                         srcIDs: sourceIds,
                     }], [{

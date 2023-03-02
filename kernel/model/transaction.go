@@ -161,6 +161,7 @@ const (
 	TxErrCodeBlockNotFound    = 0
 	TxErrCodeUnableAccessFile = 1
 	TxErrCodeWriteTree        = 2
+	TxErrWriteAttributeView   = 3
 )
 
 type TxErr struct {
@@ -214,9 +215,9 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		case "setAttrs":
 			ret = tx.setAttrs(op)
 		case "insertAttrViewBlock":
-			ret = tx.insertAttrViewBlock(op)
+			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
-			ret = tx.removeAttrViewBlock(op)
+			ret = tx.doRemoveAttrViewBlock(op)
 		}
 
 		if nil != ret {
@@ -233,14 +234,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		logging.LogErrorf("commit tx failed: %s", cr)
 		return &TxErr{msg: cr.Error()}
 	}
-	return
-}
-
-func (tx *Transaction) insertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	return
-}
-
-func (tx *Transaction) removeAttrViewBlock(operation *Operation) (ret *TxErr) {
 	return
 }
 

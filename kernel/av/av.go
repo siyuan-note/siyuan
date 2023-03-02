@@ -19,7 +19,7 @@ package av
 
 import (
 	"database/sql"
-	"github.com/88250/lute/ast"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -48,9 +48,9 @@ const (
 	AttributeViewTypeTable AttributeViewType = "table" // 属性视图类型 - 表格
 )
 
-func NewAttributeView() *AttributeView {
+func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
-		ID:          ast.NewNodeID(),
+		ID:          id,
 		Columns:     []Column{NewColumnBlock()},
 		Rows:        [][]Cell{},
 		Type:        AttributeViewTypeTable,
@@ -114,7 +114,7 @@ const (
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := getAttributeViewJSONPath(avID)
 	if !gulu.File.IsExist(avJSONPath) {
-		ret = NewAttributeView()
+		ret = NewAttributeView(avID)
 		return
 	}
 
@@ -133,7 +133,7 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
-	data, err := gulu.JSON.MarshalJSON(av)
+	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t")
 	if nil != err {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return
@@ -147,8 +147,16 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func getAttributeViewJSONPath(avID string) string {
-	return filepath.Join(util.DataDir, "storage", "av", avID+".json")
+func getAttributeViewJSONPath(avID string) (ret string) {
+	av := filepath.Join(util.DataDir, "storage", "av")
+	ret = filepath.Join(av, avID+".json")
+	if !gulu.File.IsDir(av) {
+		if err := os.MkdirAll(av, 0755); nil != err {
+			logging.LogErrorf("create attribute view dir failed: %s", err)
+			return
+		}
+	}
+	return
 }
 
 func dropAttributeViewTableColumn(db *sql.DB, avID string, column string) (err error) {

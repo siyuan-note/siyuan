@@ -585,8 +585,16 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     let imgElement: HTMLElement = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement || range.startContainer as HTMLElement;
                     if (imgElement && imgElement.nodeType !== 3 && imgElement.classList.contains("img")) {
                         // 已经找到图片
+                    } else if (imgElement.previousSibling?.nodeType !== 3 && (imgElement.previousSibling as HTMLElement).classList.contains("img")) {
+                        // https://github.com/siyuan-note/siyuan/issues/7540
+                        imgElement = imgElement.previousSibling as HTMLElement;
                     } else {
-                        imgElement = nodeElement.querySelector(".img");
+                        Array.from(nodeElement.querySelectorAll(".img")).find((item: HTMLElement) => {
+                            if (item.querySelector("img").getAttribute("data-src") === "") {
+                                imgElement = item;
+                                return true;
+                            }
+                        });
                     }
                     const rect = imgElement.getBoundingClientRect();
                     imgMenu(protyle, range, imgElement, {

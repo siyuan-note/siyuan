@@ -28,6 +28,12 @@
       }
     }
 
+    &.av {
+      min-height: 100px;
+      border: 1px solid var(--b3-border-color);
+      border-radius: 4px;
+    }
+
     &.hr {
       cursor: pointer;
 

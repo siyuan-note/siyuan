@@ -63,6 +63,9 @@ export const getIconByType = (type: string, sub?: string) => {
         case "NodeAudio":
             iconName = "iconRecord";
             break;
+        case "NodeAttributeView":
+            iconName = "iconDatabase";
+            break;
     }
     return iconName;
 };

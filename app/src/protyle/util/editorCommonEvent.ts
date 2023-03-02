@@ -1,5 +1,5 @@
 import {focusBlock, focusByRange} from "./selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
 import {cancelSB, genEmptyElement, genSBElement} from "../../block/util";
@@ -727,7 +727,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        const targetElement = editorElement.querySelector(".dragover__bottom") || editorElement.querySelector(".dragover__top") || editorElement.querySelector(".dragover__left") || editorElement.querySelector(".dragover__right");
+        const targetElement = hasClosestBlock(event.target);
         let gutterType = "";
         for (const item of event.dataTransfer.items) {
             if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
@@ -778,6 +778,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     });
                 }
 
+                const sourceIds: string [] = []
                 sourceElements.forEach(item => {
                     item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
                     item.removeAttribute("select-start");
@@ -786,11 +787,27 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     item.querySelectorAll('[data-type="search-mark"]').forEach(markItem => {
                         markItem.outerHTML = markItem.innerHTML;
                     });
+                    sourceIds.push(item.getAttribute("data-node-id"));
                 });
 
                 hideElements(["gutter"], protyle);
                 const targetClass = targetElement.className.split(" ");
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
+                if (targetElement.className.indexOf("dragover__") === -1) {
+                    // 拖拽到属性试图内
+                    transaction(protyle, [{
+                        action: "insertAttrViewBlock",
+                        id: targetElement.getAttribute("data-node-id"),
+                        parentID: targetElement.getAttribute("data-av-type"),
+                        previousID: "",
+                        srcIDs: sourceIds,
+                    }], [{
+                        action: "removeAttrViewBlock",
+                        id: targetElement.getAttribute("data-node-id"),
+                        parentID: targetElement.getAttribute("data-av-type"),
+                    }]);
+                    return;
+                }
                 if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                     targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
                     if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
@@ -893,7 +910,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
             targetElement.classList.remove("protyle-wysiwyg--select", "dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
-
+            if (targetElement.getAttribute("data-type") === "NodeAttributeView" && hasClosestByTag(event.target, "TD")) {
+                targetElement.classList.add("protyle-wysiwyg--select");
+                return;
+            }
             if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom", "protyle-wysiwyg--select");

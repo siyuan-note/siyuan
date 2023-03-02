@@ -56,15 +56,37 @@ func (av *AttributeView) GetColumnNames() (ret []string) {
 }
 
 type AttributeViewFilter struct {
-	Column   string `json:"column"`
-	Operator string `json:"operator"`
-	Value    string `json:"value"`
+	Column   string         `json:"column"`
+	Operator FilterOperator `json:"operator"`
+	Value    string         `json:"value"`
 }
 
+type FilterOperator string
+
+const (
+	FilterOperatorEq      FilterOperator = "="
+	FilterOperatorNe      FilterOperator = "!="
+	FilterOperatorGt      FilterOperator = ">"
+	FilterOperatorGe      FilterOperator = ">="
+	FilterOperatorLt      FilterOperator = "<"
+	FilterOperatorLe      FilterOperator = "<="
+	FilterOperatorIn      FilterOperator = "IN"
+	FilterOperatorNotIn   FilterOperator = "NOT IN"
+	FilterOperatorLike    FilterOperator = "LIKE"
+	FilterOperatorNotLike FilterOperator = "NOT LIKE"
+)
+
 type AttributeViewSort struct {
-	Column string `json:"column"`
-	Order  string `json:"order"`
+	Column string    `json:"column"`
+	Order  SortOrder `json:"order"`
 }
+
+type SortOrder string
+
+const (
+	SortOrderAsc  SortOrder = "ASC"
+	SortOrderDesc SortOrder = "DESC"
+)
 
 // SyncAttributeViewTableFromJSON 从 JSON 文件同步属性视图表，用于数据同步后将属性视图 JSON 文件同步到数据库。
 func SyncAttributeViewTableFromJSON(tableID string) (err error) {

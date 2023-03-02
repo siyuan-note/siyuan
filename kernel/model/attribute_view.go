@@ -46,10 +46,11 @@ func AddBlockToAttributeView(blockID, avID string) (err error) {
 		return
 	}
 
-	attrs := parse.IAL2Map(node.KramdownIAL)
 	var row []av.Cell
 	row = append(row, av.NewCellBlock(block.ID))
 	if 1 < len(attrView.Columns) {
+		attrs := parse.IAL2Map(node.KramdownIAL)
+
 		for _, col := range attrView.Columns[1:] {
 			colName := col.Name()
 			attrs[colName] = ""

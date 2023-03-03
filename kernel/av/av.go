@@ -31,6 +31,7 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
+	Spec    int           `json:"spec"`
 	ID      string        `json:"id"`      // 属性视图 ID
 	Columns []interface{} `json:"columns"` // 表格列名
 	Rows    []*Row        `json:"rows"`    // 表格行记录
@@ -50,6 +51,7 @@ const (
 
 func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
+		Spec:        0,
 		ID:          id,
 		Columns:     []interface{}{NewColumnBlock()},
 		Rows:        []*Row{},

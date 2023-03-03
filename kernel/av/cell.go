@@ -17,7 +17,7 @@
 package av
 
 type Cell struct {
-	Value string
+	Value string `json:"value"`
 }
 
 type CellBlock struct {

@@ -147,7 +147,7 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 	}
 
 	row := av.NewRow()
-	row.Cells = append(row.Cells, &av.Cell{Value: blockID})
+	row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: blockID})
 	if 1 < len(attrView.Columns) {
 		// 将列作为属性添加到块中
 

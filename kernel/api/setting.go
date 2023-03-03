@@ -111,6 +111,7 @@ func setEditor(c *gin.Context) {
 
 	if oldReadOnly != model.Conf.Editor.ReadOnly {
 		util.BroadcastByType("protyle", "readonly", 0, "", model.Conf.Editor.ReadOnly)
+		util.BroadcastByType("main", "readonly", 0, "", model.Conf.Editor.ReadOnly)
 	}
 
 	ret.Data = model.Conf.Editor

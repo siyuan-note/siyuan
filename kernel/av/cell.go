@@ -16,20 +16,14 @@
 
 package av
 
-type Cell interface {
-
-	// Value 返回单元格的值。
-	Value() string
+type Cell struct {
+	Value string
 }
 
 type CellBlock struct {
-	ID string `json:"id"`
+	*Cell
 }
 
 func NewCellBlock(blockID string) *CellBlock {
-	return &CellBlock{ID: blockID}
-}
-
-func (c *CellBlock) Value() string {
-	return c.ID
+	return &CellBlock{&Cell{Value: blockID}}
 }

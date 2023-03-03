@@ -31,9 +31,9 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	ID      string   `json:"id"`      // 属性视图 ID
-	Columns []Column `json:"columns"` // 表格列名
-	Rows    [][]Cell `json:"rows"`    // 表格行记录
+	ID      string        `json:"id"`      // 属性视图 ID
+	Columns []interface{} `json:"columns"` // 表格列名
+	Rows    []*Row        `json:"rows"`    // 表格行记录
 
 	Type        AttributeViewType      `json:"type"`        // 属性视图类型
 	Projections []string               `json:"projections"` // 显示的列名，SELECT *
@@ -51,8 +51,8 @@ const (
 func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
 		ID:          id,
-		Columns:     []Column{NewColumnBlock()},
-		Rows:        [][]Cell{},
+		Columns:     []interface{}{NewColumnBlock()},
+		Rows:        []*Row{},
 		Type:        AttributeViewTypeTable,
 		Projections: []string{},
 		Filters:     []*AttributeViewFilter{},
@@ -63,12 +63,12 @@ func NewAttributeView(id string) *AttributeView {
 func (av *AttributeView) GetColumnNames() (ret []string) {
 	ret = []string{}
 	for _, column := range av.Columns {
-		ret = append(ret, column.Name())
+		ret = append(ret, column.(*Column).Name)
 	}
 	return
 }
 
-func (av *AttributeView) InsertColumn(index int, column Column) {
+func (av *AttributeView) InsertColumn(index int, column interface{}) {
 	if 0 > index || len(av.Columns) == index {
 		av.Columns = append(av.Columns, column)
 		return

@@ -17,7 +17,7 @@
 package av
 
 type ColumnSelect struct {
-	*BaseColumn
+	*Column
 	Options []*ColumnSelectOption `json:"options"`
 }
 

@@ -17,11 +17,11 @@
 package av
 
 type ColumnText struct {
-	*BaseColumn
+	*Column
 }
 
 func NewColumnText(name string) *ColumnText {
 	return &ColumnText{
-		BaseColumn: NewBaseColumn(name, ColumnTypeText),
+		Column: NewColumn(name, ColumnTypeText),
 	}
 }

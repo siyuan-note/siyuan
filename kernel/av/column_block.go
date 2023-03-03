@@ -17,11 +17,11 @@
 package av
 
 type ColumnBlock struct {
-	*BaseColumn
+	*Column
 }
 
 func NewColumnBlock() *ColumnBlock {
 	return &ColumnBlock{
-		BaseColumn: NewBaseColumn("Block", ColumnTypeBlock),
+		Column: NewColumn("Block", ColumnTypeBlock),
 	}
 }

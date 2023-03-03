@@ -17,5 +17,5 @@
 package av
 
 type ColumnDate struct {
-	*BaseColumn
+	*Column
 }

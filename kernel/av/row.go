@@ -16,7 +16,13 @@
 
 package av
 
-type ColumnRollup struct {
-	*Column
-	RelationColumnID string `json:"relationColumnId"` // 目标关联列 ID
+import "github.com/88250/lute/ast"
+
+type Row struct {
+	ID    string        `json:"id"`
+	Cells []interface{} `json:"cells"`
+}
+
+func NewRow() *Row {
+	return &Row{ID: ast.NewNodeID()}
 }

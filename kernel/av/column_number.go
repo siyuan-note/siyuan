@@ -17,5 +17,5 @@
 package av
 
 type ColumnNumber struct {
-	*BaseColumn
+	*Column
 }

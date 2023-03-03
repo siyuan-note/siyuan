@@ -17,6 +17,6 @@
 package av
 
 type ColumnRelation struct {
-	*BaseColumn
+	*Column
 	AttributeViewID string `json:"attributeViewId"` // 关联的属性视图 ID
 }

@@ -176,7 +176,7 @@ export class WYSIWYG {
         if (protyle.model) {
             getAllModels().outline.forEach(item => {
                 if (item.blockId === protyle.block.rootID) {
-                    item.setCurrent(nodeElement)
+                    item.setCurrent(nodeElement);
                 }
             });
         }

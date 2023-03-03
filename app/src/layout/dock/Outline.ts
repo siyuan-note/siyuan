@@ -220,7 +220,7 @@ export class Outline extends Model {
 
     public setCurrent(nodeElement: HTMLElement) {
         if (nodeElement.getAttribute("data-type") === "NodeHeading") {
-            this.setCurrentById(nodeElement.getAttribute("data-node-id"))
+            this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {
             let previousElement = getPreviousBlock(nodeElement);
             while (previousElement) {
@@ -231,7 +231,7 @@ export class Outline extends Model {
                 }
             }
             if (previousElement) {
-                this.setCurrentById(previousElement.getAttribute("data-node-id"))
+                this.setCurrentById(previousElement.getAttribute("data-node-id"));
             } else {
                 fetchPost("/api/block/getBlockBreadcrumb", {
                     id: nodeElement.getAttribute("data-node-id"),

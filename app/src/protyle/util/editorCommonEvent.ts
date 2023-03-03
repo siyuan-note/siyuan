@@ -778,7 +778,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     });
                 }
 
-                const sourceIds: string [] = []
+                const sourceIds: string [] = [];
                 sourceElements.forEach(item => {
                     item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
                     item.removeAttribute("select-start");

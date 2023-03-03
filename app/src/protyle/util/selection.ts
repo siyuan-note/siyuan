@@ -213,7 +213,7 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
         return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
             left: rects[rects.length - 1].left,
             top: rects[0].top
-        }
+        };
     }
 
     return {

@@ -8,7 +8,6 @@ import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
-import {disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
 import {getOpenNotebookCount} from "../../util/pathName";
 import {popMenu} from "./menu";
 import {MobileFiles} from "./MobileFiles";
@@ -76,7 +75,7 @@ export const initFramework = () => {
         });
     });
     window.siyuan.mobile.files = new MobileFiles();
-    document.getElementById("toolbarFile").addEventListener("click", (event) => {
+    document.getElementById("toolbarFile").addEventListener("click", () => {
         hideKeyboardToolbar();
         hideKeyboard();
         sidebarElement.style.left = "0";

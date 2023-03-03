@@ -55,7 +55,7 @@ export const renderKeyboardToolbar = (protyle: IProtyle, range: Range) => {
 <button data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
 <button data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
 <button data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
-<button data-type="indent"><svg><use xlink:href="#iconClose"></use></svg></button>`
+<button data-type="indent"><svg><use xlink:href="#iconClose"></use></svg></button>`;
     const html = `<button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
 <button data-type="indent"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
 <button data-type="indent"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
@@ -69,14 +69,14 @@ export const renderKeyboardToolbar = (protyle: IProtyle, range: Range) => {
 <button data-type="redo"><svg><use xlink:href="#iconOutdent"></use></svg></button>
 <button data-type="redo"><svg><use xlink:href="#iconUp"></use></svg></button>
 <button data-type="redo"><svg><use xlink:href="#iconDown"></use></svg></button>
-`
+`;
     toolbarElement.innerHTML = `<div class="fn__flex-1">
     <div class="keyboard__dynamic">${html}</div>
     <div class="fn__none keyboard__dynamic">${inlineHTML}</div>
 </div>
 <span class="keyboard__split"></span>
-<button data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>`
-}
+<button data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>`;
+};
 
 export const hideKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
@@ -93,21 +93,21 @@ const disabledKeyboardToolbar = () => {
             item.setAttribute("disabled", "disabled");
         }
     });
-}
+};
 
 const enKeyboardToolbar = () => {
     document.querySelectorAll("#keyboardToolbar button").forEach(item => {
         item.removeAttribute("disabled");
     });
-}
+};
 
 export const initKeyboardToolbar = () => {
-    window.addEventListener('focus', (event) => {
-        const target = event.target as HTMLElement
+    window.addEventListener("focus", (event) => {
+        const target = event.target as HTMLElement;
         if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
-            disabledKeyboardToolbar()
+            disabledKeyboardToolbar();
         } else if (target.classList.contains("protyle-wysiwyg")) {
-            enKeyboardToolbar()
+            enKeyboardToolbar();
         }
     }, true);
 

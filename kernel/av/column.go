@@ -35,6 +35,15 @@ type Column struct {
 	ID   string     `json:"id"`   // 列 ID
 	Name string     `json:"name"` // 列名
 	Type ColumnType `json:"type"` // 列类型
+
+	AttributeViewID  string                `json:"attributeViewId"`  // 关联的属性视图 ID
+	RelationColumnID string                `json:"relationColumnId"` // 目标关联列 ID
+	Options          []*ColumnSelectOption `json:"options"`          // 选项列表
+}
+
+type ColumnSelectOption struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }
 
 func NewColumn(name string, columnType ColumnType) *Column {

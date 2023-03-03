@@ -398,7 +398,7 @@
   }
 
   .img {
-    display: inline-block;
+    display: initial; // inline-block 会导致 https://ld246.com/article/1677809509055
     text-align: center;
     vertical-align: top; // https://ld246.com/article/1647522074722
     margin: 0 auto;

@@ -19,8 +19,8 @@ package av
 import "github.com/88250/lute/ast"
 
 type Row struct {
-	ID    string        `json:"id"`
-	Cells []interface{} `json:"cells"`
+	ID    string  `json:"id"`
+	Cells []*Cell `json:"cells"`
 }
 
 func NewRow() *Row {

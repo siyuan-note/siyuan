@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -31,10 +32,10 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	Spec    int           `json:"spec"`
-	ID      string        `json:"id"`      // 属性视图 ID
-	Columns []interface{} `json:"columns"` // 表格列名
-	Rows    []*Row        `json:"rows"`    // 表格行记录
+	Spec    int       `json:"spec"`
+	ID      string    `json:"id"`      // 属性视图 ID
+	Columns []*Column `json:"columns"` // 表格列名
+	Rows    []*Row    `json:"rows"`    // 表格行记录
 
 	Type        AttributeViewType      `json:"type"`        // 属性视图类型
 	Projections []string               `json:"projections"` // 显示的列名，SELECT *
@@ -53,7 +54,7 @@ func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
 		Spec:        0,
 		ID:          id,
-		Columns:     []interface{}{NewColumnBlock()},
+		Columns:     []*Column{&Column{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
 		Rows:        []*Row{},
 		Type:        AttributeViewTypeTable,
 		Projections: []string{},
@@ -65,12 +66,12 @@ func NewAttributeView(id string) *AttributeView {
 func (av *AttributeView) GetColumnNames() (ret []string) {
 	ret = []string{}
 	for _, column := range av.Columns {
-		ret = append(ret, column.(*Column).Name)
+		ret = append(ret, column.Name)
 	}
 	return
 }
 
-func (av *AttributeView) InsertColumn(index int, column interface{}) {
+func (av *AttributeView) InsertColumn(index int, column *Column) {
 	if 0 > index || len(av.Columns) == index {
 		av.Columns = append(av.Columns, column)
 		return
@@ -114,7 +115,7 @@ const (
 )
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
-	avJSONPath := getAttributeViewJSONPath(avID)
+	avJSONPath := getAttributeViewDataPath(avID)
 	if !gulu.File.IsExist(avJSONPath) {
 		ret = NewAttributeView(avID)
 		return
@@ -141,7 +142,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		return
 	}
 
-	avJSONPath := getAttributeViewJSONPath(av.ID)
+	avJSONPath := getAttributeViewDataPath(av.ID)
 	if err = filelock.WriteFile(avJSONPath, data); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 		return
@@ -149,7 +150,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func getAttributeViewJSONPath(avID string) (ret string) {
+func getAttributeViewDataPath(avID string) (ret string) {
 	av := filepath.Join(util.DataDir, "storage", "av")
 	ret = filepath.Join(av, avID+".json")
 	if !gulu.File.IsDir(av) {

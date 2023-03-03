@@ -154,7 +154,7 @@ export class Backlink extends Model {
                 this.setFocus();
                 this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
-            ctrlClick(element) {
+            ctrlClick: (element) => {
                 openFileById({
                     id: element.getAttribute("data-node-id"),
                     action: [Constants.CB_GET_CONTEXT]
@@ -514,7 +514,15 @@ export class Backlink extends Model {
         }
     }
 
-    public render(data: { box: string, backlinks: IBlockTree[], backmentions: IBlockTree[], linkRefsCount: number, mentionsCount: number, k: string, mk: string }) {
+    public render(data: {
+        box: string,
+        backlinks: IBlockTree[],
+        backmentions: IBlockTree[],
+        linkRefsCount: number,
+        mentionsCount: number,
+        k: string,
+        mk: string
+    }) {
         if (!data) {
             data = {
                 box: "",

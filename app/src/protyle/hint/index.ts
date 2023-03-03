@@ -573,7 +573,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                         dialog.destroy();
                         focusByRange(protyle.toolbar.range);
                         insertHTML(`${inputElement.value}
-* 1`, protyle, true);
+${response.data}`, protyle, true);
                     });
                 });
                 return;

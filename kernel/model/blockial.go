@@ -110,22 +110,9 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 }
 
 func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
-	oldAttrs := parse.IAL2Map(node.KramdownIAL)
-
-	for name := range nameValues {
-		for i := 0; i < len(name); i++ {
-			if !lex.IsASCIILetterNumHyphen(name[i]) {
-				return errors.New(fmt.Sprintf(Conf.Language(25), node.ID))
-			}
-		}
-	}
-
-	for name, value := range nameValues {
-		if "" == value {
-			node.RemoveIALAttr(name)
-		} else {
-			node.SetIALAttr(name, value)
-		}
+	oldAttrs, err := setNodeAttrs0(node, nameValues)
+	if nil != err {
+		return
 	}
 
 	if 1 == len(nameValues) && "" != nameValues["scroll"] {
@@ -142,19 +129,56 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
-	newAttrs := parse.IAL2Map(node.KramdownIAL)
-	doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: node.ID}
-	trans := []*Transaction{{
-		DoOperations:   []*Operation{doOp},
-		UndoOperations: []*Operation{},
-	}}
-	pushBroadcastAttrTransactions(trans)
+	pushBroadcastAttrTransactions(oldAttrs, node)
 	return
 }
 
-func pushBroadcastAttrTransactions(transactions []*Transaction) {
+func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
+	oldAttrs, err := setNodeAttrs0(node, nameValues)
+	if nil != err {
+		return
+	}
+
+	if err = tx.writeTree(tree); nil != err {
+		return
+	}
+
+	IncSync()
+	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+	pushBroadcastAttrTransactions(oldAttrs, node)
+	return
+}
+
+func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[string]string, err error) {
+	oldAttrs = parse.IAL2Map(node.KramdownIAL)
+
+	for name := range nameValues {
+		for i := 0; i < len(name); i++ {
+			if !lex.IsASCIILetterNumHyphen(name[i]) {
+				err = errors.New(fmt.Sprintf(Conf.Language(25), node.ID))
+				return
+			}
+		}
+	}
+
+	for name, value := range nameValues {
+		if "" == value {
+			node.RemoveIALAttr(name)
+		} else {
+			node.SetIALAttr(name, value)
+		}
+	}
+	return
+}
+
+func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
+	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: node.ID}
 	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
-	evt.Data = transactions
+	evt.Data = []*Transaction{{
+		DoOperations:   []*Operation{doOp},
+		UndoOperations: []*Operation{},
+	}}
 	util.PushEvent(evt)
 }
 

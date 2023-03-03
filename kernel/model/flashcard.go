@@ -592,14 +592,7 @@ func removeBlocksDeckAttr(blockIDs []string, deckID string) (err error) {
 		}
 
 		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
-
-		newAttrs := parse.IAL2Map(node.KramdownIAL)
-		doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: blockID}
-		trans := []*Transaction{{
-			DoOperations:   []*Operation{doOp},
-			UndoOperations: []*Operation{},
-		}}
-		pushBroadcastAttrTransactions(trans)
+		pushBroadcastAttrTransactions(oldAttrs, node)
 	}
 
 	return
@@ -674,14 +667,7 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 		}
 
 		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
-
-		newAttrs := parse.IAL2Map(node.KramdownIAL)
-		doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: blockID}
-		trans := []*Transaction{{
-			DoOperations:   []*Operation{doOp},
-			UndoOperations: []*Operation{},
-		}}
-		pushBroadcastAttrTransactions(trans)
+		pushBroadcastAttrTransactions(oldAttrs, node)
 	}
 
 	deck := Decks[deckID]

@@ -14,9 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package av
+package api
 
-type Cell struct {
-	ID    string `json:"id"`
-	Value string `json:"value"`
+import (
+	"net/http"
+
+	"github.com/88250/gulu"
+	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+func renderAttributeView(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	ret.Data = model.RenderAttributeView(id)
 }

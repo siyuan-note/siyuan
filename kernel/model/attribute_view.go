@@ -28,6 +28,17 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
+func RenderAttributeView(avID string) (dom string) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	_ = attrView
+	return
+}
+
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
 	firstSrcID := operation.SrcIDs[0]
 	tree, err := tx.loadTree(firstSrcID)
@@ -38,7 +49,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 	avID := operation.ParentID
 	for _, id := range operation.SrcIDs {
-		if err = addAttributeViewBlock(id, avID, tree); nil != err {
+		if err = addAttributeViewBlock(id, avID, tree, tx); nil != err {
 			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: err.Error()}
 		}
 	}
@@ -55,7 +66,7 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 	avID := operation.ParentID
 	for _, id := range operation.SrcIDs {
-		if err = removeAttributeViewBlock(id, avID, tree); nil != err {
+		if err = removeAttributeViewBlock(id, avID, tree, tx); nil != err {
 			return &TxErr{code: TxErrWriteAttributeView, id: avID}
 		}
 	}
@@ -82,7 +93,7 @@ func AddAttributeViewColumn(name string, typ string, columnIndex int, avID strin
 	return
 }
 
-func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error) {
+func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
 		err = ErrBlockNotFound
@@ -105,7 +116,7 @@ func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error
 	return
 }
 
-func addAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error) {
+func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
 		err = ErrBlockNotFound
@@ -138,20 +149,20 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error) {
 	row := av.NewRow()
 	row.Cells = append(row.Cells, &av.Cell{Value: blockID})
 	if 1 < len(attrView.Columns) {
-		attrs := parse.IAL2Map(node.KramdownIAL)
+		// 将列作为属性添加到块中
 
+		attrs := parse.IAL2Map(node.KramdownIAL)
 		for _, col := range attrView.Columns[1:] {
 			colName := col.Name
 			attrs[colName] = ""
 		}
 
-		if err = setNodeAttrs(node, tree, attrs); nil != err {
+		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
 			return
 		}
 	}
 
 	attrView.Rows = append(attrView.Rows, row)
-
 	err = av.SaveAttributeView(attrView)
 	return
 }

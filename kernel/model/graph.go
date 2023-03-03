@@ -114,23 +114,45 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 			}
 
 			sqlRefBlocks := sql.QueryRefRootBlocksByDefRootIDs(rootIDs)
-			for defRootID, sqlRefBlocks := range sqlRefBlocks {
-				rootBlock := getBlockIn(rootDefBlocks, defRootID)
-				if nil == rootBlock {
+			for defRootID, sqlRefBs := range sqlRefBlocks {
+				rootB := getBlockIn(rootDefBlocks, defRootID)
+				if nil == rootB {
 					continue
 				}
 
-				blocks = append(blocks, rootBlock)
-				refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
-				rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
+				blocks = append(blocks, rootB)
+				refBlocks := fromSQLBlocks(&sqlRefBs, "", 0)
+				rootB.Refs = append(rootB.Refs, refBlocks...)
 				blocks = append(blocks, refBlocks...)
 			}
 
 			// 按定义处理
+			blocks = append(blocks, rootBlock)
 			sqlRefBlocks = sql.QueryRefRootBlocksByDefRootIDs([]string{rootID})
-			for _, sqlRefBlocks := range sqlRefBlocks {
-				blocks = append(blocks, rootBlock)
-				refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 0)
+
+			// 关系图日记过滤失效 https://github.com/siyuan-note/siyuan/issues/7547
+			dailyNotesPaths := dailyNotePaths(true)
+			for _, sqlRefBs := range sqlRefBlocks {
+				refBlocks := fromSQLBlocks(&sqlRefBs, "", 0)
+
+				if 0 < len(dailyNotesPaths) {
+					filterDailyNote := false
+					var tmp []*Block
+					for _, refBlock := range refBlocks {
+						for _, dailyNotePath := range dailyNotesPaths {
+							if strings.HasPrefix(refBlock.HPath, dailyNotePath) {
+								filterDailyNote = true
+								break
+							}
+						}
+
+						if !filterDailyNote {
+							tmp = append(tmp, refBlock)
+						}
+					}
+					refBlocks = tmp
+				}
+
 				rootBlock.Refs = append(rootBlock.Refs, refBlocks...)
 				blocks = append(blocks, refBlocks...)
 			}
@@ -648,33 +670,37 @@ func graphTypeFilter(local bool) string {
 }
 
 func graphDailyNoteFilter(local bool) string {
+	dailyNotesPaths := dailyNotePaths(local)
+	if 1 > len(dailyNotesPaths) {
+		return ""
+	}
+
+	buf := bytes.Buffer{}
+	for _, p := range dailyNotesPaths {
+		buf.WriteString(" AND ref.hpath NOT LIKE '" + p + "%'")
+	}
+	return buf.String()
+}
+
+func dailyNotePaths(local bool) (ret []string) {
 	dailyNote := Conf.Graph.Local.DailyNote
 	if !local {
 		dailyNote = Conf.Graph.Global.DailyNote
 	}
 
 	if dailyNote {
-		return ""
+		return
 	}
 
-	var dailyNotesPaths []string
 	for _, box := range Conf.GetOpenedBoxes() {
 		boxConf := box.GetConf()
 		if 1 < strings.Count(boxConf.DailyNoteSavePath, "/") {
 			dailyNoteSaveDir := strings.Split(boxConf.DailyNoteSavePath, "/")[1]
-			dailyNotesPaths = append(dailyNotesPaths, "/"+dailyNoteSaveDir)
+			ret = append(ret, "/"+dailyNoteSaveDir)
 		}
 	}
-	if 1 > len(dailyNotesPaths) {
-		return ""
-	}
-
-	dailyNotesPaths = gulu.Str.RemoveDuplicatedElem(dailyNotesPaths)
-	buf := bytes.Buffer{}
-	for _, p := range dailyNotesPaths {
-		buf.WriteString(" AND ref.hpath NOT LIKE '" + p + "%'")
-	}
-	return buf.String()
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
 }
 
 func graphStyle(local bool) (ret map[string]string) {

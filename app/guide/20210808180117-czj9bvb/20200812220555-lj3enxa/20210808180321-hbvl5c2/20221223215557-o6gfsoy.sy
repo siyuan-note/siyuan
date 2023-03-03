@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20230219092526"
+		"updated": "20230304000800"
 	},
 	"Children": [
 		{
@@ -433,12 +433,21 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20221223221214-wr48h8b",
-				"updated": "20221223221216"
+				"updated": "20230304000800"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "注意"
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},

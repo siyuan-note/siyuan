@@ -1,0 +1,428 @@
+{
+	"ID": "20230304000547-ibldj1z",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230304000547-ibldj1z",
+		"title": "Artificial Intelligence",
+		"updated": "20230304000723"
+	},
+	"Children": [
+		{
+			"ID": "20230304000646-2lycahn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230304000646-2lycahn",
+				"updated": "20230304000646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230304000646-g8eokbs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230304000646-g8eokbs",
+				"updated": "20230304000646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Currently only supports text dialogue through "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://openai.com/",
+					"TextMarkTextContent": "OpenAI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Chat API, only supported on the desktop."
+				}
+			]
+		},
+		{
+			"ID": "20230304000646-ampo9ng",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230304000646-ampo9ng",
+				"updated": "20230304000646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20230304000646-a5e7srt",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20230304000646-a5e7srt",
+				"updated": "20230304000646"
+			},
+			"Children": [
+				{
+					"ID": "20230304000646-0aseguf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20230304000646-0aseguf",
+						"updated": "20230304000646"
+					},
+					"Children": [
+						{
+							"ID": "20230304000646-z4uyi78",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230304000646-z4uyi78",
+								"updated": "20230304000646"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Register an OpenAI account and create an API Key"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230304000646-6207b6r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230304000646-6207b6r",
+						"updated": "20230304000646"
+					},
+					"Children": [
+						{
+							"ID": "20230304000646-t8nos3j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230304000646-t8nos3j",
+								"updated": "20230304000646"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Configure environment variables"
+								}
+							]
+						},
+						{
+							"ID": "20230304000646-aj5szch",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230304000646-aj5szch",
+								"updated": "20230304000646"
+							},
+							"Children": [
+								{
+									"ID": "20230304000646-po7r7lt",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230304000646-po7r7lt",
+										"updated": "20230304000646"
+									},
+									"Children": [
+										{
+											"ID": "20230304000646-nxfk9qb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230304000646-nxfk9qb",
+												"updated": "20230304000646"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_OPENAI_API_KEY"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ specifies the API Key (required)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230304000646-78w2ck5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230304000646-78w2ck5",
+										"updated": "20230304000646"
+									},
+									"Children": [
+										{
+											"ID": "20230304000646-2blt9e0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230304000646-2blt9e0",
+												"updated": "20230304000646"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_OPENAI_API_TIMEOUT"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ specifies the timeout time (seconds), the default is 15 seconds (optional)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230304000646-zrv15q4",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230304000646-zrv15q4",
+										"updated": "20230304000646"
+									},
+									"Children": [
+										{
+											"ID": "20230304000646-m2luurq",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230304000646-m2luurq",
+												"updated": "20230304000646"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_OPENAI_API_PROXY"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ specifies the proxy, the default is empty, that is, no proxy is used (optional)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230304000646-8swnrqn",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230304000646-8swnrqn",
+										"updated": "20230304000646"
+									},
+									"Children": [
+										{
+											"ID": "20230304000646-33hvl2k",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230304000646-33hvl2k",
+												"updated": "20230304000646"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_OPENAI_API_MAX_TOKENS"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ specifies the number of tokens, the default is 0, that is unlimited (optional)"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230304000646-pyi5cq7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20230304000646-pyi5cq7",
+						"updated": "20230304000646"
+					},
+					"Children": [
+						{
+							"ID": "20230304000646-jscziux",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230304000646-jscziux",
+								"updated": "20230304000646"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After restarting, you can use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/AI Chat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to invoke the dialog box, enter a question or demand and confirm"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230304000646-cahbmm9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230304000646-cahbmm9",
+				"updated": "20230304000723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230304000646-zgzs8kh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230304000646-zgzs8kh",
+				"updated": "20230304000646"
+			},
+			"Children": [
+				{
+					"ID": "20230304000646-25xgeq6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230304000646-25xgeq6",
+						"updated": "20230304000646"
+					},
+					"Children": [
+						{
+							"ID": "20230304000646-wqg9ni0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230304000646-wqg9ni0",
+								"updated": "20230304000646"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text entered through this function dialog is sent to OpenAI"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230304000646-m3ojnfs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230304000646-m3ojnfs",
+						"updated": "20230304000646"
+					},
+					"Children": [
+						{
+							"ID": "20230304000646-xpeou1e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230304000646-xpeou1e",
+								"updated": "20230304000646"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Using this function to call the OpenAI API will incur a certain fee"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

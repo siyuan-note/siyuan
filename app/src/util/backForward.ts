@@ -13,6 +13,7 @@ import {scrollCenter} from "./highlightById";
 import {lockFile} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
@@ -51,9 +52,15 @@ const focusStack = async (stack: IBackStack) => {
                 title: info.data.rootTitle,
                 docIcon: info.data.rootIcon,
                 callback(tab) {
+                    const scrollAttr = saveScroll(stack.protyle, true);
+                    scrollAttr.focusId = stack.id;
+                    scrollAttr.focusStart = stack.position.start
+                    scrollAttr.focusEnd = stack.position.end
                     const editor = new Editor({
                         tab,
-                        blockId: stack.id, // 忘记为什么要用 rootChildID 了，但用了会产生 https://github.com/siyuan-note/siyuan/issues/6004 问题
+                        scrollAttr,
+                        blockId: stack.isZoom ? stack.id : stack.protyle.block.rootID,
+                        action: stack.isZoom ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS]
                     });
                     tab.addModel(editor);
                 }
@@ -164,7 +171,7 @@ const focusStack = async (stack: IBackStack) => {
             return false;
         }
         fetchPost("/api/filetree/getDoc", {
-            id: stack.id, // 忘记为什么要用 rootChildID 了，但用了会产生 https://github.com/siyuan-note/siyuan/issues/6004 问题
+            id: stack.id,
             mode: stack.isZoom ? 0 : 3,
             size: stack.isZoom ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {

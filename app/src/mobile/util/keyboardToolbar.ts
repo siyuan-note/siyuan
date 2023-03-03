@@ -50,8 +50,8 @@ export const renderKeyboardToolbar = () => {
 <button data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
 <button data-type="indent"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
 <span class="keyboard__split"></span>
-<button ${protyle.undo.undoStack.length === 0 ? "disabled" : ""} data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
-<button ${protyle.undo.redoStack.length === 0 ? "disabled" : ""} data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+<button ${protyle.undo.undoStack.length === 0 ? 'disabled="disabled"' : ""} data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
+<button ${protyle.undo.redoStack.length === 0 ? 'disabled="disabled"' : ""} data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
 <button data-type="redo"><svg><use xlink:href="#iconFont"></use></svg></button>
 <button data-type="redo"><svg><use xlink:href="#iconMore"></use></svg></button>
 <span class="keyboard__split"></span>
@@ -110,7 +110,7 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
-        if (!buttonElement) {
+        if (!buttonElement || buttonElement.getAttribute("disabled")) {
             return;
         }
         event.preventDefault();

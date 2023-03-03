@@ -30,6 +30,9 @@ import {openMobileFileById} from "../../mobile/editor";
 import {getIconByType} from "../../editor/getIcon";
 import {processRender} from "../util/processCode";
 import {getEventName} from "../util/compatibility";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
+import {progressLoading} from "../../dialog/processSystem";
 
 export class Hint {
     public timeId: number;
@@ -540,6 +543,36 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                         action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]
                     });
                     /// #endif
+                });
+                return;
+            } else if (value === Constants.ZWSP + 5) {
+                const dialog = new Dialog({
+                    title: "AI Chat",
+                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                    width: isMobile() ? "80vw" : "520px",
+                })
+                const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+                const btnsElement = dialog.element.querySelectorAll(".b3-button");
+                dialog.bindInput(inputElement, () => {
+                    (btnsElement[1] as HTMLButtonElement).click();
+                });
+                inputElement.focus();
+                btnsElement[0].addEventListener("click", () => {
+                    dialog.destroy();
+                });
+                btnsElement[1].addEventListener("click", () => {
+                    progressLoading({code: 1, cmd:"", data:"", msg:"", sid:""});
+                    fetchPost("/api/ai/chatGPT", {
+                        msg: inputElement.value,
+                    }, (response) => {
+                        insertHTML(response.data, protyle, true);
+                        progressLoading({code: 2, cmd:"", data:"", msg:"", sid:""});
+                        dialog.destroy();
+                    });
                 });
                 return;
             } else if (Constants.INLINE_TYPE.includes(value)) {

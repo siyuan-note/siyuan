@@ -17,7 +17,11 @@
 package util
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"github.com/88250/lute/html"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -40,6 +44,9 @@ func ChatGPT(msg string) (ret string) {
 	if "" == OpenAIAPIKey {
 		return
 	}
+
+	PushEndlessProgress("Requesting...")
+	defer ClearPushProgress(100)
 
 	config := gogpt.DefaultConfig(OpenAIAPIKey)
 	if "" != OpenAIAPIProxy {
@@ -64,16 +71,35 @@ func ChatGPT(msg string) (ret string) {
 			},
 		},
 	}
-	resp, err := c.CreateChatCompletion(ctx, req)
+
+	stream, err := c.CreateChatCompletionStream(ctx, req)
 	if nil != err {
-		logging.LogErrorf("create chat completion failed: %s", err)
+		logging.LogErrorf("create chat completion stream failed: %s", err)
 		return
 	}
+	defer stream.Close()
 
-	if 0 < len(resp.Choices) {
-		ret = resp.Choices[0].Message.Content
-		ret = strings.TrimSpace(ret)
+	buf := bytes.Buffer{}
+	for {
+		resp, recvErr := stream.Recv()
+		if errors.Is(recvErr, io.EOF) {
+			break
+		}
+
+		if nil != recvErr {
+			logging.LogErrorf("create chat completion stream recv failed: %s", recvErr)
+			break
+		}
+
+		for _, choice := range resp.Choices {
+			content := choice.Delta.Content
+			buf.WriteString(content)
+			PushEndlessProgress(html.EscapeHTMLStr(buf.String()))
+		}
 	}
+
+	ret = buf.String()
+	ret = strings.TrimSpace(ret)
 	return
 }
 

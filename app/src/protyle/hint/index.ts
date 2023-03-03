@@ -32,7 +32,6 @@ import {processRender} from "../util/processCode";
 import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
-import {progressLoading} from "../../dialog/processSystem";
 
 export class Hint {
     public timeId: number;
@@ -565,15 +564,12 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     dialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
-                    progressLoading({code: 1, cmd:"", data:"", msg:"", sid:""});
                     fetchPost("/api/ai/chatGPT", {
                         msg: inputElement.value,
                     }, (response) => {
-                        progressLoading({code: 2, cmd:"", data:"", msg:"", sid:""});
                         dialog.destroy();
                         focusByRange(protyle.toolbar.range);
-                        insertHTML(`${inputElement.value}
-${response.data}`, protyle, true);
+                        insertHTML(`${inputElement.value}\n\n${response.data}`, protyle, true);
                     });
                 });
                 return;

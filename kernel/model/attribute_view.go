@@ -32,13 +32,13 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 	tree, err := tx.loadTree(firstSrcID)
 	if nil != err {
 		logging.LogErrorf("load tree [%s] failed: %s", firstSrcID, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID}
+		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID, msg: err.Error()}
 	}
 
 	avID := operation.ParentID
 	for _, id := range operation.SrcIDs {
 		if err = addAttributeViewBlock(id, avID, tree); nil != err {
-			return &TxErr{code: TxErrWriteAttributeView, id: avID}
+			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: err.Error()}
 		}
 	}
 	return
@@ -58,8 +58,6 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 			return &TxErr{code: TxErrWriteAttributeView, id: avID}
 		}
 	}
-	return
-
 	return
 }
 

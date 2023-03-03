@@ -4,6 +4,7 @@ import {insertEmptyBlock} from "../../block/util";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
+import {getEventName} from "../../protyle/util/compatibility";
 
 export const showKeyboardToolbar = (bottom = 0) => {
     if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
@@ -67,8 +68,7 @@ export const renderKeyboardToolbar = () => {
     <div class="${selectText ? "fn__none " : ""}keyboard__dynamic">${html}</div>
     <div class="${selectText ? "" : "fn__none "}keyboard__dynamic">
         <button data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
-        <button data-type="indent"><svg><use xlink:href="#iconRef"></use></svg></button>
-        <button data-type="block-ref"<use xlink:href="#iconRef"></use></svg></button>
+        <button data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
         <button data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
         <button data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
         <button data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
@@ -154,6 +154,14 @@ export const initKeyboardToolbar = () => {
             return;
         }
         // inline element
+        if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
+            protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("block-ref" === type ? getEventName() : "click"));
+            return true;
+        }
+        if (["strong", "em", "s", "code", "mark", "tag", "u", "sup", "clear", "sub", "kbd"].includes(type)) {
+            protyle.toolbar.setInlineMark(protyle, type, "toolbar");
+            return ;
+        }
         // block element
 
         if (type === "up") {

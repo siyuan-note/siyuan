@@ -54,8 +54,8 @@ const focusStack = async (stack: IBackStack) => {
                 callback(tab) {
                     const scrollAttr = saveScroll(stack.protyle, true);
                     scrollAttr.focusId = stack.id;
-                    scrollAttr.focusStart = stack.position.start
-                    scrollAttr.focusEnd = stack.position.end
+                    scrollAttr.focusStart = stack.position.start;
+                    scrollAttr.focusEnd = stack.position.end;
                     const editor = new Editor({
                         tab,
                         scrollAttr,

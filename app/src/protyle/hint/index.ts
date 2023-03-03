@@ -553,7 +553,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
                     width: isMobile() ? "80vw" : "520px",
-                })
+                });
                 const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
                 const btnsElement = dialog.element.querySelectorAll(".b3-button");
                 dialog.bindInput(inputElement, () => {

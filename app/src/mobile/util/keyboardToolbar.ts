@@ -38,7 +38,7 @@ export const showKeyboardToolbar = (bottom = 0) => {
 
 let renderKeyboardToolbarTimeout: number;
 export const renderKeyboardToolbar = () => {
-    clearTimeout(renderKeyboardToolbarTimeout)
+    clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
         if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
             return;
@@ -46,11 +46,11 @@ export const renderKeyboardToolbar = () => {
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = getSelection().getRangeAt(0);
         const selectText = range.toString();
-        const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true)
+        const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
         if (selectText || !isProtyle) {
-            dynamicElements[0].classList.add("fn__none")
+            dynamicElements[0].classList.add("fn__none");
         } else {
-            dynamicElements[0].classList.remove("fn__none")
+            dynamicElements[0].classList.remove("fn__none");
             const protyle = window.siyuan.mobile.editor.protyle;
             if (protyle.undo.undoStack.length === 0) {
                 dynamicElements[0].querySelector('[data-type="undo"]').setAttribute("disabled", "disabled");
@@ -64,9 +64,9 @@ export const renderKeyboardToolbar = () => {
             }
         }
         if (selectText && isProtyle) {
-            dynamicElements[1].classList.remove("fn__none")
+            dynamicElements[1].classList.remove("fn__none");
         } else {
-            dynamicElements[1].classList.add("fn__none")
+            dynamicElements[1].classList.add("fn__none");
         }
     }, 620); // 需等待 range 更新
 };
@@ -82,7 +82,7 @@ export const hideKeyboard = () => {
 
 export const initKeyboardToolbar = () => {
     document.addEventListener("selectionchange", () => {
-        renderKeyboardToolbar()
+        renderKeyboardToolbar();
     }, false);
 
     const toolbarElement = document.getElementById("keyboardToolbar");
@@ -151,15 +151,15 @@ export const initKeyboardToolbar = () => {
             return;
         }
         if (type === "goback") {
-            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic")
-            dynamicElements[0].classList.remove("fn__none")
-            dynamicElements[1].classList.add("fn__none")
+            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
+            dynamicElements[0].classList.remove("fn__none");
+            dynamicElements[1].classList.add("fn__none");
             return;
         }
         if (type === "goinline") {
-            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic")
-            dynamicElements[1].classList.remove("fn__none")
-            dynamicElements[0].classList.add("fn__none")
+            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
+            dynamicElements[1].classList.remove("fn__none");
+            dynamicElements[0].classList.add("fn__none");
             return;
         }
 

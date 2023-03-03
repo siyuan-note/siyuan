@@ -24,6 +24,7 @@ import {initMessage} from "./dialog/message";
 import {resizeDrag} from "./layout/util";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
+import {updateEditModeElement} from "./layout/topBar";
 
 class App {
     constructor() {
@@ -45,6 +46,10 @@ class App {
                 msgCallback: (data) => {
                     if (data) {
                         switch (data.cmd) {
+                            case "readonly":
+                                window.siyuan.config.editor.readOnly = data.data;
+                                updateEditModeElement();
+                                break;
                             case "progress":
                                 progressLoading(data);
                                 break;

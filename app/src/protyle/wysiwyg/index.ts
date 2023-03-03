@@ -408,11 +408,9 @@ export class WYSIWYG {
                 const colElement = nodeElement.querySelectorAll("table col")[parseInt(target.getAttribute("data-col-index"))] as HTMLElement;
                 // 清空初始化 table 时的最小宽度
                 if (colElement.style.minWidth) {
-                    colElement.style.width = colElement.style.minWidth;
+                    colElement.style.width = (nodeElement.querySelectorAll("table td, table th")[parseInt(target.getAttribute("data-col-index"))] as HTMLElement).offsetWidth + "px";
                     colElement.style.minWidth = "";
                 }
-                // 兼容 1.8.2
-                (nodeElement.querySelectorAll("table th")[parseInt(target.getAttribute("data-col-index"))] as HTMLElement).style.width = "";
                 const oldWidth = colElement.clientWidth;
                 const hasScroll = nodeElement.firstElementChild.clientWidth < nodeElement.firstElementChild.scrollWidth;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {

@@ -8,12 +8,8 @@ github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5 h1:8HdZozCsXS
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20230223100136-26e5f16ac3c0 h1:hZn2F/kNKcxoK41JhfoTfJ5BYHoWG3fSYk/BlOPYqLo=
 github.com/88250/gulu v1.2.3-0.20230223100136-26e5f16ac3c0/go.mod h1:pTWnjt+6qUqNnP9xltswsJxgCBVu3C7eW09u48LWX0k=
-github.com/88250/lute v1.7.6-0.20230302102529-4dd94587d7da h1:HPz4B8anvSVxuJGCKADZ3uYKdDeO6HfHPT0jhHwjHlc=
-github.com/88250/lute v1.7.6-0.20230302102529-4dd94587d7da/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
-github.com/88250/lute v1.7.6-0.20230303043637-f075ff078228 h1:KE7Z2HgKn1ycRzpEapyowUby0GdLMNzaQy+EM/HCyL8=
-github.com/88250/lute v1.7.6-0.20230303043637-f075ff078228/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
-github.com/88250/lute v1.7.6-0.20230303043953-04b4d2f358fd h1:6gD0wQUTwXQhWExyCRujk4Mb1gcfEcRg767WidA5JVc=
-github.com/88250/lute v1.7.6-0.20230303043953-04b4d2f358fd/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
+github.com/88250/lute v1.7.6-0.20230303060605-b654e00909d4 h1:Iw6OJn6z20P3QNXMmacRKOvOAoQ0m56FYkqN5ldX8Js=
+github.com/88250/lute v1.7.6-0.20230303060605-b654e00909d4/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390 h1:q2AR33VoQ87WYtvZ4pEvwj5gZkv22HK/yMlPWwF1oyc=
 github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=

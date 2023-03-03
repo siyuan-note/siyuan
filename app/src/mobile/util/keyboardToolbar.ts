@@ -45,12 +45,13 @@ export const renderKeyboardToolbar = () => {
         const range = getSelection().getRangeAt(0);
         let html = ""
         if (hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true)) {
+            const protyle = window.siyuan.mobile.editor.protyle;
             html = `<button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
-<button data-type="indent"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
+<button data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
 <button data-type="indent"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
 <span class="keyboard__split"></span>
-<button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
-<button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+<button ${protyle.undo.undoStack.length === 0 ? "disabled" : ""} data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
+<button ${protyle.undo.redoStack.length === 0 ? "disabled" : ""} data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
 <button data-type="redo"><svg><use xlink:href="#iconFont"></use></svg></button>
 <button data-type="redo"><svg><use xlink:href="#iconMore"></use></svg></button>
 <span class="keyboard__split"></span>
@@ -65,7 +66,7 @@ export const renderKeyboardToolbar = () => {
         document.getElementById("keyboardToolbar").innerHTML = `<div class="fn__flex-1">
     <div class="${selectText ? "fn__none " : ""}keyboard__dynamic">${html}</div>
     <div class="${selectText ? "" : "fn__none "}keyboard__dynamic">
-        <button data-type="indent"><svg><use xlink:href="#iconBack"></use></svg></button>
+        <button data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
         <button data-type="indent"><svg><use xlink:href="#iconRef"></use></svg></button>
         <button data-type="block-ref"<use xlink:href="#iconRef"></use></svg></button>
         <button data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
@@ -83,7 +84,7 @@ export const renderKeyboardToolbar = () => {
         <button data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
         <button data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
         <button data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
-        <button data-type="indent"><svg><use xlink:href="#iconClose"></use></svg></button>
+        <button data-type="goback"><svg class="keyboard__svg--close"><use xlink:href="#iconClose"></use></svg></button>
     </div>
 </div>
 <span class="keyboard__split"></span>
@@ -109,7 +110,7 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
-        if (!buttonElement || !window.siyuan.mobile.editor) {
+        if (!buttonElement) {
             return;
         }
         event.preventDefault();
@@ -119,7 +120,7 @@ export const initKeyboardToolbar = () => {
             hideKeyboard();
             return;
         }
-        if (window.siyuan.mobile.editor.protyle.disabled) {
+        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || !window.siyuan.mobile.editor) {
             return;
         }
         const protyle = window.siyuan.mobile.editor.protyle;
@@ -131,17 +132,29 @@ export const initKeyboardToolbar = () => {
             protyle.undo.redo(protyle);
             return;
         }
-        let range: Range;
-        if (getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0);
-        }
-        if (!range || (range && !protyle.wysiwyg.element.contains(range.startContainer))) {
+        if (type === "goback") {
+            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic")
+            dynamicElements[0].classList.remove("fn__none")
+            dynamicElements[1].classList.add("fn__none")
             return;
         }
+        if (type === "goinline") {
+            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic")
+            dynamicElements[1].classList.remove("fn__none")
+            dynamicElements[0].classList.add("fn__none")
+            return;
+        }
+
+        if (getSelection().rangeCount === 0) {
+            return;
+        }
+        const range = getSelection().getRangeAt(0);
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {
             return;
         }
+        // inline element
+        // block element
 
         if (type === "up") {
             moveToUp(protyle, nodeElement, range);

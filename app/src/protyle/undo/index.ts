@@ -15,8 +15,8 @@ interface IOperations {
 
 export class Undo {
     private hasUndo = false;
-    private redoStack: IOperations[];
-    private undoStack: IOperations[];
+    public redoStack: IOperations[];
+    public undoStack: IOperations[];
 
     constructor() {
         this.redoStack = [];

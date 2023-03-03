@@ -112,6 +112,11 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree) (err error) {
 		return
 	}
 
+	if ast.NodeAttributeView == node.Type {
+		// 不能将一个属性视图拖拽到另一个属性视图中
+		return
+	}
+
 	block := sql.BuildBlockFromNode(node, tree)
 	if nil == block {
 		err = ErrBlockNotFound

@@ -162,8 +162,7 @@ export const initKeyboardToolbar = () => {
             protyle.toolbar.setInlineMark(protyle, type, "toolbar");
             return ;
         }
-        // block element
-
+        // TODO block element
         if (type === "up") {
             moveToUp(protyle, nodeElement, range);
             focusByRange(range);

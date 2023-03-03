@@ -569,9 +569,11 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     fetchPost("/api/ai/chatGPT", {
                         msg: inputElement.value,
                     }, (response) => {
-                        insertHTML(response.data, protyle, true);
                         progressLoading({code: 2, cmd:"", data:"", msg:"", sid:""});
                         dialog.destroy();
+                        focusByRange(protyle.toolbar.range);
+                        insertHTML(`${inputElement.value}
+* 1`, protyle, true);
                     });
                 });
                 return;

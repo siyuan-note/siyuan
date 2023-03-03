@@ -40,6 +40,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.7.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
+	github.com/sashabaranov/go-gpt3 v1.3.3
 	github.com/shirou/gopsutil/v3 v3.23.1
 	github.com/siyuan-note/dejavu v0.0.0-20230223101417-691d54268764
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75

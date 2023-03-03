@@ -51,8 +51,6 @@ import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";
 import {openAsset, openBy, openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
-/// #else
-import {renderKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
 import {isCtrl, openByMobile} from "../util/compatibility";
@@ -1902,8 +1900,6 @@ export class WYSIWYG {
                 } else {
                     hideElements(["toolbar"], protyle);
                 }
-                /// #else
-                renderKeyboardToolbar(protyle, newRange);
                 /// #endif
                 if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                     countSelectWord(newRange, protyle.block.rootID);

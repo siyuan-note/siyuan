@@ -68,7 +68,7 @@ export class Toolbar {
     public render(protyle: IProtyle, range: Range, event?: KeyboardEvent) {
         this.range = range;
         let nodeElement = hasClosestBlock(range.startContainer);
-        if (!nodeElement || protyle.disabled) {
+        if (isMobile() || !nodeElement || protyle.disabled) {
             this.element.classList.add("fn__none");
             return;
         }

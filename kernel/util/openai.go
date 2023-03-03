@@ -33,7 +33,7 @@ var (
 	OpenAIAPIKey       = ""
 	OpenAIAPITimeout   = 15 * time.Second
 	OpenAIAPIProxy     = ""
-	OpenAIAPIMaxTokens = 4096
+	OpenAIAPIMaxTokens = 0
 )
 
 func ChatGPT(msg string) (ret string) {
@@ -102,9 +102,6 @@ func initOpenAI() {
 		if nil == err {
 			OpenAIAPIMaxTokens = maxTokensInt
 		}
-	}
-	if 1 > OpenAIAPIMaxTokens {
-		OpenAIAPIMaxTokens = 4096
 	}
 
 	logging.LogInfof("OpenAI API enabled [maxTokens=%d, timeout=%ds, proxy=%s]", OpenAIAPIMaxTokens, int(OpenAIAPITimeout.Seconds()), OpenAIAPIProxy)

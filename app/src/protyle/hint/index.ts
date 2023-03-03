@@ -569,7 +569,11 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                     }, (response) => {
                         dialog.destroy();
                         focusByRange(protyle.toolbar.range);
-                        insertHTML(`${inputElement.value}\n\n${response.data}`, protyle, true);
+                        let respContent = "";
+                        if (response.data && "" !== response.data) {
+                            respContent = "\n\n" + response.data;
+                        }
+                        insertHTML(`${inputElement.value}${respContent}`, protyle, true);
                     });
                 });
                 return;

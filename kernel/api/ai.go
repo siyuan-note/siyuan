@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"net/http"
 
 	"github.com/88250/gulu"
@@ -34,5 +35,10 @@ func chatGPT(c *gin.Context) {
 	}
 
 	msg := arg["msg"].(string)
+	if "" == util.OpenAIAPIKey {
+		util.PushMsg(model.Conf.Language(193), 5000)
+		return
+	}
+
 	ret.Data = util.ChatGPT(msg)
 }

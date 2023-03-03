@@ -1100,6 +1100,7 @@
     "189": "Le répertoire de synchronisation cloud est toujours verrouillé par d'autres appareils, veuillez réessayer plus tard",
     "190": "Un problème a été trouvé lors de la validation de l'index, qui a été automatiquement corrigé",
     "191": "[%d/%d] Création d'un index de données historiques",
-    "192": "Reconstruction de l'index des données historiques, veuillez patienter..."
+    "192": "Reconstruction de l'index des données historiques, veuillez patienter...",
+    "193": "Veuillez vous référer au chapitre [Intelligence Artificielle] du guide de l'utilisateur pour la configuration"
   }
 }

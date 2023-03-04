@@ -147,7 +147,7 @@ export class Breadcrumb {
         this.mediaRecorder.startRecordingNewWavFile();
     }
 
-    private showMenu(protyle: IProtyle, position: { x: number, y: number }) {
+    public showMenu(protyle: IProtyle, position: { x: number, y: number }) {
         let id;
         const cursorNodeElement = hasClosestBlock(getEditorRange(protyle.element).startContainer);
         if (cursorNodeElement) {

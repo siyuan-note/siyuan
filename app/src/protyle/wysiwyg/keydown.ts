@@ -1295,7 +1295,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
                     if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(menuItem.name)) {
-                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("block-ref" === menuItem.name ? getEventName() : "click"));
+                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("click"));
                         return true;
                     }
                     protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");

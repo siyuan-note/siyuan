@@ -1,4 +1,4 @@
-import {getEventName, setStorageVal, updateHotkeyTip} from "../util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
 import {setPosition} from "../../util/setPosition";
 import {focusByRange, getSelectionPosition} from "../util/selection";
@@ -10,7 +10,7 @@ export class Font extends ToolbarItem {
 
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
-        this.element.addEventListener(getEventName(), () => {
+        this.element.addEventListener("click", () => {
             if (protyle.toolbar.range.toString() === "") {
                 return;
             }
@@ -115,13 +115,13 @@ const fontMenu = (protyle: IProtyle) => {
 </div>
 <div class="fn__hr"></div>
 <button class="b3-button b3-button--cancel" data-type="clear"><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.clearFontStyle}</button>`;
-    element.addEventListener(getEventName(), function (event: Event) {
+    element.addEventListener("click", function (event: Event) {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {
             const dataType = target.getAttribute("data-type");
             if (target.tagName === "BUTTON") {
                 if (dataType === "clear") {
-                    protyle.toolbar.setInlineMark(protyle, "clear", "range", {type:"text"});
+                    protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"});
                 } else {
                     fontEvent(protyle, dataType, target.style.backgroundColor || target.style.color || target.textContent);
                 }

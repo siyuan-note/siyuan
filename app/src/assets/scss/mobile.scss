@@ -332,8 +332,12 @@
   }
 }
 
-.b3-menu__accelerator {
-  display: none;
+.b3-menu {
+  width: 100%;
+
+  &__accelerator {
+    display: none;
+  }
 }
 
 #historyContainer {

@@ -3,7 +3,8 @@ import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../.
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
-import {getEventName} from "../../protyle/util/compatibility";
+import {removeBlock} from "../../protyle/wysiwyg/remove";
+import {hintSlash} from "../../protyle/hint/extend";
 
 export const showKeyboardToolbar = (bottom = 0) => {
     if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
@@ -105,12 +106,12 @@ export const initKeyboardToolbar = () => {
         <span class="keyboard__split"></span>
         <button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
         <button data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
-        <button data-type="indent"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
+        <button data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
         <span class="keyboard__split"></span>
         <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
         <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
-        <button data-type="appearance"><svg><use xlink:href="#iconFont"></use></svg></button>
-        <button data-type="block"><svg><use xlink:href="#iconMore"></use></svg></button>
+        <button data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
+        <button data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
         <span class="keyboard__split"></span>
         <button data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
         <button data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
@@ -182,7 +183,7 @@ export const initKeyboardToolbar = () => {
         }
         // inline element
         if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
-            protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("text" === type ? getEventName() : "click"));
+            protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));
             return;
         } else if (["strong", "em", "s", "code", "mark", "tag", "u", "sup", "clear", "sub", "kbd"].includes(type)) {
             protyle.toolbar.setInlineMark(protyle, type, "toolbar");
@@ -196,16 +197,26 @@ export const initKeyboardToolbar = () => {
             focusByRange(range);
             return;
         } else if (type === "remove") {
-            // TODO
+            nodeElement.classList.add("protyle-wysiwyg--select");
+            removeBlock(protyle, nodeElement, range);
             return;
         } else if (type === "add") {
-            // TODO
+            protyle.hint.splitChar = "/";
+            protyle.hint.lastIndex = -1;
+            protyle.hint.genHTML(hintSlash("", protyle), protyle);
+            focusByRange(range);
             return;
-        } else if (type === "appearance") {
-            // TODO
+        } else if (type === "more") {
+            protyle.breadcrumb.showMenu(protyle, {
+                x: 0,
+                y: 0
+            });
+            focusByRange(range);
             return;
         } else if (type === "block") {
-            // TODO
+            protyle.gutter.renderMenu(protyle, nodeElement);
+            window.siyuan.menus.menu.popup({x: 0, y:0}, true);
+            focusByRange(range);
             return;
         } else if (type === "outdent") {
             listOutdent(protyle, [nodeElement.parentElement], range);

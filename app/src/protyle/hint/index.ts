@@ -581,7 +581,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 range.deleteContents();
                 focusByRange(range);
                 if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(value)) {
-                    protyle.toolbar.element.querySelector(`[data-type="${value}"]`).dispatchEvent(new CustomEvent("block-ref" === value ? getEventName() : "click"));
+                    protyle.toolbar.element.querySelector(`[data-type="${value}"]`).dispatchEvent(new CustomEvent("click"));
                     return;
                 }
                 protyle.toolbar.setInlineMark(protyle, value, "range");

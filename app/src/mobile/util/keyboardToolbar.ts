@@ -1,6 +1,5 @@
 import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../../protyle/util/hasClosest";
-import {insertEmptyBlock} from "../../block/util";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
@@ -62,6 +61,19 @@ export const renderKeyboardToolbar = () => {
             } else {
                 dynamicElements[0].querySelector('[data-type="redo"]').removeAttribute("disabled");
             }
+            const nodeElement = hasClosestBlock(range.startContainer);
+            if (nodeElement) {
+                const indentElement = dynamicElements[0].querySelector('[data-type="indent"]')
+                if (nodeElement.parentElement.classList.contains("li")) {
+                    indentElement.classList.remove("fn__none");
+                    indentElement.nextElementSibling.classList.remove("fn__none");
+                    indentElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
+                } else {
+                    indentElement.classList.add("fn__none");
+                    indentElement.nextElementSibling.classList.add("fn__none");
+                    indentElement.nextElementSibling.nextElementSibling.classList.add("fn__none");
+                }
+            }
         }
         if (selectText && isProtyle) {
             dynamicElements[1].classList.remove("fn__none");
@@ -88,19 +100,20 @@ export const initKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.innerHTML = `<div class="fn__flex-1">
     <div class="fn__none keyboard__dynamic">
+        <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
+        <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+        <span class="keyboard__split"></span>
         <button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
         <button data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
         <button data-type="indent"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
         <span class="keyboard__split"></span>
         <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
         <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
-        <button data-type="redo"><svg><use xlink:href="#iconFont"></use></svg></button>
-        <button data-type="redo"><svg><use xlink:href="#iconMore"></use></svg></button>
+        <button data-type="appearance"><svg><use xlink:href="#iconFont"></use></svg></button>
+        <button data-type="block"><svg><use xlink:href="#iconMore"></use></svg></button>
         <span class="keyboard__split"></span>
-        <button data-type="undo"><svg><use xlink:href="#iconIndent"></use></svg></button>
-        <button data-type="redo"><svg><use xlink:href="#iconOutdent"></use></svg></button>
-        <button data-type="redo"><svg><use xlink:href="#iconUp"></use></svg></button>
-        <button data-type="redo"><svg><use xlink:href="#iconDown"></use></svg></button>
+        <button data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
+        <button data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
     </div>
     <div class="fn__none keyboard__dynamic">
         <button data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
@@ -145,24 +158,20 @@ export const initKeyboardToolbar = () => {
         if (type === "undo") {
             protyle.undo.undo(protyle);
             return;
-        }
-        if (type === "redo") {
+        } else if (type === "redo") {
             protyle.undo.redo(protyle);
             return;
-        }
-        if (type === "goback") {
+        } else if (type === "goback") {
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[0].classList.remove("fn__none");
             dynamicElements[1].classList.add("fn__none");
             return;
-        }
-        if (type === "goinline") {
+        } else if (type === "goinline") {
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[1].classList.remove("fn__none");
             dynamicElements[0].classList.add("fn__none");
             return;
         }
-
         if (getSelection().rangeCount === 0) {
             return;
         }
@@ -174,53 +183,34 @@ export const initKeyboardToolbar = () => {
         // inline element
         if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
             protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("text" === type ? getEventName() : "click"));
-            return true;
-        }
-        if (["strong", "em", "s", "code", "mark", "tag", "u", "sup", "clear", "sub", "kbd"].includes(type)) {
+            return;
+        } else if (["strong", "em", "s", "code", "mark", "tag", "u", "sup", "clear", "sub", "kbd"].includes(type)) {
             protyle.toolbar.setInlineMark(protyle, type, "toolbar");
             return;
-        }
-        // TODO block element
-        if (type === "up") {
+        } else if (type === "moveup") {
             moveToUp(protyle, nodeElement, range);
             focusByRange(range);
             return;
-        }
-        if (type === "down") {
+        } else if (type === "movedown") {
             moveToDown(protyle, nodeElement, range);
             focusByRange(range);
             return;
-        }
-
-        if (type === "before") {
-            insertEmptyBlock(protyle, "beforebegin");
+        } else if (type === "remove") {
+            // TODO
             return;
-        }
-        if (type === "after") {
-            insertEmptyBlock(protyle, "afterend");
+        } else if (type === "add") {
+            // TODO
             return;
-        }
-
-        if (type === "clear") {
-            if (range.toString()) {
-                protyle.toolbar.setInlineMark(protyle, "clear", "toolbar");
-            } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN") {
-                range.setStartAfter(range.startContainer.parentElement);
-                range.collapse(false);
-                range.insertNode(document.createTextNode(Constants.ZWSP));
-                range.collapse(false);
-            }
-            focusByRange(range);
+        } else if (type === "appearance") {
+            // TODO
             return;
-        }
-
-        if (!nodeElement.parentElement.classList.contains("li") || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
-            focusByRange(range);
+        } else if (type === "block") {
+            // TODO
             return;
-        }
-        if (type === "outdent") {
+        } else if (type === "outdent") {
             listOutdent(protyle, [nodeElement.parentElement], range);
             focusByRange(range);
+            return;
         } else if (type === "indent") {
             listIndent(protyle, [nodeElement.parentElement], range);
             focusByRange(range);

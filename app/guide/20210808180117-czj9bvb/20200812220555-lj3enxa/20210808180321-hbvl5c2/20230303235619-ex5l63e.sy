@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
-		"updated": "20230304000753"
+		"updated": "20230304171349"
 	},
 	"Children": [
 		{
@@ -70,7 +70,7 @@
 			},
 			"Properties": {
 				"id": "20230303235749-kurfjky",
-				"updated": "20230304000517"
+				"updated": "20230304171349"
 			},
 			"Children": [
 				{
@@ -113,7 +113,8 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20230303235819-0o648f9"
+						"id": "20230303235819-0o648f9",
+						"updated": "20230304171349"
 					},
 					"Children": [
 						{
@@ -136,7 +137,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230303235950-z00ou0r",
-								"updated": "20230303235950"
+								"updated": "20230304171349"
 							},
 							"Children": [
 								{
@@ -259,7 +260,7 @@
 									},
 									"Properties": {
 										"id": "20230303235950-5y60wvh",
-										"updated": "20230303235950"
+										"updated": "20230304171349"
 									},
 									"Children": [
 										{
@@ -267,7 +268,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230303235950-ffevwk8",
-												"updated": "20230303235950"
+												"updated": "20230304171349"
 											},
 											"Children": [
 												{
@@ -281,7 +282,11 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ 指定 tokens 数量，默认为 0，即不限制（可选）"
+													"Data": "​​ 指定 tokens 数量，默认为 0，即使用模型默认值"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "（可选）"
 												}
 											]
 										}

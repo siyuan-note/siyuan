@@ -682,11 +682,10 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-export-prevent", (event, id) => {
         BrowserWindow.fromId(id).webContents.on("will-navigate", (event, url) => {
             const currentURL = new URL(event.sender.getURL());
+            event.preventDefault();
             if (url.startsWith(getServer(currentURL.port))) {
                 return;
             }
-
-            event.preventDefault();
             shell.openExternal(url);
         });
     });

@@ -17,11 +17,11 @@
 package api
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/model"
 	"net/http"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -35,10 +35,57 @@ func chatGPT(c *gin.Context) {
 	}
 
 	msg := arg["msg"].(string)
-	if "" == util.OpenAIAPIKey {
-		util.PushMsg(model.Conf.Language(193), 5000)
+	ret.Data = model.ChatGPT(msg)
+}
+
+func chatGPTContinueWriteBlocks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
 		return
 	}
 
-	ret.Data = util.ChatGPT(msg)
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	ret.Data = model.ChatGPTContinueWriteBlocks(ids)
+}
+
+func chatGPTTranslate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	lang := arg["lang"].(string)
+	ret.Data = model.ChatGPTTranslate(ids, lang)
+}
+
+func chatGPTSummary(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	ret.Data = model.ChatGPTSummary(ids)
 }

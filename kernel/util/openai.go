@@ -19,9 +19,6 @@ package util
 import (
 	"bytes"
 	"context"
-	"errors"
-	"github.com/88250/lute/html"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -35,12 +32,32 @@ import (
 
 var (
 	OpenAIAPIKey       = ""
-	OpenAIAPITimeout   = 15 * time.Second
+	OpenAIAPITimeout   = 30 * time.Second
 	OpenAIAPIProxy     = ""
 	OpenAIAPIMaxTokens = 0
 )
 
+var cachedContextMsg []string
+
 func ChatGPT(msg string) (ret string) {
+	ret, retCtxMsgs := ChatGPTContinueWrite(msg, cachedContextMsg)
+	cachedContextMsg = append(cachedContextMsg, retCtxMsgs...)
+	return
+}
+
+func ChatGPTTranslate(msg string, lang string) (ret string) {
+	msg = "Translate to " + lang + ":\n" + msg
+	ret, _ = ChatGPTContinueWrite(msg, nil)
+	return
+}
+
+func ChatGPTSummary(msg string, lang string) (ret string) {
+	msg = "Summarized as follows, the result is in {" + lang + "}:\n" + msg
+	ret, _ = ChatGPTContinueWrite(msg, nil)
+	return
+}
+
+func ChatGPTContinueWrite(msg string, contextMsgs []string) (ret string, retContextMsgs []string) {
 	if "" == OpenAIAPIKey {
 		return
 	}
@@ -48,59 +65,87 @@ func ChatGPT(msg string) (ret string) {
 	PushEndlessProgress("Requesting...")
 	defer ClearPushProgress(100)
 
-	config := gogpt.DefaultConfig(OpenAIAPIKey)
-	if "" != OpenAIAPIProxy {
-		proxyUrl, err := url.Parse(OpenAIAPIProxy)
-		if nil != err {
-			logging.LogErrorf("OpenAI API proxy error: %v", err)
-		} else {
-			config.HTTPClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
+	c := newOpenAIClient()
+	buf := &bytes.Buffer{}
+	for i := 0; i < 7; i++ {
+		part, stop := chatGPT(msg, contextMsgs, c)
+		buf.WriteString(part)
+
+		if stop {
+			break
 		}
+
+		PushEndlessProgress("Continue requesting...")
 	}
 
-	c := gogpt.NewClientWithConfig(config)
-	ctx, cancel := context.WithTimeout(context.Background(), OpenAIAPITimeout)
-	defer cancel()
+	ret = buf.String()
+	ret = strings.TrimSpace(ret)
+	retContextMsgs = append(retContextMsgs, msg, ret)
+	return
+}
+
+func chatGPT(msg string, contextMsgs []string, c *gogpt.Client) (ret string, stop bool) {
+	var reqMsgs []gogpt.ChatCompletionMessage
+	if 7 < len(contextMsgs) {
+		contextMsgs = contextMsgs[len(contextMsgs)-7:]
+	}
+
+	for _, ctxMsg := range contextMsgs {
+		reqMsgs = append(reqMsgs, gogpt.ChatCompletionMessage{
+			Role:    "user",
+			Content: ctxMsg,
+		})
+	}
+	reqMsgs = append(reqMsgs, gogpt.ChatCompletionMessage{
+		Role:    "user",
+		Content: msg,
+	})
+
 	req := gogpt.ChatCompletionRequest{
 		Model:     gogpt.GPT3Dot5Turbo,
 		MaxTokens: OpenAIAPIMaxTokens,
-		Messages: []gogpt.ChatCompletionMessage{
-			{
-				Role:    "user",
-				Content: msg,
-			},
-		},
+		Messages:  reqMsgs,
 	}
-
-	stream, err := c.CreateChatCompletionStream(ctx, req)
+	ctx, cancel := context.WithTimeout(context.Background(), OpenAIAPITimeout)
+	defer cancel()
+	resp, err := c.CreateChatCompletion(ctx, req)
 	if nil != err {
-		logging.LogErrorf("create chat completion stream failed: %s", err)
+		PushErrMsg("Requesting failed, please check kernel log for more details", 3000)
+		logging.LogErrorf("create chat completion failed: %s", err)
+		stop = true
 		return
 	}
-	defer stream.Close()
 
-	buf := bytes.Buffer{}
-	for {
-		resp, recvErr := stream.Recv()
-		if errors.Is(recvErr, io.EOF) {
-			break
-		}
+	if 1 > len(resp.Choices) {
+		stop = true
+		return
+	}
 
-		if nil != recvErr {
-			logging.LogErrorf("create chat completion stream recv failed: %s", recvErr)
-			break
-		}
-
-		for _, choice := range resp.Choices {
-			content := choice.Delta.Content
-			buf.WriteString(content)
-			PushEndlessProgress(html.EscapeHTMLStr(buf.String()))
-		}
+	buf := &strings.Builder{}
+	choice := resp.Choices[0]
+	buf.WriteString(choice.Message.Content)
+	if "length" == choice.FinishReason {
+		stop = false
+	} else {
+		stop = true
 	}
 
 	ret = buf.String()
 	ret = strings.TrimSpace(ret)
 	return
+}
+
+func newOpenAIClient() *gogpt.Client {
+	config := gogpt.DefaultConfig(OpenAIAPIKey)
+	if "" != OpenAIAPIProxy {
+		proxyUrl, err := url.Parse(OpenAIAPIProxy)
+		if nil != err {
+			logging.LogErrorf("OpenAI API proxy failed: %v", err)
+		} else {
+			config.HTTPClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
+		}
+	}
+	return gogpt.NewClientWithConfig(config)
 }
 
 func initOpenAI() {

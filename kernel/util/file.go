@@ -148,13 +148,13 @@ func FilterFileName(name string) string {
 	return name
 }
 
-func IsSubFolder(parent, sub string) bool {
-	if 1 > len(parent) || 1 > len(sub) {
+func IsSubPath(absPath, toCheckPath string) bool {
+	if 1 > len(absPath) || 1 > len(toCheckPath) {
 		return false
 	}
 	if gulu.OS.IsWindows() {
-		if filepath.IsAbs(parent) && filepath.IsAbs(sub) {
-			if strings.ToLower(parent)[0] != strings.ToLower(sub)[0] {
+		if filepath.IsAbs(absPath) && filepath.IsAbs(toCheckPath) {
+			if strings.ToLower(absPath)[0] != strings.ToLower(toCheckPath)[0] {
 				// 不在一个盘
 				return false
 			}
@@ -162,7 +162,7 @@ func IsSubFolder(parent, sub string) bool {
 	}
 
 	up := ".." + string(os.PathSeparator)
-	rel, err := filepath.Rel(parent, sub)
+	rel, err := filepath.Rel(absPath, toCheckPath)
 	if err != nil {
 		return false
 	}

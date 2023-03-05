@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230304000829-9jwu3po",
 		"title": "人工智能",
-		"updated": "20230304171553"
+		"updated": "20230305102546"
 	},
 	"Children": [
 		{
@@ -70,7 +70,7 @@
 			},
 			"Properties": {
 				"id": "20230304000837-t0swnf6",
-				"updated": "20230304171553"
+				"updated": "20230305102546"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 					},
 					"Properties": {
 						"id": "20230304000837-ktv65zx",
-						"updated": "20230304171553"
+						"updated": "20230305102546"
 					},
 					"Children": [
 						{
@@ -137,7 +137,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230304000837-8z180b1",
-								"updated": "20230304171553"
+								"updated": "20230305102546"
 							},
 							"Children": [
 								{
@@ -186,7 +186,7 @@
 									},
 									"Properties": {
 										"id": "20230304000837-71slt0q",
-										"updated": "20230304000837"
+										"updated": "20230305102546"
 									},
 									"Children": [
 										{
@@ -194,7 +194,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230304000837-t2um8y2",
-												"updated": "20230304000837"
+												"updated": "20230305102546"
 											},
 											"Children": [
 												{
@@ -208,7 +208,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ 指定超時時間（秒），默認為 15 秒（可選）"
+													"Data": "​ 指定超時時間（秒），默認為 30 秒（可選）"
 												}
 											]
 										}

@@ -19,9 +19,6 @@ package util
 import (
 	"bytes"
 	"context"
-	"errors"
-	"github.com/88250/lute/html"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -35,7 +32,7 @@ import (
 
 var (
 	OpenAIAPIKey       = ""
-	OpenAIAPITimeout   = 15 * time.Second
+	OpenAIAPITimeout   = 30 * time.Second
 	OpenAIAPIProxy     = ""
 	OpenAIAPIMaxTokens = 0
 )
@@ -57,7 +54,25 @@ func ChatGPTContinueWrite(msg string, contextMsgs []string) (ret string, retCont
 	defer ClearPushProgress(100)
 
 	c := newOpenAIClient()
+	buf := &bytes.Buffer{}
+	for i := 0; i < 7; i++ {
+		part, stop := chatGPT(msg, contextMsgs, c)
+		buf.WriteString(part)
 
+		if stop {
+			break
+		}
+
+		PushEndlessProgress("Continue writing...")
+	}
+
+	ret = buf.String()
+	ret = strings.TrimSpace(ret)
+	retContextMsgs = append(retContextMsgs, msg, ret)
+	return
+}
+
+func chatGPT(msg string, contextMsgs []string, c *gogpt.Client) (ret string, stop bool) {
 	var reqMsgs []gogpt.ChatCompletionMessage
 	if 7 < len(contextMsgs) {
 		contextMsgs = contextMsgs[len(contextMsgs)-7:]
@@ -81,35 +96,30 @@ func ChatGPTContinueWrite(msg string, contextMsgs []string) (ret string, retCont
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), OpenAIAPITimeout)
 	defer cancel()
-	stream, err := c.CreateChatCompletionStream(ctx, req)
+	resp, err := c.CreateChatCompletion(ctx, req)
 	if nil != err {
-		logging.LogErrorf("create chat completion stream failed: %s", err)
+		PushErrMsg("Requesting failed, please check kernel log for more details", 3000)
+		logging.LogErrorf("create chat completion failed: %s", err)
+		stop = true
 		return
 	}
-	defer stream.Close()
 
-	buf := bytes.Buffer{}
-	for {
-		resp, recvErr := stream.Recv()
-		if errors.Is(recvErr, io.EOF) {
-			break
-		}
+	if 1 > len(resp.Choices) {
+		stop = true
+		return
+	}
 
-		if nil != recvErr {
-			logging.LogErrorf("create chat completion stream recv failed: %s", recvErr)
-			break
-		}
-
-		for _, choice := range resp.Choices {
-			content := choice.Delta.Content
-			buf.WriteString(content)
-			PushEndlessProgress(html.EscapeHTMLStr(buf.String()))
-		}
+	buf := &strings.Builder{}
+	choice := resp.Choices[0]
+	buf.WriteString(choice.Message.Content)
+	if "length" == choice.FinishReason {
+		stop = false
+	} else {
+		stop = true
 	}
 
 	ret = buf.String()
 	ret = strings.TrimSpace(ret)
-	retContextMsgs = append(retContextMsgs, msg, ret)
 	return
 }
 

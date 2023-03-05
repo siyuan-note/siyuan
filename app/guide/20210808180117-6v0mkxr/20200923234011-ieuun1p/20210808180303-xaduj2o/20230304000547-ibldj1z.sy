@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
-		"updated": "20230304171533"
+		"updated": "20230305102525"
 	},
 	"Children": [
 		{
@@ -70,7 +70,7 @@
 			},
 			"Properties": {
 				"id": "20230304000646-a5e7srt",
-				"updated": "20230304171533"
+				"updated": "20230305102525"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 					},
 					"Properties": {
 						"id": "20230304000646-6207b6r",
-						"updated": "20230304171533"
+						"updated": "20230305102525"
 					},
 					"Children": [
 						{
@@ -137,7 +137,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230304000646-aj5szch",
-								"updated": "20230304171533"
+								"updated": "20230305102525"
 							},
 							"Children": [
 								{
@@ -186,7 +186,7 @@
 									},
 									"Properties": {
 										"id": "20230304000646-78w2ck5",
-										"updated": "20230304000646"
+										"updated": "20230305102525"
 									},
 									"Children": [
 										{
@@ -194,7 +194,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230304000646-2blt9e0",
-												"updated": "20230304000646"
+												"updated": "20230305102525"
 											},
 											"Children": [
 												{
@@ -208,7 +208,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ specifies the timeout time (seconds), the default is 15 seconds (optional)"
+													"Data": "​ specifies the timeout time (seconds), the default is 30 seconds (optional)"
 												}
 											]
 										}

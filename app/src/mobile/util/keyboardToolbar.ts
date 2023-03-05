@@ -6,7 +6,7 @@ import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {removeBlock} from "../../protyle/wysiwyg/remove";
 import {hintSlash} from "../../protyle/hint/extend";
 
-export const showKeyboardToolbar = (bottom = 0, height: number) => {
+export const showKeyboardToolbar = (height: number) => {
     if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
         return;
     }
@@ -17,8 +17,6 @@ export const showKeyboardToolbar = (bottom = 0, height: number) => {
         return;
     }
     toolbarElement.classList.remove("fn__none");
-    toolbarElement.style.bottom = bottom + "px";
-
     const range = getSelection().getRangeAt(0);
     if (!window.siyuan.mobile.editor ||
         !window.siyuan.mobile.editor.protyle.wysiwyg.element.contains(range.startContainer)) {

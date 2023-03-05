@@ -45,6 +45,18 @@ func ChatGPT(msg string) (ret string) {
 	return
 }
 
+func ChatGPTTranslate(msg string, lang string) (ret string) {
+	msg = "Translate to " + lang + ":\n" + msg
+	ret, _ = ChatGPTContinueWrite(msg, nil)
+	return
+}
+
+func ChatGPTSummary(msg string, lang string) (ret string) {
+	msg = "Summarized as follows, the result is in {" + lang + "}:\n" + msg
+	ret, _ = ChatGPTContinueWrite(msg, nil)
+	return
+}
+
 func ChatGPTContinueWrite(msg string, contextMsgs []string) (ret string, retContextMsgs []string) {
 	if "" == OpenAIAPIKey {
 		return

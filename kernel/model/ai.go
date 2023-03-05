@@ -23,20 +23,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ChatGPTSummary(ids []string) (ret string) {
+	if !isOpenAIAPIEnabled() {
+		return
+	}
+
+	msg := getBlocksContent(ids)
+	ret = util.ChatGPTSummary(msg, Conf.Lang)
+	return
+}
+
+func ChatGPTTranslate(ids []string, lang string) (ret string) {
+	if !isOpenAIAPIEnabled() {
+		return
+	}
+
+	msg := getBlocksContent(ids)
+	ret = util.ChatGPTTranslate(msg, lang)
+	return
+}
+
 func ChatGPTContinueWriteBlocks(ids []string) (ret string) {
 	if !isOpenAIAPIEnabled() {
 		return
 	}
 
-	sqlBlocks := sql.GetBlocks(ids)
-
-	buf := bytes.Buffer{}
-	for _, sqlBlock := range sqlBlocks {
-		buf.WriteString(sqlBlock.Content)
-		buf.WriteString("\n\n")
-	}
-
-	msg := buf.String()
+	msg := getBlocksContent(ids)
 	ret, _ = util.ChatGPTContinueWrite(msg, nil)
 	return
 }
@@ -55,4 +67,15 @@ func isOpenAIAPIEnabled() bool {
 		return false
 	}
 	return true
+}
+
+func getBlocksContent(ids []string) string {
+	sqlBlocks := sql.GetBlocks(ids)
+	buf := bytes.Buffer{}
+	for _, sqlBlock := range sqlBlocks {
+		buf.WriteString(sqlBlock.Content)
+		buf.WriteString("\n\n")
+	}
+
+	return buf.String()
 }

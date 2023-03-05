@@ -54,3 +54,38 @@ func chatGPTContinueWriteBlocks(c *gin.Context) {
 	}
 	ret.Data = model.ChatGPTContinueWriteBlocks(ids)
 }
+
+func chatGPTTranslate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	lang := arg["lang"].(string)
+	ret.Data = model.ChatGPTTranslate(ids, lang)
+}
+
+func chatGPTSummary(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	ret.Data = model.ChatGPTSummary(ids)
+}

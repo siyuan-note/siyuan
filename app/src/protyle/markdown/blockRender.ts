@@ -1,4 +1,4 @@
-import {hasClosestByAttribute} from "../util/hasClosest";
+import {hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
@@ -34,6 +34,11 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
             breadcrumb = breadcrumb === "true";
         } else {
             breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb;
+        }
+        // https://github.com/siyuan-note/siyuan/issues/7575
+        const sbElement = hasTopClosestByClassName(item, "sb")
+        if (sbElement) {
+            breadcrumb = false;
         }
         fetchPost("/api/search/searchEmbedBlock", {
             embedBlockID: item.getAttribute("data-node-id"),

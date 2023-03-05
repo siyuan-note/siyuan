@@ -24,6 +24,11 @@ import (
 )
 
 func ChatGPTContinueWriteBlocks(ids []string) (ret string) {
+	if "" == util.OpenAIAPIKey {
+		util.PushMsg(Conf.Language(193), 5000)
+		return
+	}
+
 	sqlBlocks := sql.GetBlocks(ids)
 
 	buf := bytes.Buffer{}
@@ -37,5 +42,10 @@ func ChatGPTContinueWriteBlocks(ids []string) (ret string) {
 	return
 }
 func ChatGPT(msg string) (ret string) {
+	if "" == util.OpenAIAPIKey {
+		util.PushMsg(Conf.Language(193), 5000)
+		return
+	}
+
 	return util.ChatGPT(msg)
 }

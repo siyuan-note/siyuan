@@ -202,14 +202,25 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }
     }
 
-    public genHTML(data: IHintData[], protyle: IProtyle, hide = false, hasSearch = false) {
-        if (data.length === 0) {
-            if (!this.element.querySelector(".fn__loading") || hide) {
-                this.element.classList.add("fn__none");
-            }
-            return;
+    public bindUploadEvent (protyle:IProtyle, element:HTMLElement) {
+        const uploadElement = element.querySelector('input[type="file"]');
+        if (uploadElement) {
+            uploadElement.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+                if (event.target.files.length === 0) {
+                    return;
+                }
+                const range = getEditorRange(protyle.wysiwyg.element);
+                if (this.lastIndex > -1) {
+                    range.setStart(range.startContainer, this.lastIndex);
+                }
+                range.deleteContents();
+                uploadFiles(protyle, event.target.files, event.target);
+                hideElements(["hint", "toolbar"], protyle);
+            });
         }
+    }
 
+    public getHTMLByData(data: IHintData[], hasSearch = false) {
         let hintsHTML = "";
         if (hasSearch) {
             hintsHTML = '<input style="margin: 0 4px 4px 4px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
@@ -234,7 +245,18 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (hasSearch) {
             hintsHTML = hintsHTML + "</div>";
         }
-        this.element.innerHTML = hintsHTML;
+        return hintsHTML
+    }
+
+    public genHTML(data: IHintData[], protyle: IProtyle, hide = false, hasSearch = false) {
+        if (data.length === 0) {
+            if (!this.element.querySelector(".fn__loading") || hide) {
+                this.element.classList.add("fn__none");
+            }
+            return;
+        }
+
+        this.element.innerHTML = this.getHTMLByData(data, hasSearch);
         this.element.classList.remove("fn__none");
         // https://github.com/siyuan-note/siyuan/issues/4575
         if (data[0].filter) {
@@ -246,21 +268,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
         setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
         this.element.scrollTop = 0;
-        const uploadElement = this.element.querySelector('input[type="file"]');
-        if (uploadElement) {
-            uploadElement.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
-                if (event.target.files.length === 0) {
-                    return;
-                }
-                const range = getEditorRange(protyle.wysiwyg.element);
-                if (this.lastIndex > -1) {
-                    range.setStart(range.startContainer, this.lastIndex);
-                }
-                range.deleteContents();
-                uploadFiles(protyle, event.target.files, event.target);
-                hideElements(["hint", "toolbar"], protyle);
-            });
-        }
+        this.bindUploadEvent(protyle, this.element);
         if (hasSearch) {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;
             const oldValue = this.element.querySelector("mark")?.textContent || "";

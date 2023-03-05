@@ -97,9 +97,7 @@
 
   &__title {
     flex: 1;
-    padding: 4px 8px;
-    border: 1px solid transparent;
-    background-color: transparent;
+    box-shadow: none;
   }
 
   &__search {
@@ -228,10 +226,11 @@
   box-sizing: border-box;
   height: 42px;
   background: var(--b3-theme-background);
-  z-index: 212;
+  z-index: 222;
   display: flex;
   border-top: 1px solid var(--b3-theme-surface-lighter);
   overflow: hidden;
+  flex-direction: column;
 
   &__dynamic {
     overflow: auto;
@@ -242,12 +241,21 @@
     }
   }
 
+  &__bar {
+    border-bottom: 1px solid var(--b3-theme-surface-lighter);
+  }
+
   &__split {
     width: 1px;
     height: 28px;
-    background: var(--b3-border-color);
+    background-color: var(--b3-theme-surface-lighter);
     align-self: center;
     flex-shrink: 0;
+  }
+
+  &__util {
+    flex: 1;
+    overflow: auto;
   }
 
   button {
@@ -333,8 +341,6 @@
 }
 
 .b3-menu {
-  width: 100%;
-
   &__accelerator {
     display: none;
   }

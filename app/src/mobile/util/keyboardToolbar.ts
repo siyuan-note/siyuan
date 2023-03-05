@@ -6,11 +6,13 @@ import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {removeBlock} from "../../protyle/wysiwyg/remove";
 import {hintSlash} from "../../protyle/hint/extend";
 
-export const showKeyboardToolbar = (bottom = 0) => {
+export const showKeyboardToolbar = (bottom = 0, height: number) => {
     if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
         return;
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
+    toolbarElement.setAttribute("data-keyboardheight", height.toString())
+    hideKeyboardToolbarUtil();
     if (!toolbarElement.classList.contains("fn__none")) {
         return;
     }
@@ -37,12 +39,19 @@ export const showKeyboardToolbar = (bottom = 0) => {
 };
 
 let renderKeyboardToolbarTimeout: number;
+let showKeyboardToolbarUtil = false;
 export const renderKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
         if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
             return;
         }
+        hideKeyboardToolbarUtil();
+        if (window.innerHeight + 200 > ((window.orientation === 90 || window.orientation === -90) ? screen.width : screen.height)) {
+            hideKeyboardToolbar();
+            return;
+        }
+
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = getSelection().getRangeAt(0);
         const selectText = range.toString();
@@ -85,6 +94,9 @@ export const renderKeyboardToolbar = () => {
 };
 
 export const hideKeyboardToolbar = () => {
+    if (showKeyboardToolbarUtil) {
+        return;
+    }
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.classList.add("fn__none");
 };
@@ -93,52 +105,72 @@ export const hideKeyboard = () => {
     (document.activeElement as HTMLElement).blur();
 };
 
+const renderKeyboardToolbarUtil = () => {
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    const keyboardHeight = (parseInt(toolbarElement.getAttribute("data-keyboardheight")) + 42) + "px"
+    toolbarElement.style.height = keyboardHeight
+    window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight
+    window.siyuan.menus.menu.remove();
+    showKeyboardToolbarUtil = true;
+    setTimeout(() => {
+        showKeyboardToolbarUtil = false
+    }, 1000)
+}
+
+const hideKeyboardToolbarUtil = () => {
+    document.getElementById("keyboardToolbar").style.height = ""
+    window.siyuan.mobile.editor.protyle.element.style.marginBottom = ""
+}
+
 export const initKeyboardToolbar = () => {
     document.addEventListener("selectionchange", () => {
         renderKeyboardToolbar();
     }, false);
 
     const toolbarElement = document.getElementById("keyboardToolbar");
-    toolbarElement.innerHTML = `<div class="fn__flex-1">
-    <div class="fn__none keyboard__dynamic">
-        <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
-        <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
-        <span class="keyboard__split"></span>
-        <button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
-        <button data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
-        <button data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
-        <span class="keyboard__split"></span>
-        <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
-        <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
-        <button data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
-        <button data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
-        <span class="keyboard__split"></span>
-        <button data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
-        <button data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
+    toolbarElement.innerHTML = `<div class="fn__flex keyboard__bar">
+    <div class="fn__flex-1">
+        <div class="fn__none keyboard__dynamic">
+            <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
+            <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+            <span class="keyboard__split"></span>
+            <button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
+            <button data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
+            <button data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
+            <span class="keyboard__split"></span>
+            <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
+            <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+            <button data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
+            <button data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
+            <span class="keyboard__split"></span>
+            <button data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
+            <button data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
+        </div>
+        <div class="fn__none keyboard__dynamic">
+            <button data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
+            <button data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
+            <button data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
+            <button data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
+            <button data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
+            <button data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
+            <button data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>
+            <button data-type="s"><svg><use xlink:href="#iconStrike"></use></svg></button>
+            <button data-type="mark"><svg><use xlink:href="#iconMark"></use></svg></button>
+            <button data-type="sup"><svg><use xlink:href="#iconSup"></use></svg></button>
+            <button data-type="sub"><svg><use xlink:href="#iconSub"></use></svg></button>
+            <button data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
+            <button data-type="code"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
+            <button data-type="kbd"<use xlink:href="#iconKeymap"></use></svg></button>
+            <button data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
+            <button data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
+            <button data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
+            <button data-type="goback"><svg class="keyboard__svg--close"><use xlink:href="#iconClose"></use></svg></button>
+        </div>
     </div>
-    <div class="fn__none keyboard__dynamic">
-        <button data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
-        <button data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
-        <button data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
-        <button data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
-        <button data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
-        <button data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
-        <button data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>
-        <button data-type="s"><svg><use xlink:href="#iconStrike"></use></svg></button>
-        <button data-type="mark"><svg><use xlink:href="#iconMark"></use></svg></button>
-        <button data-type="sup"><svg><use xlink:href="#iconSup"></use></svg></button>
-        <button data-type="sub"><svg><use xlink:href="#iconSub"></use></svg></button>
-        <button data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
-        <button data-type="code"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
-        <button data-type="kbd"<use xlink:href="#iconKeymap"></use></svg></button>
-        <button data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
-        <button data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
-        <button data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
-        <button data-type="goback"><svg class="keyboard__svg--close"><use xlink:href="#iconClose"></use></svg></button>
-    </div>
+    <span class="keyboard__split"></span>
+    <button data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
 </div>
-<span class="keyboard__split"></span>
-<button data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>`;
+<div class="keyboard__util"></div>`;
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
@@ -150,6 +182,7 @@ export const initKeyboardToolbar = () => {
         const type = buttonElement.getAttribute("data-type");
         if (type === "done") {
             hideKeyboard();
+            hideKeyboardToolbar();
             return;
         }
         if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || !window.siyuan.mobile.editor) {
@@ -203,8 +236,16 @@ export const initKeyboardToolbar = () => {
         } else if (type === "add") {
             protyle.hint.splitChar = "/";
             protyle.hint.lastIndex = -1;
-            protyle.hint.genHTML(hintSlash("", protyle), protyle);
-            focusByRange(range);
+            const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement
+            utilElement.innerHTML = protyle.hint.getHTMLByData(hintSlash("", protyle), false)
+            protyle.hint.bindUploadEvent(protyle, utilElement);
+            utilElement.addEventListener("click", (event) => {
+                const btnElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+                if (btnElement) {
+                    protyle.hint.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle);
+                }
+            })
+            renderKeyboardToolbarUtil();
             return;
         } else if (type === "more") {
             protyle.breadcrumb.showMenu(protyle, {
@@ -215,7 +256,7 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "block") {
             protyle.gutter.renderMenu(protyle, nodeElement);
-            window.siyuan.menus.menu.popup({x: 0, y:0}, true);
+            window.siyuan.menus.menu.popup({x: 0, y: 0}, true);
             focusByRange(range);
             return;
         } else if (type === "outdent") {

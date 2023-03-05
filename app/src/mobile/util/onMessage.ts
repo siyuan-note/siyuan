@@ -27,7 +27,7 @@ export const onMessage = (data: IWebSocketData) => {
             case"syncing":
                 processSync(data);
                 if (data.code !== 0) {
-                    document.getElementById("transactionTip").classList.add("fn__none");
+                    document.getElementById("toolbarSync").classList.add("fn__none");
                 }
                 break;
             case "create":

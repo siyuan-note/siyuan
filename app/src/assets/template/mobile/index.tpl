@@ -15,6 +15,9 @@
         <use xlink:href="#iconMenu"></use>
     </svg>
     <input class="toolbar__title b3-text-field fn__hidden" id="toolbarName">
+    <svg id="toolbarSync" class="toolbar__icon fn__none">
+        <use xlink:href="#iconCloudSucc"></use>
+    </svg>
     <svg id="toolbarEdit" class="toolbar__icon fn__hidden">
         <use xlink:href="#iconEdit"></use>
     </svg>
@@ -56,6 +59,5 @@
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
 <div id="keyboardToolbar" class="keyboard"></div>
-<div id="transactionTip" class="fn__none"></div>
 </body>
 </html>

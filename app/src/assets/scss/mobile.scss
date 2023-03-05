@@ -293,22 +293,6 @@
   }
 }
 
-#transactionTip {
-  position: fixed;
-  top: 73px;
-  border-radius: 4px;
-  box-sizing: border-box;
-  background: var(--b3-theme-background);
-  padding: 4px;
-  box-shadow: var(--b3-point-shadow);
-  border: 1px solid var(--b3-theme-surface-lighter);
-  z-index: 1;
-  line-height: 28px;
-  left: 8px;
-  right: 8px;
-  text-align: center;
-}
-
 .svg {
   fill: currentColor;
   display: inline-block;

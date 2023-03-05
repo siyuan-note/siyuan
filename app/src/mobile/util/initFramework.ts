@@ -112,6 +112,9 @@ export const initFramework = () => {
         window.siyuan.config.editor.readOnly = editIconElement.getAttribute("xlink:href") === "#iconEdit";
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
     });
+    document.getElementById("toolbarSync").addEventListener(getEventName(), () => {
+        syncGuide();
+    });
     if (navigator.userAgent.indexOf("iPhone") > -1 && !window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly) {
         // 不知道为什么 iPhone 中如果是编辑状态，点击文档后无法点击标题
         setTimeout(() => {
@@ -132,11 +135,6 @@ export const initFramework = () => {
     if (window.siyuan.config.openHelp) {
         mountHelp();
     }
-    const transactionTipElement = document.getElementById("transactionTip");
-    transactionTipElement.innerHTML = `${window.siyuan.languages.waitSync} <button class="b3-button">${window.siyuan.languages.syncNow}</button>`;
-    transactionTipElement.querySelector(".b3-button").addEventListener(getEventName(), () => {
-        syncGuide();
-    });
     if (getOpenNotebookCount() > 0) {
         if (window.JSAndroid) {
             if (window.openFileByURL(window.JSAndroid.getBlockURL())) {

@@ -24,8 +24,7 @@ import (
 )
 
 func ChatGPTContinueWriteBlocks(ids []string) (ret string) {
-	if "" == util.OpenAIAPIKey {
-		util.PushMsg(Conf.Language(193), 5000)
+	if !isOpenAIAPIEnabled() {
 		return
 	}
 
@@ -41,11 +40,19 @@ func ChatGPTContinueWriteBlocks(ids []string) (ret string) {
 	ret, _ = util.ChatGPTContinueWrite(msg, nil)
 	return
 }
+
 func ChatGPT(msg string) (ret string) {
-	if "" == util.OpenAIAPIKey {
-		util.PushMsg(Conf.Language(193), 5000)
+	if !isOpenAIAPIEnabled() {
 		return
 	}
 
 	return util.ChatGPT(msg)
+}
+
+func isOpenAIAPIEnabled() bool {
+	if "" == util.OpenAIAPIKey {
+		util.PushMsg(Conf.Language(193), 5000)
+		return false
+	}
+	return true
 }

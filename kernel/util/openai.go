@@ -63,7 +63,7 @@ func ChatGPTContinueWrite(msg string, contextMsgs []string) (ret string, retCont
 			break
 		}
 
-		PushEndlessProgress("Continue writing...")
+		PushEndlessProgress("Continue requesting...")
 	}
 
 	ret = buf.String()

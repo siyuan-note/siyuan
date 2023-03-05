@@ -546,16 +546,21 @@ func getEmbeddedBlock(embedBlockID string, trees map[string]*parse.Tree, sqlBloc
 	content := renderBlockContentByNodes(nodes)
 	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom, Markdown: content /* 这里使用 Markdown 字段来临时存储 content */}
 
-	// 位于超级块中的嵌入块不显示面包屑 https://github.com/siyuan-note/siyuan/issues/6258
-	inSuperBlock := false
-	embedNodeTree, _ := loadTreeByBlockID(embedBlockID)
-	if nil != embedNodeTree {
-		embedNode := treenode.GetNodeInTree(embedNodeTree, embedBlockID)
-		inSuperBlock = nil != embedNode && embedNode.ParentIs(ast.NodeSuperBlock)
-	}
+	if breadcrumb {
+		// 位于超级块中的嵌入块不显示面包屑 https://github.com/siyuan-note/siyuan/issues/6258
+		// 但是这里后端无法判断递归嵌入的情况，所以还是需要前端判断 breadcrumb
+		// 超级块内递归嵌入的嵌入块不应该显示面包屑 https://github.com/siyuan-note/siyuan/issues/7575
 
-	if breadcrumb && !inSuperBlock {
-		blockPaths = buildBlockBreadcrumb(def, nil)
+		inSuperBlock := false
+		embedNodeTree, _ := loadTreeByBlockID(embedBlockID)
+		if nil != embedNodeTree {
+			embedNode := treenode.GetNodeInTree(embedNodeTree, embedBlockID)
+			inSuperBlock = nil != embedNode && embedNode.ParentIs(ast.NodeSuperBlock)
+		}
+
+		if !inSuperBlock {
+			blockPaths = buildBlockBreadcrumb(def, nil)
+		}
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

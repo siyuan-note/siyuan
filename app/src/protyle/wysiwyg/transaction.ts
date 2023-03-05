@@ -728,6 +728,11 @@ export const turnsIntoOneTransaction = (options: {
                 id,
             });
         }
+        // 超级块内嵌入块无面包屑，需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
+        if (item.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+            item.removeAttribute("data-render")
+            blockRender(options.protyle, item)
+        }
     });
     transaction(options.protyle, doOperations, undoOperations);
     focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.selectsElement[0].getAttribute("data-node-id")}"]`));

@@ -822,6 +822,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"), event.ctrlKey);
                     }
                 }
+                // 超级块内嵌入块无面包屑，需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
+                sourceElements.forEach(item => {
+                    if (item.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+                        item.removeAttribute("data-render")
+                        blockRender(protyle, item)
+                    }
+                })
+                if (targetElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+                    targetElement.removeAttribute("data-render")
+                    blockRender(protyle, targetElement)
+                }
             }
         } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1
             && targetElement && !protyle.options.backlinkData) {

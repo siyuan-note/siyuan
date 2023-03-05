@@ -14,43 +14,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package api
+package model
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/model"
-	"net/http"
+	"bytes"
 
-	"github.com/88250/gulu"
-	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func chatGPT(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+func ChatGPTContinueWriteBlocks(ids []string) (ret string) {
+	sqlBlocks := sql.GetBlocks(ids)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	buf := bytes.Buffer{}
+	for _, sqlBlock := range sqlBlocks {
+		buf.WriteString(sqlBlock.Content)
+		buf.WriteString("\n\n")
 	}
 
-	msg := arg["msg"].(string)
-	ret.Data = model.ChatGPT(msg)
+	msg := buf.String()
+	ret, _ = util.ChatGPTContinueWrite(msg, nil)
+	return
 }
-
-func chatGPTContinueWriteBlocks(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	idsArg := arg["ids"].([]interface{})
-	var ids []string
-	for _, id := range idsArg {
-		ids = append(ids, id.(string))
-	}
-	ret.Data = model.ChatGPTContinueWriteBlocks(ids)
+func ChatGPT(msg string) (ret string) {
+	return util.ChatGPT(msg)
 }

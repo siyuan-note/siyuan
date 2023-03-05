@@ -19,6 +19,7 @@ package util
 import (
 	"bytes"
 	"context"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"net/http"
 	"net/url"
 	"os"
@@ -47,6 +48,7 @@ func ChatGPT(msg string) (ret string) {
 
 func ChatGPTContinueWrite(msg string, contextMsgs []string) (ret string, retContextMsgs []string) {
 	if "" == OpenAIAPIKey {
+		PushMsg(model.Conf.Language(193), 5000)
 		return
 	}
 

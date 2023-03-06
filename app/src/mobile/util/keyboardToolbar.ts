@@ -15,12 +15,6 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement
     utilElement.innerHTML = protyle.hint.getHTMLByData(hintSlash("", protyle), false)
     protyle.hint.bindUploadEvent(protyle, utilElement);
-    utilElement.addEventListener("click", (event) => {
-        const btnElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
-        if (btnElement) {
-            protyle.hint.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle);
-        }
-    })
 }
 
 const renderKeyboardToolbarUtil = () => {
@@ -186,6 +180,14 @@ export const initKeyboardToolbar = () => {
 <div class="keyboard__util"></div>`;
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
+        const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+        const protyle = window.siyuan.mobile.editor.protyle;
+        if (slashBtnElement) {
+            protyle.hint.fill(decodeURIComponent(slashBtnElement.getAttribute("data-value")), protyle);
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
         if (!buttonElement || buttonElement.getAttribute("disabled")) {
             return;
@@ -201,7 +203,6 @@ export const initKeyboardToolbar = () => {
         if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || !window.siyuan.mobile.editor) {
             return;
         }
-        const protyle = window.siyuan.mobile.editor.protyle;
         if (type === "undo") {
             protyle.undo.undo(protyle);
             return;
@@ -227,6 +228,7 @@ export const initKeyboardToolbar = () => {
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[0].classList.remove("fn__none");
             dynamicElements[1].classList.add("fn__none");
+            range.collapse(true);
             focusByRange(range);
             return;
         } else if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
@@ -256,12 +258,12 @@ export const initKeyboardToolbar = () => {
                 x: 0,
                 y: 0
             });
-            hideKeyboardToolbar();
+            activeBlur();
             return;
         } else if (type === "block") {
             protyle.gutter.renderMenu(protyle, nodeElement);
-            window.siyuan.menus.menu.popup({x: 0, y: 0}, true);
-            hideKeyboardToolbar();
+            window.siyuan.menus.menu.fullscreen();
+            activeBlur();
             return;
         } else if (type === "outdent") {
             listOutdent(protyle, [nodeElement.parentElement], range);

@@ -25,7 +25,7 @@
     max-height: none;
 
     .b3-menu__submenu {
-      top: 54px;
+      top: 45px;
       left: 0;
       bottom: 0;
       max-height: none;
@@ -54,16 +54,7 @@
 
   &__title {
     padding: 8px;
-    line-height: 30px;
-    font-size: 18px;
-    color: var(--b3-theme-on-surface);
-    text-align: center;
-
-    svg {
-      height: 30px;
-      width: 20px;
-      float: left;
-    }
+    display: flex;
   }
 
   &__item {

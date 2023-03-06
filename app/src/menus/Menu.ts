@@ -92,7 +92,7 @@ export class Menu {
 
         this.element.innerHTML = "";
         this.element.classList.add("fn__none");
-        this.element.classList.remove("b3-menu--list");
+        this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
         window.siyuan.menus.menu.element.removeAttribute("data-name");    // 标识再次点击不消失
     }
@@ -121,8 +121,8 @@ export class Menu {
     public fullscreen () {
         this.element.classList.add("b3-menu--fullscreen");
         this.element.insertAdjacentHTML("afterbegin", `<div class="b3-menu__title">
-<svg><use xlink:href="#iconLeft"></use></svg>
-${window.siyuan.languages.back}
+<svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
+<span class="b3-menu__label">${window.siyuan.languages.back}</span>
 </div>`);
         this.popup({x: 0, y: 0});
     }

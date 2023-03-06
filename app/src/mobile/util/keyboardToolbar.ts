@@ -260,7 +260,7 @@ export const initKeyboardToolbar = () => {
         } else if (type === "block") {
             protyle.gutter.renderMenu(protyle, nodeElement);
             window.siyuan.menus.menu.popup({x: 0, y: 0}, true);
-            focusByRange(range);
+            hideKeyboardToolbar();
             return;
         } else if (type === "outdent") {
             listOutdent(protyle, [nodeElement.parentElement], range);

@@ -34,6 +34,7 @@ import {movePathTo} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {transferBlockRef} from "../../menus/block";
+import {isMobile} from "../../util/functions";
 
 export class Gutter {
     public element: HTMLElement;
@@ -205,7 +206,11 @@ export class Gutter {
                 openAttr(protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`), protyle);
             } else {
                 this.renderMenu(protyle, buttonElement);
-                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
+                if (isMobile()) {
+                    window.siyuan.menus.menu.fullscreen();
+                } else {
+                    window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
+                }
                 // https://ld246.com/article/1648433751993
                 if (!protyle.toolbar.range) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.firstElementChild);
@@ -1638,7 +1643,7 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.width,
             submenu: styles.concat([{
-                label: `<div aria-label="${width}%" class="b3-tooltips b3-tooltips__n fn__size200">
+                label: `<div aria-label="${width}%" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
     <input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,
                 bind(element) {

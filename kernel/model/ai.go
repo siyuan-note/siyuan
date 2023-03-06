@@ -25,53 +25,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ChatGPTFixGrammarSpell(ids []string) (ret string) {
+func ChatGPTWithAction(ids []string, action string) (ret string) {
 	if !isOpenAIAPIEnabled() {
 		return
 	}
 
 	msg := getBlocksContent(ids)
-	ret = util.ChatGPTFixGrammarSpell(msg, Conf.Lang)
-	return
-}
-
-func ChatGPTBrainStorm(ids []string) (ret string) {
-	if !isOpenAIAPIEnabled() {
-		return
-	}
-
-	msg := getBlocksContent(ids)
-	ret = util.ChatGPTBrainStorm(msg, Conf.Lang)
-	return
-}
-
-func ChatGPTSummary(ids []string) (ret string) {
-	if !isOpenAIAPIEnabled() {
-		return
-	}
-
-	msg := getBlocksContent(ids)
-	ret = util.ChatGPTSummary(msg, Conf.Lang)
-	return
-}
-
-func ChatGPTTranslate(ids []string, lang string) (ret string) {
-	if !isOpenAIAPIEnabled() {
-		return
-	}
-
-	msg := getBlocksContent(ids)
-	ret = util.ChatGPTTranslate(msg, lang)
-	return
-}
-
-func ChatGPTContinueWriteBlocks(ids []string) (ret string) {
-	if !isOpenAIAPIEnabled() {
-		return
-	}
-
-	msg := getBlocksContent(ids)
-	ret, _ = util.ChatGPTContinueWrite(msg, nil)
+	ret = util.ChatGPTWithAction(msg, action)
 	return
 }
 
@@ -121,10 +81,11 @@ func getBlocksContent(ids []string) string {
 		}
 	}
 
+	luteEngine := util.NewLute()
 	buf := bytes.Buffer{}
 	for _, node := range nodes {
-		content := treenode.NodeStaticContent(node, nil, true)
-		buf.WriteString(content)
+		md := treenode.ExportNodeStdMd(node, luteEngine)
+		buf.WriteString(md)
 		buf.WriteString("\n\n")
 	}
 	return buf.String()

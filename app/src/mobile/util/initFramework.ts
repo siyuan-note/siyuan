@@ -132,9 +132,6 @@ export const initFramework = () => {
         closePanel();
     });
     initEditorName();
-    if (window.siyuan.config.openHelp) {
-        mountHelp();
-    }
     if (getOpenNotebookCount() > 0) {
         if (window.JSAndroid) {
             if (window.openFileByURL(window.JSAndroid.getBlockURL())) {

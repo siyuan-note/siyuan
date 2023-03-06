@@ -11,7 +11,7 @@ import {Editor} from "../../editor";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
-import {newNotebook} from "../../util/mount";
+import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
@@ -577,6 +577,10 @@ export class Files extends Model {
         });
         this.init();
         setPanelFocus(this.element.parentElement);
+        if (window.siyuan.config.openHelp) {
+            // 需等待链接建立，不能放在 ongetconfig 中
+            mountHelp();
+        }
     }
 
     private genNotebook(item: INotebook) {

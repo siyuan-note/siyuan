@@ -9,7 +9,7 @@ import {fetchPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
-import {newNotebook} from "../../util/mount";
+import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {newFile} from "../../util/newFile";
 
@@ -208,6 +208,9 @@ export class MobileFiles extends Model {
             }
         });
         this.init();
+        if (window.siyuan.config.openHelp) {
+            mountHelp();
+        }
     }
 
     private genSort(event: MouseEvent) {

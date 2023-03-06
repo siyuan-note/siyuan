@@ -57,6 +57,18 @@ func ChatGPTSummary(msg string, lang string) (ret string) {
 	return
 }
 
+func ChatGPTBrainStorm(msg string, lang string) (ret string) {
+	msg = "Brainstorm ideas as follows, the result is in {" + lang + "}:\n" + msg
+	ret, _ = ChatGPTContinueWrite(msg, nil)
+	return
+}
+
+func ChatGPTFixGrammarSpell(msg string, lang string) (ret string) {
+	msg = "Fix grammar and spelling as follows, the result is in {" + lang + "}:\n" + msg
+	ret, _ = ChatGPTContinueWrite(msg, nil)
+	return
+}
+
 func ChatGPTContinueWrite(msg string, contextMsgs []string) (ret string, retContextMsgs []string) {
 	if "" == OpenAIAPIKey {
 		return

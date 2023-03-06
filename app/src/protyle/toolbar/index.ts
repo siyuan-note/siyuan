@@ -315,7 +315,8 @@ export class Toolbar {
                 item.replaceWith(spanElement);
             });
         }
-        const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
+        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic") : this.element
+        const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
 
         if (type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") || (
@@ -323,7 +324,7 @@ export class Toolbar {
         )) {
             // 移除
             if (type === "clear") {
-                this.element.querySelectorAll('[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="strong"]').forEach(item => {
+                toolbarElement.querySelectorAll('[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="strong"]').forEach(item => {
                     item.classList.remove("protyle-toolbar__item--current");
                 });
             } else if (actionBtn) {
@@ -414,8 +415,8 @@ export class Toolbar {
             });
         } else {
             // 添加
-            if (!this.element.classList.contains("fn__none") && type !== "text") {
-                this.element.querySelector(`[data-type="${type}"]`).classList.add("protyle-toolbar__item--current");
+            if (!this.element.classList.contains("fn__none") && type !== "text" && actionBtn) {
+                actionBtn.classList.add("protyle-toolbar__item--current");
             }
             if (selectText === "") {
                 const inlineElement = document.createElement("span");
@@ -479,9 +480,7 @@ export class Toolbar {
                             types.find((item, index) => {
                                 if (item === "sup") {
                                     types.splice(index, 1);
-                                    if (!this.element.classList.contains("fn__none")) {
-                                        this.element.querySelector('[data-type="sup"]').classList.remove("protyle-toolbar__item--current");
-                                    }
+                                    toolbarElement.querySelector('[data-type="sup"]').classList.remove("protyle-toolbar__item--current");
                                     return true;
                                 }
                             });
@@ -489,9 +488,7 @@ export class Toolbar {
                             types.find((item, index) => {
                                 if (item === "sub") {
                                     types.splice(index, 1);
-                                    if (!this.element.classList.contains("fn__none")) {
-                                        this.element.querySelector('[data-type="sub"]').classList.remove("protyle-toolbar__item--current");
-                                    }
+                                    toolbarElement.querySelector('[data-type="sub"]').classList.remove("protyle-toolbar__item--current");
                                     return true;
                                 }
                             });

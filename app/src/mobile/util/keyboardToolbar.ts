@@ -45,11 +45,11 @@ const renderKeyboardToolbar = () => {
         const range = getSelection().getRangeAt(0);
         const selectText = range.toString();
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
+        const protyle = window.siyuan.mobile.editor.protyle;
         if (selectText || !isProtyle) {
             dynamicElements[0].classList.add("fn__none");
         } else {
             dynamicElements[0].classList.remove("fn__none");
-            const protyle = window.siyuan.mobile.editor.protyle;
             if (protyle.undo.undoStack.length === 0) {
                 dynamicElements[0].querySelector('[data-type="undo"]').setAttribute("disabled", "disabled");
             } else {
@@ -75,6 +75,20 @@ const renderKeyboardToolbar = () => {
             }
         }
         if (selectText && isProtyle) {
+            dynamicElements[1].querySelectorAll('.protyle-toolbar__item--current').forEach(item => {
+                item.classList.remove("protyle-toolbar__item--current");
+            });
+            const types = protyle.toolbar.getCurrentType();
+            types.forEach(item => {
+                if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",
+                    "inline-memo", "", "backslash"].includes(item)) {
+                    return;
+                }
+                const itemElement = dynamicElements[1].querySelector(`[data-type="${item}"]`);
+                if (itemElement) {
+                    itemElement.classList.add("protyle-toolbar__item--current");
+                }
+            });
             dynamicElements[1].classList.remove("fn__none");
         } else {
             dynamicElements[1].classList.add("fn__none");
@@ -138,44 +152,44 @@ export const initKeyboardToolbar = () => {
     toolbarElement.innerHTML = `<div class="fn__flex keyboard__bar">
     <div class="fn__flex-1">
         <div class="fn__none keyboard__dynamic">
-            <button data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
-            <button data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+            <button class="keyboard__action" data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
+            <button class="keyboard__action" data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
             <span class="keyboard__split"></span>
-            <button data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
-            <button data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
-            <button data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
+            <button class="keyboard__action" data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
+            <button class="keyboard__action" data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
+            <button class="keyboard__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
             <span class="keyboard__split"></span>
-            <button data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
-            <button data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
-            <button data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
-            <button data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
+            <button class="keyboard__action" data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
+            <button class="keyboard__action" data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+            <button class="keyboard__action" data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
+            <button class="keyboard__action" data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
             <span class="keyboard__split"></span>
-            <button data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
-            <button data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
+            <button class="keyboard__action" data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
+            <button class="keyboard__action" data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
         </div>
         <div class="fn__none keyboard__dynamic">
-            <button data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
-            <button data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
-            <button data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
-            <button data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
-            <button data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
-            <button data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
-            <button data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>
-            <button data-type="s"><svg><use xlink:href="#iconStrike"></use></svg></button>
-            <button data-type="mark"><svg><use xlink:href="#iconMark"></use></svg></button>
-            <button data-type="sup"><svg><use xlink:href="#iconSup"></use></svg></button>
-            <button data-type="sub"><svg><use xlink:href="#iconSub"></use></svg></button>
-            <button data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
-            <button data-type="code"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
-            <button data-type="kbd"<use xlink:href="#iconKeymap"></use></svg></button>
-            <button data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
-            <button data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
-            <button data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
-            <button data-type="goback"><svg class="keyboard__svg--close"><use xlink:href="#iconClose"></use></svg></button>
+            <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
+            <button class="keyboard__action" data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
+            <button class="keyboard__action" data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
+            <button class="keyboard__action" data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
+            <button class="keyboard__action" data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
+            <button class="keyboard__action" data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
+            <button class="keyboard__action" data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>
+            <button class="keyboard__action" data-type="s"><svg><use xlink:href="#iconStrike"></use></svg></button>
+            <button class="keyboard__action" data-type="mark"><svg><use xlink:href="#iconMark"></use></svg></button>
+            <button class="keyboard__action" data-type="sup"><svg><use xlink:href="#iconSup"></use></svg></button>
+            <button class="keyboard__action" data-type="sub"><svg><use xlink:href="#iconSub"></use></svg></button>
+            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
+            <button class="keyboard__action" data-type="code"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
+            <button class="keyboard__action" data-type="kbd"<use xlink:href="#iconKeymap"></use></svg></button>
+            <button class="keyboard__action" data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
+            <button class="keyboard__action" data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
+            <button class="keyboard__action" data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
+            <button class="keyboard__action" data-type="goback"><svg class="keyboard__svg--close"><use xlink:href="#iconClose"></use></svg></button>
         </div>
     </div>
     <span class="keyboard__split"></span>
-    <button data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
+    <button class="keyboard__action" data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
 </div>
 <div class="keyboard__util"></div>`;
     toolbarElement.addEventListener("click", (event) => {

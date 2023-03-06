@@ -245,6 +245,11 @@
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
   }
 
+  &__util {
+    flex: 1;
+    overflow: auto;
+  }
+
   &__split {
     width: 1px;
     height: 28px;
@@ -253,18 +258,18 @@
     flex-shrink: 0;
   }
 
-  &__util {
-    flex: 1;
-    overflow: auto;
-  }
-
-  button {
+  &__action {
     background: transparent;
     padding: 0;
     border: 0;
+    color: var(--b3-theme-on-surface);
 
     &[disabled] {
       opacity: 0.38;
+    }
+
+    &.protyle-toolbar__item--current {
+      color: var(--b3-theme-primary);
     }
 
     svg {
@@ -272,7 +277,6 @@
       width: 16px;
       float: left;
       padding: 12px;
-      color: var(--b3-theme-on-surface);
 
       &.keyboard__svg--big {
         width: 30px;

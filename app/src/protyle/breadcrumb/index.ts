@@ -155,7 +155,6 @@ export class Breadcrumb {
         }
         fetchPost("/api/block/getTreeStat", {id: id || protyle.block.id}, (response) => {
             window.siyuan.menus.menu.remove();
-
             if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                 let uploadHTML = "";
                 uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';
@@ -378,7 +377,11 @@ export class Breadcrumb {
 <div class="fn__flex">${window.siyuan.languages.image}<span class="fn__space fn__flex-1"></span>${response.data.imageCount}</div>
 <div class="fn__flex">${window.siyuan.languages.ref}<span class="fn__space fn__flex-1"></span>${response.data.refCount}</div>`,
             }).element);
-            window.siyuan.menus.menu.popup(position);
+            if (isMobile()) {
+                window.siyuan.menus.menu.fullscreen();
+            } else {
+                window.siyuan.menus.menu.popup(position);
+            }
         });
     }
 

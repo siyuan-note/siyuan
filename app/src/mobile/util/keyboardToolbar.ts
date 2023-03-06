@@ -2,12 +2,26 @@ import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../../protyle/util/hasClosest";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
-import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
+import {focusByRange, getEditorRange, getSelectionPosition} from "../../protyle/util/selection";
 import {removeBlock} from "../../protyle/wysiwyg/remove";
 import {hintSlash} from "../../protyle/hint/extend";
 
 let renderKeyboardToolbarTimeout: number;
 let showKeyboardToolbarUtil = false;
+
+const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
+    protyle.hint.splitChar = "/";
+    protyle.hint.lastIndex = -1;
+    const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement
+    utilElement.innerHTML = protyle.hint.getHTMLByData(hintSlash("", protyle), false)
+    protyle.hint.bindUploadEvent(protyle, utilElement);
+    utilElement.addEventListener("click", (event) => {
+        const btnElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+        if (btnElement) {
+            protyle.hint.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle);
+        }
+    })
+}
 
 const renderKeyboardToolbarUtil = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
@@ -233,17 +247,7 @@ export const initKeyboardToolbar = () => {
             removeBlock(protyle, nodeElement, range);
             return;
         } else if (type === "add") {
-            protyle.hint.splitChar = "/";
-            protyle.hint.lastIndex = -1;
-            const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement
-            utilElement.innerHTML = protyle.hint.getHTMLByData(hintSlash("", protyle), false)
-            protyle.hint.bindUploadEvent(protyle, utilElement);
-            utilElement.addEventListener("click", (event) => {
-                const btnElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
-                if (btnElement) {
-                    protyle.hint.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle);
-                }
-            })
+            renderSlashMenu(protyle, toolbarElement);
             renderKeyboardToolbarUtil();
             return;
         } else if (type === "more") {
@@ -251,7 +255,7 @@ export const initKeyboardToolbar = () => {
                 x: 0,
                 y: 0
             });
-            focusByRange(range);
+            hideKeyboardToolbar();
             return;
         } else if (type === "block") {
             protyle.gutter.renderMenu(protyle, nodeElement);

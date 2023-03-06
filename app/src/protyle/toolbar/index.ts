@@ -622,7 +622,12 @@ export class Toolbar {
             }
         }
         if (previousElement) {
-            this.mergeNode(previousElement.childNodes);
+            if (previousElement.nodeType !== 3 && previousElement.textContent === Constants.ZWSP) {
+                // https://github.com/siyuan-note/siyuan/issues/7548
+                previousElement.remove();
+            } else {
+                this.mergeNode(previousElement.childNodes);
+            }
         }
         if (nextElement) {
             this.mergeNode(nextElement.childNodes);

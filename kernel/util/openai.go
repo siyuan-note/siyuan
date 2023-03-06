@@ -45,26 +45,11 @@ func ChatGPT(msg string) (ret string) {
 	return
 }
 
-func ChatGPTTranslate(msg string, lang string) (ret string) {
-	msg = "Translate to " + lang + ":\n" + msg
-	ret, _ = ChatGPTContinueWrite(msg, nil)
-	return
-}
-
-func ChatGPTSummary(msg string, lang string) (ret string) {
-	msg = "Summarized as follows, the result is in {" + lang + "}:\n" + msg
-	ret, _ = ChatGPTContinueWrite(msg, nil)
-	return
-}
-
-func ChatGPTBrainStorm(msg string, lang string) (ret string) {
-	msg = "Brainstorm ideas as follows, the result is in {" + lang + "}:\n" + msg
-	ret, _ = ChatGPTContinueWrite(msg, nil)
-	return
-}
-
-func ChatGPTFixGrammarSpell(msg string, lang string) (ret string) {
-	msg = "Fix grammar and spelling as follows, the result is in {" + lang + "}:\n" + msg
+func ChatGPTWithAction(msg string, action string, lang string) (ret string) {
+	prompt := "{action} as follows, the result is in {lang}:\n"
+	prompt = strings.Replace(prompt, "{action}", action, -1)
+	prompt = strings.Replace(prompt, "{lang}", lang, -1)
+	msg = prompt + msg
 	ret, _ = ChatGPTContinueWrite(msg, nil)
 	return
 }

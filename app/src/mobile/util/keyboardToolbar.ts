@@ -208,11 +208,6 @@ export const initKeyboardToolbar = () => {
         } else if (type === "redo") {
             protyle.undo.redo(protyle);
             return;
-        } else if (type === "goback") {
-            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
-            dynamicElements[0].classList.remove("fn__none");
-            dynamicElements[1].classList.add("fn__none");
-            return;
         } else if (type === "goinline") {
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[1].classList.remove("fn__none");
@@ -228,7 +223,13 @@ export const initKeyboardToolbar = () => {
             return;
         }
         // inline element
-        if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
+        if (type === "goback") {
+            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
+            dynamicElements[0].classList.remove("fn__none");
+            dynamicElements[1].classList.add("fn__none");
+            focusByRange(range);
+            return;
+        } else if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
             protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));
             return;
         } else if (["strong", "em", "s", "code", "mark", "tag", "u", "sup", "clear", "sub", "kbd"].includes(type)) {

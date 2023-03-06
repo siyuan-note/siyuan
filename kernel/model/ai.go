@@ -31,7 +31,7 @@ func ChatGPTWithAction(ids []string, action string) (ret string) {
 	}
 
 	msg := getBlocksContent(ids)
-	ret = util.ChatGPTWithAction(msg, action, Conf.Lang)
+	ret = util.ChatGPTWithAction(msg, action)
 	return
 }
 
@@ -81,10 +81,11 @@ func getBlocksContent(ids []string) string {
 		}
 	}
 
+	luteEngine := util.NewLute()
 	buf := bytes.Buffer{}
 	for _, node := range nodes {
-		content := treenode.NodeStaticContent(node, nil, true)
-		buf.WriteString(content)
+		md := treenode.ExportNodeStdMd(node, luteEngine)
+		buf.WriteString(md)
 		buf.WriteString("\n\n")
 	}
 	return buf.String()

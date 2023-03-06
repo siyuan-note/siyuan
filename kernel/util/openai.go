@@ -45,11 +45,8 @@ func ChatGPT(msg string) (ret string) {
 	return
 }
 
-func ChatGPTWithAction(msg string, action string, lang string) (ret string) {
-	prompt := "{action} as follows, the result is in {lang}:\n"
-	prompt = strings.Replace(prompt, "{action}", action, -1)
-	prompt = strings.Replace(prompt, "{lang}", lang, -1)
-	msg = prompt + msg
+func ChatGPTWithAction(msg string, action string) (ret string) {
+	msg = action + ":\n\n" + msg
 	ret, _ = ChatGPTContinueWrite(msg, nil)
 	return
 }

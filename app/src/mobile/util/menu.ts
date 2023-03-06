@@ -16,7 +16,7 @@ import {Dialog} from "../../dialog";
 import {syncGuide} from "../../sync/syncGuide";
 import {openCard} from "../../card/openCard";
 import {pathPosix} from "../../util/pathName";
-import {hideKeyboard, hideKeyboardToolbar} from "./keyboardToolbar";
+import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 
 const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) => {
     closePanel();
@@ -115,7 +115,7 @@ const genWorkspace = (workspaceDirElement: Element) => {
     });
 };
 export const popMenu = () => {
-    hideKeyboard();
+    activeBlur();
     hideKeyboardToolbar();
     const modelElement = document.getElementById("model");
     const modelMainElement = document.getElementById("modelMain");

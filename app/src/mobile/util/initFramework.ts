@@ -16,7 +16,7 @@ import {hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {MobileBacklinks} from "./MobileBacklinks";
 import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
-import {hideKeyboard, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardToolbar";
+import {activeBlur, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardToolbar";
 import {getSearch} from "../../util/functions";
 import {syncGuide} from "../../sync/syncGuide";
 
@@ -77,7 +77,7 @@ export const initFramework = () => {
     window.siyuan.mobile.files = new MobileFiles();
     document.getElementById("toolbarFile").addEventListener("click", () => {
         hideKeyboardToolbar();
-        hideKeyboard();
+        activeBlur();
         sidebarElement.style.left = "0";
         document.querySelector(".scrim").classList.remove("fn__none");
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");

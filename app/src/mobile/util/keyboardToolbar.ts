@@ -36,10 +36,10 @@ const renderKeyboardToolbar = () => {
             return;
         }
         hideKeyboardToolbarUtil();
-        // if (window.innerHeight + 200 > ((window.orientation === 90 || window.orientation === -90) ? screen.width : screen.height)) {
-        //     hideKeyboardToolbar();
-        //     return;
-        // }
+        if (window.innerHeight + 200 > ((window.orientation === 90 || window.orientation === -90) ? screen.width : screen.height)) {
+            hideKeyboardToolbar();
+            return;
+        }
 
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = getSelection().getRangeAt(0);

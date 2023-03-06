@@ -53,10 +53,10 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     doOperations.forEach(item => {
         const element = protyle.wysiwyg.element.querySelector(`[data-node-id="${item.id}"]`);
         if (element && element.getAttribute("data-type") === "NodeBlockQueryEmbed") {
-            element.removeAttribute("data-render")
-            blockRender(protyle, element)
+            element.removeAttribute("data-render");
+            blockRender(protyle, element);
         }
-    })
+    });
     return {
         doOperations, undoOperations, previousId
     };

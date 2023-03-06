@@ -29,7 +29,6 @@ import {openFileById} from "../../editor/util";
 import {openMobileFileById} from "../../mobile/editor";
 import {getIconByType} from "../../editor/getIcon";
 import {processRender} from "../util/processCode";
-import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 
@@ -245,7 +244,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (hasSearch) {
             hintsHTML = hintsHTML + "</div>";
         }
-        return hintsHTML
+        return hintsHTML;
     }
 
     public genHTML(data: IHintData[], protyle: IProtyle, hide = false, hasSearch = false) {

@@ -730,8 +730,8 @@ export const turnsIntoOneTransaction = (options: {
         }
         // 超级块内嵌入块无面包屑，需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
         if (item.getAttribute("data-type") === "NodeBlockQueryEmbed") {
-            item.removeAttribute("data-render")
-            blockRender(options.protyle, item)
+            item.removeAttribute("data-render");
+            blockRender(options.protyle, item);
         }
     });
     transaction(options.protyle, doOperations, undoOperations);

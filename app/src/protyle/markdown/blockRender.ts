@@ -36,7 +36,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
             breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb;
         }
         // https://github.com/siyuan-note/siyuan/issues/7575
-        const sbElement = hasTopClosestByClassName(item, "sb")
+        const sbElement = hasTopClosestByClassName(item, "sb");
         if (sbElement) {
             breadcrumb = false;
         }

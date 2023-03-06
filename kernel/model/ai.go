@@ -25,6 +25,26 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ChatGPTFixGrammarSpell(ids []string) (ret string) {
+	if !isOpenAIAPIEnabled() {
+		return
+	}
+
+	msg := getBlocksContent(ids)
+	ret = util.ChatGPTFixGrammarSpell(msg, Conf.Lang)
+	return
+}
+
+func ChatGPTBrainStorm(ids []string) (ret string) {
+	if !isOpenAIAPIEnabled() {
+		return
+	}
+
+	msg := getBlocksContent(ids)
+	ret = util.ChatGPTBrainStorm(msg, Conf.Lang)
+	return
+}
+
 func ChatGPTSummary(ids []string) (ret string) {
 	if !isOpenAIAPIEnabled() {
 		return

@@ -144,8 +144,11 @@ export const activeBlur = () => {
 };
 
 export const initKeyboardToolbar = () => {
+    let preventRender = false;
     document.addEventListener("selectionchange", () => {
-        renderKeyboardToolbar();
+        if (!preventRender) {
+            renderKeyboardToolbar();
+        }
     }, false);
 
     const toolbarElement = document.getElementById("keyboardToolbar");
@@ -237,14 +240,21 @@ export const initKeyboardToolbar = () => {
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[0].classList.remove("fn__none");
             dynamicElements[1].classList.add("fn__none");
-            range.collapse(true);
             focusByRange(range);
+            preventRender = true;
+            setTimeout(() => {
+                preventRender = false;
+            }, 1000)
             return;
         } else if (type === "goinline") {
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[1].classList.remove("fn__none");
             dynamicElements[0].classList.add("fn__none");
             focusByRange(range);
+            preventRender = true;
+            setTimeout(() => {
+                preventRender = false;
+            }, 1000)
             return;
         } else if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
             protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));

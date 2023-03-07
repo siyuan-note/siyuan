@@ -908,7 +908,8 @@
     "task.history.generateDoc": "執行生成文件歷史",
     "task.history.database.index.commit": "執行歷史數據庫索引提交",
     "task.database.index.embedBlock": "執行數據庫索引嵌入塊",
-    "task.reload.ui": "執行重載界面"
+    "task.reload.ui": "執行重載界面",
+    "task.upgrade.userGuide": "執行升級用戶指南"
   },
   "_trayMenu": {
     "showWindow": "顯示主窗口",

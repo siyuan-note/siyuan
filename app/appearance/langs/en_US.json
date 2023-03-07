@@ -908,7 +908,8 @@
     "task.history.generateDoc": "Execute GenerateDoc History",
     "task.history.database.index.commit": "Execute history database index commit",
     "task.database.index.embedBlock": "Execute database index embed block",
-    "task.reload.ui": "Execute reload UI"
+    "task.reload.ui": "Execute reload UI",
+    "task.upgrade.userGuide": "Execute upgrade user guide"
   },
   "_trayMenu": {
     "showWindow": "Show Window",

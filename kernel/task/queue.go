@@ -93,6 +93,7 @@ const (
 	HistoryDatabaseIndexCommit = "task.history.database.index.commit" // 历史数据库索引提交
 	DatabaseIndexEmbedBlock    = "task.database.index.embedBlock"     // 数据库索引嵌入块
 	ReloadUI                   = "task.reload.ui"                     // 重载 UI
+	UpgradeUserGuide           = "task.upgrade.userGuide"             // 升级用户指南文档笔记本
 )
 
 // uniqueActions 描述了唯一的任务，即队列中只能存在一个在执行的任务。

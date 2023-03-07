@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/88250/lute/ast"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -31,6 +30,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/getsentry/sentry-go"
@@ -40,6 +40,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 	"golang.org/x/text/language"
 )
 
@@ -213,6 +214,11 @@ func InitConf() {
 		Conf.System = conf.NewSystem()
 		Conf.OpenHelp = true
 	} else {
+		if 0 < semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion) {
+			logging.LogInfof("upgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
+		} else {
+			logging.LogInfof("downgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
+		}
 		Conf.OpenHelp = Conf.System.KernelVersion != util.Ver
 		Conf.System.KernelVersion = util.Ver
 		Conf.System.IsInsider = util.IsInsider

@@ -223,11 +223,6 @@ export const initKeyboardToolbar = () => {
         } else if (type === "redo") {
             protyle.undo.redo(protyle);
             return;
-        } else if (type === "goinline") {
-            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
-            dynamicElements[1].classList.remove("fn__none");
-            dynamicElements[0].classList.add("fn__none");
-            return;
         }
         if (getSelection().rangeCount === 0) {
             return;
@@ -243,6 +238,12 @@ export const initKeyboardToolbar = () => {
             dynamicElements[0].classList.remove("fn__none");
             dynamicElements[1].classList.add("fn__none");
             range.collapse(true);
+            focusByRange(range);
+            return;
+        } else if (type === "goinline") {
+            const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
+            dynamicElements[1].classList.remove("fn__none");
+            dynamicElements[0].classList.add("fn__none");
             focusByRange(range);
             return;
         } else if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {

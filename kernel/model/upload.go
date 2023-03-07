@@ -189,7 +189,7 @@ func Upload(c *gin.Context) {
 				break
 			}
 			f.Close()
-			succMap[baseName] = path.Join(relAssetsDirPath, fName)
+			succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
 		}
 	}
 

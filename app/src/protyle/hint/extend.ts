@@ -42,7 +42,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
     },
     // {
-    //     filter: ["属性试图", "shuxingshitu", "sxst", "attribute view"],
+    //     filter: ["属性视图", "shuxingshitu", "sxst", "attribute view"],
     //     value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
     //     html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.attributeView}</span></div>`,
     // },

@@ -793,7 +793,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 hideElements(["gutter"], protyle);
                 const targetClass = targetElement.className.split(" ");
                 if (targetElement.className.indexOf("dragover__") === -1) {
-                    // 拖拽到属性试图内
+                    // 拖拽到属性视图内
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         id: targetElement.getAttribute("data-node-id"),

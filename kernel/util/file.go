@@ -194,6 +194,9 @@ func SizeOfDirectory(path string) (size int64, err error) {
 func DataSize() (dataSize, assetsSize int64) {
 	filepath.Walk(DataDir, func(path string, info os.FileInfo, err error) error {
 		if nil != err {
+			if os.IsNotExist(err) {
+				return nil
+			}
 			logging.LogErrorf("size of data failed: %s", err)
 			return io.EOF
 		}

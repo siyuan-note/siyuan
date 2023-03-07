@@ -908,7 +908,8 @@
     "task.history.generateDoc": "Exécuter l'historique de GenerateDoc",
     "task.history.database.index.commit": "Effectuer la validation de l'index de la base de données d'historique",
     "task.database.index.embedBlock": "Exécuter le bloc d'intégration d'index de base de données",
-    "task.reload.ui": "Interface utilisateur de rechargement de tâche"
+    "task.reload.ui": "Interface utilisateur de rechargement de tâche",
+    "task.upgrade.userGuide": "Mise à niveau de la tâche de guide utilisateur",
   },
   "_trayMenu": {
     "showWindow": "Afficher la fenêtre principale",

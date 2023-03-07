@@ -16,24 +16,24 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
 const mergeElement = (a: Element, b: Element, after = true) => {
     a.setAttribute("data-type", a.getAttribute("data-type").replace("search-mark", "").trim());
     b.setAttribute("data-type", b.getAttribute("data-type").replace("search-mark", "").trim());
-    const attributes = a.attributes
-    let isMatch = true
+    const attributes = a.attributes;
+    let isMatch = true;
     for (let i = 0; i < attributes.length; i++) {
         if (b.getAttribute(attributes[i].name) !== attributes[i].value) {
-            isMatch = false
+            isMatch = false;
         }
     }
 
     if (isMatch) {
         if (after) {
-            a.innerHTML = a.innerHTML + b.innerHTML
+            a.innerHTML = a.innerHTML + b.innerHTML;
         } else {
-            a.innerHTML = b.innerHTML + a.innerHTML
+            a.innerHTML = b.innerHTML + a.innerHTML;
         }
         b.remove();
     }
     return isMatch;
-}
+};
 
 export const removeSearchMark = (element: HTMLElement) => {
     let previousElement = element.previousSibling as HTMLElement;
@@ -56,4 +56,4 @@ export const removeSearchMark = (element: HTMLElement) => {
     if (element.getAttribute("data-type").includes("search-mark")) {
         element.setAttribute("data-type", element.getAttribute("data-type").replace("search-mark", "").trim());
     }
-}
+};

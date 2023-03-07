@@ -3,7 +3,6 @@ import {closePanel} from "./closePanel";
 import {openMobileFileById} from "../editor";
 import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
-import {mountHelp} from "../../util/mount";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";

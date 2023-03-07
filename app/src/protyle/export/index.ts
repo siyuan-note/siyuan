@@ -468,7 +468,7 @@ const renderPDF = (id: string) => {
             nodeIntegration: true,
             webviewTag: true,
             webSecurity: false,
-            autoplayPolicy: 'user-gesture-required' // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
+            autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
         },
     });
     ipcRenderer.send(Constants.SIYUAN_EXPORT_PREVENT, window.siyuan.printWin.id);

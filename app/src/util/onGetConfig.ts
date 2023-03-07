@@ -12,7 +12,6 @@ import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
 import {globalShortcut} from "./globalShortcut";
 import {fetchPost} from "./fetch";
-import {mountHelp} from "./mount";
 import {addGA, initAssets, setInlineStyle} from "./assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFileById} from "../editor/util";

@@ -250,7 +250,7 @@ export const initKeyboardToolbar = () => {
             preventRender = true;
             setTimeout(() => {
                 preventRender = false;
-            }, 1000)
+            }, 1000);
             return;
         } else if (type === "goinline") {
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");

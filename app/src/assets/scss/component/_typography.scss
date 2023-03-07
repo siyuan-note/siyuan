@@ -594,7 +594,7 @@
     word-break: break-all;
     position: relative;
 
-    &--done > div:not([data-subtype="t"]) {
+    &--done > div[data-node-id].p {
       color: var(--b3-theme-on-surface-light);
       text-decoration: line-through;
     }

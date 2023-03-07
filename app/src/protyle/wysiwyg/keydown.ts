@@ -71,6 +71,7 @@ import {getSavePath} from "../../util/newFile";
 import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {quickMakeCard} from "../../card/makeCard";
+import {removeSearchMark} from "../toolbar/util";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
@@ -526,6 +527,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null);
                 if (inlineElement) {
                     const types = inlineElement.getAttribute("data-type").split(" ");
+                    if (types.length > 0) {
+                        protyle.toolbar.range = range;
+                        removeSearchMark(inlineElement);
+                    }
                     if (types.includes("block-ref")) {
                         refMenu(protyle, inlineElement);
                         return;

@@ -1614,5 +1614,3 @@ export class Toolbar {
         });
     }
 }
-
-

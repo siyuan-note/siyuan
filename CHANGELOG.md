@@ -1,3 +1,54 @@
+## v2.7.8 / 2023-03-07
+
+### 改进功能
+
+* [移动端编辑器悬浮工具栏移到底部](https://github.com/siyuan-note/siyuan/issues/7518)
+* [移动端键盘工具栏上添加块标菜单功能](https://github.com/siyuan-note/siyuan/issues/7519)
+* [隐藏 iPhone 键盘顶部工具栏](https://github.com/siyuan-note/siyuan/issues/7532)
+* [编辑引擎添加属性视图节点](https://github.com/siyuan-note/siyuan/issues/7535)
+* [全屏后需更新块标位置](https://github.com/siyuan-note/siyuan/issues/7537)
+* [优化动态加载没有标题时的大纲高亮](https://github.com/siyuan-note/siyuan/issues/7538)
+* [选中多行时浮动工具栏不遮挡第一行](https://github.com/siyuan-note/siyuan/issues/7541)
+* [云端收集箱剪藏超时调整为 30s](https://github.com/siyuan-note/siyuan/issues/7544)
+* [持久化属性视图](https://github.com/siyuan-note/siyuan/issues/7545)
+* [移动端根据不同的输入场景对输入工具栏进行切换](https://github.com/siyuan-note/siyuan/issues/7553)
+* [移动端根据当前块的类型调整输入工具栏中对应的操作按钮](https://github.com/siyuan-note/siyuan/issues/7554)
+* [支持编辑/只读模式在浏览器和桌面应用中保持一致](https://github.com/siyuan-note/siyuan/issues/7555)
+* [桌面端接入 OpenAI Chat API ](https://github.com/siyuan-note/siyuan/issues/7560)
+* [粘贴图片后图片宽度会被挤压](https://github.com/siyuan-note/siyuan/issues/7561)
+* [移动端斜杠菜单移到底部](https://github.com/siyuan-note/siyuan/issues/7564)
+* [改进判断工作空间路径实现](https://github.com/siyuan-note/siyuan/issues/7569)
+* [合并超级块时自动刷新包含的嵌入块](https://github.com/siyuan-note/siyuan/issues/7574)
+* [移动端数据同步提示改进](https://github.com/siyuan-note/siyuan/issues/7576)
+* [移动端数据历史图标和桌面端保持一致](https://github.com/siyuan-note/siyuan/issues/7577)
+* [移动端键盘工具栏上添加面包屑更多菜单功能](https://github.com/siyuan-note/siyuan/issues/7578)
+* [搜索结果被高亮分割的同一行内元素应进行合并](https://github.com/siyuan-note/siyuan/issues/7585)
+* [搜索结果内输入字符不应进行分割](https://github.com/siyuan-note/siyuan/issues/7586)
+* [桌面端禁止自动播放多媒体](https://github.com/siyuan-note/siyuan/issues/7587)
+* [低于 Windows 10 安装时弹出警告](https://github.com/siyuan-note/siyuan/issues/7589)
+* [只读模式下支持刷新和全屏快捷键操作](https://github.com/siyuan-note/siyuan/issues/7590)
+
+### 开发重构
+
+* [使用 esbuid-loader 提高前端代码的编译速度](https://github.com/siyuan-note/siyuan/pull/7525)
+
+### 修复缺陷
+
+* [导入 Markdown 文件夹后无法在其中继续导入](https://github.com/siyuan-note/siyuan/issues/7512)
+* [更新版本后自动打开最新版的用户指南重复](https://github.com/siyuan-note/siyuan/issues/7517)
+* [关闭所有页签后点击后退无法重新打开页签](https://github.com/siyuan-note/siyuan/issues/7524)
+* [正则表达式搜索失效](https://github.com/siyuan-note/siyuan/issues/7529)
+* [无法在表格中的引用前后加入空格](https://github.com/siyuan-note/siyuan/issues/7539)
+* [表格中有图片时插入图片链接定位错误](https://github.com/siyuan-note/siyuan/issues/7540)
+* [关系图日记过滤失效](https://github.com/siyuan-note/siyuan/issues/7547)
+* [行级代码选中 `Ctrl+G` 取消后前方出现空代码元素](https://github.com/siyuan-note/siyuan/issues/7548)
+* [PDF 导出预览点击资源文件链接白屏](https://github.com/siyuan-note/siyuan/issues/7549)
+* [关闭页签再点击后退缩放状态错误](https://github.com/siyuan-note/siyuan/issues/7550)
+* [有图片的表格拖拽后列宽异常](https://github.com/siyuan-note/siyuan/issues/7556)
+* [移动端基于文档的间隔重复被文档树遮挡](https://github.com/siyuan-note/siyuan/issues/7562)
+* [超级块内递归嵌入的嵌入块不应该显示面包屑](https://github.com/siyuan-note/siyuan/issues/7575)
+* [搜索结果被高亮隔断后加粗导致内容丢失](https://github.com/siyuan-note/siyuan/issues/7588)
+
 ## v2.7.7 / 2023-02-28
 
 ### 改进功能

@@ -596,7 +596,9 @@ export class WYSIWYG {
                     if (!startFirstElement) {
                         startFirstElement = firstElement;
                     }
-                } else if (!firstBlockElement) {
+                } else if (!firstBlockElement &&
+                    // https://github.com/siyuan-note/siyuan/issues/7580
+                    moveEvent.clientY < protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
                     firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
                 }
                 let selectElements: Element[] = [];

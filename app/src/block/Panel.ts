@@ -254,7 +254,7 @@ export class BlockPanel {
                 showMessage(response.msg);
                 return;
             }
-            if (this.targetElement) {
+            if (!this.targetElement) {
                 return;
             }
             const action = [];
@@ -313,7 +313,7 @@ export class BlockPanel {
     }
 
     private render() {
-        if (!this.element.parentElement.parentElement) {
+        if (!document.body.contains(this.element)) {
             this.destroy();
             return;
         }

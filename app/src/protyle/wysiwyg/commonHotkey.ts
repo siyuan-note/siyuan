@@ -36,20 +36,6 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
-        reloadProtyle(protyle);
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.fullscreen.custom, event)) {
-        fullscreen(protyle.element);
-        setPadding(protyle);
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
         netImg2LocalAssets(protyle);
         event.preventDefault();

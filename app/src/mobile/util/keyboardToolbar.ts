@@ -43,13 +43,22 @@ const renderKeyboardToolbar = () => {
 
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = getSelection().getRangeAt(0);
-        const selectText = range.toString();
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
-        const protyle = window.siyuan.mobile.editor.protyle;
-        if (selectText || !isProtyle) {
+        if (!isProtyle) {
             dynamicElements[0].classList.add("fn__none");
-        } else {
+            dynamicElements[1].classList.add("fn__none");
+            return;
+        }
+
+        const selectText = range.toString();
+        if (!selectText && dynamicElements[0].classList.contains("fn__none") && dynamicElements[1].classList.contains("fn__none")) {
             dynamicElements[0].classList.remove("fn__none");
+        } else if (selectText) {
+            dynamicElements[0].classList.add("fn__none");
+            dynamicElements[1].classList.remove("fn__none");
+        }
+        const protyle = window.siyuan.mobile.editor.protyle;
+        if (!dynamicElements[0].classList.contains("fn__none")) {
             if (protyle.undo.undoStack.length === 0) {
                 dynamicElements[0].querySelector('[data-type="undo"]').setAttribute("disabled", "disabled");
             } else {
@@ -74,7 +83,7 @@ const renderKeyboardToolbar = () => {
                 }
             }
         }
-        if (selectText && isProtyle) {
+        if (!dynamicElements[1].classList.contains("fn__none")) {
             dynamicElements[1].querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
                 item.classList.remove("protyle-toolbar__item--current");
             });
@@ -89,9 +98,6 @@ const renderKeyboardToolbar = () => {
                     itemElement.classList.add("protyle-toolbar__item--current");
                 }
             });
-            dynamicElements[1].classList.remove("fn__none");
-        } else {
-            dynamicElements[1].classList.add("fn__none");
         }
     }, 620); // 需等待 range 更新
 };
@@ -251,10 +257,6 @@ export const initKeyboardToolbar = () => {
             dynamicElements[1].classList.remove("fn__none");
             dynamicElements[0].classList.add("fn__none");
             focusByRange(range);
-            preventRender = true;
-            setTimeout(() => {
-                preventRender = false;
-            }, 1000)
             return;
         } else if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
             protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));

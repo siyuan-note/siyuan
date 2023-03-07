@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -39,6 +38,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"

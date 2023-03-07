@@ -139,6 +139,7 @@ export class WYSIWYG {
         if (// 表格行内公式之前无法插入文字 https://github.com/siyuan-note/siyuan/issues/3908
             inlineElement.tagName === "SPAN" &&
             inlineElement.textContent !== inputData &&
+            !currentTypes.includes("search-mark") &&    // https://github.com/siyuan-note/siyuan/issues/7586
             range.toString() === "" && range.startContainer.nodeType === 3 &&
             (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
             !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&

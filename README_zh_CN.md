@@ -262,6 +262,16 @@
 
 ## 🙏 鸣谢
 
+### 贡献者列表
+
+欢迎加入我们，一起为思源贡献代码。
+
+<a href="https://github.com/siyuan-note/siyuan/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=siyuan-note/siyuan" />
+</a>
+
+### 开源项目依赖列表
+
 思源的诞生离不开下列开源项目。
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`

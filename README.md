@@ -251,6 +251,16 @@ Currently, only users in mainland China are supported to subscribe, and users wh
 
 ## 🙏 Acknowledgement
 
+### Contributors
+
+Welcome to join us and contribute code to SiYuan together.
+
+<a href="https://github.com/siyuan-note/siyuan/graphs/contributors">
+   <img src="https://contrib.rocks/image?repo=siyuan-note/siyuan" />
+</a>
+
+### Open source project dependencies
+
 SiYuan is made possible by the following open source projects.
 
 * [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`

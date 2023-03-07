@@ -103,6 +103,7 @@ export const globalShortcut = () => {
             window.siyuan.hideBreadcrumb = false;
         }
         if (event.buttons === 0 &&  // 鼠标按键被按下时不触发
+            window.siyuan.layout.bottomDock &&
             !isWindow() && !hasClosestByClassName(event.target, "b3-dialog") && !hasClosestByClassName(event.target, "b3-menu")) {
             if (event.clientX < 43) {
                 if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0 &&

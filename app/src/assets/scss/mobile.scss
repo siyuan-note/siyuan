@@ -60,6 +60,7 @@
 .toolbar {
   display: flex;
   align-items: center;
+  max-width: 100vw;
   background: var(--b3-theme-background);
 
   &--border {

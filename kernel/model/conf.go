@@ -783,6 +783,8 @@ func clearWorkspaceTemp() {
 }
 
 func upgradeUserGuide() {
+	defer logging.Recover()
+
 	dirs, err := os.ReadDir(util.DataDir)
 	if nil != err {
 		logging.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)

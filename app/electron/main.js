@@ -192,6 +192,7 @@ const boot = () => {
             webviewTag: true,
             webSecurity: false,
             contextIsolation: false,
+            autoplayPolicy: 'user-gesture-required' // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
         },
         frame: "darwin" === process.platform,
         titleBarStyle: "hidden",
@@ -751,6 +752,7 @@ app.whenReady().then(() => {
                 nodeIntegration: true,
                 webviewTag: true,
                 webSecurity: false,
+                autoplayPolicy: 'user-gesture-required' // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
             },
         });
         win.loadURL(data.url);

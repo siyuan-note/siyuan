@@ -586,8 +586,9 @@ export class Toolbar {
                 if (currentType.indexOf("inline-math") > -1) {
                     // 数学公式合并 data-content https://github.com/siyuan-note/siyuan/issues/6028
                     nextNewNode.setAttribute("data-content", currentNewNode.getAttribute("data-content") + nextNewNode.getAttribute("data-content"));
-                } else if (currentType.indexOf("block-ref") === -1) {
-                    // 引用不需合并内容 https://ld246.com/article/1664454663564
+                } else {
+                    // 测试不存在 https://ld246.com/article/1664454663564 情况，故移除引用合并限制
+                    // 搜索结果引用被高亮隔断需进行合并 https://github.com/siyuan-note/siyuan/issues/7588
                     nextNewNode.innerHTML = currentNewNode.innerHTML + nextNewNode.innerHTML;
                     // 如果为备注时，合并备注内容
                     if (currentType.indexOf("inline-memo") > -1) {

@@ -36,11 +36,13 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         filter: ["嵌入块", "qianrukuai", "qrk", "embed block"],
         value: "{{",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSQL"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.blockEmbed}</span><span class="b3-list-item__meta">{{</span></div>`,
-    }, {
-        filter: ["ai chat"],
-        value: Constants.ZWSP + 5,
-        html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
-    },{
+    },
+    //     {
+    //     filter: ["ai chat"],
+    //     value: Constants.ZWSP + 5,
+    //     html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
+    // },
+    {
         filter: ["属性试图", "shuxingshitu", "sxst", "attribute view"],
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.attributeView}</span></div>`,

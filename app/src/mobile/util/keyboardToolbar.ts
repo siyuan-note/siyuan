@@ -3,7 +3,6 @@ import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../.
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
-import {removeBlock} from "../../protyle/wysiwyg/remove";
 import {hintSlash} from "../../protyle/hint/extend";
 
 let renderKeyboardToolbarTimeout: number;
@@ -166,7 +165,6 @@ export const initKeyboardToolbar = () => {
             <span class="keyboard__split"></span>
             <button class="keyboard__action" data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
             <button class="keyboard__action" data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
-            <button class="keyboard__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
             <span class="keyboard__split"></span>
             <button class="keyboard__action" data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
             <button class="keyboard__action" data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
@@ -271,10 +269,6 @@ export const initKeyboardToolbar = () => {
         } else if (type === "movedown") {
             moveToDown(protyle, nodeElement, range);
             focusByRange(range);
-            return;
-        } else if (type === "remove") {
-            nodeElement.classList.add("protyle-wysiwyg--select");
-            removeBlock(protyle, nodeElement, range);
             return;
         } else if (type === "add") {
             renderSlashMenu(protyle, toolbarElement);

@@ -5,16 +5,16 @@
 	"Properties": {
 		"id": "20230304000829-9jwu3po",
 		"title": "人工智能",
-		"updated": "20230305102546"
+		"updated": "20230308213648"
 	},
 	"Children": [
 		{
-			"ID": "20230304000837-o6ep7ny",
+			"ID": "20230308213628-wj4dxxx",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230304000837-o6ep7ny",
-				"updated": "20230304000837"
+				"id": "20230308213628-wj4dxxx",
+				"updated": "20230308213628"
 			},
 			"Children": [
 				{
@@ -24,11 +24,11 @@
 			]
 		},
 		{
-			"ID": "20230304000837-c7i5f98",
+			"ID": "20230308213628-td1ykoz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230304000837-c7i5f98",
-				"updated": "20230304000837"
+				"id": "20230308213628-td1ykoz",
+				"updated": "20230308213628"
 			},
 			"Children": [
 				{
@@ -48,12 +48,12 @@
 			]
 		},
 		{
-			"ID": "20230304000837-0amynjf",
+			"ID": "20230308213628-jlzf0ki",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230304000837-0amynjf",
-				"updated": "20230304000837"
+				"id": "20230308213628-jlzf0ki",
+				"updated": "20230308213628"
 			},
 			"Children": [
 				{
@@ -63,18 +63,18 @@
 			]
 		},
 		{
-			"ID": "20230304000837-t0swnf6",
+			"ID": "20230308213628-fkt9ihv",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20230304000837-t0swnf6",
-				"updated": "20230305102546"
+				"id": "20230308213628-fkt9ihv",
+				"updated": "20230308213648"
 			},
 			"Children": [
 				{
-					"ID": "20230304000837-udv9xqz",
+					"ID": "20230308213628-s9q9diq",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -83,16 +83,16 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20230304000837-udv9xqz",
-						"updated": "20230304000837"
+						"id": "20230308213628-s9q9diq",
+						"updated": "20230308213628"
 					},
 					"Children": [
 						{
-							"ID": "20230304000837-8mb86a9",
+							"ID": "20230308213628-q59kzpm",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230304000837-8mb86a9",
-								"updated": "20230304000837"
+								"id": "20230308213628-q59kzpm",
+								"updated": "20230308213628"
 							},
 							"Children": [
 								{
@@ -104,7 +104,7 @@
 					]
 				},
 				{
-					"ID": "20230304000837-ktv65zx",
+					"ID": "20230308213628-2bnvc4r",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -113,16 +113,16 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20230304000837-ktv65zx",
-						"updated": "20230305102546"
+						"id": "20230308213628-2bnvc4r",
+						"updated": "20230308213628"
 					},
 					"Children": [
 						{
-							"ID": "20230304000837-rvncpuv",
+							"ID": "20230308213628-m4d5rpm",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230304000837-rvncpuv",
-								"updated": "20230304000837"
+								"id": "20230308213628-m4d5rpm",
+								"updated": "20230308213628"
 							},
 							"Children": [
 								{
@@ -132,32 +132,32 @@
 							]
 						},
 						{
-							"ID": "20230304000837-8z180b1",
+							"ID": "20230308213628-qpozqny",
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20230304000837-8z180b1",
-								"updated": "20230305102546"
+								"id": "20230308213628-qpozqny",
+								"updated": "20230308213628"
 							},
 							"Children": [
 								{
-									"ID": "20230304000837-zwu0am4",
+									"ID": "20230308213628-2vi7j3h",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20230304000837-zwu0am4",
-										"updated": "20230304000837"
+										"id": "20230308213628-2vi7j3h",
+										"updated": "20230308213628"
 									},
 									"Children": [
 										{
-											"ID": "20230304000837-mx4nbyd",
+											"ID": "20230308213628-tmkbk2e",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20230304000837-mx4nbyd",
-												"updated": "20230304000837"
+												"id": "20230308213628-tmkbk2e",
+												"updated": "20230308213628"
 											},
 											"Children": [
 												{
@@ -178,23 +178,23 @@
 									]
 								},
 								{
-									"ID": "20230304000837-71slt0q",
+									"ID": "20230308213628-1desi9f",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20230304000837-71slt0q",
-										"updated": "20230305102546"
+										"id": "20230308213628-1desi9f",
+										"updated": "20230308213628"
 									},
 									"Children": [
 										{
-											"ID": "20230304000837-t2um8y2",
+											"ID": "20230308213628-sk97619",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20230304000837-t2um8y2",
-												"updated": "20230305102546"
+												"id": "20230308213628-sk97619",
+												"updated": "20230308213628"
 											},
 											"Children": [
 												{
@@ -215,23 +215,23 @@
 									]
 								},
 								{
-									"ID": "20230304000837-tk4s9l8",
+									"ID": "20230308213628-4jq7xca",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20230304000837-tk4s9l8",
-										"updated": "20230304000837"
+										"id": "20230308213628-4jq7xca",
+										"updated": "20230308213628"
 									},
 									"Children": [
 										{
-											"ID": "20230304000837-bvv20rq",
+											"ID": "20230308213628-k0f3rx6",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20230304000837-bvv20rq",
-												"updated": "20230304000837"
+												"id": "20230308213628-k0f3rx6",
+												"updated": "20230308213628"
 											},
 											"Children": [
 												{
@@ -252,23 +252,23 @@
 									]
 								},
 								{
-									"ID": "20230304000837-sd6h4qn",
+									"ID": "20230308213628-hn7rn67",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20230304000837-sd6h4qn",
-										"updated": "20230304171553"
+										"id": "20230308213628-hn7rn67",
+										"updated": "20230308213628"
 									},
 									"Children": [
 										{
-											"ID": "20230304000837-y8kj8ki",
+											"ID": "20230308213628-iqb8u0o",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20230304000837-y8kj8ki",
-												"updated": "20230304171553"
+												"id": "20230308213628-iqb8u0o",
+												"updated": "20230308213628"
 											},
 											"Children": [
 												{
@@ -282,7 +282,53 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​​ 指定 tokens 數量，默認為 0，即使用模型默認值（可選）"
+													"Data": "​ 指定 tokens 數量，默認為 0，即使用模型默認值（可選）"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230308213628-lt8tt00",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230308213628-lt8tt00",
+										"updated": "20230308213628"
+									},
+									"Children": [
+										{
+											"ID": "20230308213628-knxr1iu",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230308213628-knxr1iu",
+												"updated": "20230308213628"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "SIYUAN_OPENAI_API_BASE_URL"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 指定 API 服務端基礎地址，默認為 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "https://api.openai.com/v1"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​（可選）"
 												}
 											]
 										}
@@ -293,7 +339,7 @@
 					]
 				},
 				{
-					"ID": "20230304000837-8aacttx",
+					"ID": "20230308213628-x6hemjt",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -302,16 +348,16 @@
 						"Num": 3
 					},
 					"Properties": {
-						"id": "20230304000837-8aacttx",
-						"updated": "20230304000837"
+						"id": "20230308213628-x6hemjt",
+						"updated": "20230308213642"
 					},
 					"Children": [
 						{
-							"ID": "20230304000837-xsmvy3a",
+							"ID": "20230308213628-hqonun0",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230304000837-xsmvy3a",
-								"updated": "20230304000837"
+								"id": "20230308213628-hqonun0",
+								"updated": "20230308213642"
 							},
 							"Children": [
 								{
@@ -320,7 +366,7 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "/AI Chat"
 								},
 								{
@@ -330,22 +376,57 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20230308213628-yjr823g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230308213628-yjr823g",
+						"updated": "20230308213648"
+					},
+					"Children": [
+						{
+							"ID": "20230308213628-14mj10g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213628-14mj10g",
+								"updated": "20230308213648"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "也可以通過塊標菜單 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "人工智能"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 進行更多操作"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20230304000837-507o2cp",
+			"ID": "20230308213628-72djdf5",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230304000837-507o2cp",
-				"updated": "20230304000912"
+				"id": "20230308213628-72djdf5",
+				"updated": "20230308213628"
 			},
 			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -358,65 +439,65 @@
 			]
 		},
 		{
-			"ID": "20230304000837-16zrrs8",
+			"ID": "20230308213628-wrvk8y7",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20230304000837-16zrrs8",
-				"updated": "20230304000837"
+				"id": "20230308213628-wrvk8y7",
+				"updated": "20230308213628"
 			},
 			"Children": [
 				{
-					"ID": "20230304000837-2pmo4r2",
+					"ID": "20230308213628-1vdivab",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230304000837-2pmo4r2",
-						"updated": "20230304000837"
+						"id": "20230308213628-1vdivab",
+						"updated": "20230308213628"
 					},
 					"Children": [
 						{
-							"ID": "20230304000837-olsbuqw",
+							"ID": "20230308213628-7s4csia",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230304000837-olsbuqw",
-								"updated": "20230304000837"
+								"id": "20230308213628-7s4csia",
+								"updated": "20230308213628"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通過該功能對話框輸入的文本會發送至 OpenAI"
+									"Data": "該功能會將相關文本發送至 OpenAI"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230304000837-ma9tqg8",
+					"ID": "20230308213628-1y4ugxr",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230304000837-ma9tqg8",
-						"updated": "20230304000837"
+						"id": "20230308213628-1y4ugxr",
+						"updated": "20230308213628"
 					},
 					"Children": [
 						{
-							"ID": "20230304000837-1n86ajy",
+							"ID": "20230308213628-mjreimk",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230304000837-1n86ajy",
-								"updated": "20230304000837"
+								"id": "20230308213628-mjreimk",
+								"updated": "20230308213628"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "使用該功能調用 OpenAI API 會產生一定費用"
+									"Data": "調用 OpenAI API 會產生一定費用"
 								}
 							]
 						}

@@ -969,9 +969,9 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
                     assetElement.style.width = "";
                     assetElement.style.maxWidth = "";
                 } else {
-                    assetElement.removeAttribute("style")
+                    assetElement.removeAttribute("style");
                 }
-                imgElement.removeAttribute("style")
+                imgElement.removeAttribute("style");
             } else {
                 assetElement.style.width = label;
                 assetElement.style.maxWidth = "";

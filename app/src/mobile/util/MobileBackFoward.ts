@@ -111,7 +111,7 @@ export const goForward = () => {
 export const goBack = () => {
     if (window.JSAndroid) {
         if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") && !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
-            window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}))
+            window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
             return;
         } else if (window.siyuan.backStack.length < 1) {
             window.JSAndroid.returnDesktop();

@@ -36,4 +36,4 @@ export const AIChat = (protyle:IProtyle) => {
             insertHTML(`${inputElement.value}${respContent}`, protyle, true);
         });
     });
-}
+};

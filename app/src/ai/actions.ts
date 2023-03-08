@@ -6,10 +6,10 @@ import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 
 export const AIActions = (elements: Element[], protyle: IProtyle) => {
-    const ids: string[] = []
+    const ids: string[] = [];
     elements.forEach(item => {
-        ids.push(item.getAttribute("data-node-id"))
-    })
+        ids.push(item.getAttribute("data-node-id"));
+    });
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconSparkles",
         label: window.siyuan.languages.ai,
@@ -136,4 +136,4 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             }
         }]
     }).element);
-}
+};

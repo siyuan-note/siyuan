@@ -4,7 +4,7 @@ import {Model} from "./Model";
 import {Editor} from "../editor";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
-import {escapeHtml} from "../util/escape";
+import {escapeGreat, escapeHtml} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {showTooltip} from "../dialog/tooltip";
@@ -63,9 +63,9 @@ export class Tab {
                         id
                     }, (response) => {
                         if (!this.headElement.getAttribute("aria-label")) {
-                            showTooltip(escapeHtml(response.data), this.headElement);
+                            showTooltip(escapeGreat(response.data), this.headElement);
                         }
-                        this.headElement.setAttribute("aria-label", escapeHtml(response.data));
+                        this.headElement.setAttribute("aria-label", escapeGreat(response.data));
                     });
                 }
             });
@@ -79,7 +79,7 @@ export class Tab {
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     event.dataTransfer.setData("text/html", tabElement.outerHTML);
-                    const modeJSON = {id:this.id};
+                    const modeJSON = {id: this.id};
                     layoutToJSON(this, modeJSON);
                     event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, JSON.stringify(modeJSON));
                     event.dataTransfer.dropEffect = "move";

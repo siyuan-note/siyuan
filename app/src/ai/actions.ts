@@ -2,6 +2,8 @@ import {MenuItem} from "../menus/Menu";
 import {fetchPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selection";
 import {insertHTML} from "../protyle/util/insertHTML";
+import {Dialog} from "../dialog";
+import {isMobile} from "../util/functions";
 
 export const AIActions = (elements: Element[], protyle: IProtyle) => {
     const ids: string[] = []
@@ -9,7 +11,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         ids.push(item.getAttribute("data-node-id"))
     })
     window.siyuan.menus.menu.append(new MenuItem({
-        icon: "iconRefresh",
+        icon: "iconSparkles",
         label: window.siyuan.languages.ai,
         type: "submenu",
         submenu: [{
@@ -80,6 +82,58 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                     });
                 }
             }]
+        }, {
+            label: window.siyuan.languages.aiExtractSummary,
+            click() {
+                fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Summarize"}, (response) => {
+                    focusByRange(protyle.toolbar.range);
+                    insertHTML(response.data, protyle, true);
+                });
+            }
+        }, {
+            label: window.siyuan.languages.aiBrainStorm,
+            click() {
+                fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Brainstorm"}, (response) => {
+                    focusByRange(protyle.toolbar.range);
+                    insertHTML(response.data, protyle, true);
+                });
+            }
+        }, {
+            label: window.siyuan.languages.aiCustomAction,
+            click() {
+                const dialog = new Dialog({
+                    title: window.siyuan.languages.aiCustomAction,
+                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                    width: isMobile() ? "80vw" : "520px",
+                });
+                const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+                const btnsElement = dialog.element.querySelectorAll(".b3-button");
+                dialog.bindInput(inputElement, () => {
+                    (btnsElement[1] as HTMLButtonElement).click();
+                });
+                inputElement.focus();
+                btnsElement[0].addEventListener("click", () => {
+                    dialog.destroy();
+                });
+                btnsElement[1].addEventListener("click", () => {
+                    fetchPost("/api/ai/chatGPTWithAction", {
+                        ids,
+                        action: inputElement.value,
+                    }, (response) => {
+                        dialog.destroy();
+                        focusByRange(protyle.toolbar.range);
+                        let respContent = "";
+                        if (response.data && "" !== response.data) {
+                            respContent = "\n\n" + response.data;
+                        }
+                        insertHTML(`${inputElement.value}${respContent}`, protyle, true);
+                    });
+                });
+            }
         }]
     }).element);
 }

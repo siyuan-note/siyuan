@@ -398,10 +398,16 @@
   }
 
   .img {
-    display: initial; // inline-block 会导致 https://ld246.com/article/1677809509055
+    // inline-block 会导致 https://ld246.com/article/1677809509055
+    // initial 会导致 https://ld246.com/article/1678257197581?r=88250
+    display: inline-block;
     text-align: center;
     vertical-align: top; // https://ld246.com/article/1647522074722
     margin: 0 auto;
+
+    &:not([style]) {
+      display: initial;
+    }
 
     & > span:nth-child(2) {
       max-width: calc(100% - 10px);

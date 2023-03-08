@@ -964,9 +964,19 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
         label,
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            assetElement.style.width = label === window.siyuan.languages.default ? "" : label;
-            imgElement.style.width = label === window.siyuan.languages.default ? "" : "10000px";
-            assetElement.style.maxWidth = label === window.siyuan.languages.default ? (imgElement.clientWidth + 10) + "px" : "";
+            if (label === window.siyuan.languages.default) {
+                if (assetElement.style.display === "block") {
+                    assetElement.style.width = "";
+                    assetElement.style.maxWidth = "";
+                } else {
+                    assetElement.removeAttribute("style")
+                }
+                imgElement.removeAttribute("style")
+            } else {
+                assetElement.style.width = label;
+                assetElement.style.maxWidth = "";
+                imgElement.style.width = "10000px";
+            }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
             focusBlock(nodeElement);
         }

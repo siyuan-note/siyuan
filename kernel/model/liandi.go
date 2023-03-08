@@ -36,6 +36,66 @@ import (
 
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
+func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool) {
+	if nil == Conf.User {
+		return
+	}
+
+	payload := map[string]interface{}{}
+	var messages []map[string]interface{}
+	for _, contextMsg := range contextMsgs {
+		messages = append(messages, map[string]interface{}{
+			"role":    "user",
+			"content": contextMsg,
+		})
+	}
+	messages = append(messages, map[string]interface{}{
+		"role":    "user",
+		"content": msg,
+	})
+	payload["messages"] = messages
+
+	requestResult := gulu.Ret.NewResult()
+	request := httpclient.NewCloudRequest30s()
+	_, err := request.
+		SetSuccessResult(requestResult).
+		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
+		SetBody(payload).
+		Post(util.AliyunServer + "/apis/siyuan/ai/chatGPT")
+	if nil != err {
+		logging.LogErrorf("chat gpt failed: %s", err)
+		err = ErrFailedToConnectCloudServer
+		return
+	}
+	if 0 != requestResult.Code {
+		err = errors.New(requestResult.Msg)
+		stop = true
+		return
+	}
+
+	data := requestResult.Data.(map[string]interface{})
+	choices := data["choices"].([]interface{})
+	if 1 > len(choices) {
+		stop = true
+		return
+	}
+	choice := choices[0].(map[string]interface{})
+	message := choice["message"].(map[string]interface{})
+	ret = message["content"].(string)
+
+	if nil != choice["finish_reason"] {
+		finishReason := choice["finish_reason"].(string)
+		if "length" == finishReason {
+			stop = false
+		} else {
+			stop = true
+		}
+	} else {
+		stop = true
+	}
+	return
+}
+
 func StartFreeTrial() (err error) {
 	if nil == Conf.User {
 		return errors.New(Conf.Language(31))

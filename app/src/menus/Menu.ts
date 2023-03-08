@@ -16,7 +16,7 @@ export class Menu {
             const target = event.target as Element;
             if (isMobile()) {
                 const titleElement = hasClosestByClassName(target, "b3-menu__title");
-                if (titleElement) {
+                if (titleElement || (typeof event.detail === "string" && event.detail === "back")) {
                     const lastShowElements = this.element.querySelectorAll(".b3-menu__item--show");
                     if (lastShowElements.length > 0) {
                         lastShowElements[lastShowElements.length - 1].classList.remove("b3-menu__item--show");

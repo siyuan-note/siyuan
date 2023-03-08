@@ -1,9 +1,14 @@
 import {MenuItem} from "../menus/Menu";
 import {fetchPost} from "../util/fetch";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange, setLastNodeRange} from "../protyle/util/selection";
 import {insertHTML} from "../protyle/util/insertHTML";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
+
+export const fillContent = (protyle:IProtyle, data:string, elements:Element[]) => {
+    setLastNodeRange(elements[elements.length - 1], protyle.toolbar.range);
+    insertHTML(data, protyle, true, true);
+}
 
 export const AIActions = (elements: Element[], protyle: IProtyle) => {
     const ids: string[] = [];
@@ -18,8 +23,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             label: window.siyuan.languages.aiContinueWrite,
             click() {
                 fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Continue writing"}, (response) => {
-                    focusByRange(protyle.toolbar.range);
-                    insertHTML(response.data, protyle, true);
+                    fillContent(protyle, response.data, elements);
                 });
             }
         }, {
@@ -29,8 +33,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 label: window.siyuan.languages.aiTranslate_zh_CN,
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Translate as follows to [zh_CN]"}, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }, {
@@ -45,40 +48,35 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 label: window.siyuan.languages.aiTranslate_ko_KR,
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Translate as follows to [ko_KR]"}, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }, {
                 label: window.siyuan.languages.aiTranslate_en_US,
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Translate as follows to [en_US]"}, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }, {
                 label: window.siyuan.languages.aiTranslate_es_ES,
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Translate as follows to [es_ES]"}, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }, {
                 label: window.siyuan.languages.aiTranslate_fr_FR,
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Translate as follows to [fr_FR]"}, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }, {
                 label: window.siyuan.languages.aiTranslate_de_DE,
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Translate as follows to [de_DE]"}, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }]
@@ -86,24 +84,21 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             label: window.siyuan.languages.aiExtractSummary,
             click() {
                 fetchPost("/api/ai/chatGPTWithAction", {ids, action: window.siyuan.languages.aiExtractSummary}, (response) => {
-                    focusByRange(protyle.toolbar.range);
-                    insertHTML(response.data, protyle, true);
+                    fillContent(protyle, response.data, elements);
                 });
             }
         }, {
             label: window.siyuan.languages.aiBrainStorm,
             click() {
                 fetchPost("/api/ai/chatGPTWithAction", {ids, action: window.siyuan.languages.aiBrainStorm}, (response) => {
-                    focusByRange(protyle.toolbar.range);
-                    insertHTML(response.data, protyle, true);
+                    fillContent(protyle, response.data, elements);
                 });
             }
         }, {
             label: window.siyuan.languages.aiFixGrammarSpell,
             click() {
                 fetchPost("/api/ai/chatGPTWithAction", {ids, action: window.siyuan.languages.aiFixGrammarSpell}, (response) => {
-                    focusByRange(protyle.toolbar.range);
-                    insertHTML(response.data, protyle, true);
+                    fillContent(protyle, response.data, elements);
                 });
             }
         },{
@@ -133,12 +128,11 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                         action: inputElement.value,
                     }, (response) => {
                         dialog.destroy();
-                        focusByRange(protyle.toolbar.range);
                         let respContent = "";
                         if (response.data && "" !== response.data) {
                             respContent = "\n\n" + response.data;
                         }
-                        insertHTML(`${inputElement.value}${respContent}`, protyle, true);
+                        fillContent(protyle, `${inputElement.value}${respContent}`, elements);
                     });
                 });
             }

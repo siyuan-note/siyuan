@@ -1,10 +1,9 @@
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {focusByRange} from "../protyle/util/selection";
-import {insertHTML} from "../protyle/util/insertHTML";
+import {fillContent} from "./actions";
 
-export const AIChat = (protyle:IProtyle) => {
+export const AIChat = (protyle: IProtyle, element: Element) => {
     const dialog = new Dialog({
         title: "AI Chat",
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
@@ -28,12 +27,11 @@ export const AIChat = (protyle:IProtyle) => {
             msg: inputElement.value,
         }, (response) => {
             dialog.destroy();
-            focusByRange(protyle.toolbar.range);
             let respContent = "";
             if (response.data && "" !== response.data) {
                 respContent = "\n\n" + response.data;
             }
-            insertHTML(`${inputElement.value}${respContent}`, protyle, true);
+            fillContent(protyle, `${inputElement.value}${respContent}`, [element]);
         });
     });
 };

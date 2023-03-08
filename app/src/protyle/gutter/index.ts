@@ -35,6 +35,7 @@ import {hintMoveBlock} from "../hint/extend";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
+import {AIActions} from "../../ai/actions";
 
 export class Gutter {
     public element: HTMLElement;
@@ -433,6 +434,7 @@ export class Gutter {
                 return true;
             }
         });
+        AIActions(selectsElement, protyle);
         if (!isList && !protyle.disabled) {
             const turnIntoSubmenu: IMenu[] = [];
             if (isContinue) {
@@ -732,6 +734,7 @@ export class Gutter {
         hideElements(["select"], protyle);
         nodeElement.classList.add("protyle-wysiwyg--select");
         countBlockWord([id], protyle.block.rootID);
+        AIActions([nodeElement], protyle);
         // "heading1-6", "list", "ordered-list", "check", "quote", "code", "table", "line", "math", "paragraph"
         if (type === "NodeParagraph" && !protyle.disabled) {
             turnIntoSubmenu.push(this.turnsIntoOne({

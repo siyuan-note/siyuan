@@ -74,7 +74,9 @@ export class Menu {
     }
 
     private preventDefault(event: KeyboardEvent) {
-        if (!hasClosestByClassName(event.target as Element, "b3-menu")) {
+        if (!hasClosestByClassName(event.target as Element, "b3-menu") &&
+            // 移动端底部键盘菜单
+            !hasClosestByClassName(event.target as Element, "keyboard__bar")) {
             event.preventDefault();
         }
     }
@@ -118,7 +120,7 @@ export class Menu {
         setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 
-    public fullscreen () {
+    public fullscreen() {
         this.element.classList.add("b3-menu--fullscreen");
         this.element.insertAdjacentHTML("afterbegin", `<div class="b3-menu__title">
 <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>

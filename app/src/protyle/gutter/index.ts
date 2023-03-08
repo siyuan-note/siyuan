@@ -36,6 +36,7 @@ import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
+import {activeBlur} from "../../mobile/util/keyboardToolbar";
 
 export class Gutter {
     public element: HTMLElement;
@@ -700,6 +701,9 @@ export class Gutter {
     public renderMenu(protyle: IProtyle, buttonElement: Element) {
         hideElements(["util", "toolbar", "hint"], protyle);
         window.siyuan.menus.menu.remove();
+        if (isMobile()) {
+            activeBlur();
+        }
         const id = buttonElement.getAttribute("data-node-id");
         const selectsElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
         if (selectsElement.length > 1) {

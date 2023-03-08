@@ -8,11 +8,13 @@ import {Constants} from "../../constants";
 import {highlightRender} from "../markdown/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 
-export const insertHTML = (html: string, protyle: IProtyle, isBlock = false) => {
+export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
+                           // 移动端插入嵌入块时，获取到的 range 为旧值
+                           useProtyleRange = false) => {
     if (html === "") {
         return;
     }
-    const range = getEditorRange(protyle.wysiwyg.element);
+    const range = useProtyleRange ? protyle.toolbar.range : getEditorRange(protyle.wysiwyg.element);
     fixTableRange(range);
     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
         html = protyle.lute.BlockDOM2InlineBlockDOM(html);

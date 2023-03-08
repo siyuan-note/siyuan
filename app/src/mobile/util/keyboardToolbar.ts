@@ -280,11 +280,13 @@ export const initKeyboardToolbar = () => {
                 y: 0
             });
             activeBlur();
+            hideKeyboardToolbar();
             return;
         } else if (type === "block") {
             protyle.gutter.renderMenu(protyle, nodeElement);
             window.siyuan.menus.menu.fullscreen();
             activeBlur();
+            hideKeyboardToolbar();
             return;
         } else if (type === "outdent") {
             listOutdent(protyle, [nodeElement.parentElement], range);

@@ -22,6 +22,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	gogpt "github.com/sashabaranov/go-gpt3"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -47,18 +48,24 @@ func ChatGPTWithAction(ids []string, action string) (ret string) {
 var cachedContextMsg []string
 
 func chatGPT(msg string, cloud bool) (ret string) {
-	ret, retCtxMsgs := chatGPTContinueWrite(msg, cachedContextMsg, cloud)
+	ret, retCtxMsgs, err := chatGPTContinueWrite(msg, cachedContextMsg, cloud)
+	if nil != err {
+		return
+	}
 	cachedContextMsg = append(cachedContextMsg, retCtxMsgs...)
 	return
 }
 
 func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
 	msg = action + ":\n\n" + msg
-	ret, _ = chatGPTContinueWrite(msg, nil, cloud)
+	ret, _, err := chatGPTContinueWrite(msg, nil, cloud)
+	if nil != err {
+		return
+	}
 	return
 }
 
-func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string) {
+func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string, err error) {
 	util.PushEndlessProgress("Requesting...")
 	defer util.ClearPushProgress(100)
 
@@ -66,19 +73,19 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 		contextMsgs = contextMsgs[len(contextMsgs)-7:]
 	}
 
-	c := util.NewOpenAIClient()
+	var gpt GPT
+	if cloud {
+		gpt = &CloudGPT{}
+	} else {
+		gpt = &OpenAIGPT{c: util.NewOpenAIClient()}
+	}
+
 	buf := &bytes.Buffer{}
 	for i := 0; i < 7; i++ {
-		var part string
-		var stop bool
-		if cloud {
-			part, stop = CloudChatGPT(msg, contextMsgs)
-		} else {
-			part, stop = util.ChatGPT(msg, contextMsgs, c)
-		}
+		part, stop, chatErr := gpt.chat(msg, contextMsgs)
 		buf.WriteString(part)
 
-		if stop {
+		if stop || nil != chatErr {
 			break
 		}
 
@@ -137,4 +144,23 @@ func getBlocksContent(ids []string) string {
 		buf.WriteString("\n\n")
 	}
 	return buf.String()
+}
+
+type GPT interface {
+	chat(msg string, contextMsgs []string) (partRet string, stop bool, err error)
+}
+
+type OpenAIGPT struct {
+	c *gogpt.Client
+}
+
+func (gpt *OpenAIGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
+	return util.ChatGPT(msg, contextMsgs, gpt.c)
+}
+
+type CloudGPT struct {
+}
+
+func (gpt *CloudGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
+	return CloudChatGPT(msg, contextMsgs)
 }

@@ -37,7 +37,7 @@ var (
 	OpenAIAPIBaseURL   = "https://api.openai.com/v1"
 )
 
-func ChatGPT(msg string, contextMsgs []string, c *gogpt.Client) (ret string, stop bool) {
+func ChatGPT(msg string, contextMsgs []string, c *gogpt.Client) (ret string, stop bool, err error) {
 	var reqMsgs []gogpt.ChatCompletionMessage
 
 	for _, ctxMsg := range contextMsgs {

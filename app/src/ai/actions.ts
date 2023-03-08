@@ -7,6 +7,7 @@ import {isMobile} from "../util/functions";
 
 export const fillContent = (protyle:IProtyle, data:string, elements:Element[]) => {
     setLastNodeRange(elements[elements.length - 1], protyle.toolbar.range);
+    protyle.toolbar.range.collapse(true);
     insertHTML(data, protyle, true, true);
 }
 

@@ -85,7 +85,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         }, {
             label: window.siyuan.languages.aiExtractSummary,
             click() {
-                fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Summarize"}, (response) => {
+                fetchPost("/api/ai/chatGPTWithAction", {ids, action: window.siyuan.languages.aiExtractSummary}, (response) => {
                     focusByRange(protyle.toolbar.range);
                     insertHTML(response.data, protyle, true);
                 });
@@ -93,7 +93,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         }, {
             label: window.siyuan.languages.aiBrainStorm,
             click() {
-                fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Brainstorm"}, (response) => {
+                fetchPost("/api/ai/chatGPTWithAction", {ids, action: window.siyuan.languages.aiBrainStorm}, (response) => {
                     focusByRange(protyle.toolbar.range);
                     insertHTML(response.data, protyle, true);
                 });
@@ -101,7 +101,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         }, {
             label: window.siyuan.languages.aiFixGrammarSpell,
             click() {
-                fetchPost("/api/ai/chatGPTWithAction", {ids, action: "Identify the language used in the following text and mark it as {x}, correct the grammar and spelling errors, return the result in language {x}"}, (response) => {
+                fetchPost("/api/ai/chatGPTWithAction", {ids, action: window.siyuan.languages.aiFixGrammarSpell}, (response) => {
                     focusByRange(protyle.toolbar.range);
                     insertHTML(response.data, protyle, true);
                 });

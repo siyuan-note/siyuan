@@ -36,7 +36,7 @@ import (
 
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
-func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool) {
+func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err error) {
 	if nil == Conf.User {
 		return
 	}
@@ -57,7 +57,7 @@ func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool) {
 
 	requestResult := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
-	_, err := request.
+	_, err = request.
 		SetSuccessResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		SetBody(payload).

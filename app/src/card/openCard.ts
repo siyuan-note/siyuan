@@ -6,6 +6,7 @@ import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
+import {needSubscribe} from "../util/needSubscribe";
 
 export const openCard = () => {
     const exit = window.siyuan.dialogs.find(item => {
@@ -185,6 +186,12 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 cardID: blocks[index].cardID,
                 rating: parseInt(type)
             }, () => {
+                /// #if MOBILE
+                if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
+                    window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
+                    document.getElementById("toolbarSync").classList.remove("fn__none");
+                }
+                /// #endif
                 index++;
                 editor.protyle.element.classList.add("card__block--hide");
                 if (index > blocks.length - 1) {

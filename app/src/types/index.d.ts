@@ -394,7 +394,7 @@ declare interface IConfig {
         stat: string
         interval: number
         cloudName: string
-        provider: number
+        provider: number    // 0 官方同步， 2 S3， 3 WebDAV
         s3: {
             endpoint: string
             pathStyle: boolean

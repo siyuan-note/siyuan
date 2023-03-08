@@ -205,6 +205,7 @@ export const initKeyboardToolbar = () => {
         const protyle = window.siyuan.mobile.editor.protyle;
         if (slashBtnElement) {
             protyle.hint.fill(decodeURIComponent(slashBtnElement.getAttribute("data-value")), protyle);
+            focusByRange(protyle.toolbar.range);
             event.preventDefault();
             event.stopPropagation();
             return;

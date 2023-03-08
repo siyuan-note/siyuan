@@ -909,7 +909,7 @@
     "task.history.database.index.commit": "Ejecutar la confirmación del índice de la base de datos del historial",
     "task.database.index.embedBlock": "Ejecutar bloque de incrustación de índice de base de datos",
     "task.reload.ui": "IU de recarga de tareas",
-    "task.upgrade.userGuide": "Ejecutar la guía de usuario de actualización",
+    "task.upgrade.userGuide": "Ejecutar la guía de usuario de actualización"
   },
   "_trayMenu": {
     "showWindow": "Mostrar ventana",

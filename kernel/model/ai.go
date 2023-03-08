@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -25,22 +26,69 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ChatGPT(msg string) (ret string) {
+	if !isOpenAIAPIEnabled() {
+		return
+	}
+
+	return chatGPT(msg, false)
+}
+
 func ChatGPTWithAction(ids []string, action string) (ret string) {
 	if !isOpenAIAPIEnabled() {
 		return
 	}
 
 	msg := getBlocksContent(ids)
-	ret = util.ChatGPTWithAction(msg, action)
+	ret = chatGPTWithAction(msg, action, false)
 	return
 }
 
-func ChatGPT(msg string) (ret string) {
-	if !isOpenAIAPIEnabled() {
-		return
+var cachedContextMsg []string
+
+func chatGPT(msg string, cloud bool) (ret string) {
+	ret, retCtxMsgs := chatGPTContinueWrite(msg, cachedContextMsg, cloud)
+	cachedContextMsg = append(cachedContextMsg, retCtxMsgs...)
+	return
+}
+
+func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
+	msg = action + ":\n\n" + msg
+	ret, _ = chatGPTContinueWrite(msg, nil, cloud)
+	return
+}
+
+func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string) {
+	util.PushEndlessProgress("Requesting...")
+	defer util.ClearPushProgress(100)
+
+	if 7 < len(contextMsgs) {
+		contextMsgs = contextMsgs[len(contextMsgs)-7:]
 	}
 
-	return util.ChatGPT(msg)
+	c := util.NewOpenAIClient()
+	buf := &bytes.Buffer{}
+	for i := 0; i < 7; i++ {
+		var part string
+		var stop bool
+		if cloud {
+			part, stop = CloudChatGPT(msg, contextMsgs)
+		} else {
+			part, stop = util.ChatGPT(msg, contextMsgs, c)
+		}
+		buf.WriteString(part)
+
+		if stop {
+			break
+		}
+
+		util.PushEndlessProgress("Continue requesting...")
+	}
+
+	ret = buf.String()
+	ret = strings.TrimSpace(ret)
+	retContextMsgs = append(retContextMsgs, msg, ret)
+	return
 }
 
 func isOpenAIAPIEnabled() bool {

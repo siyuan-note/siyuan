@@ -34,6 +34,7 @@ var (
 	OpenAIAPITimeout   = 30 * time.Second
 	OpenAIAPIProxy     = ""
 	OpenAIAPIMaxTokens = 0
+	OpenAIAPIBaseURL   = "https://api.openai.com/v1"
 )
 
 func ChatGPT(msg string, contextMsgs []string, c *gogpt.Client) (ret string, stop bool) {
@@ -94,6 +95,8 @@ func NewOpenAIClient() *gogpt.Client {
 			config.HTTPClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
 		}
 	}
+
+	config.BaseURL = OpenAIAPIBaseURL
 	return gogpt.NewClientWithConfig(config)
 }
 
@@ -124,5 +127,15 @@ func initOpenAI() {
 		}
 	}
 
-	logging.LogInfof("OpenAI API enabled [maxTokens=%d, timeout=%ds, proxy=%s]", OpenAIAPIMaxTokens, int(OpenAIAPITimeout.Seconds()), OpenAIAPIProxy)
+	baseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
+	if "" != baseURL {
+		OpenAIAPIBaseURL = baseURL
+	}
+
+	logging.LogInfof("OpenAI API enabled\n"+
+		"    baseURL=%s\n"+
+		"    timeout=%ds\n"+
+		"    proxy=%s\n"+
+		"    maxTokens=%d",
+		OpenAIAPIBaseURL, int(OpenAIAPITimeout.Seconds()), OpenAIAPIProxy, OpenAIAPIMaxTokens)
 }

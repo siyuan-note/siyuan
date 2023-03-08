@@ -27,26 +27,20 @@ import (
 )
 
 func ChatGPT(msg string) (ret string) {
-	cloud := IsSubscriber()
-	if !cloud && !isOpenAIAPIEnabled() {
+	if !isOpenAIAPIEnabled() {
 		return
 	}
 
-	cloud = false
-
-	return chatGPT(msg, cloud)
+	return chatGPT(msg, false)
 }
 
 func ChatGPTWithAction(ids []string, action string) (ret string) {
-	cloud := IsSubscriber()
-	if !cloud && !isOpenAIAPIEnabled() {
+	if !isOpenAIAPIEnabled() {
 		return
 	}
 
-	cloud = false
-
 	msg := getBlocksContent(ids)
-	ret = chatGPTWithAction(msg, action, cloud)
+	ret = chatGPTWithAction(msg, action, false)
 	return
 }
 

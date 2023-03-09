@@ -115,7 +115,8 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }
-    insertHTML(succFileText, protyle);
+    // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
+    insertHTML(succFileText, protyle, true);
 };
 
 export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: boolean) => {

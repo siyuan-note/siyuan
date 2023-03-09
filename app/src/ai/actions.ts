@@ -4,9 +4,10 @@ import {focusByRange, setLastNodeRange} from "../protyle/util/selection";
 import {insertHTML} from "../protyle/util/insertHTML";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
+import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 
 export const fillContent = (protyle:IProtyle, data:string, elements:Element[]) => {
-    setLastNodeRange(elements[elements.length - 1], protyle.toolbar.range);
+    setLastNodeRange(getContenteditableElement(elements[elements.length - 1]), protyle.toolbar.range);
     protyle.toolbar.range.collapse(true);
     insertHTML(data, protyle, true, true);
 }

@@ -106,7 +106,7 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         succFileText += genAssetHTML(type, path, filename.substring(0, filename.length - type.length), filename);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             keys.length - 1 !== index) {
-            succFileText += "\n";
+            succFileText += "\n\n";
         }
     });
     const range = getEditorRange(protyle.wysiwyg.element);

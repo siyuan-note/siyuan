@@ -25,37 +25,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func setRecentDoc(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	param, err := gulu.JSON.MarshalJSON(arg["recentDoc"])
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	recentDoc := &model.RecentDoc{}
-	if err = gulu.JSON.UnmarshalJSON(param, recentDoc); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	err = model.SetRecentDoc(recentDoc)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}
-
 func getRecentDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

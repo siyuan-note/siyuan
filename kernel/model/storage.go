@@ -325,6 +325,10 @@ func GetLocalStorage() (ret map[string]interface{}, err error) {
 }
 
 func setLocalStorage(val interface{}) (err error) {
+	if util.ReadOnly {
+		return
+	}
+
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); nil != err {
 		logging.LogErrorf("create storage [local] dir failed: %s", err)

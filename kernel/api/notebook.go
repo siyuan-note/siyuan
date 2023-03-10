@@ -102,6 +102,15 @@ func removeNotebook(c *gin.Context) {
 		return
 	}
 
+	if util.ReadOnly && !model.IsUserGuide(notebook) {
+		result := util.NewResult()
+		result.Code = -1
+		result.Msg = model.Conf.Language(34)
+		result.Data = map[string]interface{}{"closeTimeout": 5000}
+		c.JSON(200, result)
+		return
+	}
+
 	err := model.RemoveBox(notebook)
 	if nil != err {
 		ret.Code = -1
@@ -164,6 +173,15 @@ func openNotebook(c *gin.Context) {
 
 	notebook := arg["notebook"].(string)
 	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	if util.ReadOnly && !model.IsUserGuide(notebook) {
+		result := util.NewResult()
+		result.Code = -1
+		result.Msg = model.Conf.Language(34)
+		result.Data = map[string]interface{}{"closeTimeout": 5000}
+		c.JSON(200, result)
 		return
 	}
 

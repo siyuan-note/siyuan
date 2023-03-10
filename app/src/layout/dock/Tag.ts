@@ -65,8 +65,8 @@ export class Tag extends Model {
     <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
-    <span class="fn__space"></span>
-    <span data-type="sort" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.sort}">
+    <span class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></span>
+    <span data-type="sort" class="block__icon b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.sort}">
         <svg><use xlink:href="#iconSort"></use></svg>
     </span>
     <span class="fn__space"></span>

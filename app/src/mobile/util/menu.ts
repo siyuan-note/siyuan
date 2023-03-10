@@ -128,12 +128,12 @@ export const popMenu = () => {
     }
 
     let accountHTML = "";
-    if (window.siyuan.user) {
+    if (window.siyuan.user && !window.siyuan.config.readonly) {
         accountHTML = `<div class="b3-list-item b3-list-item--big" id="menuAccount">
     <img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
     <span class="b3-list-item__text">${window.siyuan.user.userName}</span>
 </div>`;
-    } else {
+    } else if (!window.siyuan.config.readonly) {
         accountHTML = `<div class="b3-list-item b3-list-item--big" id="menuAccount">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>
 </div>`;
@@ -141,30 +141,29 @@ export const popMenu = () => {
     menuElement.innerHTML = `<div id="menuSearch" class="b3-list-item b3-list-item--big">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.search}</span>
 </div>
-<div id="menuNewDaily" class="b3-list-item b3-list-item--big">
+<div id="menuNewDaily" class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconCalendar"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dailyNote}</span>
 </div>
-<div id="menuCard" class="b3-list-item b3-list-item--big">
+<div id="menuCard" class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg class="b3-list-item__graphic" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>
 </div>
-<div class="b3-list-item b3-list-item--big" id="menuNewNotebook">
+<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewNotebook">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
 </div>
-<div class="b3-list-item b3-list-item--big" id="menuSyncNow">
+<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuSyncNow">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconCloudSucc"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.syncNow}</span>
 </div>
 <div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconHistory"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
 </div>
-<div slot="border-bottom: 1px solid var(--b3-theme-surface-lighter);"></div>
-<div class="b3-list-item b3-list-item--big" id="menuAppearance">
+<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAppearance">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconTheme"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.appearance}</span>
 </div>
-<div class="b3-list-item b3-list-item--big" id="menuLock">
+<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuLock">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconLock"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.lockScreen}</span>
 </div>
 ${accountHTML}
-<div id="menuSync" class="b3-list-item b3-list-item--big">
+<div id="menuSync" class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.cloud}</span>
 </div>
 <div class="b3-list-item b3-list-item--big" id="menuHelp">
@@ -398,7 +397,7 @@ const initAbout = () => {
     modelElement.style.top = "0";
     modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconInfo"></use>';
     modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.about;
-    modelMainElement.innerHTML = `<div class="b3-label fn__flex">
+    modelMainElement.innerHTML = `<div class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about11}
         <div class="b3-label__text">${window.siyuan.languages.about12}</div>
@@ -414,7 +413,7 @@ const initAbout = () => {
        <div class="fn__hr"></div>
        <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
 </div>
-<div class="b3-label">
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.about5}
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="authCode">
@@ -422,7 +421,7 @@ const initAbout = () => {
     </button>
     <div class="b3-label__text">${window.siyuan.languages.about6}</div>
 </div>
-<div class="b3-label">
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.dataRepoKey}
     <div class="fn__hr"></div>
     <div class="${window.siyuan.config.repo.key ? "fn__none" : ""}">
@@ -450,7 +449,7 @@ const initAbout = () => {
     <div class="b3-label__text">${window.siyuan.languages.dataRepoKeyTip1}</div>
     <div class="b3-label__text ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
 </div>
-<div class="b3-label">
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.about13}
     <span class="b3-label__text">${window.siyuan.config.api.token}</span>
     <div class="fn__hr"></div>
@@ -459,7 +458,7 @@ const initAbout = () => {
     </button>
     <div class="b3-label__text">${window.siyuan.languages.about14}</div>
 </div>
-<div class="b3-label">
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     <div class="fn__flex">
         ${window.siyuan.languages.export}
     </div>
@@ -476,7 +475,7 @@ const initAbout = () => {
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
 </div>
-<div class="b3-label">
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     <div class="fn__flex">
         ${window.siyuan.languages.import}
     </div>
@@ -488,7 +487,7 @@ const initAbout = () => {
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
 </div>
-<div class="b3-label">
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.workspaceList}
     <div class="fn__hr"></div>
     <button id="openWorkspace" class="b3-button b3-button--outline fn__block">${window.siyuan.languages.openBy}...</button>

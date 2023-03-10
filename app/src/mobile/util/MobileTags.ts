@@ -23,8 +23,8 @@ export class MobileTags {
     <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconFullscreen"></use></svg>
     <span class="fn__space"></span>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
-    <span class="fn__space"></span>
-    <svg data-type="sort" class="toolbar__icon"><use xlink:href="#iconSort"></use></svg>
+    <span class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></span>
+    <svg data-type="sort" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconSort"></use></svg>
 </div>
 <div class="fn__flex-1 tagList"></div>
 <img style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 30vw;box-sizing: border-box;" src="/stage/loading-pure.svg">`;
@@ -72,7 +72,7 @@ export class MobileTags {
                     toolbarSearchEvent();
                 }
             },
-            topExtHTML: '<span class="b3-list-item__action" data-type="edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>'
+            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action" data-type="edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>'
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

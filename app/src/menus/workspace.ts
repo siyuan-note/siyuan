@@ -74,30 +74,32 @@ export const workspaceMenu = (rect: DOMRect) => {
             submenu: dockMenu
         }).element);
         /// #if !BROWSER
-        const workspaceSubMenu: IMenu[] = [{
-            label: window.siyuan.languages.openBy + "...",
-            iconHTML: Constants.ZWSP,
-            click: async () => {
-                const localPath = await dialog.showOpenDialog({
-                    defaultPath: window.siyuan.config.system.homeDir,
-                    properties: ["openDirectory", "createDirectory"],
-                });
-                if (localPath.filePaths.length === 0) {
-                    return;
+        if (!window.siyuan.config.readonly) {
+            const workspaceSubMenu: IMenu[] = [{
+                label: window.siyuan.languages.openBy + "...",
+                iconHTML: Constants.ZWSP,
+                click: async () => {
+                    const localPath = await dialog.showOpenDialog({
+                        defaultPath: window.siyuan.config.system.homeDir,
+                        properties: ["openDirectory", "createDirectory"],
+                    });
+                    if (localPath.filePaths.length === 0) {
+                        return;
+                    }
+                    openWorkspace(localPath.filePaths[0]);
                 }
-                openWorkspace(localPath.filePaths[0]);
-            }
-        }];
-        workspaceSubMenu.push({type: "separator"});
-        response.data.forEach((item: IWorkspace) => {
-            workspaceSubMenu.push(workspaceItem(item) as IMenu);
-        });
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.workspaceList,
-            icon: "iconWorkspace",
-            type: "submenu",
-            submenu: workspaceSubMenu,
-        }).element);
+            }];
+            workspaceSubMenu.push({type: "separator"});
+            response.data.forEach((item: IWorkspace) => {
+                workspaceSubMenu.push(workspaceItem(item) as IMenu);
+            });
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.workspaceList,
+                icon: "iconWorkspace",
+                type: "submenu",
+                submenu: workspaceSubMenu,
+            }).element);
+        }
         /// #endif
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         if (!window.siyuan.config.readonly) {
@@ -155,24 +157,24 @@ export const workspaceMenu = (rect: DOMRect) => {
                     }
                 }],
             }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.lockScreen,
+                icon: "iconLock",
+                accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
+                click: () => {
+                    lockScreen();
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.dataHistory,
+                icon: "iconHistory",
+                accelerator: window.siyuan.config.keymap.general.dataHistory.custom,
+                click: () => {
+                    openHistory();
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.lockScreen,
-            icon: "iconLock",
-            accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
-            click: () => {
-                lockScreen();
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.dataHistory,
-            icon: "iconHistory",
-            accelerator: window.siyuan.config.keymap.general.dataHistory.custom,
-            click: () => {
-                openHistory();
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.help,
             icon: "iconHelp",

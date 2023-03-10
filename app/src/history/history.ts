@@ -214,6 +214,9 @@ const renderRmNotebook = (element: HTMLElement) => {
 };
 
 export const openHistory = () => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#historyContainer")) {
             item.destroy();

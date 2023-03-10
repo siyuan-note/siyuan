@@ -17,6 +17,9 @@ import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
 
 export const lockScreen = () => {
+    if (window.siyuan.config.readonly) {
+        return
+    }
     /// #if BROWSER
     fetchPost("/api/system/logoutAuth", {}, () => {
         window.location.href = `/check-auth?url=${window.location.href}`;

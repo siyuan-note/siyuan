@@ -10,7 +10,7 @@ import {blockRender} from "../markdown/blockRender";
 import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../util/onGet";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
-    if (!protyle.wysiwyg.element.firstElementChild) {
+    if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
         // 报错或者空白页面
         return undefined;
     }

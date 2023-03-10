@@ -589,7 +589,9 @@ export const globalShortcut = () => {
             return;
         }
         if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.dataHistory.custom, event)) {
-            openHistory();
+            if (!window.siyuan.config.readonly) {
+                openHistory();
+            }
             event.preventDefault();
             return;
         }

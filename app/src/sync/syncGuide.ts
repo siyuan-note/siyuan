@@ -113,6 +113,9 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
 };
 
 export const syncGuide = (element?: Element) => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
     if (element && element.classList.contains("toolbar__item--active")) {
         return;
     }

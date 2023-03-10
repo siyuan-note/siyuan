@@ -1,3 +1,28 @@
+## v2.7.9 / 2023-03-10
+
+### 改进功能
+
+* [加入针对内容块的人工智能辅助支持](https://github.com/siyuan-note/siyuan/issues/7566)
+* [鼠标划选没有选中块时不应划选所有块](https://github.com/siyuan-note/siyuan/issues/7580)
+* [Android 端长按弹出内容操作菜单后底栏需滑动](https://github.com/siyuan-note/siyuan/issues/7591)
+* [移动端底部工具栏移除删除按钮](https://github.com/siyuan-note/siyuan/issues/7595)
+* [改进任务列表项完成后的样式](https://github.com/siyuan-note/siyuan/pull/7599)
+* [Android 端块菜单返回支持左右滑动](https://github.com/siyuan-note/siyuan/issues/7600)
+* [OpenAI API 接入增加环境变量 `SIYUAN_OPENAI_API_BASE_URL`](https://github.com/siyuan-note/siyuan/issues/7604)
+* [批量插入文件时每个文件占一个块](https://github.com/siyuan-note/siyuan/issues/7607)
+* [鼠标移动到页签上时 `&` 不显示为 `&amp;`](https://github.com/siyuan-note/siyuan/issues/7609)
+* [移动端复习过闪卡后顶部需出现同步按钮](https://github.com/siyuan-note/siyuan/issues/7610)
+* [引用搜索命名空格未显示](https://github.com/siyuan-note/siyuan/issues/7613)
+* [改进内核只读模式](https://github.com/siyuan-note/siyuan/issues/7615)
+
+### 修复缺陷
+
+* [斜杆菜单缺失 `AI Chat`](https://github.com/siyuan-note/siyuan/issues/7592)
+* [Android 端某些系统上界面显示不全](https://github.com/siyuan-note/siyuan/issues/7593)
+* [移动端块引用、嵌入无法使用](https://github.com/siyuan-note/siyuan/issues/7594)
+* [图片无法设定宽度百分比](https://github.com/siyuan-note/siyuan/issues/7606)
+* [浏览器剪藏扩展丢失部分元素](https://github.com/siyuan-note/siyuan/issues/7608)
+
 ## v2.7.8 / 2023-03-07
 
 ### 改进功能

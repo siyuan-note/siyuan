@@ -488,6 +488,10 @@ func NewLute() (ret *lute.Lute) {
 var confSaveLock = sync.Mutex{}
 
 func (conf *AppConf) Save() {
+	if util.ReadOnly {
+		return
+	}
+
 	confSaveLock.Lock()
 	confSaveLock.Unlock()
 

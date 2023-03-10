@@ -93,6 +93,10 @@ func SetBlockReminder(id string, timed string) (err error) {
 }
 
 func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
+	if util.ReadOnly {
+		return
+	}
+
 	WaitForWritingFiles()
 
 	tree, err := loadTreeByBlockID(id)

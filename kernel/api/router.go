@@ -183,8 +183,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ref/getBackmentionDoc", model.CheckAuth, getBackmentionDoc)
 
 	ginServer.Handle("POST", "/api/attr/getBookmarkLabels", model.CheckAuth, getBookmarkLabels)
-	ginServer.Handle("POST", "/api/attr/resetBlockAttrs", model.CheckAuth, model.CheckReadonly, model.CheckReadonly, resetBlockAttrs)
-	ginServer.Handle("POST", "/api/attr/setBlockAttrs", model.CheckAuth, model.CheckReadonly, model.CheckReadonly, setBlockAttrs)
+	ginServer.Handle("POST", "/api/attr/resetBlockAttrs", model.CheckAuth, model.CheckReadonly, resetBlockAttrs)
+	ginServer.Handle("POST", "/api/attr/setBlockAttrs", model.CheckAuth, setBlockAttrs)
 	ginServer.Handle("POST", "/api/attr/getBlockAttrs", model.CheckAuth, getBlockAttrs)
 
 	ginServer.Handle("POST", "/api/cloud/getCloudSpace", model.CheckAuth, getCloudSpace)

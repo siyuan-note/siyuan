@@ -188,6 +188,10 @@
       color: var(--b3-protyle-inline-mark-color);
     }
 
+    span.current-search-highlight-mark{
+      background-color:lightgreen;
+    }
+
     span[data-type="virtual-block-ref"] {
       border-bottom: 1px dashed var(--b3-theme-on-surface);
       transition: var(--b3-transition);

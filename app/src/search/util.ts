@@ -486,15 +486,25 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                             } else if (!target.classList.contains("b3-list-item--focus")) {
                                 searchPanelElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                 target.classList.add("b3-list-item--focus");
+                                target.removeAttribute("data-highlight-idx")
                                 getArticle({
                                     edit,
                                     id: target.getAttribute("data-node-id"),
                                     k: getKey(target)
                                 });
                                 searchInputElement.focus();
+                            } else {
+                                // 点击相同搜索结果,根据是否按下ctrl键来决定重置高亮,还是高亮下一个
+                                highlightSearchItem({
+                                    edit,
+                                    id: target.getAttribute("data-node-id"),
+                                    target,
+                                    isCtrl:event.ctrlKey
+                                })
+                                searchInputElement.focus();
                             }
                         }, Constants.TIMEOUT_DBLCLICK);
-                    } else if (event.detail === 2) {
+                    } else if (event.detail === 2 && !event.ctrlKey) {
                         clearTimeout(clickTimeout);
                         const id = target.getAttribute("data-node-id");
                         fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
@@ -1109,6 +1119,48 @@ const getKey = (element: HTMLElement) => {
     return [...new Set(keys)].join(" ");
 };
 
+const highlightSearchItem=(options: {
+    id: string,
+    edit: Protyle,
+    target?:any,
+    isCtrl?:boolean
+})=>{
+    let matchElement
+    let target=options.target
+    // 移除当前高亮的词
+    options.edit.protyle.wysiwyg.element.querySelector(".current-search-highlight-mark")?.classList.remove("current-search-highlight-mark")
+    if(target){
+        let hl_idx_s=target.getAttribute("data-highlight-idx")
+        let allMatchElements = options.edit.protyle.wysiwyg.element.querySelectorAll(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
+        if(allMatchElements.length>0){
+            // 将要高亮的索引
+            let idx_to_hl
+            if(!options.isCtrl){
+                // 重置,回到第一个高亮
+                idx_to_hl=0
+            }else {
+                // 高亮下一个
+                if (hl_idx_s == null){
+                    idx_to_hl=1
+                }else {
+                    let hl_idx =parseInt(hl_idx_s)
+                    idx_to_hl=hl_idx+1
+                }
+            }
+            if (idx_to_hl >= allMatchElements.length) {
+                idx_to_hl=0
+            }
+            target.setAttribute("data-highlight-idx",String(idx_to_hl))
+            matchElement=allMatchElements[idx_to_hl]
+        }
+    }
+    if (matchElement) {
+        // 高亮并居中
+        matchElement.classList.add("current-search-highlight-mark")
+        const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
+        options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+    }
+}
 const getArticle = (options: {
     id: string,
     k: string,
@@ -1127,6 +1179,7 @@ const getArticle = (options: {
             onGet(getResponse, options.edit.protyle, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML]);
             const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`);
             if (matchElement) {
+                matchElement.classList.add("current-search-highlight-mark")
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
             }

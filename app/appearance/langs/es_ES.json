@@ -975,7 +975,7 @@
     "49": "Por favor, especifique la ruta de guardado de las notas diarias en la Configuración de la Libreta",
     "50": "Resolviendo referencia [%s]",
     "51": "Bloque de contenido de la caché [%d]",
-    "52": "Cada vez que abra la guía del usuario se restablecerán los datos del cuaderno, así que no guarde ningún dato en ella",
+    "52": "Cada vez que inicie y abra la guía del usuario, los datos que contiene se restablecerán, así que no guarde ningún dato en la guía del usuario",
     "53": "No se ha habilitado la sincronizacion de datos",
     "54": "Indexando referencias...",
     "55": "Referencias indexadas de [%d] documentos",

@@ -975,7 +975,7 @@
     "49": "Veuillez spécifier le chemin d'enregistrement des notes quotidiennes dans les paramètres du carnet de notes.",
     "50": "Résolution des référence [%s]",
     "51": "Blocage du contenu du cache [%d]",
-    "52": "Chaque fois que vous ouvrez le guide de l'utilisateur, les données du notebook seront réinitialisées, veuillez donc ne pas y enregistrer de données.",
+    "52": "Chaque fois que vous démarrez et ouvrez le guide de l'utilisateur, les données qu'il contient seront réinitialisées, veuillez donc ne pas enregistrer de données dans le guide de l'utilisateur",
     "53": "La synchronisation des données n'a pas été activée",
     "54": "Indexation des références...",
     "55": "Références indexées de [%d] documents",

@@ -9,7 +9,7 @@ import {fetchPost} from "../util/fetch";
 import {genOptions} from "../util/genOptions";
 import {openSnippets} from "./util/snippets";
 import {openColorPicker} from "./util/colorPicker";
-import {loadAssets} from "../util/assets";
+import {loadAssets, setNativeTheme} from "../util/assets";
 import {resetFloatDockSize} from "../layout/dock/util";
 
 export const appearance = {
@@ -189,21 +189,24 @@ export const appearance = {
             nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
+            setNativeTheme(response.data.modeOS, response.data.mode);
             if (window.siyuan.config.appearance.themeJS) {
-                if (!response.data.modeOS && (
-                    response.data.mode !== window.siyuan.config.appearance.mode ||
-                    window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
-                    window.siyuan.config.appearance.themeDark !== response.data.themeDark
-                )) {
-                    exportLayout(true);
-                    return;
-                }
-                const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                if (response.data.modeOS && (
-                    (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
-                )) {
-                    exportLayout(true);
-                    return;
+                if (response.data.modeOS) {
+                    const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                    if ((response.data.mode === 1 && OSTheme === "light") ||
+                    (response.data.mode === 0 && OSTheme === "dark")
+                    ) {
+                        exportLayout(true);
+                        return;
+                    }
+                } else {
+                    if (response.data.mode !== window.siyuan.config.appearance.mode ||
+                        window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
+                        window.siyuan.config.appearance.themeDark !== response.data.themeDark
+                    ) {
+                        exportLayout(true);
+                        return;
+                    }
                 }
             }
             appearance.onSetappearance(response.data);

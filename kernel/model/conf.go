@@ -308,9 +308,6 @@ func InitConf() {
 	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
 		Conf.Search.BacklinkMentionKeywordsLimit = 512
 	}
-	if 1 > Conf.Search.VirtualRefKeywordsLimit {
-		Conf.Search.VirtualRefKeywordsLimit = 512
-	}
 
 	if nil == Conf.Stat {
 		Conf.Stat = conf.NewStat()

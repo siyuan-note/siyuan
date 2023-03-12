@@ -52,11 +52,10 @@ type Search struct {
 	BacklinkMentionDoc           bool `json:"backlinkMentionDoc"`
 	BacklinkMentionKeywordsLimit int  `json:"backlinkMentionKeywordsLimit"`
 
-	VirtualRefName          bool `json:"virtualRefName"`
-	VirtualRefAlias         bool `json:"virtualRefAlias"`
-	VirtualRefAnchor        bool `json:"virtualRefAnchor"`
-	VirtualRefDoc           bool `json:"virtualRefDoc"`
-	VirtualRefKeywordsLimit int  `json:"virtualRefKeywordsLimit"`
+	VirtualRefName   bool `json:"virtualRefName"`
+	VirtualRefAlias  bool `json:"virtualRefAlias"`
+	VirtualRefAnchor bool `json:"virtualRefAnchor"`
+	VirtualRefDoc    bool `json:"virtualRefDoc"`
 }
 
 func NewSearch() *Search {
@@ -88,11 +87,10 @@ func NewSearch() *Search {
 		BacklinkMentionDoc:           true,
 		BacklinkMentionKeywordsLimit: 512,
 
-		VirtualRefName:          true,
-		VirtualRefAlias:         false,
-		VirtualRefAnchor:        true,
-		VirtualRefDoc:           true,
-		VirtualRefKeywordsLimit: 512,
+		VirtualRefName:   true,
+		VirtualRefAlias:  false,
+		VirtualRefAnchor: true,
+		VirtualRefDoc:    true,
 	}
 }
 

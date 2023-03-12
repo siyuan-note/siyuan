@@ -225,11 +225,6 @@ func getVirtualRefKeywords(docName string) (ret []string) {
 	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 	ret = gulu.Str.ExcludeElem(ret, []string{docName})
 	ret = prepareMarkKeywords(ret)
-
-	// 在 设置 - 搜索 中分别增加虚拟引用和反链提及 `关键字数量限制` https://github.com/siyuan-note/siyuan/issues/6603
-	if Conf.Search.VirtualRefKeywordsLimit < len(ret) {
-		ret = ret[:Conf.Search.VirtualRefKeywordsLimit]
-	}
 	return
 }
 

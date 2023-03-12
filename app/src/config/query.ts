@@ -226,13 +226,6 @@ export const query = {
             <span class="fn__space"></span>
             <input class="b3-switch" id="virtualRefDoc" type="checkbox"${window.siyuan.config.search.virtualRefDoc ? " checked" : ""}/>
         </label>
-        <label class="fn__flex" style="flex: 2">
-            <div class=>
-                ${window.siyuan.languages.keywordsLimit}
-            </div>
-            <span class="fn__space"></span>
-            <input class="b3-text-field" id="virtualRefKeywordsLimit" type="number" min="1" max="10240" value="${window.siyuan.config.search.virtualRefKeywordsLimit}">
-        </label>
     </div>
 </div>
 <label class="fn__flex b3-label config__item">
@@ -284,7 +277,6 @@ export const query = {
                     virtualRefAlias: (query.element.querySelector("#virtualRefAlias") as HTMLInputElement).checked,
                     virtualRefAnchor: (query.element.querySelector("#virtualRefAnchor") as HTMLInputElement).checked,
                     virtualRefDoc: (query.element.querySelector("#virtualRefDoc") as HTMLInputElement).checked,
-                    virtualRefKeywordsLimit: parseInt((query.element.querySelector("#virtualRefKeywordsLimit") as HTMLInputElement).value),
                 }, response => {
                     window.siyuan.config.search = response.data;
                 });

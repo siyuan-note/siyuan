@@ -186,10 +186,10 @@
     span[data-type~="search-mark"] {
       background-color: var(--b3-protyle-inline-mark-background);
       color: var(--b3-protyle-inline-mark-color);
-    }
 
-    span.current-search-highlight-mark{
-      background-color:lightgreen;
+      &.search-mark--hl {
+        background-color: var(--b3-protyle-inline-mark-hl-background);;
+      }
     }
 
     span[data-type="virtual-block-ref"] {

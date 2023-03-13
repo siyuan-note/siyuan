@@ -95,8 +95,8 @@
     --b3-width-transition: width .2s cubic-bezier(0, 0, .2, 1) 0ms;
 
     /* 阴影 */
-    --b3-point-shadow: 0 3px 6px rgba(140,149,159,0.15);
-    --b3-dialog-shadow: 0 8px 24px rgba(140,149,159,0.2);
+    --b3-point-shadow: 0 3px 6px rgba(140, 149, 159, 0.15);
+    --b3-dialog-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
 
     /* 图表颜色 */
     --b3-graph-p-point: #076f7e;
@@ -136,6 +136,7 @@
     --b3-protyle-inline-s-color: #202124;
     --b3-protyle-inline-link-color: #4285f4;
     --b3-protyle-inline-mark-background: rgb(252, 212, 126);
+    --b3-protyle-inline-mark-hl-background: #fffd38;
     --b3-protyle-inline-mark-color: #202124;
     --b3-protyle-inline-tag-color: #5f6368;
     --b3-protyle-inline-blockref-color: #8250df;

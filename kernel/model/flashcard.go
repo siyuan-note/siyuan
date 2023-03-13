@@ -136,6 +136,8 @@ func GetFlashcards(deckID string, page int) (blocks []*Block, total, pageCount i
 
 func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCount int) {
 	const pageSize = 20
+	total = len(cards)
+	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
 	start := (page - 1) * pageSize
 	end := page * pageSize
 	if start > len(cards) {
@@ -144,10 +146,9 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 	if end > len(cards) {
 		end = len(cards)
 	}
-	cardIDs := cards[start:end]
-	total = len(cards)
-	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))
-	if 1 > len(cardIDs) {
+
+	cards = cards[start:end]
+	if 1 > len(cards) {
 		blocks = []*Block{}
 		return
 	}

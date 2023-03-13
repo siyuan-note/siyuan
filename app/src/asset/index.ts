@@ -198,11 +198,11 @@ export class Asset extends Model {
             </button>
             <div class="horizontalToolbarSeparator b3-menu__separator"></div>
             <button id="scrollVertical" class="secondaryToolbarButton b3-menu__item scrollModeButtons scrollVertical toggled" tabindex="62">
-             <svg class="b3-menu__icon"><use xlink:href="#iconSplitTB"></use></svg> 
+             <svg class="b3-menu__icon"><use xlink:href="#iconScrollVert"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.scrollVertical}</span>
             </button>
             <button id="scrollHorizontal" class="secondaryToolbarButton b3-menu__item scrollModeButtons scrollHorizontal" tabindex="63">
-              <svg class="b3-menu__icon"><use xlink:href="#iconSplitLR"></use></svg> 
+              <svg class="b3-menu__icon"><use xlink:href="#iconScrollHoriz"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.scrollHorizontal}</span>
             </button>
             <button id="scrollWrapped" class="secondaryToolbarButton b3-menu__item scrollModeButtons scrollWrapped" tabindex="64">
@@ -236,7 +236,7 @@ export class Asset extends Model {
           <div id="toolbarContainer">
             <div id="toolbarViewer">
                 <button id="sidebarToggle" class="toolbarButton b3-tooltips b3-tooltips__se" tabindex="11" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title}">
-                    <svg><use xlink:href="#iconBoth"></use></svg>
+                    <svg><use xlink:href="#iconLayoutRight"></use></svg>
                 </button>
                 <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search}">
                   <svg><use xlink:href="#iconSearch"></use></svg>

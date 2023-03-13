@@ -325,7 +325,7 @@ export class Breadcrumb {
             }).element);
             if (!isMobile()) {
                 window.siyuan.menus.menu.append(new MenuItem({
-                    icon: "iconFullscreen",
+                    icon: "iconHideDock",
                     accelerator: window.siyuan.config.keymap.editor.general.fullscreen.custom,
                     label: window.siyuan.languages.fullscreen,
                     click: () => {

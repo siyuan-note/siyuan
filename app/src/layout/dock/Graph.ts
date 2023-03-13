@@ -264,7 +264,7 @@ export class Graph extends Model {
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <div class="fn__space"></div>
     <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon" aria-label="${window.siyuan.languages.fullscreen}">
-        <svg><use xlink:href="#iconFullscreen"></use></svg>
+        <svg><use xlink:href="#iconHideDock"></use></svg>
     </div>
     <div class="fn__space"></div>
     <div data-type="menu" class="b3-tooltips b3-tooltips__sw block__icon" aria-label="${window.siyuan.languages.more}">

@@ -307,7 +307,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                                 hPathList.push(escapeHtml(getNotebookName(toNotebook[index])));
                             } else {
                                 enableIncludeChild = true;
-                                config.idPath.push(pathPosix().join(toNotebook[index], item));
+                                config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));
                             }
                         });
                         if (response.data) {

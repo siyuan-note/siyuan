@@ -130,7 +130,7 @@ export const about = {
             <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
         </button>
         <div class="fn__hr${isBrowser() ? "" : " fn__none"}"></div>
-        <button id="menuSafeQuit" class="b3-button b3-button--outline fn__block${["android", "ios"].includes(window.siyuan.config.system.container) ? "" : " fn__none"}">
+        <button id="menuSafeQuit" class="b3-button b3-button--outline fn__block${(window.webkit?.messageHandlers || window.JSAndroid) ? "" : " fn__none"}">
             <svg><use xlink:href="#iconQuit"></use></svg>${window.siyuan.languages.safeQuit}
         </button>
     </div>

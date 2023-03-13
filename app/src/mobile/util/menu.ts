@@ -172,7 +172,7 @@ ${accountHTML}
 <div class="b3-list-item b3-list-item--big" id="menuAbout">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconInfo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.about}</span>
 </div>
-<div class="b3-list-item b3-list-item--big" id="menuSafeQuit">
+<div class="b3-list-item b3-list-item--big${(window.webkit?.messageHandlers || window.JSAndroid) ? "" : " fn__none"}" id="menuSafeQuit">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconQuit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
 </div>`;
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628

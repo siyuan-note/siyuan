@@ -10,7 +10,7 @@ export const fillContent = (protyle:IProtyle, data:string, elements:Element[]) =
     setLastNodeRange(getContenteditableElement(elements[elements.length - 1]), protyle.toolbar.range);
     protyle.toolbar.range.collapse(true);
     insertHTML(data, protyle, true, true);
-}
+};
 
 export const AIActions = (elements: Element[], protyle: IProtyle) => {
     const ids: string[] = [];

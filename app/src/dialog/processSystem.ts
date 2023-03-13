@@ -18,7 +18,7 @@ import {needSubscribe} from "../util/needSubscribe";
 
 export const lockScreen = () => {
     if (window.siyuan.config.readonly) {
-        return
+        return;
     }
     /// #if BROWSER
     fetchPost("/api/system/logoutAuth", {}, () => {

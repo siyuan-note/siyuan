@@ -78,7 +78,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                     if (pageIndex <= 1) {
                         previousElement.setAttribute("disabled", "disabled");
                     }
-                    fetchPost("/api/riff/getRiffCards", {id: deckID, page: pageIndex}, (cardsResponse) => {
+                    fetchPost(`/api/riff/get${deckType}RiffCards`, {id: deckID, page: pageIndex}, (cardsResponse) => {
                         if (pageIndex === cardsResponse.data.pageCount) {
                             nextElement.setAttribute("disabled", "disabled");
                         } else if (cardsResponse.data.pageCount > 1) {
@@ -97,7 +97,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                     }
                     pageIndex++;
                     previousElement.removeAttribute("disabled");
-                    fetchPost("/api/riff/getRiffCards", {id: deckID, page: pageIndex}, (cardsResponse) => {
+                    fetchPost(`/api/riff/get${deckType}RiffCards`, {id: deckID, page: pageIndex}, (cardsResponse) => {
                         if (pageIndex === cardsResponse.data.pageCount) {
                             nextElement.setAttribute("disabled", "disabled");
                         } else if (cardsResponse.data.pageCount > 1) {

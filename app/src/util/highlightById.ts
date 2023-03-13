@@ -44,8 +44,8 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         const cursorTop = getSelectionPosition(editorElement).top - editorElement.getBoundingClientRect().top;
         if (cursorTop < 0) {
             editorElement.scrollTop = editorElement.scrollTop + cursorTop;
-        } else if (cursorTop > editorElement.clientHeight - 34) {
-            editorElement.scrollTop = editorElement.scrollTop + (cursorTop + 34 - editorElement.clientHeight);
+        } else if (cursorTop > editorElement.clientHeight - 74) {   // 74 = 移动端底部 + 段落块高度
+            editorElement.scrollTop = editorElement.scrollTop + (cursorTop + 74 - editorElement.clientHeight);
         }
         return;
     }

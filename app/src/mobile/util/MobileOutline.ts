@@ -17,7 +17,7 @@ export class MobileOutline {
         ${window.siyuan.languages.outline}
     </div>
     <span class="fn__flex-1 fn__space"></span>
-    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconFullscreen"></use></svg>
+    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <span class="fn__space"></span>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
 </div>

@@ -325,7 +325,7 @@ export class Breadcrumb {
             }).element);
             if (!isMobile()) {
                 window.siyuan.menus.menu.append(new MenuItem({
-                    icon: "iconHideDock",
+                    icon: protyle.element.className.includes("fullscreen") ? "iconFullscreenExit" : "iconFullscreen",
                     accelerator: window.siyuan.config.keymap.editor.general.fullscreen.custom,
                     label: window.siyuan.languages.fullscreen,
                     click: () => {

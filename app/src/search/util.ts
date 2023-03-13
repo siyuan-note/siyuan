@@ -159,7 +159,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <div class="fn__flex${config.group === 0 ? " fn__none" : ""}">
             <span class="fn__space"></span>
             <span id="searchExpand" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.expand}">
-                <svg><use xlink:href="#iconFullscreen"></use></svg>
+                <svg><use xlink:href="#iconExpand"></use></svg>
             </span>
             <span class="fn__space"></span>
             <span id="searchCollapse" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.collapse}">

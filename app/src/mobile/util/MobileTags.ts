@@ -20,7 +20,7 @@ export class MobileTags {
         ${window.siyuan.languages.tag}
     </div>
     <span class="fn__space"></span>
-    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconFullscreen"></use></svg>
+    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <span class="fn__space"></span>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
     <span class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></span>

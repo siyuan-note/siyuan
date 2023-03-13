@@ -19,7 +19,7 @@ export class MobileBacklinks {
     </div>
     <span class="counter listCount"></span>
     <span class="fn__space"></span>
-    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconFullscreen"></use></svg>
+    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <span class="fn__space"></span>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
 </div>
@@ -31,7 +31,7 @@ export class MobileBacklinks {
     </div>
     <span class="counter listMCount"></span>
     <span class="fn__space"></span>
-    <svg data-type="mExpand" class="toolbar__icon"><use xlink:href="#iconFullscreen"></use></svg>
+    <svg data-type="mExpand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <span class="fn__space"></span>
     <svg data-type="mCollapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
     <span class="fn__space"></span>

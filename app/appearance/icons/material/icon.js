@@ -1,5 +1,11 @@
 document.body.insertAdjacentHTML('afterbegin', `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
 <defs>
+  <symbol id="iconFullscreenExit" viewBox="0 0 32 32">
+    <path d="M8.125 31v-7.125h-7.125v-3.214h10.339v10.339zM20.661 31v-10.339h10.339v3.214h-7.125v7.125zM1 11.339v-3.214h7.125v-7.125h3.214v10.339zM20.661 11.339v-10.339h3.214v7.125h7.125v3.214z"></path>
+  </symbol>
+  <symbol id="iconFullscreen" viewBox="0 0 32 32">
+    <path d="M1 31v-10.339h3.214v7.125h7.125v3.214zM1 11.339v-10.339h10.339v3.214h-7.125v7.125zM20.661 31v-3.214h7.125v-7.125h3.214v10.339zM27.786 11.339v-7.125h-7.125v-3.214h10.339v10.339z"></path>
+  </symbol>
   <symbol id="iconScrollHoriz" viewBox="0 0 32 32">
     <path d="M8.367 27.8l-7.117-7.117 7.117-7.117 1.549 1.549-4.462 4.462h11.652v2.212h-11.652l4.462 4.462zM23.633 18.434l-1.549-1.549 4.462-4.462h-11.652v-2.213h11.652l-4.462-4.462 1.549-1.549 7.117 7.117z"></path>
   </symbol>
@@ -484,7 +490,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg style="position: absolute; 
   <symbol id="iconInfo" viewBox="0 0 32 32">
     <path d="M14.4 8h3.2v3.2h-3.2zM14.4 14.4h3.2v9.6h-3.2zM16 0c-8.832 0-16 7.168-16 16s7.168 16 16 16 16-7.168 16-16-7.168-16-16-16zM16 28.8c-7.056 0-12.8-5.744-12.8-12.8s5.744-12.8 12.8-12.8 12.8 5.744 12.8 12.8-5.744 12.8-12.8 12.8z"></path>
   </symbol>
-  <symbol id="iconFullscreen" viewBox="0 0 32 32">
+  <symbol id="iconExpand" viewBox="0 0 32 32">
     <path d="M32 14.222v-14.222h-14.222l5.849 5.849-17.778 17.778-5.849-5.849v14.222h14.222l-5.849-5.849 17.778-17.778z"></path>
   </symbol>
   <symbol id="iconPreview" viewBox="0 0 32 32">

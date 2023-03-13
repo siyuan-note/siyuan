@@ -187,7 +187,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             lastElement = item;
         }
     });
-    if (editableElement && editableElement.textContent === "") {
+    if (editableElement && editableElement.textContent === "" && blockElement.classList.contains("p")) {
         // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
         doOperation.find((item, index) => {
             if (item.id === id) {

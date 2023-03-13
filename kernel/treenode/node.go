@@ -162,6 +162,11 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 		}
 
 		switch n.Type {
+		case ast.NodeTableCell:
+			// 表格块写入数据库表时在单元格之间添加空格 https://github.com/siyuan-note/siyuan/issues/7654
+			if 0 < buf.Len() && ' ' != buf.Bytes()[buf.Len()-1] {
+				buf.WriteByte(' ')
+			}
 		case ast.NodeImage:
 			linkDest := n.ChildByType(ast.NodeLinkDest)
 			var linkDestStr, ocrText string

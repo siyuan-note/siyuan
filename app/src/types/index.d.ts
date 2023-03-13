@@ -487,7 +487,6 @@ declare interface IConfig {
         virtualRefAlias: boolean
         virtualRefAnchor: boolean
         virtualRefDoc: boolean
-        virtualRefKeywordsLimit: boolean
     },
     stat: {
         treeCount: number

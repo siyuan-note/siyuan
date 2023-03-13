@@ -642,7 +642,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 	}
 
 	buf := bytes.Buffer{}
-	buf.WriteString("SELECT * FROM " + table + " WHERE " + table + " MATCH '{content}:(")
+	buf.WriteString("SELECT * FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(")
 	for i, mentionKeyword := range mentionKeywords {
 		if Conf.Search.BacklinkMentionKeywordsLimit < i {
 			util.PushMsg(fmt.Sprintf(Conf.Language(38), len(mentionKeywords)), 5000)
@@ -688,7 +688,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			if !entering || n.IsBlock() {
 				return ast.WalkContinue
 			}
-			if ast.NodeText == n.Type {
+			if ast.NodeText == n.Type { // 这里包含了标签命中的情况，因为 Lute 没有启用 TextMark
 				textBuf.Write(n.Tokens)
 			}
 			return ast.WalkContinue
@@ -703,6 +703,14 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 		newText := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
 		if text != newText {
 			tmp = append(tmp, b)
+		} else {
+			// columnFilter 中的命名、别名和备注命中的情况
+			// 反链提及搜索范围增加命名、别名和备注 https://github.com/siyuan-note/siyuan/issues/7639
+			if gulu.Str.Contains(trimMarkTags(b.Name), mentionKeywords) ||
+				gulu.Str.Contains(trimMarkTags(b.Alias), mentionKeywords) ||
+				gulu.Str.Contains(trimMarkTags(b.Memo), mentionKeywords) {
+				tmp = append(tmp, b)
+			}
 		}
 	}
 	blocks = tmp
@@ -725,6 +733,10 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 		return ret[i].ID > ret[j].ID
 	})
 	return
+}
+
+func trimMarkTags(str string) string {
+	return strings.TrimSuffix(strings.TrimPrefix(str, "<mark>"), "</mark>")
 }
 
 func getContainStr(str string, strs []string) string {

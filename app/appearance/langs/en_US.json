@@ -975,7 +975,7 @@
     "49": "Please specify the daily note save path in the Notebook Settings",
     "50": "Resolving reference [%s]",
     "51": "Cache content block [%d]",
-    "52": "Every time you open the user guide notebook data will be reset, so please do not save any data in it",
+    "52": "Every time you start and open the user guide, the data in it will be reset, so please do not save any data in the user guide",
     "53": "Data synchronization has not been enabled",
     "54": "Indexing references...",
     "55": "Indexed references of [%d] documents",

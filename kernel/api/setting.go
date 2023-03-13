@@ -234,7 +234,6 @@ func setSearch(c *gin.Context) {
 	oldVirtualRefAlias := model.Conf.Search.VirtualRefAlias
 	oldVirtualRefAnchor := model.Conf.Search.VirtualRefAnchor
 	oldVirtualRefDoc := model.Conf.Search.VirtualRefDoc
-	oldVirtualRefKeywordsLimit := model.Conf.Search.VirtualRefKeywordsLimit
 
 	model.Conf.Search = s
 	model.Conf.Save()
@@ -246,8 +245,7 @@ func setSearch(c *gin.Context) {
 	if oldVirtualRefName != s.VirtualRefName ||
 		oldVirtualRefAlias != s.VirtualRefAlias ||
 		oldVirtualRefAnchor != s.VirtualRefAnchor ||
-		oldVirtualRefDoc != s.VirtualRefDoc ||
-		oldVirtualRefKeywordsLimit != s.VirtualRefKeywordsLimit {
+		oldVirtualRefDoc != s.VirtualRefDoc {
 		model.ResetVirtualBlockRefCache()
 	}
 	ret.Data = s

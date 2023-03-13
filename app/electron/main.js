@@ -703,7 +703,7 @@ app.whenReady().then(() => {
                 return true;
             }
         });
-        if (tray && "win32" === process.platform) {
+        if (tray && ("win32" === process.platform || "linux" === process.platform)) {
             tray.destroy();
         }
         if (workspaces.length === 0) {

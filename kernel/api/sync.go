@@ -181,7 +181,7 @@ func setSyncMode(c *gin.Context) {
 	mode := int(arg["mode"].(float64))
 	err := model.SetSyncMode(mode)
 	if nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
@@ -200,7 +200,7 @@ func setSyncProvider(c *gin.Context) {
 	provider := int(arg["provider"].(float64))
 	err := model.SetSyncProvider(provider)
 	if nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
@@ -219,7 +219,7 @@ func setSyncProviderS3(c *gin.Context) {
 	s3Arg := arg["s3"].(interface{})
 	data, err := gulu.JSON.MarshalJSON(s3Arg)
 	if nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
@@ -227,7 +227,7 @@ func setSyncProviderS3(c *gin.Context) {
 
 	s3 := &conf.S3{}
 	if err = gulu.JSON.UnmarshalJSON(data, s3); nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
@@ -235,7 +235,7 @@ func setSyncProviderS3(c *gin.Context) {
 
 	err = model.SetSyncProviderS3(s3)
 	if nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
@@ -254,7 +254,7 @@ func setSyncProviderWebDAV(c *gin.Context) {
 	webdavArg := arg["webdav"].(interface{})
 	data, err := gulu.JSON.MarshalJSON(webdavArg)
 	if nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
@@ -262,7 +262,7 @@ func setSyncProviderWebDAV(c *gin.Context) {
 
 	webdav := &conf.WebDAV{}
 	if err = gulu.JSON.UnmarshalJSON(data, webdav); nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
@@ -270,7 +270,7 @@ func setSyncProviderWebDAV(c *gin.Context) {
 
 	err = model.SetSyncProviderWebDAV(webdav)
 	if nil != err {
-		ret.Code = 1
+		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return

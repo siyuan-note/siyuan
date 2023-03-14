@@ -157,77 +157,68 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     });
 };
 
-export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark") => {
+const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rms: string[]) => void) => {
     let customHTML = "";
     let notifyHTML = "";
+    const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     Object.keys(attrs).forEach(item => {
         if (item === "custom-reminder-wechat") {
-            notifyHTML = `<label class="fn__flex customItem">
-    <span class="ft__on-surface fn__flex-center fn__ellipsis" style="text-align: right;width: 100px">${window.siyuan.languages.wechatReminder}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__flex-1" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DDTHH:mm")}">
-    <div class="fn__space"></div>
-    <span class="block__icon fn__flex-center" style="opacity: 1;"><svg></svg></span>
-</label><div class="fn__hr--b"></div>`;
+            notifyHTML = `<label class="b3-label b3-label--noborder">
+    ${window.siyuan.languages.wechatReminder}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DDTHH:mm")}">
+</label>`;
         } else if (item.indexOf("custom") > -1) {
-            customHTML += `<label class="fn__flex customItem">
-    <span class="ft__on-surface fn__flex-center fn__ellipsis" title="${item.replace("custom-", "")}" style="text-align: right;width: 100px">${item.replace("custom-", "")}</span>
-    <div class="fn__space"></div>
-    <textarea class="b3-text-field fn__flex-1" rows="1" data-name="${item}">${attrs[item]}</textarea>
-    <div class="fn__space"></div>
-    <span data-action="remove" class="block__icon fn__flex-center" style="opacity: 1;"><svg><use xlink:href="#iconMin"></use></svg></span>
-</label><div class="fn__hr--b"></div>`;
+            customHTML += `<label class="b3-label b3-label--noborder">
+     <div class="fn__flex">
+        <span class="fn__flex-1">${item.replace("custom-", "")}</span>
+        <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
+    </div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" rows="1" data-name="${item}">${attrs[item]}</textarea>
+</label>`;
         }
     });
     const dialog = new Dialog({
-        width: isMobile() ? "80vw" : "50vw",
+        width: isMobile() ? "94vw" : "50vw",
         title: window.siyuan.languages.attr,
-        content: `<div class="b3-dialog__content custom-attr">
-    <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.bookmark}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" data-name="bookmark">
-        <div class="fn__space"></div>
-        <span data-action="bookmark" class="block__icon fn__flex-center" style="opacity: 1;"><svg><use xlink:href="#iconDown"></use></svg></span>
-    </div>
-    <div class="fn__hr--b"></div>
-    <label class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.name}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" data-name="name">
-        <div class="fn__space"></div>
-        <span class="block__icon fn__flex-center"><svg></svg></span>
+        content: `<div class="custom-attr" style="max-height: calc(100vh - 166px);overflow: auto;">
+    <label class="b3-label b3-label--noborder">
+        <div class="fn__flex">
+            <span class="fn__flex-1">${window.siyuan.languages.bookmark}</span>
+            <span data-action="bookmark" class="block__icon block__icon--show"><svg><use xlink:href="#iconDown"></use></svg></span>
+        </div>
+        <div class="fn__hr"></div>
+        <input class="b3-text-field fn__block" data-name="bookmark">
     </label>
-    <div class="fn__hr--b"></div>
-    <label class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.alias}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" data-name="alias">
-        <div class="fn__space"></div>
-        <span class="block__icon fn__flex-center"><svg></svg></span>
+    <label class="b3-label b3-label--noborder">
+        ${window.siyuan.languages.name}
+        <div class="fn__hr"></div>
+        <input class="b3-text-field fn__block" data-name="name">
     </label>
-    <div class="fn__hr--b"></div>
-    <label class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.memo}</span>
-        <div class="fn__space"></div>
-        <textarea rows="2" class="b3-text-field fn__flex-1" data-name="memo">${attrs.memo || ""}</textarea>
-        <div class="fn__space"></div>
-        <span class="block__icon fn__flex-center"><svg></svg></span>
+    <label class="b3-label b3-label--noborder">
+        ${window.siyuan.languages.alias}
+        <div class="fn__hr"></div>
+        <input class="b3-text-field fn__block" data-name="alias">
     </label>
-    <div style="background-color: var(--b3-theme-surface-lighter);height: 1px;margin: 16px 0;"></div>
-    <div class="custom-attr__add">
-        ${notifyHTML}
-        ${customHTML}
-        <button class="b3-button b3-button--outline" style="width: 100px">
-            <svg><use xlink:href="#iconAdd"></use></svg>
-            ${window.siyuan.languages.addAttr}
-        </button>
-    </div>
+    <label class="b3-label b3-label--noborder">
+        ${window.siyuan.languages.memo}
+        <div class="fn__hr"></div>
+        <textarea class="b3-text-field fn__block" rows="2" data-name="memo">${attrs.memo || ""}</textarea>
+    </label>
+    ${notifyHTML}
+    ${customHTML}
 </div>
 <div class="b3-dialog__action">
+    <button class="b3-button b3-button--outline">
+        <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}
+    </button><div class="fn__space"></div>
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
+        destroyCallback() {
+            focusByRange(range);
+        }
     });
     (dialog.element.querySelector('.b3-text-field[data-name="bookmark"]') as HTMLInputElement).value = attrs.bookmark || "";
     (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = attrs.name || "";
@@ -241,11 +232,10 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
         }
         switch (actionElement.getAttribute("data-action")) {
             case "remove":
-                if (actionElement.parentElement.firstElementChild.tagName === "SPAN") {
-                    removeAttrs.push(actionElement.parentElement.querySelector("textarea").getAttribute("data-name"));
+                if (actionElement.previousElementSibling.tagName === "SPAN") {
+                    removeAttrs.push(actionElement.parentElement.parentElement.querySelector("textarea").getAttribute("data-name"));
                 }
-                actionElement.parentElement.nextElementSibling.remove();
-                actionElement.parentElement.remove();
+                actionElement.parentElement.parentElement.remove();
                 break;
             case "bookmark":
                 fetchPost("/api/attr/getBookmarkLabels", {}, (response) => {
@@ -261,7 +251,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                             window.siyuan.menus.menu.append(new MenuItem({
                                 label: item,
                                 click() {
-                                    actionElement.parentElement.querySelector("input").value = item;
+                                    actionElement.parentElement.parentElement.querySelector("input").value = item;
                                 }
                             }).element);
                         });
@@ -275,13 +265,15 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
-        btnsElement[0].insertAdjacentHTML("beforebegin", `<div class="fn__flex customItem">
-    <input placeholder="${window.siyuan.languages.attrName}" class="b3-text-field" style="width: 100px;text-align: right">
-    <div class="fn__space"></div>
-    <textarea rows="1" class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
-    <div class="fn__space"></div>
-    <span data-action="remove" class="block__icon fn__flex-center" style="opacity: 1;"><svg><use xlink:href="#iconMin"></use></svg></span>
-</div><div class="fn__hr--b"></div>`);
+        dialog.element.querySelector(".custom-attr").insertAdjacentHTML("beforeend", `<div class="b3-label b3-label--noborder">
+    <div class="fn__flex">
+        <input placeholder="${window.siyuan.languages.attrName}" class="b3-text-field">
+        <span class="fn__flex-1"></span>
+        <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
+    </div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
+</div>`);
         const inputElements = dialog.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
         inputElements[inputElements.length - 2].focus();
         bindAttrInput(inputElements[inputElements.length - 1], btnsElement[2]);
@@ -291,11 +283,29 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
         dialog.destroy();
     });
     btnsElement[2].addEventListener("click", () => {
+        cb(dialog, removeAttrs);
+    });
+    dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
+        if (focusName === item.getAttribute("data-name")) {
+            item.focus();
+        }
+        bindAttrInput(item, btnsElement[2]);
+    });
+}
+
+export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark") => {
+    genAttr(attrs, focusName, (dialog, removeAttrs) => {
         let nodeAttrHTML = "";
         let errorTip = "";
         const attrsResult: IObject = {};
-        dialog.element.querySelectorAll(".fn__flex-1").forEach((item: HTMLInputElement) => {
-            const name = item.getAttribute("data-name") || ("custom-" + (item.previousElementSibling.previousElementSibling as HTMLInputElement).value);
+        dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
+            let name = item.getAttribute("data-name");
+            if (!name) {
+                if (item.tagName === "INPUT") {
+                    return;
+                }
+                name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value
+            }
             if (item.value.trim()) {
                 if (!/^[0-9a-zA-Z\-]*$/.test(name.replace("custom-", "")) || name === "custom-") {
                     errorTip += name.replace("custom-", "") + ", ";
@@ -346,13 +356,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
             /// #endif
         });
         dialog.destroy();
-    });
-    dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-        if (focusName === item.getAttribute("data-name")) {
-            item.focus();
-        }
-        bindAttrInput(item, btnsElement[2]);
-    });
+    })
 };
 
 export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "bookmark") => {
@@ -360,149 +364,19 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
         return;
     }
     const id = nodeElement.getAttribute("data-node-id");
-    const range = getEditorRange(nodeElement);
     fetchPost("/api/attr/getBlockAttrs", {id}, (response) => {
-        let customHTML = "";
-        let notifyHTML = "";
-        Object.keys(response.data).forEach(item => {
-            if (item === "custom-reminder-wechat") {
-                notifyHTML = `<label class="fn__flex customItem">
-    <span class="ft__on-surface fn__flex-center fn__ellipsis" style="text-align: right;width: 100px">${window.siyuan.languages.wechatReminder}</span>
-    <div class="fn__space"></div>
-    <input class="b3-text-field fn__flex-1" type="datetime-local" readonly data-name="${item}" value="${dayjs(response.data[item]).format("YYYY-MM-DDTHH:mm")}">
-    <div class="fn__space"></div>
-    <span class="block__icon fn__flex-center" style="opacity: 1;"><svg></svg></span>
-</label><div class="fn__hr--b"></div>`;
-            } else if (item.indexOf("custom") > -1 && item !== "custom-reminder-wechat") {
-                customHTML += `<label class="fn__flex customItem">
-    <span class="ft__on-surface fn__flex-center fn__ellipsis" style="text-align: right;width: 100px" title="${item.replace("custom-", "")}">${item.replace("custom-", "")}</span>
-    <div class="fn__space"></div>
-    <textarea class="b3-text-field fn__flex-1" rows="1" data-name="${item}">${response.data[item]}</textarea>
-    <div class="fn__space"></div>
-    <span data-action="remove" class="block__icon fn__flex-center" style="opacity: 1;"><svg><use xlink:href="#iconMin"></use></svg></span>
-</label><div class="fn__hr--b"></div>`;
-            }
-        });
-        const dialog = new Dialog({
-            width: isMobile() ? "80vw" : "50vw",
-            title: window.siyuan.languages.attr,
-            content: `<div class="b3-dialog__content custom-attr">
-    <div class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.bookmark}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" data-name="bookmark">
-        <div class="fn__space"></div>
-        <span data-action="bookmark" class="block__icon fn__flex-center" style="opacity: 1;"><svg><use xlink:href="#iconDown"></use></svg></span>
-    </div>
-    <div class="fn__hr--b"></div>
-    <label class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.name}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" data-name="name">
-        <div class="fn__space"></div>
-        <span class="block__icon fn__flex-center"><svg></svg></span>
-    </label>
-    <div class="fn__hr--b"></div>
-    <label class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.alias}</span>
-        <div class="fn__space"></div>
-        <input class="b3-text-field fn__flex-1" data-name="alias">
-        <div class="fn__space"></div>
-        <span class="block__icon fn__flex-center"><svg></svg></span>
-    </label>
-    <div class="fn__hr--b"></div>
-    <label class="fn__flex">
-        <span class="ft__on-surface fn__flex-center" style="text-align: right;white-space: nowrap;width: 100px">${window.siyuan.languages.memo}</span>
-        <div class="fn__space"></div>
-        <textarea class="b3-text-field fn__flex-1" rows="2" data-name="memo">${response.data.memo || ""}</textarea>
-        <div class="fn__space"></div>
-        <span class="block__icon fn__flex-center"><svg></svg></span>
-    </label>
-    <div style="background-color: var(--b3-theme-surface-lighter);height: 1px;margin: 16px 0;"></div>
-    <div class="custom-attr__add">
-        ${notifyHTML}
-        ${customHTML}
-        <button class="b3-button b3-button--outline" style="width: 100px">
-            <svg><use xlink:href="#iconAdd"></use></svg>
-            ${window.siyuan.languages.addAttr}
-        </button>
-    </div>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-            destroyCallback() {
-                focusByRange(range);
-            }
-        });
-        (dialog.element.querySelector('.b3-text-field[data-name="bookmark"]') as HTMLInputElement).value = response.data.bookmark || "";
-        (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = response.data.name || "";
-        (dialog.element.querySelector('.b3-text-field[data-name="alias"]') as HTMLInputElement).value = response.data.alias || "";
-        const removeAttrs: string[] = [];
-        dialog.element.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement;
-            const actionElement = hasClosestByClassName(target, "block__icon");
-            if (!actionElement) {
-                return;
-            }
-            switch (actionElement.getAttribute("data-action")) {
-                case "remove":
-                    if (actionElement.parentElement.firstElementChild.tagName === "SPAN") {
-                        removeAttrs.push(actionElement.parentElement.querySelector("textarea").getAttribute("data-name"));
-                    }
-                    actionElement.parentElement.nextElementSibling.remove();
-                    actionElement.parentElement.remove();
-                    break;
-                case "bookmark":
-                    fetchPost("/api/attr/getBookmarkLabels", {}, (response) => {
-                        window.siyuan.menus.menu.remove();
-                        if (response.data.length === 0) {
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                iconHTML: Constants.ZWSP,
-                                label: window.siyuan.languages.emptyContent,
-                                type: "readonly",
-                            }).element);
-                        } else {
-                            response.data.forEach((item: string) => {
-                                window.siyuan.menus.menu.append(new MenuItem({
-                                    label: item,
-                                    click() {
-                                        actionElement.parentElement.querySelector("input").value = item;
-                                    }
-                                }).element);
-                            });
-                        }
-                        window.siyuan.menus.menu.element.style.zIndex = "310";
-                        window.siyuan.menus.menu.element.classList.add("b3-menu--list");
-                        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
-                    });
-                    break;
-            }
-        });
-        const btnsElement = dialog.element.querySelectorAll(".b3-button");
-        btnsElement[0].addEventListener("click", () => {
-            btnsElement[0].insertAdjacentHTML("beforebegin", `<div class="fn__flex customItem">
-    <input placeholder="${window.siyuan.languages.attrName}" class="b3-text-field" style="width: 100px;text-align: right">
-    <div class="fn__space"></div>
-    <textarea class="b3-text-field fn__flex-1" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
-    <div class="fn__space"></div>
-    <span data-action="remove" class="block__icon fn__flex-center" style="opacity: 1;"><svg><use xlink:href="#iconMin"></use></svg></span>
-</div><div class="fn__hr--b"></div>`);
-            const inputElements = dialog.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
-            inputElements[inputElements.length - 2].focus();
-            bindAttrInput(inputElements[inputElements.length - 1], btnsElement[2]);
-            bindAttrInput(inputElements[inputElements.length - 2], btnsElement[2]);
-        });
-        btnsElement[1].addEventListener("click", () => {
-            dialog.destroy();
-        });
-        btnsElement[2].addEventListener("click", () => {
+        genAttr(response.data, focusName, (dialog, removeAttrs) => {
             let nodeAttrHTML = "";
             const oldHTML = nodeElement.outerHTML;
             let errorTip = "";
-            dialog.element.querySelectorAll(".fn__flex-1").forEach((item: HTMLInputElement) => {
-                const name = item.getAttribute("data-name") || ("custom-" + (item.previousElementSibling.previousElementSibling as HTMLInputElement).value);
+            dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
+                let name = item.getAttribute("data-name");
+                if (!name) {
+                    if (item.tagName === "INPUT") {
+                        return;
+                    }
+                    name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value
+                }
                 if (item.value.trim()) {
                     if (!/^[0-9a-zA-Z\-]*$/.test(name.replace("custom-", "")) || name === "custom-") {
                         errorTip += name.replace("custom-", "") + ", ";
@@ -555,13 +429,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
             dialog.destroy();
-        });
-        dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-            if (focusName === item.getAttribute("data-name")) {
-                item.focus();
-            }
-            bindAttrInput(item, btnsElement[2]);
-        });
+        })
     });
 };
 

@@ -31,6 +31,7 @@
 @import "viewerjs/viewer";
 @import "business/export";
 @import "business/card";
+@import "business/custom";
 
 /*
 .status: 2
@@ -127,22 +128,6 @@ html {
     &:hover {
       border-radius: 16px;
       background-color: var(--b3-theme-surface-light);
-    }
-  }
-}
-
-.custom-attr {
-  .b3-text-field {
-    border: 0;
-  }
-
-  &__add {
-    overflow: auto;
-    height: 30vh;
-    padding: 4px 0 4px 4px;
-
-    &::-webkit-scrollbar {
-      display: none;
     }
   }
 }

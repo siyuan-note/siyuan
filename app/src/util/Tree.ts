@@ -82,7 +82,7 @@ data-treetype="${item.type}"
 data-type="${item.nodeType}" 
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
-    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${(item.type === "backlink" || hasChild) ? " b3-list-item__toggle--hl" : ""}${hasChild||item.type === "backlink" ? "" : " fn__hidden"}">
+    <span style="padding-left: ${(item.depth - 1) * 14 + 22}px;margin-right: 2px" class="b3-list-item__toggle${(item.type === "backlink" || hasChild) ? " b3-list-item__toggle--hl" : ""}${hasChild||item.type === "backlink" ? "" : " fn__hidden"}">
         <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow${hasChild ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
@@ -128,7 +128,7 @@ data-type="${item.type}"
 data-subtype="${item.subType}" 
 data-treetype="${type}"
 data-def-path="${item.defPath}">
-    <span style="padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}${item.children ? "" : " fn__hidden"}">
+    <span style="padding-left: ${(item.depth - 1) * 14 + 22}px;margin-right: 2px" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}${item.children ? "" : " fn__hidden"}">
         <svg data-id="${item.id}" class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}

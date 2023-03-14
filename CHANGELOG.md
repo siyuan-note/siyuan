@@ -1,3 +1,31 @@
+## v2.7.10 / 2023-03-14
+
+### 改进功能
+
+* [浏览器端不显示 `退出应用`](https://github.com/siyuan-note/siyuan/issues/7618)
+* [升级 Mermaid 以支持 timeline 和 mindmap](https://github.com/siyuan-note/siyuan/issues/7619)
+* [表格和有内容的段落块中插入多个文件时不进行分块](https://github.com/siyuan-note/siyuan/issues/7624)
+* [点击搜索项将依次高亮该结果中的多个关键字](https://github.com/siyuan-note/siyuan/pull/7629)
+* [表格中插入图片时偶尔会多一个空行](https://github.com/siyuan-note/siyuan/issues/7631)
+* [移动端软键盘顶部工具栏遮挡编辑位置](https://github.com/siyuan-note/siyuan/issues/7632)
+* [反链提及搜索范围增加命名、别名和备注](https://github.com/siyuan-note/siyuan/issues/7639)
+* [人工智能插入公式块、代码块和图表块后自动进行渲染](https://github.com/siyuan-note/siyuan/issues/7643)
+* [代码片段设置界面用户体验优化](https://github.com/siyuan-note/siyuan/issues/7647)
+* [部分图标改进](https://github.com/siyuan-note/siyuan/issues/7650)
+* [Linux 端打开多工作空间托盘无法关闭](https://github.com/siyuan-note/siyuan/issues/7653)
+* [表格块写入数据库表时在单元格之间添加空格](https://github.com/siyuan-note/siyuan/issues/7654)
+
+### 移除功能
+
+* [移除 设置 - 搜索 - 虚拟引用 - 关键字数量限制](https://github.com/siyuan-note/siyuan/issues/7634)
+
+### 修复缺陷
+
+* [使用 Markdown 标记符嵌套行级元素后被还原为纯文本](https://github.com/siyuan-note/siyuan/issues/7637)
+* [闪卡管理分页失效](https://github.com/siyuan-note/siyuan/issues/7638)
+* [集市包更新下载进度显示问题](https://github.com/siyuan-note/siyuan/issues/7640)
+* [搜索中指定路径选为文档时搜索结果不包含子文档](https://github.com/siyuan-note/siyuan/issues/7642)
+
 ## v2.7.9 / 2023-03-10
 
 ### 改进功能

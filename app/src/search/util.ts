@@ -1121,24 +1121,24 @@ const renderNextSearchMark = (options: {
     edit: Protyle,
     target: Element,
 }) => {
-    let matchElement
+    let matchElement;
     const allMatchElements = Array.from(options.edit.protyle.wysiwyg.element.querySelectorAll(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`));
     allMatchElements.find((item, itemIndex) => {
         if (item.classList.contains("search-mark--hl")) {
-            item.classList.remove("search-mark--hl")
-            matchElement = allMatchElements[itemIndex + 1]
+            item.classList.remove("search-mark--hl");
+            matchElement = allMatchElements[itemIndex + 1];
             return;
         }
-    })
+    });
     if (!matchElement) {
-        matchElement = allMatchElements[0]
+        matchElement = allMatchElements[0];
     }
     if (matchElement) {
         matchElement.classList.add("search-mark--hl");
         const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
         options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
     }
-}
+};
 const getArticle = (options: {
     id: string,
     k: string,

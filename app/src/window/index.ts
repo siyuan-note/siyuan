@@ -9,7 +9,6 @@ import {fetchGet, fetchPost} from "../util/fetch";
 import {addBaseURL, setNoteBook} from "../util/pathName";
 import {openFileById} from "../editor/util";
 import {
-    downloadProgress,
     processSync, progressBackgroundTask,
     progressLoading,
     progressStatus,

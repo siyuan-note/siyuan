@@ -106,7 +106,7 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         range.collapse(false);
     }
     // https://github.com/siyuan-note/siyuan/issues/7624
-    const nodeElement = hasClosestBlock(range.startContainer)
+    const nodeElement = hasClosestBlock(range.startContainer);
     if (nodeElement) {
         if (nodeElement.classList.contains("table")) {
             insertBlock = false;

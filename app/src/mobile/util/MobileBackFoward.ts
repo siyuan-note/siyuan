@@ -8,6 +8,7 @@ import {highlightRender} from "../../protyle/markdown/highlightRender";
 import {blockRender} from "../../protyle/markdown/blockRender";
 import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
 import {setStorageVal} from "../../protyle/util/compatibility";
+import {closePanel} from "./closePanel";
 
 const forwardStack: IBackStack[] = [];
 
@@ -112,6 +113,9 @@ export const goBack = () => {
     if (window.JSAndroid) {
         if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") && !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
             window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+            return;
+        } else if (document.getElementById("model").style.top === "0px") {
+            closePanel();
             return;
         } else if (window.siyuan.backStack.length < 1) {
             window.JSAndroid.returnDesktop();

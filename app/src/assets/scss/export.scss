@@ -2,6 +2,7 @@
 @import "component/tooltips";
 @import "component/typography";
 @import "protyle/wysiwyg";
+@import "protyle/attr";
 @import "util/function";
 @import "business/history";
 @import "component/button";
@@ -31,41 +32,4 @@ svg {
 
 .b3-typography table, .protyle-wysiwyg table {
   display: table;
-}
-
-.protyle-attr {
-  position: absolute;
-  right: 0;
-  top: -9px;
-  display: flex;
-  opacity: 0;
-  font-size: 12px;
-  font-weight: normal;
-
-  & > div.protyle-attr--bookmark {
-    flex: 1;
-  }
-
-  & > div:not(.protyle-attr--refcount) {
-    margin: 0 4px;
-    display: flex;
-    align-items: center;
-    line-height: 16px;
-    color: var(--b3-theme-on-surface);
-
-    &:hover {
-      color: var(--b3-theme-on-background);
-    }
-
-    svg {
-      height: 12px;
-      width: 12px;
-      margin: 2px 2px 0 0;
-      float: left;
-    }
-  }
-
-  &:empty {
-    display: none;
-  }
 }

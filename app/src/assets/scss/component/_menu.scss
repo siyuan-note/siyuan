@@ -7,11 +7,23 @@
   padding: 8px;
   z-index: 210;
   max-height: 80vh;
-  overflow: auto;
+  overflow: overlay;
   box-sizing: border-box;
 
   &::-webkit-scrollbar {
-    display: none;
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    box-sizing: content-box;
+    border: 1.5px solid transparent;
+    border-radius: 5px;
+    box-shadow: inset 0 0 2px 2px var(--b3-scroll-color);
+
+    &:hover {
+      border-width: 0.5px;
+    }
   }
 
   &--fullscreen {

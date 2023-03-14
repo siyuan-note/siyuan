@@ -374,6 +374,13 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	webdav.Endpoint = strings.TrimSpace(webdav.Endpoint)
 	webdav.Endpoint = util.NormalizeEndpoint(webdav.Endpoint)
+
+	// 不支持配置坚果云 WebDAV 进行同步 https://github.com/siyuan-note/siyuan/issues/7657
+	if strings.Contains(strings.ToLower(webdav.Endpoint), "dav.jianguoyun.com") {
+		err = errors.New(Conf.Language(194))
+		return
+	}
+
 	webdav.Username = strings.TrimSpace(webdav.Username)
 	webdav.Password = strings.TrimSpace(webdav.Password)
 	webdav.Timeout = util.NormalizeTimeout(webdav.Timeout)

@@ -1116,6 +1116,7 @@
     "190": "Un problème a été trouvé lors de la validation de l'index, qui a été automatiquement corrigé",
     "191": "[%d/%d] Création d'un index de données historiques",
     "192": "Reconstruction de l'index des données historiques, veuillez patienter...",
-    "193": "Veuillez vous référer au chapitre [Intelligence Artificielle] du guide de l'utilisateur pour la configuration"
+    "193": "Veuillez vous référer au chapitre [Intelligence Artificielle] du guide de l'utilisateur pour la configuration",
+    "194": "Il existe des restrictions sur l'interface Nutstore, veuillez utiliser d'autres services WebDAV"
   }
 }

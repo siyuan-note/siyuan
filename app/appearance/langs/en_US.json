@@ -1116,6 +1116,7 @@
     "190": "A problem was found while validating the index, which has been automatically fixed",
     "191": "[%d/%d] Created historical data index",
     "192": "Rebuilding historical data index, please wait...",
-    "193": "Please refer to the [Artificial Intelligence] chapter of the User Guide for configuration"
+    "193": "Please refer to the [Artificial Intelligence] chapter of the User Guide for configuration",
+    "194": "There are restrictions on the Nutstore interface, please use other WebDAV services"
   }
 }

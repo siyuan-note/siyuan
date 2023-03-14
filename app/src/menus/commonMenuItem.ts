@@ -162,6 +162,9 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
     let notifyHTML = "";
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     Object.keys(attrs).forEach(item => {
+        if ("custom-riff-decks" === item) {
+            return;
+        }
         if (item === "custom-reminder-wechat") {
             notifyHTML = `<label class="b3-label b3-label--noborder">
     ${window.siyuan.languages.wechatReminder}
@@ -294,7 +297,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
 }
 
 export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark") => {
-    genAttr(attrs, focusName, (dialog, removeAttrs) => {
+    genAttr(attrs, focusName, (dialog) => {
         let nodeAttrHTML = "";
         let errorTip = "";
         const attrsResult: IObject = {};

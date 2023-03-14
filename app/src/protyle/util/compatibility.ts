@@ -139,7 +139,7 @@ export const hotKey2Electron = (key: string) => {
     return electronKey + key.substr(key.length - 1);
 };
 
-export const getLocalStorage = (cb:()=>void) => {
+export const getLocalStorage = (cb: () => void) => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
         window.siyuan.storage = response.data;
         // 历史数据迁移
@@ -204,15 +204,16 @@ export const getLocalStorage = (cb:()=>void) => {
             }
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
+        defaultStorage[Constants.LOCAL_SEARCHEKEY] = "";
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHEKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
             Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHEDATA,
-            Constants.LOCAL_ZOOM,].forEach((key) => {
+            Constants.LOCAL_ZOOM, Constants.LOCAL_SEARCHEKEY].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     window.siyuan.storage[key] = Object.assign(defaultStorage[key], JSON.parse(response.data[key]));
                 } catch (e) {
-                    window.siyuan.storage[key] = defaultStorage[key];
+                    window.siyuan.storage[key] = key === Constants.LOCAL_SEARCHEKEY ? (response.data[key] || "") : defaultStorage[key];
                 }
             } else if (typeof response.data[key] === "undefined") {
                 window.siyuan.storage[key] = defaultStorage[key];

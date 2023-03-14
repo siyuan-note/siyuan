@@ -46,7 +46,7 @@ export const toolbarSearchEvent = () => {
 const initToolbarSearch = () => {
     const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     inputElement.focus();
-    inputElement.value = window.siyuan.storage[Constants.LOCAL_SEARCHEKEY];
+    inputElement.value = window.siyuan.storage[Constants.LOCAL_SEARCHEKEY] || "";
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;

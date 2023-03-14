@@ -525,7 +525,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
                 const inlineElement = hasClosestByAttribute(range.startContainer, "data-type", null);
-                if (inlineElement) {
+                if (inlineElement && inlineElement.tagName === "SPAN") {
                     const types = inlineElement.getAttribute("data-type").split(" ");
                     if (types.length > 0) {
                         protyle.toolbar.range = range;

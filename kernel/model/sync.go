@@ -505,6 +505,8 @@ func formatErrorMsg(err error) string {
 		msg = Conf.Language(189)
 	} else if errors.Is(err, dejavu.ErrRepoFatalErr) {
 		msg = Conf.Language(23)
+	} else if errors.Is(err, cloud.ErrSystemTimeIncorrect) {
+		msg = Conf.Language(195)
 	} else {
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {

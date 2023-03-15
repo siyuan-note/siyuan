@@ -279,6 +279,12 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/siyuan-note/dejavu v0.0.0-20230315030141-aa009a045727 h1:FkwDzml+y1Vr0KBMdO4AU7/t+1grcSq/RA4xub9F6LU=
 github.com/siyuan-note/dejavu v0.0.0-20230315030141-aa009a045727/go.mod h1:KUsHkTYpibU30rUArZOakCCHF1SGHQlxPWUu2LqW72s=
+github.com/siyuan-note/dejavu v0.0.0-20230315033328-1ba6b15d02ba h1:GJUcrnYvt92w3VIO+8RaiYzDyl9EYucm6XO+i8amxh4=
+github.com/siyuan-note/dejavu v0.0.0-20230315033328-1ba6b15d02ba/go.mod h1:KUsHkTYpibU30rUArZOakCCHF1SGHQlxPWUu2LqW72s=
+github.com/siyuan-note/dejavu v0.0.0-20230315033551-2d5f5db2919f h1:Aqrf755AR9zGMFYAfLyZ1kIdQi5x2c8YXGxLULNHD6M=
+github.com/siyuan-note/dejavu v0.0.0-20230315033551-2d5f5db2919f/go.mod h1:KUsHkTYpibU30rUArZOakCCHF1SGHQlxPWUu2LqW72s=
+github.com/siyuan-note/dejavu v0.0.0-20230315034343-e9513a7e1999 h1:t4FSwNVaa2CJbAIJNyF5egCdgqAeBDbP0WmGXcPBbGs=
+github.com/siyuan-note/dejavu v0.0.0-20230315034343-e9513a7e1999/go.mod h1:KUsHkTYpibU30rUArZOakCCHF1SGHQlxPWUu2LqW72s=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b h1:828lTUW2C0uNiolODqoACu7J8sDUzswD4Xo04mUombg=

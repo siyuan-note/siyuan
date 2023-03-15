@@ -1117,6 +1117,7 @@
     "191": "[%d/%d] Índice de datos históricos creado",
     "192": "Reconstruyendo el índice de datos históricos, espere...",
     "193": "Consulte el capítulo [Inteligencia artificial] de la guía del usuario para la configuración",
-    "194": "Existen restricciones en la interfaz de Nutstore, utilice otros servicios WebDAV"
+    "194": "Existen restricciones en la interfaz de Nutstore, utilice otros servicios WebDAV",
+    "195": "La hora del sistema es incorrecta, calibre la hora del sistema y vuelva a intentarlo"
   }
 }

@@ -93,6 +93,23 @@ func AddAttributeViewColumn(name string, typ string, columnIndex int, avID strin
 	return
 }
 
+func RemoveAttributeViewColumn(columnID string, avID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	for i, column := range attrView.Columns[1:] {
+		if column.ID == columnID {
+			attrView.Columns = append(attrView.Columns[:i], attrView.Columns[i+1:]...)
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {

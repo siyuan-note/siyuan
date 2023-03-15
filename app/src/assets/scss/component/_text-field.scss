@@ -10,7 +10,7 @@
   background-color: var(--b3-theme-background);
 
   &:hover {
-    border-color: var(--b3-theme-on-background);
+    box-shadow: inset 0 0 0 .4px var(--b3-theme-on-background);
   }
 
   &:focus {

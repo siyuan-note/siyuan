@@ -430,7 +430,7 @@ export class Breadcrumb {
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
 </span>`;
                 } else {
-                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}"${response.data.length === 1 ? ' style="max-width:none"' : ""}>
+                    html += `<span class="protyle-breadcrumb__item${isCurrent ? " protyle-breadcrumb__item--active" : ""}" data-node-id="${item.id}"${(response.data.length === 1 || index === 0) ? ' style="max-width:none"' : ""}>
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
     <span class="protyle-breadcrumb__text" title="${item.name}">${item.name}</span>
 </span>`;
@@ -446,25 +446,22 @@ export class Breadcrumb {
                 return;
             }
             let jump = false;
-            while (this.element.scrollHeight > 30 && !jump) {
+            while (this.element.scrollHeight > 30 && !jump && itemElements.length > 1) {
                 itemElements.find((item, index) => {
-                    if (itemElements.length === 1) {
-                        item.classList.add("protyle-breadcrumb__text--ellipsis");
-                        jump = true;
-                        return true;
-                    }
-                    if (!item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
-                        item.classList.add("protyle-breadcrumb__text--ellipsis");
-                        return true;
-                    }
-                    if (index === itemElements.length - 1 && item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
-                        jump = true;
+                    if (index > 0) {
+                        if (!item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
+                            item.classList.add("protyle-breadcrumb__text--ellipsis");
+                            return true;
+                        }
+                        if (index === itemElements.length - 1 && item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
+                            jump = true;
+                        }
                     }
                 });
             }
             this.element.classList.add("protyle-breadcrumb__bar--nowrap");
             if (this.element.lastElementChild) {
-                this.element.scrollLeft = (this.element.lastElementChild as HTMLElement).offsetLeft - this.element.clientWidth - 8;
+                this.element.scrollLeft = (this.element.lastElementChild as HTMLElement).offsetLeft - this.element.clientWidth + 14;
             }
         });
     }

@@ -73,7 +73,23 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 	return
 }
 
-func AddAttributeViewColumn(name string, typ string, columnIndex int, avID string) (err error) {
+func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
+	err := addAttributeViewColumn(operation.Name, operation.Typ, 1024, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
+	err := removeAttributeViewColumn(operation.ID, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func addAttributeViewColumn(name string, typ string, columnIndex int, avID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
@@ -93,7 +109,7 @@ func AddAttributeViewColumn(name string, typ string, columnIndex int, avID strin
 	return
 }
 
-func RemoveAttributeViewColumn(columnID string, avID string) (err error) {
+func removeAttributeViewColumn(columnID string, avID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return

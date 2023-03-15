@@ -24,31 +24,19 @@
   }
 
   &--border {
-    div {
+
+    .b3-list__panel {
       margin-left: 34px;
       position: relative;
     }
 
-    & > div div:before {
+    .b3-list__panel:before {
       content: "";
       height: 100%;
-      top: 0;
-      position: absolute;
-      border-left: 1px solid var(--b3-theme-background-light);
-      left: -47px;
-    }
-
-    & > div label:before {
-      content: "";
-      height: 100%;
-      top: 0;
+      top: 0px;
       position: absolute;
       border-left: 1px solid var(--b3-theme-background-light);
       left: -21px;
-    }
-
-    .b3-list-item__text {
-      padding-left: 4px;
     }
   }
 

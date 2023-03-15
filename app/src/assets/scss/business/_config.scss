@@ -10,6 +10,7 @@
       margin: 0 24px;
     }
   }
+
   &__panel {
     & > .b3-tab-bar {
       user-select: none;
@@ -148,9 +149,30 @@
     }
   }
 
-  &-keymap li .b3-text-field {
-    width: 124px;
-    text-align: center;
+  &-keymap {
+    &__key {
+      padding: 2px 4px;
+      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      line-height: 1;
+      color: var(--b3-theme-on-surface);
+      vertical-align: middle;
+      background-color: var(--b3-theme-surface);
+      border: solid 1px var(--b3-theme-surface-lighter);
+      border-radius: 3px;
+      box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
+      margin-left: 4px;
+      cursor: pointer;
+      height: 14px;
+      min-width: 17px;
+    }
+
+    .b3-list__panel .b3-text-field {
+      margin-left: 4px;
+    }
+
+    div.b3-list-item > .b3-list-item__text {
+      padding-left: 4px;
+    }
   }
 
   &-bazaar__readme {

@@ -22,10 +22,6 @@
         flex-direction: column;
         min-height: 100%;
       }
-
-      .b3-form__icona {
-        margin-top: 8px;
-      }
     }
 
     &__item {
@@ -36,9 +32,28 @@
       .b3-slider,
       & > .b3-button,
       & > .b3-tooltips,
-      &-line {
+      & > .b3-form__icona,
+      &-line,
+      .searchByKeyLabel {
         width: 100%;
         margin-top: 8px;
+      }
+    }
+
+    &-keymap {
+      label.b3-list-item {
+        flex-wrap: wrap;
+      }
+
+      .b3-list-item__action {
+        display: flex;
+      }
+
+      .config-keymap__key,
+      .b3-text-field {
+        width: 100%;
+        margin-left: 0 !important;
+        text-align: center;
       }
     }
   }

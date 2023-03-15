@@ -56,7 +56,7 @@ ${window.siyuan.languages.account2}
 <div class="b3-form__icon fn__block">
    <svg class="ft__secondary b3-form__icon-icon"><use xlink:href="#iconVIP"></use></svg>
    <input class="b3-text-field fn__block b3-form__icon-input" style="padding-right: 44px;" placeholder="${window.siyuan.languages.activationCodePlaceholder}">
-   <button id="activationCode" class="b3-button b3-button--white" style="position: absolute;right: 1px;top: 1px;height: 25px;">${window.siyuan.languages.confirm}</button>
+   <button id="activationCode" class="b3-button b3-button--text" style="position: absolute;right: 0;top: 0;">${window.siyuan.languages.confirm}</button>
 </div>`;
             if (window.siyuan.user.userSiYuanProExpireTime === -1) {
                 activeSubscriptionHTML = "";

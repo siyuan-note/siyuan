@@ -19,13 +19,14 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/88250/lute/parse"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
+	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -166,6 +167,12 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	}
 
 	for name, value := range nameValues {
+		if strings.HasPrefix(name, "av") {
+			// 属性视图设置的属性值可以为空
+			node.SetIALAttr(name, value)
+			continue
+		}
+
 		if "" == value {
 			node.RemoveIALAttr(name)
 		} else {

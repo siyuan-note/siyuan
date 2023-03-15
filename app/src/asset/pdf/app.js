@@ -665,7 +665,8 @@ class PDFViewerApplication {
   }
 
   get loadingBar () {
-    const bar = new ProgressBar('loadingBar')
+    // NOTE
+    const bar = new ProgressBar(this.appConfig.appContainer.querySelector("#loadingBar"))
     return shadow(this, 'loadingBar', bar)
   }
 

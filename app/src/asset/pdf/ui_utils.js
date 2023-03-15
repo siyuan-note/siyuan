@@ -699,8 +699,8 @@ class ProgressBar {
 
   #visible = true;
 
-  constructor(id) {
-    const bar = document.getElementById(id);
+  // NOTE
+  constructor(bar) {
     this.#classList = bar.classList;
   }
 
@@ -738,6 +738,7 @@ class ProgressBar {
     this.#visible = false;
     // NOTE
     this.#classList.add("fn__hidden");
+    docStyle.setProperty("--progressBar-percent", "0");
   }
 
   show() {

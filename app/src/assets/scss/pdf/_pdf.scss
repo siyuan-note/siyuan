@@ -248,7 +248,6 @@
   position: absolute;
   height: 4px;
   background-color: var(--b3-theme-on-background);
-  border-bottom: 1px solid var(--b3-theme-surface-lighter);
   transition-duration: 200ms;
   transition-timing-function: ease;
   z-index: 1;
@@ -273,7 +272,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 0%;
+  width: var(--progressBar-percent);
   height: 100%;
   background-color: var(--b3-theme-primary-light);
   overflow: hidden;

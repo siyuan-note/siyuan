@@ -35,11 +35,15 @@
       flex: 1;
 
       & > span {
-        display: block;
+        display: flex;
         color: var(--b3-theme-on-surface);
         text-align: center;
         font-size: 12px;
         margin-bottom: 8px;
+        height: 28px;
+        line-height: 14px;
+        justify-content: center;
+        align-items: center;
       }
     }
   }

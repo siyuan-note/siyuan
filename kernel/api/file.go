@@ -110,6 +110,33 @@ func getFile(c *gin.Context) {
 	}
 }
 
+func removeFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	filePath := arg["path"].(string)
+	filePath = filepath.Join(util.WorkspaceDir, filePath)
+	_, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		c.Status(404)
+		return
+	}
+	if nil != err {
+		logging.LogErrorf("stat [%s] failed: %s", filePath, err)
+		c.Status(500)
+		return
+	}
+
+	if err = os.RemoveAll(filePath); nil != err {
+		c.Status(500)
+		return
+	}
+}
+
 func putFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

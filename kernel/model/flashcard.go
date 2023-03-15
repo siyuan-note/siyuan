@@ -233,7 +233,7 @@ type Flashcard struct {
 func newFlashcard(card riff.Card, blockID, deckID string, now time.Time) *Flashcard {
 	nextDues := map[riff.Rating]string{}
 	for rating, due := range card.NextDues() {
-		nextDues[rating] = strings.TrimSpace(util.HumanizeRelTime(due, now, Conf.Lang))
+		nextDues[rating] = strings.TrimSpace(util.HumanizeDiffTime(due, now, Conf.Lang))
 	}
 
 	return &Flashcard{

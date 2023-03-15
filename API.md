@@ -38,6 +38,7 @@
 * [File](#File)
     * [Get file](#Get-file)
     * [Put file](#Put-file)
+    * [Remove file](#Remove-file)
 * [Export](#Export)
     * [Export Markdown](#Export-Markdown)
 * [Notification](#Notification)
@@ -439,7 +440,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-    * `id`：Block ID
+    * `id`: Block ID
 * Return value
 
   ```json
@@ -854,7 +855,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     * `isDir`: whether to create a folder, when `true` only create a folder, ignore `file`
     * `modTime`: last access and modification time, Unix time
     * `file`: the uploaded file
-* return value
+* Return value
 
    ```json
    {
@@ -863,6 +864,28 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
      "data": null
    }
    ```
+
+### Remove file
+
+* `/api/file/removeFile`
+* Parameters
+
+  ```json
+  {
+    "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+  }
+  ```
+  * `path`: the file path under the workspace path
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
 
 ## Export
 
@@ -946,7 +969,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     }
   }
   ```
-    * `id`：Message ID
+    * `id`: Message ID
 
 ## System
 

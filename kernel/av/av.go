@@ -54,7 +54,7 @@ func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
 		Spec:        0,
 		ID:          id,
-		Columns:     []*Column{&Column{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
+		Columns:     []*Column{{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
 		Rows:        []*Row{},
 		Type:        AttributeViewTypeTable,
 		Projections: []string{},

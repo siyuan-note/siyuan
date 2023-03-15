@@ -218,6 +218,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
 			ret = tx.doRemoveAttrViewBlock(op)
+		case "addAttrViewCol":
+			ret = tx.doAddAttrViewColumn(op)
+		case "removeAttrViewCol":
+			ret = tx.doRemoveAttrViewColumn(op)
 		}
 
 		if nil != ret {
@@ -1026,8 +1030,11 @@ type Operation struct {
 	ParentID   string      `json:"parentID"`
 	PreviousID string      `json:"previousID"`
 	NextID     string      `json:"nextID"`
-	SrcIDs     []string    `json:"srcIDs"` // 用于将块拖拽到属性视图中
 	RetData    interface{} `json:"retData"`
+
+	SrcIDs []string `json:"srcIDs"` // 用于将块拖拽到属性视图中
+	Name   string   `json:"name"`   // 用于属性视图列名
+	Typ    string   `json:"type"`   // 用于属性视图列类型
 
 	discard bool // 用于标识是否在事务合并中丢弃
 }

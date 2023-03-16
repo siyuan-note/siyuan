@@ -147,7 +147,7 @@ func CheckFileSysStatus() {
 		os.Exit(ExitCodeFileSysInconsistent)
 	}
 
-	const fileSysStatusCheckFile = "filesys_status_check"
+	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"
 
 	for {
 		workspaceDirLower := strings.ToLower(WorkspaceDir)
@@ -168,7 +168,7 @@ func CheckFileSysStatus() {
 			continue
 		}
 
-		for i := 0; i < 16; i++ {
+		for i := 0; i < 32; i++ {
 			tmp := filepath.Join(dir, "check_"+gulu.Rand.String(7))
 			data := make([]byte, 1024*4)
 			_, err := rand.Read(data)
@@ -184,7 +184,7 @@ func CheckFileSysStatus() {
 
 			time.Sleep(time.Second)
 
-			for j := 0; j < 64; j++ {
+			for j := 0; j < 32; j++ {
 				f, err := os.Open(tmp)
 				if nil != err {
 					reportFileSysFatalError(err)
@@ -196,35 +196,35 @@ func CheckFileSysStatus() {
 					break
 				}
 
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(200 * time.Millisecond)
 
 				if err = os.Rename(tmp, tmp+"_1"); nil != err {
 					reportFileSysFatalError(err)
 					break
 				}
 
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(200 * time.Millisecond)
 				if err = os.Rename(tmp+"_1", tmp); nil != err {
 					reportFileSysFatalError(err)
 					break
 				}
-			}
 
-			entries, err := os.ReadDir(dir)
-			if nil != err {
-				reportFileSysFatalError(err)
-				break
-			}
-
-			count := 0
-			for _, entry := range entries {
-				if !entry.IsDir() && strings.Contains(entry.Name(), "check_") {
-					count++
+				entries, err := os.ReadDir(dir)
+				if nil != err {
+					reportFileSysFatalError(err)
+					break
 				}
-			}
-			if 1 < count {
-				reportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file", dir))
-				break
+
+				count := 0
+				for _, entry := range entries {
+					if !entry.IsDir() && strings.Contains(entry.Name(), "check_") {
+						count++
+					}
+				}
+				if 1 < count {
+					reportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file", dir))
+					break
+				}
 			}
 
 			if err = os.RemoveAll(tmp); nil != err {

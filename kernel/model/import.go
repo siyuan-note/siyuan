@@ -38,6 +38,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/html/atom"
@@ -702,6 +703,23 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	IncSync()
 	util.ReloadUI()
 	debug.FreeOSMemory()
+	return
+}
+
+func parseStdMd(markdown []byte) (ret *parse.Tree) {
+	luteEngine := lute.New()
+	luteEngine.SetFootnotes(false)
+	luteEngine.SetToC(false)
+	luteEngine.SetIndentCodeBlock(false)
+	luteEngine.SetAutoSpace(false)
+	luteEngine.SetHeadingID(false)
+	luteEngine.SetSetext(false)
+	luteEngine.SetYamlFrontMatter(false)
+	luteEngine.SetLinkRef(false)
+	luteEngine.SetGFMAutoLink(false) // 导入 Markdown 时不自动转换超链接 https://github.com/siyuan-note/siyuan/issues/7682
+	luteEngine.SetImgPathAllowSpace(true)
+	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
+	genTreeID(ret)
 	return
 }
 

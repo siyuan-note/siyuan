@@ -30,7 +30,6 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
@@ -401,22 +400,6 @@ func (box *Box) moveTrees0(files []*FileInfo) {
 		msg := fmt.Sprintf(Conf.Language(107), subTree.HPath)
 		util.PushStatusBar(msg)
 	}
-}
-
-func parseStdMd(markdown []byte) (ret *parse.Tree) {
-	luteEngine := lute.New()
-	luteEngine.SetFootnotes(false)
-	luteEngine.SetToC(false)
-	luteEngine.SetIndentCodeBlock(false)
-	luteEngine.SetAutoSpace(false)
-	luteEngine.SetHeadingID(false)
-	luteEngine.SetSetext(false)
-	luteEngine.SetYamlFrontMatter(false)
-	luteEngine.SetLinkRef(false)
-	luteEngine.SetImgPathAllowSpace(true)
-	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
-	genTreeID(ret)
-	return
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {

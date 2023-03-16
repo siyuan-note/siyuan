@@ -428,10 +428,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
     if (operation.action === "updateAttrs") { // 调用接口才推送
         const data = operation.data as any;
         const attrsResult: IObject = {};
-        let bookmarkHTML = ''
-        let nameHTML = ''
-        let aliasHTML = ''
-        let memoHTML = ''
+        let bookmarkHTML = "";
+        let nameHTML = "";
+        let aliasHTML = "";
+        let memoHTML = "";
         Object.keys(data.new).forEach(key => {
             attrsResult[key] = data.new[key];
             const escapeHTML = Lute.EscapeHTMLStr(data.new[key]);

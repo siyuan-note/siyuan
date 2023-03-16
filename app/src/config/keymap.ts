@@ -15,7 +15,7 @@ export const keymap = {
         let html = "";
         Object.keys(keymap).forEach(key => {
             if (window.siyuan.languages[key]) {
-                const keyValue = updateHotkeyTip(keymap[key].custom)
+                const keyValue = updateHotkeyTip(keymap[key].custom);
                 html += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
     <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
@@ -340,9 +340,9 @@ export const keymap = {
             });
             item.addEventListener("blur", function () {
                 setTimeout(() => {
-                    this.classList.add("fn__none")
-                    this.previousElementSibling.textContent = this.value
-                    this.previousElementSibling.classList.remove("fn__none")
+                    this.classList.add("fn__none");
+                    this.previousElementSibling.textContent = this.value;
+                    this.previousElementSibling.classList.remove("fn__none");
                 }, Constants.TIMEOUT_INPUT);    // 隐藏的话点击删除无法 target 会为 li
             });
         });

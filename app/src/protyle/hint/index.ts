@@ -172,7 +172,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/5083
-        if (this.splitChar === "/" || this.splitChar === "、") {
+        if (!isMobile() && (this.splitChar === "/" || this.splitChar === "、")) {
             clearTimeout(this.timeId);
             if (this.enableSlash) {
                 this.genHTML(hintSlash(key, protyle), protyle);

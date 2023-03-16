@@ -154,7 +154,7 @@ export const getLocalStorage = (cb: () => void) => {
             rowTab: "",
             layoutTab: 0
         };
-        defaultStorage[Constants.LOCAL_PDFTHEME] = {light: "light", dark: "dark"};
+        defaultStorage[Constants.LOCAL_PDFTHEME] = {light: "light", dark: "dark", annoColor: "var(--b3-pdf-background1)"};
         defaultStorage[Constants.LOCAL_BAZAAR] = {
             theme: "0",
             template: "0",

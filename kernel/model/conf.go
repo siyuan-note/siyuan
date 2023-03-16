@@ -32,7 +32,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
 	"github.com/getsentry/sentry-go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -58,7 +58,8 @@ type AppConf struct {
 	Editor         *conf.Editor     `json:"editor"`         // 编辑器配置
 	Export         *conf.Export     `json:"export"`         // 导出配置
 	Graph          *conf.Graph      `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局
+	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局，v2.8.0 后这个字段不再使用
+	UILayouts      []*conf.UILayout `json:"uiLayouts"`      // 界面布局列表
 	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
 	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化
 	Account        *conf.Account    `json:"account"`        // 帐号配置
@@ -148,6 +149,9 @@ func InitConf() {
 	Conf.Appearance.Lang = Conf.Lang
 	if nil == Conf.UILayout {
 		Conf.UILayout = &conf.UILayout{}
+	}
+	if 1 > len(Conf.UILayouts) {
+		Conf.UILayouts = []*conf.UILayout{}
 	}
 	if nil == Conf.Keymap {
 		Conf.Keymap = &conf.Keymap{}

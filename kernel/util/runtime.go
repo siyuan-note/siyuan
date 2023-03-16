@@ -17,9 +17,14 @@
 package util
 
 import (
+	"fmt"
+	"math/rand"
 	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
+	"runtime/debug"
+	"strings"
 	"sync"
 	"time"
 
@@ -38,6 +43,7 @@ const (
 	ExitCodeBlockTreeErr          = 23 // 无法读写 blocktree.msgpack 文件
 	ExitCodeWorkspaceLocked       = 24 // 工作空间已被锁定
 	ExitCodeCreateWorkspaceDirErr = 25 // 创建工作空间失败
+	ExitCodeFileSysInconsistent   = 26 // 文件系统不一致
 	ExitCodeOk                    = 0  // 正常退出
 	ExitCodeFatal                 = 1  // 致命错误
 )
@@ -119,3 +125,106 @@ var (
 	TimeLangs       = map[string]map[string]interface{}{}
 	TaskActionLangs = map[string]map[string]interface{}{}
 )
+
+var thirdPartySyncCheckTicker = time.NewTicker(time.Second * 10)
+
+func CheckFileSysStatus() {
+	if ContainerStd != Container {
+		return
+	}
+
+	reportFileSysFatalError := func(err error) {
+		stack := debug.Stack()
+		logging.LogErrorf("check file system status failed: %s, %s", err, stack)
+		os.Exit(ExitCodeFileSysInconsistent)
+	}
+
+	const fileSysStatusCheckFile = "filesys_status_check"
+
+	for {
+		<-thirdPartySyncCheckTicker.C
+
+		workspaceDirLower := strings.ToLower(WorkspaceDir)
+		if strings.Contains(workspaceDirLower, "onedrive") || strings.Contains(workspaceDirLower, "dropbox") ||
+			strings.Contains(workspaceDirLower, "google drive") || strings.Contains(workspaceDirLower, "pcloud") {
+			reportFileSysFatalError(fmt.Errorf("workspace dir [%s] is in third party sync dir", WorkspaceDir))
+			continue
+		}
+
+		dir := filepath.Join(DataDir, fileSysStatusCheckFile)
+		if err := os.RemoveAll(dir); nil != err {
+			reportFileSysFatalError(err)
+			continue
+		}
+
+		if err := os.MkdirAll(dir, 0755); nil != err {
+			reportFileSysFatalError(err)
+			continue
+		}
+
+		for i := 0; i < 32; i++ {
+			tmp := filepath.Join(dir, "check_"+gulu.Rand.String(7))
+			data := make([]byte, 1024*4)
+			_, err := rand.Read(data)
+			if nil != err {
+				reportFileSysFatalError(err)
+				break
+			}
+
+			if err = os.WriteFile(tmp, data, 0644); nil != err {
+				reportFileSysFatalError(err)
+				break
+			}
+
+			time.Sleep(time.Second)
+
+			for j := 0; j < 32; j++ {
+				f, err := os.Open(tmp)
+				if nil != err {
+					reportFileSysFatalError(err)
+					break
+				}
+
+				if err = f.Close(); nil != err {
+					reportFileSysFatalError(err)
+					break
+				}
+
+				time.Sleep(100 * time.Millisecond)
+
+				if err = os.Rename(tmp, tmp+"_1"); nil != err {
+					reportFileSysFatalError(err)
+					break
+				}
+
+				time.Sleep(100 * time.Millisecond)
+				if err = os.Rename(tmp+"_1", tmp); nil != err {
+					reportFileSysFatalError(err)
+					break
+				}
+			}
+
+			entries, err := os.ReadDir(dir)
+			if nil != err {
+				reportFileSysFatalError(err)
+				break
+			}
+
+			count := 0
+			for _, entry := range entries {
+				if !entry.IsDir() && strings.Contains(entry.Name(), "check_") {
+					count++
+				}
+			}
+			if 1 < count {
+				reportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file", dir))
+				break
+			}
+
+			if err = os.RemoveAll(tmp); nil != err {
+				reportFileSysFatalError(err)
+				break
+			}
+		}
+	}
+}

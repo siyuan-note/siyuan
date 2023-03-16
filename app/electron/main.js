@@ -482,6 +482,11 @@ const initKernel = (workspace, port, lang) => {
                                 "⚠️ 创建工作空间目录失败 Failed to create workspace directory",
                                 "<div>创建工作空间目录失败。</div><div>Failed to create workspace directory.</div>");
                             break;
+                        case 26:
+                            showErrorWindow(
+                                "⚠️ 文件系统不一致 File system inconsistent",
+                                "<div>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
+                            break;
                         case 0:
                         case 1: // Fatal error
                             break;

@@ -387,9 +387,9 @@ export const globalShortcut = () => {
         if (document.getElementById("errorLog") || event.isComposing) {
             return;
         }
-
+        const target = event.target as HTMLElement;
         if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey &&
-            !["INPUT", "TEXTAREA"].includes((event.target as HTMLElement).tagName) &&
+            !["INPUT", "TEXTAREA"].includes(target.tagName) &&
             ["1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p"].includes(event.key.toLowerCase())) {
             const openCardDialog = window.siyuan.dialogs.find(item => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
@@ -540,7 +540,7 @@ export const globalShortcut = () => {
             return;
         }
         /// #if !BROWSER
-        if (matchHotKey("⌘=", event)) {
+        if (matchHotKey("⌘=", event) && !hasClosestByClassName(target, "pdf__outer")) {
             Constants.SIZE_ZOOM.find((item, index) => {
                 if (item === window.siyuan.storage[Constants.LOCAL_ZOOM]) {
                     window.siyuan.storage[Constants.LOCAL_ZOOM] = Constants.SIZE_ZOOM[index + 1] || 3;
@@ -559,7 +559,7 @@ export const globalShortcut = () => {
             event.preventDefault();
             return;
         }
-        if (matchHotKey("⌘-", event)) {
+        if (matchHotKey("⌘-", event) && !hasClosestByClassName(target, "pdf__outer")) {
             Constants.SIZE_ZOOM.find((item, index) => {
                 if (item === window.siyuan.storage[Constants.LOCAL_ZOOM]) {
                     window.siyuan.storage[Constants.LOCAL_ZOOM] = Constants.SIZE_ZOOM[index - 1] || 0.25;
@@ -600,7 +600,6 @@ export const globalShortcut = () => {
             event.preventDefault();
             return;
         }
-        const target = event.target as HTMLElement;
         if (matchHotKey("⌘A", event) && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
             event.preventDefault();
             return;

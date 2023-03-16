@@ -169,19 +169,23 @@ export class Asset extends Model {
             <button id="firstPage" class="secondaryToolbarButton b3-menu__item firstPage" tabindex="56">
               <svg class="b3-menu__icon"><use xlink:href="#iconUp"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.firstPage}</span>
+              <span class="b3-menu__accelerator">Home</span>
             </button>
             <button id="lastPage" class="secondaryToolbarButton b3-menu__item lastPage" tabindex="57">
               <svg class="b3-menu__icon"><use xlink:href="#iconDown"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.lastPage}</span>
+              <span class="b3-menu__accelerator">End</span>
             </button>
             <div class="horizontalToolbarSeparator b3-menu__separator"></div>
             <button id="pageRotateCw" class="secondaryToolbarButton b3-menu__item rotateCw" tabindex="58">
                <svg class="b3-menu__icon"><use xlink:href="#iconRedo"></use></svg> 
-              <span class="b3-menu__label">${window.siyuan.languages.rotateCw}</span>
+               <span class="b3-menu__label">${window.siyuan.languages.rotateCw}</span>
+               <span class="b3-menu__accelerator">R</span>
             </button>
             <button id="pageRotateCcw" class="secondaryToolbarButton b3-menu__item rotateCcw" tabindex="59">
                <svg class="b3-menu__icon"><use xlink:href="#iconUndo"></use></svg> 
-              <span class="b3-menu__label">${window.siyuan.languages.rotateCcw}</span>
+               <span class="b3-menu__label">${window.siyuan.languages.rotateCcw}</span>
+               <span class="b3-menu__accelerator">⇧R</span>
             </button>
 
             <div class="horizontalToolbarSeparator b3-menu__separator"></div>
@@ -235,28 +239,28 @@ export class Asset extends Model {
         <div class="pdf__toolbar">
           <div id="toolbarContainer">
             <div id="toolbarViewer">
-                <button id="sidebarToggle" class="toolbarButton b3-tooltips b3-tooltips__se" tabindex="11" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title}">
+                <button id="sidebarToggle" class="toolbarButton b3-tooltips b3-tooltips__se" tabindex="11" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
                     <svg><use xlink:href="#iconLayoutRight"></use></svg>
                 </button>
-                <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search}">
+                <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search} ${updateHotkeyTip("⌘F")}">
                   <svg><use xlink:href="#iconSearch"></use></svg>
                 </button>
                 <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__s" tabindex="12" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation} ${updateHotkeyTip("⌘D")}/${updateHotkeyTip("⌥D")}">
                   <svg><use xlink:href="#iconLeftTop"></use></svg>
                 </button>
-                <button class="toolbarButton pageUp b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.previousLabel}" id="previous" tabindex="13">
+                <button class="toolbarButton pageUp b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.previousLabel} ${updateHotkeyTip("P")}/${updateHotkeyTip("K")}" id="previous" tabindex="13">
                   <svg><use xlink:href="#iconUp"></use></svg>
                 </button>
-                <button class="toolbarButton pageDown b3-tooltips b3-tooltips__s" id="next" tabindex="14" aria-label="${window.siyuan.languages.nextLabel}">
+                <button class="toolbarButton pageDown b3-tooltips b3-tooltips__s" id="next" tabindex="14" aria-label="${window.siyuan.languages.nextLabel} ${updateHotkeyTip("J")}/${updateHotkeyTip("N")}">
                   <svg><use xlink:href="#iconDown"></use></svg>
                 </button>
                 <input type="number" id="pageNumber" class="toolbarField pageNumber b3-text-field" value="1" size="4" min="1" tabindex="15" autocomplete="off">
                 <span id="numPages"></span>
                 <div class="fn__flex-1"></div>
-                <button id="zoomOut" class="toolbarButton zoomOut b3-tooltips b3-tooltips__sw" tabindex="21" aria-label="${window.siyuan.languages.zoomOut}">
+                <button id="zoomOut" class="toolbarButton zoomOut b3-tooltips b3-tooltips__sw" tabindex="21" aria-label="${window.siyuan.languages.zoomOut} ${updateHotkeyTip("⌘-")}">
                   <svg><use xlink:href="#iconLine"></use></svg>
                 </button>
-                <button id="zoomIn" class="toolbarButton zoomIn b3-tooltips b3-tooltips__sw" tabindex="22" aria-label="${window.siyuan.languages.zoomIn}">
+                <button id="zoomIn" class="toolbarButton zoomIn b3-tooltips b3-tooltips__sw" tabindex="22" aria-label="${window.siyuan.languages.zoomIn} ${updateHotkeyTip("⌘=")}">
                   <svg><use xlink:href="#iconAdd"></use></svg>
                 </button>
                 <span id="scaleSelectContainer" class="dropdownToolbarButton">
@@ -276,7 +280,7 @@ export class Asset extends Model {
                     <option value="4">400%</option>
                   </select>
                 </span>
-                <button id="presentationMode" class="toolbarButton presentationMode b3-tooltips b3-tooltips__sw hiddenLargeView" tabindex="31" aria-label="${window.siyuan.languages.presentationMode}">
+                <button id="presentationMode" class="toolbarButton presentationMode b3-tooltips b3-tooltips__sw hiddenLargeView" tabindex="31" aria-label="${window.siyuan.languages.presentationMode} ${updateHotkeyTip("⌥⌘P")}">
                   <svg><use xlink:href="#iconPlay"></use></svg>
                 </button>
                 <span id="scrollPage" class="fn__none"></span>

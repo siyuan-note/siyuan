@@ -113,7 +113,7 @@
     &__icon {
       svg, img {
         float: left;
-        margin: 0 -2px 0 2px;
+        margin: 3px 0;
         height: 16px;
         width: 16px;
         color: var(--b3-theme-on-surface);
@@ -125,9 +125,8 @@
       margin-right: 4px;
       line-height: 22px;
       height: 22px;
-      width: 16px;
       transition: var(--b3-transition);
-      padding: 0 6px 0 2px;
+      padding: 0 4px;
       flex-shrink: 0;
 
       &:hover {

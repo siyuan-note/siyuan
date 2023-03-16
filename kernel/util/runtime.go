@@ -127,18 +127,12 @@ var (
 )
 
 var (
-	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 30)
-	firstThirdPartySyncCheck  = true
+	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 10)
 )
 
 func CheckFileSysStatus() {
 	if ContainerStd != Container {
 		return
-	}
-
-	if firstThirdPartySyncCheck {
-		firstThirdPartySyncCheck = false
-		time.Sleep(time.Second * 10)
 	}
 
 	reportFileSysFatalError := func(err error) {
@@ -150,6 +144,8 @@ func CheckFileSysStatus() {
 	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"
 
 	for {
+		<-thirdPartySyncCheckTicker.C
+
 		workspaceDirLower := strings.ToLower(WorkspaceDir)
 		if strings.Contains(workspaceDirLower, "onedrive") || strings.Contains(workspaceDirLower, "dropbox") ||
 			strings.Contains(workspaceDirLower, "google drive") || strings.Contains(workspaceDirLower, "pcloud") {
@@ -232,7 +228,6 @@ func CheckFileSysStatus() {
 				break
 			}
 
-			<-thirdPartySyncCheckTicker.C
 		}
 	}
 }

@@ -262,7 +262,8 @@
     font-family: var(--b3-font-family-emoji);
     text-align: center;
     height: 28px;
-    padding: 2px 4px;
+    width: 32px;
+    padding: 2px 8px 2px 0;
     cursor: pointer;
     display: inline-block;
     transition: var(--b3-transition);
@@ -275,6 +276,7 @@
       height: 24px;
       display: block;
       width: 24px;
+      padding: 0 -4px 0 4px;
     }
 
     &--current,

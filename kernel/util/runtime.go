@@ -126,11 +126,19 @@ var (
 	TaskActionLangs = map[string]map[string]interface{}{}
 )
 
-var thirdPartySyncCheckTicker = time.NewTicker(time.Second * 10)
+var (
+	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 30)
+	firstThirdPartySyncCheck  = true
+)
 
 func CheckFileSysStatus() {
 	if ContainerStd != Container {
 		return
+	}
+
+	if firstThirdPartySyncCheck {
+		firstThirdPartySyncCheck = false
+		time.Sleep(time.Second * 10)
 	}
 
 	reportFileSysFatalError := func(err error) {
@@ -142,8 +150,6 @@ func CheckFileSysStatus() {
 	const fileSysStatusCheckFile = "filesys_status_check"
 
 	for {
-		<-thirdPartySyncCheckTicker.C
-
 		workspaceDirLower := strings.ToLower(WorkspaceDir)
 		if strings.Contains(workspaceDirLower, "onedrive") || strings.Contains(workspaceDirLower, "dropbox") ||
 			strings.Contains(workspaceDirLower, "google drive") || strings.Contains(workspaceDirLower, "pcloud") {
@@ -162,7 +168,7 @@ func CheckFileSysStatus() {
 			continue
 		}
 
-		for i := 0; i < 32; i++ {
+		for i := 0; i < 16; i++ {
 			tmp := filepath.Join(dir, "check_"+gulu.Rand.String(7))
 			data := make([]byte, 1024*4)
 			_, err := rand.Read(data)
@@ -178,7 +184,7 @@ func CheckFileSysStatus() {
 
 			time.Sleep(time.Second)
 
-			for j := 0; j < 32; j++ {
+			for j := 0; j < 64; j++ {
 				f, err := os.Open(tmp)
 				if nil != err {
 					reportFileSysFatalError(err)
@@ -225,6 +231,8 @@ func CheckFileSysStatus() {
 				reportFileSysFatalError(err)
 				break
 			}
+
+			<-thirdPartySyncCheckTicker.C
 		}
 	}
 }

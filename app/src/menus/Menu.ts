@@ -125,7 +125,7 @@ export class Menu {
         this.element.insertAdjacentHTML("afterbegin", `<div class="b3-menu__title">
 <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
 <span class="b3-menu__label">${window.siyuan.languages.back}</span>
-</div>`);
+</div><button class="b3-menu__separator"></button>`);
         this.popup({x: 0, y: 0});
     }
 }

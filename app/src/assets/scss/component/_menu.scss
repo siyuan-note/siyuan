@@ -39,13 +39,14 @@
 
     .b3-menu {
       &__submenu {
-        top: 45px;
+        top: 57px;
         left: 0;
         bottom: 0;
         max-height: none;
         right: 0;
         box-shadow: none;
         border: 0;
+        padding: 0;
       }
 
       &__item {
@@ -63,6 +64,10 @@
         &--readonly {
           line-height: 24px;
           padding-left: 16px;
+        }
+
+        .color__square {
+          margin: 0 16px 0 8px;
         }
       }
 
@@ -141,13 +146,9 @@
           padding: 4px;
           align-content: flex-start;
 
-          .b3-menu__icon {
-            display: none;
-          }
-
           .b3-menu__item {
-            width: auto;
-            padding: 4px;
+            min-width: auto;
+            margin-top: 7px;
           }
 
           .b3-menu__label {

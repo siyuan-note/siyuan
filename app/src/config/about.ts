@@ -310,7 +310,7 @@ export const about = {
             fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
                 exportLayout(false, () => {
                     exitSiYuan();
-                });
+                }, false, true);
             });
         });
         const googleAnalyticsElement = about.element.querySelector("#googleAnalytics") as HTMLInputElement;
@@ -324,7 +324,7 @@ export const about = {
             fetchPost("/api/system/setUploadErrLog", {uploadErrLog: uploadErrLogElement.checked}, () => {
                 exportLayout(false, () => {
                     exitSiYuan();
-                });
+                }, false, true);
             });
         });
         const downloadInstallPkgElement = about.element.querySelector("#downloadInstallPkg") as HTMLInputElement;

@@ -209,7 +209,7 @@ const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
         } else {
             exitSiYuan();
         }
-    });
+    }, false, true);
     /// #endif
 };
 

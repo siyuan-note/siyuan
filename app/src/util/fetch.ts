@@ -47,7 +47,7 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
         }
         /// #if !BROWSER
         if (url === "/api/system/exit" || url === "/api/system/setWorkspaceDir" || (
-            ["/api/system/setUILayout"].includes(url) && data.exit // 内核中断，点关闭处理
+            ["/api/system/setUILayout"].includes(url) && data.errorExit // 内核中断，点关闭处理
         )) {
             ipcRenderer.send(Constants.SIYUAN_QUIT, getCurrentWindow().id);
         }

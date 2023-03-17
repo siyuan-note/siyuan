@@ -145,7 +145,7 @@ export const resetLayout = () => {
     });
 };
 
-export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false) => {
+export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false, errorExit = false) => {
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {
         return;
@@ -161,7 +161,10 @@ export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false)
     if (onlyData) {
         return layoutJSON;
     }
-    fetchPost("/api/system/setUILayout", {layout: layoutJSON}, () => {
+    fetchPost("/api/system/setUILayout", {
+        layout: layoutJSON,
+        errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
+    }, () => {
         if (reload) {
             window.location.reload();
         } else if (cb) {

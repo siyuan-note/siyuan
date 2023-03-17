@@ -22,7 +22,7 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
                     fetchPost("/api/system/logoutAuth", {}, () => {
                         window.location.href = `/check-auth?url=${window.location.href}`;
                     });
-                });
+                }, false, false);
             }
             break;
     }

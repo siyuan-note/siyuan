@@ -187,7 +187,7 @@ export const transactionError = (data: { code: number, data: string }) => {
         /// #else
         exportLayout(false, () => {
             exitSiYuan();
-        });
+        }, false, true);
         /// #endif
     });
     btnsElement[1].addEventListener("click", () => {

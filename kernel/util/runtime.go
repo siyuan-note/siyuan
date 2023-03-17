@@ -163,7 +163,7 @@ func CheckFileSysStatus() {
 		}
 
 		for i := 0; i < 32; i++ {
-			tmp := filepath.Join(dir, "check_"+gulu.Rand.String(7))
+			tmp := filepath.Join(dir, "check_consistency")
 			data := make([]byte, 1024*4)
 			_, err := rand.Read(data)
 			if nil != err {
@@ -192,13 +192,13 @@ func CheckFileSysStatus() {
 
 				time.Sleep(200 * time.Millisecond)
 
-				if err = os.Rename(tmp, tmp+"_1"); nil != err {
+				if err = os.Rename(tmp, tmp+"_renamed"); nil != err {
 					reportFileSysFatalError(err)
 					break
 				}
 
 				time.Sleep(200 * time.Millisecond)
-				if err = os.Rename(tmp+"_1", tmp); nil != err {
+				if err = os.Rename(tmp+"_renamed", tmp); nil != err {
 					reportFileSysFatalError(err)
 					break
 				}

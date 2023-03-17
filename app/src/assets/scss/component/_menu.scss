@@ -10,12 +10,14 @@
   overflow: overlay;
   box-sizing: border-box;
 
-  &::-webkit-scrollbar {
+  &::-webkit-scrollbar,
+  &__submenu::-webkit-scrollbar {
     width: 5px;
     height: 5px;
   }
 
-  &::-webkit-scrollbar-thumb {
+  &::-webkit-scrollbar-thumb,
+  &__submenu::-webkit-scrollbar-thumb {
     box-sizing: content-box;
     border: 2px solid transparent;
     border-radius: 5px;
@@ -276,10 +278,6 @@
     position: fixed;
     box-shadow: var(--b3-dialog-shadow);
     z-index: 1;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   &__accelerator {

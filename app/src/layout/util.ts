@@ -145,7 +145,7 @@ export const resetLayout = () => {
     });
 };
 
-export const exportLayout = (reload: boolean, cb?: () => void) => {
+export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false) => {
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {
         return;
@@ -158,7 +158,10 @@ export const exportLayout = (reload: boolean, cb?: () => void) => {
         right: dockToJSON(window.siyuan.layout.rightDock),
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
-    fetchPost("/api/system/setUILayout", {layout: layoutJSON, exit: typeof cb !== "undefined"}, () => {
+    if (onlyData) {
+        return layoutJSON;
+    }
+    fetchPost("/api/system/setUILayout", {layout: layoutJSON}, () => {
         if (reload) {
             window.location.reload();
         } else if (cb) {

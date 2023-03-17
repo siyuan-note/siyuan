@@ -56,6 +56,11 @@ interface Window {
     openFileByURL(URL: string): boolean
 }
 
+interface ISaveLayout {
+    name: string,
+    layout: IObject
+}
+
 interface IWorkspace {
     path: string
     closed: boolean

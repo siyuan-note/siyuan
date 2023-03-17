@@ -12,13 +12,15 @@ import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
-import {getDockByType} from "../layout/util";
+import {exportLayout, getDockByType} from "../layout/util";
 import {lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 import {unicode2Emoji} from "../emoji";
 import {Dock} from "../layout/dock";
 import {escapeHtml} from "../util/escape";
 import {viewCards} from "../card/viewCards";
+import {Dialog} from "../dialog";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -101,6 +103,88 @@ export const workspaceMenu = (rect: DOMRect) => {
             }).element);
         }
         /// #endif
+        const layoutSubMenu: IMenu[] = [{
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.saveLayout,
+            click() {
+                const saveDialog = new Dialog({
+                    title: window.siyuan.languages.saveLayout,
+                    content: `<div class="b3-dialog__content">
+        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                    width: "520px",
+                });
+                const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
+                saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
+                    btnsElement[1].dispatchEvent(new CustomEvent("click"));
+                });
+                btnsElement[0].addEventListener("click", () => {
+                    saveDialog.destroy();
+                });
+                btnsElement[1].addEventListener("click", () => {
+                    const value = saveDialog.element.querySelector("input").value;
+                    if (!value) {
+                        showMessage(window.siyuan.languages["_kernel"]["142"]);
+                        return;
+                    }
+                    const hadName = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: ISaveLayout) => {
+                        if (item.name === value) {
+                            showMessage(window.siyuan.languages.duplicate);
+                            return true;
+                        }
+                    })
+                    if (hadName) {
+                        return;
+                    }
+                    window.siyuan.storage[Constants.LOCAL_LAYOUTS].push({
+                        name: value,
+                        layout: exportLayout(false, undefined, true)
+                    })
+                    setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
+                    saveDialog.destroy();
+                });
+            }
+        }];
+        window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
+            layoutSubMenu.push({
+                iconHTML: Constants.ZWSP,
+                label: `<div class="fn__flex">
+    <span class="fn__flex-1">${item.name}</span>
+    <span class="fn__space"></span>
+    <svg class="b3-menu__icon fn__a" style="width: 8px"><use xlink:href="#iconClose"></use></svg>
+</div>`,
+                bind(menuElement) {
+                    menuElement.addEventListener("click", (event) => {
+                        if (hasClosestByClassName(event.target as HTMLElement, "fn__a")) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout, index: number) => {
+                                if (layoutItem.name === item.name) {
+                                    menuElement.remove();
+                                    window.siyuan.storage[Constants.LOCAL_LAYOUTS].splice(index, 1);
+                                    setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
+                                    return true;
+                                }
+                            })
+                            return;
+                        }
+                        fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+                            window.location.reload();
+                        });
+                    });
+                }
+            });
+        });
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.layout,
+            icon: "iconLayout",
+            type: "submenu",
+            submenu: layoutSubMenu
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         if (!window.siyuan.config.readonly) {
             if (getOpenNotebookCount() < 2) {

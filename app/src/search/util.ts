@@ -1139,6 +1139,7 @@ const renderNextSearchMark = (options: {
         options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
     }
 };
+
 const getArticle = (options: {
     id: string,
     k: string,
@@ -1155,7 +1156,7 @@ const getArticle = (options: {
             zoom: foldResponse.data,
         }, getResponse => {
             onGet(getResponse, options.edit.protyle, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML]);
-            const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type="search-mark"]`);
+            const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
             if (matchElement) {
                 matchElement.classList.add("search-mark--hl");
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();

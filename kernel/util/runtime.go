@@ -168,7 +168,7 @@ func CheckFileSysStatus() {
 			continue
 		}
 
-		for i := 0; i < 32; i++ {
+		for i := 0; i < 7; i++ {
 			tmp := filepath.Join(dir, "check_consistency")
 			data := make([]byte, 1024*4)
 			_, err := rand.Read(data)
@@ -182,7 +182,7 @@ func CheckFileSysStatus() {
 				break
 			}
 
-			time.Sleep(time.Second)
+			time.Sleep(5 * time.Second)
 
 			for j := 0; j < 32; j++ {
 				renamed := tmp + "_renamed"
@@ -191,7 +191,7 @@ func CheckFileSysStatus() {
 					break
 				}
 
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(1 * time.Millisecond)
 
 				f, err := os.Open(renamed)
 				if nil != err {

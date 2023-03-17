@@ -11,7 +11,7 @@ export class MobileOutline {
 
     constructor() {
         this.element = document.querySelector('#sidebar [data-type="sidebar-outline"]');
-        this.element.innerHTML = `<div class="toolbar">
+        this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">
         ${window.siyuan.languages.outline}

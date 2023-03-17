@@ -117,6 +117,7 @@
   &__text {
     @include text-clamp(1);
     flex: 1;
+    font-size: 17px;
   }
 }
 

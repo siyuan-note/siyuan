@@ -127,18 +127,12 @@ var (
 )
 
 var (
-	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 30)
-	firstThirdPartySyncCheck  = true
+	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 10)
 )
 
 func CheckFileSysStatus() {
 	if ContainerStd != Container {
 		return
-	}
-
-	if firstThirdPartySyncCheck {
-		firstThirdPartySyncCheck = false
-		time.Sleep(time.Second * 10)
 	}
 
 	reportFileSysFatalError := func(err error) {
@@ -150,9 +144,9 @@ func CheckFileSysStatus() {
 	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"
 
 	for {
-		workspaceDirLower := strings.ToLower(WorkspaceDir)
-		if strings.Contains(workspaceDirLower, "onedrive") || strings.Contains(workspaceDirLower, "dropbox") ||
-			strings.Contains(workspaceDirLower, "google drive") || strings.Contains(workspaceDirLower, "pcloud") {
+		<-thirdPartySyncCheckTicker.C
+
+		if IsCloudDrivePath(WorkspaceDir) {
 			reportFileSysFatalError(fmt.Errorf("workspace dir [%s] is in third party sync dir", WorkspaceDir))
 			continue
 		}
@@ -169,7 +163,7 @@ func CheckFileSysStatus() {
 		}
 
 		for i := 0; i < 32; i++ {
-			tmp := filepath.Join(dir, "check_"+gulu.Rand.String(7))
+			tmp := filepath.Join(dir, "check_consistency")
 			data := make([]byte, 1024*4)
 			_, err := rand.Read(data)
 			if nil != err {
@@ -198,13 +192,13 @@ func CheckFileSysStatus() {
 
 				time.Sleep(200 * time.Millisecond)
 
-				if err = os.Rename(tmp, tmp+"_1"); nil != err {
+				if err = os.Rename(tmp, tmp+"_renamed"); nil != err {
 					reportFileSysFatalError(err)
 					break
 				}
 
 				time.Sleep(200 * time.Millisecond)
-				if err = os.Rename(tmp+"_1", tmp); nil != err {
+				if err = os.Rename(tmp+"_renamed", tmp); nil != err {
 					reportFileSysFatalError(err)
 					break
 				}
@@ -232,7 +226,12 @@ func CheckFileSysStatus() {
 				break
 			}
 
-			<-thirdPartySyncCheckTicker.C
 		}
 	}
+}
+
+func IsCloudDrivePath(absPath string) bool {
+	absPathLower := strings.ToLower(absPath)
+	return strings.Contains(absPathLower, "onedrive") || strings.Contains(absPathLower, "dropbox") ||
+		strings.Contains(absPathLower, "google drive") || strings.Contains(absPathLower, "pcloud")
 }

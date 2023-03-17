@@ -197,6 +197,13 @@ func setWorkspaceDir(c *gin.Context) {
 		return
 	}
 
+	if util.IsCloudDrivePath(path) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(196)
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
 	if gulu.OS.IsWindows() {
 		// 改进判断工作空间路径实现 https://github.com/siyuan-note/siyuan/issues/7569
 		installDirLower := strings.ToLower(filepath.Dir(util.WorkingDir))

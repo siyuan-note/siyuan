@@ -1118,6 +1118,7 @@
     "192": "Reconstruction de l'index des données historiques, veuillez patienter...",
     "193": "Veuillez vous référer au chapitre [Intelligence Artificielle] du guide de l'utilisateur pour la configuration",
     "194": "Il existe des restrictions sur l'interface Nutstore, veuillez utiliser d'autres services WebDAV",
-    "195": "L'heure du système est incorrecte, veuillez calibrer l'heure du système et réessayer"
+    "195": "L'heure du système est incorrecte, veuillez calibrer l'heure du système et réessayer",
+    "196": "Ne définissez pas l'espace de travail sous le chemin d'un disque de synchronisation tiers, sinon les données seront endommagées (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)"
   }
 }

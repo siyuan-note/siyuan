@@ -75,9 +75,9 @@
   &__icon {
     height: 18px;
     width: 18px;
-    padding: 4px;
+    padding: 8px;
     flex-shrink: 0;
-    margin: 4px;
+    margin: 6px 4px;
     color: var(--b3-theme-on-surface);
 
     &--small {
@@ -101,6 +101,12 @@
     flex: 1;
     box-shadow: none;
     min-width: 1px;
+    line-height: 30px;
+
+    &:focus,
+    &:hover {
+      box-shadow: none;
+    }
   }
 
   &__search {

@@ -492,7 +492,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 		return
 	}
 
-	newName = util.AssetName(newName) + filepath.Ext(oldPath)
+	newName = util.AssetName(newName + filepath.Ext(oldPath))
 	newPath := "assets/" + newName
 	if err = filelock.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)

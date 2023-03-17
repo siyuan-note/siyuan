@@ -217,12 +217,14 @@ func serveAppearance(ginServer *gin.Engine) {
 				enUSFilePath := filepath.Join(appearancePath, "langs", "en_US.json")
 				enUSData, err := os.ReadFile(enUSFilePath)
 				if nil != err {
-					logging.LogFatalf("read en_US.json [%s] failed: %s", enUSFilePath, err)
+					logging.LogErrorf("read en_US.json [%s] failed: %s", enUSFilePath, err)
+					util.ReportFileSysFatalError(err)
 					return
 				}
 				enUSMap := map[string]interface{}{}
 				if err = gulu.JSON.UnmarshalJSON(enUSData, &enUSMap); nil != err {
-					logging.LogFatalf("unmarshal en_US.json [%s] failed: %s", enUSFilePath, err)
+					logging.LogErrorf("unmarshal en_US.json [%s] failed: %s", enUSFilePath, err)
+					util.ReportFileSysFatalError(err)
 					return
 				}
 

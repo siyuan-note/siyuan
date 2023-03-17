@@ -23,7 +23,6 @@ export const initFramework = () => {
     setInlineStyle();
     renderSnippet();
     initKeyboardToolbar();
-    const scrimElement = document.querySelector(".scrim");
     const sidebarElement = document.getElementById("sidebar");
     let outline: MobileOutline;
     let backlink: MobileBacklinks;
@@ -37,6 +36,10 @@ export const initFramework = () => {
             return;
         }
         const type = svgElement.getAttribute("data-type");
+        if (!type) {
+            closePanel();
+            return;
+        }
         sidebarElement.querySelectorAll(".toolbar--border svg").forEach(item => {
             const itemType = item.getAttribute("data-type");
             if (itemType === type) {
@@ -78,7 +81,6 @@ export const initFramework = () => {
         hideKeyboardToolbar();
         activeBlur();
         sidebarElement.style.left = "0";
-        document.querySelector(".scrim").classList.remove("fn__none");
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
         if (type === "sidebar-outline-tab") {
             outline.update();
@@ -123,10 +125,6 @@ export const initFramework = () => {
             }, Constants.TIMEOUT_INPUT);
         }, Constants.TIMEOUT_INPUT);
     }
-
-    scrimElement.addEventListener(getEventName(), () => {
-        closePanel();
-    });
     document.getElementById("modelClose").addEventListener(getEventName(), () => {
         closePanel();
     });

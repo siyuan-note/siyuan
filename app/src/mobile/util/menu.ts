@@ -62,7 +62,7 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
         fetchPost("/api/setting/logoutCloudUser", {}, () => {
             window.siyuan.user = null;
             closePanel();
-            document.getElementById("menuAccount").innerHTML = `<svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>`;
+            document.getElementById("menuAccount").innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconAccount"></use></svg><span class="b3-menu__label">${window.siyuan.languages.login}</span>`;
             processSync();
         });
     });
@@ -71,7 +71,7 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
             fetchPost("/api/account/deactivate", {}, () => {
                 window.siyuan.user = null;
                 closePanel();
-                document.getElementById("menuAccount").innerHTML = `<svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>`;
+                document.getElementById("menuAccount").innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconAccount"></use></svg><span class="b3-menu__label">${window.siyuan.languages.login}</span>`;
                 processSync();
             });
         });
@@ -91,9 +91,9 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
             showAccountInfo(modelElement, modelMainElement);
             const menuAccountElement = document.getElementById("menuAccount");
             if (window.siyuan.user) {
-                menuAccountElement.innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/><span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
+                menuAccountElement.innerHTML = `<img class="b3-menu__icon" src="${window.siyuan.user.userAvatarURL}"/><span class="b3-menu__label">${window.siyuan.user.userName}</span>`;
             } else {
-                menuAccountElement.innerHTML = `<svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>`;
+                menuAccountElement.innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconAccount"></use></svg><span class="b3-menu__label">${window.siyuan.languages.login}</span>`;
             }
             processSync();
         });
@@ -117,70 +117,85 @@ const genWorkspace = (workspaceDirElement: Element) => {
 export const popMenu = () => {
     activeBlur();
     hideKeyboardToolbar();
-    const modelElement = document.getElementById("model");
-    const modelMainElement = document.getElementById("modelMain");
-    const scrimElement = document.querySelector(".scrim");
     const menuElement = document.getElementById("menu");
     if (menuElement.innerHTML !== "") {
         menuElement.style.right = "0";
-        scrimElement.classList.remove("fn__none");
         return;
     }
-
     let accountHTML = "";
     if (window.siyuan.user && !window.siyuan.config.readonly) {
-        accountHTML = `<div class="b3-list-item b3-list-item--big" id="menuAccount">
-    <img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
-    <span class="b3-list-item__text">${window.siyuan.user.userName}</span>
+        accountHTML = `<div class="b3-menu__item" id="menuAccount">
+    <img class="b3-menu__icon" src="${window.siyuan.user.userAvatarURL}"/>
+    <span class="b3-menu__label">${window.siyuan.user.userName}</span>
 </div>`;
     } else if (!window.siyuan.config.readonly) {
-        accountHTML = `<div class="b3-list-item b3-list-item--big" id="menuAccount">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconAccount"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.login}</span>
+        accountHTML = `<div class="b3-menu__item" id="menuAccount">
+    <svg class="b3-menu__icon"><use xlink:href="#iconAccount"></use></svg><span class="b3-menu__label">${window.siyuan.languages.login}</span>
 </div>`;
     }
-    menuElement.innerHTML = `<div id="menuSearch" class="b3-list-item b3-list-item--big">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.search}</span>
+    menuElement.innerHTML = `<div class="b3-menu__title">
+    <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.back}</span>
 </div>
-<div id="menuNewDaily" class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconCalendar"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dailyNote}</span>
-</div>
-<div id="menuCard" class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <svg class="b3-list-item__graphic" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>
-</div>
-<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewNotebook">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
-</div>
-<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuSyncNow">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconCloudSucc"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.syncNow}</span>
-</div>
-<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconHistory"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
-</div>
-<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAppearance">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconTheme"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.appearance}</span>
-</div>
-<div class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuLock">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconLock"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.lockScreen}</span>
-</div>
+<div class="b3-menu__separator"></div>
 ${accountHTML}
-<div id="menuSync" class="b3-list-item b3-list-item--big${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.cloud}</span>
+<div id="menuSearch" class="b3-menu__item">
+    <svg class="b3-menu__icon"><use xlink:href="#iconSearch"></use></svg><span class="b3-menu__label">${window.siyuan.languages.search}</span>
 </div>
-<div class="b3-list-item b3-list-item--big" id="menuHelp">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.help}</span>
+<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuSyncNow">
+    <svg class="b3-menu__icon"><use xlink:href="#iconCloudSucc"></use></svg><span class="b3-menu__label">${window.siyuan.languages.syncNow}</span>
 </div>
-<div class="b3-list-item b3-list-item--big" id="menuAbout">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconInfo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.about}</span>
+<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewNotebook">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newNotebook}</span>
 </div>
-<div class="b3-list-item b3-list-item--big${(window.webkit?.messageHandlers || window.JSAndroid) ? "" : " fn__none"}" id="menuSafeQuit">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconQuit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.safeQuit}</span>
+<div class="b3-menu__separator"></div>
+<div id="menuNewDaily" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconCalendar"></use></svg><span class="b3-menu__label">${window.siyuan.languages.dailyNote}</span>
+</div>
+<div id="menuCard" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
+    <svg class="b3-menu__icon" style="color: var(--b3-theme-secondary)"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-menu__label">${window.siyuan.languages.riffCard}</span>
+</div>
+<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuLock">
+    <svg class="b3-menu__icon"><use xlink:href="#iconLock"></use></svg><span class="b3-menu__label">${window.siyuan.languages.lockScreen}</span>
+</div>
+<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
+    <svg class="b3-menu__icon"><use xlink:href="#iconHistory"></use></svg><span class="b3-menu__label">${window.siyuan.languages.dataHistory}</span>
+</div>
+<div class="b3-menu__separator"></div>
+<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAppearance">
+    <svg class="b3-menu__icon"><use xlink:href="#iconTheme"></use></svg><span class="b3-menu__label">${window.siyuan.languages.appearance}</span>
+</div>
+<div id="menuSync" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconCloud"></use></svg><span class="b3-menu__label">${window.siyuan.languages.cloud}</span>
+</div>
+<div class="b3-menu__item" id="menuAbout">
+    <svg class="b3-menu__icon"><use xlink:href="#iconInfo"></use></svg><span class="b3-menu__label">${window.siyuan.languages.about}</span>
+</div>
+<div class="b3-menu__separator"></div>
+<div class="b3-menu__item" id="menuHelp">
+    <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.help}</span>
+</div>
+<a class="b3-menu__item" href="${"zh_CN" === window.siyuan.config.lang ? "https://ld246.com/article/1649901726096" : "https://github.com/siyuan-note/siyuan/issues"}" target="_blank">
+    <svg class="b3-menu__icon"><use xlink:href="#iconHeart"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.feedback}</span>
+</a>
+<div class="b3-menu__separator${(window.webkit?.messageHandlers || window.JSAndroid) ? "" : " fn__none"}"></div>
+<div class="b3-menu__item${(window.webkit?.messageHandlers || window.JSAndroid) ? "" : " fn__none"}" id="menuSafeQuit">
+    <svg class="b3-menu__icon"><use xlink:href="#iconQuit"></use></svg><span class="b3-menu__label">${window.siyuan.languages.safeQuit}</span>
 </div>`;
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
     processSync();
+    const modelElement = document.getElementById("model");
+    const modelMainElement = document.getElementById("modelMain");
     menuElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(menuElement)) {
-            if (target.id === "menuSearch") {
+            if (target.classList.contains("b3-menu__title")) {
+                closePanel();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuSearch") {
                 popSearch(modelElement, modelMainElement);
                 event.preventDefault();
                 event.stopPropagation();
@@ -353,8 +368,8 @@ ${accountHTML}
                         }, response => {
                             window.siyuan.user = response.data;
                             closePanel();
-                            document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
-<span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
+                            document.getElementById("menuAccount").innerHTML = `<img class="b3-menu__icon" src="${window.siyuan.user.userAvatarURL}"/>
+<span class="b3-menu__label">${window.siyuan.user.userName}</span>`;
                             processSync();
                         });
                     });
@@ -370,8 +385,8 @@ ${accountHTML}
                         }, response => {
                             window.siyuan.user = response.data;
                             closePanel();
-                            document.getElementById("menuAccount").innerHTML = `<img class="b3-list-item__graphic" src="${window.siyuan.user.userAvatarURL}"/>
-<span class="b3-list-item__text">${window.siyuan.user.userName}</span>`;
+                            document.getElementById("menuAccount").innerHTML = `<img class="b3-menu__icon" src="${window.siyuan.user.userAvatarURL}"/>
+<span class="b3-menu__label">${window.siyuan.user.userName}</span>`;
                             processSync();
                         });
                     });
@@ -382,7 +397,6 @@ ${accountHTML}
         }
     });
     menuElement.style.right = "0";
-    scrimElement.classList.remove("fn__none");
 };
 
 const initAbout = () => {
@@ -507,12 +521,6 @@ const initAbout = () => {
             <br>
             <span class="ft__on-surface">${window.siyuan.languages.slogan}</span>
         </div>
-        <span class="fn__flex-1"></span>
-        <a class="fn__flex" href="${"zh_CN" === window.siyuan.config.lang ? "https://ld246.com/article/1649901726096" : "https://github.com/siyuan-note/siyuan/issues"}" target="_blank">
-            <svg class="fn__flex-center svg"><use xlink:href="#iconHeart"></use></svg>
-            <span class="fn__space"></span>
-            ${window.siyuan.languages.feedback}
-        </a>
     </div>
     <div style="color:var(--b3-theme-surface);font-family: cursive;">会泽百家&nbsp;至公天下</div>
     ${window.siyuan.languages.about1}

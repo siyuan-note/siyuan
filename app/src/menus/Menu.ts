@@ -50,8 +50,6 @@ export class Menu {
             itemElement.classList.add("b3-menu__item--show");
             if (!this.element.classList.contains("b3-menu--fullscreen")) {
                 this.showSubMenu(subMenuElement);
-            } else {
-                this.element.scrollTop = 0
             }
         });
     }

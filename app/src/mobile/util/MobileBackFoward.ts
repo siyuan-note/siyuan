@@ -98,6 +98,16 @@ export const pushBack = () => {
 };
 
 export const goForward = () => {
+    if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
+        !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+        window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+        return;
+    } else if (document.getElementById("model").style.top === "0px" ||
+        document.getElementById("menu").style.right === "0px" ||
+        document.getElementById("sidebar").style.left === "0px") {
+        closePanel();
+        return;
+    }
     if (window.JSAndroid && forwardStack.length < 2) {
         window.JSAndroid.returnDesktop();
         return;
@@ -110,17 +120,19 @@ export const goForward = () => {
 };
 
 export const goBack = () => {
-    if (window.JSAndroid) {
-        if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") && !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
-            window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
-            return;
-        } else if (document.getElementById("model").style.top === "0px") {
-            closePanel();
-            return;
-        } else if (window.siyuan.backStack.length < 1) {
-            window.JSAndroid.returnDesktop();
-            return;
-        }
+    if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
+        !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+        window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+        return;
+    } else if (document.getElementById("model").style.top === "0px" ||
+        document.getElementById("menu").style.right === "0px" ||
+        document.getElementById("sidebar").style.left === "0px") {
+        closePanel();
+        return;
+    }
+    if (window.JSAndroid && window.siyuan.backStack.length < 1) {
+        window.JSAndroid.returnDesktop();
+        return;
     }
     if (window.siyuan.backStack.length < 1) {
         return;

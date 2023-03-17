@@ -27,14 +27,15 @@
 </div>
 <div id="editor" class="fn__none fn__flex-1"></div>
 <div id="empty"></div>
-<div class="scrim fn__none"></div>
-<div id="sidebar" class="side-panel side-panel--left fn__flex-column">
+<div id="sidebar" class="side-panel fn__flex-column">
     <div class="toolbar toolbar--border toolbar--dark">
         <svg data-type="sidebar-file-tab" class="toolbar__icon toolbar__icon--active"><use xlink:href="#iconFiles"></use></svg>
         <svg data-type="sidebar-outline-tab" class="toolbar__icon"><use xlink:href="#iconAlignCenter"></use></svg>
         <svg data-type="sidebar-bookmark-tab" class="toolbar__icon"><use xlink:href="#iconBookmark"></use></svg>
         <svg data-type="sidebar-tag-tab" class="toolbar__icon"><use xlink:href="#iconTags"></use></svg>
         <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
+        <span class="fn__flex-1"></span>
+        <svg class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
     </div>
     <div class="fn__flex-1 b3-list--mobile">
         <div class="fn__flex-column" data-type="sidebar-file"></div>
@@ -44,7 +45,7 @@
         <div class="fn__flex-column fn__none" data-type="sidebar-backlink"></div>
     </div>
 </div>
-<div id="menu" style="overflow: auto" class="side-panel b3-list b3-list--background fn__flex-column"></div>
+<div id="menu" class="b3-menu b3-menu--fullscreen"></div>
 <div id="model" class="side-panel side-panel--all fn__flex-column">
     <div class="toolbar toolbar--border">
         <svg class="toolbar__icon toolbar__icon--small"><use xlink:href="#iconMenu"></use></svg>

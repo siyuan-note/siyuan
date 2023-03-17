@@ -34,7 +34,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     xDiff = 0;
     yDiff = 0;
     clientX = event.touches[0].clientX;
-    if ((clientX < 48 || clientX > window.innerWidth - 24) && document.querySelector(".scrim").classList.contains("fn__none")) {
+    if ((clientX < 48 || clientX > window.innerWidth - 24)) {
         clientY = event.touches[0].clientY;
     } else {
         clientX = null;

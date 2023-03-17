@@ -458,18 +458,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (!event.altKey && !isCtrl(event) && (event.key === "Home" || event.key === "End") && isMac()) {
-            const editElement = getContenteditableElement(nodeElement);
-            if (editElement && editElement.tagName !== "TABLE") {
-                if (!event.shiftKey) {
-                    range.selectNodeContents(editElement);
-                    range.collapse(event.key === "Home");
+        if ((event.shiftKey && !event.altKey && !isCtrl(event) && (event.key === "Home" || event.key === "End") && isMac()) ||
+            (event.shiftKey && !event.altKey && isCtrl(event) && (event.key === "Home" || event.key === "End") && !isMac())) {
+            const topElement = hasTopClosestByAttribute(nodeElement, "data-node-id", null)
+            if (topElement) {
+                topElement.classList.add("protyle-wysiwyg--select");
+                let nextElement = event.key === "Home" ? topElement.previousElementSibling : topElement.nextElementSibling;
+                while (nextElement) {
+                    nextElement.classList.add("protyle-wysiwyg--select");
+                    nextElement = event.key === "Home" ? nextElement.previousElementSibling : nextElement.nextElementSibling;
+                }
+                if (event.key === "Home") {
+                    protyle.wysiwyg.element.firstElementChild.scrollIntoView()
                 } else {
-                    if (event.key === "Home" && editElement.firstChild) {
-                        range.setStartBefore(editElement.firstChild);
-                    } else {
-                        range.setEndAfter(editElement.lastChild);
-                    }
+                    protyle.wysiwyg.element.lastElementChild.scrollIntoView(false)
                 }
             }
             event.stopPropagation();

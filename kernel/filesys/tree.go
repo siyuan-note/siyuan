@@ -41,6 +41,10 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	data, err := filelock.ReadFile(filePath)
 	if nil != err {
 		logging.LogErrorf("load tree [%s] failed: %s", p, err)
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			os.Exit(util.ExitCodeFileSysInconsistent)
+			return
+		}
 		return
 	}
 
@@ -92,6 +96,10 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 				}
 			} else {
 				logging.LogWarnf("read parent tree data [%s] failed: %s", parentAbsPath, readErr)
+				if errors.Is(readErr, filelock.ErrUnableAccessFile) {
+					os.Exit(util.ExitCodeFileSysInconsistent)
+					return
+				}
 			}
 			hPathBuilder.WriteString("Untitled/")
 			continue

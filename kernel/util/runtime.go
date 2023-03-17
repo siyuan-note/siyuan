@@ -17,6 +17,7 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
 	"os"
@@ -137,7 +138,12 @@ func CheckFileSysStatus() {
 
 	reportFileSysFatalError := func(err error) {
 		stack := debug.Stack()
-		logging.LogErrorf("check file system status failed: %s, %s", err, stack)
+		output := string(stack)
+		if 5 < strings.Count(output, "\n") {
+			lines := strings.Split(output, "\n")
+			output = strings.Join(lines[5:], "\n")
+		}
+		logging.LogErrorf("check file system status failed: %s, %s", err, output)
 		os.Exit(ExitCodeFileSysInconsistent)
 	}
 
@@ -179,7 +185,15 @@ func CheckFileSysStatus() {
 			time.Sleep(time.Second)
 
 			for j := 0; j < 32; j++ {
-				f, err := os.Open(tmp)
+				renamed := tmp + "_renamed"
+				if err = os.Rename(tmp, renamed); nil != err {
+					reportFileSysFatalError(err)
+					break
+				}
+
+				time.Sleep(100 * time.Millisecond)
+
+				f, err := os.Open(renamed)
 				if nil != err {
 					reportFileSysFatalError(err)
 					break
@@ -190,15 +204,7 @@ func CheckFileSysStatus() {
 					break
 				}
 
-				time.Sleep(200 * time.Millisecond)
-
-				if err = os.Rename(tmp, tmp+"_renamed"); nil != err {
-					reportFileSysFatalError(err)
-					break
-				}
-
-				time.Sleep(200 * time.Millisecond)
-				if err = os.Rename(tmp+"_renamed", tmp); nil != err {
+				if err = os.Rename(renamed, tmp); nil != err {
 					reportFileSysFatalError(err)
 					break
 				}
@@ -209,14 +215,23 @@ func CheckFileSysStatus() {
 					break
 				}
 
-				count := 0
+				checkFilenames := bytes.Buffer{}
 				for _, entry := range entries {
 					if !entry.IsDir() && strings.Contains(entry.Name(), "check_") {
-						count++
+						checkFilenames.WriteString(entry.Name())
+						checkFilenames.WriteString("\n")
 					}
 				}
-				if 1 < count {
-					reportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file", dir))
+				lines := strings.Split(strings.TrimSpace(checkFilenames.String()), "\n")
+				if 1 < len(lines) {
+					buf := bytes.Buffer{}
+					for _, line := range lines {
+						buf.WriteString("  ")
+						buf.WriteString(line)
+						buf.WriteString("\n")
+					}
+					output := buf.String()
+					reportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file:\n%s", dir, output))
 					break
 				}
 			}

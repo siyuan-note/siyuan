@@ -355,6 +355,11 @@
           const {ipcRenderer} = require('electron')
           const fs = require('fs')
           const initPath = result.filePaths[0]
+          if (isCloudDrivePath(initPath)) {
+            alert('⚠️ This folder may be a cloud sync disk folder, please change to a local folder')
+            return
+          }
+
           if (!fs.existsSync(initPath)) {
             fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
           }
@@ -366,6 +371,12 @@
       })
     })
   })
+
+  const isCloudDrivePath = (absPath) => {
+      const absPathLower = absPath.toLowerCase()
+      return -1 < absPathLower.indexOf("onedrive") || -1 < absPathLower.indexOf("dropbox") ||
+          -1 < absPathLower.indexOf("google drive") || -1 < absPathLower.indexOf("pcloud")
+  }
 </script>
 </body>
 </html>

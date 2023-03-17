@@ -146,9 +146,7 @@ func CheckFileSysStatus() {
 	for {
 		<-thirdPartySyncCheckTicker.C
 
-		workspaceDirLower := strings.ToLower(WorkspaceDir)
-		if strings.Contains(workspaceDirLower, "onedrive") || strings.Contains(workspaceDirLower, "dropbox") ||
-			strings.Contains(workspaceDirLower, "google drive") || strings.Contains(workspaceDirLower, "pcloud") {
+		if IsCloudDrivePath(WorkspaceDir) {
 			reportFileSysFatalError(fmt.Errorf("workspace dir [%s] is in third party sync dir", WorkspaceDir))
 			continue
 		}
@@ -230,4 +228,10 @@ func CheckFileSysStatus() {
 
 		}
 	}
+}
+
+func IsCloudDrivePath(absPath string) bool {
+	absPathLower := strings.ToLower(absPath)
+	return strings.Contains(absPathLower, "onedrive") || strings.Contains(absPathLower, "dropbox") ||
+		strings.Contains(absPathLower, "google drive") || strings.Contains(absPathLower, "pcloud")
 }

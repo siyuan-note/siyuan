@@ -35,13 +35,17 @@ import (
 func InitAppearance() {
 	util.SetBootDetails("Initializing appearance...")
 	if err := os.Mkdir(util.AppearancePath, 0755); nil != err && !os.IsExist(err) {
-		logging.LogFatalf("create appearance folder [%s] failed: %s", util.AppearancePath, err)
+		logging.LogErrorf("create appearance folder [%s] failed: %s", util.AppearancePath, err)
+		util.ReportFileSysFatalError(err)
+		return
 	}
 
 	unloadThemes()
 	from := filepath.Join(util.WorkingDir, "appearance")
 	if err := gulu.File.Copy(from, util.AppearancePath); nil != err {
-		logging.LogFatalf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
+		logging.LogErrorf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
+		util.ReportFileSysFatalError(err)
+		return
 	}
 	loadThemes()
 
@@ -95,7 +99,9 @@ func unloadThemes() {
 func loadThemes() {
 	themeDirs, err := os.ReadDir(util.ThemesPath)
 	if nil != err {
-		logging.LogFatalf("read appearance themes folder failed: %s", err)
+		logging.LogErrorf("read appearance themes folder failed: %s", err)
+		util.ReportFileSysFatalError(err)
+		return
 	}
 
 	Conf.Appearance.DarkThemes = nil
@@ -204,7 +210,9 @@ func widgetJSON(widgetName string) (ret map[string]interface{}, err error) {
 func loadIcons() {
 	iconDirs, err := os.ReadDir(util.IconsPath)
 	if nil != err {
-		logging.LogFatalf("read appearance icons folder failed: %s", err)
+		logging.LogErrorf("read appearance icons folder failed: %s", err)
+		util.ReportFileSysFatalError(err)
+		return
 	}
 
 	Conf.Appearance.Icons = nil

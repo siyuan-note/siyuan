@@ -343,13 +343,17 @@ func initLang() {
 	p := filepath.Join(util.WorkingDir, "appearance", "langs")
 	dir, err := os.Open(p)
 	if nil != err {
-		logging.LogFatalf("open language configuration folder [%s] failed: %s", p, err)
+		logging.LogErrorf("open language configuration folder [%s] failed: %s", p, err)
+		util.ReportFileSysFatalError(err)
+		return
 	}
 	defer dir.Close()
 
 	langNames, err := dir.Readdirnames(-1)
 	if nil != err {
-		logging.LogFatalf("list language configuration folder [%s] failed: %s", p, err)
+		logging.LogErrorf("list language configuration folder [%s] failed: %s", p, err)
+		util.ReportFileSysFatalError(err)
+		return
 	}
 
 	for _, langName := range langNames {
@@ -510,7 +514,9 @@ func (conf *AppConf) Save() {
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if err := filelock.WriteFile(confPath, data); nil != err {
-		logging.LogFatalf("write conf [%s] failed: %s", confPath, err)
+		logging.LogErrorf("write conf [%s] failed: %s", confPath, err)
+		util.ReportFileSysFatalError(err)
+		return
 	}
 }
 

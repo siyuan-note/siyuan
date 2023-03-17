@@ -131,20 +131,20 @@ var (
 	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 10)
 )
 
+func ReportFileSysFatalError(err error) {
+	stack := debug.Stack()
+	output := string(stack)
+	if 5 < strings.Count(output, "\n") {
+		lines := strings.Split(output, "\n")
+		output = strings.Join(lines[5:], "\n")
+	}
+	logging.LogErrorf("check file system status failed: %s, %s", err, output)
+	os.Exit(ExitCodeFileSysInconsistent)
+}
+
 func CheckFileSysStatus() {
 	if ContainerStd != Container {
 		return
-	}
-
-	reportFileSysFatalError := func(err error) {
-		stack := debug.Stack()
-		output := string(stack)
-		if 5 < strings.Count(output, "\n") {
-			lines := strings.Split(output, "\n")
-			output = strings.Join(lines[5:], "\n")
-		}
-		logging.LogErrorf("check file system status failed: %s, %s", err, output)
-		os.Exit(ExitCodeFileSysInconsistent)
 	}
 
 	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"
@@ -153,19 +153,19 @@ func CheckFileSysStatus() {
 		<-thirdPartySyncCheckTicker.C
 
 		if IsCloudDrivePath(WorkspaceDir) {
-			reportFileSysFatalError(fmt.Errorf("workspace dir [%s] is in third party sync dir", WorkspaceDir))
-			continue
+			ReportFileSysFatalError(fmt.Errorf("workspace dir [%s] is in third party sync dir", WorkspaceDir))
+			return
 		}
 
 		dir := filepath.Join(DataDir, fileSysStatusCheckFile)
 		if err := os.RemoveAll(dir); nil != err {
-			reportFileSysFatalError(err)
-			continue
+			ReportFileSysFatalError(err)
+			return
 		}
 
 		if err := os.MkdirAll(dir, 0755); nil != err {
-			reportFileSysFatalError(err)
-			continue
+			ReportFileSysFatalError(err)
+			return
 		}
 
 		for i := 0; i < 7; i++ {
@@ -173,13 +173,13 @@ func CheckFileSysStatus() {
 			data := make([]byte, 1024*4)
 			_, err := rand.Read(data)
 			if nil != err {
-				reportFileSysFatalError(err)
-				break
+				ReportFileSysFatalError(err)
+				return
 			}
 
 			if err = os.WriteFile(tmp, data, 0644); nil != err {
-				reportFileSysFatalError(err)
-				break
+				ReportFileSysFatalError(err)
+				return
 			}
 
 			time.Sleep(5 * time.Second)
@@ -187,7 +187,7 @@ func CheckFileSysStatus() {
 			for j := 0; j < 32; j++ {
 				renamed := tmp + "_renamed"
 				if err = os.Rename(tmp, renamed); nil != err {
-					reportFileSysFatalError(err)
+					ReportFileSysFatalError(err)
 					break
 				}
 
@@ -195,24 +195,24 @@ func CheckFileSysStatus() {
 
 				f, err := os.Open(renamed)
 				if nil != err {
-					reportFileSysFatalError(err)
-					break
+					ReportFileSysFatalError(err)
+					return
 				}
 
 				if err = f.Close(); nil != err {
-					reportFileSysFatalError(err)
-					break
+					ReportFileSysFatalError(err)
+					return
 				}
 
 				if err = os.Rename(renamed, tmp); nil != err {
-					reportFileSysFatalError(err)
-					break
+					ReportFileSysFatalError(err)
+					return
 				}
 
 				entries, err := os.ReadDir(dir)
 				if nil != err {
-					reportFileSysFatalError(err)
-					break
+					ReportFileSysFatalError(err)
+					return
 				}
 
 				checkFilenames := bytes.Buffer{}
@@ -231,14 +231,14 @@ func CheckFileSysStatus() {
 						buf.WriteString("\n")
 					}
 					output := buf.String()
-					reportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file:\n%s", dir, output))
-					break
+					ReportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file:\n%s", dir, output))
+					return
 				}
 			}
 
 			if err = os.RemoveAll(tmp); nil != err {
-				reportFileSysFatalError(err)
-				break
+				ReportFileSysFatalError(err)
+				return
 			}
 
 		}

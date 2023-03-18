@@ -191,7 +191,7 @@ func CheckFileSysStatus() {
 					break
 				}
 
-				time.Sleep(1 * time.Millisecond)
+				time.Sleep(time.Second)
 
 				f, err := os.Open(renamed)
 				if nil != err {

@@ -9,7 +9,6 @@
   right: 0;
   top: 30px;
   width: 16px;
-  padding: 0 8px;
   bottom: 9px; // 下图标 hover 时，需要留出一定的空间
 
   svg {
@@ -48,7 +47,7 @@
 
   &__bar {
     position: absolute;
-    right: calc(11px - var(--b3-dynamicscroll-width) / 2);
+    right: calc(4px - var(--b3-dynamicscroll-width) / 2);
     top: calc(50% - 8px);
     transform: rotate(90deg);
     z-index: 1;

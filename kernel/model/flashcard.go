@@ -181,8 +181,13 @@ func getCardsBlocks(cards []riff.Card, page int) (blocks []*Block, total, pageCo
 	return
 }
 
-// reviewCardCache <cardID, card> 用于复习时缓存卡片，以便支持撤销。
-var reviewCardCache = map[string]riff.Card{}
+var (
+	// reviewCardCache <cardID, card> 用于复习时缓存卡片，以便支持撤销。
+	reviewCardCache = map[string]riff.Card{}
+
+	// skipCardCache <cardID, card> 用于复习时缓存跳过的卡片，以便支持跳过过滤。
+	skipCardCache = map[string]riff.Card{}
+)
 
 func ReviewFlashcard(deckID, cardID string, rating riff.Rating) (err error) {
 	deckLock.Lock()
@@ -203,6 +208,9 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating) (err error) {
 		// 命中缓存说明这张卡片已经复习过了，这次调用复习是撤销后再次复习
 		// 将缓存的卡片重新覆盖回卡包中，以恢复最开始复习前的状态
 		deck.SetCard(cachedCard)
+
+		// 从跳过缓存中移除（如果上一次点的是跳过的话），如果不在跳过缓存中，说明上一次点的是复习，这里移除一下也没有副作用
+		delete(skipCardCache, cardID)
 	} else {
 		// 首次复习该卡片，将卡片缓存以便后续支持撤销后再次复习
 		reviewCardCache[cardID] = card
@@ -217,9 +225,29 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating) (err error) {
 
 	dueCards := getDueFlashcards(deckID)
 	if 1 > len(dueCards) {
-		// 该卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存
+		// 该卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存和跳过缓存
 		reviewCardCache = map[string]riff.Card{}
+		skipCardCache = map[string]riff.Card{}
 	}
+	return
+}
+
+func SkipReviewFlashcard(deckID, cardID string) (err error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+
+	if syncingStorages {
+		err = errors.New(Conf.Language(81))
+		return
+	}
+
+	deck := Decks[deckID]
+	card := deck.GetCard(cardID)
+	if nil == card {
+		return
+	}
+
+	skipCardCache[cardID] = card
 	return
 }
 
@@ -286,7 +314,7 @@ func GetNotebookDueFlashcards(boxID string) (ret []*Flashcard, err error) {
 		return
 	}
 
-	cards := deck.Dues()
+	cards := getDeckDueCards(deck)
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -317,7 +345,7 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 	}
 
 	treeBlockIDs := getTreeSubTreeChildBlocks(rootID)
-	cards := deck.Dues()
+	cards := getDeckDueCards(deck)
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -396,7 +424,7 @@ func getDueFlashcards(deckID string) (ret []*Flashcard) {
 		return
 	}
 
-	cards := deck.Dues()
+	cards := getDeckDueCards(deck)
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -416,7 +444,7 @@ func getDueFlashcards(deckID string) (ret []*Flashcard) {
 func getAllDueFlashcards() (ret []*Flashcard) {
 	now := time.Now()
 	for _, deck := range Decks {
-		cards := deck.Dues()
+		cards := getDeckDueCards(deck)
 		for _, card := range cards {
 			blockID := card.BlockID()
 			if nil == treenode.GetBlockTree(blockID) {
@@ -864,6 +892,20 @@ func getRiffDir() string {
 func getDeckIDs() (deckIDs []string) {
 	for deckID := range Decks {
 		deckIDs = append(deckIDs, deckID)
+	}
+	return
+}
+
+func getDeckDueCards(deck *riff.Deck) (ret []riff.Card) {
+	ret = []riff.Card{}
+	dues := deck.Dues()
+
+	for _, c := range dues {
+		if nil != skipCardCache[c.ID()] {
+			continue
+		}
+
+		ret = append(ret, c)
 	}
 	return
 }

@@ -1448,7 +1448,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectsElement.push(nodeElement);
                 }
                 selectsElement.forEach(item => {
-                    item.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
+                    // 不能使用 [contenteditable="true"], 否则嵌入块无法复制
+                    item.querySelectorAll("[spellcheck]").forEach(editItem => {
                         const cloneNode = editItem.cloneNode(true) as HTMLElement;
                         cloneNode.querySelectorAll('[data-type="backslash"]').forEach(slashItem => {
                             slashItem.firstElementChild.remove();

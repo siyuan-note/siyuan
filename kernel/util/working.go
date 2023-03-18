@@ -190,7 +190,7 @@ func initWorkspaceDir(workspaceArg string) {
 	if !gulu.File.IsExist(workspaceConf) {
 		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
 			log.Printf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
-			os.Exit(ExitCodeCreateConfDirErr)
+			os.Exit(logging.ExitCodeCreateConfDirErr)
 		}
 	}
 
@@ -203,7 +203,7 @@ func initWorkspaceDir(workspaceArg string) {
 	}
 	if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
 		log.Printf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
-		os.Exit(ExitCodeCreateWorkspaceDirErr)
+		os.Exit(logging.ExitCodeCreateWorkspaceDirErr)
 	}
 
 	var workspacePaths []string
@@ -481,7 +481,7 @@ func tryLockWorkspace() {
 	} else {
 		logging.LogErrorf("lock workspace [%s] failed", WorkspaceDir)
 	}
-	os.Exit(ExitCodeWorkspaceLocked)
+	os.Exit(logging.ExitCodeWorkspaceLocked)
 }
 
 func IsWorkspaceLocked(workspacePath string) bool {

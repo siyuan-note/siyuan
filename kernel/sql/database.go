@@ -1148,7 +1148,7 @@ func beginTx() (tx *sql.Tx, err error) {
 	if tx, err = db.Begin(); nil != err {
 		logging.LogErrorf("begin tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
-			os.Exit(util.ExitCodeReadOnlyDatabase)
+			os.Exit(logging.ExitCodeReadOnlyDatabase)
 		}
 	}
 	return
@@ -1158,7 +1158,7 @@ func beginHistoryTx() (tx *sql.Tx, err error) {
 	if tx, err = historyDB.Begin(); nil != err {
 		logging.LogErrorf("begin history tx failed: %s\n  %s", err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
-			os.Exit(util.ExitCodeReadOnlyDatabase)
+			os.Exit(logging.ExitCodeReadOnlyDatabase)
 		}
 	}
 	return

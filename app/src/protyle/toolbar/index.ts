@@ -957,6 +957,20 @@ export class Toolbar {
         });
         const exportImg = () => {
             const msgId = showMessage(window.siyuan.languages.exporting, 0);
+            if (renderElement.getAttribute("data-subtype") === "plantuml") {
+                fetch(renderElement.querySelector("img").getAttribute("src")).then(function (response) {
+                    return response.blob()
+                }).then(function (blob) {
+                    const formData = new FormData();
+                    formData.append("file", blob);
+                    formData.append("type", "image/png");
+                    fetchPost("/api/export/exportAsFile", formData, (response) => {
+                        openByMobile(response.data.file);
+                        hideMessage(msgId);
+                    });
+                });
+                return;
+            }
             setTimeout(() => {
                 addScript("stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
                     window.html2canvas(renderElement).then((canvas) => {

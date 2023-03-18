@@ -367,9 +367,9 @@
                     return
                 }
 
-                let msg = '⚠️ Do not set the workspace under the path of a third-party sync disk, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continue?'
+                let msg = '⚠️ Do not set the workspace under the path of a third-party sync disk, otherwise the data will be damaged (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continue?'
                 if ('zh_CN' === currentLang) {
-                    msg = '⚠️ 请勿将工作空间设置在第三方同步盘路径下，否则数据会被损坏（OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等），是否继续？'
+                    msg = '⚠️ 请勿将工作空间设置在第三方同步盘路径下，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等），是否继续？'
                 }
                 if (!confirm(msg)) {
                     return

@@ -485,7 +485,7 @@ const initKernel = (workspace, port, lang) => {
                         case 26:
                             showErrorWindow(
                                 "⚠️ 文件系统不一致 File system inconsistent",
-                                "<div>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
+                                "<div>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
                             break;
                         case 0:
                         case 1: // Fatal error

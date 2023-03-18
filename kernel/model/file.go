@@ -414,7 +414,7 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 	}
 }
 
-func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int, isBacklink bool) (blockCount, childBlockCount int, dom, parentID, parent2ID, rootID, typ string, eof bool, boxID, docPath string, isBacklinkExpand bool, err error) {
+func GetDoc(startID, endID, id string, index int, keyword string, mode int, size int, isBacklink bool) (blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -540,7 +540,6 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	}
 
 	blockCount = tree.DocBlockCount()
-	childBlockCount = treenode.CountBlockNodes(tree.Root)
 	if ast.NodeDocument == node.Type {
 		parentID = node.ID
 		parent2ID = parentID
@@ -560,6 +559,26 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 	if !isDoc {
 		typ = node.Type.String()
 	}
+
+	// 判断是否需要显示动态加载滚动条 https://github.com/siyuan-note/siyuan/issues/7693
+	childCount := 0
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if 1 > childCount {
+			childCount = 1
+		} else {
+			childCount += treenode.CountBlockNodes(n)
+		}
+
+		if childCount > Conf.Editor.DynamicLoadBlocks {
+			scroll = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
 
 	var nodes []*ast.Node
 	if isBacklink {

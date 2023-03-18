@@ -409,7 +409,7 @@ interface IProtyle {
     id: string,
     block: {
         id?: string,
-        childBlockCount?: number,
+        scroll?: boolean
         parentID?: string,
         parent2ID?: string,
         rootID?: string,

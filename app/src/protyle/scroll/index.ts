@@ -82,7 +82,7 @@ export class Scroll {
         if (protyle.block.showAll) {
             this.element.classList.add("fn__none");
         } else {
-            if (protyle.block.childBlockCount > window.siyuan.config.editor.dynamicLoadBlocks) {
+            if (protyle.block.scroll) {
                 this.element.classList.remove("fn__none");
             } else {
                 this.element.classList.add("fn__none");

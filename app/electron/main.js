@@ -61,23 +61,26 @@ try {
 // type: port/id
 const exitApp = (type, id) => {
     let tray;
+    let mainWindow;
     workspaces.find((item, index) => {
         if (type === "id") {
             if (item.id === id) {
+                mainWindow = item.browserWindow;
                 if (workspaces.length > 1) {
                     item.browserWindow.destroy();
-                    workspaces.splice(index, 1);
                 }
+                workspaces.splice(index, 1);
                 tray = item.tray;
                 return true;
             }
         } else {
             const currentURL = new URL(item.browserWindow.getURL());
             if (currentURL.port === id) {
+                mainWindow = item.browserWindow;
                 if (workspaces.length > 1) {
                     item.browserWindow.destroy();
-                    workspaces.splice(index, 1);
                 }
+                workspaces.splice(index, 1);
                 tray = item.tray;
                 return true;
             }
@@ -86,12 +89,11 @@ const exitApp = (type, id) => {
     if (tray && ("win32" === process.platform || "linux" === process.platform)) {
         tray.destroy();
     }
-    if (workspaces.length === 1) {
+    if (workspaces.length === 0 && mainWindow) {
         try {
             if (resetWindowStateOnRestart) {
                 fs.writeFileSync(windowStatePath, "{}");
             } else {
-                const mainWindow = workspaces[0].browserWindow;
                 const bounds = mainWindow.getBounds();
                 fs.writeFileSync(windowStatePath, JSON.stringify({
                     isMaximized: mainWindow.isMaximized(),

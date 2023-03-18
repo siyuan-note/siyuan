@@ -38,6 +38,7 @@ let bootWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, browserWindow, tray
 let kernelPort = 6806;
+let resetWindowStateOnRestart = false;
 require("@electron/remote/main").initialize();
 
 if (!app.requestSingleInstanceLock()) {
@@ -55,6 +56,60 @@ try {
     require("electron").dialog.showErrorBox("创建配置目录失败 Failed to create config directory",
         "思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。\n\nSiYuan needs to create a configuration folder (~/.config/siyuan) in the user's home directory. Please make sure that the path has write permissions.");
     app.exit();
+}
+
+// type: port/id
+const exitApp = (type, id) => {
+    let tray;
+    workspaces.find((item, index) => {
+        if (type === "id") {
+            if (item.id === id) {
+                if (workspaces.length > 1) {
+                    item.browserWindow.destroy();
+                    workspaces.splice(index, 1);
+                }
+                tray = item.tray;
+                return true;
+            }
+        } else {
+            const currentURL = new URL(item.browserWindow.getURL());
+            if (currentURL.port === id) {
+                if (workspaces.length > 1) {
+                    item.browserWindow.destroy();
+                    workspaces.splice(index, 1);
+                }
+                tray = item.tray;
+                return true;
+            }
+        }
+    });
+    if (tray && ("win32" === process.platform || "linux" === process.platform)) {
+        tray.destroy();
+    }
+    if (workspaces.length === 1) {
+        try {
+            if (resetWindowStateOnRestart) {
+                fs.writeFileSync(windowStatePath, "{}");
+            } else {
+                const mainWindow = workspaces[0].browserWindow;
+                const bounds = mainWindow.getBounds();
+                fs.writeFileSync(windowStatePath, JSON.stringify({
+                    isMaximized: mainWindow.isMaximized(),
+                    fullscreen: mainWindow.isFullScreen(),
+                    isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
+                    x: bounds.x,
+                    y: bounds.y,
+                    width: bounds.width,
+                    height: bounds.height,
+                }));
+            }
+        } catch (e) {
+            writeLog(e);
+        }
+        app.exit();
+        globalShortcut.unregisterAll();
+        writeLog("exited ui");
+    }
 }
 
 const getServer = (port = kernelPort) => {
@@ -497,7 +552,7 @@ const initKernel = (workspace, port, lang) => {
 <div>SiYuan Kernel exited for unknown reasons [code=${code}], please try to reboot your operating system and then start SiYuan again. If occurs this problem still, please check your anti-virus software whether kill the SiYuan Kernel.</div>`);
                             break;
                     }
-
+                    exitApp("port", kernelPort);
                     bootWindow.destroy();
                     resolve(false);
                 }
@@ -583,8 +638,6 @@ app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
 app.setPath("userData", app.getPath("userData") + "-Electron"); // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
 
 app.whenReady().then(() => {
-
-    let resetWindowStateOnRestart = false;
     const resetTrayMenu = (tray, lang, mainWindow) => {
         const trayMenuTemplate = [
             {
@@ -696,44 +749,7 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-quit", (event, id) => {
-        const mainWindow = BrowserWindow.fromId(id);
-        let tray;
-        workspaces.find((item, index) => {
-            if (item.id === id) {
-                if (workspaces.length > 1) {
-                    mainWindow.destroy();
-                }
-                tray = item.tray;
-                workspaces.splice(index, 1);
-                return true;
-            }
-        });
-        if (tray && ("win32" === process.platform || "linux" === process.platform)) {
-            tray.destroy();
-        }
-        if (workspaces.length === 0) {
-            try {
-                if (resetWindowStateOnRestart) {
-                    fs.writeFileSync(windowStatePath, "{}");
-                } else {
-                    const bounds = mainWindow.getBounds();
-                    fs.writeFileSync(windowStatePath, JSON.stringify({
-                        isMaximized: mainWindow.isMaximized(),
-                        fullscreen: mainWindow.isFullScreen(),
-                        isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
-                        x: bounds.x,
-                        y: bounds.y,
-                        width: bounds.width,
-                        height: bounds.height,
-                    }));
-                }
-            } catch (e) {
-                writeLog(e);
-            }
-            app.exit();
-            globalShortcut.unregisterAll();
-            writeLog("exited ui");
-        }
+        exitApp("id", id)
     });
     ipcMain.on("siyuan-openwindow", (event, data) => {
         const mainWindow = BrowserWindow.fromId(data.id);

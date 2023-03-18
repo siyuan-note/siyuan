@@ -285,98 +285,112 @@
 </svg>
 <div class="drag"></div>
 <script>
-  const getSearch = (key) => {
-    if (window.location.search.indexOf('?') === -1) {
-      return ''
-    }
-    let value = ''
-    const data = window.location.search.split('?')[1].split('&')
-    data.find(item => {
-      const keyValue = item.split('=')
-      if (keyValue[0] === key) {
-        value = keyValue[1]
-        return true
-      }
-    })
-    return value
-  }
-
-  const setLang = (lang) => {
-    if (lang === 'zh_CN') {
-      document.title = `思源笔记 v${getSearch('v')}`
-      document.getElementById('zhCN').classList.remove('fn__none')
-      document.getElementById('enUS').classList.add('fn__none')
-    } else {
-      document.title = `SiYuan v${getSearch('v')}`
-      document.getElementById('zhCN').classList.add('fn__none')
-      document.getElementById('enUS').classList.remove('fn__none')
-    }
-  }
-
-  let lang = decodeURIComponent(getSearch('lang'));
-  setLang(lang)
-
-  document.querySelectorAll('.version').forEach(item => {
-    item.textContent = `🔖 v${getSearch('v')}`
-  })
-
-  document.querySelectorAll('.icon').forEach(item => {
-    item.src = decodeURIComponent(`${getSearch('icon')}`)
-  })
-
-  document.querySelectorAll('.lang').forEach(item => {
-    item.value = lang
-    item.addEventListener('change', () => {
-      document.querySelectorAll('.lang').forEach(item1 => {
-        item1.value = item.value
-      })
-      setLang(item.value)
-    })
-  })
-
-  document.getElementById('close').addEventListener('click', () => {
-    const {ipcRenderer} = require('electron')
-    ipcRenderer.send('siyuan-first-quit')
-  })
-  document.getElementById('min').addEventListener('click', () => {
-    const {getCurrentWindow} = require('@electron/remote')
-    getCurrentWindow().minimize()
-  })
-
-  document.querySelectorAll('.choosePath').forEach((item) => {
-    item.addEventListener('click', () => {
-      const {dialog} = require('@electron/remote')
-      const path = require('path')
-      dialog.showOpenDialog({
-        defaultPath: path.join(decodeURIComponent(getSearch('home')), 'Documents'),
-        properties: ['openDirectory', 'createDirectory'],
-      }).then((result) => {
-        if (!result.canceled) {
-          const {ipcRenderer} = require('electron')
-          const fs = require('fs')
-          const initPath = result.filePaths[0]
-          if (isCloudDrivePath(initPath)) {
-            alert('⚠️ This folder may be a cloud sync disk folder, please change to a local folder')
-            return
-          }
-
-          if (!fs.existsSync(initPath)) {
-            fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
-          }
-          ipcRenderer.send('siyuan-first-init', {
-            workspace: initPath,
-            lang: document.querySelector('.lang').value
-          })
+    const getSearch = (key) => {
+        if (window.location.search.indexOf('?') === -1) {
+            return ''
         }
-      })
-    })
-  })
+        let value = ''
+        const data = window.location.search.split('?')[1].split('&')
+        data.find(item => {
+            const keyValue = item.split('=')
+            if (keyValue[0] === key) {
+                value = keyValue[1]
+                return true
+            }
+        })
+        return value
+    }
 
-  const isCloudDrivePath = (absPath) => {
-      const absPathLower = absPath.toLowerCase()
-      return -1 < absPathLower.indexOf("onedrive") || -1 < absPathLower.indexOf("dropbox") ||
-          -1 < absPathLower.indexOf("google drive") || -1 < absPathLower.indexOf("pcloud")
-  }
+    let currentLang = decodeURIComponent(getSearch('lang'))
+    const setLang = (lang) => {
+        if ('zh_CN' === lang) {
+            document.title = `思源笔记 v${getSearch('v')}`
+            document.getElementById('zhCN').classList.remove('fn__none')
+            document.getElementById('enUS').classList.add('fn__none')
+        } else {
+            document.title = `SiYuan v${getSearch('v')}`
+            document.getElementById('zhCN').classList.add('fn__none')
+            document.getElementById('enUS').classList.remove('fn__none')
+        }
+        currentLang = lang
+    }
+    setLang(currentLang)
+
+    document.querySelectorAll('.version').forEach(item => {
+        item.textContent = `🔖 v${getSearch('v')}`
+    })
+
+    document.querySelectorAll('.icon').forEach(item => {
+        item.src = decodeURIComponent(`${getSearch('icon')}`)
+    })
+
+    document.querySelectorAll('.lang').forEach(item => {
+        item.value = currentLang
+        item.addEventListener('change', () => {
+            document.querySelectorAll('.lang').forEach(item1 => {
+                item1.value = item.value
+            })
+            setLang(item.value)
+        })
+    })
+
+    document.getElementById('close').addEventListener('click', () => {
+        const {ipcRenderer} = require('electron')
+        ipcRenderer.send('siyuan-first-quit')
+    })
+    document.getElementById('min').addEventListener('click', () => {
+        const {getCurrentWindow} = require('@electron/remote')
+        getCurrentWindow().minimize()
+    })
+
+    document.querySelectorAll('.choosePath').forEach((item) => {
+        item.addEventListener('click', () => {
+            const {dialog} = require('@electron/remote')
+            const path = require('path')
+            dialog.showOpenDialog({
+                defaultPath: path.join(decodeURIComponent(getSearch('home')), 'Documents'),
+                properties: ['openDirectory', 'createDirectory'],
+            }).then((result) => {
+                if (result.canceled) {
+                    return
+                }
+
+                const {ipcRenderer} = require('electron')
+                const fs = require('fs')
+                const initPath = result.filePaths[0]
+                if (isCloudDrivePath(initPath)) {
+                    let msg = '⚠️ This folder may be a cloud sync disk folder, please change to another path'
+                    if ('zh_CN' === currentLang) {
+                       msg = '⚠️ 该文件夹可能是云同步盘文件夹，请更换其他路径'
+                    }
+                    alert(msg)
+                    return
+                }
+
+                let msg = '⚠️ Do not set the workspace under the path of a third-party sync disk, otherwise the data will be damaged (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continue?'
+                if ('zh_CN' === currentLang) {
+                    msg = '⚠️ 请勿将工作空间设置在第三方同步盘路径下，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等），是否继续？'
+                }
+                if (!confirm(msg)) {
+                    return
+                }
+
+                if (!fs.existsSync(initPath)) {
+                    fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
+                }
+                ipcRenderer.send('siyuan-first-init', {
+                    workspace: initPath,
+                    lang: document.querySelector('.lang').value
+                })
+            })
+        })
+    })
+
+    const isCloudDrivePath = (absPath) => {
+        const absPathLower = absPath.toLowerCase()
+        return -1 < absPathLower.indexOf("onedrive") || -1 < absPathLower.indexOf("dropbox") ||
+            -1 < absPathLower.indexOf("google drive") || -1 < absPathLower.indexOf("pcloud")
+    }
 </script>
 </body>
 </html>

@@ -463,7 +463,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		}
 		logging.LogInfof("exited kernel")
 		util.WebSocketServer.Close()
-		os.Exit(util.ExitCodeOk)
+		os.Exit(logging.ExitCodeOk)
 	}()
 	return
 }

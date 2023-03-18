@@ -259,6 +259,10 @@ func setCriteria(criteria []*Criterion) (err error) {
 	err = filelock.WriteFile(lsPath, data)
 	if nil != err {
 		logging.LogErrorf("write storage [criteria] failed: %s", err)
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			os.Exit(logging.ExitCodeFileSysInconsistent)
+			return
+		}
 		return
 	}
 	return
@@ -274,6 +278,10 @@ func getCriteria() (ret []*Criterion, err error) {
 	data, err := filelock.ReadFile(dataPath)
 	if nil != err {
 		logging.LogErrorf("read storage [criteria] failed: %s", err)
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			os.Exit(logging.ExitCodeFileSysInconsistent)
+			return
+		}
 		return
 	}
 
@@ -345,6 +353,10 @@ func setLocalStorage(val interface{}) (err error) {
 	err = filelock.WriteFile(lsPath, data)
 	if nil != err {
 		logging.LogErrorf("write storage [local] failed: %s", err)
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			os.Exit(logging.ExitCodeFileSysInconsistent)
+			return
+		}
 		return
 	}
 	return
@@ -360,6 +372,10 @@ func getLocalStorage() (ret map[string]interface{}, err error) {
 	data, err := filelock.ReadFile(lsPath)
 	if nil != err {
 		logging.LogErrorf("read storage [local] failed: %s", err)
+		if errors.Is(err, filelock.ErrUnableAccessFile) {
+			os.Exit(logging.ExitCodeFileSysInconsistent)
+			return
+		}
 		return
 	}
 

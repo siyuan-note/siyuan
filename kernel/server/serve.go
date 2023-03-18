@@ -84,7 +84,7 @@ func Serve(fastMode bool) {
 	if nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
-			os.Exit(util.ExitCodeUnavailablePort)
+			os.Exit(logging.ExitCodeUnavailablePort)
 		}
 
 		// fast 模式下启动失败则直接返回
@@ -95,7 +95,7 @@ func Serve(fastMode bool) {
 	if nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
-			os.Exit(util.ExitCodeUnavailablePort)
+			os.Exit(logging.ExitCodeUnavailablePort)
 		}
 	}
 	util.ServerPort = port
@@ -129,7 +129,7 @@ func Serve(fastMode bool) {
 	if err = http.Serve(ln, ginServer); nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
-			os.Exit(util.ExitCodeUnavailablePort)
+			os.Exit(logging.ExitCodeUnavailablePort)
 		}
 	}
 }

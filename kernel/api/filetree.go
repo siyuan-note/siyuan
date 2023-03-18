@@ -690,7 +690,7 @@ func getDoc(c *gin.Context) {
 		isBacklink = isBacklinkArg.(bool)
 	}
 
-	blockCount, childBlockCount, content, parentID, parent2ID, rootID, typ, eof, boxID, docPath, isBacklinkExpand, err := model.GetDoc(startID, endID, id, index, keyword, mode, size, isBacklink)
+	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, err := model.GetDoc(startID, endID, id, index, keyword, mode, size, isBacklink)
 	if errors.Is(err, filelock.ErrUnableAccessFile) {
 		ret.Code = 2
 		ret.Data = id
@@ -719,8 +719,8 @@ func getDoc(c *gin.Context) {
 		"type":             typ,
 		"content":          content,
 		"blockCount":       blockCount,
-		"childBlockCount":  childBlockCount,
 		"eof":              eof,
+		"scroll":           scroll,
 		"box":              boxID,
 		"path":             docPath,
 		"isSyncing":        isSyncing,

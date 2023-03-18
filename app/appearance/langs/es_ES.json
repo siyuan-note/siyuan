@@ -1120,6 +1120,7 @@
     "193": "Consulte el capítulo [Inteligencia artificial] de la guía del usuario para la configuración",
     "194": "Existen restricciones en la interfaz de Nutstore, utilice otros servicios WebDAV",
     "195": "La hora del sistema es incorrecta, calibre la hora del sistema y vuelva a intentarlo",
-    "196": "No configure el espacio de trabajo bajo la ruta de un disco de sincronización de terceros, de lo contrario, los datos se dañarán (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)"
+    "196": "No configure el espacio de trabajo bajo la ruta de un disco de sincronización de terceros, de lo contrario, los datos se dañarán (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)",
+    "197": "Actualmente, el editor se encuentra en modo de solo lectura. Si necesita editar contenido, cambie al modo de edición"
   }
 }

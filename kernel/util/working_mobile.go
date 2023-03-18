@@ -46,7 +46,7 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	if !gulu.File.IsExist(userHomeConfDir) {
 		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
 			log.Printf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
-			os.Exit(ExitCodeCreateConfDirErr)
+			os.Exit(logging.ExitCodeCreateConfDirErr)
 		}
 
 	}
@@ -54,7 +54,7 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	defaultWorkspaceDir := filepath.Join(workspaceBaseDir, "siyuan")
 	if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
 		log.Printf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
-		os.Exit(ExitCodeCreateWorkspaceDirErr)
+		os.Exit(logging.ExitCodeCreateWorkspaceDirErr)
 	}
 
 	initWorkspaceDirMobile(workspaceBaseDir)

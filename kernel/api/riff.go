@@ -104,6 +104,25 @@ func reviewRiffCard(c *gin.Context) {
 	}
 }
 
+func skipReviewRiffCard(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	deckID := arg["deckID"].(string)
+	cardID := arg["cardID"].(string)
+	err := model.SkipReviewFlashcard(deckID, cardID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func getNotebookRiffDueCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

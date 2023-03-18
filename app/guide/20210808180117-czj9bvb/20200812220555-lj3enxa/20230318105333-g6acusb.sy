@@ -1,0 +1,319 @@
+{
+	"ID": "20230318105333-g6acusb",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f58a",
+		"id": "20230318105333-g6acusb",
+		"title": "快速开始思源笔记",
+		"updated": "20230318110313"
+	},
+	"Children": [
+		{
+			"ID": "20230318105333-vp160xt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230318105333-vp160xt",
+				"updated": "20230318105347"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以尝试以下基本操作："
+				}
+			]
+		},
+		{
+			"ID": "20230318105411-l7y4qz1",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 3
+			},
+			"Properties": {
+				"id": "20230318105411-l7y4qz1",
+				"updated": "20230318110236"
+			},
+			"Children": [
+				{
+					"ID": "20230318105412-rnr80mg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 3,
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230318105412-rnr80mg",
+						"updated": "20230318105429"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker"
+						},
+						{
+							"ID": "20230318105412-xasdvu3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230318105412-xasdvu3",
+								"updated": "20230318110201"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击此文档页面中任意位置，开始输入内容，支持MarkDown语法"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230318105417-338zjhm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 3,
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230318105417-338zjhm",
+						"updated": "20230318105534"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker"
+						},
+						{
+							"ID": "20230318105417-xf3z3pz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230318105417-xf3z3pz",
+								"updated": "20230318105606"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "键盘输入 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"Properties": {
+										"style": "color: var(--b3-font-color6);"
+									},
+									"TextMarkType": "kbd text",
+									"TextMarkTextContent": "/"
+								},
+								{
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"color: var(--b3-font-color6);\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​，可以插入各种类型的内容或创建子页面"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230318105418-l2ogv73",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 3,
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230318105418-l2ogv73"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker"
+						},
+						{
+							"ID": "20230318105418-hzh4why",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230318105418-hzh4why",
+								"updated": "20230318105825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "鼠标选中一段文字，通过弹出的工具栏更改你喜欢的文字样式，或给文字增加引用、链接"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230318105419-5nfpxke",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 3,
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230318105419-5nfpxke"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker"
+						},
+						{
+							"ID": "20230318105419-74taz0n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230318105419-74taz0n",
+								"updated": "20230318105902"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "拖拽左侧的块标按钮就可以移动位置，点击块标按钮则会显示块标菜单"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230318105420-dh1jnid",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 3,
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230318105420-dh1jnid"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker"
+						},
+						{
+							"ID": "20230318105420-iyjd63n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230318105420-iyjd63n",
+								"updated": "20230318105913"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击左侧栏目录中  +  按钮，可以创建新页面"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230318105937-aqoi4u5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 3,
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230318105937-aqoi4u5"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker"
+						},
+						{
+							"ID": "20230318105937-a3p6dpc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230318105937-a3p6dpc",
+								"updated": "20230318110009"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击底栏左侧的按钮，可以打开或隐藏两侧的工具栏"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230318110202-ryd6xbb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 3,
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230318110202-ryd6xbb",
+						"updated": "20230318110236"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker"
+						},
+						{
+							"ID": "20230318110202-fabssnz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230318110202-fabssnz",
+								"updated": "20230318110236"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"Properties": {
+										"style": "color: var(--b3-font-color8);"
+									},
+									"TextMarkType": "strong text",
+									"TextMarkTextContent": "注意，帮助文档每次打开思源软件本体都会刷新重置，请勿在帮助文档中记录任何正式笔记"
+								},
+								{
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"color: var(--b3-font-color8);\"}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230318105503-mznw57w",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20230318105503-mznw57w",
+				"updated": "20230318110313"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20230318110109-uk6m0qt",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20230318110109-uk6m0qt",
+						"updated": "20230318110313"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "如有其他操作不了解，可点击左上角工作空间按钮里的帮助菜单，打开最新的帮助文档查阅。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230318110155-bb352ki",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230318110155-bb352ki"
+			}
+		}
+	]
+}

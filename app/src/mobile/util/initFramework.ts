@@ -28,7 +28,8 @@ export const initFramework = () => {
     let backlink: MobileBacklinks;
     let bookmark: MobileBookmarks;
     let tag: MobileTags;
-    sidebarElement.querySelector(".toolbar--border").addEventListener(getEventName(), (event: Event & {
+    // 不能使用 getEventName，否则点击返回会展开右侧栏
+    sidebarElement.querySelector(".toolbar--border").addEventListener("click", (event: Event & {
         target: Element
     }) => {
         const svgElement = hasTopClosestByTag(event.target, "svg");

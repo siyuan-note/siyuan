@@ -45,9 +45,9 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20230315034343-e9513a7e1999
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
-	github.com/siyuan-note/filelock v0.0.0-20230318155428-4b54cef95279
+	github.com/siyuan-note/filelock v0.0.0-20230319015503-9ac4a0ee675b
 	github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc
-	github.com/siyuan-note/logging v0.0.0-20230318155021-66a29c2075ee
+	github.com/siyuan-note/logging v0.0.0-20230319012246-6224f958f554
 	github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.0.0-20230203202212-3282f94193f2

@@ -520,11 +520,6 @@ const initKernel = (workspace, port, lang) => {
                                 "⚠️ 创建配置目录失败 Failed to create config directory",
                                 "<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>");
                             break;
-                        case 23:
-                            showErrorWindow(
-                                "⚠️ 无法读写块树文件 Failed to access blocktree file",
-                                "<div>块树文件正在被其他程序锁定或者已经损坏，请删除 工作空间/temp/ 文件夹后重启</div><div>The block tree file is being locked by another program or is corrupted, please delete the workspace/temp/ folder and restart.</div>");
-                            break;
                         case 24: // 工作空间已被锁定，尝试切换到第一个打开的工作空间
                             if (workspaces && 0 < workspaces.length) {
                                 showWindow(workspaces[0].browserWindow);
@@ -541,8 +536,8 @@ const initKernel = (workspace, port, lang) => {
                             break;
                         case 26:
                             showErrorWindow(
-                                "⚠️ 文件系统不一致 File system inconsistent",
-                                "<div>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
+                                "⚠️ 文件系统读写错误 File system access error",
+                                "<div>请检查文件系统权限，并确保没有其他程序正在读写文件<br>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Please check file system permissions and make sure no other programs are reading or writing to the file<br>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
                             break;
                         case 0:
                         case 1: // Fatal error
@@ -554,6 +549,7 @@ const initKernel = (workspace, port, lang) => {
 <div>SiYuan Kernel exited for unknown reasons [code=${code}], please try to reboot your operating system and then start SiYuan again. If occurs this problem still, please check your anti-virus software whether kill the SiYuan Kernel.</div>`);
                             break;
                     }
+
                     exitApp("port", kernelPort);
                     bootWindow.destroy();
                     resolve(false);

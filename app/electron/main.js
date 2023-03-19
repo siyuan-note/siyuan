@@ -508,16 +508,11 @@ const initKernel = (workspace, port, lang) => {
                                 "<div>数据库文件正在被其他进程占用，请检查是否同时存在多个内核进程（SiYuan Kernel）服务相同的工作空间。</div><div>The database file is being occupied by other processes, please check whether there are multiple kernel processes (SiYuan Kernel) serving the same workspace at the same time.</div>");
                             break;
                         case 21:
-                            showErrorWindow("⚠️ 监听端口 " + kernelPort +
-                                " 失败 Failed to listen to port " + kernelPort,
-                                "<div>监听 " + kernelPort +
-                                " 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port " +
-                                kernelPort +
-                                ", please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
+                            showErrorWindow("⚠️ 监听端口 " + kernelPort + " 失败 Failed to listen to port " + kernelPort,
+                                "<div>监听 " + kernelPort + " 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port " + kernelPort + ", please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
                             break;
                         case 22:
-                            showErrorWindow(
-                                "⚠️ 创建配置目录失败 Failed to create config directory",
+                            showErrorWindow("⚠️ 创建配置目录失败 Failed to create config directory",
                                 "<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>");
                             break;
                         case 24: // 工作空间已被锁定，尝试切换到第一个打开的工作空间
@@ -525,26 +520,22 @@ const initKernel = (workspace, port, lang) => {
                                 showWindow(workspaces[0].browserWindow);
                             }
 
-                            showErrorWindow(
-                                "⚠️ 工作空间已被锁定 The workspace is locked",
+                            showErrorWindow("⚠️ 工作空间已被锁定 The workspace is locked",
                                 "<div>该工作空间正在被使用。</div><div>The workspace is in use.</div>");
                             break;
                         case 25:
-                            showErrorWindow(
-                                "⚠️ 创建工作空间目录失败 Failed to create workspace directory",
+                            showErrorWindow("⚠️ 创建工作空间目录失败 Failed to create workspace directory",
                                 "<div>创建工作空间目录失败。</div><div>Failed to create workspace directory.</div>");
                             break;
                         case 26:
-                            showErrorWindow(
-                                "⚠️ 文件系统读写错误 File system access error",
+                            showErrorWindow("⚠️ 文件系统读写错误 File system access error",
                                 "<div>请检查文件系统权限，并确保没有其他程序正在读写文件<br>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Please check file system permissions and make sure no other programs are reading or writing to the file<br>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
                             break;
                         case 0:
                         case 1: // Fatal error
                             break;
                         default:
-                            showErrorWindow(
-                                "⚠️ 内核因未知原因退出 The kernel exited for unknown reasons",
+                            showErrorWindow("⚠️ 内核因未知原因退出 The kernel exited for unknown reasons",
                                 `<div>思源内核因未知原因退出 [code=${code}]，请尝试重启操作系统后再启动思源。如果该问题依然发生，请检查杀毒软件是否阻止思源内核启动。</div>
 <div>SiYuan Kernel exited for unknown reasons [code=${code}], please try to reboot your operating system and then start SiYuan again. If occurs this problem still, please check your anti-virus software whether kill the SiYuan Kernel.</div>`);
                             break;
@@ -576,8 +567,7 @@ const initKernel = (workspace, port, lang) => {
                 count++;
                 if (14 < count) {
                     writeLog("get kernel ver failed");
-                    showErrorWindow(
-                        "⚠️ 获取内核服务端口失败 Failed to get kernel serve port",
+                    showErrorWindow("⚠️ 获取内核服务端口失败 Failed to get kernel serve port",
                         "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to get kernel serve port, please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
                     bootWindow.destroy();
                     resolve(false);
@@ -601,8 +591,7 @@ const initKernel = (workspace, port, lang) => {
                 let progressing = false;
                 while (!progressing) {
                     try {
-                        const progressResult = await fetch(
-                            getServer() + "/api/system/bootProgress");
+                        const progressResult = await fetch(getServer() + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
                         if (progressData.data.progress >= 100) {
                             resolve(true);
@@ -639,9 +628,7 @@ app.whenReady().then(() => {
     const resetTrayMenu = (tray, lang, mainWindow) => {
         const trayMenuTemplate = [
             {
-                label: mainWindow.isVisible()
-                    ? lang.hideWindow
-                    : lang.showWindow,
+                label: mainWindow.isVisible() ? lang.hideWindow : lang.showWindow,
                 click: () => {
                     showHideWindow(tray, lang, mainWindow);
                 },
@@ -677,9 +664,7 @@ app.whenReady().then(() => {
         if ("win32" === process.platform) {
             // Windows 端支持窗口置顶 https://github.com/siyuan-note/siyuan/issues/6860
             trayMenuTemplate.splice(1, 0, {
-                label: mainWindow.isAlwaysOnTop()
-                    ? lang.cancelWindowTop
-                    : lang.setWindowTop,
+                label: mainWindow.isAlwaysOnTop() ? lang.cancelWindowTop : lang.setWindowTop,
                 click: () => {
                     if (!mainWindow.isAlwaysOnTop()) {
                         mainWindow.setAlwaysOnTop(true);

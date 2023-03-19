@@ -10,7 +10,6 @@ import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
 import {disabledProtyle} from "../protyle/util/onGet";
 import {fetchPost} from "../util/fetch";
-import {lockFile} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 
 export class BlockPanel {
@@ -245,11 +244,6 @@ export class BlockPanel {
     private initProtyle(editorElement: HTMLElement) {
         const index = parseInt(editorElement.getAttribute("data-index"));
         fetchPost("api/block/getBlockInfo", {id: this.nodeIds[index]}, (response) => {
-            if (response.code === 2) {
-                // 文件被锁定
-                lockFile(response.data);
-                return false;
-            }
             if (response.code === 3) {
                 showMessage(response.msg);
                 return;

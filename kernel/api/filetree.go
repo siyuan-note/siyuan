@@ -501,24 +501,6 @@ func createDocWithMd(c *gin.Context) {
 	pushCreate(box, p, id, arg)
 }
 
-func lockFile(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
-	locked := model.TryAccessFileByBlockID(id)
-	if !locked {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(75))
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
-	}
-}
-
 func getDocCreateSavePath(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -689,11 +671,6 @@ func getDoc(c *gin.Context) {
 	}
 
 	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, err := model.GetDoc(startID, endID, id, index, keyword, mode, size, isBacklink)
-	//if errors.Is(err, filelock.ErrUnableAccessFile) {
-	//	ret.Code = 2
-	//	ret.Data = id
-	//	return
-	//}
 	if model.ErrBlockNotFound == err {
 		ret.Code = 3
 		return

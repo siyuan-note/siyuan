@@ -6,7 +6,6 @@ import {getCurrentWindow} from "@electron/remote";
 import {Constants} from "../constants";
 import {Tab} from "../layout/Tab";
 import {fetchPost} from "../util/fetch";
-import {lockFile} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 
 export const openNewWindow = (tab: Tab) => {
@@ -23,11 +22,6 @@ export const openNewWindow = (tab: Tab) => {
 
 export const openNewWindowById = (id: string) => {
     fetchPost("api/block/getBlockInfo", {id}, (response) => {
-        if (response.code === 2) {
-            // 文件被锁定
-            lockFile(response.data);
-            return false;
-        }
         if (response.code === 3) {
             showMessage(response.msg);
             return;

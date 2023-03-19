@@ -6,7 +6,6 @@ import {blockRender} from "../markdown/blockRender";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
-import {lockFile} from "../../dialog/processSystem";
 import {setFold} from "../../menus/protyle";
 import {onGet} from "../util/onGet";
 /// #if !MOBILE
@@ -69,10 +68,7 @@ const promiseTransaction = () => {
         } else {
             promiseTransaction();
         }
-        if (response.code === 1) {
-            lockFile(protyle.block.rootID);
-            return;
-        }
+
         countBlockWord([], protyle.block.rootID, true);
         /// #if MOBILE
         if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&

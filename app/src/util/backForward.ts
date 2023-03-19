@@ -10,7 +10,6 @@ import {Tab} from "../layout/Tab";
 import {Editor} from "../editor";
 import {onGet} from "../protyle/util/onGet";
 import {scrollCenter} from "./highlightById";
-import {lockFile} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
@@ -39,11 +38,6 @@ const focusStack = async (stack: IBackStack) => {
         }
         if (wnd) {
             const info = await fetchSyncPost("/api/block/getBlockInfo", {id: stack.id});
-            if (info.code === 2) {
-                // 文件被锁定
-                lockFile(info.data);
-                return false;
-            }
             if (info.code === 3) {
                 showMessage(info.msg);
                 return;

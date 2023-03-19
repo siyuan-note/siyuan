@@ -454,9 +454,10 @@ const initKernel = (workspace, port, lang) => {
                 stdio: "ignore",
             },);
 
+            const currentKernelPort = kernelPort;
             writeLog("booted kernel process [pid=" + kernelProcess.pid + ", port=" + kernelPort + "]");
             kernelProcess.on("close", (code) => {
-                writeLog(`kernel [pid=${kernelProcess.pid}, port=${kernelPort}] exited with code [${code}]`);
+                writeLog(`kernel [pid=${kernelProcess.pid}, port=${currentKernelPort}] exited with code [${code}]`);
                 if (0 !== code) {
                     let errorWindowId;
                     switch (code) {
@@ -464,7 +465,7 @@ const initKernel = (workspace, port, lang) => {
                             errorWindowId = showErrorWindow("⚠️ 数据库被锁定 The database is locked", "<div>数据库文件正在被其他进程占用，请检查是否同时存在多个内核进程（SiYuan Kernel）服务相同的工作空间。</div><div>The database file is being occupied by other processes, please check whether there are multiple kernel processes (SiYuan Kernel) serving the same workspace at the same time.</div>");
                             break;
                         case 21:
-                            errorWindowId = showErrorWindow("⚠️ 监听端口 " + kernelPort + " 失败 Failed to listen to port " + kernelPort, "<div>监听 " + kernelPort + " 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port " + kernelPort + ", please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
+                            errorWindowId = showErrorWindow("⚠️ 监听端口 " + currentKernelPort + " 失败 Failed to listen to port " + currentKernelPort, "<div>监听 " + currentKernelPort + " 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port " + currentKernelPort + ", please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
                             break;
                         case 22:
                             errorWindowId = showErrorWindow("⚠️ 创建配置目录失败 Failed to create config directory", "<div>思源需要在用户家目录下创建配置文件夹（~/.config/siyuan），请确保该路径具有写入权限。</div><div>SiYuan needs to create a configuration folder (~/.config/siyuan) in the user\'s home directory. Please make sure that the path has write permissions.</div>");
@@ -490,7 +491,7 @@ const initKernel = (workspace, port, lang) => {
                             break;
                     }
 
-                    exitApp("port", kernelPort, errorWindowId);
+                    exitApp("port", currentKernelPort, errorWindowId);
                     bootWindow.destroy();
                     resolve(false);
                 }

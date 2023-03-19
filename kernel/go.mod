@@ -37,12 +37,13 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/user_agent v0.6.0
 	github.com/olahol/melody v1.1.3
+	github.com/open-spaced-repetition/go-fsrs v0.1.0
 	github.com/panjf2000/ants/v2 v2.7.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-gpt3 v1.4.0
 	github.com/shirou/gopsutil/v3 v3.23.2
-	github.com/siyuan-note/dejavu v0.0.0-20230315034343-e9513a7e1999
+	github.com/siyuan-note/dejavu v0.0.0-20230319084158-c8c1eaadf7bd
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20230319015503-9ac4a0ee675b
@@ -66,7 +67,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.221 // indirect
+	github.com/aws/aws-sdk-go v1.44.224 // indirect
 	github.com/bytedance/sonic v1.8.5 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
@@ -107,14 +108,13 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/onsi/ginkgo/v2 v2.9.1 // indirect
-	github.com/open-spaced-repetition/go-fsrs v0.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/qiniu/go-sdk/v7 v7.14.0 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
-	github.com/quic-go/qtls-go1-19 v0.2.1 // indirect
-	github.com/quic-go/qtls-go1-20 v0.1.1 // indirect
+	github.com/quic-go/qtls-go1-19 v0.3.0 // indirect
+	github.com/quic-go/qtls-go1-20 v0.2.0 // indirect
 	github.com/quic-go/quic-go v0.33.0 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
@@ -128,7 +128,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/exp v0.0.0-20230314191032-db074128a8ec // indirect
+	golang.org/x/exp v0.0.0-20230315142452-642cacee5cc0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect

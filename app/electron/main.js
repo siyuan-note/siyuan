@@ -529,7 +529,7 @@ const initKernel = (workspace, port, lang) => {
                             break;
                         case 26:
                             showErrorWindow("⚠️ 文件系统读写错误 File system access error",
-                                "<div>请检查文件系统权限，并确保没有其他程序正在读写文件<br>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Please check file system permissions and make sure no other programs are reading or writing to the file<br>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
+                                "<div>请检查文件系统权限，并确保没有其他程序正在读写文件；<br>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Please check file system permissions and make sure no other programs are reading or writing to the file;<br>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");
                             break;
                         case 0:
                         case 1: // Fatal error

@@ -397,7 +397,7 @@ func initPandoc() {
 	}
 
 	pandocZip := filepath.Join(WorkingDir, "pandoc.zip")
-	if "dev" == Mode {
+	if "dev" == Mode || !gulu.File.IsExist(pandocZip) {
 		if gulu.OS.IsWindows() {
 			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-windows-amd64.zip")
 		} else if gulu.OS.IsDarwin() {

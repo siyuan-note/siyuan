@@ -36,7 +36,9 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: "SiYuan"
   license: "../LICENSE"
-  include: "installer.nsh"
+  include: "nsis/installer.nsh"
+  installerSidebar: "nsis/installerSidebar.bmp"
+  uninstallerSidebar: "nsis/uninstallerSidebar.bmp"
 
 extraResources:
   - from: "appearance/boot"

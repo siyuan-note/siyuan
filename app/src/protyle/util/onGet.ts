@@ -1,4 +1,4 @@
-import {lockFile, setTitle} from "../../dialog/processSystem";
+import {setTitle} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {genEmptyElement} from "../../block/util";
@@ -36,12 +36,6 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     }
     protyle.notebookId = data.data.box;
     protyle.path = data.data.path;
-    if (data.code === 2) {
-        // 文件被锁定
-        protyle.block.rootID = data.data;
-        lockFile(data.data);
-        return;
-    }
 
     if (data.data.eof) {
         if (action.includes(Constants.CB_GET_BEFORE)) {

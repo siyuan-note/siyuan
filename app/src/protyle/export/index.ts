@@ -11,7 +11,6 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {getThemeMode, setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
-import {lockFile} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
@@ -468,11 +467,6 @@ const getExportPath = (option: { type: string, id: string }, removeAssets?: bool
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
     }, (response) => {
-        if (response.code === 2) {
-            // 文件被锁定
-            lockFile(response.data);
-            return;
-        }
         if (response.code === 3) {
             showMessage(response.msg);
             return;

@@ -527,19 +527,6 @@ func (box *Box) UpdateHistoryGenerated() {
 	boxLatestHistoryTime[box.ID] = time.Now()
 }
 
-func TryAccessFileByBlockID(id string) (ok bool) {
-	bt := treenode.GetBlockTree(id)
-	if nil == bt {
-		return
-	}
-	p := filepath.Join(util.DataDir, bt.BoxID, bt.Path)
-
-	if !gulu.File.IsExist(p) {
-		return false
-	}
-	return true
-}
-
 func getBoxesByPaths(paths []string) (ret map[string]*Box) {
 	ret = map[string]*Box{}
 	for _, p := range paths {

@@ -19,7 +19,7 @@ import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
 import {Layout} from "../layout";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
-import {lockFile, setTitle} from "../dialog/processSystem";
+import {setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
@@ -34,11 +34,6 @@ export const openFileById = (options: {
     removeCurrentTab?: boolean
 }) => {
     fetchPost("/api/block/getBlockInfo", {id: options.id}, (data) => {
-        if (data.code === 2) {
-            // 文件被锁定
-            lockFile(data.data);
-            return;
-        }
         if (data.code === 3) {
             showMessage(data.msg);
             return;

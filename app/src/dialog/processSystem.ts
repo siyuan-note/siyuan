@@ -1,7 +1,6 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
-import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
 /// #if !BROWSER
@@ -27,47 +26,6 @@ export const lockScreen = () => {
     /// #else
     ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "lockscreen"});
     /// #endif
-};
-
-export const lockFile = (id: string) => {
-    const html = `<div class="b3-dialog__scrim"></div>
-<div class="b3-dialog__container">
-    <div class="b3-dialog__header" onselectstart="return false;">🔒 ${window.siyuan.languages.lockFile0} <small>v${Constants.SIYUAN_VERSION}</small></div>
-    <div class="b3-dialog__content">
-        <p>${window.siyuan.languages.lockFile1}</p>
-        <p>${window.siyuan.languages.lockFile2}</p>
-    </div>
-    <div class="b3-dialog__action">
-        <button class="b3-button b3-button--cancel">${window.siyuan.languages.closeTab}</button>
-        <div class="fn__space"></div>
-        <button class="b3-button b3-button--text">${window.siyuan.languages.retry}</button>
-    </div>
-</div>`;
-    let logElement = document.getElementById("errorLog");
-    if (logElement) {
-        logElement.innerHTML = html;
-    } else {
-        document.body.insertAdjacentHTML("beforeend", `<div id="errorLog" class="b3-dialog b3-dialog--open">${html}</div>`);
-        logElement = document.getElementById("errorLog");
-    }
-    logElement.querySelector(".b3-button--cancel").addEventListener("click", () => {
-        /// #if !MOBILE
-        getAllModels().editor.find((item) => {
-            if (item.editor.protyle.block.rootID === id) {
-                item.parent.parent.removeTab(item.parent.id, false, false);
-                return true;
-            }
-        });
-        logElement.remove();
-        /// #endif
-    });
-    logElement.querySelector(".b3-button--text").addEventListener("click", () => {
-        fetchPost("/api/filetree/lockFile", {id}, (response) => {
-            if (response.code === 0) {
-                window.location.reload();
-            }
-        });
-    });
 };
 
 export const kernelError = () => {
@@ -162,10 +120,6 @@ export const exitSiYuan = () => {
 };
 
 export const transactionError = (data: { code: number, data: string }) => {
-    if (data.code === 1) {
-        lockFile(data.data);
-        return;
-    }
     if (document.getElementById("transactionError")) {
         return;
     }

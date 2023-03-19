@@ -29,6 +29,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/open-spaced-repetition/go-fsrs"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -634,6 +635,10 @@ func removeFlashcardsByBlockIDs(blockIDs []string, deck *riff.Deck) {
 	}
 
 	cards := deck.GetCardsByBlockIDs(blockIDs)
+	if 1 > len(cards) {
+		return
+	}
+
 	for _, card := range cards {
 		deck.RemoveCard(card.ID())
 	}
@@ -900,9 +905,18 @@ func getDeckDueCards(deck *riff.Deck) (ret []riff.Card) {
 	ret = []riff.Card{}
 	dues := deck.Dues()
 
+	newCount := 0
+	reviewCount := 0
 	for _, c := range dues {
 		if nil != skipCardCache[c.ID()] {
 			continue
+		}
+
+		fsrsCard := c.Impl().(*fsrs.Card)
+		if fsrs.New == fsrsCard.State {
+			newCount++
+		} else {
+			reviewCount++
 		}
 
 		ret = append(ret, c)

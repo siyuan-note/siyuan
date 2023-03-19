@@ -67,7 +67,7 @@ const exitApp = (type, id, errorWindowId) => {
             }
         } else {
             const currentURL = new URL(item.browserWindow.getURL());
-            if (currentURL.port === id || currentURL.port === id.toString()) {
+            if (currentURL.port.toString() === id.toString()) {
                 mainWindow = item.browserWindow;
                 if (workspaces.length > 1) {
                     item.browserWindow.destroy();
@@ -477,7 +477,7 @@ const initKernel = (workspace, port, lang) => {
                             errorWindowId = showErrorWindow("⚠️ 工作空间已被锁定 The workspace is locked", "<div>该工作空间正在被使用。</div><div>The workspace is in use.</div>");
                             break;
                         case 25:
-                            showErrorWindow("⚠️ 创建工作空间目录失败 Failed to create workspace directory", "<div>创建工作空间目录失败。</div><div>Failed to create workspace directory.</div>");
+                            errorWindowId = showErrorWindow("⚠️ 创建工作空间目录失败 Failed to create workspace directory", "<div>创建工作空间目录失败。</div><div>Failed to create workspace directory.</div>");
                             break;
                         case 26:
                             errorWindowId = showErrorWindow("⚠️ 文件系统读写错误 File system access error", "<div>请检查文件系统权限，并确保没有其他程序正在读写文件；<br>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）</div><div>Please check file system permissions and make sure no other programs are reading or writing to the file;<br>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)</div>");

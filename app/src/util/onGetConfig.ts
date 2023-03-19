@@ -149,6 +149,9 @@ export const onGetConfig = (isStart: boolean) => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
             JSONToLayout(isStart);
+            if (window.JSAndroid) {
+                window.openFileByURL(window.JSAndroid.getBlockURL())
+            }
         } catch (e) {
             resetLayout();
         }

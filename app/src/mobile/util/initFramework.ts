@@ -131,10 +131,8 @@ export const initFramework = () => {
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {
-        if (window.JSAndroid) {
-            if (window.openFileByURL(window.JSAndroid.getBlockURL())) {
-                return;
-            }
+        if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {
+            return;
         }
         const openId = getSearch("id");
         if (openId) {

@@ -25,6 +25,7 @@ import {resizeDrag} from "./layout/util";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {updateEditModeElement} from "./layout/topBar";
+import {getSearch} from "./util/functions";
 
 class App {
     constructor() {
@@ -171,3 +172,13 @@ class App {
 }
 
 new App();
+window.openFileByURL = (openURL) => {
+    if (openURL && /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(openURL)) {
+        openFileById({
+            id: openURL.substr(16, 22),
+            action:getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+        });
+        return true;
+    }
+    return false;
+};

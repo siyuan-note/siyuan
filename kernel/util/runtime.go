@@ -130,105 +130,111 @@ func ReportFileSysFatalError(err error) {
 	os.Exit(logging.ExitCodeFileSysErr)
 }
 
+var checkFileSysStatusLock = sync.Mutex{}
+
 func CheckFileSysStatus() {
 	if ContainerStd != Container {
 		return
 	}
 
-	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"
-
 	for {
 		<-thirdPartySyncCheckTicker.C
+		checkFileSysStatus()
+	}
+}
 
-		if IsCloudDrivePath(WorkspaceDir) {
-			ReportFileSysFatalError(fmt.Errorf("workspace dir [%s] is in third party sync dir", WorkspaceDir))
-			return
-		}
+func checkFileSysStatus() {
+	checkFileSysStatusLock.Lock()
+	defer checkFileSysStatusLock.Unlock()
 
-		dir := filepath.Join(DataDir, fileSysStatusCheckFile)
-		if err := os.RemoveAll(dir); nil != err {
+	const fileSysStatusCheckFile = ".siyuan/filesys_status_check"
+	if IsCloudDrivePath(WorkspaceDir) {
+		ReportFileSysFatalError(fmt.Errorf("workspace dir [%s] is in third party sync dir", WorkspaceDir))
+		return
+	}
+
+	dir := filepath.Join(DataDir, fileSysStatusCheckFile)
+	if err := os.RemoveAll(dir); nil != err {
+		ReportFileSysFatalError(err)
+		return
+	}
+
+	if err := os.MkdirAll(dir, 0755); nil != err {
+		ReportFileSysFatalError(err)
+		return
+	}
+
+	for i := 0; i < 7; i++ {
+		tmp := filepath.Join(dir, "check_consistency")
+		data := make([]byte, 1024*4)
+		_, err := rand.Read(data)
+		if nil != err {
 			ReportFileSysFatalError(err)
 			return
 		}
 
-		if err := os.MkdirAll(dir, 0755); nil != err {
+		if err = os.WriteFile(tmp, data, 0644); nil != err {
 			ReportFileSysFatalError(err)
 			return
 		}
 
-		for i := 0; i < 7; i++ {
-			tmp := filepath.Join(dir, "check_consistency")
-			data := make([]byte, 1024*4)
-			_, err := rand.Read(data)
+		time.Sleep(5 * time.Second)
+
+		for j := 0; j < 32; j++ {
+			renamed := tmp + "_renamed"
+			if err = os.Rename(tmp, renamed); nil != err {
+				ReportFileSysFatalError(err)
+				break
+			}
+
+			time.Sleep(time.Second)
+
+			f, err := os.Open(renamed)
 			if nil != err {
 				ReportFileSysFatalError(err)
 				return
 			}
 
-			if err = os.WriteFile(tmp, data, 0644); nil != err {
+			if err = f.Close(); nil != err {
 				ReportFileSysFatalError(err)
 				return
 			}
 
-			time.Sleep(5 * time.Second)
-
-			for j := 0; j < 32; j++ {
-				renamed := tmp + "_renamed"
-				if err = os.Rename(tmp, renamed); nil != err {
-					ReportFileSysFatalError(err)
-					break
-				}
-
-				time.Sleep(time.Second)
-
-				f, err := os.Open(renamed)
-				if nil != err {
-					ReportFileSysFatalError(err)
-					return
-				}
-
-				if err = f.Close(); nil != err {
-					ReportFileSysFatalError(err)
-					return
-				}
-
-				if err = os.Rename(renamed, tmp); nil != err {
-					ReportFileSysFatalError(err)
-					return
-				}
-
-				entries, err := os.ReadDir(dir)
-				if nil != err {
-					ReportFileSysFatalError(err)
-					return
-				}
-
-				checkFilenames := bytes.Buffer{}
-				for _, entry := range entries {
-					if !entry.IsDir() && strings.Contains(entry.Name(), "check_") {
-						checkFilenames.WriteString(entry.Name())
-						checkFilenames.WriteString("\n")
-					}
-				}
-				lines := strings.Split(strings.TrimSpace(checkFilenames.String()), "\n")
-				if 1 < len(lines) {
-					buf := bytes.Buffer{}
-					for _, line := range lines {
-						buf.WriteString("  ")
-						buf.WriteString(line)
-						buf.WriteString("\n")
-					}
-					output := buf.String()
-					ReportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file:\n%s", dir, output))
-					return
-				}
-			}
-
-			if err = os.RemoveAll(tmp); nil != err {
+			if err = os.Rename(renamed, tmp); nil != err {
 				ReportFileSysFatalError(err)
 				return
 			}
 
+			entries, err := os.ReadDir(dir)
+			if nil != err {
+				ReportFileSysFatalError(err)
+				return
+			}
+
+			checkFilenames := bytes.Buffer{}
+			for _, entry := range entries {
+				if !entry.IsDir() && strings.Contains(entry.Name(), "check_") {
+					checkFilenames.WriteString(entry.Name())
+					checkFilenames.WriteString("\n")
+				}
+			}
+			lines := strings.Split(strings.TrimSpace(checkFilenames.String()), "\n")
+			if 1 < len(lines) {
+				buf := bytes.Buffer{}
+				for _, line := range lines {
+					buf.WriteString("  ")
+					buf.WriteString(line)
+					buf.WriteString("\n")
+				}
+				output := buf.String()
+				ReportFileSysFatalError(fmt.Errorf("dir [%s] has more than 1 file:\n%s", dir, output))
+				return
+			}
+		}
+
+		if err = os.RemoveAll(tmp); nil != err {
+			ReportFileSysFatalError(err)
+			return
 		}
 	}
 }

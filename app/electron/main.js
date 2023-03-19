@@ -51,31 +51,29 @@ try {
 }
 
 // type: port/id
-const exitApp = (type, id, errorWindowId) => {
+const exitApp = (port, errorWindowId) => {
     let tray;
     let mainWindow;
+
+    // 关闭端口相同的所有非主窗口
+    BrowserWindow.getAllWindows().forEach((item) => {
+        const currentURL = new URL(item.getURL())
+        if (port.toString() === currentURL.port.toString()) {
+            if (currentURL.href.indexOf("/stage/build/app/?v=") > -1) {
+                mainWindow = item;
+            } else {
+                item.destroy();
+            }
+        }
+    });
     workspaces.find((item, index) => {
-        if (type === "id") {
-            if (item.id === id) {
-                mainWindow = item.browserWindow;
-                if (workspaces.length > 1) {
-                    item.browserWindow.destroy();
-                }
-                workspaces.splice(index, 1);
-                tray = item.tray;
-                return true;
+        if (mainWindow.id === item.browserWindow.id) {
+            if (workspaces.length > 1) {
+                item.browserWindow.destroy();
             }
-        } else {
-            const currentURL = new URL(item.browserWindow.getURL());
-            if (currentURL.port.toString() === id.toString()) {
-                mainWindow = item.browserWindow;
-                if (workspaces.length > 1) {
-                    item.browserWindow.destroy();
-                }
-                workspaces.splice(index, 1);
-                tray = item.tray;
-                return true;
-            }
+            workspaces.splice(index, 1);
+            tray = item.tray;
+            return true;
         }
     });
     if (tray && ("win32" === process.platform || "linux" === process.platform)) {
@@ -103,7 +101,6 @@ const exitApp = (type, id, errorWindowId) => {
 
         if (errorWindowId) {
             BrowserWindow.getAllWindows().forEach((item) => {
-                writeLog(errorWindowId + " " + item.id);
                 if (errorWindowId !== item.id) {
                     item.destroy();
                 }
@@ -491,7 +488,7 @@ const initKernel = (workspace, port, lang) => {
                             break;
                     }
 
-                    exitApp("port", currentKernelPort, errorWindowId);
+                    exitApp(currentKernelPort, errorWindowId);
                     bootWindow.destroy();
                     resolve(false);
                 }
@@ -666,8 +663,8 @@ app.whenReady().then(() => {
             shell.openExternal(url);
         });
     });
-    ipcMain.on("siyuan-quit", (event, id) => {
-        exitApp("id", id)
+    ipcMain.on("siyuan-quit", (event, port) => {
+        exitApp(port);
     });
     ipcMain.on("siyuan-openwindow", (event, data) => {
         const mainWindow = BrowserWindow.fromId(data.id);

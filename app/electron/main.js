@@ -504,10 +504,9 @@ const initKernel = (workspace, port, lang) => {
                 },
             );
 
-            const currentKernelPid = kernelProcess.pid;
-            writeLog("booted kernel process [pid=" + currentKernelPid + ", port=" + kernelPort + "]");
+            writeLog("booted kernel process [pid=" + kernelProcess.pid + ", port=" + kernelPort + "]");
             kernelProcess.on("close", (code) => {
-                writeLog(`kernel [pid=${currentKernelPid}, port=${kernelPort}] exited with code [${code}]`);
+                writeLog(`kernel [pid=${kernelProcess.pid}, port=${kernelPort}] exited with code [${code}]`);
                 if (0 !== code) {
                     let errorWindowId;
                     switch (code) {
@@ -544,8 +543,7 @@ const initKernel = (workspace, port, lang) => {
                             break;
                         default:
                             errorWindowId = showErrorWindow("⚠️ 内核因未知原因退出 The kernel exited for unknown reasons",
-                                `<div>思源内核因未知原因退出 [code=${code}]，请尝试重启操作系统后再启动思源。如果该问题依然发生，请检查杀毒软件是否阻止思源内核启动。</div>
-<div>SiYuan Kernel exited for unknown reasons [code=${code}], please try to reboot your operating system and then start SiYuan again. If occurs this problem still, please check your anti-virus software whether kill the SiYuan Kernel.</div>`);
+                                `<div>思源内核因未知原因退出 [code=${code}]，请尝试重启操作系统后再启动思源。如果该问题依然发生，请检查杀毒软件是否阻止思源内核启动。</div><div>SiYuan Kernel exited for unknown reasons [code=${code}], please try to reboot your operating system and then start SiYuan again. If occurs this problem still, please check your anti-virus software whether kill the SiYuan Kernel.</div>`);
                             break;
                     }
 

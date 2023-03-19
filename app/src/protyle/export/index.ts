@@ -238,34 +238,18 @@ const renderPDF = (id: string) => {
     let pdfTop = 0;
     const previewElement = document.getElementById('preview');
     const setLineNumberWidth = (element) => {
-        let width = 800
-        switch (element.value) {
-            case "A3":
-              width = 842
-              break;
-            case "A4":
-              width = 595
-              break;
-            case "A5":
-              width = 420
-              break;
-            case "Legal":
-            case "Letter":
-              width = 612
-              break;
-            case "Tabloid":
-              width = 792
-              break;
-        }
-        previewElement.querySelectorAll('.hljs.protyle-linenumber').forEach((item) => {
-            item.parentElement.style.width = width + "px";
+        // 为保持代码块宽度一致，全部都进行宽度设定 https://github.com/siyuan-note/siyuan/issues/7692 
+        previewElement.querySelectorAll('.hljs').forEach((item) => {
+            item.parentElement.style.width = "";
+            item.parentElement.style.width = item.parentElement.clientWidth + "px";
             item.removeAttribute('data-render');
         })
+        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
         previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
-            item.style.width = width + "px";
+            item.style.width = "";
+            item.style.width = item.clientWidth + "px";
         })
         Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
-        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
     }
     const setPadding = () => {
         const isLandscape = document.querySelector("#landscape").checked;
@@ -327,10 +311,7 @@ const renderPDF = (id: string) => {
         Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
         Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
         Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
-        setTimeout(() => {
-            setLineNumberWidth(document.querySelector("#action #pageSize"));
-        }, 600);
+        setLineNumberWidth(document.querySelector("#action #pageSize"));
     }
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
@@ -448,6 +429,7 @@ const renderPDF = (id: string) => {
             previewElement.classList.add("exporting");
             previewElement.style.paddingTop = "6px";
             previewElement.style.paddingBottom = "0";
+            setLineNumberWidth(pageSizeElement);
         });
         setPadding();
         renderPreview(response.data.content);

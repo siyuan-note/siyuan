@@ -154,38 +154,38 @@
 <img id="icon">
 <div class="drag"></div>
 <script>
-  const getSearch = (key) => {
-    if (window.location.search.indexOf('?') === -1) {
-      return ''
+    const getSearch = (key) => {
+        if (window.location.search.indexOf('?') === -1) {
+            return ''
+        }
+        let value = ''
+        const data = window.location.search.split('?')[1].split('&')
+        data.find(item => {
+            const keyValue = item.split('=')
+            if (keyValue[0] === key) {
+                value = keyValue[1]
+                return true
+            }
+        })
+        return value
     }
-    let value = ''
-    const data = window.location.search.split('?')[1].split('&')
-    data.find(item => {
-      const keyValue = item.split('=')
-      if (keyValue[0] === key) {
-        value = keyValue[1]
-        return true
-      }
+
+    document.querySelector('#icon').src = decodeURIComponent(`${getSearch('icon')}`)
+
+    document.getElementById('title').innerHTML = decodeURIComponent(getSearch('title'))
+    document.getElementById('content').innerHTML = decodeURIComponent(getSearch('content'))
+    document.querySelectorAll('.version').forEach(item => {
+        item.textContent = `🔖 v${getSearch('v')}`
     })
-    return value
-  }
 
-  document.querySelector('#icon').src = decodeURIComponent(`${getSearch('icon')}`)
-
-  document.getElementById('title').innerHTML = decodeURIComponent(getSearch('title'))
-  document.getElementById('content').innerHTML = decodeURIComponent(getSearch('content'))
-  document.querySelectorAll('.version').forEach(item => {
-    item.textContent = `🔖 v${getSearch('v')}`
-  })
-
-  document.getElementById('close').addEventListener('click', () => {
-    const {ipcRenderer} = require('electron')
-    ipcRenderer.send('siyuan-first-quit')
-  })
-  document.getElementById('min').addEventListener('click', () => {
-    const {getCurrentWindow} = require('@electron/remote')
-    getCurrentWindow().minimize()
-  })
+    document.getElementById('close').addEventListener('click', () => {
+        const {getCurrentWindow} = require('@electron/remote')
+        getCurrentWindow().destroy()
+    })
+    document.getElementById('min').addEventListener('click', () => {
+        const {getCurrentWindow} = require('@electron/remote')
+        getCurrentWindow().minimize()
+    })
 </script>
 </body>
 </html>

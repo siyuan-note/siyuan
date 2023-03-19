@@ -75,7 +75,7 @@ const exitApp = (type, id) => {
             }
         } else {
             const currentURL = new URL(item.browserWindow.getURL());
-            if (currentURL.port === id) {
+            if (currentURL.port === id || currentURL.port === id.toString()) {
                 mainWindow = item.browserWindow;
                 if (workspaces.length > 1) {
                     item.browserWindow.destroy();
@@ -486,7 +486,6 @@ const initKernel = (workspace, port, lang) => {
         let cmd = `ui version [${appVer}], booting kernel [${kernelPath} ${cmds.join(
             " ")}]`;
         writeLog(cmd);
-        let kernelProcessPid = "";
         if (!isDevEnv || workspaces.length > 0) {
             const cp = require("child_process");
             const kernelProcess = cp.spawn(kernelPath,
@@ -495,12 +494,13 @@ const initKernel = (workspace, port, lang) => {
                     stdio: "ignore",
                 },
             );
-            kernelProcessPid = kernelProcess.pid;
-            writeLog("booted kernel process [pid=" + kernelProcessPid + ", port=" +
-                kernelPort + "]");
+
+            const currentKernelPid = kernelProcess.pid;
+            const currentKernelPort = kernelPort;
+            writeLog("booted kernel process [pid=" + currentKernelPid + ", port=" + currentKernelPort + "]");
 
             kernelProcess.on("close", (code) => {
-                writeLog(`kernel [pid=${kernelProcessPid}] exited with code [${code}]`);
+                writeLog(`kernel [pid=${currentKernelPid}, port=${currentKernelPort}] exited with code [${code}]`);
                 if (0 !== code) {
                     switch (code) {
                         case 20:
@@ -550,7 +550,7 @@ const initKernel = (workspace, port, lang) => {
                             break;
                     }
 
-                    exitApp("port", kernelPort);
+                    exitApp("port", currentKernelPort);
                     bootWindow.destroy();
                     resolve(false);
                 }

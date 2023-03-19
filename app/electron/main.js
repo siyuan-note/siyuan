@@ -57,13 +57,17 @@ const exitApp = (port, errorWindowId) => {
 
     // 关闭端口相同的所有非主窗口
     BrowserWindow.getAllWindows().forEach((item) => {
-        const currentURL = new URL(item.getURL())
-        if (port.toString() === currentURL.port.toString()) {
-            if (currentURL.href.indexOf("/stage/build/app/?v=") > -1) {
-                mainWindow = item;
-            } else {
-                item.destroy();
+        try {
+            const currentURL = new URL(item.getURL())
+            if (port.toString() === currentURL.port.toString()) {
+                if (currentURL.href.indexOf("/stage/build/app/?v=") > -1) {
+                    mainWindow = item;
+                } else {
+                    item.destroy();
+                }
             }
+        } catch (e) {
+            // load file is not a url
         }
     });
     workspaces.find((item, index) => {

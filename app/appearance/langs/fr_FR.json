@@ -1,4 +1,6 @@
 {
+  "skip": "Navire",
+  "reboot": "Redémarrer",
   "saveLayout": "Enregistrer la mise en page",
   "ai": "Intelligence Artificielle",
   "aiContinueWrite": "Continuer à écrire",

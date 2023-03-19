@@ -1,4 +1,6 @@
 {
+  "skip": "Skip",
+  "reboot": "Reboot",
   "saveLayout": "Save Layout",
   "ai": "Artificial Intelligence",
   "aiContinueWrite": "Continue writing",

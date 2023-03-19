@@ -1,4 +1,6 @@
 {
+  "skip": "跳过",
+  "reboot": "重启",
   "saveLayout": "保存布局",
   "ai": "人工智能",
   "aiContinueWrite": "续写",

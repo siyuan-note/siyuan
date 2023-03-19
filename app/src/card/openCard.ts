@@ -59,6 +59,13 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     </div>
     <div class="fn__flex card__action fn__none">
         <div>
+            <span>${window.siyuan.languages.reboot}</span>
+            <button data-type="-3" aria-label="0" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
+                <div>💤</div>
+                ${window.siyuan.languages.skip} (0)
+            </button>
+        </div>
+        <div>
             <span></span>
             <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
                 <div>🙈</div>
@@ -137,6 +144,8 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 type = "-1";
             } else if (event.detail === "p") {
                 type = "-2";
+            } else if (event.detail === "0") {
+                type = "-3";
             }
         }
         if (!type) {
@@ -158,7 +167,9 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             editor.protyle.element.classList.remove("card__block--hide");
             actionElements[0].classList.add("fn__none");
             actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
-                element.previousElementSibling.textContent = blocks[index].nextDues[btnIndex];
+                if (btnIndex !== 0) {
+                    element.previousElementSibling.textContent = blocks[index].nextDues[btnIndex - 1];
+                }
             });
             actionElements[1].classList.remove("fn__none");
             return;
@@ -180,14 +191,15 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             }
             return;
         }
-        if (["0", "1", "2", "3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
-            fetchPost("/api/riff/reviewRiffCard", {
+        if (["0", "1", "2", "3", "-3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
+            fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
                 deckID: blocks[index].deckID,
                 cardID: blocks[index].cardID,
                 rating: parseInt(type)
             }, () => {
                 /// #if MOBILE
-                if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
+                if (type !== "-3" &&
+                    (0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
                     window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
                     document.getElementById("toolbarSync").classList.remove("fn__none");
                 }

@@ -15,13 +15,12 @@
   }
 
   &__action {
-    padding: 8px 16px;
+    padding: 8px 4px;
 
     .b3-button {
-      padding: 8px;
+      padding: 8px 0;
       display: block;
-      margin: 0 auto;
-      width: 90%;
+      width: 100%;
 
       & > div {
         font-size: 32px;
@@ -33,6 +32,7 @@
 
     & > div {
       flex: 1;
+      margin: 0 4px;
 
       & > span {
         display: flex;

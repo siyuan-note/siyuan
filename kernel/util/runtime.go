@@ -127,7 +127,7 @@ func ReportFileSysFatalError(err error) {
 		output = strings.Join(lines[5:], "\n")
 	}
 	logging.LogErrorf("check file system status failed: %s, %s", err, output)
-	os.Exit(logging.ExitCodeFileSysInconsistent)
+	os.Exit(logging.ExitCodeFileSysErr)
 }
 
 func CheckFileSysStatus() {

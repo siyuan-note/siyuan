@@ -41,10 +41,6 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	data, err := filelock.ReadFile(filePath)
 	if nil != err {
 		logging.LogErrorf("load tree [%s] failed: %s", p, err)
-		if errors.Is(err, filelock.ErrUnableAccessFile) {
-			os.Exit(logging.ExitCodeFileSysInconsistent)
-			return
-		}
 		return
 	}
 
@@ -96,10 +92,6 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 				}
 			} else {
 				logging.LogWarnf("read parent tree data [%s] failed: %s", parentAbsPath, readErr)
-				if errors.Is(readErr, filelock.ErrUnableAccessFile) {
-					os.Exit(logging.ExitCodeFileSysInconsistent)
-					return
-				}
 			}
 			hPathBuilder.WriteString("Untitled/")
 			continue
@@ -129,10 +121,6 @@ func WriteTreeWithoutChangeTime(tree *parse.Tree) (err error) {
 	}
 
 	if err = filelock.WriteFileWithoutChangeTime(filePath, data); nil != err {
-		if errors.Is(err, filelock.ErrUnableAccessFile) {
-			return
-		}
-
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 		logging.LogErrorf(msg)
 		return errors.New(msg)
@@ -149,10 +137,6 @@ func WriteTree(tree *parse.Tree) (err error) {
 	}
 
 	if err = filelock.WriteFile(filePath, data); nil != err {
-		if errors.Is(err, filelock.ErrUnableAccessFile) {
-			return
-		}
-
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 		logging.LogErrorf(msg)
 		return errors.New(msg)

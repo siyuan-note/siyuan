@@ -896,10 +896,7 @@ func DuplicateDoc(tree *parse.Tree) {
 
 func createTreeTx(tree *parse.Tree) {
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
-	err := PerformTransactions(&[]*Transaction{transaction})
-	if nil != err {
-		logging.LogFatalf("transaction failed: %s", err)
-	}
+	PerformTransactions(&[]*Transaction{transaction})
 }
 
 func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree, err error) {
@@ -1450,11 +1447,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	}
 
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
-	err = PerformTransactions(&[]*Transaction{transaction})
-	if nil != err {
-		logging.LogFatalf("transaction failed: %s", err)
-		return
-	}
+	PerformTransactions(&[]*Transaction{transaction})
 	WaitForWritingFiles()
 	return
 }

@@ -45,9 +45,9 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20230315034343-e9513a7e1999
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
-	github.com/siyuan-note/filelock v0.0.0-20230318101209-f0e353df8b5b
+	github.com/siyuan-note/filelock v0.0.0-20230319015503-9ac4a0ee675b
 	github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc
-	github.com/siyuan-note/logging v0.0.0-20230318100514-8ece27db458d
+	github.com/siyuan-note/logging v0.0.0-20230319012246-6224f958f554
 	github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.0.0-20230203202212-3282f94193f2
@@ -126,7 +126,6 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/exp v0.0.0-20230314191032-db074128a8ec // indirect

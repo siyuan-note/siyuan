@@ -61,13 +61,7 @@ func appendBlock(c *gin.Context) {
 		},
 	}
 
-	err := model.PerformTransactions(&transactions)
-	if nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
-	}
-
+	model.PerformTransactions(&transactions)
 	model.WaitForWritingFiles()
 
 	ret.Data = transactions
@@ -106,13 +100,7 @@ func prependBlock(c *gin.Context) {
 		},
 	}
 
-	err := model.PerformTransactions(&transactions)
-	if nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
-	}
-
+	model.PerformTransactions(&transactions)
 	model.WaitForWritingFiles()
 
 	ret.Data = transactions
@@ -169,13 +157,7 @@ func insertBlock(c *gin.Context) {
 		},
 	}
 
-	err := model.PerformTransactions(&transactions)
-	if nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
-	}
-
+	model.PerformTransactions(&transactions)
 	model.WaitForWritingFiles()
 
 	ret.Data = transactions
@@ -260,13 +242,7 @@ func updateBlock(c *gin.Context) {
 		}
 	}
 
-	err = model.PerformTransactions(&transactions)
-	if nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
-	}
-
+	model.PerformTransactions(&transactions)
 	model.WaitForWritingFiles()
 
 	ret.Data = transactions
@@ -298,12 +274,7 @@ func deleteBlock(c *gin.Context) {
 		},
 	}
 
-	err := model.PerformTransactions(&transactions)
-	if nil != err {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
-	}
+	model.PerformTransactions(&transactions)
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)

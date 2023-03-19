@@ -283,12 +283,12 @@ github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b h1:828lTUW2C0uNiolODqoACu7J8sDUzswD4Xo04mUombg=
 github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b/go.mod h1:Sqo4FYX5lAXu7gWkbEdJF0e6P57tNNVV4WDKYDctokI=
-github.com/siyuan-note/filelock v0.0.0-20230318101209-f0e353df8b5b h1:NtC1PhGKtOvjQNf95UUW3K5OW/0OIu3ny8sLq9YYqOQ=
-github.com/siyuan-note/filelock v0.0.0-20230318101209-f0e353df8b5b/go.mod h1:kL4KLZ3/SJxQFQ/lUxkbOyQiqVh/MJyo1CGy6sAUqM8=
+github.com/siyuan-note/filelock v0.0.0-20230319015503-9ac4a0ee675b h1:nK+77PDzDEyLBAdX4e3SKWQp6P1uDP0Td8j72ir1hT0=
+github.com/siyuan-note/filelock v0.0.0-20230319015503-9ac4a0ee675b/go.mod h1:sOq/g1jqdnkR/kAqOsTZFSr10Env4AN2nKOhZn62vQ8=
 github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc h1:MX2cPWpn7Hfd3FmpwLjGdPIjF84AFUS9f/mcPJc/4w4=
 github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc/go.mod h1:WDO42mUVRnkk8M4AhZ4oakZ5jnghulP0c8NFCrrFWG4=
-github.com/siyuan-note/logging v0.0.0-20230318100514-8ece27db458d h1:K7y9mEvoQ2PZkM0f+bHvnyDi/gnKfY5OJjYUe2GFnpc=
-github.com/siyuan-note/logging v0.0.0-20230318100514-8ece27db458d/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
+github.com/siyuan-note/logging v0.0.0-20230319012246-6224f958f554 h1:uaLbecIT6G7jFQUscXSzIxi/hDVSfzZccMCl8Lzqqn0=
+github.com/siyuan-note/logging v0.0.0-20230319012246-6224f958f554/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7 h1:Kr8hhMhr6v+U24TMDCP5WdP4dWrXm5maar+TycTZs9I=
 github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7/go.mod h1:XJtLlKCr8cZE+lzykM4edHHih92M9M50UNw/nDLYRN8=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d h1:zE9ykElWQ6/NYmHa3jpm/yHnI4xSofP+UP6SpjHcSeM=
@@ -338,8 +338,6 @@ github.com/yuin/goldmark v1.4.0/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yusufpapurcu/wmi v1.2.2 h1:KBNDSne4vP5mbSWnJbO+51IMOXJB67QiYCSBrubbPRg=
 github.com/yusufpapurcu/wmi v1.2.2/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
-go.uber.org/multierr v1.10.0 h1:S0h4aNzvfcFsC3dRF1jLoaov7oRaKqRGC/pUEJ2yvPQ=
-go.uber.org/multierr v1.10.0/go.mod h1:20+QtiLqy0Nd6FdQB9TLXag12DsQkrbs3htMFfDN80Y=
 golang.org/x/arch v0.0.0-20210923205945-b76863e36670/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=
 golang.org/x/arch v0.3.0 h1:02VY4/ZcO/gBOH6PUaoiptASxtXU10jazRCP865E97k=
 golang.org/x/arch v0.3.0/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=

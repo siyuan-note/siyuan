@@ -1000,7 +1000,7 @@
     "73": "En cours d'importation, veuillez patienter...",
     "74": "Le kernel n'a pas été complètement démarré [%d%%], veuillez réessayer plus tard.",
     "75": "La tentative d'accès au fichier a échoué",
-    "76": "Le fichier de données a été verrouillé par un autre programme.",
+    "76": "TODO",
     "77": "Chemin d'accès invalide [%s]",
     "78": "Les anciens et les nouveaux chemins sont répétés",
     "79": "Prise en charge de l'importation de documents Markdown uniquement",

@@ -112,84 +112,84 @@ func InitDatabase(forceRebuild bool) (err error) {
 func initDBTables() {
 	_, err := db.Exec("DROP TABLE IF EXISTS stat")
 	if nil != err {
-		logging.LogFatalf("drop table [stat] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [stat] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE stat (key, value)")
 	if nil != err {
-		logging.LogFatalf("create table [stat] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [stat] failed: %s", err)
 	}
 	setDatabaseVer()
 
 	_, err = db.Exec("DROP TABLE IF EXISTS blocks")
 	if nil != err {
-		logging.LogFatalf("drop table [blocks] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated)")
 	if nil != err {
-		logging.LogFatalf("create table [blocks] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS blocks_fts")
 	if nil != err {
-		logging.LogFatalf("drop table [blocks_fts] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks_fts] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
 	if nil != err {
-		logging.LogFatalf("create table [blocks_fts] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks_fts] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS blocks_fts_case_insensitive")
 	if nil != err {
-		logging.LogFatalf("drop table [blocks_fts_case_insensitive] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks_fts_case_insensitive] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
 	if nil != err {
-		logging.LogFatalf("create table [blocks_fts_case_insensitive] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocks_fts_case_insensitive] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS spans")
 	if nil != err {
-		logging.LogFatalf("drop table [spans] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [spans] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE spans (id, block_id, root_id, box, path, content, markdown, type, ial)")
 	if nil != err {
-		logging.LogFatalf("create table [spans] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [spans] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS assets")
 	if nil != err {
-		logging.LogFatalf("drop table [assets] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [assets] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE assets (id, block_id, root_id, box, docpath, path, name, title, hash)")
 	if nil != err {
-		logging.LogFatalf("create table [assets] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [assets] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS attributes")
 	if nil != err {
-		logging.LogFatalf("drop table [attributes] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [attributes] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE attributes (id, name, value, type, block_id, root_id, box, path)")
 	if nil != err {
-		logging.LogFatalf("create table [attributes] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [attributes] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS refs")
 	if nil != err {
-		logging.LogFatalf("drop table [refs] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [refs] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE refs (id, def_block_id, def_block_parent_id, def_block_root_id, def_block_path, block_id, root_id, box, path, content, markdown, type)")
 	if nil != err {
-		logging.LogFatalf("create table [refs] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [refs] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS file_annotation_refs")
 	if nil != err {
-		logging.LogFatalf("drop table [refs] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [refs] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE file_annotation_refs (id, file_path, annotation_id, block_id, root_id, box, path, content, type)")
 	if nil != err {
-		logging.LogFatalf("create table [refs] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [refs] failed: %s", err)
 	}
 }
 
@@ -228,7 +228,7 @@ func initHistoryDBConnection() {
 	var err error
 	historyDB, err = sql.Open("sqlite3_extended", dsn)
 	if nil != err {
-		logging.LogFatalf("create database failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create database failed: %s", err)
 	}
 	historyDB.SetMaxIdleConns(3)
 	historyDB.SetMaxOpenConns(3)
@@ -239,7 +239,7 @@ func initHistoryDBTables() {
 	historyDB.Exec("DROP TABLE histories_fts_case_insensitive")
 	_, err := historyDB.Exec("CREATE VIRTUAL TABLE histories_fts_case_insensitive USING fts5(type UNINDEXED, op UNINDEXED, title, content, path UNINDEXED, created UNINDEXED, tokenize=\"siyuan case_insensitive\")")
 	if nil != err {
-		logging.LogFatalf("create table [histories_fts_case_insensitive] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [histories_fts_case_insensitive] failed: %s", err)
 	}
 }
 
@@ -260,7 +260,7 @@ func initDBConnection() {
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
 	if nil != err {
-		logging.LogFatalf("create database failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create database failed: %s", err)
 	}
 	db.SetMaxIdleConns(20)
 	db.SetMaxOpenConns(20)
@@ -1206,7 +1206,7 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 			tx.Rollback()
 			closeDatabase()
 			removeDatabaseFile()
-			logging.LogFatalf("database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it", util.DBPath)
+			logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it", util.DBPath)
 		}
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
 		return

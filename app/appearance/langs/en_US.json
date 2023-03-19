@@ -1000,7 +1000,7 @@
     "73": "Importing, please wait...",
     "74": "The kernel has not been fully booted [%d%%], please try again later",
     "75": "Attempt to access file failed",
-    "76": "The data file has been locked by another program.",
+    "76": "TODO",
     "77": "Invalid dir path [%s]",
     "78": "The old and new paths are repeated",
     "79": "Only supports importing Markdown document",

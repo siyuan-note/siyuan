@@ -50,7 +50,6 @@ try {
     app.exit();
 }
 
-// type: port/id
 const exitApp = (port, errorWindowId) => {
     let tray;
     let mainWindow;

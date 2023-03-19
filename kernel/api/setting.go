@@ -29,6 +29,43 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setFlashcard(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	flashcard := &conf.Flashcard{}
+	if err = gulu.JSON.UnmarshalJSON(param, flashcard); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if 1 > flashcard.DailyNewCardLimit {
+		flashcard.DailyNewCardLimit = 1
+	}
+
+	if 1 > flashcard.DailyReviewCardLimit {
+		flashcard.DailyReviewCardLimit = 1
+	}
+
+	model.Conf.Flashcard = flashcard
+	model.Conf.Save()
+
+	ret.Data = flashcard
+}
+
 func setAccount(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

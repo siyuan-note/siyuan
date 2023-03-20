@@ -78,7 +78,7 @@ Cloud services require a paid subscription.
 * [SiYuan development plan and progress](https://github.com/orgs/siyuan-note/projects/1)
 * [SiYuan changelog](CHANGELOG.md)
 
-## 🛠️ Download Setup
+## 🚀 Download Setup
 
 It is recommended to give priority to installing through the application market on the desktop and mobile, so that you can upgrade the version with one click in the future.
 
@@ -148,6 +148,10 @@ We release insider preview before major updates, please visit [https://github.co
 * [Issues](https://github.com/siyuan-note/siyuan/issues) Official support channels
 * [Discord](https://discord.com/invite/bzfCBwMzdP) A community built by enthusiastic users
 * [Awesome SiYuan](https://github.com/siyuan-note/awesome) Resources organized by enthusiastic users
+
+## 🛠️ Development Guide
+
+See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
 ## ❓ FAQ
 

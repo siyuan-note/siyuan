@@ -149,6 +149,10 @@ We release insider preview before major updates, please visit [https://github.co
 * [Discord](https://discord.com/invite/bzfCBwMzdP) A community built by enthusiastic users
 * [Awesome SiYuan](https://github.com/siyuan-note/awesome) Resources organized by enthusiastic users
 
+## ⚙ Development Guide
+
+See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
+
 ## ❓ FAQ
 
 ### Is SiYuan right for me? Or how should I choose note-taking software?
@@ -201,6 +205,10 @@ SiYuan is completely open source, and contributions are welcome:
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 
 For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
+
+### How to develop or build from source?
+
+See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
 ### How to upgrade to a new version?
 

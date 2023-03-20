@@ -154,6 +154,10 @@
 * [用户社区汇总](https://ld246.com/article/1640266171309) 由热心用户建立的社区
 * [Awesome SiYuan](https://github.com/siyuan-note/awesome) 由热心用户整理的资源
 
+## ⚙ 开发指南
+
+见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
+
 ## ❓ 常见问题和解答
 
 ### 听说思源笔记会通过用户电脑挖矿？
@@ -212,6 +216,10 @@
 * [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
 
 更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
+
+### 如何开发&从源码构建？
+
+见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
 
 ### 如何升级到新版本？
 

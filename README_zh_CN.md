@@ -217,10 +217,6 @@
 
 更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
 
-### 如何开发&从源码构建？
-
-见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)。
-
 ### 如何升级到新版本？
 
 * 如果是通过应用商店安装的，请通过应用商店更新

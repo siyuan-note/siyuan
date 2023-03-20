@@ -206,10 +206,6 @@ SiYuan is completely open source, and contributions are welcome:
 
 For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
-### How to develop or build from source?
-
-See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
-
 ### How to upgrade to a new version?
 
 * If installed via app store, please update via app store

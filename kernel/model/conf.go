@@ -70,6 +70,7 @@ type AppConf struct {
 	Sync           *conf.Sync       `json:"sync"`           // 同步配置
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Flashcard      *conf.Flashcard  `json:"flashcard"`      // 闪卡配置
+	AI             *conf.AI         `json:"ai"`             // 人工智能配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
 	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
@@ -317,6 +318,11 @@ func InitConf() {
 	if nil == Conf.Flashcard {
 		Conf.Flashcard = conf.NewFlashcard()
 	}
+
+	// TODO 支持应用内配置人工智能 https://github.com/siyuan-note/siyuan/issues/7714
+	//if nil == Conf.AI {
+	//	Conf.AI = conf.NewAI()
+	//}
 
 	Conf.ReadOnly = util.ReadOnly
 

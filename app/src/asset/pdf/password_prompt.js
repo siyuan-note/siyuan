@@ -85,9 +85,7 @@ class PasswordPrompt {
       this.input.focus();
     }
     // NOTE
-    this.label.textContent = window.siyuan.languages[`password_${passwordIncorrect
-      ? 'invalid'
-      : 'label'}`]
+    this.label.textContent = window.siyuan.languages[`password_${passwordIncorrect ? 'invalid' : 'label'}`]
   }
 
   async close() {

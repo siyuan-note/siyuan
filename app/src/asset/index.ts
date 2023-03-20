@@ -284,6 +284,8 @@ export class Asset extends Model {
                   <svg><use xlink:href="#iconPlay"></use></svg>
                 </button>
                 <span id="scrollPage" class="fn__none"></span>
+                <span id="print" class="fn__none"></span>
+                <span id="secondaryPrint" class="fn__none"></span>
                 <span id="viewBookmark" class="fn__none"></span>
                 <span id="secondaryViewBookmark" class="fn__none"></span>
                 <button id="secondaryToolbarToggle" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.more}" tabindex="36" aria-expanded="false" aria-controls="secondaryToolbar">

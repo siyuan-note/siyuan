@@ -18,5 +18,5 @@
 
 const {addScriptSync} = require('../../protyle/util/addScript')
 const {Constants} = require('../../constants')
-addScriptSync(`${Constants.PROTYLE_CDN}/js/pdf/pdf.js?v=3.0.150`, 'pdfjsScript')
+addScriptSync(`${Constants.PROTYLE_CDN}/js/pdf/pdf.js?v=3.4.120`, 'pdfjsScript')
 module.exports = window["pdfjs-dist/build/pdf"];

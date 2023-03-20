@@ -149,9 +149,8 @@ class PDFFindBar {
         status = "notFound";
         break;
       case FindState.WRAPPED:
-        findMsg = window.siyuan.languages.find_not_found[`find_reached_${previous
-          ? 'top'
-          : 'bottom'}`]
+        // NOTE
+        findMsg = window.siyuan.languages.find_not_found[`find_reached_${previous ? 'top' : 'bottom'}`]
         break;
     }
     this.findField.setAttribute("data-status", status);
@@ -165,7 +164,7 @@ class PDFFindBar {
 
   updateResultsCount({ current = 0, total = 0 } = {}) {
     const limit = MATCHES_COUNT_LIMIT;
-    // // NOTE
+    // NOTE
     let matchCountMsg = "";
 
     if (total > 0) {

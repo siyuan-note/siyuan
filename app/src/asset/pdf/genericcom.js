@@ -14,10 +14,8 @@
  */
 
 import { BasePreferences } from "./preferences.js";
-// NOTE
-// import { DownloadManager } from "./download_manager.js";
 import { GenericScripting } from "./generic_scripting.js";
-import { shadow } from './pdfjs'
+import {shadow} from "./pdfjs";
 
 if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("GENERIC")) {
   throw new Error(
@@ -37,44 +35,48 @@ class GenericPreferences extends BasePreferences {
   }
 }
 
-// NOTE
-class GenericExternalServices {
-  constructor () {
-    throw new Error('Cannot initialize DefaultExternalServices.')
+class DefaultExternalServices {
+  constructor() {
+    throw new Error("Cannot initialize DefaultExternalServices.");
   }
 
-  static updateFindControlState (data) {}
+  static updateFindControlState(data) {}
 
-  static updateFindMatchesCount (data) {}
+  static updateFindMatchesCount(data) {}
 
-  static initPassiveLoading (callbacks) {}
+  static initPassiveLoading(callbacks) {}
 
-  static async fallback (data) {}
+  static reportTelemetry(data) {}
 
-  static reportTelemetry (data) {}
-
-  static get supportsIntegratedFind () {
-    return shadow(this, 'supportsIntegratedFind', false)
+  static get supportsPinchToZoom() {
+    return shadow(this, "supportsPinchToZoom", true);
   }
 
-  static get supportsDocumentFonts () {
-    return shadow(this, 'supportsDocumentFonts', true)
+  static get supportsIntegratedFind() {
+    return shadow(this, "supportsIntegratedFind", false);
   }
 
-  static get supportedMouseWheelZoomModifierKeys () {
-    return shadow(this, 'supportedMouseWheelZoomModifierKeys', {
+  static get supportsDocumentFonts() {
+    return shadow(this, "supportsDocumentFonts", true);
+  }
+
+  static get supportedMouseWheelZoomModifierKeys() {
+    return shadow(this, "supportedMouseWheelZoomModifierKeys", {
       ctrlKey: true,
       metaKey: true,
-    })
+    });
   }
 
-  static get isInAutomation () {
-    return shadow(this, 'isInAutomation', false)
+  static get isInAutomation() {
+    return shadow(this, "isInAutomation", false);
   }
 
-  static createDownloadManager(options) {
-    // NOTE
-    // return new DownloadManager();
+  static updateEditorStates(data) {
+    throw new Error("Not implemented: updateEditorStates");
+  }
+
+  static createDownloadManager() {
+    // NOTE return new DownloadManager();
   }
 
   static createPreferences() {
@@ -82,13 +84,15 @@ class GenericExternalServices {
   }
 
   static createL10n({ locale = "en-US" }) {
-    // NOTE
-    // return new GenericL10n(locale);
+    // NOTE return new GenericL10n(locale);
   }
 
   static createScripting({ sandboxBundleSrc }) {
     return new GenericScripting(sandboxBundleSrc);
   }
 }
+
 // NOTE
-export { GenericCom, GenericExternalServices };
+// PDFViewerApplication.externalServices = GenericExternalServices;
+
+export { GenericCom, DefaultExternalServices };

@@ -531,7 +531,7 @@ export const getHighlight = (element: HTMLElement) => {
 const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
     const pageIndex = selected.index;
     const page = pdf.pdfViewer.getPageView(pageIndex);
-    let textLayerElement = page.textLayer.textLayerDiv;
+    let textLayerElement = page.textLayer.div;
     if (!textLayerElement.lastElementChild) {
         return;
     }

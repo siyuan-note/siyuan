@@ -239,11 +239,9 @@ class PDFDocumentProperties {
     }
     // NOTE
     if (mb >= 1) {
-      return `${mb >= 1 && (+mb.toPrecision(
-        3)).toLocaleString()} MB ${fileSize.toLocaleString()} bytes`
+      return `${mb >= 1 && (+mb.toPrecision(3)).toLocaleString()} MB ${fileSize.toLocaleString()} bytes`
     }
-    return `${mb < 1 && (+kb.toPrecision(
-      3)).toLocaleString()} KB (${fileSize.toLocaleString()} bytes`
+    return `${mb < 1 && (+kb.toPrecision(3)).toLocaleString()} KB (${fileSize.toLocaleString()} bytes`
   }
 
   async #parsePageSize(pageSizeInches, pagesRotation) {
@@ -313,15 +311,11 @@ class PDFDocumentProperties {
     // NOTE
     const [{ width, height }, unit, name, orientation] = await Promise.all([
       this._isNonMetricLocale ? sizeInches : sizeMillimeters,
-      this._isNonMetricLocale
-        ? window.siyuan.languages.unitInches
-        : window.siyuan.languages.unitMillimeters,
+      this._isNonMetricLocale ? window.siyuan.languages.unitInches : window.siyuan.languages.unitMillimeters,
       rawName &&
       window.siyuan.languages[`document_properties_page_size_name_${rawName.toLowerCase()}`],
-      window.siyuan.languages[`document_properties_page_size_orientation_${isPortrait
-        ? 'portrait'
-        : 'landscape'}`],
-    ])
+      window.siyuan.languages[`document_properties_page_size_orientation_${isPortrait ? 'portrait' : 'landscape'}`],
+    ]);
     if (name) {
       return `${width.toLocaleString()} × ${height.toLocaleString()} ${unit} (${name}, ${orientation})`
     }

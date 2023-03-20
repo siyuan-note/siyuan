@@ -38,14 +38,18 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
     }
 };
 
-export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false) => {
+export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false, behavior: ScrollBehavior = "auto") => {
     if (!top && getSelection().rangeCount > 0 && hasClosestBlock(getSelection().getRangeAt(0).startContainer)) {
         const editorElement = protyle.contentElement;
         const cursorTop = getSelectionPosition(editorElement).top - editorElement.getBoundingClientRect().top;
+        let top = 0
         if (cursorTop < 0) {
-            editorElement.scrollTop = editorElement.scrollTop + cursorTop;
+            top = editorElement.scrollTop + cursorTop;
         } else if (cursorTop > editorElement.clientHeight - 74) {   // 74 = 移动端底部 + 段落块高度
-            editorElement.scrollTop = editorElement.scrollTop + (cursorTop + 74 - editorElement.clientHeight);
+            top = editorElement.scrollTop + (cursorTop + 74 - editorElement.clientHeight);
+        }
+        if (top !== 0) {
+            editorElement.scroll({top, behavior});
         }
         return;
     }
@@ -64,12 +68,15 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         parentNodeElement = parentNodeElement.parentElement;
     }
     if (top) {
-        protyle.contentElement.scrollTop = offsetTop - 32;
+        protyle.contentElement.scroll({top: offsetTop - 32, behavior});
         return;
     }
     if (protyle.contentElement.scrollTop > offsetTop - 32) {
-        protyle.contentElement.scrollTop = offsetTop - 32;
+        protyle.contentElement.scroll({top: offsetTop - 32, behavior});
     } else if (protyle.contentElement.scrollTop + protyle.contentElement.clientHeight < offsetTop + nodeElement.clientHeight - 32) {
-        protyle.contentElement.scrollTop = offsetTop + nodeElement.clientHeight - 32 - protyle.contentElement.clientHeight;
+        protyle.contentElement.scroll({
+            top: offsetTop + nodeElement.clientHeight - 32 - protyle.contentElement.clientHeight,
+            behavior
+        });
     }
 };

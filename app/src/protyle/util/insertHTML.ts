@@ -44,7 +44,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
         setTimeout(() => {
-            scrollCenter(protyle, blockElement);
+            scrollCenter(protyle, blockElement, false, "smooth");
         }, Constants.TIMEOUT_BLOCKLOAD);
         return;
     }

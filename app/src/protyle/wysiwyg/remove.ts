@@ -14,6 +14,7 @@ import {setFold, zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
+import {scrollCenter} from "../../util/highlightById";
 
 const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
@@ -262,6 +263,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 }
 
                 focusBlock(sideElement, undefined, false);
+                scrollCenter(protyle, sideElement);
                 if (listElement) {
                     inserts.push({
                         action: "update",

@@ -2025,7 +2025,7 @@ export class WYSIWYG {
                 focusByRange(range);
             }
 
-            if (ctrlIsPressed) {
+            if (ctrlIsPressed && range.toString() === "") {
                 let ctrlElement = hasClosestBlock(event.target);
                 if (ctrlElement) {
                     ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;

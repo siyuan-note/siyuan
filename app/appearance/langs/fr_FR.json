@@ -1122,6 +1122,8 @@
     "194": "Il existe des restrictions sur l'interface Nutstore, veuillez utiliser d'autres services WebDAV",
     "195": "L'heure du système est incorrecte, veuillez calibrer l'heure du système et réessayer",
     "196": "Ne définissez pas l'espace de travail sous le chemin d'un disque de synchronisation tiers, sinon les données seront endommagées (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)",
-    "197": "Actuellement, l'éditeur est en mode lecture seule. Si vous devez modifier le contenu, veuillez passer en mode édition"
+    "197": "Actuellement, l'éditeur est en mode lecture seule. Si vous devez modifier le contenu, veuillez passer en mode édition",
+    "198": "Ceci n'est pas une archive data.zip valide. Si l'archive a été exportée depuis [Doc tree], veuillez l'importer depuis [Doc tree]",
+    "199": "Ceci n'est pas une archive .sy.zip valide. Si l'archive a été exportée depuis [Paramètres], veuillez l'importer depuis [Paramètres]"
   }
 }

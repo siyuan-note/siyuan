@@ -1122,6 +1122,8 @@
     "194": "There are restrictions on the Nutstore interface, please use other WebDAV services",
     "195": "The system time is incorrect, please calibrate the system time and try again",
     "196": "Do not set the workspace under the path of a third-party sync disk, otherwise the data will be damaged (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)",
-    "197": "Currently the editor is in read-only mode. If you need to edit content, please switch to edit mode"
+    "197": "Currently the editor is in read-only mode. If you need to edit content, please switch to edit mode",
+    "198": "This is not a valid Data archive. If the archive was exported from [Doc tree], please import it from [Doc tree]",
+    "199": "This is not a valid .sy.zip archive. If the archive was exported from [Settings], please import it from [Settings]"
   }
 }

@@ -306,6 +306,7 @@ declare interface IExport {
     paragraphBeginningSpace: boolean;
     addTitle: boolean;
     addFooter: boolean;
+    markdownYFM: boolean;
 }
 
 declare interface IEditor {

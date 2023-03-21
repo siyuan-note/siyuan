@@ -5,32 +5,56 @@ export const card = {
     genHTML: () => {
         return `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.selectOpen}
-        <div class="b3-label__text">${window.siyuan.languages.fileTree2}</div>
+        dailyNewCardLimit
+        <div class="b3-label__text">dailyNewCardLimitdailyNewCardLimit</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="alwaysSelectOpenedFile" type="checkbox"${window.siyuan.config.fileTree.alwaysSelectOpenedFile ? " checked" : ""}/>
+    <input class="b3-text-field fn__flex-center" id="dailyNewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.dailyNewCardLimit ? " checked" : ""}/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.fileTree7}
-        <div class="b3-label__text">${window.siyuan.languages.fileTree8}</div>
+        dailyReviewCardLimit
+        <div class="b3-label__text">dailyReviewCardLimitdailyReviewCardLimit</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="openFilesUseCurrentTab" type="checkbox"${window.siyuan.config.fileTree.openFilesUseCurrentTab ? " checked" : ""}/>
+    <input class="b3-text-field fn__flex-center" id="dailyReviewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.dailyReviewCardLimit ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        list
+        <div class="b3-label__text">listlist</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="list" type="checkbox"${window.siyuan.config.flashcard.list ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        superBlock
+        <div class="b3-label__text">superBlocksuperBlock</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="superBlock" type="checkbox"${window.siyuan.config.flashcard.superBlock ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        deck
+        <div class="b3-label__text">deckdeck</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="deck" type="checkbox"${window.siyuan.config.flashcard.deck ? " checked" : ""}/>
 </label>`;
     },
     bindEvent: () => {
         card.element.querySelectorAll("input").forEach((item) => {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setFlashcard", {
-                        apiBaseURL: (card.element.querySelector("#apiBaseURL") as HTMLInputElement).checked,
-                        apiKey: (card.element.querySelector("#apiKey") as HTMLInputElement).value,
-                        apiMaxTokens: (card.element.querySelector("#apiMaxTokens") as HTMLInputElement).value,
-                        apiProxy: (card.element.querySelector("#apiProxy") as HTMLInputElement).checked,
-                        apiTimeout: (card.element.querySelector("#apiTimeout") as HTMLInputElement).checked,
+                    dailyNewCardLimit: parseInt((card.element.querySelector("#dailyNewCardLimit") as HTMLInputElement).value),
+                    dailyReviewCardLimit: parseInt((card.element.querySelector("#dailyReviewCardLimit") as HTMLInputElement).value),
+                    list: (card.element.querySelector("#list") as HTMLInputElement).checked,
+                    superBlock: (card.element.querySelector("#superBlock") as HTMLInputElement).checked,
+                    deck: (card.element.querySelector("#deck") as HTMLInputElement).checked,
                 }, response => {
-                    window.siyuan.config.ai = response.data;
+                    window.siyuan.config.flashcard = response.data;
                 });
             });
         });

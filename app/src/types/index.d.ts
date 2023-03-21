@@ -392,6 +392,13 @@ declare interface IConfig {
     repo: {
         key: string
     },
+    flashcard: {
+        dailyNewCardLimit: number
+        dailyReviewCardLimit: number
+        list: boolean
+        superBlock: boolean
+        deck: boolean
+    }
     ai: {
         openAI: {
             apiBaseURL: string

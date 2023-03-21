@@ -58,11 +58,11 @@ export const AI = {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setAI", {
                     openAI: {
-                        apiBaseURL: (AI.element.querySelector("#apiBaseURL") as HTMLInputElement).checked,
+                        apiBaseURL: (AI.element.querySelector("#apiBaseURL") as HTMLInputElement).value,
                         apiKey: (AI.element.querySelector("#apiKey") as HTMLInputElement).value,
-                        apiMaxTokens: (AI.element.querySelector("#apiMaxTokens") as HTMLInputElement).value,
-                        apiProxy: (AI.element.querySelector("#apiProxy") as HTMLInputElement).checked,
-                        apiTimeout: (AI.element.querySelector("#apiTimeout") as HTMLInputElement).checked,
+                        apiMaxTokens: parseInt((AI.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),
+                        apiProxy: (AI.element.querySelector("#apiProxy") as HTMLInputElement).value,
+                        apiTimeout: parseInt((AI.element.querySelector("#apiTimeout") as HTMLInputElement).value),
                     }
                 }, response => {
                     window.siyuan.config.ai = response.data;

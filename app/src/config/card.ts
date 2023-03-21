@@ -1,3 +1,4 @@
+import {fetchPost} from "../util/fetch";
 
 export const card = {
     element: undefined as Element,
@@ -20,5 +21,18 @@ export const card = {
 </label>`;
     },
     bindEvent: () => {
+        card.element.querySelectorAll("input").forEach((item) => {
+            item.addEventListener("change", () => {
+                fetchPost("/api/setting/setFlashcard", {
+                        apiBaseURL: (card.element.querySelector("#apiBaseURL") as HTMLInputElement).checked,
+                        apiKey: (card.element.querySelector("#apiKey") as HTMLInputElement).value,
+                        apiMaxTokens: (card.element.querySelector("#apiMaxTokens") as HTMLInputElement).value,
+                        apiProxy: (card.element.querySelector("#apiProxy") as HTMLInputElement).checked,
+                        apiTimeout: (card.element.querySelector("#apiTimeout") as HTMLInputElement).checked,
+                }, response => {
+                    window.siyuan.config.ai = response.data;
+                });
+            });
+        });
     },
 };

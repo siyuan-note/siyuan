@@ -21,6 +21,7 @@ type Flashcard struct {
 	DailyReviewCardLimit int  `json:"dailyReviewCardLimit"` // 每日复习卡上限 https://github.com/siyuan-note/siyuan/issues/7703
 	List                 bool `json:"list"`                 // 是否启用列表块制卡 https://github.com/siyuan-note/siyuan/issues/7701
 	SuperBlock           bool `json:"superBlock"`           // 是否启用超级块制卡 https://github.com/siyuan-note/siyuan/issues/7702
+	Deck                 bool `json:"deck"`                 // 是否启用卡包制卡 https://github.com/siyuan-note/siyuan/issues/7724
 }
 
 func NewFlashcard() *Flashcard {

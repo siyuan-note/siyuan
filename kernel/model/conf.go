@@ -319,10 +319,9 @@ func InitConf() {
 		Conf.Flashcard = conf.NewFlashcard()
 	}
 
-	// TODO 支持应用内配置人工智能 https://github.com/siyuan-note/siyuan/issues/7714
-	//if nil == Conf.AI {
-	//	Conf.AI = conf.NewAI()
-	//}
+	if nil == Conf.AI {
+		Conf.AI = conf.NewAI()
+	}
 
 	Conf.ReadOnly = util.ReadOnly
 

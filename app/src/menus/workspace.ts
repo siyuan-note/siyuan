@@ -136,14 +136,14 @@ export const workspaceMenu = (rect: DOMRect) => {
                             showMessage(window.siyuan.languages.duplicate);
                             return true;
                         }
-                    })
+                    });
                     if (hadName) {
                         return;
                     }
                     window.siyuan.storage[Constants.LOCAL_LAYOUTS].push({
                         name: value,
                         layout: exportLayout(false, undefined, true)
-                    })
+                    });
                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                     saveDialog.destroy();
                 });
@@ -169,7 +169,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                                     return true;
                                 }
-                            })
+                            });
                             return;
                         }
                         fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {

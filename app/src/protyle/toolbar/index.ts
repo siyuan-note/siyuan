@@ -959,7 +959,7 @@ export class Toolbar {
             const msgId = showMessage(window.siyuan.languages.exporting, 0);
             if (renderElement.getAttribute("data-subtype") === "plantuml") {
                 fetch(renderElement.querySelector("img").getAttribute("src")).then(function (response) {
-                    return response.blob()
+                    return response.blob();
                 }).then(function (blob) {
                     const formData = new FormData();
                     formData.append("file", blob);

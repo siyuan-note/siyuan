@@ -119,7 +119,7 @@ export const exitSiYuan = () => {
     });
 };
 
-export const transactionError = (data: { code: number, data: string }) => {
+export const transactionError = () => {
     if (document.getElementById("transactionError")) {
         return;
     }

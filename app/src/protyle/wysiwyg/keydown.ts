@@ -460,7 +460,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if ((event.shiftKey && !event.altKey && !isCtrl(event) && (event.key === "Home" || event.key === "End") && isMac()) ||
             (event.shiftKey && !event.altKey && isCtrl(event) && (event.key === "Home" || event.key === "End") && !isMac())) {
-            const topElement = hasTopClosestByAttribute(nodeElement, "data-node-id", null)
+            const topElement = hasTopClosestByAttribute(nodeElement, "data-node-id", null);
             if (topElement) {
                 topElement.classList.add("protyle-wysiwyg--select");
                 let nextElement = event.key === "Home" ? topElement.previousElementSibling : topElement.nextElementSibling;
@@ -469,9 +469,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     nextElement = event.key === "Home" ? nextElement.previousElementSibling : nextElement.nextElementSibling;
                 }
                 if (event.key === "Home") {
-                    protyle.wysiwyg.element.firstElementChild.scrollIntoView()
+                    protyle.wysiwyg.element.firstElementChild.scrollIntoView();
                 } else {
-                    protyle.wysiwyg.element.lastElementChild.scrollIntoView(false)
+                    protyle.wysiwyg.element.lastElementChild.scrollIntoView(false);
                 }
             }
             event.stopPropagation();

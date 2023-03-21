@@ -57,7 +57,7 @@ const exitApp = (port, errorWindowId) => {
     // 关闭端口相同的所有非主窗口
     BrowserWindow.getAllWindows().forEach((item) => {
         try {
-            const currentURL = new URL(item.getURL())
+            const currentURL = new URL(item.getURL());
             if (port.toString() === currentURL.port.toString()) {
                 if (currentURL.href.indexOf("/stage/build/app/?v=") > -1) {
                     mainWindow = item;
@@ -114,7 +114,7 @@ const exitApp = (port, errorWindowId) => {
         globalShortcut.unregisterAll();
         writeLog("exited ui");
     }
-}
+};
 
 const getServer = (port = kernelPort) => {
     return "http://127.0.0.1:" + port;

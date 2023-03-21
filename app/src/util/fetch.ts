@@ -1,7 +1,6 @@
 import {Constants} from "../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
-import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {processMessage} from "./processMessage";
 import {kernelError} from "../dialog/processSystem";

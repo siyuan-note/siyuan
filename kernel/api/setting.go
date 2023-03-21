@@ -29,6 +29,35 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setAI(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ai := &conf.AI{}
+	if err = gulu.JSON.UnmarshalJSON(param, ai); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.Conf.AI = ai
+	model.Conf.Save()
+
+	ret.Data = ai
+}
+
 func setFlashcard(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

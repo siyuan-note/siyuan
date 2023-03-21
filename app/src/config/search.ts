@@ -25,6 +25,12 @@ export const initConfigSearch = (element: HTMLElement) => {
             "fileTree6", "fileTree7", "fileTree8", "fileTree9", "fileTree10", "fileTree12", "fileTree13", "fileTree15",
             "fileTree16", "fileTree17"]),
 
+        // 闪卡
+        getLang(["riffCard"]),
+
+        // AI
+        ["AI"].concat(getLang(["ai"])),
+
         // 图片
         getLang(["assets", "clearUnused"]),
 

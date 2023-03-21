@@ -323,6 +323,15 @@ func InitConf() {
 		Conf.AI = conf.NewAI()
 	}
 
+	if "" != Conf.AI.OpenAI.APIKey {
+		logging.LogInfof("OpenAI API enabled\n"+
+			"    baseURL=%s\n"+
+			"    timeout=%ds\n"+
+			"    proxy=%s\n"+
+			"    maxTokens=%d",
+			Conf.AI.OpenAI.APIBaseURL, Conf.AI.OpenAI.APITimeout, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIMaxTokens)
+	}
+
 	Conf.ReadOnly = util.ReadOnly
 
 	if "" != util.AccessAuthCode {

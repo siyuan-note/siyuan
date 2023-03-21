@@ -118,8 +118,6 @@ func Boot() {
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
 	logging.LogInfof("\n" + bootBanner.String())
 	logBootInfo()
-
-	initOpenAI()
 }
 
 func setBootDetails(details string) {

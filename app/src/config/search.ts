@@ -15,7 +15,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             "editor", "md2", "md3", "md12", "md16", "md27", "md28", "md29", "md30", "md31", "md32", "md33", "md34",
             "md39", "md40", "fontSizeTip", "fontSize", "font", "font1", "generateHistory", "generateHistoryInterval",
             "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip",
-            "editReadonly", "editReadonlyTip", "embedBlockBreadcrumb", "embedBlockBreadcrumbTip", "outdentTip",
+            "editReadonly", "editReadonlyTip", "embedBlockBreadcrumb", "embedBlockBreadcrumbTip", "outlineOutdentTip",
             "outdent", "floatWindowMode", "floatWindowModeTip", "justify", "justifyTip", "rtl", "rtlTip", "spellcheck",
             "spellcheckTip", "backlinkExpand", "backlinkExpandTip"
         ]),
@@ -46,7 +46,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             .concat(getLang(["appearance", "appearance1", "appearance2", "appearance3", "appearance4",
                 "appearance5", "appearance6", "appearance8", "appearance9", "appearance10", "appearance11",
                 "appearance14", "appearance15", "appearance16", "appearance17",
-                "resetLayout", "reset", "icon", "themeLight", "themeDark", "open", "close", "themeOS", "theme",
+                "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
                 "theme2", "theme11", "theme12", "theme13", "theme14", "customEmoji", "customEmojiTip", "refresh"])),
 
         // 集市
@@ -75,7 +75,7 @@ export const initConfigSearch = (element: HTMLElement) => {
             "twoFactorCaptcha", "account1", "account2", "account5"]),
 
         // 关于
-        getLang(["about", "about1", "about2", "about3", "about4", "about5", "about6",
+        getLang(["autoLaunch", "autoLaunchTip", "about", "about1", "about2", "about3", "about4", "about5", "about6",
             "about9", "about10", "about11", "about12", "about13", "about14", "about17", "config", "dataRepoKey",
             "dataRepoKeyTip1", "dataRepoKeyTip2", "slogan", "currentVer", "checkUpdate", "updatePath", "systemLog",
             "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export", "visitAnnouncements",

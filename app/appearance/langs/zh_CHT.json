@@ -718,6 +718,8 @@
   "export20": "導出 Word .docx 文件需要使用 <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a> 進行格式轉換",
   "export21": "導出 PDF 添加頁腳",
   "export22": "開啟後在導出的 PDF 頁腳處添加 <code class='fn__code'>由思源筆記導出</code>",
+  "export23": "導出 Markdown 添加 YFM",
+  "export24": "啟用後在導出的 Markdown 文件開頭處添加一些較為通用的元數據信息",
   "blockRef": "引用塊",
   "theme11": "淺色模式下使用主題",
   "theme12": "深色模式下使用主題",

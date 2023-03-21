@@ -28,6 +28,7 @@ type Export struct {
 	TagCloseMarker          string `json:"tagCloseMarker"`          // 标签结束标记符，默认是 #
 	FileAnnotationRefMode   int    `json:"fileAnnotationRefMode"`   // 文件标注引用导出模式，0：文件名 - 页码 - 锚文本，1：仅锚文本
 	PandocBin               string `json:"pandocBin"`               // Pandoc 可执行文件路径
+	MarkdownYFM             bool   `json:"markdownYFM"`             // Markdown 导出时是否添加 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/7727
 }
 
 func NewExport() *Export {
@@ -43,5 +44,6 @@ func NewExport() *Export {
 		TagCloseMarker:          "#",
 		FileAnnotationRefMode:   0,
 		PandocBin:               "",
+		MarkdownYFM:             false,
 	}
 }

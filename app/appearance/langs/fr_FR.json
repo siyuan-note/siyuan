@@ -718,6 +718,8 @@
   "export20": "L'exportation de fichiers Word .docx nécessite une conversion de format à l'aide de <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a>",
   "export21": "Exporter un PDF avec pied de page",
   "export22": "Après l'activation, ajoutez <code class='fn__code'>Exporter par SiYuan</code> au pied de page du PDF exporté",
+  "export23": "Exporter Markdown avec YFM",
+  "export24": "Après l'activation, ajoutez des informations générales sur les métadonnées au début du fichier Markdown exporté",
   "blockRef": "Bloc Réf",
   "theme11": "Utiliser le thème en mode Clair",
   "theme12": "Utiliser le thème en mode sombre",

@@ -437,7 +437,7 @@
     try {
       const {ipcRenderer} = require('electron')
       const {getCurrentWindow} = require('@electron/remote')
-      ipcRenderer.send('siyuan-quit', getCurrentWindow().id)
+      ipcRenderer.send('siyuan-quit', location.port)
     } catch (e) {
       if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid) {
         window.location.href = 'siyuan://api/system/exit'

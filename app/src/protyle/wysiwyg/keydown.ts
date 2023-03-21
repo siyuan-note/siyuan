@@ -1003,12 +1003,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
             const selectElement: Element[] = [];
-            if (!hasClosestByClassName(nodeElement, "protyle-wysiwyg--select")) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-            }
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 selectElement.push(item);
             });
+            if (selectElement.length === 0) {
+                selectElement.push(nodeElement)
+            }
             quickMakeCard(selectElement);
             event.preventDefault();
             event.stopPropagation();

@@ -115,6 +115,11 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		return errors.New(Conf.Language(199))
 	}
 	unzipRootPath := unzipRootPaths[0]
+	name := filepath.Base(unzipRootPath)
+	if strings.HasPrefix(name, "data-20") && len("data-20230321175442") == len(name) {
+		return errors.New(Conf.Language(199))
+	}
+
 	luteEngine := util.NewLute()
 	blockIDs := map[string]string{}
 	trees := map[string]*parse.Tree{}

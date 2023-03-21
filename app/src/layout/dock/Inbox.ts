@@ -8,6 +8,9 @@ import {MenuItem} from "../../menus/Menu";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {replaceFileName} from "../../editor/rename";
+import {escapeHtml} from "../../util/escape";
+import {unicode2Emoji} from "../../emoji";
+import {Constants} from "../../constants";
 
 export class Inbox extends Model {
     private element: Element;
@@ -134,7 +137,8 @@ ${(Lute.New()).MarkdownStr("", response.data.shorthandContent)}
                                 window.siyuan.notebooks.forEach((item) => {
                                     if (!item.closed) {
                                         window.siyuan.menus.menu.append(new MenuItem({
-                                            label: item.name,
+                                            iconHTML: `${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-menu__icon", true)}`,
+                                            label: escapeHtml(item.name),
                                             click: () => {
                                                 this.move(item.id, detailsElement.getAttribute("data-id"));
                                             }
@@ -210,7 +214,8 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
         window.siyuan.notebooks.forEach((item) => {
             if (!item.closed) {
                 submenu.push({
-                    label: item.name,
+                    iconHTML: `${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-menu__icon", true)}`,
+                    label: escapeHtml(item.name),
                     click: () => {
                         this.move(item.id);
                     }

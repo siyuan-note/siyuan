@@ -1,3 +1,69 @@
+## v2.8.0 / 2023-03-21
+
+### 引入特性
+
+* [支持保存和加载不同的界面布局](https://github.com/siyuan-note/siyuan/issues/7636)
+
+### 改进功能
+
+* [属性视图增减列](https://github.com/siyuan-note/siyuan/issues/7521)
+* [属性视图增减行](https://github.com/siyuan-note/siyuan/issues/7522)
+* [块菜单、编辑器更多菜单等全屏菜单样式优化](https://github.com/siyuan-note/siyuan/issues/7598)
+* [移动端上架 vivo 应用商店](https://github.com/siyuan-note/siyuan/issues/7614)
+* [移动端支持点备注打开属性设置界面](https://github.com/siyuan-note/siyuan/issues/7635)
+* [菜单显示不下时加入滚动条](https://github.com/siyuan-note/siyuan/issues/7644)
+* [移动端设置二级页面滑动返回上一层](https://github.com/siyuan-note/siyuan/issues/7655)
+* [不支持配置坚果云 WebDAV 进行同步](https://github.com/siyuan-note/siyuan/issues/7657)
+* [PDF 矩形标注支持默认颜色](https://github.com/siyuan-note/siyuan/issues/7658)
+* [移动端属性设置界面优化](https://github.com/siyuan-note/siyuan/issues/7661)
+* [属性设置对话框中不再显示 `riff-decks`](https://github.com/siyuan-note/siyuan/issues/7665)
+* [快速制卡后属性顺序应保持不变](https://github.com/siyuan-note/siyuan/issues/7666)
+* [数据同步加入系统时间校验](https://github.com/siyuan-note/siyuan/issues/7669)
+* [调整输入框和下拉框样式](https://github.com/siyuan-note/siyuan/issues/7670)
+* [改进闪卡下一轮重复时间显示精度](https://github.com/siyuan-note/siyuan/issues/7672)
+* [更新加减号图标大小及对齐 `添加到卡包` 弹窗中的图标](https://github.com/siyuan-note/siyuan/issues/7673)
+* [快捷键设置界面优化](https://github.com/siyuan-note/siyuan/issues/7674)
+* [面包屑第一项如果显示文档名则不进行省略](https://github.com/siyuan-note/siyuan/issues/7675)
+* [提供删除文件 API](https://github.com/siyuan-note/siyuan/issues/7678)
+* [移动端输入不触发斜杆菜单](https://github.com/siyuan-note/siyuan/issues/7681)
+* [导入 Markdown 时不自动转换超链接](https://github.com/siyuan-note/siyuan/issues/7682)
+* [使用第三方同步盘时弹出提示并退出内核](https://github.com/siyuan-note/siyuan/issues/7683)
+* [添加 PDF 快捷键说明及显示](https://github.com/siyuan-note/siyuan/issues/7684)
+* [新增当前位置至已加载内容页头/页尾快捷键](https://github.com/siyuan-note/siyuan/issues/7687)
+* [调整编辑器右侧边距](https://github.com/siyuan-note/siyuan/issues/7690)
+* [改进动态加载判断](https://github.com/siyuan-note/siyuan/issues/7693)
+* [闪卡复习时支持跳过](https://github.com/siyuan-note/siyuan/issues/7697)
+* [编辑器处于只读模式时启动后提示用户](https://github.com/siyuan-note/siyuan/issues/7700)
+* [文件系统读取或写入失败时退出内核](https://github.com/siyuan-note/siyuan/issues/7707)
+* [调整 Windows 端安装和卸载程序侧栏图片](https://github.com/siyuan-note/siyuan/issues/7709)
+* [导出 PDF 时代码块强制换行](https://github.com/siyuan-note/siyuan/issues/7711)
+* [对齐页签下拉选择和文档的菜单按钮](https://github.com/siyuan-note/siyuan/issues/7712)
+* [Pad 端支持思源协议 `siyuan://` 跳转打开](https://github.com/siyuan-note/siyuan/issues/7713)
+* [Windows 端安装脚本检测是否存在工作空间数据](https://github.com/siyuan-note/siyuan/issues/7717)
+* [Windows 端安装包支持自定义安装路径](https://github.com/siyuan-note/siyuan/issues/7718)
+* [删除大量内容后光标依旧显示在可视区域内](https://github.com/siyuan-note/siyuan/issues/7722)
+* [为插入内容前后的滚动添加动画效果](https://github.com/siyuan-note/siyuan/issues/7723)
+
+### 开发重构
+
+* [升级 Pandoc](https://github.com/siyuan-note/siyuan/issues/7710)
+
+### 修复缺陷
+
+* [移动端较老 WebView 版本启动后卡在加载界面](https://github.com/siyuan-note/siyuan/issues/7616)
+* [在容器块子块为空时 `Ctrl+/` 弹出块菜单功能失效](https://github.com/siyuan-note/siyuan/issues/7656)
+* [块引锚文本导出时 `&` 变为实体 `&amp;`](https://github.com/siyuan-note/siyuan/issues/7659)
+* [Android 端某些系统上返回桌面后再进入白屏](https://github.com/siyuan-note/siyuan/issues/7663)
+* [移动端搜索框显示 `undefined`](https://github.com/siyuan-note/siyuan/issues/7667)
+* [PDF 页签打开进度和白边问题](https://github.com/siyuan-note/siyuan/issues/7671)
+* [文件名包含 `.` 时的重命名问题](https://github.com/siyuan-note/siyuan/issues/7686)
+* [PlantUML 无法导出图片](https://github.com/siyuan-note/siyuan/issues/7691)
+* [导出 PDF 时显示行号的代码块宽度不正确](https://github.com/siyuan-note/siyuan/issues/7692)
+* [打开某些 PDF 文件时缺失部分内容](https://github.com/siyuan-note/siyuan/issues/7699)
+* [快捷键复制嵌入块为纯文本无效](https://github.com/siyuan-note/siyuan/issues/7706)
+* [打开多个工作空间和多个新窗口时退出未关闭关联窗口](https://github.com/siyuan-note/siyuan/issues/7708)
+* [表格单元格内存在多行时末尾输入转义符 `\` 导致 `<br />` 暴露](https://github.com/siyuan-note/siyuan/issues/7725)
+
 ## v2.7.10 / 2023-03-14
 
 ### 改进功能

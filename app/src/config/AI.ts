@@ -1,24 +1,64 @@
+import {fetchPost} from "../util/fetch";
 
 export const AI = {
     element: undefined as Element,
     genHTML: () => {
         return `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.selectOpen}
-        <div class="b3-label__text">${window.siyuan.languages.fileTree2}</div>
+        APIKey
+        <div class="b3-label__text">APIKeyAPIKeyAPIKey</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="alwaysSelectOpenedFile" type="checkbox"${window.siyuan.config.fileTree.alwaysSelectOpenedFile ? " checked" : ""}/>
+    <input class="b3-text-field fn__flex-center" id="apiKey" value="${window.siyuan.config.ai.openAI.apiKey}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.fileTree7}
-        <div class="b3-label__text">${window.siyuan.languages.fileTree8}</div>
+        APITimeout
+        <div class="b3-label__text">APITimeoutAPITimeoutAPITimeout</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="openFilesUseCurrentTab" type="checkbox"${window.siyuan.config.fileTree.openFilesUseCurrentTab ? " checked" : ""}/>
+    <input class="b3-text-field fn__flex-center" type="number" step="1" min="1" id="openFilesUseCurrentTab" value="${window.siyuan.config.ai.openAI}"/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        APIProxy
+        <div class="b3-label__text">APIProxyAPIProxyAPIProxy</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center" id="apiProxy" value="${window.siyuan.config.ai.openAI.apiProxy}"/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        APIMaxTokens
+        <div class="b3-label__text">APIMaxTokensAPIMaxTokensAPIMaxTokens</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center" type="number" step="1" min="0" id="apiMaxTokens" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        APIBaseURL
+        <div class="b3-label__text">APIBaseURLAPIBaseURLAPIBaseURL</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>
 </label>`;
     },
     bindEvent: () => {
+        AI.element.querySelectorAll("input").forEach((item) => {
+            item.addEventListener("change", () => {
+                fetchPost("/api/setting/setAI", {
+                    openAI: {
+                        apiBaseURL: (AI.element.querySelector("#apiBaseURL") as HTMLInputElement).checked,
+                        apiKey: (AI.element.querySelector("#apiKey") as HTMLInputElement).value,
+                        apiMaxTokens: (AI.element.querySelector("#apiMaxTokens") as HTMLInputElement).value,
+                        apiProxy: (AI.element.querySelector("#apiProxy") as HTMLInputElement).checked,
+                        apiTimeout: (AI.element.querySelector("#apiTimeout") as HTMLInputElement).checked,
+                    }
+                }, response => {
+                    window.siyuan.config.ai = response.data;
+                });
+            });
+        });
     },
 };

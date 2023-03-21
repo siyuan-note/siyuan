@@ -392,6 +392,15 @@ declare interface IConfig {
     repo: {
         key: string
     },
+    ai: {
+        openAI: {
+            apiBaseURL: string
+            apiKey: string
+            apiMaxTokens: number
+            apiProxy: string
+            apiTimeout: number
+        },
+    }
     sync: {
         generateConflictDoc: boolean
         enabled: boolean

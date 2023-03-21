@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
-	github.com/88250/gulu v1.2.3-0.20230223100136-26e5f16ac3c0
+	github.com/88250/gulu v1.2.3-0.20230321111235-9885e68fb740
 	github.com/88250/lute v1.7.6-0.20230320134658-c722b84ce5e7
 	github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
@@ -43,10 +43,10 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-gpt3 v1.4.0
 	github.com/shirou/gopsutil/v3 v3.23.2
-	github.com/siyuan-note/dejavu v0.0.0-20230319084158-c8c1eaadf7bd
+	github.com/siyuan-note/dejavu v0.0.0-20230321111759-9b0dd98e204e
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
-	github.com/siyuan-note/filelock v0.0.0-20230319015503-9ac4a0ee675b
+	github.com/siyuan-note/filelock v0.0.0-20230321111457-98cf6952fcb6
 	github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc
 	github.com/siyuan-note/logging v0.0.0-20230319012246-6224f958f554
 	github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7
@@ -67,7 +67,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.224 // indirect
+	github.com/aws/aws-sdk-go v1.44.225 // indirect
 	github.com/bytedance/sonic v1.8.5 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
@@ -128,7 +128,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/exp v0.0.0-20230315142452-642cacee5cc0 // indirect
+	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect

@@ -57,7 +57,10 @@ func chatGPT(msg string, cloud bool) (ret string) {
 }
 
 func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
-	msg = action + ":\n\n" + msg
+	action = strings.TrimSpace(action)
+	if "" != action {
+		msg = action + ":\n\n" + msg
+	}
 	ret, _, err := chatGPTContinueWrite(msg, nil, cloud)
 	if nil != err {
 		return

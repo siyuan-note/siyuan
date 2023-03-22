@@ -263,7 +263,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
 
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
-        const searchPathInputElement =  element.querySelector("#searchPathInput");
+        const searchPathInputElement = element.querySelector("#searchPathInput");
         while (target && !target.isSameNode(element)) {
             if (target.classList.contains("search__rmpath")) {
                 config.idPath = [];
@@ -370,6 +370,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                     icon: "iconSearch",
                     title: window.siyuan.languages.search,
                     callback(tab) {
+                        config.k = searchInputElement.value
+                        config.r = replaceInputElement.value
                         const asset = new Search({
                             tab,
                             config

@@ -212,6 +212,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                         rootID: titleElement.getAttribute("data-id"),
                         deckID: selectElement?.value,
                         notebook: titleElement.getAttribute("data-notebookid"),
+                        reviewedCardIDs: blocks
                     }, (treeCards) => {
                         index = 0;
                         blocks = treeCards.data;

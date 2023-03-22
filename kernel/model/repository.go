@@ -331,7 +331,7 @@ func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 	for _, f := range files {
 		ext := path.Ext(f.Path)
 		if "" == ext {
-			ext = "noExt"
+			ext = "NoExt"
 		}
 
 		found := false

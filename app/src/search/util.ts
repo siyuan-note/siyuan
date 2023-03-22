@@ -542,6 +542,11 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
     });
     searchInputElement.addEventListener("blur", () => {
+        if (config.removed) {
+            config.k = searchInputElement.value;
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+            setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
+        }
         saveKeyList("keys", searchInputElement.value);
     });
     searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -825,6 +830,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                         }
                         return;
                     }
+                    config.removed = false;
                     updateConfig(element, item, config, edit);
                 });
             }
@@ -841,6 +847,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
         label: window.siyuan.languages.removeCriterion,
         click() {
             updateConfig(element, {
+                removed: true,
                 sort: 0,
                 group: 0,
                 hasReplace: false,

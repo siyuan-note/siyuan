@@ -259,6 +259,8 @@ func isICloudPath(absPath string) bool {
 		return false
 	}
 
+	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
+
 	iCloudRoot := "~/Library/Mobile Documents"
 	err := filepath.Walk(iCloudRoot, func(path string, info os.FileInfo, err error) error {
 		if nil != err {

@@ -11,7 +11,7 @@ import {keymap} from "./keymap";
 import {bazaar} from "./bazaar";
 import {query} from "./query";
 import {Dialog} from "../dialog";
-import {AI} from "./AI";
+import {ai} from "./ai";
 import {card} from "./card";
 
 export const openSetting = () => {
@@ -82,9 +82,9 @@ export const openSetting = () => {
                         fileTree.bindEvent();
                         break;
                     case "AI":
-                        containerElement.innerHTML = AI.genHTML();
-                        AI.element = dialog.element.querySelector('.config__tab-container[data-name="AI"]');
-                        AI.bindEvent();
+                        containerElement.innerHTML = ai.genHTML();
+                        ai.element = dialog.element.querySelector('.config__tab-container[data-name="AI"]');
+                        ai.bindEvent();
                         break;
                     case "card":
                         containerElement.innerHTML = card.genHTML();

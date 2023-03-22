@@ -286,7 +286,7 @@ func getCriteria() (ret []*Criterion, err error) {
 
 var localStorageLock = sync.Mutex{}
 
-func RemoveLocalStorageVal(key string) (err error) {
+func RemoveLocalStorageVals(keys []string) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
@@ -295,7 +295,9 @@ func RemoveLocalStorageVal(key string) (err error) {
 		return
 	}
 
-	delete(localStorage, key)
+	for _, key := range keys {
+		delete(localStorage, key)
+	}
 	return setLocalStorage(localStorage)
 }
 

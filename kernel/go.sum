@@ -39,6 +39,8 @@ github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef h1:2JGTg6JapxP
 github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef/go.mod h1:JS7hed4L1fj0hXcyEejnW57/7LCetXggd+vwrRnYeII=
 github.com/aws/aws-sdk-go v1.44.225 h1:JNJpUg+M1cm4jtKnyex//Mw1Rv8QN/kWT3dtr+oLdW4=
 github.com/aws/aws-sdk-go v1.44.225/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
+github.com/aws/aws-sdk-go v1.44.226 h1:lqTNeHJUq0U6dpMGJc9ZcmfTUkuAjklcwewj96RhMlc=
+github.com/aws/aws-sdk-go v1.44.226/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.8.5 h1:kjX0/vo5acEQ/sinD/18SkA/lDDUk23F0RcaHvI7omc=
 github.com/bytedance/sonic v1.8.5/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
@@ -279,6 +281,8 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/siyuan-note/dejavu v0.0.0-20230321113431-2b6e0cc337a6 h1:QJaH1WfpWLfU8M9u/PM4jprSPBVYuqxNmOT0X7wzZ2o=
 github.com/siyuan-note/dejavu v0.0.0-20230321113431-2b6e0cc337a6/go.mod h1:uX8glu/TOY5a10e1VOqAV3/92MslpxEN+W4zUtUSFVo=
+github.com/siyuan-note/dejavu v0.0.0-20230322095009-c0109a321c0c h1:LLaU8b2LYB6rk2usYuzLTIKHgODvNEKm8FOV+gMOQus=
+github.com/siyuan-note/dejavu v0.0.0-20230322095009-c0109a321c0c/go.mod h1:uX8glu/TOY5a10e1VOqAV3/92MslpxEN+W4zUtUSFVo=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b h1:828lTUW2C0uNiolODqoACu7J8sDUzswD4Xo04mUombg=

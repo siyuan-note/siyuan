@@ -30,5 +30,6 @@ func NewFlashcard() *Flashcard {
 		DailyReviewCardLimit: 200,
 		List:                 true,
 		SuperBlock:           true,
+		Deck:                 false,
 	}
 }

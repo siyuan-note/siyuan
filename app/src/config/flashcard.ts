@@ -1,6 +1,6 @@
 import {fetchPost} from "../util/fetch";
 
-export const card = {
+export const flashcard = {
     element: undefined as Element,
     genHTML: () => {
         return `<label class="fn__flex b3-label">
@@ -45,14 +45,14 @@ export const card = {
 </label>`;
     },
     bindEvent: () => {
-        card.element.querySelectorAll("input").forEach((item) => {
+        flashcard.element.querySelectorAll("input").forEach((item) => {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setFlashcard", {
-                    dailyNewCardLimit: parseInt((card.element.querySelector("#dailyNewCardLimit") as HTMLInputElement).value),
-                    dailyReviewCardLimit: parseInt((card.element.querySelector("#dailyReviewCardLimit") as HTMLInputElement).value),
-                    list: (card.element.querySelector("#list") as HTMLInputElement).checked,
-                    superBlock: (card.element.querySelector("#superBlock") as HTMLInputElement).checked,
-                    deck: (card.element.querySelector("#deck") as HTMLInputElement).checked,
+                    dailyNewCardLimit: parseInt((flashcard.element.querySelector("#dailyNewCardLimit") as HTMLInputElement).value),
+                    dailyReviewCardLimit: parseInt((flashcard.element.querySelector("#dailyReviewCardLimit") as HTMLInputElement).value),
+                    list: (flashcard.element.querySelector("#list") as HTMLInputElement).checked,
+                    superBlock: (flashcard.element.querySelector("#superBlock") as HTMLInputElement).checked,
+                    deck: (flashcard.element.querySelector("#deck") as HTMLInputElement).checked,
                 }, response => {
                     window.siyuan.config.flashcard = response.data;
                 });

@@ -12,7 +12,7 @@ import {bazaar} from "./bazaar";
 import {query} from "./query";
 import {Dialog} from "../dialog";
 import {ai} from "./ai";
-import {card} from "./card";
+import {flashcard} from "./flashcard";
 
 export const openSetting = () => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
@@ -87,9 +87,9 @@ export const openSetting = () => {
                         ai.bindEvent();
                         break;
                     case "card":
-                        containerElement.innerHTML = card.genHTML();
-                        card.element = dialog.element.querySelector('.config__tab-container[data-name="card"]');
-                        card.bindEvent();
+                        containerElement.innerHTML = flashcard.genHTML();
+                        flashcard.element = dialog.element.querySelector('.config__tab-container[data-name="card"]');
+                        flashcard.bindEvent();
                         break;
                     case "image":
                         containerElement.innerHTML = image.genHTML();

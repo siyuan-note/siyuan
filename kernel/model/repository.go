@@ -330,9 +330,13 @@ func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
 func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 	for _, f := range files {
 		ext := path.Ext(f.Path)
+		if "" == ext {
+			ext = "NoExt"
+		}
 
 		found := false
 		for _, tc := range ret {
+
 			if tc.Type == ext {
 				tc.Count++
 				found = true

@@ -17,19 +17,19 @@
 package conf
 
 type Flashcard struct {
-	DailyNewCardLimit    int  `json:"dailyNewCardLimit"`    // 每日新卡上限 https://github.com/siyuan-note/siyuan/issues/7695
-	DailyReviewCardLimit int  `json:"dailyReviewCardLimit"` // 每日复习卡上限 https://github.com/siyuan-note/siyuan/issues/7703
-	List                 bool `json:"list"`                 // 是否启用列表块制卡 https://github.com/siyuan-note/siyuan/issues/7701
-	SuperBlock           bool `json:"superBlock"`           // 是否启用超级块制卡 https://github.com/siyuan-note/siyuan/issues/7702
-	Deck                 bool `json:"deck"`                 // 是否启用卡包制卡 https://github.com/siyuan-note/siyuan/issues/7724
+	NewCardLimit    int  `json:"newCardLimit"`    // 新卡上限 https://github.com/siyuan-note/siyuan/issues/7695
+	ReviewCardLimit int  `json:"reviewCardLimit"` // 复习卡上限 https://github.com/siyuan-note/siyuan/issues/7703
+	List            bool `json:"list"`            // 是否启用列表块制卡 https://github.com/siyuan-note/siyuan/issues/7701
+	SuperBlock      bool `json:"superBlock"`      // 是否启用超级块制卡 https://github.com/siyuan-note/siyuan/issues/7702
+	Deck            bool `json:"deck"`            // 是否启用卡包制卡 https://github.com/siyuan-note/siyuan/issues/7724
 }
 
 func NewFlashcard() *Flashcard {
 	return &Flashcard{
-		DailyNewCardLimit:    20,
-		DailyReviewCardLimit: 200,
-		List:                 true,
-		SuperBlock:           true,
-		Deck:                 false,
+		NewCardLimit:    20,
+		ReviewCardLimit: 200,
+		List:            true,
+		SuperBlock:      true,
+		Deck:            false,
 	}
 }

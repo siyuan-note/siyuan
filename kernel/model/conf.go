@@ -318,11 +318,11 @@ func InitConf() {
 	if nil == Conf.Flashcard {
 		Conf.Flashcard = conf.NewFlashcard()
 	}
-	if 1 > Conf.Flashcard.DailyNewCardLimit {
-		Conf.Flashcard.DailyNewCardLimit = 20
+	if 1 > Conf.Flashcard.NewCardLimit {
+		Conf.Flashcard.NewCardLimit = 20
 	}
-	if 1 > Conf.Flashcard.DailyReviewCardLimit {
-		Conf.Flashcard.DailyReviewCardLimit = 200
+	if 1 > Conf.Flashcard.ReviewCardLimit {
+		Conf.Flashcard.ReviewCardLimit = 200
 	}
 
 	if nil == Conf.AI {

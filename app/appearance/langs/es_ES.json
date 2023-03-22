@@ -1,8 +1,8 @@
 {
-  "flashcardDailyNewCardLimit": "Límite diario de tarjetas nuevas",
-  "flashcardDailyNewCardLimitTip": "Si hay muchas tarjetas nuevas, puede establecer la cantidad de tarjetas nuevas diarias para revisar a través de este elemento",
-  "flashcardDailyReviewCardLimit": "Límite de tarjeta de revisión diaria",
-  "flashcardDailyReviewCardLimitTip": "Si hay muchas tarjetas de revisión, puede establecer el número de revisión diaria a través de este elemento",
+  "flashcardNewCardLimit": "Límite de tarjeta nueva",
+  "flashcardNewCardLimitTip": "Si hay muchas tarjetas nuevas, puede establecer la cantidad de tarjetas nuevas para revisar a través de este elemento",
+  "flashcardReviewCardLimit": "Revisar límite de tarjeta",
+  "flashcardReviewCardLimitTip": "Si hay muchas tarjetas de revisión, puede establecer el número de revisión a través de este elemento",
   "flashcardList": "Lista de tarjetas",
   "flashcardListTip": "Después de habilitar, el primer elemento de una lista se reconoce como una pregunta, y el resto de los elementos básicos se reconocen como respuestas",
   "flashcardSuperBlock": "Carda de súper bloque",

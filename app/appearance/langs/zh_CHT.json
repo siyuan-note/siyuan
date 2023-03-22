@@ -1,8 +1,8 @@
 {
-  "flashcardDailyNewCardLimit": "每日新卡上限",
-  "flashcardDailyNewCardLimitTip": "如果新卡較多，可以通過該項設置新卡複習的數量",
-  "flashcardDailyReviewCardLimit": "每日復習卡上限",
-  "flashcardDailyReviewCardLimitTip": "如果復習卡較多，可以通過該項設置每日復習的數量",
+  "flashcardNewCardLimit": "新卡上限",
+  "flashcardNewCardLimitTip": "如果新卡較多，可以通過該項設置新卡複習的數量",
+  "flashcardReviewCardLimit": "復習卡上限",
+  "flashcardReviewCardLimitTip": "如果復習卡較多，可以通過該項設置復習的數量",
   "flashcardList": "列表塊制卡",
   "flashcardListTip": "啟用後支持列表塊制卡，列表的第一個列表項被識別為問題，子列表識別為答案",
   "flashcardSuperBlock": "超級塊制卡",

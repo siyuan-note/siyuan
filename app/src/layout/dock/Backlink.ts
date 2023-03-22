@@ -586,7 +586,7 @@ export class Backlink extends Model {
                 }
             }
             if (data.linkRefsCount > 0) {
-                Array.from({length: window.siyuan.config.editor.backlinkExpandCount}).forEach((item, index) => {
+                Array.from({length: window.siyuan.config.editor.backmentionExpandCount}).forEach((item, index) => {
                     if (data.backlinks[index]) {
                         this.status[this.blockId].backlinkOpenIds.push(data.backlinks[index].id);
                     }

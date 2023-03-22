@@ -4,7 +4,7 @@ import {Tab} from "../layout/Tab";
 import {Search} from "./index";
 import {Wnd} from "../layout/Wnd";
 import {Constants} from "../constants";
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeGreat, escapeHtml} from "../util/escape";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
@@ -146,8 +146,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <span id="searchResult" class="search__result"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1"></span>
-        <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis" title="${config.hPath}">
-            ${config.hPath}
+        <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis" title="${escapeAttr(config.hPath)}">
+            ${escapeHtml(config.hPath)}
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconClose"></use></svg>
         </span>
         <span class="fn__space"></span>
@@ -263,11 +263,13 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
 
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
+        const searchPathInputElement =  element.querySelector("#searchPathInput");
         while (target && !target.isSameNode(element)) {
             if (target.classList.contains("search__rmpath")) {
                 config.idPath = [];
                 config.hPath = "";
-                element.querySelector("#searchPathInput").innerHTML = config.hPath;
+                searchPathInputElement.innerHTML = config.hPath;
+                searchPathInputElement.setAttribute("title", "");
                 inputTimeout = inputEvent(element, config, inputTimeout, edit);
                 const includeElement = element.querySelector("#searchInclude");
                 includeElement.classList.remove("b3-button--cancel");
@@ -304,7 +306,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         toPath.forEach((item, index) => {
                             if (item === "/") {
                                 config.idPath.push(toNotebook[index]);
-                                hPathList.push(escapeHtml(getNotebookName(toNotebook[index])));
+                                hPathList.push(getNotebookName(toNotebook[index]));
                             } else {
                                 enableIncludeChild = true;
                                 config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));
@@ -313,8 +315,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         if (response.data) {
                             hPathList.push(...response.data);
                         }
-                        config.hPath = escapeHtml(hPathList.join(" "));
-                        element.querySelector("#searchPathInput").innerHTML = `${config.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
+                        config.hPath = hPathList.join(" ");
+                        searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
+                        searchPathInputElement.setAttribute("title", config.hPath);
                         const includeElement = element.querySelector("#searchInclude");
                         includeElement.classList.remove("b3-button--cancel");
                         if (enableIncludeChild) {
@@ -878,10 +881,13 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
             element.querySelector("#replaceHistoryBtn").parentElement.classList.add("fn__none");
         }
     }
+    const searchPathInputElement = element.querySelector("#searchPathInput")
     if (item.hPath) {
-        element.querySelector("#searchPathInput").innerHTML = `${item.hPath}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
+        searchPathInputElement.innerHTML = `${escapeHtml(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
+        searchPathInputElement.setAttribute("title", item.hPath);
     } else {
-        element.querySelector("#searchPathInput").innerHTML = "";
+        searchPathInputElement.innerHTML = "";
+        searchPathInputElement.setAttribute("title", "");
     }
     if (config.group !== item.group) {
         if (item.group === 0) {
@@ -1285,7 +1291,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
 const onSearch = (data: IBlock[], edit: Protyle, element: Element) => {
     let resultHTML = "";
     data.forEach((item, index) => {
-        const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
+        const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
@@ -1307,7 +1313,7 @@ ${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${title}">${title}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${escapeAttr(title)}">${escapeGreat(title)}</span>
 </div>`;
         }
     });

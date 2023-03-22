@@ -38,15 +38,15 @@ export const toolbarSearchEvent = () => {
                 onRecentBlocks(response.data.blocks, response.data.matchedRootCount,response.data.matchedBlockCount);
             });
         }
-        window.siyuan.storage[Constants.LOCAL_SEARCHEKEY] = inputElement.value;
-        setStorageVal(Constants.LOCAL_SEARCHEKEY, window.siyuan.storage[Constants.LOCAL_SEARCHEKEY]);
+        window.siyuan.storage[Constants.LOCAL_SEARCHKEY] = inputElement.value;
+        setStorageVal(Constants.LOCAL_SEARCHKEY, window.siyuan.storage[Constants.LOCAL_SEARCHKEY]);
     }, Constants.TIMEOUT_SEARCH);
 };
 
 const initToolbarSearch = () => {
     const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     inputElement.focus();
-    inputElement.value = window.siyuan.storage[Constants.LOCAL_SEARCHEKEY] || "";
+    inputElement.value = window.siyuan.storage[Constants.LOCAL_SEARCHKEY] || "";
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;

@@ -11,19 +11,11 @@ export const ai = {
     <div data-type="openai">
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
-                ${window.siyuan.languages.apiKey}
-                <div class="b3-label__text">${window.siyuan.languages.apiKeyTip}</div>
-            </div>
-            <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" id="apiKey" value="${window.siyuan.config.ai.openAI.apiKey}"/>
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1">
                 ${window.siyuan.languages.apiTimeout}
                 <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
             </div>
             <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
+            <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
         </label>
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
@@ -31,23 +23,31 @@ export const ai = {
                 <div class="b3-label__text">${window.siyuan.languages.apiMaxTokensTip}</div>
             </div>
             <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" type="number" step="1" min="0" id="apiMaxTokens" max="4096" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+            <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="0" id="apiMaxTokens" max="4096" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+        </label>
+        <label class="fn__flex b3-label">
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.apiKey}
+                <div class="b3-label__text">${window.siyuan.languages.apiKeyTip}</div>
+                <div class="fn__hr"></div>
+                <input class="b3-text-field fn__block" id="apiKey" value="${window.siyuan.config.ai.openAI.apiKey}"/>
+            </div>
         </label>
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
                 ${window.siyuan.languages.apiProxy}
                 <div class="b3-label__text">${window.siyuan.languages.apiProxyTip}</div>
+                <span class="fn__hr"></span>
+                <input class="b3-text-field fn__block" id="apiProxy" value="${window.siyuan.config.ai.openAI.apiProxy}"/>
             </div>
-            <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" id="apiProxy" value="${window.siyuan.config.ai.openAI.apiProxy}"/>
         </label>
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
                 ${window.siyuan.languages.apiBaseURL}
                 <div class="b3-label__text">${window.siyuan.languages.apiBaseURLTip}</div>
+                <span class="fn__hr"></span>
+                <input class="b3-text-field fn__block" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>
             </div>
-            <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>
         </label>
     </div>
 </div>

@@ -21,15 +21,15 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {setStorageVal} from "../protyle/util/compatibility";
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
-    let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][type];
+    let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
     list.splice(0, 0, value);
     list = Array.from(new Set(list));
     if (list.length > window.siyuan.config.search.limit) {
         list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
     }
     // new Set 后需重新赋值
-    window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][type] = list;
-    setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
+    window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type] = list;
+    setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
 };
 
 export const openGlobalSearch = (text: string, replace: boolean) => {
@@ -53,7 +53,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
         icon: "iconSearch",
         title: window.siyuan.languages.search,
         callback(tab) {
-            const localData = window.siyuan.storage[Constants.LOCAL_SEARCHEDATA];
+            const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
             const asset = new Search({
                 tab,
                 config: {
@@ -95,7 +95,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             enableIncludeChild = true;
         }
     });
-    const data = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS];
+    const data = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
     element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: 4px;overflow: hidden;" : ""}">
     <div class="b3-form__icon search__header">
         <span class="fn__a" id="searchHistoryBtn">
@@ -228,7 +228,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         const documentSelf = document;
         const nextElement = dragElement.nextElementSibling as HTMLElement;
         const previousElement = dragElement.previousElementSibling as HTMLElement;
-        const direction = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][closeCB ? "layout" : "layoutTab"] === 1 ? "lr" : "tb";
+        const direction = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][closeCB ? "layout" : "layoutTab"] === 1 ? "lr" : "tb";
         const x = event[direction === "lr" ? "clientX" : "clientY"];
         const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
         const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
@@ -253,8 +253,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             documentSelf.ondragstart = null;
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
-            window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS][direction === "lr" ? (closeCB ? "col" : "colTab") : (closeCB ? "row" : "rowTab")] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
-            setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
+            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][direction === "lr" ? (closeCB ? "col" : "colTab") : (closeCB ? "row" : "rowTab")] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
+            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
             if (direction === "lr") {
                 setPadding(edit.protyle);
             }
@@ -405,7 +405,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                const list = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS];
+                const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
                 if (!list.keys || list.keys.length === 0) {
                     return;
                 }
@@ -425,7 +425,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                const list = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS];
+                const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
                 if (!list.replaceKeys || list.replaceKeys.length === 0) {
                     return;
                 }
@@ -714,7 +714,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             }
         }]
     }).element);
-    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS];
+    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
     const isPopover = hasClosestByClassName(element, "b3-dialog__container");
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.layout,
@@ -737,7 +737,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 } else {
                     localData.layoutTab = 0;
                 }
-                setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
+                setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
             }
         }, {
             label: window.siyuan.languages.leftRightLayout,
@@ -757,7 +757,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 } else {
                     localData.layoutTab = 1;
                 }
-                setStorageVal(Constants.LOCAL_SEARCHEKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHEKEYS]);
+                setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
             }
         }]
     }).element);
@@ -930,8 +930,8 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     }
     element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", methodTip);
     Object.assign(config, item);
-    window.siyuan.storage[Constants.LOCAL_SEARCHEDATA] = Object.assign({}, config);
-    setStorageVal(Constants.LOCAL_SEARCHEDATA, window.siyuan.storage[Constants.LOCAL_SEARCHEDATA]);
+    window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+    setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
     inputEvent(element, config, undefined, edit);
     window.siyuan.menus.menu.remove();
 };

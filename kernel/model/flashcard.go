@@ -190,7 +190,7 @@ var (
 	skipCardCache = map[string]riff.Card{}
 )
 
-func ReviewFlashcard(deckID, cardID string, rating riff.Rating) (err error) {
+func ReviewFlashcard(deckID, cardID string, rating riff.Rating, reviewedCardIDs []string) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
@@ -224,7 +224,7 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating) (err error) {
 		return
 	}
 
-	dueCards := getDueFlashcards(deckID)
+	dueCards := getDueFlashcards(deckID, reviewedCardIDs)
 	if 1 > len(dueCards) {
 		// 该卡包中没有待复习的卡片了，说明最后一张卡片已经复习完了，清空撤销缓存和跳过缓存
 		reviewCardCache = map[string]riff.Card{}
@@ -273,7 +273,7 @@ func newFlashcard(card riff.Card, blockID, deckID string, now time.Time) *Flashc
 	}
 }
 
-func GetNotebookDueFlashcards(boxID string) (ret []*Flashcard, err error) {
+func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
@@ -315,7 +315,7 @@ func GetNotebookDueFlashcards(boxID string) (ret []*Flashcard, err error) {
 		return
 	}
 
-	cards := getDeckDueCards(deck)
+	cards := getDeckDueCards(deck, reviewedCardIDs)
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -331,7 +331,7 @@ func GetNotebookDueFlashcards(boxID string) (ret []*Flashcard, err error) {
 	return
 }
 
-func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
+func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
@@ -346,7 +346,7 @@ func GetTreeDueFlashcards(rootID string) (ret []*Flashcard, err error) {
 	}
 
 	treeBlockIDs := getTreeSubTreeChildBlocks(rootID)
-	cards := getDeckDueCards(deck)
+	cards := getDeckDueCards(deck, reviewedCardIDs)
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -400,7 +400,7 @@ func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDs map[string]bool) {
 	return
 }
 
-func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
+func GetDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard, err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
@@ -410,22 +410,22 @@ func GetDueFlashcards(deckID string) (ret []*Flashcard, err error) {
 	}
 
 	if "" == deckID {
-		ret = getAllDueFlashcards()
+		ret = getAllDueFlashcards(reviewedCardIDs)
 		return
 	}
 
-	ret = getDueFlashcards(deckID)
+	ret = getDueFlashcards(deckID, reviewedCardIDs)
 	return
 }
 
-func getDueFlashcards(deckID string) (ret []*Flashcard) {
+func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard) {
 	deck := Decks[deckID]
 	if nil == deck {
 		logging.LogWarnf("deck not found [%s]", deckID)
 		return
 	}
 
-	cards := getDeckDueCards(deck)
+	cards := getDeckDueCards(deck, reviewedCardIDs)
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -442,10 +442,10 @@ func getDueFlashcards(deckID string) (ret []*Flashcard) {
 	return
 }
 
-func getAllDueFlashcards() (ret []*Flashcard) {
+func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard) {
 	now := time.Now()
 	for _, deck := range Decks {
-		cards := getDeckDueCards(deck)
+		cards := getDeckDueCards(deck, reviewedCardIDs)
 		for _, card := range cards {
 			blockID := card.BlockID()
 			if nil == treenode.GetBlockTree(blockID) {
@@ -894,7 +894,7 @@ func getDeckIDs() (deckIDs []string) {
 	return
 }
 
-func getDeckDueCards(deck *riff.Deck) (ret []riff.Card) {
+func getDeckDueCards(deck *riff.Deck, reviewedCardIDs []string) (ret []riff.Card) {
 	ret = []riff.Card{}
 	dues := deck.Dues()
 
@@ -916,6 +916,10 @@ func getDeckDueCards(deck *riff.Deck) (ret []riff.Card) {
 			if reviewCount > Conf.Flashcard.ReviewCardLimit {
 				continue
 			}
+		}
+
+		if !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
+			continue
 		}
 
 		ret = append(ret, c)

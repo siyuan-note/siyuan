@@ -196,7 +196,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 deckID: blocks[index].deckID,
                 cardID: blocks[index].cardID,
                 rating: parseInt(type),
-                reviewedCardIDs: blocks
+                reviewedCards: blocks
             }, () => {
                 /// #if MOBILE
                 if (type !== "-3" &&
@@ -213,7 +213,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                         rootID: titleElement.getAttribute("data-id"),
                         deckID: selectElement?.value,
                         notebook: titleElement.getAttribute("data-notebookid"),
-                        reviewedCardIDs: blocks
+                        reviewedCards: blocks
                     }, (treeCards) => {
                         index = 0;
                         blocks = treeCards.data;

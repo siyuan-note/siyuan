@@ -23,7 +23,7 @@ export const AI = {
                 <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
             </div>
             <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" type="number" step="1" min="5" max="600" id="openFilesUseCurrentTab" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
+            <input class="b3-text-field fn__flex-center" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
         </label>
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">

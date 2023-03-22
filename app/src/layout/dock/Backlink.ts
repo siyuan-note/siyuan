@@ -574,19 +574,24 @@ export class Backlink extends Model {
             if (data.mentionsCount === 0) {
                 this.status[this.blockId].backlinkMStatus = 3;
             } else {
-                Array.from({length: window.siyuan.config.editor.backlinkExpandCount}).forEach((item, index) => {
+                Array.from({length: window.siyuan.config.editor.backmentionExpandCount}).forEach((item, index) => {
                     if (data.backmentions[index]) {
                         this.status[this.blockId].backlinkMOpenIds.push(data.backmentions[index].id);
                     }
                 });
-                if (data.linkRefsCount === 0) {
-                    this.status[this.blockId].backlinkMStatus = 0;
+                if (window.siyuan.config.editor.backmentionExpandCount === 0) {
+                    // 设置为 0 时需折叠
+                    this.status[this.blockId].backlinkMStatus = 3;
                 } else {
-                    this.status[this.blockId].backlinkMStatus = 1;
+                    if (data.linkRefsCount === 0) {
+                        this.status[this.blockId].backlinkMStatus = 0;
+                    } else {
+                        this.status[this.blockId].backlinkMStatus = 1;
+                    }
                 }
             }
             if (data.linkRefsCount > 0) {
-                Array.from({length: window.siyuan.config.editor.backmentionExpandCount}).forEach((item, index) => {
+                Array.from({length: window.siyuan.config.editor.backlinkExpandCount}).forEach((item, index) => {
                     if (data.backlinks[index]) {
                         this.status[this.blockId].backlinkOpenIds.push(data.backlinks[index].id);
                     }

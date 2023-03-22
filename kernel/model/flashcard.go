@@ -918,7 +918,7 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs []string) (ret []riff.Card
 			}
 		}
 
-		if !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
+		if 0 < len(reviewedCardIDs) && !gulu.Str.Contains(c.ID(), reviewedCardIDs) {
 			continue
 		}
 

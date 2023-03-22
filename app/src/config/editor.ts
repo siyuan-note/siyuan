@@ -181,6 +181,14 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.backmentionExpand}
+        <div class="b3-label__text">${window.siyuan.languages.backmentionExpandTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="backmentionExpandCount" type="number" min="0" max="512" value="${window.siyuan.config.editor.backmentionExpandCount}"/>
+</label>
+<label class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.generateHistory}
         <div class="b3-label__text">${window.siyuan.languages.generateHistoryInterval}</div>
     </div>
@@ -281,6 +289,7 @@ export const editor = {
                 virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
                 blockRefDynamicAnchorTextMaxLen: parseInt((editor.element.querySelector("#blockRefDynamicAnchorTextMaxLen") as HTMLInputElement).value),
                 backlinkExpandCount: parseInt((editor.element.querySelector("#backlinkExpandCount") as HTMLInputElement).value),
+                backmentionExpandCount: parseInt((editor.element.querySelector("#backmentionExpandCount") as HTMLInputElement).value),
                 dynamicLoadBlocks: dynamicLoadBlocks,
                 codeLigatures: (editor.element.querySelector("#codeLigatures") as HTMLInputElement).checked,
                 codeTabSpaces: parseInt((editor.element.querySelector("#codeTabSpaces") as HTMLInputElement).value),

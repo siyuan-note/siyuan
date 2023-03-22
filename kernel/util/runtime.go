@@ -267,6 +267,26 @@ func isICloudPath(absPath string) bool {
 			return err
 		}
 
+		if 0 != info.Mode()&os.ModeSymlink && 0 != info.Mode()&os.ModeDir {
+			resolved, symErr := filepath.EvalSymlinks(path)
+			if nil != symErr {
+				logging.LogErrorf("resolve symlink [%s] failed: %s", path, symErr)
+				return nil
+			}
+			filepath.Walk(resolved, func(path string, info os.FileInfo, err error) error {
+				if nil != err {
+					return err
+				}
+
+				if absPath == strings.ToLower(path) {
+					logging.LogInfof("under symlink path: %s", path)
+					return fmt.Errorf("found")
+				}
+
+				return nil
+			})
+		}
+
 		logging.LogInfof("path: %s", path)
 		return nil
 	})

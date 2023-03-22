@@ -52,6 +52,20 @@ func setAI(c *gin.Context) {
 		return
 	}
 
+	if 5 > ai.OpenAI.APITimeout {
+		ai.OpenAI.APITimeout = 5
+	}
+	if 600 < ai.OpenAI.APITimeout {
+		ai.OpenAI.APITimeout = 600
+	}
+
+	if 0 > ai.OpenAI.APIMaxTokens {
+		ai.OpenAI.APIMaxTokens = 0
+	}
+	if 4096 < ai.OpenAI.APIMaxTokens {
+		ai.OpenAI.APIMaxTokens = 4096
+	}
+
 	model.Conf.AI = ai
 	model.Conf.Save()
 

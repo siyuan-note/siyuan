@@ -195,7 +195,8 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
                 deckID: blocks[index].deckID,
                 cardID: blocks[index].cardID,
-                rating: parseInt(type)
+                rating: parseInt(type),
+                reviewedCardIDs: blocks
             }, () => {
                 /// #if MOBILE
                 if (type !== "-3" &&

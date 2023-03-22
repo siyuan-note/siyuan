@@ -393,8 +393,8 @@ declare interface IConfig {
         key: string
     },
     flashcard: {
-        dailyNewCardLimit: number
-        dailyReviewCardLimit: number
+        newCardLimit: number
+        reviewCardLimit: number
         list: boolean
         superBlock: boolean
         deck: boolean

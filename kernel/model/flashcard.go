@@ -915,8 +915,14 @@ func getDeckDueCards(deck *riff.Deck) (ret []riff.Card) {
 		fsrsCard := c.Impl().(*fsrs.Card)
 		if fsrs.New == fsrsCard.State {
 			newCount++
+			if newCount > Conf.Flashcard.NewCardLimit {
+				continue
+			}
 		} else {
 			reviewCount++
+			if reviewCount > Conf.Flashcard.ReviewCardLimit {
+				continue
+			}
 		}
 
 		ret = append(ret, c)

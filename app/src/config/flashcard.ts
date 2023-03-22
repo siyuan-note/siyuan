@@ -5,19 +5,19 @@ export const flashcard = {
     genHTML: () => {
         return `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.flashcardDailyNewCardLimit}
-        <div class="b3-label__text">${window.siyuan.languages.flashcardDailyNewCardLimitTip}</div>
+        ${window.siyuan.languages.flashcardNewCardLimit}
+        <div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimitTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center" id="dailyNewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.dailyNewCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.dailyNewCardLimit}"/>
+    <input class="b3-text-field fn__flex-center" id="newCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.newCardLimit}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.flashcardDailyReviewCardLimit}
-        <div class="b3-label__text">${window.siyuan.languages.flashcardDailyReviewCardLimitTip}</div>
+        ${window.siyuan.languages.flashcardReviewCardLimit}
+        <div class="b3-label__text">${window.siyuan.languages.flashcardReviewCardLimitTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center" id="dailyReviewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.dailyReviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.dailyReviewCardLimit}"/>
+    <input class="b3-text-field fn__flex-center" id="reviewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -48,8 +48,8 @@ export const flashcard = {
         flashcard.element.querySelectorAll("input").forEach((item) => {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setFlashcard", {
-                    dailyNewCardLimit: parseInt((flashcard.element.querySelector("#dailyNewCardLimit") as HTMLInputElement).value),
-                    dailyReviewCardLimit: parseInt((flashcard.element.querySelector("#dailyReviewCardLimit") as HTMLInputElement).value),
+                    newCardLimit: parseInt((flashcard.element.querySelector("#newCardLimit") as HTMLInputElement).value),
+                    reviewCardLimit: parseInt((flashcard.element.querySelector("#reviewCardLimit") as HTMLInputElement).value),
                     list: (flashcard.element.querySelector("#list") as HTMLInputElement).checked,
                     superBlock: (flashcard.element.querySelector("#superBlock") as HTMLInputElement).checked,
                     deck: (flashcard.element.querySelector("#deck") as HTMLInputElement).checked,

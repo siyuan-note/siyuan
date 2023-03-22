@@ -95,12 +95,12 @@ func setFlashcard(c *gin.Context) {
 		return
 	}
 
-	if 1 > flashcard.DailyNewCardLimit {
-		flashcard.DailyNewCardLimit = 1
+	if 1 > flashcard.NewCardLimit {
+		flashcard.NewCardLimit = 1
 	}
 
-	if 1 > flashcard.DailyReviewCardLimit {
-		flashcard.DailyReviewCardLimit = 1
+	if 1 > flashcard.ReviewCardLimit {
+		flashcard.ReviewCardLimit = 1
 	}
 
 	model.Conf.Flashcard = flashcard

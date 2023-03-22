@@ -1,8 +1,8 @@
 {
-  "flashcardDailyNewCardLimit": "Daily New Card Limit",
-  "flashcardDailyNewCardLimitTip": "If there are many new cards, you can set the number of daily new cards to review through this item",
-  "flashcardDailyReviewCardLimit": "Daily Review Card Limit",
-  "flashcardDailyReviewCardLimitTip": "If there are many review cards, you can set the number of daily review through this item",
+  "flashcardNewCardLimit": "New Card Limit",
+  "flashcardNewCardLimitTip": "If there are many new cards, you can set the number of new cards to review through this item",
+  "flashcardReviewCardLimit": "Review Card Limit",
+  "flashcardReviewCardLimitTip": "If there are many review cards, you can set the number of review through this item",
   "flashcardList": "List Carding",
   "flashcardListTip": "After enabling, the first list item of a list is recognized as a question, and the rest of the lite items are recognized as answers",
   "flashcardSuperBlock": "Super Block Carding",

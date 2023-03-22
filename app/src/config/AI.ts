@@ -11,40 +11,40 @@ export const AI = {
     <div data-type="openai">
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
-                APIKey
-                <div class="b3-label__text">APIKeyAPIKeyAPIKey</div>
+                ${window.siyuan.languages.apiKey}
+                <div class="b3-label__text">${window.siyuan.languages.apiKeyTip}</div>
             </div>
             <span class="fn__space"></span>
             <input class="b3-text-field fn__flex-center" id="apiKey" value="${window.siyuan.config.ai.openAI.apiKey}"/>
         </label>
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
-                APITimeout
-                <div class="b3-label__text">APITimeoutAPITimeoutAPITimeout</div>
+                ${window.siyuan.languages.apiTimeout}
+                <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
             </div>
             <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" type="number" step="1" min="1" id="openFilesUseCurrentTab" value="${window.siyuan.config.ai.openAI}"/>
+            <input class="b3-text-field fn__flex-center" type="number" step="1" min="5" max="600" id="openFilesUseCurrentTab" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
         </label>
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
-                APIProxy
-                <div class="b3-label__text">APIProxyAPIProxyAPIProxy</div>
+                ${window.siyuan.languages.apiMaxTokens}
+                <div class="b3-label__text">${window.siyuan.languages.apiMaxTokensTip}</div>
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-text-field fn__flex-center" type="number" step="1" min="0" id="apiMaxTokens" max="4096" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+        </label>
+        <label class="fn__flex b3-label">
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.apiProxy}
+                <div class="b3-label__text">${window.siyuan.languages.apiProxyTip}</div>
             </div>
             <span class="fn__space"></span>
             <input class="b3-text-field fn__flex-center" id="apiProxy" value="${window.siyuan.config.ai.openAI.apiProxy}"/>
         </label>
         <label class="fn__flex b3-label">
             <div class="fn__flex-1">
-                APIMaxTokens
-                <div class="b3-label__text">APIMaxTokensAPIMaxTokensAPIMaxTokens</div>
-            </div>
-            <span class="fn__space"></span>
-            <input class="b3-text-field fn__flex-center" type="number" step="1" min="0" id="apiMaxTokens" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1">
-                APIBaseURL
-                <div class="b3-label__text">APIBaseURLAPIBaseURLAPIBaseURL</div>
+                ${window.siyuan.languages.apiBaseURL}
+                <div class="b3-label__text">${window.siyuan.languages.apiBaseURLTip}</div>
             </div>
             <span class="fn__space"></span>
             <input class="b3-text-field fn__flex-center" id="apiBaseURL" value="${window.siyuan.config.ai.openAI.apiBaseURL}"/>

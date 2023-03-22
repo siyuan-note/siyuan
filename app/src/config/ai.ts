@@ -1,6 +1,6 @@
 import {fetchPost} from "../util/fetch";
 
-export const AI = {
+export const ai = {
     element: undefined as Element,
     genHTML: () => {
         return `<div class="fn__flex-column" style="height: 100%">
@@ -54,15 +54,15 @@ export const AI = {
 </div>`;
     },
     bindEvent: () => {
-        AI.element.querySelectorAll("input").forEach((item) => {
+        ai.element.querySelectorAll("input").forEach((item) => {
             item.addEventListener("change", () => {
                 fetchPost("/api/setting/setAI", {
                     openAI: {
-                        apiBaseURL: (AI.element.querySelector("#apiBaseURL") as HTMLInputElement).value,
-                        apiKey: (AI.element.querySelector("#apiKey") as HTMLInputElement).value,
-                        apiMaxTokens: parseInt((AI.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),
-                        apiProxy: (AI.element.querySelector("#apiProxy") as HTMLInputElement).value,
-                        apiTimeout: parseInt((AI.element.querySelector("#apiTimeout") as HTMLInputElement).value),
+                        apiBaseURL: (ai.element.querySelector("#apiBaseURL") as HTMLInputElement).value,
+                        apiKey: (ai.element.querySelector("#apiKey") as HTMLInputElement).value,
+                        apiMaxTokens: parseInt((ai.element.querySelector("#apiMaxTokens") as HTMLInputElement).value),
+                        apiProxy: (ai.element.querySelector("#apiProxy") as HTMLInputElement).value,
+                        apiTimeout: parseInt((ai.element.querySelector("#apiTimeout") as HTMLInputElement).value),
                     }
                 }, response => {
                     window.siyuan.config.ai = response.data;

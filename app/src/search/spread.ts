@@ -45,7 +45,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
     if (exitDialog) {
         return;
     }
-    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHEDATA];
+    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
     let hPath = "";
     let idPath: string[] = [];
     if (notebookId) {

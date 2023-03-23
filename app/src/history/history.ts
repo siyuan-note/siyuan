@@ -102,7 +102,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
             repoHTML += `<li class="b3-list-item b3-list-item--two" data-type="repoitem">
     <div class="b3-list-item__first">
         <span class="b3-list-item__text">${escapeHtml(item.memo)}</span>
-        <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
+        <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
     </div>
     <div>
         <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
@@ -116,7 +116,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     <div class="fn__flex-1">
         <div class="b3-list-item__text">
             ${escapeHtml(item.memo)}
-            <span class="b3-chip b3-chip--secondary${item.tag ? "" : " fn__none"}">${item.tag}</span>
+            <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
         </div>
         <div>
             <span class="ft__smaller ft__on-surface">${item.hCreated}</span>

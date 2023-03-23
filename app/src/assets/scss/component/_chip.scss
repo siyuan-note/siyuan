@@ -3,17 +3,33 @@ a.b3-chip:hover {
   background-color: #ea4aaa;
 }
 
+.b3-chips {
+  display: flex;
+  padding: 4px;
+
+  .b3-chip {
+    margin: 4px;
+  }
+}
+
 .b3-chip {
   background-color: var(--b3-list-hover);
   color: var(--b3-theme-on-background);
-  line-height: 32px;
+  line-height: 16px;
   font-weight: 400;
+  font-size: 0.8125rem;
   display: inline-flex;
   align-items: center;
   box-sizing: border-box;
-  padding: 0 16px;
+  padding: 8px 12px;
   border-radius: 16px;
   transition: var(--b3-transition);
+
+  &--small {
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 16px;
+  }
 
   &--secondary {
     background-color: var(--b3-theme-secondary);
@@ -26,9 +42,9 @@ a.b3-chip:hover {
   }
 
   svg {
-    margin-right: 4px;
-    margin-left: -4px;
-    height: 14px;
-    width: 14px;
+    margin-right: 6px;
+    margin-left: -5px;
+    height: 16px;
+    width: 16px;
   }
 }

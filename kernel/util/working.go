@@ -35,6 +35,7 @@ import (
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/gofrs/flock"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
@@ -295,7 +296,7 @@ func WriteWorkspacePaths(workspacePaths []string) (err error) {
 		return
 	}
 
-	if err = os.WriteFile(workspaceConf, data, 0644); nil != err {
+	if err = filelock.WriteFile(workspaceConf, data); nil != err {
 		msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)

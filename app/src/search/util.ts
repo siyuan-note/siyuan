@@ -5,7 +5,7 @@ import {Search} from "./index";
 import {Wnd} from "../layout/Wnd";
 import {Constants} from "../constants";
 import {escapeAttr, escapeGreat, escapeHtml} from "../util/escape";
-import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {fetchPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
@@ -22,19 +22,19 @@ import {setStorageVal} from "../protyle/util/compatibility";
 
 const appendCriteria = (element: HTMLElement, data: ISearchOption[]) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
-        let html = '';
+        let html = "";
         response.data.forEach((item: ISearchOption, index: number) => {
             data.push(item);
-            html += `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${['secondary', "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`
-        })
+            html += `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+        });
         element.innerHTML = html;
         if (html === "") {
-            element.classList.add("fn__none")
+            element.classList.add("fn__none");
         } else {
-            element.classList.remove("fn__none")
+            element.classList.remove("fn__none");
         }
     });
-}
+};
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
@@ -193,7 +193,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
 </div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
-    const criteriaData: ISearchOption[] = []
+    const criteriaData: ISearchOption[] = [];
     appendCriteria(element.querySelector("#criteria"), criteriaData);
     const searchPanelElement = element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
@@ -293,19 +293,19 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         updateConfig(element, item, config, edit);
                         return true;
                     }
-                })
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-chip__close") && target.getAttribute("data-type") === "remove-criteria") {
-                const name = target.parentElement.innerText.trim()
+                const name = target.parentElement.innerText.trim();
                 fetchPost("/api/storage/removeCriterion", {name});
                 criteriaData.find((item, index) => {
                     if (item.name === name) {
                         criteriaData.splice(index, 1);
                         return true;
                     }
-                })
+                });
                 if (target.parentElement.parentElement.childElementCount === 1) {
                     target.parentElement.parentElement.classList.add("fn__none");
                     target.parentElement.remove();
@@ -871,9 +871,9 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 criteriaData.push(Object.assign({}, criterion));
                 fetchPost("/api/storage/setCriterion", {criterion}, () => {
                     saveDialog.destroy();
-                    const criteriaElement = element.querySelector("#criteria")
+                    const criteriaElement = element.querySelector("#criteria");
                     criteriaElement.classList.remove("fn__none");
-                    criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${['secondary', "primary", "info", "success", "warning", "error", ""][(criteriaElement.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`)
+                    criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
                 });
             });
         }
@@ -926,7 +926,7 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
             element.querySelector("#replaceHistoryBtn").parentElement.classList.add("fn__none");
         }
     }
-    const searchPathInputElement = element.querySelector("#searchPathInput")
+    const searchPathInputElement = element.querySelector("#searchPathInput");
     if (item.hPath) {
         searchPathInputElement.innerHTML = `${escapeHtml(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
         searchPathInputElement.setAttribute("title", item.hPath);

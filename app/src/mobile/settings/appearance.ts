@@ -1,4 +1,3 @@
-import {closePanel} from "../util/closePanel";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {genOptions} from "../../util/genOptions";

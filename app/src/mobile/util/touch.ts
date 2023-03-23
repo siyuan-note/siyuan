@@ -17,7 +17,7 @@ export const handleTouchEnd = () => {
         return;
     }
 
-    if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > window.innerWidth / 2) {
+    if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > window.innerWidth / 4) {
         if (xDiff > 0) {
             goForward();
         } else {

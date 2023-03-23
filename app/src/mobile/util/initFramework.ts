@@ -126,7 +126,7 @@ export const initFramework = () => {
             }, Constants.TIMEOUT_INPUT);
         }, Constants.TIMEOUT_INPUT);
     }
-    document.getElementById("modelClose").addEventListener(getEventName(), () => {
+    document.getElementById("modelClose").addEventListener("click", () => {
         closePanel();
     });
     initEditorName();

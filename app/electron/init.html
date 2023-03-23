@@ -407,8 +407,7 @@
         const iCloudRoot = path.join(decodeURIComponent(getSearch('home')), 'Library', 'Mobile Documents')
         const allFiles = walk(iCloudRoot)
         for (const file of allFiles) {
-            console.log(file)
-            if (-1 < absPath.indexOf(file)) {
+            if (-1 < absPath.indexOf(file.toLowerCase())) {
                 return true
             }
         }
@@ -420,13 +419,16 @@
         const path = require('path')
         const dirFiles = fs.readdirSync(dir)
         for (const f of dirFiles) {
-            const stat = fs.lstatSync(dir + path.sep + f)
+            let stat = fs.lstatSync(dir + path.sep + f)
+            if (stat.isSymbolicLink()) {
+                files.push(fs.readlinkSync(dir + path.sep + f))
+                continue
+            }
             if (stat.isDirectory()) {
                 // 如果已经遍历过则不再遍历
                 if (files.includes(dir + path.sep + f)) {
                     continue
                 }
-
                 walk(dir + path.sep + f, files)
             } else {
                 files.push(dir + path.sep + f)

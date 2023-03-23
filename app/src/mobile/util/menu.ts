@@ -23,7 +23,7 @@ const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) =
     if (window.siyuan.user.userTitles.length > 0) {
         userTitlesHTML = '<div class="b3-chips" style="position: absolute">';
         window.siyuan.user.userTitles.forEach((item) => {
-            userTitlesHTML += `<div class="b3-chip">${item.icon} ${item.name}</div>`;
+            userTitlesHTML += `<div class="b3-chip b3-chip--middle">${item.icon} ${item.name}</div>`;
         });
         userTitlesHTML += "</div>";
     }

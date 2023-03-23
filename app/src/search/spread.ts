@@ -75,7 +75,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
     const dialog = new Dialog({
         content: "",
         width: "80vw",
-        height: "80vh",
+        height: "90vh",
         destroyCallback: () => {
             if (range) {
                 focusByRange(range);

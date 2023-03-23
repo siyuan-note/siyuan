@@ -84,7 +84,7 @@
   "sortByRankAsc": "按相關度升序",
   "saveCriterion": "保存命名查詢",
   "useCriterion": "使用命名查詢",
-  "removeCriterion": "移除命名查詢",
+  "removeCriterion": "清空查詢條件",
   "group": "分組",
   "noGroupBy": "不分組",
   "groupByDoc": "按文檔分組",

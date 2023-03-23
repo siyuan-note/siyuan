@@ -20,6 +20,22 @@ import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {setStorageVal} from "../protyle/util/compatibility";
 
+const appendCriteria = (element: HTMLElement, data: ISearchOption[]) => {
+    fetchPost("/api/storage/getCriteria", {}, (response) => {
+        let html = '';
+        response.data.forEach((item: ISearchOption, index: number) => {
+            data.push(item);
+            html += `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${['secondary', "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`
+        })
+        element.innerHTML = html;
+        if (html === "") {
+            element.classList.add("fn__none")
+        } else {
+            element.classList.remove("fn__none")
+        }
+    });
+}
+
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
     list.splice(0, 0, value);
@@ -143,13 +159,14 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <div class="fn__space"></div>
         <div id="replaceHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
-    <div class="fn__flex search__header" style="padding: 4px 8px;">
+    <div id="criteria" class="b3-chips" style="background-color: var(--b3-theme-background)"></div>
+    <div class="search__header" style="padding: 4px 8px;">
         <span id="searchResult" class="search__result"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1"></span>
         <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis" title="${escapeAttr(config.hPath)}">
             ${escapeHtml(config.hPath)}
-            <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconClose"></use></svg>
+            <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
         </span>
         <span class="fn__space"></span>
         <button ${enableIncludeChild ? "" : "disabled"} id="searchInclude" class="b3-button b3-button--small${includeChild ? "" : " b3-button--cancel"}">${window.siyuan.languages.includeChildDoc}</button>
@@ -175,6 +192,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     </div>
 </div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
+
+    const criteriaData: ISearchOption[] = []
+    appendCriteria(element.querySelector("#criteria"), criteriaData);
     const searchPanelElement = element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
@@ -266,7 +286,36 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
         while (target && !target.isSameNode(element)) {
-            if (target.classList.contains("search__rmpath")) {
+            if (target.classList.contains("b3-chip") && target.getAttribute("data-type") === "set-criteria") {
+                config.removed = false;
+                criteriaData.find(item => {
+                    if (item.name === target.innerText.trim()) {
+                        updateConfig(element, item, config, edit);
+                        return true;
+                    }
+                })
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.classList.contains("b3-chip__close") && target.getAttribute("data-type") === "remove-criteria") {
+                const name = target.parentElement.innerText.trim()
+                fetchPost("/api/storage/removeCriterion", {name});
+                criteriaData.find((item, index) => {
+                    if (item.name === name) {
+                        criteriaData.splice(index, 1);
+                        return true;
+                    }
+                })
+                if (target.parentElement.parentElement.childElementCount === 1) {
+                    target.parentElement.parentElement.classList.add("fn__none");
+                    target.parentElement.remove();
+                } else {
+                    target.parentElement.remove();
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.classList.contains("search__rmpath")) {
                 config.idPath = [];
                 config.hPath = "";
                 searchPathInputElement.innerHTML = config.hPath;
@@ -317,7 +366,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                             hPathList.push(...response.data);
                         }
                         config.hPath = hPathList.join(" ");
-                        searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
+                        searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
                         searchPathInputElement.setAttribute("title", config.hPath);
                         const includeElement = element.querySelector("#searchInclude");
                         includeElement.classList.remove("b3-button--cancel");
@@ -371,8 +420,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                     icon: "iconSearch",
                     title: window.siyuan.languages.search,
                     callback(tab) {
-                        config.k = searchInputElement.value
-                        config.r = replaceInputElement.value
+                        config.k = searchInputElement.value;
+                        config.r = replaceInputElement.value;
                         const asset = new Search({
                             tab,
                             config
@@ -394,7 +443,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchMore") {
-                addConfigMoreMenu(config, edit, element, event);
+                addConfigMoreMenu(config, edit, element, event, criteriaData);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -633,10 +682,10 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     return edit;
 };
 
-const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: Element, event: MouseEvent) => {
-    const criteria = await fetchSyncPost("/api/storage/getCriteria");
+const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: Element, event: MouseEvent, criteriaData: ISearchOption[]) => {
     window.siyuan.menus.menu.remove();
     const sortMenu = [{
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.type,
         current: config.sort === 0,
         click() {
@@ -644,6 +693,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             inputEvent(element, config, undefined, edit);
         }
     }, {
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.createdASC,
         current: config.sort === 1,
         click() {
@@ -651,6 +701,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             inputEvent(element, config, undefined, edit);
         }
     }, {
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.createdDESC,
         current: config.sort === 2,
         click() {
@@ -658,6 +709,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             inputEvent(element, config, undefined, edit);
         }
     }, {
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.modifiedASC,
         current: config.sort === 3,
         click() {
@@ -665,6 +717,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             inputEvent(element, config, undefined, edit);
         }
     }, {
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.modifiedDESC,
         current: config.sort === 4,
         click() {
@@ -672,6 +725,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             inputEvent(element, config, undefined, edit);
         }
     }, {
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.sortByRankAsc,
         current: config.sort === 6,
         click() {
@@ -679,6 +733,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
             inputEvent(element, config, undefined, edit);
         }
     }, {
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.sortByRankDesc,
         current: config.sort === 7,
         click() {
@@ -688,6 +743,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     }];
     if (config.group === 1) {
         sortMenu.push({
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.sortByContent,
             current: config.sort === 5,
             click() {
@@ -697,14 +753,17 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
         });
     }
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.sort,
         type: "submenu",
         submenu: sortMenu,
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.group,
         type: "submenu",
         submenu: [{
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.noGroupBy,
             current: config.group === 0,
             click() {
@@ -716,6 +775,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 inputEvent(element, config, undefined, edit);
             }
         }, {
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.groupByDoc,
             current: config.group === 1,
             click() {
@@ -728,9 +788,11 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
     const isPopover = hasClosestByClassName(element, "b3-dialog__container");
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.layout,
         type: "submenu",
         submenu: [{
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.topBottomLayout,
             current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
             click() {
@@ -751,6 +813,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
             }
         }, {
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.leftRightLayout,
             current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
             click() {
@@ -775,6 +838,7 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.saveCriterion,
+        iconHTML: Constants.ZWSP,
         click() {
             const saveDialog = new Dialog({
                 title: window.siyuan.languages.saveCriterion,
@@ -804,47 +868,18 @@ const addConfigMoreMenu = async (config: ISearchOption, edit: Protyle, element: 
                 config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
                 const criterion = config;
                 criterion.name = value;
+                criteriaData.push(Object.assign({}, criterion));
                 fetchPost("/api/storage/setCriterion", {criterion}, () => {
                     saveDialog.destroy();
+                    const criteriaElement = element.querySelector("#criteria")
+                    criteriaElement.classList.remove("fn__none");
+                    criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${['secondary', "primary", "info", "success", "warning", "error", ""][(criteriaElement.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`)
                 });
             });
         }
     }).element);
-    const searchSubMenu: IMenu[] = [];
-    criteria.data.forEach((item: ISearchOption) => {
-        searchSubMenu.push({
-            label: `<div class="fn__flex">
-    <span class="fn__flex-1">${item.name}</span>
-    <span class="fn__space"></span>
-    <svg class="b3-menu__icon fn__a" style="width: 8px"><use xlink:href="#iconClose"></use></svg>
-</div>`,
-            bind(menuElement) {
-                menuElement.addEventListener("click", (event) => {
-                    if (hasClosestByClassName(event.target as HTMLElement, "fn__a")) {
-                        fetchPost("/api/storage/removeCriterion", {name: item.name.trim()});
-                        event.preventDefault();
-                        event.stopPropagation();
-                        if (!menuElement.previousElementSibling && !menuElement.nextElementSibling) {
-                            menuElement.parentElement.parentElement.remove();
-                        } else {
-                            menuElement.remove();
-                        }
-                        return;
-                    }
-                    config.removed = false;
-                    updateConfig(element, item, config, edit);
-                });
-            }
-        });
-    });
-    if (searchSubMenu.length > 0) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.useCriterion,
-            type: "submenu",
-            submenu: searchSubMenu
-        }).element);
-    }
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.removeCriterion,
         click() {
             updateConfig(element, {
@@ -893,7 +928,7 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     }
     const searchPathInputElement = element.querySelector("#searchPathInput")
     if (item.hPath) {
-        searchPathInputElement.innerHTML = `${escapeHtml(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconClose"></use></svg>`;
+        searchPathInputElement.innerHTML = `${escapeHtml(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
         searchPathInputElement.setAttribute("title", item.hPath);
     } else {
         searchPathInputElement.innerHTML = "";
@@ -1087,6 +1122,7 @@ const addConfigFilterMenu = (config: ISearchOption, edit: Protyle, element: Elem
 const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) => {
     const searchSyntaxCheckElement = element.querySelector("#searchSyntaxCheck");
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.keyword,
         current: config.method === 0,
         click() {
@@ -1096,6 +1132,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.querySyntax,
         current: config.method === 1,
         click() {
@@ -1105,6 +1142,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: "SQL",
         current: config.method === 2,
         click() {
@@ -1114,6 +1152,7 @@ const addQueryMenu = (config: ISearchOption, edit: Protyle, element: Element) =>
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.regex,
         current: config.method === 3,
         click() {

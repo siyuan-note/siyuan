@@ -20,10 +20,10 @@ package util
 
 func GetOSPlatform() (plat, ver string) {
 	if ContainerIOS == Container {
-		return "iOS", MobileOSVer
+		return "iOS " + MobileOSVer
 	}
 	if ContainerAndroid == Container {
-		return "Android", MobileOSVer
+		return "Android " + MobileOSVer
 	}
-	return "Unknown", MobileOSVer
+	return "Unknown " + MobileOSVer
 }

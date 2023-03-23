@@ -65,7 +65,8 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     idPath: [],
                     group: localData.group,
                     sort: localData.sort,
-                    types: localData.types
+                    types: localData.types,
+                    removed: localData.removed
                 }
             });
             tab.addModel(asset);

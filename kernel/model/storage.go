@@ -182,6 +182,7 @@ type CriterionTypes struct {
 	ListItem   bool `json:"listItem"`
 	CodeBlock  bool `json:"codeBlock"`
 	HtmlBlock  bool `json:"htmlBlock"`
+	EmbedBlock bool `json:"embedBlock"`
 }
 
 var criteriaLock = sync.Mutex{}

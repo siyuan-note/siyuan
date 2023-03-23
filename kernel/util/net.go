@@ -17,19 +17,20 @@
 package util
 
 import (
-	"github.com/88250/lute/ast"
-	"github.com/imroc/req/v3"
-	"github.com/siyuan-note/httpclient"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/imroc/req/v3"
 	"github.com/olahol/melody"
+	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 )
 
-func IsOnline() bool {
+func IsOnline() (ret bool) {
 	c := req.C().SetTimeout(1 * time.Second)
 	resp, err := c.R().Head("https://www.baidu.com")
 	if nil != err {
@@ -38,7 +39,12 @@ func IsOnline() bool {
 			resp, err = c.R().Head("https://api.ipify.org")
 		}
 	}
-	return nil == err && nil != resp && nil != resp.Response
+
+	ret = nil == err && nil != resp && nil != resp.Response
+	if !ret {
+		logging.LogWarnf("network is offline")
+	}
+	return
 }
 
 func GetRemoteAddr(session *melody.Session) string {

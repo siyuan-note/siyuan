@@ -19,6 +19,7 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -244,8 +245,8 @@ func checkFileSysStatus() {
 	}
 }
 
-func IsCloudDrivePath(absPath string) bool {
-	absPathLower := strings.ToLower(absPath)
+func IsCloudDrivePath(workspaceAbsPath string) bool {
+	absPathLower := strings.ToLower(workspaceAbsPath)
 	if isICloudPath(absPathLower) {
 		return true
 	}
@@ -254,21 +255,23 @@ func IsCloudDrivePath(absPath string) bool {
 		strings.Contains(absPathLower, "google drive") || strings.Contains(absPathLower, "pcloud")
 }
 
-func isICloudPath(absPath string) bool {
+func isICloudPath(workspaceAbsPath string) (ret bool) {
 	if !gulu.OS.IsDarwin() {
 		return false
 	}
 
 	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
-
 	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")
-	err := WalkWithSymlinks(iCloudRoot, func(path string, info os.FileInfo, err error) error {
-		logging.LogInfof("path: %s", path)
+	WalkWithSymlinks(iCloudRoot, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			return nil
+		}
+
+		if strings.HasPrefix(workspaceAbsPath, strings.ToLower(path)) {
+			ret = true
+			return io.EOF
+		}
 		return nil
 	})
-	if nil != err {
-		logging.LogErrorf("walk iCloud dir [%s] failed: %s", iCloudRoot, err)
-	}
-
-	return false
+	return
 }

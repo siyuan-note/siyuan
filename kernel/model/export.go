@@ -1077,7 +1077,6 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 
 		id := docIAL["id"]
 		hPath, md := exportMarkdownContent(id)
-		md = yfm(docIAL) + md
 		dir, name = path.Split(hPath)
 		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590
 		name = util.FilterFileName(name)
@@ -1441,6 +1440,8 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle)
+	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
+	exportedMd = yfm(docIAL) + exportedMd
 	return
 }
 

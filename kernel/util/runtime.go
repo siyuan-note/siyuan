@@ -263,10 +263,6 @@ func isICloudPath(absPath string) bool {
 
 	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")
 	err := WalkWithSymlinks(iCloudRoot, func(path string, info os.FileInfo, err error) error {
-		if nil != err {
-			return err
-		}
-
 		logging.LogInfof("path: %s", path)
 		return nil
 	})

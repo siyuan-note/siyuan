@@ -152,14 +152,11 @@ export const workspaceMenu = (rect: DOMRect) => {
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
                 iconHTML: Constants.ZWSP,
-                label: `<div class="fn__flex">
-    <span class="fn__flex-1">${item.name}</span>
-    <span class="fn__space"></span>
-    <svg class="b3-menu__icon fn__a" style="width: 8px"><use xlink:href="#iconClose"></use></svg>
-</div>`,
+                action:"iconCloseRound",
+                label: item.name,
                 bind(menuElement) {
                     menuElement.addEventListener("click", (event) => {
-                        if (hasClosestByClassName(event.target as HTMLElement, "fn__a")) {
+                        if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {
                             event.preventDefault();
                             event.stopPropagation();
                             window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout, index: number) => {
@@ -316,22 +313,26 @@ const workspaceItem = (item: IWorkspace) => {
         iconHTML: Constants.ZWSP,
         type: "submenu",
         submenu: [{
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.openBy,
             click() {
                 openWorkspace(item.path);
             }
         }, {
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.showInFolder,
             click() {
                 shell.showItemInFolder(item.path);
             }
         }, {
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.copyPath,
             click() {
                 writeText(item.path);
                 showMessage(window.siyuan.languages.copied);
             }
         }, {
+            iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.removeWorkspaceTip,
             click() {
                 fetchPost("/api/system/removeWorkspaceDir", {path: item.path});

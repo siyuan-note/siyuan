@@ -25,7 +25,7 @@ export class Dialog {
         this.element.innerHTML = `<div class="b3-dialog">
 <div class="b3-dialog__scrim"${options.transparent ? 'style="background-color:transparent"' : ""}></div>
 <div class="b3-dialog__container" style="width:${options.width || "auto"}">
-  <svg class="b3-dialog__close fn__a${this.disableClose ? " fn__none" : ""}"><use xlink:href="#iconClose"></use></svg>
+  <svg class="b3-dialog__close${this.disableClose ? " fn__none" : ""}"><use xlink:href="#iconCloseRound"></use></svg>
   <div class="b3-dialog__header${options.title ? "" : " fn__none"}" onselectstart="return false;">${options.title || ""}</div>
   <div style="height:${options.height || "auto"}">${options.content}</div>
 </div></div>`;

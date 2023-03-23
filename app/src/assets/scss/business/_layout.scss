@@ -233,17 +233,14 @@
         &:hover,
         &.item--focus {
           .item__close svg {
-            opacity: 1;
+            opacity: .68;
           }
         }
 
         &--readonly {
           padding-left: 13px;
+          padding-right: 8px;
           max-width: none;
-
-          .item__close svg {
-            opacity: 1;
-          }
         }
 
         &--pin {
@@ -320,18 +317,15 @@
           align-items: center;
 
           svg {
-            border-radius: 10px;
-            height: 8px;
-            width: 8px;
+            height: 16px;
+            width: 16px;
             color: var(--b3-theme-on-surface);
             transition: var(--b3-transition);
-            padding: 4px;
             opacity: 0;
           }
 
           &:hover svg {
-            color: var(--b3-theme-on-background);
-            background-color: var(--b3-theme-background-light);
+            opacity: 1 !important;
           }
         }
       }

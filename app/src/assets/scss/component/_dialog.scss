@@ -79,7 +79,13 @@
     cursor: pointer;
     top: 10px;
     right: -32px;
-    height: 16px;
-    width: 16px;
+    height: 18px;
+    width: 18px;
+    opacity: .68;
+    color: var(--b3-theme-on-surface);
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }

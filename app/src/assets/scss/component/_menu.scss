@@ -193,7 +193,7 @@
       background-color: var(--b3-list-hover);
 
       & > .b3-menu__action {
-        opacity: 1;
+        opacity: .68;
       }
     }
 
@@ -215,17 +215,14 @@
 
   &__action {
     opacity: 0;
-    color: var(--b3-theme-on-surface);
-    width: 8px;
-    height: 8px;
+    width: 16px;
+    height: 16px;
     align-self: center;
     margin-left: 8px;
-    padding: 4px;
-    border-radius: 8px;
+    color: var(--b3-theme-on-surface);
 
     &:hover {
-      color: var(--b3-theme-on-background);
-      background: var(--b3-theme-background-light);
+      opacity: 1;
     }
   }
 

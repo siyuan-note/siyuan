@@ -80,12 +80,6 @@
     margin: 6px 4px;
     color: var(--b3-theme-on-surface);
 
-    &--small {
-      height: 14px;
-      width: 14px;
-      padding: 11px 8px;
-    }
-
     &[disabled] {
       opacity: 0.38;
     }

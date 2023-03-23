@@ -48,10 +48,10 @@
 <div id="menu" class="b3-menu b3-menu--fullscreen"></div>
 <div id="model" class="side-panel side-panel--all fn__flex-column">
     <div class="toolbar toolbar--border">
-        <svg class="toolbar__icon toolbar__icon--small"><use xlink:href="#iconMenu"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconMenu"></use></svg>
         <span class="toolbar__text"></span>
-        <svg id="modelClose" class="toolbar__icon toolbar__icon--small">
-            <use xlink:href="#iconClose"></use>
+        <svg id="modelClose" class="toolbar__icon">
+            <use xlink:href="#iconCloseRound"></use>
         </svg>
     </div>
     <div id="modelMain" class="fn__flex-1"></div>

@@ -61,10 +61,10 @@ const exitApp = (port, errorWindowId) => {
             if (port.toString() === currentURL.port.toString()) {
                 const hasMain = workspaces.find((workspaceItem) => {
                     if (workspaceItem.browserWindow.id === item.id) {
-                        mainWindow = item
+                        mainWindow = item;
                         return true;
                     }
-                })
+                });
                 if (!hasMain) {
                     item.destroy();
                 }

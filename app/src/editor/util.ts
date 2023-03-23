@@ -118,7 +118,7 @@ const openFile = (options: IOpenFileOptions) => {
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
     BrowserWindow.getAllWindows().find((item) => {
-        const json = getSearch("json", new URL(item.webContents.getURL()).search)
+        const json = getSearch("json", new URL(item.webContents.getURL()).search);
         if (json) {
             const jsonObj = JSON.parse(json);
             if ((jsonObj.children.rootId && jsonObj.children.rootId === options.rootID) ||

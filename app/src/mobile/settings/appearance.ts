@@ -5,7 +5,6 @@ import {genOptions} from "../../util/genOptions";
 import {reloadProtyle} from "../../protyle/util/reload";
 
 export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTMLElement) => {
-    closePanel();
     modelElement.style.top = "0";
     modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconTheme"></use>';
     modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.appearance;

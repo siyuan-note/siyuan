@@ -62,7 +62,6 @@ const initToolbarSearch = () => {
 };
 
 export const popSearch = (modelElement: HTMLElement, modelMainElement: HTMLElement) => {
-    closePanel();
     modelElement.style.top = "0";
     modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconSearch"></use>';
     modelElement.querySelector(".toolbar__text").innerHTML = '<input id="toolbarSearch" style="background-color: var(--b3-theme-surface);border: 0;" class="b3-text-field fn__block">';

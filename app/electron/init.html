@@ -417,10 +417,16 @@
 
     const walk = (dir, files = []) => {
         const fs = require('fs')
+        const path = require('path')
         const dirFiles = fs.readdirSync(dir)
         for (const f of dirFiles) {
             const stat = fs.lstatSync(dir + path.sep + f)
             if (stat.isDirectory()) {
+                // 如果已经遍历过则不再遍历
+                if (files.includes(dir + path.sep + f)) {
+                    continue
+                }
+
                 walk(dir + path.sep + f, files)
             } else {
                 files.push(dir + path.sep + f)

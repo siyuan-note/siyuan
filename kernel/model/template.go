@@ -34,6 +34,7 @@ import (
 	"github.com/88250/lute/render"
 	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -54,6 +55,14 @@ func RenderGoTemplate(templateContent string) (ret string, err error) {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
 	}
 	ret = buf.String()
+	return
+}
+
+func RemoveTemplate(p string) (err error) {
+	err = filelock.Remove(p)
+	if nil != err {
+		logging.LogErrorf("remove template failed: %s", err)
+	}
 	return
 }
 
@@ -145,7 +154,7 @@ func DocSaveAsTemplate(id string, overwrite bool) (code int, err error) {
 		}
 	}
 
-	err = os.WriteFile(savePath, md, 0644)
+	err = filelock.WriteFile(savePath, md)
 	return
 }
 

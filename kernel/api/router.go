@@ -135,6 +135,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/search/searchTag", model.CheckAuth, searchTag)
 	ginServer.Handle("POST", "/api/search/searchTemplate", model.CheckAuth, searchTemplate)
+	ginServer.Handle("POST", "/api/search/removeTemplate", model.CheckAuth, removeTemplate)
 	ginServer.Handle("POST", "/api/search/searchWidget", model.CheckAuth, searchWidget)
 	ginServer.Handle("POST", "/api/search/searchRefBlock", model.CheckAuth, searchRefBlock)
 	ginServer.Handle("POST", "/api/search/searchEmbedBlock", model.CheckAuth, searchEmbedBlock)

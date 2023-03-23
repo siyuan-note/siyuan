@@ -84,7 +84,7 @@
   "sortByRankAsc": "Relevance ASC",
   "saveCriterion": "Save named criterion",
   "useCriterion": "Use named criterion",
-  "removeCriterion": "Remove named criterion",
+  "removeCriterion": "Clear query conditions",
   "group": "Group",
   "noGroupBy": "No grouping",
   "groupByDoc": "Group by document",

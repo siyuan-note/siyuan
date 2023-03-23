@@ -84,7 +84,7 @@
   "sortByRankAsc": "Relevancia ASC",
   "saveCriterion": "Guardar criterio nombrado",
   "useCriterion": "Usar criterio con nombre",
-  "removeCriterion": "Eliminar criterio nombrado",
+  "removeCriterion": "Borrar condiciones de consulta",
   "grupo": "Grupo",
   "noGroupBy": "Sin agrupar",
   "groupByDoc": "Agrupar por documento",

@@ -149,20 +149,15 @@
 
   &__rmpath {
     position: absolute;
-    height: 8px;
-    width: 8px;
-    padding: 4px;
-    border-radius: 10px;
-    color: var(--b3-theme-on-surface);
-    background-color: var(--b3-theme-surface);
+    height: 18px;
+    width: 16px;
+    opacity: 0.68;
     transition: var(--b3-transition);
-    top: 1px;
-    right: 0px;
+    right: 0;
     cursor: pointer;
 
     &:hover {
-      color: var(--b3-theme-on-background);
-      background-color: var(--b3-theme-background-light);
+      opacity: 1;
     }
   }
 }

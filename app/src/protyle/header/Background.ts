@@ -43,7 +43,7 @@ export class Background {
         <span class="protyle-icon protyle-icon--last" data-type="confirm">${window.siyuan.languages.confirm}</span>
     </div>
 </div>
-<div class="protyle-background__tags"></div>
+<div class="b3-chips"></div>
 <div class="protyle-background__iconw">
     <div class="protyle-background__icon" data-menu="true" data-type="open-emoji"></div>
     <div class="protyle-icons fn__flex-center">
@@ -52,7 +52,7 @@ export class Background {
         <span class="protyle-icon protyle-icon--last b3-tooltips b3-tooltips__s" data-type="random" aria-label="${window.siyuan.languages.titleBg}"><svg><use xlink:href="#iconImage"></use></svg></span>
     </div>
 </div>`;
-        this.tagsElement = this.element.querySelector(".protyle-background__tags") as HTMLElement;
+        this.tagsElement = this.element.querySelector(".b3-chips") as HTMLElement;
         this.iconElement = this.element.querySelector(".protyle-background__icon") as HTMLElement;
         this.imgElement = this.element.firstElementChild.firstElementChild as HTMLImageElement;
         if (isMobile()) {
@@ -108,7 +108,9 @@ export class Background {
                 };
             });
         }
-        this.element.querySelector("input").addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
+        this.element.querySelector("input").addEventListener("change", (event: InputEvent & {
+            target: HTMLInputElement
+        }) => {
             if (event.target.files.length === 0) {
                 return;
             }
@@ -351,8 +353,9 @@ export class Background {
         this.element.setAttribute("data-node-id", rootId);
         if (tags) {
             let html = "";
+            const colors = ['secondary', "primary", "info", "success", "warning", "error", ""];
             tags.split(",").forEach((item, index) => {
-                html += `<div class="item item--${index % 4}" data-type="open-search">${item}<svg data-type="remove-tag"><use xlink:href="#iconClose"></use></svg></div>`;
+                html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${item}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
             });
             this.tagsElement.innerHTML = html;
         } else {
@@ -465,7 +468,7 @@ export class Background {
 
     private getTags() {
         const tags: string[] = [];
-        this.tagsElement.querySelectorAll(".item").forEach(item => {
+        this.tagsElement.querySelectorAll(".b3-chip").forEach(item => {
             tags.push(item.textContent.trim());
         });
         return tags;

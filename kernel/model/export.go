@@ -1785,6 +1785,8 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			exportMdVal := n.IALAttr("data-export-md")
 			exportMdVal = html.UnescapeString(exportMdVal) // 导出 `data-export-md` 时未解析代码块与行内代码内的转义字符 https://github.com/siyuan-note/siyuan/issues/4180
 			if "" != exportMdVal {
+				luteEngine0 := util.NewLute()
+				luteEngine0.SetYamlFrontMatter(true) // 挂件导出属性 `data-export-md` 支持 YFM https://github.com/siyuan-note/siyuan/issues/7752
 				exportMdTree := parse.Parse("", []byte(exportMdVal), luteEngine.ParseOptions)
 				var insertNodes []*ast.Node
 				for c := exportMdTree.Root.FirstChild; nil != c; c = c.Next {

@@ -87,6 +87,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
     });
     dialog.element.setAttribute("data-key", hotkey);
     const edit = genSearch({
+        removed: localData.removed,
         k: key || localData.k,
         r: localData.r,
         hasReplace: hotkey === window.siyuan.config.keymap.general.replace.custom,

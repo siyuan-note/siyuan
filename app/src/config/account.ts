@@ -45,9 +45,9 @@ ${window.siyuan.languages.account2}
         if (window.siyuan.user) {
             let userTitlesHTML = "";
             if (window.siyuan.user.userTitles.length > 0) {
-                userTitlesHTML = '<div class="fn__hr--b"></div><div class="fn__flex" style="position: absolute"><span class="fn__space"></span>';
+                userTitlesHTML = '<div class="b3-chips" style="position: absolute">';
                 window.siyuan.user.userTitles.forEach((item) => {
-                    userTitlesHTML += `<div class="b3-chip">${item.icon} ${item.name}</div><span class="fn__space"></span>`;
+                    userTitlesHTML += `<div class="b3-chip">${item.icon} ${item.name}</div>`;
                 });
                 userTitlesHTML += "</div>";
             }

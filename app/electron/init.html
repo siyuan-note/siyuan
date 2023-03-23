@@ -397,8 +397,8 @@
     }
 
     const isICloudPath = (absPath) => {
-        const process = require('process')
-        if ('darwin' !== process.platform) {
+        const os = require('os')
+        if ('darwin' !== os.platform()) {
             return false
         }
 

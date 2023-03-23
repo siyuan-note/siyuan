@@ -42,7 +42,7 @@ func IsOnline() (ret bool) {
 
 	ret = nil == err && nil != resp && nil != resp.Response
 	if !ret {
-		logging.LogWarnf("network is offline")
+		logging.LogWarnf("network is offline: %v", err)
 	}
 	return
 }

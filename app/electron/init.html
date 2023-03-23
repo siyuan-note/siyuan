@@ -361,7 +361,7 @@
                 if (isCloudDrivePath(initPath)) {
                     let msg = '⚠️ This folder may be a cloud sync disk folder, please change to another path'
                     if ('zh_CN' === currentLang) {
-                       msg = '⚠️ 该文件夹可能是云同步盘文件夹，请更换其他路径'
+                        msg = '⚠️ 该文件夹可能是云同步盘文件夹，请更换其他路径'
                     }
                     alert(msg)
                     return
@@ -388,9 +388,47 @@
 
     const isCloudDrivePath = (absPath) => {
         const absPathLower = absPath.toLowerCase()
+        if (isICloudPath(absPathLower)) {
+            return true
+        }
+
         return -1 < absPathLower.indexOf("onedrive") || -1 < absPathLower.indexOf("dropbox") ||
             -1 < absPathLower.indexOf("google drive") || -1 < absPathLower.indexOf("pcloud")
     }
+
+    const isICloudPath = (absPath) => {
+        const process = require('process')
+        if ('darwin' !== process.platform) {
+            return false
+        }
+
+        // macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
+        const path = require('path')
+        const iCloudRoot = path.join(decodeURIComponent(getSearch('home')), 'Library', 'Mobile Documents')
+        const allFiles = walk(iCloudRoot)
+        for (const file of allFiles) {
+            console.log(file)
+            if (-1 < absPath.indexOf(file)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    const walk = (dir, files = []) => {
+        const fs = require('fs')
+        const dirFiles = fs.readdirSync(dir)
+        for (const f of dirFiles) {
+            const stat = fs.lstatSync(dir + path.sep + f)
+            if (stat.isDirectory()) {
+                walk(dir + path.sep + f, files)
+            } else {
+                files.push(dir + path.sep + f)
+            }
+        }
+        return files
+    }
+
 </script>
 </body>
 </html>

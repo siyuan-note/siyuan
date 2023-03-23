@@ -19,7 +19,6 @@ import {pathPosix} from "../../util/pathName";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 
 const showAccountInfo = (modelElement: HTMLElement, modelMainElement: Element) => {
-    closePanel();
     let userTitlesHTML = "";
     if (window.siyuan.user.userTitles.length > 0) {
         userTitlesHTML = '<div class="fn__hr--b"></div><div class="fn__flex" style="position: absolute"><span class="fn__space"></span>';
@@ -244,7 +243,6 @@ ${accountHTML}
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuSync") {
-                closePanel();
                 modelElement.style.top = "0";
                 modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconCloud"></use>';
                 modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.cloud;
@@ -268,7 +266,6 @@ ${accountHTML}
             } else if (target.id === "menuAccount") {
                 event.preventDefault();
                 event.stopPropagation();
-                closePanel();
                 if (document.querySelector("#menuAccount img")) {
                     showAccountInfo(modelElement, modelMainElement);
                     return;
@@ -400,7 +397,6 @@ ${accountHTML}
 };
 
 const initAbout = () => {
-    closePanel();
     if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
         (window.siyuan.config.localIPs.length === 1 && window.siyuan.config.localIPs[0] === "")) {
         window.siyuan.config.localIPs = ["127.0.0.1"];

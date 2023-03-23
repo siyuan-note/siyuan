@@ -124,8 +124,10 @@ export const goBack = () => {
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
-    } else if (document.getElementById("model").style.top === "0px" ||
-        document.getElementById("menu").style.right === "0px" ||
+    } else if (document.getElementById("model").style.top === "0px") {
+        document.getElementById("model").style.top = "-200vh";
+        return;
+    } else if (document.getElementById("menu").style.right === "0px" ||
         document.getElementById("sidebar").style.left === "0px") {
         closePanel();
         return;

@@ -55,9 +55,9 @@ export class Wnd {
         <ul class="fn__flex layout-tab-bar"></ul>
         <ul class="layout-tab-bar layout-tab-bar--readonly fn__flex-1">
             <li class="item item--readonly">
-                <span data-type="new" class="item__close" title="${window.siyuan.languages.newFile}"><svg style="height: 10px;width: 10px;padding: 3px"><use xlink:href="#iconAdd"></use></svg></span>
+                <span data-type="new" class="block__icon block__icon--show" title="${window.siyuan.languages.newFile}"><svg><use xlink:href="#iconAdd"></use></svg></span>
                 <span class="fn__flex-1"></span>
-                <span data-type="more" data-menu="true" class="item__close" title="${window.siyuan.languages.more}"><svg><use xlink:href="#iconDown"></use></svg></span>
+                <span data-type="more" data-menu="true" class="block__icon block__icon--show" title="${window.siyuan.languages.more}"><svg><use xlink:href="#iconDown"></use></svg></span>
             </li>
         </ul>
     </div>
@@ -93,11 +93,11 @@ export class Wnd {
         this.headersElement.parentElement.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.headersElement)) {
-                if (target.classList.contains("item__close") && target.getAttribute("data-type") === "new") {
+                if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new") {
                     setPanelFocus(this.headersElement.parentElement.parentElement);
                     newFile(undefined, undefined, undefined, true);
                     break;
-                } else if (target.classList.contains("item__close") && target.getAttribute("data-type") === "more") {
+                } else if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "more") {
                     this.renderTabList(event);
                     break;
                 } else if (target.tagName === "LI" && target.getAttribute("data-id") && !pdfIsLoading(this.element)) {
@@ -560,12 +560,12 @@ export class Wnd {
             const graphicElement = item.querySelector(".item__graphic");
             window.siyuan.menus.menu.append(new MenuItem({
                 label: escapeHtml(item.querySelector(".item__text").textContent),
-                action: "iconClose",
+                action: "iconCloseRound",
                 iconHTML: iconElement ? `<span class="b3-menu__icon">${iconElement.innerHTML}</span>` : "",
                 icon: graphicElement ? graphicElement.firstElementChild.getAttribute("xlink:href").substring(1) : "",
                 bind: (element) => {
                     element.addEventListener("click", (event) => {
-                        if (hasClosestByTag(event.target as Element, "svg")) {
+                        if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {
                             this.removeTab(item.getAttribute("data-id"));
                             if (element.previousElementSibling || element.nextElementSibling) {
                                 element.remove();

@@ -1077,7 +1077,6 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 
 		id := docIAL["id"]
 		hPath, md := exportMarkdownContent(id)
-		md = yfm(docIAL) + md
 		dir, name = path.Split(hPath)
 		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590
 		name = util.FilterFileName(name)
@@ -1441,6 +1440,8 @@ func exportMarkdownContent(id string) (hPath, exportedMd string) {
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle)
+	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
+	exportedMd = yfm(docIAL) + exportedMd
 	return
 }
 
@@ -1784,6 +1785,8 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 			exportMdVal := n.IALAttr("data-export-md")
 			exportMdVal = html.UnescapeString(exportMdVal) // 导出 `data-export-md` 时未解析代码块与行内代码内的转义字符 https://github.com/siyuan-note/siyuan/issues/4180
 			if "" != exportMdVal {
+				luteEngine0 := util.NewLute()
+				luteEngine0.SetYamlFrontMatter(true) // 挂件导出属性 `data-export-md` 支持 YFM https://github.com/siyuan-note/siyuan/issues/7752
 				exportMdTree := parse.Parse("", []byte(exportMdVal), luteEngine.ParseOptions)
 				var insertNodes []*ast.Node
 				for c := exportMdTree.Root.FirstChild; nil != c; c = c.Next {

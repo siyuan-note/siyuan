@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
-		"updated": "20230308213745"
+		"updated": "20230324161818"
 	},
 	"Children": [
 		{
@@ -28,12 +28,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230308213723-q8a5kbd",
-				"updated": "20230308213723"
+				"updated": "20230324161738"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Currently only supports text dialogue through "
+					"Data": "Supports text dialogue through "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Chat API, only supported on the desktop."
+					"Data": " Chat API."
 				}
 			]
 		},
@@ -70,7 +70,7 @@
 			},
 			"Properties": {
 				"id": "20230308213723-r46h6mw",
-				"updated": "20230308213739"
+				"updated": "20230324161818"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 					},
 					"Properties": {
 						"id": "20230308213723-obctww8",
-						"updated": "20230308213723"
+						"updated": "20230324161801"
 					},
 					"Children": [
 						{
@@ -122,217 +122,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230308213723-rerhr3p",
-								"updated": "20230308213723"
+								"updated": "20230324161801"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Configure environment variables"
-								}
-							]
-						},
-						{
-							"ID": "20230308213723-pyed7a2",
-							"Type": "NodeList",
-							"ListData": {},
-							"Properties": {
-								"id": "20230308213723-pyed7a2",
-								"updated": "20230308213723"
-							},
-							"Children": [
-								{
-									"ID": "20230308213723-lakya6i",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230308213723-lakya6i",
-										"updated": "20230308213723"
-									},
-									"Children": [
-										{
-											"ID": "20230308213723-2sruo2o",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230308213723-2sruo2o",
-												"updated": "20230308213723"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_KEY"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ specifies the API Key (required)"
-												}
-											]
-										}
-									]
+									"Data": "Configure in "
 								},
 								{
-									"ID": "20230308213723-5vfosvz",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230308213723-5vfosvz",
-										"updated": "20230308213723"
-									},
-									"Children": [
-										{
-											"ID": "20230308213723-cxomjan",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230308213723-cxomjan",
-												"updated": "20230308213723"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_TIMEOUT"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ specifies the timeout time (seconds), the default is 30 seconds (optional)"
-												}
-											]
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
-									"ID": "20230308213723-fj3oskr",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230308213723-fj3oskr",
-										"updated": "20230308213723"
-									},
-									"Children": [
-										{
-											"ID": "20230308213723-pvngelo",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230308213723-pvngelo",
-												"updated": "20230308213723"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_PROXY"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ specifies the proxy, the default is empty, that is, no proxy is used (optional)"
-												}
-											]
-										}
-									]
+									"Type": "NodeText",
+									"Data": "​ - "
 								},
 								{
-									"ID": "20230308213723-objm7mx",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230308213723-objm7mx",
-										"updated": "20230308213723"
-									},
-									"Children": [
-										{
-											"ID": "20230308213723-x64pmnz",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230308213723-x64pmnz",
-												"updated": "20230308213723"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_MAX_TOKENS"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ specifies the number of tokens, the default is 0, that is, the default value of the model is used (optional)"
-												}
-											]
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI"
 								},
 								{
-									"ID": "20230308213723-fi8mg6o",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230308213723-fi8mg6o",
-										"updated": "20230308213723"
-									},
-									"Children": [
-										{
-											"ID": "20230308213723-11ww633",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230308213723-11ww633",
-												"updated": "20230308213723"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_BASE_URL"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ specifies the base address of the API server, the default is "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "https://api.openai.com/v1"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ (optional)"
-												}
-											]
-										}
-									]
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -349,7 +162,7 @@
 					},
 					"Properties": {
 						"id": "20230308213723-5m7aqfs",
-						"updated": "20230308213730"
+						"updated": "20230324161809"
 					},
 					"Children": [
 						{
@@ -357,12 +170,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230308213723-i5y2zf5",
-								"updated": "20230308213730"
+								"updated": "20230324161809"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After restarting, you can use "
+									"Data": "Use "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -388,7 +201,7 @@
 					},
 					"Properties": {
 						"id": "20230308213723-la05np0",
-						"updated": "20230308213739"
+						"updated": "20230324161818"
 					},
 					"Children": [
 						{
@@ -396,12 +209,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230308213723-mjv4wg6",
-								"updated": "20230308213739"
+								"updated": "20230324161818"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "You can also perform more operations through the block menu "
+									"Data": "Perform more operations through the block menu "
 								},
 								{
 									"Type": "NodeTextMark",

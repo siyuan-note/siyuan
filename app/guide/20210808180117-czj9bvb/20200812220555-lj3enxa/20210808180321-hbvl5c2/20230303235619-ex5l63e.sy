@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
-		"updated": "20230308213530"
+		"updated": "20230324161605"
 	},
 	"Children": [
 		{
@@ -28,12 +28,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230303235639-lx58u3y",
-				"updated": "20230304000315"
+				"updated": "20230324161449"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "目前仅支持通过 "
+					"Data": "通过 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Chat API 实现文本对话，仅在桌面端支持。"
+					"Data": " Chat API 实现文本对话。"
 				}
 			]
 		},
@@ -70,7 +70,7 @@
 			},
 			"Properties": {
 				"id": "20230303235749-kurfjky",
-				"updated": "20230308213454"
+				"updated": "20230324161605"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 					},
 					"Properties": {
 						"id": "20230303235819-0o648f9",
-						"updated": "20230305102554"
+						"updated": "20230324161532"
 					},
 					"Children": [
 						{
@@ -122,216 +122,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230303235819-87dmjqq",
-								"updated": "20230303235822"
+								"updated": "20230324161532"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "配置环境变量"
-								}
-							]
-						},
-						{
-							"ID": "20230303235950-z00ou0r",
-							"Type": "NodeList",
-							"ListData": {},
-							"Properties": {
-								"id": "20230303235950-z00ou0r",
-								"updated": "20230305102554"
-							},
-							"Children": [
-								{
-									"ID": "20230303235950-3rcai2b",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230303235950-3rcai2b",
-										"updated": "20230303235950"
-									},
-									"Children": [
-										{
-											"ID": "20230303235950-4femf1q",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230303235950-4femf1q",
-												"updated": "20230303235950"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_KEY"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​​ 指定 API Key（必须）"
-												}
-											]
-										}
-									]
+									"Data": "在 "
 								},
 								{
-									"ID": "20230303235950-l6o3a5a",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230303235950-l6o3a5a",
-										"updated": "20230305102554"
-									},
-									"Children": [
-										{
-											"ID": "20230303235950-zfhft7e",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230303235950-zfhft7e",
-												"updated": "20230305102554"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_TIMEOUT"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​​ 指定超时时间（秒），默认为 30 秒（可选）"
-												}
-											]
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
 								},
 								{
-									"ID": "20230303235950-ukul5sa",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230303235950-ukul5sa",
-										"updated": "20230303235950"
-									},
-									"Children": [
-										{
-											"ID": "20230303235950-7srjdql",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230303235950-7srjdql",
-												"updated": "20230303235950"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_PROXY"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​​ 指定代理，默认为空，即不使用代理（可选）"
-												}
-											]
-										}
-									]
+									"Type": "NodeText",
+									"Data": "​ - "
 								},
 								{
-									"ID": "20230303235950-5y60wvh",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230303235950-5y60wvh",
-										"updated": "20230304171349"
-									},
-									"Children": [
-										{
-											"ID": "20230303235950-ffevwk8",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230303235950-ffevwk8",
-												"updated": "20230304171349"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_MAX_TOKENS"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​​​ 指定 tokens 数量，默认为 0，即使用模型默认值（可选）"
-												}
-											]
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI"
 								},
 								{
-									"ID": "20230308213215-ichxvb3",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230308213215-ichxvb3"
-									},
-									"Children": [
-										{
-											"ID": "20230308213215-uyvki9p",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230308213215-uyvki9p",
-												"updated": "20230308213337"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "SIYUAN_OPENAI_API_BASE_URL"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ 指定 API 服务端基础地址，默认为 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code",
-													"TextMarkTextContent": "https://api.openai.com/v1"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​（可选）"
-												}
-											]
-										}
-									]
+									"Type": "NodeText",
+									"Data": "​ 中进行相关配置"
 								}
 							]
 						}
@@ -348,7 +162,7 @@
 					},
 					"Properties": {
 						"id": "20230303235958-fxi5kan",
-						"updated": "20230308213418"
+						"updated": "20230324161605"
 					},
 					"Children": [
 						{
@@ -356,12 +170,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230303235958-1ksxnm3",
-								"updated": "20230308213418"
+								"updated": "20230324161605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "重启后即可使用 "
+									"Data": "使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -370,7 +184,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 唤起对话框，输入提问或者需求后确认"
+									"Data": "​ 唤起对话框，输入提问或者需求后确认"
 								}
 							]
 						}

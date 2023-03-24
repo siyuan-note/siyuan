@@ -35,6 +35,7 @@
     * [执行 SQL 查询](#执行-SQL-查询)
 * [模板](#模板)
     * [渲染模板](#渲染模板)
+    * [渲染 Sprig](#渲染-Sprig)
 * [文件](#文件)
     * [获取文件](#获取文件)
     * [写入文件](#写入文件)
@@ -821,6 +822,27 @@
       "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
       "path": "F:\\SiYuan\\data\\templates\\foo.md"
     }
+  }
+  ```
+
+### 渲染 Sprig
+
+* `/api/template/renderSprig`
+* 参数
+
+  ```json
+  {
+    "template": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}"
+  }
+  ```
+  * `template`：模板内容
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": "/daily note/2023/03/2023-03-24"
   }
   ```
 

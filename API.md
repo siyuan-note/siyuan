@@ -35,6 +35,7 @@
     * [Execute SQL query](#Execute-SQL-query)
 * [Templates](#Templates)
     * [Render a template](#Render-a-template)
+    * [Render Sprig](#Render-Sprig)
 * [File](#File)
     * [Get file](#Get-file)
     * [Put file](#Put-file)
@@ -828,6 +829,27 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
       "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
       "path": "F:\\SiYuan\\data\\templates\\foo.md"
     }
+  }
+  ```
+
+### 渲染 Sprig
+
+* `/api/template/renderSprig`
+* Parameters
+
+  ```json
+  {
+    "template": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}"
+  }
+  ```
+  * `template`: template content
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": "/daily note/2023/03/2023-03-24"
   }
   ```
 

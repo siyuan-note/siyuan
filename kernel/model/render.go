@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"github.com/88250/lute/editor"
 	"regexp"
 	"strings"
 
@@ -203,6 +204,7 @@ func renderBlockMarkdownR0(id string, rendered *[]string) (ret []*ast.Node) {
 			if ast.NodeBlockQueryEmbed == n.Type {
 				stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 				stmt = html.UnescapeString(stmt)
+				stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 				sqlBlocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
 				for _, sqlBlock := range sqlBlocks {
 					subNodes := renderBlockMarkdownR0(sqlBlock.ID, rendered)

@@ -110,8 +110,56 @@ func getFile(c *gin.Context) {
 	}
 }
 
+func readDir(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	dirPath := arg["path"].(string)
+	dirPath = filepath.Join(util.WorkspaceDir, dirPath)
+	info, err := os.Stat(dirPath)
+	if os.IsNotExist(err) {
+		c.Status(404)
+		return
+	}
+	if nil != err {
+		logging.LogErrorf("stat [%s] failed: %s", dirPath, err)
+		c.Status(500)
+		return
+	}
+	if !info.IsDir() {
+		logging.LogErrorf("file [%s] is not a directory", dirPath)
+		c.Status(405)
+		return
+	}
+
+	entries, err := os.ReadDir(dirPath)
+	if nil != err {
+		logging.LogErrorf("read dir [%s] failed: %s", dirPath, err)
+		c.Status(500)
+		return
+	}
+
+	files := []map[string]interface{}{}
+	for _, entry := range entries {
+		files = append(files, map[string]interface{}{
+			"name":  entry.Name(),
+			"isDir": entry.IsDir(),
+		})
+	}
+
+	ret.Data = files
+}
+
 func removeFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
 		c.JSON(http.StatusOK, ret)

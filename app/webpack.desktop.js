@@ -23,7 +23,7 @@ module.exports = (env, argv) => {
         optimization: {
             minimize: true,
             minimizer: [
-                new EsbuildPlugin({target: "es6"}),
+                new EsbuildPlugin({target: "es2021"}),
             ],
         },
         resolve: {
@@ -50,7 +50,7 @@ module.exports = (env, argv) => {
                         {
                             loader: "esbuild-loader",
                             options: {
-                                target: "es6",
+                                target: "es2021",
                             }
                         },
                         {

@@ -48,6 +48,9 @@ module.exports = (env, argv) => {
                     use: [
                         {
                             loader: "esbuild-loader",
+                            options: {
+                                target: "es2021",
+                            },
                         },
                         {
                             loader: "ifdef-loader", options: {

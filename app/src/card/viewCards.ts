@@ -163,7 +163,7 @@ const renderViewItem = (blocks: IBlock[], title: string, deckType: string) => {
     pathArray.splice(0, 1);
     blocks.forEach((item: IBlock) => {
         if (item.type) {
-            let hPath
+            let hPath;
             if (deckType === "") {
                 hPath = getNotebookName(item.box) + getDisplayName(Lute.UnEscapeHTMLStr(item.hPath), false);
             } else {

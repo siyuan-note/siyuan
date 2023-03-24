@@ -105,7 +105,7 @@
   "syncProviderTip": "Si sélectionné, le service de stockage cloud de ce fournisseur sera utilisé pour réaliser les fonctions de synchronisation et de sauvegarde cloud",
   "confirmReset": "Voulez-vous vraiment réinitialiser tous les raccourcis clavier aux paramètres par défaut ?",
   "notBatchRemove": "La suppression par lots de bloc-notes n'est pas prise en charge",
-  "confirmRemoveAll": "Êtes-vous sûr de vouloir supprimer tous les fichiers sélectionnés ?",
+  "confirmRemoveAll": "Voulez-vous vraiment supprimer les documents ${count} sélectionnés et leurs sous-documents ?",
   "microphoneDenied": "Vous devez autoriser Siyuan à accéder au microphone dans les Préférences Système",
   "microphoneNotAccess": "L'accès au microphone est refusé, allez dans les Préférences Système pour réinitialiser",
   "dynamicLoadBlocks": "Nombre de blocs chargés dynamiquement",

@@ -59,7 +59,7 @@ export const deleteFiles = (liElements: Element[]) => {
             return;
         }
         confirmDialog(window.siyuan.languages.deleteOpConfirm,
-            window.siyuan.languages.confirmRemoveAll, () => {
+            window.siyuan.languages.confirmRemoveAll.replace("${count}", paths.length), () => {
                 fetchPost("/api/filetree/removeDocs", {
                     paths
                 });

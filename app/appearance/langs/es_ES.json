@@ -105,7 +105,7 @@
   "syncProviderTip": "Si se selecciona, el servicio de almacenamiento en la nube de este proveedor se usará para lograr funciones de sincronización y copia de seguridad en la nube",
   "confirmReset": "¿Está seguro de que desea restablecer todos los atajos de teclado a la configuración predeterminada?",
   "notBatchRemove": "No se admite la eliminación por lotes de blocs de notas",
-  "confirmRemoveAll": "¿Está seguro de que desea eliminar todos los archivos seleccionados?",
+  "confirmRemoveAll": "¿Está seguro de que desea eliminar los documentos ${count} seleccionados y sus subdocumentos?",
   "microphoneDenied": "Necesito permitir que Siyuan acceda al micrófono en Preferencias del Sistema",
   "microphoneNotAccess": "Acceso al micrófono denegado, ve a Preferencias del Sistema para reiniciar",
   "dynamicLoadBlocks": "Número de bloques cargados dinámicamente",

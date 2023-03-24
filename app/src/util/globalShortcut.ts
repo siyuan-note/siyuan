@@ -545,7 +545,9 @@ export const globalShortcut = () => {
                 if (item === window.siyuan.storage[Constants.LOCAL_ZOOM]) {
                     window.siyuan.storage[Constants.LOCAL_ZOOM] = Constants.SIZE_ZOOM[index + 1] || 3;
                     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
-                    setStorageVal(Constants.LOCAL_ZOOM, window.siyuan.storage[Constants.LOCAL_ZOOM]);
+                    if (!isTabWindow) {
+                        setStorageVal(Constants.LOCAL_ZOOM, window.siyuan.storage[Constants.LOCAL_ZOOM]);
+                    }
                     return true;
                 }
             });
@@ -555,7 +557,9 @@ export const globalShortcut = () => {
         if (matchHotKey("⌘0", event)) {
             webFrame.setZoomFactor(1);
             window.siyuan.storage[Constants.LOCAL_ZOOM] = 1;
-            setStorageVal(Constants.LOCAL_ZOOM, 1);
+            if (!isTabWindow) {
+                setStorageVal(Constants.LOCAL_ZOOM, 1);
+            }
             event.preventDefault();
             return;
         }
@@ -564,7 +568,9 @@ export const globalShortcut = () => {
                 if (item === window.siyuan.storage[Constants.LOCAL_ZOOM]) {
                     window.siyuan.storage[Constants.LOCAL_ZOOM] = Constants.SIZE_ZOOM[index - 1] || 0.25;
                     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
-                    setStorageVal(Constants.LOCAL_ZOOM, window.siyuan.storage[Constants.LOCAL_ZOOM]);
+                    if (!isTabWindow) {
+                        setStorageVal(Constants.LOCAL_ZOOM, window.siyuan.storage[Constants.LOCAL_ZOOM]);
+                    }
                     return true;
                 }
             });

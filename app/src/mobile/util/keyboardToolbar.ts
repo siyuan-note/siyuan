@@ -192,7 +192,7 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="tag"><svg><use xlink:href="#iconTags"></use></svg></button>
             <button class="keyboard__action" data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
             <button class="keyboard__action" data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
-            <button class="keyboard__action" data-type="goback"><svg class="keyboard__svg--close"><use xlink:href="#iconClose"></use></svg></button>
+            <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconCloseRound"></use></svg></button>
         </div>
     </div>
     <span class="keyboard__split"></span>

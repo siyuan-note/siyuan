@@ -44,7 +44,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>
         ${html}
     </div>
-    <div class="card__block card__block--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}" data-type="render"></div>
+    <div class="card__block card__block--hide fn__flex-1${blocks.length === 0 ? " fn__none" : ""}${window.siyuan.config.flashcard.superBlock ? " card__block--hidesb" : ""}${window.siyuan.config.flashcard.list ? " card__block--hideli" : ""}" data-type="render"></div>
     <div class="card__empty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
         <div>🔮</div>
         ${window.siyuan.languages.noDueCard}
@@ -160,11 +160,11 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         event.preventDefault();
         event.stopPropagation();
         hideElements(["toolbar", "hint", "util"], editor.protyle);
-        if (type === "-1") {
+        if (type === "-1") {    // 显示答案
             if (actionElements[0].classList.contains("fn__none")) {
                 return;
             }
-            editor.protyle.element.classList.remove("card__block--hide");
+            editor.protyle.element.classList.remove("card__block--hide", "card__block--hideli", "card__block--hidesb");
             actionElements[0].classList.add("fn__none");
             actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
                 if (btnIndex !== 0) {
@@ -174,13 +174,12 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
             actionElements[1].classList.remove("fn__none");
             return;
         }
-        if (type === "-2") {
+        if (type === "-2") {    // 上一步
             if (actionElements[0].classList.contains("fn__none")) {
                 return;
             }
             if (index > 0) {
                 index--;
-                editor.protyle.element.classList.add("card__block--hide");
                 nextCard({
                     countElement,
                     editor,
@@ -206,7 +205,6 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
                 }
                 /// #endif
                 index++;
-                editor.protyle.element.classList.add("card__block--hide");
                 if (index > blocks.length - 1) {
                     fetchPost(selectElement ? "/api/riff/getRiffDueCards" :
                         (titleElement.getAttribute("data-id") ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
@@ -248,7 +246,6 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {
             blocks = cardsChangeResponse.data;
             index = 0;
-            editor.protyle.element.classList.add("card__block--hide");
             if (blocks.length > 0) {
                 nextCard({
                     countElement,
@@ -267,6 +264,13 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
 const nextCard = (options: {
     countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, index: number, blocks: ICard[]
 }) => {
+    options.editor.protyle.element.classList.add("card__block--hide");
+    if (window.siyuan.config.flashcard.superBlock) {
+        options.editor.protyle.element.classList.add("card__block--hidesb");
+    }
+    if (window.siyuan.config.flashcard.list) {
+        options.editor.protyle.element.classList.add("card__block--hideli");
+    }
     options.actionElements[0].classList.remove("fn__none");
     options.actionElements[1].classList.add("fn__none");
     options.editor.protyle.element.classList.remove("fn__none");

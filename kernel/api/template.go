@@ -25,6 +25,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func renderSprig(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	template := arg["template"].(string)
+	content, err := model.RenderGoTemplate(template)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = util.EscapeHTML(err.Error())
+		return
+	}
+	ret.Data = content
+}
+
 func docSaveAsTemplate(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

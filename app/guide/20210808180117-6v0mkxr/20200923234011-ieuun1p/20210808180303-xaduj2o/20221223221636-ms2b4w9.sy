@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
-		"updated": "20230304000717"
+		"updated": "20230324111319"
 	},
 	"Children": [
 		{
@@ -192,116 +192,34 @@
 			]
 		},
 		{
-			"ID": "20230219092249-l3b55a9",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20230219092249-l3b55a9",
-				"updated": "20230219092431"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Based on card deck"
-				}
-			]
-		},
-		{
-			"ID": "20230219092249-4f5q0yn",
+			"ID": "20230324110955-eznqs9u",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230219092249-4f5q0yn",
-				"updated": "20230219092602"
+				"id": "20230324110955-eznqs9u",
+				"updated": "20230324111043"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Based on the use of card deck, the content blocks in different documents can be carded and put into a unified card pack for review."
-				}
-			]
-		},
-		{
-			"ID": "20230219092249-adkmzaf",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20230219092249-adkmzaf",
-				"updated": "20230219092718"
-			},
-			"Children": [
-				{
-					"ID": "20230219092249-w4nnmee",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230219092249-w4nnmee",
-						"updated": "20230219092718"
-					},
-					"Children": [
-						{
-							"ID": "20230219092249-3h4zeve",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230219092249-3h4zeve",
-								"updated": "20230219092718"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Select "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Add to card deck..."
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ in the block label menu, and then add the content block to a card deck to complete the card making"
-								}
-							]
-						}
-					]
+					"Data": "Among them, if you don’t need the super block card and list or list item card, you can turn it off in "
 				},
 				{
-					"ID": "20230219092249-cf49472",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230219092249-cf49472",
-						"updated": "20230219092643"
-					},
-					"Children": [
-						{
-							"ID": "20230219092249-gtv3hbr",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230219092249-gtv3hbr",
-								"updated": "20230219092643"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Access review by clicking "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Flashcard"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ in the top bar menu"
-								}
-							]
-						}
-					]
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcard"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},
@@ -311,7 +229,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230219092249-3oeqj8o",
-				"updated": "20230219092505"
+				"updated": "20230324110951"
 			},
 			"Children": [
 				{
@@ -325,7 +243,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230219092249-9l69wsr",
-				"updated": "20230219092712"
+				"updated": "20230324110951"
 			},
 			"Children": [
 				{
@@ -340,7 +258,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219092249-wbyos2h",
-				"updated": "20230219092822"
+				"updated": "20230324110951"
 			},
 			"Children": [
 				{
@@ -416,6 +334,169 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-l3b55a9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219092249-l3b55a9",
+				"updated": "20230219092431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Based on card deck"
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-4f5q0yn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219092249-4f5q0yn",
+				"updated": "20230219092602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Based on the use of card deck, the content blocks in different documents can be carded and put into a unified card pack for review."
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-adkmzaf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219092249-adkmzaf",
+				"updated": "20230219092718"
+			},
+			"Children": [
+				{
+					"ID": "20230219092249-w4nnmee",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-w4nnmee",
+						"updated": "20230219092718"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-3h4zeve",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-3h4zeve",
+								"updated": "20230219092718"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Add to card deck..."
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ in the block label menu, and then add the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "content block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to a card deck to complete the card making"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092249-cf49472",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-cf49472",
+						"updated": "20230219092643"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-gtv3hbr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-gtv3hbr",
+								"updated": "20230219092643"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Access review by clicking "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Flashcard"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ in the top bar menu"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230324111120-9sfynhi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230324111120-9sfynhi",
+				"updated": "20230324111319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This mode of use is disabled by default. If necessary, it can be enabled in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcard"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Deck"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. However, it is not recommended to use flashcards based on card deck, because the card deck are fixed and not as flexible as using flashcards based on documents."
 				}
 			]
 		},

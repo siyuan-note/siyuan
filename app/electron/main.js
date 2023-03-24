@@ -206,11 +206,13 @@ const boot = () => {
         height: defaultHeight,
     }, oldWindowState);
 
+    // writeLog("windowStat [width=" + windowState.width + ", height=" + windowState.height + "], default [width=" + defaultWidth + ", height=" + defaultHeight + "], workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
+
     let x = windowState.x;
     let y = windowState.y;
     if (workArea) {
-        // 窗口大小等同于或大于 workArea 时，缩小会隐藏到左下角
-        if (windowState.width >= workArea.width || windowState.height >= workArea.height) {
+        // 窗口大于 workArea 时缩小会隐藏到左下角，这里使用最小值重置
+        if (windowState.width > workArea.width || windowState.height > workArea.height) { // 重启后窗口大小恢复默认问题 https://github.com/siyuan-note/siyuan/issues/7755
             windowState.width = Math.min(defaultWidth, workArea.width);
             windowState.height = Math.min(defaultHeight, workArea.height);
         }

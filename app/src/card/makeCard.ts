@@ -124,7 +124,7 @@ export const makeCard = (ids: string[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "view") {
-                    viewCards(target.parentElement.getAttribute("data-id"), escapeHtml(target.parentElement.getAttribute("data-name")),"", (removeResponse) => {
+                    viewCards(target.parentElement.getAttribute("data-id"), target.parentElement.getAttribute("data-name"), "", (removeResponse) => {
                         target.parentElement.outerHTML = genCardItem(removeResponse.data);
                     });
                     event.stopPropagation();

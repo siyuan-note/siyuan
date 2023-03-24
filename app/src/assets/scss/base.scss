@@ -362,10 +362,6 @@ html {
     opacity: .38;
   }
 
-  .block__icons .block__icon[disabled] {
-    opacity: 0;
-  }
-
   &__close {
     min-height: auto;
     transition: var(--b3-transition);

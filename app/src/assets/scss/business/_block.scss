@@ -141,8 +141,12 @@
       background-color: var(--b3-theme-surface);
     }
 
-    &:hover .block__icon {
+    &:hover .block__icon:not([disabled]) {
       opacity: 1;
+    }
+
+    &:hover [disabled].block__icon {
+      opacity: .38;
     }
 
     .counter {
@@ -169,13 +173,14 @@
       background-color: var(--b3-list-icon-hover);
     }
 
-    &[disabled] {
-      opacity: 0.38;
-      cursor: not-allowed;
-    }
 
     &--show {
       opacity: 1;
+
+      &.block__icon[disabled] {
+        opacity: 0.38;
+        cursor: not-allowed;
+      }
     }
 
     svg {

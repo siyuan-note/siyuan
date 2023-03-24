@@ -1,4 +1,5 @@
 {
+  "revisionCount": "复习次数",
   "flashcardNewCardLimit": "新卡上限",
   "flashcardNewCardLimitTip": "如果新卡较多，可以通过该项设置新卡复习的数量",
   "flashcardReviewCardLimit": "复习卡上限",

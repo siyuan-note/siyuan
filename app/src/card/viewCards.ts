@@ -2,7 +2,7 @@ import {Protyle} from "../protyle";
 import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {getDisplayName, getNotebookName} from "../util/pathName";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
@@ -19,8 +19,8 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
     }, (response) => {
         const dialog = new Dialog({
             content: `<div class="fn__flex-column" style="height: 100%">
-    <div class="fn__flex b3-form__space--small">
-        <span class="fn__flex-center">${title}</span>
+    <div class="block__icons">
+        <span class="fn__flex-center">${escapeHtml(title)}</span>
         <div class="fn__flex-1"></div>
         <span class="fn__space"></span>
         <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
@@ -28,10 +28,12 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
         <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
         <span class="fn__space"></span>
         <span class="fn__flex-center ft__on-surface">${pageIndex}/${response.data.pageCount || 1}</span>
+        <span class="fn__space"></span>
+        <span class="counter">${response.data.total}</span>
     </div>
     <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1" style="min-height: auto">
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
-            ${renderViewItem(response.data.blocks)}
+            ${renderViewItem(response.data.blocks, title, deckType)}
         </ul>
         <div id="cardPreview" class="fn__flex-1 fn__none"></div>
         <div class="fn__flex-1 card__empty">${window.siyuan.languages.emptyContent}</div>
@@ -85,7 +87,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                             nextElement.removeAttribute("disabled");
                         }
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
-                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
+                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks, title, deckType);
                         getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();
@@ -104,7 +106,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                             nextElement.removeAttribute("disabled");
                         }
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
-                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks);
+                        listElement.innerHTML = renderViewItem(cardsResponse.data.blocks, title, deckType);
                         getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();
@@ -154,20 +156,28 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
 };
 
 
-const renderViewItem = (blocks: IBlock[]) => {
+const renderViewItem = (blocks: IBlock[], title: string, deckType: string) => {
     let listHTML = "";
     let isFirst = true;
+    const pathArray = title.split("/");
+    pathArray.splice(0, 1);
     blocks.forEach((item: IBlock) => {
         if (item.type) {
-            const hPath = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
+            let hPath
+            if (deckType === "") {
+                hPath = getNotebookName(item.box) + getDisplayName(Lute.UnEscapeHTMLStr(item.hPath), false);
+            } else {
+                hPath = getDisplayName(Lute.UnEscapeHTMLStr(item.hPath), false).replace("/" + pathArray.join("/"), "");
+            }
             listHTML += `<div data-type="card-item" class="b3-list-item${isFirst ? " b3-list-item--focus" : ""}${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${item.id}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text">${item.content}</span>
+<span class="b3-list-item__text">${item.content || Constants.ZWSP}</span>
 <span data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
-<span class="${isMobile() ? "fn__none " : ""}b3-list-item__meta b3-list-item__meta--ellipsis" title="${hPath}">${hPath}</span>
+<span class="${(isMobile() || !hPath) ? "fn__none " : ""}b3-list-item__meta b3-list-item__meta--ellipsis" title="${escapeAttr(hPath)}">${escapeHtml(hPath)}</span>
+<span aria-label="${window.siyuan.languages.revisionCount}" class="b3-tooltips b3-tooltips__w counter${item.riffCardReps === 0 ? " fn__none" : ""}">${item.riffCardReps}</span>
 </div>`;
             isFirst = false;
         } else {

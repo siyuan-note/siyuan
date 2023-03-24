@@ -53,19 +53,17 @@
       box-shadow: none;
     }
 
-    &--hide {
-      .protyle-wysiwyg > .sb > div:nth-of-type(n+2):not(.protyle-attr) {
-        display: none;
-      }
+    &--hide span[data-type~=mark] {
+      transition: var(--b3-transition);
+      color: transparent !important;
+    }
 
-      .li > .list {
-        display: none;
-      }
+    &--hideli .li > .list {
+      display: none;
+    }
 
-      span[data-type~=mark] {
-        transition: var(--b3-transition);
-        color: transparent !important;
-      }
+    &--hidesb .protyle-wysiwyg > .sb > div:nth-of-type(n+2):not(.protyle-attr) {
+      display: none;
     }
   }
 }

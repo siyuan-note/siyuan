@@ -32,7 +32,7 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
     const existElement = messagesElement.querySelector(`.b3-snackbar[data-id="${id}"]`);
     if (existElement) {
         window.clearTimeout(parseInt(existElement.getAttribute("data-timeoutid")));
-        existElement.innerHTML = `<div class="b3-snackbar__content">${message}</div>${timeout === 0 ? '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>' : ""}`;
+        existElement.innerHTML = `<div class="b3-snackbar__content${timeout === 0 ? " b3-snackbar__content--close" : ""}">${message}</div>${timeout === 0 ? '<svg class="b3-snackbar__close"><use xlink:href="#iconCloseRound"></use></svg>' : ""}`;
         if (type === "error") {
             existElement.classList.add("b3-snackbar--error");
         } else {
@@ -46,9 +46,9 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
         }
         return;
     }
-    let messageHTML = `<div data-id="${id}" class="b3-snackbar--hide b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div class="b3-snackbar__content">${message}</div>`;
+    let messageHTML = `<div data-id="${id}" class="b3-snackbar--hide b3-snackbar${type === "error" ? " b3-snackbar--error" : ""}"><div class="b3-snackbar__content${timeout === 0 ? " b3-snackbar__content--close" : ""}">${message}</div>`;
     if (timeout === 0) {
-        messageHTML += '<svg class="b3-snackbar__close"><use xlink:href="#iconClose"></use></svg>';
+        messageHTML += '<svg class="b3-snackbar__close"><use xlink:href="#iconCloseRound"></use></svg>';
     } else if (timeout !== -1) { // -1 时需等待请求完成后手动关闭
         const timeoutId = window.setTimeout(() => {
             hideMessage(id);

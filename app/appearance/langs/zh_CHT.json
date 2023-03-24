@@ -105,7 +105,7 @@
   "syncProviderTip": "選擇後將使用該提供商的雲端存儲服務實現雲端同步和備份功能",
   "confirmReset": "確定將所有快捷鍵都恢復為預設設置？",
   "notBatchRemove": "不支持筆記本批量刪除",
-  "confirmRemoveAll": "確定刪除選中的所有文件？",
+  "confirmRemoveAll": "確定刪除選中的 ${count} 個文檔及其子文檔？",
   "microphoneDenied": "需在系統偏好設置中允許思源訪問麥克風",
   "microphoneNotAccess": "麥克風被拒絕訪問，可前往系統偏好設置中重新設置",
   "dynamicLoadBlocks": "動態載入塊數",

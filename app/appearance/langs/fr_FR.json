@@ -1,4 +1,5 @@
 {
+  "revisionCount": "Nombre de révisions",
   "flashcardNewCardLimit": "Nouvelle limite de carte",
   "flashcardNewCardLimitTip": "S'il y a beaucoup de nouvelles cartes, vous pouvez définir le nombre de nouvelles cartes à examiner via cet élément",
   "flashcardReviewCardLimit": "Revoir la limite de la carte",

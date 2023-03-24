@@ -137,7 +137,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.mgmt,
             click: () => {
-                viewCards(notebookId, escapeHtml(name), "Notebook");
+                viewCards(notebookId, name, "Notebook");
                 /// #if MOBILE
                 closePanel();
                 /// #endif
@@ -346,7 +346,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 iconHTML: Constants.ZWSP,
                 label: window.siyuan.languages.mgmt,
                 click: () => {
-                    viewCards(id, name, "Tree");
+                    viewCards(id, pathPosix().join(getNotebookName(notebookId), name), "Tree");
                     /// #if MOBILE
                     closePanel();
                     /// #endif

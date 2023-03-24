@@ -1,4 +1,5 @@
 {
+  "revisionCount": "複習次數",
   "flashcardNewCardLimit": "新卡上限",
   "flashcardNewCardLimitTip": "如果新卡較多，可以通過該項設置新卡複習的數量",
   "flashcardReviewCardLimit": "復習卡上限",

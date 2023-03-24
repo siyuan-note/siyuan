@@ -65,6 +65,7 @@ func Themes() (ret []*Theme) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
+		theme.URL = strings.TrimSuffix(theme.URL, "/")
 
 		repoURLHash := strings.Split(repoURL, "@")
 		theme.RepoURL = "https://github.com/" + repoURLHash[0]
@@ -127,6 +128,7 @@ func InstalledThemes() (ret []*Theme) {
 		theme.Name = themeConf["name"].(string)
 		theme.Author = themeConf["author"].(string)
 		theme.URL = themeConf["url"].(string)
+		theme.URL = strings.TrimSuffix(theme.URL, "/")
 		theme.Version = themeConf["version"].(string)
 		for _, mode := range themeConf["modes"].([]interface{}) {
 			theme.Modes = append(theme.Modes, mode.(string))

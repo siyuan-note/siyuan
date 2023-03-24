@@ -27,7 +27,7 @@ module.exports = (env, argv) => {
         optimization: {
             minimize: true,
             minimizer: [
-                new EsbuildPlugin(),
+                new EsbuildPlugin({target: "es2021"}),
             ],
         },
         module: {

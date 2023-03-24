@@ -223,11 +223,11 @@ const boot = () => {
             y = 0;
         }
     }
-    if (windowState.width < 400) {
-        windowState.width = 400;
+    if (windowState.width < 493) {
+        windowState.width = 493;
     }
-    if (windowState.height < 300) {
-        windowState.height = 300;
+    if (windowState.height < 376) {
+        windowState.height = 376;
     }
     if (x < 0) {
         x = 0;

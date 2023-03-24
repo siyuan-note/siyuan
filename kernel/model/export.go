@@ -1561,6 +1561,7 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 		var defMd string
 		stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 		stmt = html.UnescapeString(stmt)
+		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 		embedBlocks := searchEmbedBlock(n.ID, stmt, nil, 0, false)
 		if 1 > len(embedBlocks) {
 			return ast.WalkContinue
@@ -1875,6 +1876,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 				} else if ast.NodeBlockQueryEmbed == n.Type {
 					stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 					stmt = html.UnescapeString(stmt)
+					stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 					sqlBlocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
 					for _, b := range sqlBlocks {
 						subNodes := renderBlockMarkdownR0(b.ID, &rendered)

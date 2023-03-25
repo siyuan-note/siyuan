@@ -105,10 +105,10 @@ export const workspaceMenu = (rect: DOMRect) => {
         /// #endif
         const layoutSubMenu: IMenu[] = [{
             iconHTML: Constants.ZWSP,
-            label: window.siyuan.languages.saveLayout,
+            label: window.siyuan.languages.save,
             click() {
                 const saveDialog = new Dialog({
-                    title: window.siyuan.languages.saveLayout,
+                    title: window.siyuan.languages.save,
                     content: `<div class="b3-dialog__content">
         <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
 </div>

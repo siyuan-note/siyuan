@@ -22,6 +22,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -251,11 +252,24 @@ func IsCloudDrivePath(workspaceAbsPath string) bool {
 		return true
 	}
 
-	return strings.Contains(absPathLower, "onedrive") || strings.Contains(absPathLower, "dropbox") ||
-		strings.Contains(absPathLower, "google drive") || strings.Contains(absPathLower, "pcloud")
+	if isKnownCloudDrivePath(absPathLower) {
+		return true
+	}
+
+	if existAvailabilityStatus(workspaceAbsPath) {
+		return true
+	}
+
+	return false
 }
 
-func isICloudPath(workspaceAbsPath string) (ret bool) {
+func isKnownCloudDrivePath(workspaceAbsPathLower string) bool {
+	return strings.Contains(workspaceAbsPathLower, "onedrive") || strings.Contains(workspaceAbsPathLower, "dropbox") ||
+		strings.Contains(workspaceAbsPathLower, "google drive") || strings.Contains(workspaceAbsPathLower, "pcloud") ||
+		strings.Contains(workspaceAbsPathLower, "坚果云")
+}
+
+func isICloudPath(workspaceAbsPathLower string) (ret bool) {
 	if !gulu.OS.IsDarwin() {
 		return false
 	}
@@ -267,11 +281,74 @@ func isICloudPath(workspaceAbsPath string) (ret bool) {
 			return nil
 		}
 
-		if strings.HasPrefix(workspaceAbsPath, strings.ToLower(path)) {
+		if strings.HasPrefix(workspaceAbsPathLower, strings.ToLower(path)) {
 			ret = true
 			return io.EOF
 		}
 		return nil
 	})
 	return
+}
+
+func existAvailabilityStatus(workspaceAbsPath string) bool {
+	if !gulu.OS.IsWindows() {
+		return false
+	}
+
+	dataAbsPath := filepath.Join(workspaceAbsPath, "data")
+
+	// 改进 Windows 端第三方同步盘检测 https://github.com/siyuan-note/siyuan/issues/7777
+
+	ps := `
+function Get-MetaData {
+	[CmdletBinding()][OutputType([object])]
+	param([ValidateNotNullOrEmpty()][string]$File)
+
+	chcp 65001
+	$folderPath = Split-Path $File
+    $filePath = Split-Path $File -Leaf
+
+    try{
+        $shell = New-Object -ComObject Shell.Application
+        $folderObj = $shell.NameSpace($folderPath)
+        $fileObj = $folderObj.ParseName($filePath)
+
+        $value = $folderObj.GetDetailsOf($fileObj, 303)
+        echo $value
+    }finally{
+        if($shell){
+            [System.Runtime.InteropServices.Marshal]::ReleaseComObject([System.__ComObject]$shell) | out-null
+        }
+    }
+}
+
+Get-MetaData -File "` + dataAbsPath + "\""
+	cmd := exec.Command("powershell", "-nologo", "-noprofile", "-command", ps)
+	gulu.CmdAttr(cmd)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return false
+	}
+
+	lines := strings.Split(string(out), "\n")
+	buf := bytes.Buffer{}
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.Contains(strings.ToLower(line), "active code page") {
+			continue
+		}
+
+		if "" != line {
+			buf.WriteString(line)
+		}
+	}
+	out = buf.Bytes()
+
+	status := strings.ToLower(strings.TrimSpace(string(out)))
+	if strings.Contains(status, "sync") || strings.Contains(status, "同步") ||
+		strings.Contains(status, "available") || strings.Contains(status, "可用") {
+		logging.LogErrorf("data [%s] third party sync status [%s]", dataAbsPath, status)
+		return true
+	}
+	return false
 }

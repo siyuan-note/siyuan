@@ -77,10 +77,10 @@ export class Tree {
             let style = "";
             if (isMobile()) {
                 if (item.depth > 0) {
-                    style = `padding-left: ${(item.depth - 1) * 29 + 40}px`
+                    style = `padding-left: ${(item.depth - 1) * 29 + 40}px`;
                 }
             } else {
-                style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`
+                style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`;
             }
             html += `<li class="b3-list-item" 
 ${(item.nodeType !== "NodeDocument" && item.type === "backlink") ? 'draggable="true" ' : ""}
@@ -130,10 +130,10 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
             let style = "";
             if (isMobile()) {
                 if (item.depth > 0) {
-                    style = `padding-left: ${(item.depth - 1) * 29 + 40}px`
+                    style = `padding-left: ${(item.depth - 1) * 29 + 40}px`;
                 }
             } else {
-                style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`
+                style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`;
             }
             html += `<li ${type === "backlink" ? 'draggable="true"' : ""} 
 class="b3-list-item ${isMobile() ? "" : "b3-list-item--hide-action"}"  

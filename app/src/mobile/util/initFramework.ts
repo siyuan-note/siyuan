@@ -29,7 +29,7 @@ export const initFramework = () => {
     let bookmark: MobileBookmarks;
     let tag: MobileTags;
     // 不能使用 getEventName，否则点击返回会展开右侧栏
-    const firstToolbarElement = sidebarElement.querySelector(".toolbar--border")
+    const firstToolbarElement = sidebarElement.querySelector(".toolbar--border");
     firstToolbarElement.addEventListener("click", (event: Event & {
         target: Element
     }) => {

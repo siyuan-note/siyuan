@@ -63,6 +63,7 @@ func Icons() (icons []*Icon) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
+		icon.URL = strings.TrimSuffix(icon.URL, "/")
 
 		repoURLHash := strings.Split(repoURL, "@")
 		icon.RepoURL = "https://github.com/" + repoURLHash[0]
@@ -125,6 +126,7 @@ func InstalledIcons() (ret []*Icon) {
 		icon.Name = iconConf["name"].(string)
 		icon.Author = iconConf["author"].(string)
 		icon.URL = iconConf["url"].(string)
+		icon.URL = strings.TrimSuffix(icon.URL, "/")
 		icon.Version = iconConf["version"].(string)
 		icon.RepoURL = icon.URL
 		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"

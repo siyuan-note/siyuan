@@ -64,6 +64,7 @@ func Widgets() (widgets []*Widget) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
+		widget.URL = strings.TrimSuffix(widget.URL, "/")
 
 		repoURLHash := strings.Split(repoURL, "@")
 		widget.RepoURL = "https://github.com/" + repoURLHash[0]
@@ -123,6 +124,7 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.Name = widgetConf["name"].(string)
 		widget.Author = widgetConf["author"].(string)
 		widget.URL = widgetConf["url"].(string)
+		widget.URL = strings.TrimSuffix(widget.URL, "/")
 		widget.Version = widgetConf["version"].(string)
 		widget.RepoURL = widget.URL
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"

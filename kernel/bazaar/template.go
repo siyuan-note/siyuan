@@ -64,6 +64,7 @@ func Templates() (templates []*Template) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
+		template.URL = strings.TrimSuffix(template.URL, "/")
 
 		repoURLHash := strings.Split(repoURL, "@")
 		template.RepoURL = "https://github.com/" + repoURLHash[0]
@@ -125,6 +126,7 @@ func InstalledTemplates() (ret []*Template) {
 		template.Name = templateConf["name"].(string)
 		template.Author = templateConf["author"].(string)
 		template.URL = templateConf["url"].(string)
+		template.URL = strings.TrimSuffix(template.URL, "/")
 		template.Version = templateConf["version"].(string)
 		template.RepoURL = template.URL
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"

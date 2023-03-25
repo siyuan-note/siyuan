@@ -364,42 +364,46 @@ export class Title {
                     openFileWechatNotify(protyle);
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.riffCard,
-                type: "submenu",
-                icon: "iconRiffCard",
-                submenu: [{
-                    iconHTML: Constants.ZWSP,
-                    label: window.siyuan.languages.spaceRepetition,
-                    click: () => {
-                        fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                            openCardByData(response.data, `<span data-id="${protyle.block.rootID}"  class="fn__flex-center">${escapeHtml(this.editElement.textContent)}</span>`);
-                        });
-                    }
-                }, {
-                    iconHTML: Constants.ZWSP,
-                    label: window.siyuan.languages.mgmt,
-                    click: () => {
-                        fetchPost("/api/filetree/getHPathByID", {
-                            id: protyle.block.rootID
-                        }, (response) => {
-                            viewCards(protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
-                        });
-                    }
-                }, {
-                    iconHTML: Constants.ZWSP,
-                    label: window.siyuan.languages.quickMakeCard,
-                    accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-                    click: () => {
-                        quickMakeCard([this.element]);
-                    }
-                }, {
+            const riffCardMenu = [{
+                iconHTML: Constants.ZWSP,
+                label: window.siyuan.languages.spaceRepetition,
+                click: () => {
+                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
+                        openCardByData(response.data, `<span data-id="${protyle.block.rootID}"  class="fn__flex-center">${escapeHtml(this.editElement.textContent)}</span>`);
+                    });
+                }
+            }, {
+                iconHTML: Constants.ZWSP,
+                label: window.siyuan.languages.mgmt,
+                click: () => {
+                    fetchPost("/api/filetree/getHPathByID", {
+                        id: protyle.block.rootID
+                    }, (response) => {
+                        viewCards(protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
+                    });
+                }
+            }, {
+                iconHTML: Constants.ZWSP,
+                label: window.siyuan.languages.quickMakeCard,
+                accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
+                click: () => {
+                    quickMakeCard([this.element]);
+                }
+            }]
+            if (window.siyuan.config.flashcard.deck) {
+                riffCardMenu.push({
                     iconHTML: Constants.ZWSP,
                     label: window.siyuan.languages.addToDeck,
                     click: () => {
                         makeCard([protyle.block.rootID]);
                     }
-                }],
+                })
+            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.riffCard,
+                type: "submenu",
+                icon: "iconRiffCard",
+                submenu: riffCardMenu,
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({

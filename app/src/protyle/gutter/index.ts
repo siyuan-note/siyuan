@@ -683,20 +683,22 @@ export class Gutter {
                 quickMakeCard(selectsElement);
             }
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.addToDeck,
-            icon: "iconRiffCard",
-            click() {
-                const ids: string[] = [];
-                selectsElement.forEach(item => {
-                    if (item.getAttribute("data-type") === "NodeThematicBreak") {
-                        return;
-                    }
-                    ids.push(item.getAttribute("data-node-id"));
-                });
-                makeCard(ids);
-            }
-        }).element);
+        if (window.siyuan.config.flashcard.deck) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.addToDeck,
+                icon: "iconRiffCard",
+                click() {
+                    const ids: string[] = [];
+                    selectsElement.forEach(item => {
+                        if (item.getAttribute("data-type") === "NodeThematicBreak") {
+                            return;
+                        }
+                        ids.push(item.getAttribute("data-node-id"));
+                    });
+                    makeCard(ids);
+                }
+            }).element);
+        }
         return window.siyuan.menus.menu;
     }
 
@@ -1469,13 +1471,15 @@ export class Gutter {
                     quickMakeCard([nodeElement]);
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.addToDeck,
-                icon: "iconRiffCard",
-                click() {
-                    makeCard([nodeElement.getAttribute("data-node-id")]);
-                }
-            }).element);
+            if (window.siyuan.config.flashcard.deck) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.addToDeck,
+                    icon: "iconRiffCard",
+                    click() {
+                        makeCard([nodeElement.getAttribute("data-node-id")]);
+                    }
+                }).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
         let updateHTML = nodeElement.getAttribute("updated") || "";

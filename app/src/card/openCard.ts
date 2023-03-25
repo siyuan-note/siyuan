@@ -60,7 +60,7 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     <div class="fn__flex card__action fn__none">
         <div>
             <span>${window.siyuan.languages.reboot}</span>
-            <button data-type="-3" aria-label="0" class="b3-button b3-button--error b3-tooltips__s b3-tooltips">
+            <button data-type="-3" aria-label="0" class="b3-button b3-button--cancel b3-tooltips__s b3-tooltips">
                 <div>💤</div>
                 ${window.siyuan.languages.skip} (0)
             </button>

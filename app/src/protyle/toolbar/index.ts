@@ -1252,16 +1252,17 @@ export class Toolbar {
             }
         });
         inputElement.addEventListener("input", (event) => {
-            const mathLanguages: string[] = [];
+            const matchLanguages: string[] = [];
             Constants.CODE_LANGUAGES.forEach((item) => {
                 if (item.indexOf(inputElement.value.toLowerCase()) > -1) {
-                    mathLanguages.push(item);
+                    matchLanguages.push(item);
 
                 }
             });
             let html = "";
             // sort
-            mathLanguages.sort((a, b) => {
+            let matchInput = false;
+            matchLanguages.sort((a, b) => {
                 if (a.startsWith(inputElement.value.toLowerCase()) && b.startsWith(inputElement.value.toLowerCase())) {
                     if (a.length < b.length) {
                         return -1;
@@ -1278,8 +1279,14 @@ export class Toolbar {
                     return 0;
                 }
             }).forEach((item) => {
+                if (inputElement.value === item) {
+                    matchInput = true
+                }
                 html += `<div class="b3-list-item">${item.replace(inputElement.value.toLowerCase(), "<b>" + inputElement.value.toLowerCase() + "</b>")}</div>`;
             });
+            if (inputElement.value.trim() && !matchInput) {
+                html = `<div class="b3-list-item"><b>${inputElement.value.replace(/`| /g, "_")}</b></div>${html}`;
+            }
             this.subElement.firstElementChild.lastElementChild.innerHTML = html;
             if (html) {
                 this.subElement.firstElementChild.lastElementChild.firstElementChild.classList.add("b3-list-item--focus");

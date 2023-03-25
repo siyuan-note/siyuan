@@ -11,7 +11,7 @@ import {highlightRender} from "../protyle/markdown/highlightRender";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 
 export const fillContent = (protyle: IProtyle, data: string, elements: Element[]) => {
     setLastNodeRange(getContenteditableElement(elements[elements.length - 1]), protyle.toolbar.range);
@@ -70,7 +70,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             const dialog = new Dialog({
                 title: window.siyuan.languages.save,
                 content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__size200" value="" placeholder="${window.siyuan.languages.memo}">
+    <input class="b3-text-field fn__block" value="" placeholder="${window.siyuan.languages.memo}">
     <div class="fn__hr"></div>
     <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.aiCustomAction}"></textarea>
 </div>
@@ -103,7 +103,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         customMenu.push({
             iconHTML: Constants.ZWSP,
             action: "iconCloseRound",
-            label: escapeHtml(item.name),
+            label: `<div aria-label="${escapeAttr(item.memo)}" data-type="a">${escapeHtml(item.name)}</div>`,
             bind: (element) => {
                 element.addEventListener("click", (event) => {
                     if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {

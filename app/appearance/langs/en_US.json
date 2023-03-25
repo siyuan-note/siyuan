@@ -1142,7 +1142,7 @@
     "191": "[%d/%d] Created historical data index",
     "192": "Rebuilding historical data index, please wait...",
     "193": "Please refer to the [Artificial Intelligence] chapter of the User Guide for configuration",
-    "194": "There are restrictions on the Nutstore interface, please use other WebDAV services",
+    "194": "<a href=\"https://help.jianguoyun.com/?p=2064\" target=\"_blank\">There are restrictions on the Nutstore interface</a>, please use other WebDAV services",
     "195": "The system time is incorrect, please calibrate the system time and try again",
     "196": "Do not set the workspace under the path of a third-party sync disk, otherwise the data will be damaged (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)",
     "197": "Currently the editor is in read-only mode. If you need to edit content, please switch to edit mode",

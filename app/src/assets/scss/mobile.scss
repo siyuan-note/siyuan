@@ -31,12 +31,55 @@
 
 .b3-list--mobile {
 
+  .counter {
+    line-height: 36px;
+    height: 36px;
+    font-size: 16px;
+    border-radius: 4px;
+  }
+
   & > .fn__flex-column {
     height: 100%;
   }
 
   .b3-list-item {
-    font-size: 16px;
+    font-size: 18px;
+    line-height: 36px;
+    padding: 4px;
+
+    &__icon {
+      font-size: 18px;
+      line-height: 36px;
+      height: auto;
+    }
+
+    &__graphic {
+      width: 20px;
+      height: 20px;
+      padding: 8px 4px;
+      line-height: 20px;
+      font-size: 20px;
+    }
+
+    &__toggle {
+      padding: 11px;
+      height: auto;
+    }
+
+    &__arrow {
+      height: 14px;
+      width: 14px;
+    }
+
+    &__action {
+      padding: 8px;
+      height: 20px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
   }
 }
 
@@ -65,7 +108,7 @@
   background: var(--b3-theme-background);
 
   &--border {
-    border-bottom: 1px solid var(--b3-theme-surface-lighter);
+    border-bottom: .5px solid var(--b3-theme-background-light);
   }
 
   &--dark {
@@ -73,8 +116,8 @@
   }
 
   &__icon {
-    height: 18px;
-    width: 18px;
+    height: 20px;
+    width: 20px;
     padding: 8px;
     flex-shrink: 0;
     margin: 6px 4px;
@@ -97,11 +140,8 @@
     min-width: 1px;
     line-height: 30px;
     font-size: 17px;
-
-    &:focus,
-    &:hover {
-      box-shadow: none;
-    }
+    padding: 0;
+    border: 0;
   }
 
   &__search {

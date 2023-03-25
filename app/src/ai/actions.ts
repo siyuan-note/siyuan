@@ -93,12 +93,12 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 window.siyuan.storage[Constants.LOCAL_AI].push({
                     name: inputElement.value,
                     memo: dialog.element.querySelector("textarea").value,
-                })
+                });
                 setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
                 dialog.destroy();
             });
         }
-    }]
+    }];
     window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }) => {
         customMenu.push({
             iconHTML: Constants.ZWSP,
@@ -117,7 +117,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                                 element.remove();
                                 return true;
                             }
-                        })
+                        });
                     } else {
                         fetchPost("/api/ai/chatGPTWithAction", {
                             ids,
@@ -135,7 +135,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                     event.stopPropagation();
                 });
             }
-        })
+        });
     });
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconSparkles",

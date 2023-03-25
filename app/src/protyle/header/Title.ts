@@ -389,7 +389,7 @@ export class Title {
                 click: () => {
                     quickMakeCard([this.element]);
                 }
-            }]
+            }];
             if (window.siyuan.config.flashcard.deck) {
                 riffCardMenu.push({
                     iconHTML: Constants.ZWSP,
@@ -397,7 +397,7 @@ export class Title {
                     click: () => {
                         makeCard([protyle.block.rootID]);
                     }
-                })
+                });
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.riffCard,

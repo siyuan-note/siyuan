@@ -28,11 +28,6 @@ jobs:
 
       - name: Gather Release Information
         id: release_info
-        # 注意：创建或更新环境变量的步骤无权访问新值；$GITHUB_OUTPUT 需要定义步骤 id 才能稍后检索输出值，$GITHUB_ENV 则不需要
-        # 以下转换不再需要：
-        #   changelog="${changelog//'%'/'%25'}"
-        #   changelog="${changelog//$'\n'/'%0A'}"
-        #   changelog="${changelog//$'\r'/'%0D'}"
         run: |
           echo "release_title=$(git show --format=%s --no-patch | head -1)" >> $GITHUB_OUTPUT
           echo "release_version=$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')" >> $GITHUB_OUTPUT

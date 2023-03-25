@@ -18,7 +18,7 @@
 
 package util
 
-func GetOSPlatform() (plat, ver string) {
+func GetOSPlatform() (plat string) {
 	if ContainerIOS == Container {
 		return "iOS " + MobileOSVer
 	}

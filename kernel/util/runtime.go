@@ -46,11 +46,7 @@ var IsExiting = false
 var MobileOSVer string
 
 func logBootInfo() {
-	plat, platVer := GetOSPlatform()
-	osInfo := plat
-	if "" != platVer {
-		osInfo += " " + platVer
-	}
+	plat := GetOSPlatform()
 	logging.LogInfof("kernel is booting:\n"+
 		"    * ver [%s]\n"+
 		"    * arch [%s]\n"+
@@ -62,7 +58,7 @@ func logBootInfo() {
 		"    * container [%s]\n"+
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s]",
-		Ver, runtime.GOARCH, osInfo, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
+		Ver, runtime.GOARCH, plat, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
 }
 
 func IsMutexLocked(m *sync.Mutex) bool {

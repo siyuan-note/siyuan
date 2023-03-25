@@ -362,9 +362,11 @@
     svg {
       border-radius: 4px;
 
+      /* 由于会覆盖颜色，先移除看看有没有副作用 https://github.com/siyuan-note/siyuan/issues/7735
       polygon {
         fill: var(--b3-theme-on-primary);
       }
+      */
     }
   }
 

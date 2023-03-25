@@ -156,6 +156,7 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_PDFTHEME] = {light: "light", dark: "dark", annoColor: "var(--b3-pdf-background1)"};
         defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}}
+        defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_BAZAAR] = {
             theme: "0",
             template: "0",
@@ -209,7 +210,7 @@ export const getLocalStorage = (cb: () => void) => {
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
             Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHDATA,
-            Constants.LOCAL_ZOOM, Constants.LOCAL_SEARCHKEY, Constants.LOCAL_LAYOUTS].forEach((key) => {
+            Constants.LOCAL_ZOOM, Constants.LOCAL_SEARCHKEY, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     window.siyuan.storage[key] = Object.assign(defaultStorage[key], JSON.parse(response.data[key]));

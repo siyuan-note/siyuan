@@ -22,7 +22,7 @@
   "apiBaseURLTip": "The base address of the request, such as <code class='fn__code'>https://api.openai.com/v1</code>",
   "skip": "Skip",
   "reboot": "Reboot",
-  "saveLayout": "Save Layout",
+  "save": "Save",
   "ai": "Artificial Intelligence",
   "aiContinueWrite": "Continue writing",
   "aiTranslate": "Translate",

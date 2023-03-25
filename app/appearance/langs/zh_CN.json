@@ -22,7 +22,7 @@
   "apiBaseURLTip": "发起请求的基础地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
   "skip": "跳过",
   "reboot": "重启",
-  "saveLayout": "保存布局",
+  "save": "保存",
   "ai": "人工智能",
   "aiContinueWrite": "续写",
   "aiTranslate": "翻译",

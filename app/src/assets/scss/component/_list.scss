@@ -98,9 +98,8 @@
     &__toggle {
       display: flex;
       align-items: center;
-      height: 22px;
       padding: 0 4px;
-      color: var(--b3-theme-on-surface);
+      color: var(--b3-theme-on-surface-light);
       transition: var(--b3-transition);
 
       &--hl:hover {
@@ -124,7 +123,6 @@
       font-size: 16px;
       margin-right: 4px;
       line-height: 22px;
-      height: 22px;
       transition: var(--b3-transition);
       padding: 0 4px;
       flex-shrink: 0;
@@ -214,7 +212,7 @@
     &__action {
       flex-shrink: 0;
       align-items: center;
-      color: var(--b3-theme-on-surface);
+      color: var(--b3-theme-on-surface-light);
       height: 22px;
       padding: 0 4px;
       margin-left: 4px;

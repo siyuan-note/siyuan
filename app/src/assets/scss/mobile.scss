@@ -31,53 +31,42 @@
 
 .b3-list--mobile {
 
-  .counter {
-    line-height: 36px;
-    height: 36px;
-    font-size: 16px;
-    border-radius: 4px;
-  }
-
   & > .fn__flex-column {
     height: 100%;
   }
 
   .b3-list-item {
     font-size: 18px;
-    line-height: 36px;
-    padding: 4px;
+    line-height: 40px;
 
     &__icon {
       font-size: 18px;
-      line-height: 36px;
-      height: auto;
+      line-height: 40px;
     }
 
     &__graphic {
-      width: 20px;
-      height: 20px;
-      padding: 8px 4px;
-      line-height: 20px;
-      font-size: 20px;
+      width: 18px;
+      height: 40px;
+      line-height: 40px;
+      font-size: 18px;
     }
 
     &__toggle {
-      padding: 11px;
-      height: auto;
+      padding: 14px;
     }
 
     &__arrow {
-      height: 14px;
-      width: 14px;
+      height: 12px;
+      width: 12px;
     }
 
     &__action {
-      padding: 8px;
-      height: 20px;
+      padding: 12px;
+      height: 16px;
 
       svg {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
       }
     }
   }
@@ -91,14 +80,14 @@
 
 .counter {
   margin-left: 4px;
-  line-height: 22px;
   padding: 0 8px;
-  color: var(--b3-theme-on-surface);
-  border-radius: 2px;
-  font-size: 12px;
+  color: var(--b3-theme-on-surface-light);
+  border-radius: 4px;
   user-select: none;
-  height: 22px;
   background-color: var(--b3-theme-background-light);
+  line-height: 24px;
+  height: 24px;
+  font-size: 16px;
 }
 
 .toolbar {
@@ -116,9 +105,9 @@
   }
 
   &__icon {
-    height: 20px;
-    width: 20px;
-    padding: 8px;
+    height: 16px;
+    width: 16px;
+    padding: 10px;
     flex-shrink: 0;
     margin: 6px 4px;
     color: var(--b3-theme-on-surface);

@@ -22,7 +22,6 @@ import (
 	"io"
 	"math/rand"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -33,6 +32,8 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/denisbrodbeck/machineid"
+	"github.com/go-ole/go-ole"
+	"github.com/go-ole/go-ole/oleutil"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
@@ -114,7 +115,7 @@ var (
 )
 
 var (
-	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 10)
+	thirdPartySyncCheckTicker = time.NewTicker(time.Second * 5)
 )
 
 func ReportFileSysFatalError(err error) {
@@ -291,56 +292,34 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 		return false
 	}
 
-	dataAbsPath := filepath.Join(workspaceAbsPath, "data")
-
 	// 改进 Windows 端第三方同步盘检测 https://github.com/siyuan-note/siyuan/issues/7777
 
-	ps := `
-function Get-MetaData {
-	[CmdletBinding()][OutputType([object])]
-	param([ValidateNotNullOrEmpty()][string]$File)
+	defer logging.Recover()
+	ole.CoInitialize(0)
+	defer ole.CoUninitialize()
 
-	chcp 65001
-	$folderPath = Split-Path $File
-    $filePath = Split-Path $File -Leaf
+	dataAbsPath := filepath.Join(workspaceAbsPath, "data")
+	dir, file := filepath.Split(dataAbsPath)
 
-    try{
-        $shell = New-Object -ComObject Shell.Application
-        $folderObj = $shell.NameSpace($folderPath)
-        $fileObj = $folderObj.ParseName($filePath)
-
-        $value = $folderObj.GetDetailsOf($fileObj, 303)
-        echo $value
-    }finally{
-        if($shell){
-            [System.Runtime.InteropServices.Marshal]::ReleaseComObject([System.__ComObject]$shell) | out-null
-        }
-    }
-}
-
-Get-MetaData -File "` + dataAbsPath + "\""
-	cmd := exec.Command("powershell", "-nologo", "-noprofile", "-command", ps)
-	gulu.CmdAttr(cmd)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
+	unknown, err := oleutil.CreateObject("Shell.Application")
+	if nil != err {
+		logging.LogWarnf("create shell application failed: %s", err)
 		return false
 	}
-
-	lines := strings.Split(string(out), "\n")
-	buf := bytes.Buffer{}
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if strings.Contains(strings.ToLower(line), "active code page") {
-			continue
-		}
-
-		if "" != line {
-			buf.WriteString(line)
-		}
+	shell, err := unknown.QueryInterface(ole.IID_IDispatch)
+	if nil != err {
+		logging.LogWarnf("query shell interface failed: %s", err)
+		return false
 	}
-	out = buf.Bytes()
+	defer shell.Release()
+	folderObj := oleutil.MustCallMethod(shell, "NameSpace", dir).ToIDispatch()
+	fileObj := oleutil.MustCallMethod(folderObj, "ParseName", file).ToIDispatch()
+	value := oleutil.MustCallMethod(folderObj, "GetDetailsOf", fileObj, 303)
+	if nil == value {
+		return false
+	}
+	status := value.Value().(string)
 
-	status := strings.ToLower(strings.TrimSpace(string(out)))
 	if strings.Contains(status, "sync") || strings.Contains(status, "同步") ||
 		strings.Contains(status, "available") || strings.Contains(status, "可用") {
 		logging.LogErrorf("data [%s] third party sync status [%s]", dataAbsPath, status)

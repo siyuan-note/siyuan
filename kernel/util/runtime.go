@@ -115,7 +115,7 @@ var (
 )
 
 var (
-	thirdPartySyncCheckTicker = time.NewTicker(time.Second * 5)
+	thirdPartySyncCheckTicker = time.NewTicker(time.Minute * 10)
 )
 
 func ReportFileSysFatalError(err error) {

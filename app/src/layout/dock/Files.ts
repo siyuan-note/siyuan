@@ -32,7 +32,7 @@ export class Files extends Model {
                 if (data) {
                     switch (data.cmd) {
                         case "moveDoc":
-                            this.onMove(data.data);
+                            this.onMove(data);
                             break;
                         case "mount":
                             this.onMount(data);
@@ -466,8 +466,8 @@ export class Files extends Model {
                     selectRootElements.push(item);
                 } else {
                     const dataPath = item.getAttribute("data-path");
-                    const isChild = fromPaths.find(item => {
-                        if (dataPath.startsWith(item.replace(".sy", ""))) {
+                    const isChild = fromPaths.find(itemPath => {
+                        if (dataPath.startsWith(itemPath.replace(".sy", ""))) {
                             return true;
                         }
                     });
@@ -478,11 +478,13 @@ export class Files extends Model {
                 }
             });
             if (newElement.classList.contains("dragover")) {
-                await fetchPost("/api/filetree/moveDocs", {
+                fetchPost("/api/filetree/moveDocs", {
                     toNotebook: toURL,
                     fromPaths,
                     toPath,
                 });
+                newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                return;
             }
             const ulSort = newUlElement.getAttribute("data-sortmode");
             if ((newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) &&
@@ -513,6 +515,7 @@ export class Files extends Model {
                             toNotebook: toURL,
                             fromPaths,
                             toPath: toDir === "/" ? "/" : toDir + ".sy",
+                            callback: Constants.CB_MOVE_NOLIST,
                         });
                         selectFileElements.forEach(item => {
                             item.setAttribute("data-path", pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy"));
@@ -775,13 +778,8 @@ export class Files extends Model {
         fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
     }
 
-    private onMove(data: {
-        fromNotebook: string,
-        toNotebook: string,
-        fromPath: string
-        toPath: string
-    }) {
-        const sourceElement = this.element.querySelector(`ul[data-url="${data.fromNotebook}"] li[data-path="${data.fromPath}"]`) as HTMLElement;
+    private onMove(response: IWebSocketData) {
+        const sourceElement = this.element.querySelector(`ul[data-url="${response.data.fromNotebook}"] li[data-path="${response.data.fromPath}"]`) as HTMLElement;
         if (sourceElement) {
             if (sourceElement.nextElementSibling && sourceElement.nextElementSibling.tagName === "UL") {
                 sourceElement.nextElementSibling.remove();
@@ -800,7 +798,7 @@ export class Files extends Model {
                 sourceElement.remove();
             }
         }
-        const newElement = this.element.querySelector(`[data-url="${data.toNotebook}"] li[data-path="${data.toPath}"]`) as HTMLElement;
+        const newElement = this.element.querySelector(`[data-url="${response.data.toNotebook}"] li[data-path="${response.data.toPath}"]`) as HTMLElement;
         // 更新移动到的新文件夹
         if (newElement) {
             newElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
@@ -814,7 +812,9 @@ export class Files extends Model {
                 if (newElement.nextElementSibling && newElement.nextElementSibling.tagName === "UL") {
                     newElement.nextElementSibling.remove();
                 }
-                this.getLeaf(newElement, data.toNotebook);
+                if (response.callback !== Constants.CB_MOVE_NOLIST) {
+                    this.getLeaf(newElement, response.data.toNotebook);
+                }
             }
         }
     }

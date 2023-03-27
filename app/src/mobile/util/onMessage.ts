@@ -38,7 +38,7 @@ export const onMessage = (data: IWebSocketData) => {
                 openMobileFileById(data.data.id, [Constants.CB_GET_FOCUS]);
                 break;
             case"txerr":
-                transactionError(data);
+                transactionError();
                 break;
             case"statusbar":
                 progressStatus(data);

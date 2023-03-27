@@ -46,7 +46,7 @@ export abstract class Constants {
     public static readonly SIZE_ZOOM = [0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 
     // ws callback
-    public static readonly CB_MOUNT_HELP = "cb-mount-help";
+    public static readonly CB_MOVE_NOLIST = "cb-move-nolist";
     public static readonly CB_MOUNT_REMOVE = "cb-mount-remove";
     public static readonly CB_GET_APPEND = "cb-get-append"; // 向下滚动加载
     public static readonly CB_GET_BEFORE = "cb-get-before"; // 向上滚动加载

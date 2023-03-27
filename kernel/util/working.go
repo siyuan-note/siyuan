@@ -21,7 +21,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"math/rand"
 	"mime"
 	"os"
@@ -186,10 +185,12 @@ var (
 func initWorkspaceDir(workspaceArg string) {
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
 	workspaceConf := filepath.Join(userHomeConfDir, "workspace.json")
+	logging.SetLogPath(filepath.Join(userHomeConfDir, "kernel.log"))
+
 	if !gulu.File.IsExist(workspaceConf) {
 		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
-			log.Printf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
-			os.Exit(logging.ExitCodeCreateConfDirErr)
+			logging.LogErrorf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
+			os.Exit(logging.ExitCodeInitWorkspaceErr)
 		}
 	}
 
@@ -201,8 +202,8 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 	}
 	if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
-		log.Printf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
-		os.Exit(logging.ExitCodeCreateWorkspaceDirErr)
+		logging.LogErrorf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
+		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 
 	var workspacePaths []string
@@ -226,13 +227,14 @@ func initWorkspaceDir(workspaceArg string) {
 	}
 
 	if !gulu.File.IsDir(WorkspaceDir) {
-		log.Printf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
+		logging.LogWarnf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
 		WorkspaceDir = defaultWorkspaceDir
 	}
 	workspacePaths = append(workspacePaths, WorkspaceDir)
 
 	if err := WriteWorkspacePaths(workspacePaths); nil != err {
-		log.Fatalf("write workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogErrorf("write workspace conf [%s] failed: %s", workspaceConf, err)
+		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
@@ -243,7 +245,8 @@ func initWorkspaceDir(workspaceArg string) {
 	osTmpDir := filepath.Join(TempDir, "os")
 	os.RemoveAll(osTmpDir)
 	if err := os.MkdirAll(osTmpDir, 0755); nil != err {
-		log.Fatalf("create os tmp dir [%s] failed: %s", osTmpDir, err)
+		logging.LogErrorf("create os tmp dir [%s] failed: %s", osTmpDir, err)
+		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 	os.RemoveAll(filepath.Join(TempDir, "repo"))
 	os.Setenv("TMPDIR", osTmpDir)
@@ -327,33 +330,33 @@ const (
 
 func initPathDir() {
 	if err := os.MkdirAll(ConfDir, 0755); nil != err && !os.IsExist(err) {
-		log.Fatalf("create conf folder [%s] failed: %s", ConfDir, err)
+		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create conf folder [%s] failed: %s", ConfDir, err)
 	}
 	if err := os.MkdirAll(DataDir, 0755); nil != err && !os.IsExist(err) {
-		log.Fatalf("create data folder [%s] failed: %s", DataDir, err)
+		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data folder [%s] failed: %s", DataDir, err)
 	}
 	if err := os.MkdirAll(TempDir, 0755); nil != err && !os.IsExist(err) {
-		log.Fatalf("create temp folder [%s] failed: %s", TempDir, err)
+		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create temp folder [%s] failed: %s", TempDir, err)
 	}
 
 	assets := filepath.Join(DataDir, "assets")
 	if err := os.MkdirAll(assets, 0755); nil != err && !os.IsExist(err) {
-		log.Fatalf("create data assets folder [%s] failed: %s", assets, err)
+		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data assets folder [%s] failed: %s", assets, err)
 	}
 
 	templates := filepath.Join(DataDir, "templates")
 	if err := os.MkdirAll(templates, 0755); nil != err && !os.IsExist(err) {
-		log.Fatalf("create data templates folder [%s] failed: %s", templates, err)
+		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data templates folder [%s] failed: %s", templates, err)
 	}
 
 	widgets := filepath.Join(DataDir, "widgets")
 	if err := os.MkdirAll(widgets, 0755); nil != err && !os.IsExist(err) {
-		log.Fatalf("create data widgets folder [%s] failed: %s", widgets, err)
+		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data widgets folder [%s] failed: %s", widgets, err)
 	}
 
 	emojis := filepath.Join(DataDir, "emojis")
 	if err := os.MkdirAll(emojis, 0755); nil != err && !os.IsExist(err) {
-		log.Fatalf("create data emojis folder [%s] failed: %s", widgets, err)
+		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data emojis folder [%s] failed: %s", widgets, err)
 	}
 }
 

@@ -87,7 +87,7 @@ export const showAccountInfo = () => {
                 });
             });
         }
-    })
+    });
 };
 
 export const login = () => {

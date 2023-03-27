@@ -2,12 +2,13 @@ import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {genOptions} from "../../util/genOptions";
 import {reloadProtyle} from "../../protyle/util/reload";
+import {openModel} from "../util/model";
 
-export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTMLElement) => {
-    modelElement.style.top = "0";
-    modelElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconTheme"></use>';
-    modelElement.querySelector(".toolbar__text").textContent = window.siyuan.languages.appearance;
-    modelMainElement.innerHTML = `<div class="b3-label">
+export const initAppearance = () => {
+    openModel({
+        title: window.siyuan.languages.appearance,
+        icon:"iconTheme",
+        html: `<div class="b3-label">
     ${window.siyuan.languages.appearance4}
     <div class="fn__hr"></div>
     <select class="b3-select fn__block" id="mode">
@@ -49,29 +50,34 @@ export const initAppearance = (modelElement: HTMLElement, modelMainElement: HTML
     <div class="fn__hr"></div>
     <input class="b3-slider fn__block" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
     <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
-</div>`;
-    modelMainElement.querySelector(".b3-slider").addEventListener("input", (event: InputEvent & { target: HTMLInputElement }) => {
-        modelMainElement.querySelector("#fontSize").textContent = event.target.value + "px";
-        window.siyuan.config.editor.fontSize = parseInt(event.target.value);
-        fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-            window.siyuan.config.editor = response.data;
-            reloadProtyle(window.siyuan.mobile.editor.protyle);
-            setInlineStyle();
-        });
-    });
-    modelMainElement.querySelectorAll("select").forEach(item => {
-        item.addEventListener("change", () => {
-            const modeElementValue = parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value);
-            fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
-                icon: (modelMainElement.querySelector("#icon") as HTMLSelectElement).value,
-                mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
-                modeOS: modeElementValue === 2,
-                themeDark: (modelMainElement.querySelector("#themeDark") as HTMLSelectElement).value,
-                themeLight: (modelMainElement.querySelector("#themeLight") as HTMLSelectElement).value,
-                lang: (modelMainElement.querySelector("#lang") as HTMLSelectElement).value,
-            }), () => {
-                window.location.reload();
+</div>`,
+        bindEvent(modelMainElement: HTMLElement) {
+            modelMainElement.querySelector(".b3-slider").addEventListener("input", (event: InputEvent & {
+                target: HTMLInputElement
+            }) => {
+                modelMainElement.querySelector("#fontSize").textContent = event.target.value + "px";
+                window.siyuan.config.editor.fontSize = parseInt(event.target.value);
+                fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
+                    window.siyuan.config.editor = response.data;
+                    reloadProtyle(window.siyuan.mobile.editor.protyle);
+                    setInlineStyle();
+                });
             });
-        });
+            modelMainElement.querySelectorAll("select").forEach(item => {
+                item.addEventListener("change", () => {
+                    const modeElementValue = parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value);
+                    fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
+                        icon: (modelMainElement.querySelector("#icon") as HTMLSelectElement).value,
+                        mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
+                        modeOS: modeElementValue === 2,
+                        themeDark: (modelMainElement.querySelector("#themeDark") as HTMLSelectElement).value,
+                        themeLight: (modelMainElement.querySelector("#themeLight") as HTMLSelectElement).value,
+                        lang: (modelMainElement.querySelector("#lang") as HTMLSelectElement).value,
+                    }), () => {
+                        window.location.reload();
+                    });
+                });
+            });
+        }
     });
 };

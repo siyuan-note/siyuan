@@ -9,7 +9,7 @@ import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation
 import {MenuItem} from "../../menus/Menu";
 import {Editor} from "../../editor";
 import {showMessage} from "../../dialog/message";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -509,7 +509,7 @@ export class Files extends Model {
                     let hasMove = false;
                     const toDir = pathPosix().dirname(toPath);
                     if (fromPaths.length > 0) {
-                        await fetchPost("/api/filetree/moveDocs", {
+                        await fetchSyncPost("/api/filetree/moveDocs", {
                             toNotebook: toURL,
                             fromPaths,
                             toPath: toDir === "/" ? "/" : toDir + ".sy",

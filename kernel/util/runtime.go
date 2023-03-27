@@ -318,11 +318,15 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 	if nil == value {
 		return false
 	}
-	status := value.Value().(string)
+	status := strings.ToLower(value.ToString())
+	if "" == status || "availability status" == status || "可用性状态" == status {
+		return false
+	}
 
 	if strings.Contains(status, "sync") || strings.Contains(status, "同步") ||
-		strings.Contains(status, "available") || strings.Contains(status, "可用") {
-		logging.LogErrorf("data [%s] third party sync status [%s]", dataAbsPath, status)
+		strings.Contains(status, "available on this device") || strings.Contains(status, "在此设备上可用") ||
+		strings.Contains(status, "available when online") || strings.Contains(status, "联机时可用") {
+		logging.LogErrorf("[%s] third party sync status [%s]", dataAbsPath, status)
 		return true
 	}
 	return false

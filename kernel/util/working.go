@@ -207,6 +207,7 @@ func initWorkspaceDir(workspaceArg string) {
 	}
 
 	var workspacePaths []string
+	var cloudDrive bool // 启动时移除处于网盘路径下的工作空间 https://github.com/siyuan-note/siyuan/issues/7790
 	if !gulu.File.IsExist(workspaceConf) {
 		WorkspaceDir = defaultWorkspaceDir
 		if "" != workspaceArg {
@@ -214,11 +215,11 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
-		// 启动时移除处于网盘路径下的工作空间 https://github.com/siyuan-note/siyuan/issues/7790
 		var tmp []string
 		for _, workspacePath := range workspacePaths {
 			if IsCloudDrivePath(workspacePath) {
 				logging.LogWarnf("skip the cloud drive path [%s]", workspacePath)
+				cloudDrive = true
 				continue
 			}
 			tmp = append(tmp, workspacePath)
@@ -246,6 +247,10 @@ func initWorkspaceDir(workspaceArg string) {
 	if err := WriteWorkspacePaths(workspacePaths); nil != err {
 		logging.LogErrorf("write workspace conf [%s] failed: %s", workspaceConf, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
+	}
+
+	if cloudDrive {
+		os.Exit(logging.ExitCodeFileSysErr)
 	}
 
 	ConfDir = filepath.Join(WorkspaceDir, "conf")

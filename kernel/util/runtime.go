@@ -331,7 +331,7 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 	}
 	folderObj := result.ToIDispatch()
 
-	result = oleutil.MustCallMethod(folderObj, "ParseName", file)
+	result, err = oleutil.CallMethod(folderObj, "ParseName", file)
 	if nil != err {
 		logging.LogWarnf("call shell [ParseName] failed: %s", err)
 		return false

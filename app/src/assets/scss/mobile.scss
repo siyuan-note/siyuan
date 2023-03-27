@@ -42,6 +42,7 @@
     &__icon {
       font-size: 18px;
       line-height: 40px;
+      height: auto;
     }
 
     &__graphic {
@@ -52,6 +53,7 @@
     }
 
     &__toggle {
+      height: auto;
       padding: 14px;
     }
 

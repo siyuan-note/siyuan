@@ -174,11 +174,20 @@ func ExportSystemLog() (zipPath string) {
 			logging.LogErrorf("copy app log from [%s] to [%s] failed: %s", err, appLog, to)
 		}
 	}
-	kernelLog := filepath.Join(util.TempDir, "siyuan.log")
+
+	kernelLog := filepath.Join(util.HomeDir, ".config", "siyuan", "kernel.log")
 	if gulu.File.IsExist(kernelLog) {
-		to := filepath.Join(exportFolder, "siyuan.log")
+		to := filepath.Join(exportFolder, "kernel.log")
 		if err := gulu.File.CopyFile(kernelLog, to); nil != err {
 			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, kernelLog, to)
+		}
+	}
+
+	siyuanLog := filepath.Join(util.TempDir, "siyuan.log")
+	if gulu.File.IsExist(siyuanLog) {
+		to := filepath.Join(exportFolder, "siyuan.log")
+		if err := gulu.File.CopyFile(siyuanLog, to); nil != err {
+			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, siyuanLog, to)
 		}
 	}
 

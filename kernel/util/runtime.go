@@ -244,12 +244,11 @@ func checkFileSysStatus() {
 }
 
 func IsCloudDrivePath(workspaceAbsPath string) bool {
-	absPathLower := strings.ToLower(workspaceAbsPath)
-	if isICloudPath(absPathLower) {
+	if isICloudPath(workspaceAbsPath) {
 		return true
 	}
 
-	if isKnownCloudDrivePath(absPathLower) {
+	if isKnownCloudDrivePath(workspaceAbsPath) {
 		return true
 	}
 
@@ -260,16 +259,19 @@ func IsCloudDrivePath(workspaceAbsPath string) bool {
 	return false
 }
 
-func isKnownCloudDrivePath(workspaceAbsPathLower string) bool {
+func isKnownCloudDrivePath(workspaceAbsPath string) bool {
+	workspaceAbsPathLower := strings.ToLower(workspaceAbsPath)
 	return strings.Contains(workspaceAbsPathLower, "onedrive") || strings.Contains(workspaceAbsPathLower, "dropbox") ||
 		strings.Contains(workspaceAbsPathLower, "google drive") || strings.Contains(workspaceAbsPathLower, "pcloud") ||
 		strings.Contains(workspaceAbsPathLower, "坚果云")
 }
 
-func isICloudPath(workspaceAbsPathLower string) (ret bool) {
+func isICloudPath(workspaceAbsPath string) (ret bool) {
 	if !gulu.OS.IsDarwin() {
 		return false
 	}
+
+	workspaceAbsPathLower := strings.ToLower(workspaceAbsPath)
 
 	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
 	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")

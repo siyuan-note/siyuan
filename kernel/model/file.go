@@ -989,7 +989,7 @@ func GetFullHPathByID(id string) (hPath string, err error) {
 	return
 }
 
-func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
+func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
 		err = errors.New(Conf.Language(0))
@@ -1020,7 +1020,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
 	for fromPath, fromBox := range pathsBoxes {
-		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine)
+		_, err = moveDoc(fromBox, fromPath, toBox, toPath, luteEngine, callback)
 		if nil != err {
 			return
 		}
@@ -1036,7 +1036,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string) (err error) {
 	return
 }
 
-func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute) (newPath string, err error) {
+func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute, callback interface{}) (newPath string, err error) {
 	isSameBox := fromBox.ID == toBox.ID
 
 	if isSameBox {
@@ -1150,6 +1150,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		"toPath":       toPath,
 		"newPath":      newPath,
 	}
+	evt.Callback = callback
 	util.PushEvent(evt)
 	return
 }

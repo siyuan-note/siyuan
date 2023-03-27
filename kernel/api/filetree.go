@@ -267,7 +267,9 @@ func moveDocs(c *gin.Context) {
 		return
 	}
 
-	err := model.MoveDocs(fromPaths, toNotebook, toPath)
+	callback := arg["callback"]
+
+	err := model.MoveDocs(fromPaths, toNotebook, toPath, callback)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

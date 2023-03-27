@@ -294,6 +294,10 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 		return false
 	}
 
+	if !gulu.File.IsExist(workspaceAbsPath) {
+		return false
+	}
+
 	// 改进 Windows 端第三方同步盘检测 https://github.com/siyuan-note/siyuan/issues/7777
 
 	defer logging.Recover()
@@ -302,6 +306,11 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 
 	dataAbsPath := filepath.Join(workspaceAbsPath, "data")
 	dir, file := filepath.Split(dataAbsPath)
+
+	if !gulu.File.IsExist(dataAbsPath) {
+		dataAbsPath = workspaceAbsPath
+		return false
+	}
 
 	unknown, err := oleutil.CreateObject("Shell.Application")
 	if nil != err {

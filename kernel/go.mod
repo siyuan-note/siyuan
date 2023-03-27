@@ -49,7 +49,7 @@ require (
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20230321113304-79a32917cc9f
 	github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc
-	github.com/siyuan-note/logging v0.0.0-20230327034340-a7bed1fff2fe
+	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.0.0-20230203202212-3282f94193f2

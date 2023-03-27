@@ -289,6 +289,8 @@ github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc h1:MX2cPWpn
 github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc/go.mod h1:WDO42mUVRnkk8M4AhZ4oakZ5jnghulP0c8NFCrrFWG4=
 github.com/siyuan-note/logging v0.0.0-20230327034340-a7bed1fff2fe h1:QmBB+8HVbjxXzVUdAiysYaClEAaREcxeZt6kvHcrFUc=
 github.com/siyuan-note/logging v0.0.0-20230327034340-a7bed1fff2fe/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
+github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493 h1:oaN5b0WDFkjdBgGxmmBnMrtZxaJ76LZLwhQSZnznJMI=
+github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7 h1:Kr8hhMhr6v+U24TMDCP5WdP4dWrXm5maar+TycTZs9I=
 github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7/go.mod h1:XJtLlKCr8cZE+lzykM4edHHih92M9M50UNw/nDLYRN8=
 github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d h1:zE9ykElWQ6/NYmHa3jpm/yHnI4xSofP+UP6SpjHcSeM=

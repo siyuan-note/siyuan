@@ -61,7 +61,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
 };
 
 const initMermaid = (mermaidElements: Element[]) => {
-    mermaidElements.forEach((item) => {
+    mermaidElements.forEach((item, index) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
@@ -71,7 +71,9 @@ const initMermaid = (mermaidElements: Element[]) => {
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
         renderElement.removeAttribute("data-processed");
         renderElement.textContent = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
-        mermaid.init(undefined, renderElement);
+        setTimeout(() => {
+            mermaid.init(undefined, renderElement);
+        }, Constants.TIMEOUT_BLOCKLOAD * index);
         item.setAttribute("data-render", "true");
         renderElement.setAttribute("contenteditable", "false");
         if (!item.textContent.endsWith(Constants.ZWSP)) {

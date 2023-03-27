@@ -98,6 +98,7 @@
     &__toggle {
       display: flex;
       align-items: center;
+      height: 22px;
       padding: 0 4px;
       color: var(--b3-theme-on-surface-light);
       transition: var(--b3-transition);
@@ -124,6 +125,7 @@
       margin-right: 4px;
       line-height: 22px;
       transition: var(--b3-transition);
+      height: 22px;
       padding: 0 4px;
       flex-shrink: 0;
 

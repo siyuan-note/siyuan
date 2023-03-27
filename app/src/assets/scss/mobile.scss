@@ -131,6 +131,8 @@
     font-size: 17px;
     padding: 0;
     border: 0;
+    background-color: transparent;
+    color: var(--b3-theme-on-background);
   }
 
   &__search {

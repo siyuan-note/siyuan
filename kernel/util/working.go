@@ -214,6 +214,7 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
+		// 启动时移除处于网盘路径下的工作空间 https://github.com/siyuan-note/siyuan/issues/7790
 		var tmp []string
 		for _, workspacePath := range workspacePaths {
 			if IsCloudDrivePath(workspacePath) {

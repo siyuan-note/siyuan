@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 export const ai = {
     element: undefined as Element,
     genHTML: () => {
-        let responsiveHTML = ""
+        let responsiveHTML = "";
         /// #if MOBILE
         responsiveHTML = `<div class="b3-label">
     ${window.siyuan.languages.apiTimeout}

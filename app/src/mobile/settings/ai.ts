@@ -10,5 +10,5 @@ export const initAI = () => {
             ai.element = modelMainElement;
             ai.bindEvent();
         }
-    })
-}
+    });
+};

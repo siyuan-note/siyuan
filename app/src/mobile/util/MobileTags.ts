@@ -65,8 +65,6 @@ export class MobileTags {
                         });
                     }
                 } else {
-                    const modelElement = document.getElementById("model");
-                    const modelMainElement = document.getElementById("modelMain");
                     popSearch();
                     (document.getElementById("toolbarSearch") as HTMLInputElement).value = `#${element.getAttribute("data-label")}#`;
                     toolbarSearchEvent();

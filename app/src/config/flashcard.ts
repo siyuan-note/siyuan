@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 export const flashcard = {
     element: undefined as Element,
     genHTML: () => {
-        let responsiveHTML = ""
+        let responsiveHTML = "";
         /// #if MOBILE
         responsiveHTML = `<div class="b3-label">
     ${window.siyuan.languages.flashcardNewCardLimit}
@@ -16,7 +16,7 @@ export const flashcard = {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__flex-center fn__block" id="reviewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
     <div class="b3-label__text">${window.siyuan.languages.flashcardReviewCardLimitTip}</div>
-</div>`
+</div>`;
         /// #else
         responsiveHTML = `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -33,7 +33,7 @@ export const flashcard = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="reviewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
-</label>`
+</label>`;
         /// #endif
         return `${responsiveHTML}
 <label class="fn__flex b3-label">

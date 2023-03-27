@@ -317,15 +317,18 @@
           align-items: center;
 
           svg {
-            height: 16px;
-            width: 16px;
+            border-radius: 10px;
+            height: 8px;
+            width: 8px;
             color: var(--b3-theme-on-surface);
             transition: var(--b3-transition);
+            padding: 4px;
             opacity: 0;
           }
 
           &:hover svg {
-            opacity: 1 !important;
+            color: var(--b3-theme-on-background);
+            background-color: var(--b3-theme-background-light);
           }
         }
       }

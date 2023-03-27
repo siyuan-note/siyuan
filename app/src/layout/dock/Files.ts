@@ -560,10 +560,9 @@ export class Files extends Model {
                         notebook: toURL
                     }, () => {
                         if (hasMove) {
-                            // 移动并排序后，会推送 moveDoc，但此时还没有 sort。 https://github.com/siyuan-note/siyuan/issues/4270
                             fetchPost("/api/filetree/listDocsByPath", {
                                 notebook: toURL,
-                                path: pathPosix().dirname(toPath),
+                                path:  toDir === "/" ? "/" : toDir + ".sy",
                                 sort: window.siyuan.config.fileTree.sort,
                             }, response => {
                                 if (response.data.path === "/" && response.data.files.length === 0) {

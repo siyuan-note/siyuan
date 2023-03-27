@@ -68,7 +68,8 @@ a.b3-chip:hover {
     opacity: .86;
 
     &:hover {
-      opacity: 1;
+      // 不明原因 https://github.com/siyuan-note/siyuan/issues/7756#issuecomment-1484057954
+      opacity: .99;
     }
   }
 
@@ -90,7 +91,8 @@ a.b3-chip:hover {
     opacity: .68;
 
     &:hover {
-      opacity: 1;
+      // 不明原因 https://github.com/siyuan-note/siyuan/issues/7756#issuecomment-1484057954
+      opacity: .99;
     }
   }
 

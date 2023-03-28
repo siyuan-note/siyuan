@@ -155,7 +155,8 @@ class PDFViewerApplication {
     this.annotationEditorParams = null
     this.isInitialViewSet = false
     this.downloadComplete = false
-    this.isViewerEmbedded = window.parent !== window
+    // NOTE 不使用 initialBookmark
+    this.isViewerEmbedded = true
     this.url = ""
     this.baseUrl = ""
     this._downloadUrl = ""
@@ -757,7 +758,7 @@ class PDFViewerApplication {
     }
     const editorIndicator =
       this._hasAnnotationEditors && !this.pdfRenderingQueue.printing;
-    // NOTE document.title = `${editorIndicator ? "* " : ""}${title}`;
+    document.title = `${editorIndicator ? "* " : ""}${title}`;
   }
 
   get _docFilename() {
@@ -1182,7 +1183,8 @@ class PDFViewerApplication {
           let sidebarView = AppOptions.get("sidebarViewOnLoad");
           let scrollMode = AppOptions.get("scrollModeOnLoad");
           let spreadMode = AppOptions.get("spreadModeOnLoad");
-
+          // NOTE
+          stored.page = this.pdfId || stored.page;
           if (stored.page && viewOnLoad !== ViewOnLoad.INITIAL) {
             hash =
               `page=${stored.page}&zoom=${zoom || stored.zoom},` +
@@ -1199,6 +1201,10 @@ class PDFViewerApplication {
             if (spreadMode === SpreadMode.UNKNOWN) {
               spreadMode = stored.spreadMode | 0;
             }
+          }
+          // NOTE 定位分页，最后通过 showHighlight 进行高亮
+          if (hash.indexOf("page=") === -1 && this.pdfId) {
+            hash += `&page=${this.pdfId}`;
           }
           // NOTE: Ignore the pageMode/pageLayout in GeckoView since there's no
           // sidebar available, nor any UI for changing the Scroll/Spread modes.
@@ -1248,11 +1254,6 @@ class PDFViewerApplication {
               setTimeout(resolve, FORCE_PAGES_LOADED_TIMEOUT);
             }),
           ]);
-          // NOTE 通过引用打开
-          if (this.annoId && this.pdfId) {
-            webViewerPageNumberChanged(
-                {value: this.pdfId, pdfInstance: this, id: this.annoId})
-          }
           if (!initialBookmark && !hash) {
             return;
           }

@@ -71,9 +71,6 @@ class TextLayerBuilder {
     this.div.append(endOfContent);
 
     this.#bindMouse();
-
-    // NOTE
-    getHighlight(this.div)
   }
 
   get numTextDivs() {
@@ -131,6 +128,8 @@ class TextLayerBuilder {
     this.#scale = scale;
     this.#rotation = rotation;
     this.show();
+    // NOTE
+    getHighlight(this.div)
     this.accessibilityManager?.enable();
   }
 

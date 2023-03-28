@@ -168,6 +168,9 @@ const renderViewItem = (blocks: IBlock[], title: string, deckType: string) => {
                 hPath = getNotebookName(item.box) + getDisplayName(Lute.UnEscapeHTMLStr(item.hPath), false);
             } else {
                 hPath = getDisplayName(Lute.UnEscapeHTMLStr(item.hPath), false).replace("/" + pathArray.join("/"), "");
+                if (hPath.startsWith("/")) {
+                    hPath = hPath.substring(1);
+                }
             }
             listHTML += `<div data-type="card-item" class="b3-list-item${isFirst ? " b3-list-item--focus" : ""}${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${item.id}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>

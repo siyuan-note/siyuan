@@ -346,7 +346,11 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 iconHTML: Constants.ZWSP,
                 label: window.siyuan.languages.mgmt,
                 click: () => {
-                    viewCards(id, pathPosix().join(getNotebookName(notebookId), name), "Tree");
+                    fetchPost("/api/filetree/getHPathByID", {
+                        id
+                    }, (response) => {
+                        viewCards(id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
+                    });
                     /// #if MOBILE
                     closePanel();
                     /// #endif

@@ -143,6 +143,8 @@ func CheckFileSysStatus() {
 }
 
 func checkFileSysStatus() {
+	defer logging.Recover()
+
 	if IsMutexLocked(&checkFileSysStatusLock) {
 		logging.LogWarnf("check file system status is locked, skip")
 		return

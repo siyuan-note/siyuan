@@ -313,8 +313,6 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 		return false
 	}
 
-	logging.LogInfof("check workspace [%s] availability status", checkAbsPath)
-
 	runtime.LockOSThread()
 	defer runtime.LockOSThread()
 	if err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED); nil != err {

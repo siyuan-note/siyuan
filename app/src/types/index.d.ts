@@ -397,6 +397,7 @@ declare interface IConfig {
     flashcard: {
         newCardLimit: number
         reviewCardLimit: number
+        mark: boolean
         list: boolean
         superBlock: boolean
         deck: boolean

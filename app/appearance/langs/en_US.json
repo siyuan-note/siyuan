@@ -4,6 +4,8 @@
   "flashcardNewCardLimitTip": "If there are many new cards, you can set the number of new cards to review through this item",
   "flashcardReviewCardLimit": "Review Card Limit",
   "flashcardReviewCardLimitTip": "If there are many review cards, you can set the number of review through this item",
+  "flashcardMark": "Mark Carding",
+  "flashcardMarkTip": "After enabling, the mark is recognized as fill in the blank",
   "flashcardList": "List Carding",
   "flashcardListTip": "After enabling, the first list item of a list is recognized as a question, and the rest of the lite items are recognized as answers",
   "flashcardSuperBlock": "Super Block Carding",

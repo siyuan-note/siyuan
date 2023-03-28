@@ -1,3 +1,61 @@
+## v2.8.1 / 2023-03-28
+
+### 改进功能
+
+* [再次打开已在新窗口中存在的页签时不在主窗口中打开](https://github.com/siyuan-note/siyuan/issues/7491)
+* [移动端左右侧栏全屏和点击区域优化](https://github.com/siyuan-note/siyuan/issues/7520)
+* [闪卡支持设置新卡上限](https://github.com/siyuan-note/siyuan/issues/7695)
+* [闪卡支持设置是否启用列表块制卡](https://github.com/siyuan-note/siyuan/issues/7701)
+* [闪卡支持设置是否启用超级块制卡](https://github.com/siyuan-note/siyuan/issues/7702)
+* [闪卡支持设置复习上限](https://github.com/siyuan-note/siyuan/issues/7703)
+* [支持应用内配置人工智能](https://github.com/siyuan-note/siyuan/issues/7714)
+* [支持配置闪卡使用卡包制卡](https://github.com/siyuan-note/siyuan/issues/7724)
+* [导出 Markdown 时在文档头添加 YFM 开关](https://github.com/siyuan-note/siyuan/issues/7727)
+* [为收集箱移动笔记本添加图标及转义处理](https://github.com/siyuan-note/siyuan/issues/7728)
+* [粘贴块时需移除其闪卡属性](https://github.com/siyuan-note/siyuan/issues/7733)
+* [用鼠标划选文本 `Ctrl+C` 后再松开鼠标不应选中块](https://github.com/siyuan-note/siyuan/issues/7734)
+* [Graphviz 中指定 shape 后无法添加填充色](https://github.com/siyuan-note/siyuan/issues/7735)
+* [改进导入 data.zip 和 .sy.zip 校验失败时的提示](https://github.com/siyuan-note/siyuan/issues/7738)
+* [新窗口界面独立临时缩放](https://github.com/siyuan-note/siyuan/issues/7739)
+* [支持配置反链面板提及默认展开数](https://github.com/siyuan-note/siyuan/issues/7743)
+* [数据同步忽略用于文件系统检查的文件](https://github.com/siyuan-note/siyuan/issues/7744)
+* [改进搜索相关细节](https://github.com/siyuan-note/siyuan/issues/7745)
+* [支持应用内删除模板](https://github.com/siyuan-note/siyuan/issues/7746)
+* [macOS 端对工作空间放置在 iCloud 路径下做检查](https://github.com/siyuan-note/siyuan/issues/7747)
+* [移动端菜单打开的面板关闭后返回到上一层菜单](https://github.com/siyuan-note/siyuan/issues/7750)
+* [搜索中的命名查询移到输入框下](https://github.com/siyuan-note/siyuan/issues/7751)
+* [挂件导出属性 `data-export-md` 支持 YFM](https://github.com/siyuan-note/siyuan/issues/7752)
+* [代码块支持设置非高亮语言](https://github.com/siyuan-note/siyuan/issues/7754)
+* [更新部分关闭/移除图标为圆形](https://github.com/siyuan-note/siyuan/issues/7756)
+* [闪卡管理添加复习次数、卡片总数及路径优化](https://github.com/siyuan-note/siyuan/issues/7761)
+* [删除文档时提示删除数量](https://github.com/siyuan-note/siyuan/issues/7762)
+* [内容块人工智能自定义操作持久化](https://github.com/siyuan-note/siyuan/issues/7763)
+* [提供列出文件 API](https://github.com/siyuan-note/siyuan/issues/7765)
+* [搜索分组文档颜色调整及块缩进](https://github.com/siyuan-note/siyuan/issues/7766)
+* [提供 Sprig 模板渲染 API](https://github.com/siyuan-note/siyuan/issues/7767)
+* [改进 Windows 端第三方同步盘检测](https://github.com/siyuan-note/siyuan/issues/7777)
+* [升级 abc.js 至 6.2.0](https://github.com/siyuan-note/siyuan/issues/7788)
+* [增加 kernel.log](https://github.com/siyuan-note/siyuan/issues/7789)
+* [闪卡支持设置是否启用标记制卡](https://github.com/siyuan-note/siyuan/issues/7794)
+* [拖拽调整表格宽度应不受单元格宽度影响](https://github.com/siyuan-note/siyuan/issues/7795)
+
+### 修复缺陷
+
+* [使用快捷键制卡时不应该将光标处和所选块同时制卡](https://github.com/siyuan-note/siyuan/issues/7716)
+* [文档树自定义排序拖拽不稳定](https://github.com/siyuan-note/siyuan/issues/7726)
+* [移动端缩放后会显示退出聚焦](https://github.com/siyuan-note/siyuan/issues/7730)
+* [块标拖拽到闪卡块上时无定位线条](https://github.com/siyuan-note/siyuan/issues/7732)
+* [桌面端设置访问授权后退出应用时抛出异常](https://github.com/siyuan-note/siyuan/issues/7736)
+* [浏览器扩展无法获取微信公众号的图片文章](https://github.com/siyuan-note/siyuan/issues/7748)
+* [重启后窗口大小恢复默认问题](https://github.com/siyuan-note/siyuan/issues/7755)
+* [多个 Mermaid mindmap 无法渲染](https://github.com/siyuan-note/siyuan/issues/7769)
+* [嵌入块 SQL 脚本中存在换行时无法导出](https://github.com/siyuan-note/siyuan/issues/7771)
+* [集市更新获取不同步的问题](https://github.com/siyuan-note/siyuan/issues/7775)
+
+### 开发重构
+
+* [改变非移动端前端编译目标为 `es2021`](https://github.com/siyuan-note/siyuan/pull/7770)
+
 ## v2.8.0 / 2023-03-21
 
 ### 引入特性

@@ -75,6 +75,7 @@ export const flashcard = {
                 fetchPost("/api/setting/setFlashcard", {
                     newCardLimit: parseInt((flashcard.element.querySelector("#newCardLimit") as HTMLInputElement).value),
                     reviewCardLimit: parseInt((flashcard.element.querySelector("#reviewCardLimit") as HTMLInputElement).value),
+                    mark: (flashcard.element.querySelector("#mark") as HTMLInputElement).checked,
                     list: (flashcard.element.querySelector("#list") as HTMLInputElement).checked,
                     superBlock: (flashcard.element.querySelector("#superBlock") as HTMLInputElement).checked,
                     deck: (flashcard.element.querySelector("#deck") as HTMLInputElement).checked,

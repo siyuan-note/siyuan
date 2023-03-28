@@ -11,7 +11,8 @@ docmap = {
     "Bug": "修复缺陷",
     "Document": "文档相关",
     "Refactor": "开发重构",
-    "Abolishment": "移除功能"
+    "Abolishment": "移除功能",
+    "Development": "开发相关",
 }
 
 

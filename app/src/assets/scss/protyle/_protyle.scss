@@ -249,7 +249,7 @@
     width: 80px;
     transition: var(--b3-transition);
     cursor: pointer;
-    font-size: 80px;
+    font-size: 68px; // 🔪显示不完整
     line-height: 80px;
     text-align: center;
     font-family: var(--b3-font-family-emoji);
@@ -260,6 +260,10 @@
       width: 80px;
       float: left;
       border-radius: 4px;
+    }
+
+    &:not(.fn__none) + .protyle-icons {
+      margin-top: 57px;
     }
   }
 
@@ -356,11 +360,9 @@
     bottom: 0;
     display: flex;
     position: absolute;
-    height: 80px;
 
     .protyle-icons {
       position: initial;
-      margin-top: 40px;
     }
   }
 }

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20230324110708"
+		"updated": "20230328100253"
 	},
 	"Children": [
 		{
@@ -204,12 +204,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230324105957-puvmnur",
-				"updated": "20230324110110"
+				"updated": "20230328100253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "其中超级块制卡和列表或者列表项制卡如果不需要的话可以在 "
+					"Data": "以上规则可以在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -227,7 +227,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中关闭。"
+					"Data": "​ 中调整。"
 				}
 			]
 		},

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
-		"updated": "20230324111319"
+		"updated": "20230328100306"
 	},
 	"Children": [
 		{
@@ -196,12 +196,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230324110955-eznqs9u",
-				"updated": "20230324111043"
+				"updated": "20230328100306"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Among them, if you don’t need the super block card and list or list item card, you can turn it off in "
+					"Data": "The above rules can be adjusted in "
 				},
 				{
 					"Type": "NodeTextMark",

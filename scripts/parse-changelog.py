@@ -62,7 +62,7 @@ def find_milestone(repo, title, lastestRelease):
     print(f'''
 ---
 <p align="center">
-<a href="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml"><img src="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml/badge.svg" style="cursor:pointer;height: 30px;margin: 3px auto;"/></a>
+<a href="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/ci.yml?event=push&label=ci.yml%20Action&logo=github" style="cursor:pointer;height: 30px;margin: 3px auto;"/></a>
 <a href="https://github.com/siyuan-note/siyuan/releases/{thisRelease}/"><img src="https://img.shields.io/github/downloads/siyuan-note/siyuan/{thisRelease}/total?logo=github" style="cursor:pointer;height: 30px;margin: 3px auto;"/></a>
 <img alt="GitHub commits difference between two branches/tags/commits" src="https://img.shields.io/github/commits-difference/siyuan-note/siyuan?base={lastestRelease}&head={thisRelease}&logo=git" style="cursor:pointer;height: 30px;margin: 3px auto;"/>
 </p>

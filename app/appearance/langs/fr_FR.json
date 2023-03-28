@@ -4,6 +4,8 @@
   "flashcardNewCardLimitTip": "S'il y a beaucoup de nouvelles cartes, vous pouvez définir le nombre de nouvelles cartes à examiner via cet élément",
   "flashcardReviewCardLimit": "Revoir la limite de la carte",
   "flashcardReviewCardLimitTip": "S'il y a plusieurs cartes d'avis, vous pouvez définir le nombre d'avis via cet élément",
+  "flashcardMark": "Carte de marque",
+  "flashcardMarkTip": "Après l'activation, la marque est reconnue comme remplissant le blanc",
   "flashcardList": "Fiche de liste",
   "flashcardListTip": "Après l'activation, le premier élément d'une liste est reconnu comme une question, et le reste des éléments légers sont reconnus comme des réponses",
   "flashcardSuperBlock": "Carte Super Block",

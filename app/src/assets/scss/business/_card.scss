@@ -53,7 +53,7 @@
       box-shadow: none;
     }
 
-    &--hide span[data-type~=mark] {
+    &--hidemark span[data-type~=mark] {
       transition: var(--b3-transition);
       color: transparent !important;
     }

@@ -4,6 +4,8 @@
   "flashcardNewCardLimitTip": "Si hay muchas tarjetas nuevas, puede establecer la cantidad de tarjetas nuevas para revisar a través de este elemento",
   "flashcardReviewCardLimit": "Revisar límite de tarjeta",
   "flashcardReviewCardLimitTip": "Si hay muchas tarjetas de revisión, puede establecer el número de revisión a través de este elemento",
+  "flashcardMark": "Marcar cardado",
+  "flashcardMarkTip": "Después de habilitar, la marca se reconoce como un espacio en blanco",
   "flashcardList": "Lista de tarjetas",
   "flashcardListTip": "Después de habilitar, el primer elemento de una lista se reconoce como una pregunta, y el resto de los elementos básicos se reconocen como respuestas",
   "flashcardSuperBlock": "Carda de súper bloque",

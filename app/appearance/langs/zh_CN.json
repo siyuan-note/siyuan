@@ -4,6 +4,8 @@
   "flashcardNewCardLimitTip": "如果新卡较多，可以通过该项设置新卡复习的数量",
   "flashcardReviewCardLimit": "复习卡上限",
   "flashcardReviewCardLimitTip": "如果复习卡较多，可以通过该项设置复习的数量",
+  "flashcardMark": "标记制卡",
+  "flashcardMarkTip": "启用后支持标记制卡，标记的文本被识别为挖空填空",
   "flashcardList": "列表块制卡",
   "flashcardListTip": "启用后支持列表块制卡，列表的第一个列表项被识别为问题，子列表识别为答案",
   "flashcardSuperBlock": "超级块制卡",

@@ -405,12 +405,17 @@ export class WYSIWYG {
                 target.removeAttribute("style");
                 const id = nodeElement.getAttribute("data-node-id");
                 const x = event.clientX;
-                const colElement = nodeElement.querySelectorAll("table col")[parseInt(target.getAttribute("data-col-index"))] as HTMLElement;
+                const colIndex = parseInt(target.getAttribute("data-col-index"))
+                const colElement = nodeElement.querySelectorAll("table col")[colIndex] as HTMLElement;
                 // 清空初始化 table 时的最小宽度
                 if (colElement.style.minWidth) {
-                    colElement.style.width = (nodeElement.querySelectorAll("table td, table th")[parseInt(target.getAttribute("data-col-index"))] as HTMLElement).offsetWidth + "px";
+                    colElement.style.width = (nodeElement.querySelectorAll("table td, table th")[colIndex] as HTMLElement).offsetWidth + "px";
                     colElement.style.minWidth = "";
                 }
+                // 移除 cell 上的宽度限制 https://github.com/siyuan-note/siyuan/issues/7795
+                nodeElement.querySelectorAll("tr").forEach((trItem: HTMLTableRowElement) => {
+                    trItem.cells[colIndex].style.width = "";
+                });
                 const oldWidth = colElement.clientWidth;
                 const hasScroll = nodeElement.firstElementChild.clientWidth < nodeElement.firstElementChild.scrollWidth;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {

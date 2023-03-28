@@ -315,7 +315,12 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 
 	logging.LogInfof("check workspace [%s] availability status", checkAbsPath)
 
-	ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED)
+	runtime.LockOSThread()
+	defer runtime.LockOSThread()
+	if err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED); nil != err {
+		logging.LogWarnf("initialize ole failed: %s", err)
+		return false
+	}
 	defer ole.CoUninitialize()
 	dir, file := filepath.Split(checkAbsPath)
 	unknown, err := oleutil.CreateObject("Shell.Application")

@@ -31,4 +31,7 @@ class Protyle {
     public static plantumlRender = plantumlRender;
 }
 
+// @ts-ignore
+window.Protyle = Protyle;
+
 export default Protyle;

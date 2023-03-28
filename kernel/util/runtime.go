@@ -303,17 +303,26 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 	// 改进 Windows 端第三方同步盘检测 https://github.com/siyuan-note/siyuan/issues/7777
 
 	defer logging.Recover()
-	ole.CoInitialize(0)
-	defer ole.CoUninitialize()
 
-	dataAbsPath := filepath.Join(workspaceAbsPath, "data")
-	dir, file := filepath.Split(dataAbsPath)
-
-	if !gulu.File.IsExist(dataAbsPath) {
-		dataAbsPath = workspaceAbsPath
+	checkAbsPath := filepath.Join(workspaceAbsPath, "data")
+	if !gulu.File.IsExist(checkAbsPath) {
+		checkAbsPath = workspaceAbsPath
+	}
+	if !gulu.File.IsExist(checkAbsPath) {
+		logging.LogWarnf("check path [%s] not exist", checkAbsPath)
 		return false
 	}
 
+	logging.LogInfof("check workspace [%s] availability status", checkAbsPath)
+
+	runtime.LockOSThread()
+	defer runtime.LockOSThread()
+	if err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED); nil != err {
+		logging.LogWarnf("initialize ole failed: %s", err)
+		return false
+	}
+	defer ole.CoUninitialize()
+	dir, file := filepath.Split(checkAbsPath)
 	unknown, err := oleutil.CreateObject("Shell.Application")
 	if nil != err {
 		logging.LogWarnf("create shell application failed: %s", err)
@@ -339,6 +348,10 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 		return false
 	}
 	fileObj := result.ToIDispatch()
+	if nil == fileObj {
+		logging.LogWarnf("call shell [ParseName] file is nil [%s]", checkAbsPath)
+		return false
+	}
 
 	result, err = oleutil.CallMethod(folderObj, "GetDetailsOf", fileObj, 303)
 	if nil != err {
@@ -357,7 +370,7 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 	if strings.Contains(status, "sync") || strings.Contains(status, "同步") ||
 		strings.Contains(status, "available on this device") || strings.Contains(status, "在此设备上可用") ||
 		strings.Contains(status, "available when online") || strings.Contains(status, "联机时可用") {
-		logging.LogErrorf("[%s] third party sync status [%s]", dataAbsPath, status)
+		logging.LogErrorf("[%s] third party sync status [%s]", checkAbsPath, status)
 		return true
 	}
 	return false

@@ -405,7 +405,7 @@ export class WYSIWYG {
                 target.removeAttribute("style");
                 const id = nodeElement.getAttribute("data-node-id");
                 const x = event.clientX;
-                const colIndex = parseInt(target.getAttribute("data-col-index"))
+                const colIndex = parseInt(target.getAttribute("data-col-index"));
                 const colElement = nodeElement.querySelectorAll("table col")[colIndex] as HTMLElement;
                 // 清空初始化 table 时的最小宽度
                 if (colElement.style.minWidth) {

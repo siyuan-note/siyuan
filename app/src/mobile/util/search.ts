@@ -67,7 +67,7 @@ export const popSearch = () => {
         title: '<input id="toolbarSearch" style="background-color: var(--b3-theme-surface);border: 0;" class="b3-text-field fn__block">',
         icon:"iconSearch",
         html: '<div id="searchPanel"></div>',
-        bindEvent(HTMLElement) {
+        bindEvent() {
             initToolbarSearch();
             const searchElement = document.getElementById("searchPanel");
             // 不能使用 getEventName() https://ld246.com/article/1638887457149

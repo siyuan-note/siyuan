@@ -433,6 +433,7 @@ declare interface IConfig {
             region: string
             skipTlsVerify: boolean
             timeout: number
+            checkURL: string
         }
         webdav: {
             endpoint: string
@@ -440,6 +441,7 @@ declare interface IConfig {
             password: string
             skipTlsVerify: boolean
             timeout: number
+            checkURL: string
         }
     },
     lang: string

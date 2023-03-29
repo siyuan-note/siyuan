@@ -365,6 +365,10 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.Bucket = strings.TrimSpace(s3.Bucket)
 	s3.Region = strings.TrimSpace(s3.Region)
 	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
+	s3.CheckURL = strings.TrimSpace(s3.CheckURL)
+	if "" == s3.CheckURL {
+		s3.CheckURL = conf.NewSyncProviderCheckURL()
+	}
 
 	Conf.Sync.S3 = s3
 	Conf.Save()
@@ -384,6 +388,10 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	webdav.Username = strings.TrimSpace(webdav.Username)
 	webdav.Password = strings.TrimSpace(webdav.Password)
 	webdav.Timeout = util.NormalizeTimeout(webdav.Timeout)
+	webdav.CheckURL = strings.TrimSpace(webdav.CheckURL)
+	if "" == webdav.CheckURL {
+		webdav.CheckURL = conf.NewSyncProviderCheckURL()
+	}
 
 	Conf.Sync.WebDAV = webdav
 	Conf.Save()

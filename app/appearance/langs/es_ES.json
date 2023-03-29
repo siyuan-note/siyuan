@@ -1026,7 +1026,7 @@
     "73": "Importando, por favor espere...",
     "74": "El kernel no ha sido arrancado completamente [%d%%], por favor, inténtelo de nuevo más tarde",
     "75": "Error al intentar acceder al archivo",
-    "76": "TODO",
+    "76": "La verificaci\u00f3n de conectividad de red del proveedor de servicios de almacenamiento en la nube es anormal, verifique la configuraci\u00f3n de red",
     "77": "Ruta inválida [%s]",
     "78": "Los viejos y nuevos caminos se repiten",
     "79": "Sólo admite la importación de documentos Markdown",

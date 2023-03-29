@@ -566,15 +566,20 @@ func planSyncAfter(d time.Duration) {
 	syncPlanTime = time.Now().Add(d)
 }
 
-func isProviderOnline() bool {
+func isProviderOnline() (ret bool) {
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
-		return util.IsOnline(util.SiYuanSyncServer)
+		ret = util.IsOnline(util.SiYuanSyncServer)
 	case conf.ProviderS3:
-		return util.IsOnline(Conf.Sync.S3.Endpoint)
+		ret = util.IsOnline(Conf.Sync.S3.Endpoint)
 	case conf.ProviderWebDAV:
-		return util.IsOnline(Conf.Sync.WebDAV.Endpoint)
+		ret = util.IsOnline(Conf.Sync.WebDAV.Endpoint)
 	default:
-		return util.IsOnline("")
+		ret = util.IsOnline("")
 	}
+
+	if !ret {
+		util.PushErrMsg(Conf.Language(76), 5000)
+	}
+	return
 }

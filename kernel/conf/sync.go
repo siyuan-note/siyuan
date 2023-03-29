@@ -56,7 +56,7 @@ type WebDAV struct {
 	Password      string `json:"password"`      // 密码
 	SkipTlsVerify bool   `json:"skipTlsVerify"` // 是否跳过 TLS 验证
 	Timeout       int    `json:"timeout"`       // 超时时间，单位：秒
-	CheckURL      string `json:"checkUrl"`      // 连通性检查 URL // https://github.com/siyuan-note/siyuan/issues/7805
+	CheckURL      string `json:"checkURL"`      // 连通性检查 URL // https://github.com/siyuan-note/siyuan/issues/7805
 }
 
 const (
@@ -66,5 +66,5 @@ const (
 )
 
 func NewSyncProviderCheckURL() string {
-	return "https://www.baidu.com https://icanhazip.com https://api.ipify.org"
+	return "https://www.baidu.com"
 }

@@ -268,7 +268,8 @@ func InitConf() {
 	}
 	Conf.Sync.S3.Endpoint = util.NormalizeEndpoint(Conf.Sync.S3.Endpoint)
 	Conf.Sync.S3.Timeout = util.NormalizeTimeout(Conf.Sync.S3.Timeout)
-	if "" == strings.TrimSpace(Conf.Sync.S3.CheckURL) {
+	Conf.Sync.S3.CheckURL = util.NormalizeCheckURL(Conf.Sync.S3.CheckURL)
+	if "" == Conf.Sync.S3.CheckURL {
 		Conf.Sync.S3.CheckURL = conf.NewSyncProviderCheckURL()
 	}
 	if nil == Conf.Sync.WebDAV {
@@ -276,7 +277,8 @@ func InitConf() {
 	}
 	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
 	Conf.Sync.WebDAV.Timeout = util.NormalizeTimeout(Conf.Sync.WebDAV.Timeout)
-	if "" == strings.TrimSpace(Conf.Sync.WebDAV.CheckURL) {
+	Conf.Sync.WebDAV.CheckURL = util.NormalizeCheckURL(Conf.Sync.WebDAV.CheckURL)
+	if "" == Conf.Sync.WebDAV.CheckURL {
 		Conf.Sync.WebDAV.CheckURL = conf.NewSyncProviderCheckURL()
 	}
 

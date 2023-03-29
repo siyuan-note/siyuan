@@ -44,7 +44,7 @@ type dbQueueOperation struct {
 	action      string // upsert/delete/delete_id/rename/rename_sub_tree/delete_box/delete_box_refs/insert_refs/index/delete_ids/update_block_content/delete_assets
 
 	indexPath                     string      // index
-	upsertTree                    *parse.Tree // upsert/insert_refs
+	upsertTree                    *parse.Tree // upsert/insert_refs/update_refs/delete_refs
 	removeTreeBox, removeTreePath string      // delete
 	removeTreeIDBox, removeTreeID string      // delete_id
 	removeTreeIDs                 []string    // delete_ids
@@ -182,6 +182,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = insertRefs(tx, op.upsertTree)
 	case "update_refs":
 		err = upsertRefs(tx, op.upsertTree)
+	case "delete_refs":
+		err = deleteRefs(tx, op.upsertTree)
 	case "update_block_content":
 		err = updateBlockContent(tx, op.block)
 	case "delete_assets":
@@ -213,6 +215,20 @@ func UpdateBlockContentQueue(block *Block) {
 	newOp := &dbQueueOperation{block: block, inQueueTime: time.Now(), action: "update_block_content"}
 	for i, op := range operationQueue {
 		if "update_block_content" == op.action && op.block.ID == block.ID {
+			operationQueue[i] = newOp
+			return
+		}
+	}
+	operationQueue = append(operationQueue, newOp)
+}
+
+func DeleteRefsTreeQueue(tree *parse.Tree) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	newOp := &dbQueueOperation{upsertTree: tree, inQueueTime: time.Now(), action: "delete_refs"}
+	for i, op := range operationQueue {
+		if "delete_refs" == op.action && op.upsertTree.ID == tree.ID {
 			operationQueue[i] = newOp
 			return
 		}

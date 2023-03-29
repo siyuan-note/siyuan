@@ -842,7 +842,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "template": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}"
   }
   ```
-    * `template`: template content
+  * `template`: template content
 * Return value
 
   ```json
@@ -898,7 +898,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
   }
   ```
-    * `path`: the file path under the workspace path
+  * `path`: the file path under the workspace path
 * Return value
 
   ```json
@@ -919,7 +919,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
   }
   ```
-    * `path`: the file path under the workspace path
+  * `path`: the file path under the workspace path
 * Return value
 
   ```json

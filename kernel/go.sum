@@ -8,8 +8,8 @@ github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5 h1:8HdZozCsXS
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20230321113152-38c4a3d73c37 h1:7ZMvlXDbH2sqaxowoAFcLjcdRN7ncVE0U1S2ukpUgac=
 github.com/88250/gulu v1.2.3-0.20230321113152-38c4a3d73c37/go.mod h1:pTWnjt+6qUqNnP9xltswsJxgCBVu3C7eW09u48LWX0k=
-github.com/88250/lute v1.7.6-0.20230320134658-c722b84ce5e7 h1:op+n/IE+LpxJaAfRk6l4ZnXgJQKDKEDz5EBaARCDU/w=
-github.com/88250/lute v1.7.6-0.20230320134658-c722b84ce5e7/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
+github.com/88250/lute v1.7.6-0.20230329015356-3dd609f50804 h1:3O2GnGwbRWFjaP7ZYt38SfLvFYm6ET8+zBT4fuVNW7c=
+github.com/88250/lute v1.7.6-0.20230329015356-3dd609f50804/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390 h1:q2AR33VoQ87WYtvZ4pEvwj5gZkv22HK/yMlPWwF1oyc=
 github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -287,8 +287,6 @@ github.com/siyuan-note/filelock v0.0.0-20230321113304-79a32917cc9f h1:zHixRabadw
 github.com/siyuan-note/filelock v0.0.0-20230321113304-79a32917cc9f/go.mod h1:UMyz+Vj2tN8we7JRIPnFm0+lGvjTBWfbnhV5SbSJuBE=
 github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc h1:MX2cPWpn7Hfd3FmpwLjGdPIjF84AFUS9f/mcPJc/4w4=
 github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc/go.mod h1:WDO42mUVRnkk8M4AhZ4oakZ5jnghulP0c8NFCrrFWG4=
-github.com/siyuan-note/logging v0.0.0-20230327034340-a7bed1fff2fe h1:QmBB+8HVbjxXzVUdAiysYaClEAaREcxeZt6kvHcrFUc=
-github.com/siyuan-note/logging v0.0.0-20230327034340-a7bed1fff2fe/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493 h1:oaN5b0WDFkjdBgGxmmBnMrtZxaJ76LZLwhQSZnznJMI=
 github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7 h1:Kr8hhMhr6v+U24TMDCP5WdP4dWrXm5maar+TycTZs9I=

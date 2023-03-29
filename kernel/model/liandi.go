@@ -227,12 +227,15 @@ func refreshSubscriptionExpirationRemind() {
 	}
 	if IsSubscriber() && -1 != Conf.User.UserSiYuanProExpireTime {
 		expired := int64(Conf.User.UserSiYuanProExpireTime)
-		if time.Now().UnixMilli() >= expired { // 已经过期
-			time.Sleep(time.Second * 30)
-			util.PushErrMsg(Conf.Language(128), 0)
+		now := time.Now().UnixMilli()
+		if now >= expired { // 已经过期
+			if now-expired <= 1000*60*60*24*2 { // 2 天内提醒 https://github.com/siyuan-note/siyuan/issues/7816
+				time.Sleep(time.Second * 30)
+				util.PushErrMsg(Conf.Language(128), 0)
+			}
 			return
 		}
-		remains := int((expired - time.Now().UnixMilli()) / 1000 / 60 / 60 / 24)
+		remains := int((expired - now) / 1000 / 60 / 60 / 24)
 		expireDay := 15 // 付费订阅提前 15 天提醒
 		if 2 == Conf.User.UserSiYuanSubscriptionPlan {
 			expireDay = 3 // 试用订阅提前 3 天提醒

@@ -34,6 +34,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# package
+# NPM Package
 package-lock.json
 yarn.lock

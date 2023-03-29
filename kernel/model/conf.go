@@ -297,7 +297,7 @@ func InitConf() {
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0
 	}
-	if 0> Conf.Editor.BackmentionExpandCount {
+	if 0 > Conf.Editor.BackmentionExpandCount {
 		Conf.Editor.BackmentionExpandCount = 0
 	}
 

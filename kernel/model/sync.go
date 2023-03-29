@@ -46,7 +46,7 @@ func SyncDataDownload() {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -82,7 +82,7 @@ func SyncDataUpload() {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -136,7 +136,7 @@ func BootSyncData() {
 		return
 	}
 
-	if !util.IsOnline() {
+	if !isProviderOnline() {
 		BootSyncSucc = 1
 		util.PushErrMsg(Conf.Language(28), 7000)
 		return
@@ -182,7 +182,7 @@ func syncData(boot, exit, byHand bool) {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -564,4 +564,23 @@ func IncSync() {
 
 func planSyncAfter(d time.Duration) {
 	syncPlanTime = time.Now().Add(d)
+}
+
+func isProviderOnline() (ret bool) {
+	checkURL := util.SiYuanSyncServer
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan:
+	case conf.ProviderS3:
+		checkURL = Conf.Sync.S3.Endpoint
+	case conf.ProviderWebDAV:
+		checkURL = Conf.Sync.WebDAV.Endpoint
+	default:
+		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
+		util.IsOnline("")
+	}
+
+	if ret = util.IsOnline(checkURL); !ret {
+		util.PushErrMsg(Conf.Language(76), 5000)
+	}
+	return
 }

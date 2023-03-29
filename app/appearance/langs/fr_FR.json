@@ -1026,7 +1026,7 @@
     "73": "En cours d'importation, veuillez patienter...",
     "74": "Le kernel n'a pas été complètement démarré [%d%%], veuillez réessayer plus tard.",
     "75": "La tentative d'accès au fichier a échoué",
-    "76": "TODO",
+    "76": "La vérification de la connectivité réseau du fournisseur de service de stockage cloud est anormale, veuillez vérifier la configuration réseau",
     "77": "Chemin d'accès invalide [%s]",
     "78": "Les anciens et les nouveaux chemins sont répétés",
     "79": "Prise en charge de l'importation de documents Markdown uniquement",

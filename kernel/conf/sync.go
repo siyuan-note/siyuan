@@ -62,3 +62,7 @@ const (
 	ProviderS3     = 2 // ProviderS3 为 S3 协议对象存储提供的云端存储服务
 	ProviderWebDAV = 3 // ProviderWebDAV 为 WebDAV 协议提供的云端存储服务
 )
+
+func NewSyncProviderCheckURL() string {
+	return "https://www.baidu.com"
+}

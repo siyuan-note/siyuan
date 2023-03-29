@@ -18,6 +18,7 @@ package util
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -80,6 +81,11 @@ func InvalidIDPattern(idArg string, result *gulu.Result) bool {
 	result.Code = -1
 	result.Msg = "invalid ID argument"
 	return true
+}
+
+func IsValidURL(str string) bool {
+	_, err := url.Parse(str)
+	return nil == err
 }
 
 func initHttpClient() {

@@ -93,6 +93,11 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
         <option ${window.siyuan.config.sync.s3.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
     </select>
+</label>
+<label class="b3-label b3-label--noborder fn__flex config__item">
+    <div class="fn__flex-center fn__size200">Connectivity Check URL</div>
+    <div class="fn__space"></div>
+    <input id="checkURL" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.checkURL}">
 </label>`;
     } else if (provider === 3) {
         const tip = `<div class="b3-label b3-label--inner">
@@ -133,6 +138,11 @@ const renderProvider = (provider: number) => {
         <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "" : "selected"} value="false">Verify</option>
         <option ${window.siyuan.config.sync.webdav.skipTlsVerify ? "selected" : ""} value="true">Skip</option>
     </select>
+</label>
+<label class="b3-label b3-label--noborder fn__flex config__item">
+    <div class="fn__flex-center fn__size200">Connectivity Check URL</div>
+    <div class="fn__space"></div>
+    <input id="checkURL" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.checkURL}">
 </label>`;
     }
     return "";
@@ -217,6 +227,7 @@ const bindProviderEvent = () => {
                     region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value,
                     skipTlsVerify: (providerPanelElement.querySelector("#s3SkipTlsVerify") as HTMLInputElement).value === "true",
                     timeout: timeout,
+                    checkURL: (providerPanelElement.querySelector("#checkURL") as HTMLInputElement).value,
                 };
                 fetchPost("/api/sync/setSyncProviderS3", {s3}, () => {
                     window.siyuan.config.sync.s3 = s3;
@@ -236,6 +247,7 @@ const bindProviderEvent = () => {
                     password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value,
                     skipTlsVerify: (providerPanelElement.querySelector("#webdavSkipTlsVerify") as HTMLInputElement).value === "true",
                     timeout: timeout,
+                    checkURL: (providerPanelElement.querySelector("#checkURL") as HTMLInputElement).value,
                 };
                 fetchPost("/api/sync/setSyncProviderWebDAV", {webdav}, () => {
                     window.siyuan.config.sync.webdav = webdav;

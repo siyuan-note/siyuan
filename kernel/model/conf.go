@@ -268,11 +268,17 @@ func InitConf() {
 	}
 	Conf.Sync.S3.Endpoint = util.NormalizeEndpoint(Conf.Sync.S3.Endpoint)
 	Conf.Sync.S3.Timeout = util.NormalizeTimeout(Conf.Sync.S3.Timeout)
+	if "" == strings.TrimSpace(Conf.Sync.S3.CheckURL) {
+		Conf.Sync.S3.CheckURL = conf.NewSyncProviderCheckURL()
+	}
 	if nil == Conf.Sync.WebDAV {
 		Conf.Sync.WebDAV = &conf.WebDAV{}
 	}
 	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
 	Conf.Sync.WebDAV.Timeout = util.NormalizeTimeout(Conf.Sync.WebDAV.Timeout)
+	if "" == strings.TrimSpace(Conf.Sync.WebDAV.CheckURL) {
+		Conf.Sync.WebDAV.CheckURL = conf.NewSyncProviderCheckURL()
+	}
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()
@@ -297,7 +303,7 @@ func InitConf() {
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0
 	}
-	if 0> Conf.Editor.BackmentionExpandCount {
+	if 0 > Conf.Editor.BackmentionExpandCount {
 		Conf.Editor.BackmentionExpandCount = 0
 	}
 

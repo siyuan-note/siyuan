@@ -245,6 +245,7 @@ export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isS
         (layout as Tab).addModel(new Asset({
             tab: (layout as Tab),
             path: json.path,
+            page: json.page,
         }));
     } else if (json.instance === "Backlink") {
         (layout as Tab).addModel(new Backlink({
@@ -381,6 +382,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.scrollAttr = saveScroll(layout.editor.protyle, true);
     } else if (layout instanceof Asset) {
         json.path = layout.path;
+        if (layout.pdfObject) {
+            json.page = layout.pdfObject.page;
+        }
         json.instance = "Asset";
     } else if (layout instanceof Backlink) {
         json.blockId = layout.blockId;

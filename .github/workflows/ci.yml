@@ -25,13 +25,22 @@ jobs:
         with:
           python-version: "3.10"
       - run: pip install PyGithub
+      
+      - id: thislatestR
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          # owner: siyuan-note
+          # repo: siyuan
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          excludes: prerelease, draft
 
       - name: Gather Release Information
         id: release_info
         run: |
           echo "release_title=$(git show --format=%s --no-patch | head -1)" >> $GITHUB_OUTPUT
           echo "release_version=$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')" >> $GITHUB_OUTPUT
-          changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} siyuan-note/siyuan)
+          changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} -b ${{ steps.thislatestR.outputs.release }} siyuan-note/siyuan)
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "release_body<<$EOF" >> $GITHUB_ENV
           echo "$changelog" >> $GITHUB_ENV
@@ -143,7 +152,7 @@ jobs:
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
 
     - name: Install Node Dependencies
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile
       working-directory: ${{ github.workspace }}/go/src/github.com/siyuan-note/siyuan/app
       
     - name: Building UI

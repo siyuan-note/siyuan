@@ -954,7 +954,12 @@ powerMonitor.on("resume", async () => {
                 const result = await fetch("https://icanhazip.com", {timeout: 1000});
                 return 200 === result.status;
             } catch (e) {
-                return false;
+                try {
+                    const result = await fetch("https://api.ipify.org", {timeout: 1000});
+                    return 200 === result.status;
+                } catch (e) {
+                    return false;
+                }
             }
         }
     };

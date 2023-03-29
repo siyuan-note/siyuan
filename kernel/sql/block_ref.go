@@ -47,3 +47,13 @@ func upsertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 	err = insertRefs(tx, tree)
 	return
 }
+
+func deleteRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
+	if err = deleteRefsByPath(tx, tree.Box, tree.Path); nil != err {
+		return
+	}
+	if err = deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); nil != err {
+		return
+	}
+	return
+}

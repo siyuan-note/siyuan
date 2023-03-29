@@ -1,67 +1,58 @@
-name: 🐛 缺陷报告 Bug Report
-description: 报告缺陷以帮助我们进行改进 Report defects to help us improve
-title: "请输入问题报告标题 Please enter the title of the bug report"
+name: 🐛 Bug Report
+description: Report defects to help us improve
+title: "Please enter the title of the bug report"
 body:
   - type: checkboxes
     attributes:
-      label: 该问题是否已经被报告过了？ Is there an existing issue for this?
+      label: Is there an existing issue for this?
       description: |
-        请搜索以查看你遇到的问题是否已经被报告过。
         Please search to see if an issue already exists for the bug you encountered.
       options:
-        - label: |
-            我已经搜索了 Issues，没有发现类似问题 
+        - label: | 
             I have searched the existing issues
           required: true
   - type: checkboxes
     attributes:
-      label: 该问题是否能够在默认主题（daylight/midnight）下重现？ Can the issue be reproduced with the default theme (daylight/midnight)?
+      label: Can the issue be reproduced with the default theme (daylight/midnight)?
       description: |
-        请确认该问题能够在默认主题下重现。
         Please confirm that the issue can be reproduced with the default theme.
       options:
         - label: |
-            我能够在默认主题下重现该问题
             I was able to reproduce the issue with the default theme
           required: true
   - type: checkboxes
     attributes:
-      label: 该问题是否可能是由于扩展功能导致？ Could the issue be due to extensions?
+      label: Could the issue be due to extensions?
       description: |
-        请注意主题、代码片段、挂件或者其他扩展功能可能会导致问题。
         Be aware that themes, code snippets, widgets, or other extensions may cause problems.
       options:
         - label: |
-            我已经排除了扩展导致问题的可能性
             I've ruled out the possibility that the extension is causing the problem.
           required: true
   - type: textarea
     attributes:
-      label: 描述问题 Describe the problem
+      label: Describe the problem
       description: |
-        请尽量清晰地描述你遇到的问题。
         Please describe the problem you are experiencing as clearly as possible.
     validations:
       required: true
   - type: textarea
     attributes:
-      label: 期待的结果 Expected result
+      label: Expected result
       description: |
-        请尽量清晰地描述你所期待的结果。
         Please be as clear and accurate as possible to describe the results you are looking for.
     validations:
       required: true
   - type: textarea
     attributes:
-      label: 截屏或者录屏演示 Screenshot or screen recording presentation
+      label: Screenshot or screen recording presentation
       description: |
-        请通过截屏或者录屏演示你碰到的问题。
         Please try to attach screenshots or videos to describe the problem you are experiencing.
     validations:
       required: false
   - type: textarea
     attributes:
-      label: 版本环境 Version environment
+      label: Version environment
       value: |
         - Version: 
         - Operating System: 
@@ -71,17 +62,15 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: 日志文件 Log file
+      label: Log file
       description: |
-        请提供内核日志 `工作空间/temp/siyuan.log`
         The program log file is located at `workspace/temp/siyuan.log`
     validations:
       required: true
   - type: textarea
     attributes:
-      label: 更多信息 More information
+      label: More information
       description: |
-        请提供任何附加信息，以帮助我们更好地定位问题。
         Please provide other additional information to help us diagnose the problem.
     validations:
       required: false

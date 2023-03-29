@@ -156,20 +156,6 @@ func NormalizeEndpoint(endpoint string) string {
 	return endpoint
 }
 
-func NormalizeCheckURL(checkURL string) string {
-	checkURL = strings.TrimSpace(checkURL)
-	if "" == checkURL {
-		return ""
-	}
-	if !strings.HasPrefix(checkURL, "http://") && !strings.HasPrefix(checkURL, "https://") {
-		checkURL = "http://" + checkURL
-	}
-	if !IsValidURL(checkURL) {
-		return ""
-	}
-	return checkURL
-}
-
 func FilterMoveDocFromPaths(fromPaths []string, toPath string) (ret []string) {
 	tmp := FilterSelfChildDocs(fromPaths)
 	for _, fromPath := range tmp {

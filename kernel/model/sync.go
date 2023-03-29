@@ -46,7 +46,7 @@ func SyncDataDownload() {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -82,7 +82,7 @@ func SyncDataUpload() {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -136,7 +136,7 @@ func BootSyncData() {
 		return
 	}
 
-	if !util.IsOnline() {
+	if !isProviderOnline() {
 		BootSyncSucc = 1
 		util.PushErrMsg(Conf.Language(28), 7000)
 		return
@@ -182,7 +182,7 @@ func syncData(boot, exit, byHand bool) {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !util.IsOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -365,10 +365,6 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.Bucket = strings.TrimSpace(s3.Bucket)
 	s3.Region = strings.TrimSpace(s3.Region)
 	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
-	s3.CheckURL = strings.TrimSpace(s3.CheckURL)
-	if "" == s3.CheckURL {
-		s3.CheckURL = conf.NewSyncProviderCheckURL()
-	}
 
 	Conf.Sync.S3 = s3
 	Conf.Save()
@@ -388,10 +384,6 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	webdav.Username = strings.TrimSpace(webdav.Username)
 	webdav.Password = strings.TrimSpace(webdav.Password)
 	webdav.Timeout = util.NormalizeTimeout(webdav.Timeout)
-	webdav.CheckURL = strings.TrimSpace(webdav.CheckURL)
-	if "" == webdav.CheckURL {
-		webdav.CheckURL = conf.NewSyncProviderCheckURL()
-	}
 
 	Conf.Sync.WebDAV = webdav
 	Conf.Save()
@@ -572,4 +564,17 @@ func IncSync() {
 
 func planSyncAfter(d time.Duration) {
 	syncPlanTime = time.Now().Add(d)
+}
+
+func isProviderOnline() bool {
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan:
+		return util.IsOnline(util.SiYuanSyncServer)
+	case conf.ProviderS3:
+		return util.IsOnline(Conf.Sync.S3.Endpoint)
+	case conf.ProviderWebDAV:
+		return util.IsOnline(Conf.Sync.WebDAV.Endpoint)
+	default:
+		return util.IsOnline("")
+	}
 }

@@ -124,6 +124,9 @@ const openFile = (options: IOpenFileOptions) => {
             if ((jsonObj.children.rootId && jsonObj.children.rootId === options.rootID) ||
                 (jsonObj.children.path && jsonObj.children.path === options.assetPath)) {
                 item.focus();
+                if (options.assetPath) {
+                    item.webContents.executeJavaScript(`window.newWindow.positionPDF("${options.assetPath}", ${typeof options.page === "number" ? options.page : `"${options.page}"`})`);
+                }
                 hasOpen = true;
                 return true;
             }

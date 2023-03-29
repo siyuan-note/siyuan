@@ -31,7 +31,6 @@ class Protyle {
     public static plantumlRender = plantumlRender;
 }
 
-// @ts-ignore
 // 由于 https://github.com/siyuan-note/siyuan/issues/7800，先临时解决一下
 window.Protyle = Protyle;
 

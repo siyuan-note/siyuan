@@ -20,6 +20,7 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
+import {positionPDF} from "./global/positionPDF";
 
 class App {
     constructor() {
@@ -141,3 +142,8 @@ class App {
 }
 
 new App();
+
+// 再次点击新窗口已打开的 PDF 时，需进行定位
+window.newWindow = {
+    positionPDF: positionPDF
+}

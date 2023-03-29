@@ -169,10 +169,25 @@ const renderPDF = (id: string) => {
         </div>
         <span class="fn__hr"></span>
         <select class="b3-select" id="marginsType">
-            <option ${localData.marginType === "0" ? "selected" : ""} value="0">Default</option>
-            <option ${localData.marginType === "1" ? "selected" : ""} value="1">None</option>
-            <option ${localData.marginType === "2" ? "selected" : ""} value="2">Minimal</option>
+            <option ${localData.marginType === "default" ? "selected" : ""} value="default">Default</option>
+            <option ${localData.marginType === "none" ? "selected" : ""} value="none">None</option>
+            <option ${localData.marginType === "printableArea" ? "selected" : ""} value="printableArea">Minimal</option>
+            <option ${localData.marginType === "custom" ? "selected" : ""} value="custom">${window.siyuan.languages.custom}</option>
         </select>
+        <div class="${localData.marginType === "custom" ? "" : "fn__none"}">
+            <span class="fn__hr"></span>
+            <div>Top</div>
+            <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
+            <span class="fn__hr"></span>
+            <div>Right</div>
+            <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
+            <span class="fn__hr"></span>
+            <div>Bottom</div>
+            <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
+            <span class="fn__hr"></span>
+            <div>Left</div>
+        <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
+    </div>
     </label>
     <label class="b3-label">
         <div>
@@ -224,8 +239,6 @@ const renderPDF = (id: string) => {
 <script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
-    let pdfLeft = 0;
-    let pdfTop = 0;
     const previewElement = document.getElementById('preview');
     const fixBlockWidth = () => {
         const isLandscape = document.querySelector("#landscape").checked;
@@ -276,36 +289,48 @@ const renderPDF = (id: string) => {
     }
     const setPadding = () => {
         const isLandscape = document.querySelector("#landscape").checked;
-        switch (document.querySelector("#marginsType").value) { // none
-            case "0":
+        const topElement = document.querySelector("#marginsTop")
+        const rightElement = document.querySelector("#marginsRight")
+        const bottomElement = document.querySelector("#marginsBottom")
+        const leftElement = document.querySelector("#marginsLeft")
+        switch (document.querySelector("#marginsType").value) {
+            case "default":
                 if (isLandscape) {
-                    pdfLeft = 0.42;
-                    pdfTop = 0.42;
+                    topElement.value = "0.42";
+                    rightElement.value = "0.42";
+                    bottomElement.value = "0.42";
+                    leftElement.value = "0.42";
                 } else {
-                    pdfLeft = 0.54;
-                    pdfTop = 1;
+                    topElement.value = "1";
+                    rightElement.value = "0.54";
+                    bottomElement.value = "1";
+                    leftElement.value = "0.54";
                 }
                 break;
-            case "2": // minimal
-                if (isLandscape) {
-                    pdfLeft = 0.07;
-                    pdfTop = 0.07;
-                } else {
-                    pdfLeft = 0.1;
-                    pdfTop = 0.58;
-                }
+            case "none": // none
+                topElement.value = "0";
+                rightElement.value = "0";
+                bottomElement.value = "0";
+                leftElement.value = "0";
                 break;
-            case "1": // none
+            case "printableArea": // minimal
                 if (isLandscape) {
-                    pdfLeft = 0;
-                    pdfTop = 0;
+                    topElement.value = ".07";
+                    rightElement.value = ".07";
+                    bottomElement.value = ".07";
+                    leftElement.value = ".07";
                 } else {
-                    pdfLeft = 0;
-                    pdfTop = 0;
+                    topElement.value = "0.58";
+                    rightElement.value = "0.1";
+                    bottomElement.value = "0.58";
+                    leftElement.value = "0.1";
                 }
                 break;
         }
-        document.getElementById('preview').style.padding = pdfTop + "in " + pdfLeft + "in";
+        document.getElementById('preview').style.padding = topElement.value + "in " 
+                             + rightElement.value + "in "
+                             + bottomElement.value + "in "
+                             + leftElement.value + "in";
         setTimeout(() => {
             fixBlockWidth();
         }, 300);
@@ -406,7 +431,24 @@ const renderPDF = (id: string) => {
         actionElement.querySelector("#pageSize").addEventListener('change', () => {
             fixBlockWidth();
         });
-        actionElement.querySelector("#marginsType").addEventListener('change', () => {
+        actionElement.querySelector("#marginsType").addEventListener('change', (event) => {
+            setPadding();
+            if (event.target.value === "custom") {
+                event.target.nextElementSibling.classList.remove("fn__none");
+            } else {
+                event.target.nextElementSibling.classList.add("fn__none");
+            }
+        });
+        actionElement.querySelector("#marginsTop").addEventListener('change', () => {
+            setPadding();
+        });
+        actionElement.querySelector("#marginsRight").addEventListener('change', () => {
+            setPadding();
+        });
+        actionElement.querySelector("#marginsBottom").addEventListener('change', () => {
+            setPadding();
+        });
+        actionElement.querySelector("#marginsLeft").addEventListener('change', () => {
             setPadding();
         });
         actionElement.querySelector("#landscape").addEventListener('change', () => {
@@ -426,15 +468,14 @@ const renderPDF = (id: string) => {
                 landscape: actionElement.querySelector("#landscape").checked,
                 marginType: actionElement.querySelector("#marginsType").value,
                 margins: {
-                  top: pdfTop * 0.6,
-                  bottom: pdfTop * 0.6,
-                  left: 0,
-                  right: 0,
+                  top: parseFloat(document.querySelector("#marginsTop").value),
+                  bottom: parseFloat(document.querySelector("#marginsBottom").value),
+                  left: parseFloat(document.querySelector("#marginsLeft").value),
+                  right: parseFloat(document.querySelector("#marginsRight").value),
                 },
                 scale:  parseFloat(actionElement.querySelector("#scale").value),
                 pageSize: actionElement.querySelector("#pageSize").value,
               },
-              left: previewElement.style.paddingLeft,
               keepFold: keepFoldElement.checked,
               mergeSubdocs: mergeSubdocsElement.checked,
               removeAssets: actionElement.querySelector("#removeAssets").checked,

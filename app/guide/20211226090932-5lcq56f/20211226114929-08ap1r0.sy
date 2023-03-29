@@ -6,7 +6,7 @@
 		"icon": "1f64f",
 		"id": "20211226114929-08ap1r0",
 		"title": "致謝",
-		"updated": "20220916112004"
+		"updated": "20230329104241"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220326092650-r61gazd",
-				"updated": "20220916112004"
+				"updated": "20230329104241"
 			},
 			"Children": [
 				{
@@ -53,30 +53,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/golang/go"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/golang/go"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/golang/go",
+									"TextMarkTextContent": "https://github.com/golang/go"
 								},
 								{
 									"Type": "NodeText",
@@ -86,6 +66,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -112,30 +96,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/atotto/clipboard"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/atotto/clipboard"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/atotto/clipboard",
+									"TextMarkTextContent": "https://github.com/atotto/clipboard"
 								},
 								{
 									"Type": "NodeText",
@@ -145,6 +109,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -171,30 +139,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/vanng822/css"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/vanng822/css"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/vanng822/css",
+									"TextMarkTextContent": "https://github.com/vanng822/css"
 								},
 								{
 									"Type": "NodeText",
@@ -204,6 +152,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -230,30 +182,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/gofrs/flock"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/gofrs/flock"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/gofrs/flock",
+									"TextMarkTextContent": "https://github.com/gofrs/flock"
 								},
 								{
 									"Type": "NodeText",
@@ -263,6 +195,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -289,30 +225,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/olahol/melody"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/olahol/melody"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/olahol/melody",
+									"TextMarkTextContent": "https://github.com/olahol/melody"
 								},
 								{
 									"Type": "NodeText",
@@ -322,6 +238,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-2-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -348,30 +268,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/pdfcpu/pdfcpu"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/pdfcpu/pdfcpu"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/pdfcpu/pdfcpu",
+									"TextMarkTextContent": "https://github.com/pdfcpu/pdfcpu"
 								},
 								{
 									"Type": "NodeText",
@@ -381,6 +281,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Apache-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -407,30 +311,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/blastrain/vitess-sqlparser"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/blastrain/vitess-sqlparser"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/blastrain/vitess-sqlparser",
+									"TextMarkTextContent": "https://github.com/blastrain/vitess-sqlparser"
 								},
 								{
 									"Type": "NodeText",
@@ -440,6 +324,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Apache-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -466,30 +354,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/ConradIrwin/font"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/ConradIrwin/font"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/ConradIrwin/font",
+									"TextMarkTextContent": "https://github.com/ConradIrwin/font"
 								},
 								{
 									"Type": "NodeText",
@@ -499,6 +367,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -525,30 +397,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/Masterminds/sprig"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/Masterminds/sprig"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/Masterminds/sprig",
+									"TextMarkTextContent": "https://github.com/Masterminds/sprig"
 								},
 								{
 									"Type": "NodeText",
@@ -558,6 +410,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -584,30 +440,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/PuerkitoBio/goquery"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/PuerkitoBio/goquery"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/PuerkitoBio/goquery",
+									"TextMarkTextContent": "https://github.com/PuerkitoBio/goquery"
 								},
 								{
 									"Type": "NodeText",
@@ -617,6 +453,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -643,30 +483,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/Xuanwo/go-locale"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/Xuanwo/go-locale"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/Xuanwo/go-locale",
+									"TextMarkTextContent": "https://github.com/Xuanwo/go-locale"
 								},
 								{
 									"Type": "NodeText",
@@ -676,6 +496,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Apache-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -702,30 +526,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/araddon/dateparse"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/araddon/dateparse"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/araddon/dateparse",
+									"TextMarkTextContent": "https://github.com/araddon/dateparse"
 								},
 								{
 									"Type": "NodeText",
@@ -735,6 +539,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -761,30 +569,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/common-nighthawk/go-figure"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/common-nighthawk/go-figure"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/common-nighthawk/go-figure",
+									"TextMarkTextContent": "https://github.com/common-nighthawk/go-figure"
 								},
 								{
 									"Type": "NodeText",
@@ -794,6 +582,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -820,30 +612,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/denisbrodbeck/machineid"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/denisbrodbeck/machineid"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/denisbrodbeck/machineid",
+									"TextMarkTextContent": "https://github.com/denisbrodbeck/machineid"
 								},
 								{
 									"Type": "NodeText",
@@ -853,6 +625,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -879,30 +655,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/dgraph-io/ristretto"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/dgraph-io/ristretto"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/dgraph-io/ristretto",
+									"TextMarkTextContent": "https://github.com/dgraph-io/ristretto"
 								},
 								{
 									"Type": "NodeText",
@@ -912,6 +668,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Apache-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -938,30 +698,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/dustin/go-humanize"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/dustin/go-humanize"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/dustin/go-humanize",
+									"TextMarkTextContent": "https://github.com/dustin/go-humanize"
 								},
 								{
 									"Type": "NodeText",
@@ -971,6 +711,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -997,30 +741,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/emirpasic/gods"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/emirpasic/gods"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/emirpasic/gods",
+									"TextMarkTextContent": "https://github.com/emirpasic/gods"
 								},
 								{
 									"Type": "NodeText",
@@ -1030,6 +754,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-2-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1056,30 +784,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/facette/natsort"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/facette/natsort"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/facette/natsort",
+									"TextMarkTextContent": "https://github.com/facette/natsort"
 								},
 								{
 									"Type": "NodeText",
@@ -1089,6 +797,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1115,30 +827,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/flopp/go-findfont"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/flopp/go-findfont"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/flopp/go-findfont",
+									"TextMarkTextContent": "https://github.com/flopp/go-findfont"
 								},
 								{
 									"Type": "NodeText",
@@ -1148,6 +840,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1174,30 +870,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/fsnotify/fsnotify"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/fsnotify/fsnotify"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/fsnotify/fsnotify",
+									"TextMarkTextContent": "https://github.com/fsnotify/fsnotify"
 								},
 								{
 									"Type": "NodeText",
@@ -1207,6 +883,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1233,30 +913,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/gabriel-vasile/mimetype"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/gabriel-vasile/mimetype"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/gabriel-vasile/mimetype",
+									"TextMarkTextContent": "https://github.com/gabriel-vasile/mimetype"
 								},
 								{
 									"Type": "NodeText",
@@ -1266,6 +926,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1292,30 +956,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/gin-contrib/cors"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/gin-contrib/cors"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/gin-contrib/cors",
+									"TextMarkTextContent": "https://github.com/gin-contrib/cors"
 								},
 								{
 									"Type": "NodeText",
@@ -1325,6 +969,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1351,30 +999,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/gin-contrib/gzip"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/gin-contrib/gzip"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/gin-contrib/gzip",
+									"TextMarkTextContent": "https://github.com/gin-contrib/gzip"
 								},
 								{
 									"Type": "NodeText",
@@ -1384,6 +1012,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1410,30 +1042,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/gin-contrib/sessions"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/gin-contrib/sessions"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/gin-contrib/sessions",
+									"TextMarkTextContent": "https://github.com/gin-contrib/sessions"
 								},
 								{
 									"Type": "NodeText",
@@ -1443,6 +1055,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1469,30 +1085,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/gin-gonic/gin"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/gin-gonic/gin"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/gin-gonic/gin",
+									"TextMarkTextContent": "https://github.com/gin-gonic/gin"
 								},
 								{
 									"Type": "NodeText",
@@ -1502,6 +1098,53 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230329104215-2rx8pbf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230329104215-2rx8pbf",
+						"updated": "20230329104241"
+					},
+					"Children": [
+						{
+							"ID": "20230329104215-4hgf96u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230329104215-4hgf96u",
+								"updated": "20230329104241"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/go-ole/go-ole",
+									"TextMarkTextContent": "https://github.com/go-ole/go-ole"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1528,30 +1171,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/imroc/req"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/imroc/req"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/imroc/req",
+									"TextMarkTextContent": "https://github.com/imroc/req"
 								},
 								{
 									"Type": "NodeText",
@@ -1561,6 +1184,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1587,30 +1214,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/jinzhu/copier"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/jinzhu/copier"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/jinzhu/copier",
+									"TextMarkTextContent": "https://github.com/jinzhu/copier"
 								},
 								{
 									"Type": "NodeText",
@@ -1620,6 +1227,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1646,30 +1257,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/mattn/go-sqlite3"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/mattn/go-sqlite3"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/mattn/go-sqlite3",
+									"TextMarkTextContent": "https://github.com/mattn/go-sqlite3"
 								},
 								{
 									"Type": "NodeText",
@@ -1679,6 +1270,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1705,30 +1300,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/mitchellh/go-ps"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/mitchellh/go-ps"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/mitchellh/go-ps",
+									"TextMarkTextContent": "https://github.com/mitchellh/go-ps"
 								},
 								{
 									"Type": "NodeText",
@@ -1738,6 +1313,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1764,30 +1343,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/mssola/user_agent"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/mssola/user_agent"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/mssola/user_agent",
+									"TextMarkTextContent": "https://github.com/mssola/user_agent"
 								},
 								{
 									"Type": "NodeText",
@@ -1797,6 +1356,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1823,30 +1386,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/panjf2000/ants"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/panjf2000/ants"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/panjf2000/ants",
+									"TextMarkTextContent": "https://github.com/panjf2000/ants"
 								},
 								{
 									"Type": "NodeText",
@@ -1856,6 +1399,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1882,30 +1429,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/patrickmn/go-cache"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/patrickmn/go-cache"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/patrickmn/go-cache",
+									"TextMarkTextContent": "https://github.com/patrickmn/go-cache"
 								},
 								{
 									"Type": "NodeText",
@@ -1915,6 +1442,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1941,30 +1472,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/radovskyb/watcher"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/radovskyb/watcher"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/radovskyb/watcher",
+									"TextMarkTextContent": "https://github.com/radovskyb/watcher"
 								},
 								{
 									"Type": "NodeText",
@@ -1974,6 +1485,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2000,30 +1515,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/sabhiram/go-gitignore"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/sabhiram/go-gitignore"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/sabhiram/go-gitignore",
+									"TextMarkTextContent": "https://github.com/sabhiram/go-gitignore"
 								},
 								{
 									"Type": "NodeText",
@@ -2033,6 +1528,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2059,30 +1558,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/steambap/captcha"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/steambap/captcha"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/steambap/captcha",
+									"TextMarkTextContent": "https://github.com/steambap/captcha"
 								},
 								{
 									"Type": "NodeText",
@@ -2092,6 +1571,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2118,30 +1601,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/vmihailenco/msgpack"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/vmihailenco/msgpack"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/vmihailenco/msgpack",
+									"TextMarkTextContent": "https://github.com/vmihailenco/msgpack"
 								},
 								{
 									"Type": "NodeText",
@@ -2151,6 +1614,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-2-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2177,30 +1644,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/xrash/smetrics"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/xrash/smetrics"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/xrash/smetrics",
+									"TextMarkTextContent": "https://github.com/xrash/smetrics"
 								},
 								{
 									"Type": "NodeText",
@@ -2210,6 +1657,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2236,30 +1687,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/jgm/pandoc"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/jgm/pandoc"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/jgm/pandoc",
+									"TextMarkTextContent": "https://github.com/jgm/pandoc"
 								},
 								{
 									"Type": "NodeText",
@@ -2269,6 +1700,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "GPL-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2295,30 +1730,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/microsoft/TypeScript"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/microsoft/TypeScript"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/microsoft/TypeScript",
+									"TextMarkTextContent": "https://github.com/microsoft/TypeScript"
 								},
 								{
 									"Type": "NodeText",
@@ -2328,6 +1743,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Apache-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2354,30 +1773,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/electron/electron"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/electron/electron"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/electron/electron",
+									"TextMarkTextContent": "https://github.com/electron/electron"
 								},
 								{
 									"Type": "NodeText",
@@ -2387,6 +1786,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2413,30 +1816,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/visjs/vis-network"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/visjs/vis-network"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/visjs/vis-network",
+									"TextMarkTextContent": "https://github.com/visjs/vis-network"
 								},
 								{
 									"Type": "NodeText",
@@ -2446,6 +1829,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Apache-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2472,30 +1859,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/mozilla/pdf.js"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/mozilla/pdf.js"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/mozilla/pdf.js",
+									"TextMarkTextContent": "https://github.com/mozilla/pdf.js"
 								},
 								{
 									"Type": "NodeText",
@@ -2505,6 +1872,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Apache-2.0 License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -2531,30 +1902,10 @@
 							},
 							"Children": [
 								{
-									"Type": "NodeLink",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "https://github.com/blueimp/JavaScript-MD5"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "https://github.com/blueimp/JavaScript-MD5"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/blueimp/JavaScript-MD5",
+									"TextMarkTextContent": "https://github.com/blueimp/JavaScript-MD5"
 								},
 								{
 									"Type": "NodeText",
@@ -2564,6 +1915,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

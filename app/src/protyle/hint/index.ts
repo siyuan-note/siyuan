@@ -412,7 +412,9 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511
         const endSplit = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && endSplit && range.startContainer.nodeType === 3
-            && (range.startContainer as Text).wholeText.indexOf(endSplit) > -1) {
+            && (range.startContainer as Text).wholeText.indexOf(endSplit) > -1
+            // 在包含 )) 的块中引用时会丢失字符  https://ld246.com/article/1679980200782
+            && (range.startContainer as Text).wholeText.indexOf(this.splitChar) > -1) {
             let matchEndChar = 0;
             let textNode = range.startContainer;
             while (textNode && matchEndChar < 2) {

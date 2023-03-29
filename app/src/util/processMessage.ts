@@ -1,7 +1,8 @@
-import {hideMessage, showMessage} from "../dialog/message";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 /// #endif
+import {isWindow} from "./functions";
+import {hideMessage, showMessage} from "../dialog/message";
 
 export const processMessage = (response: IWebSocketData) => {
     if ("msg" === response.cmd) {
@@ -23,7 +24,11 @@ export const processMessage = (response: IWebSocketData) => {
         /// #if MOBILE
         window.location.reload();
         /// #else
-        exportLayout(true);
+        if (isWindow()) {
+            window.location.reload();
+        } else {
+            exportLayout(true);
+        }
         /// #endif
         return false;
     }

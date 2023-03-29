@@ -245,7 +245,7 @@
     }
   }
 
-  code:not(.hljs),
+  code:not(.hljs):not([data-type="yaml-front-matter"]),
   span[data-type~="code"] {
     @extend .fn__code;
   }

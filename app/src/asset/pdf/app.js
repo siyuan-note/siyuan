@@ -3131,6 +3131,7 @@ function webViewerClick(evt) {
   if (!pdfInstance) {
     return
   }
+  pdfInstance.pdfViewer.focus();
   if (!pdfInstance.secondaryToolbar?.isOpen) {
     return;
   }

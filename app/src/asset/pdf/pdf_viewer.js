@@ -1492,6 +1492,8 @@ class PDFViewer {
 
   focus() {
     this.container.focus();
+    // NOTE 防止焦点没在 PDF 上时快捷键失效
+    this.container.parentElement.querySelector("#sidebarToggle").focus()
   }
 
   get _isContainerRtl() {

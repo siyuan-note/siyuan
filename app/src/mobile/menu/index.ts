@@ -18,11 +18,11 @@ import {getRecentDocs} from "./getRecentDocs";
 export const popMenu = () => {
     activeBlur();
     hideKeyboardToolbar();
+    document.getElementById("menu").style.right = "0";
+};
+
+export const initRightMenu = () => {
     const menuElement = document.getElementById("menu");
-    if (menuElement.innerHTML !== "") {
-        menuElement.style.right = "0";
-        return;
-    }
     let accountHTML = "";
     if (window.siyuan.user && !window.siyuan.config.readonly) {
         accountHTML = `<div class="b3-menu__item" id="menuAccount">
@@ -203,5 +203,4 @@ ${accountHTML}
             target = target.parentElement;
         }
     });
-    menuElement.style.right = "0";
-};
+}

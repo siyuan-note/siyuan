@@ -8,7 +8,7 @@ import github
 docmap = {
     "Feature": "Feature",
     "Enhancement": "Enhancement",
-    "Bug": "Bug",
+    "Bug": "Bugfix",
     "Document": "Document",
     "Refactor": "Refactor",
     "Abolishment": "Abolishment",

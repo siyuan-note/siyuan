@@ -248,7 +248,8 @@ const bindProviderEvent = () => {
 export const repos = {
     element: undefined as Element,
     genHTML: () => {
-        return `<div><div style="position: fixed;width: 800px;height: 434px;box-sizing: border-box;text-align: center;display: flex;align-items: center;justify-content: center;z-index: 1;" id="reposLoading">
+        return `<div>
+<div style="position: fixed;width: 800px;height: 434px;box-sizing: border-box;text-align: center;display: flex;align-items: center;justify-content: center;z-index: 1;" id="reposLoading">
     <img src="/stage/loading-pure.svg">
 </div>
 <label class="fn__flex b3-label config__item">
@@ -371,7 +372,7 @@ export const repos = {
         loadingElement.style.width = repos.element.clientWidth + "px";
         loadingElement.style.height = repos.element.clientHeight + "px";
         bindSyncCloudListEvent(syncConfigElement);
-        repos.element.addEventListener("click", (event) => {
+        repos.element.firstElementChild.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (target.getAttribute("data-type") === "config") {
                 if (syncConfigElement.classList.contains("fn__none")) {

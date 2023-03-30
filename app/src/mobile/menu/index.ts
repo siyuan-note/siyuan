@@ -203,4 +203,4 @@ ${accountHTML}
             target = target.parentElement;
         }
     });
-}
+};

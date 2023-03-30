@@ -20,28 +20,28 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
 
-    const target = event.target as HTMLElement
-    let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable")
+    const target = event.target as HTMLElement;
+    let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable");
     if (scrollElement) {
-        scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement)
+        scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement);
         if ((xDiff < 0 && scrollElement.scrollLeft > 0) ||
             (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
             return;
         }
     }
 
-    let show = false
+    let show = false;
     if (new Date().getTime() - time < 1000) {
-        show = true
+        show = true;
     } else if (Math.abs(xDiff) > window.innerWidth / 3) {
-        show = true
+        show = true;
     }
-    const menuElement = hasClosestByAttribute(target, "id", "menu")
+    const menuElement = hasClosestByAttribute(target, "id", "menu");
     if (show && menuElement && xDiff < 0) {
         closePanel();
         return;
     }
-    const sideElement = hasClosestByAttribute(target, "id", "sidebar")
+    const sideElement = hasClosestByAttribute(target, "id", "sidebar");
     if (show && sideElement && xDiff > 0) {
         closePanel();
         return;
@@ -54,7 +54,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         if (xDiff > 0) {
             popMenu();
         } else {
-            document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"))
+            document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
         }
     }
 };
@@ -83,30 +83,30 @@ export const handleTouchMove = (event: TouchEvent) => {
     yDiff = Math.floor(clientY - event.touches[0].clientY);
 
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
-        const target = event.target as HTMLElement
-        let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable")
+        const target = event.target as HTMLElement;
+        let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable");
         if (scrollElement) {
-            scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement)
+            scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement);
             if ((xDiff < 0 && scrollElement.scrollLeft > 0) ||
                 (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
                 return;
             }
         }
-        const menuElement = hasClosestByAttribute(target, "id", "menu")
+        const menuElement = hasClosestByAttribute(target, "id", "menu");
         if (menuElement && xDiff < 0) {
-            menuElement.style.right = xDiff + "px"
+            menuElement.style.right = xDiff + "px";
             return;
         }
-        const sideElement = hasClosestByAttribute(target, "id", "sidebar")
+        const sideElement = hasClosestByAttribute(target, "id", "sidebar");
         if (sideElement && xDiff > 0) {
-            sideElement.style.left = -xDiff + "px"
+            sideElement.style.left = -xDiff + "px";
             return;
         }
         console.log(event);
         if (xDiff < 0) {
-            document.getElementById("sidebar").style.left = -window.innerWidth - xDiff + "px"
+            document.getElementById("sidebar").style.left = -window.innerWidth - xDiff + "px";
         } else {
-            document.getElementById("menu").style.right = -window.innerWidth + xDiff + "px"
+            document.getElementById("menu").style.right = -window.innerWidth + xDiff + "px";
         }
     }
 };

@@ -142,7 +142,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                             target.parentElement.remove();
                         }
 
-                        dialog.element.querySelector(".counter").textContent = (parseInt(dialog.element.querySelector(".counter").textContent) - 1).toString()
+                        dialog.element.querySelector(".counter").textContent = (parseInt(dialog.element.querySelector(".counter").textContent) - 1).toString();
                         if (cb) {
                             cb(removeResponse);
                         }

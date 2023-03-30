@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 
@@ -145,7 +146,8 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 
 	var notExists []string
 	for _, doc := range tmp {
-		if nil != treenode.GetBlockTree(doc.RootID) {
+		if bt := treenode.GetBlockTree(doc.RootID); nil != bt {
+			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
 			ret = append(ret, doc)
 		} else {
 			notExists = append(notExists, doc.RootID)

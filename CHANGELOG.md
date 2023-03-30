@@ -1,3 +1,32 @@
+## v2.8.2 / 2023-03-30
+
+### Enhancement
+
+* [Update the number of flashcards after removing the flashcards](https://github.com/siyuan-note/siyuan/issues/7796)
+* [Opening a PDF with a new window requires positioning and the positioning fails when opening it for the first time](https://github.com/siyuan-note/siyuan/issues/7803)
+* [Use `Endpoint` for network connectivity checks when syncing](https://github.com/siyuan-note/siyuan/issues/7805)
+* [The current page number needs to be kept after the PDF is opened in a new window](https://github.com/siyuan-note/siyuan/issues/7809)
+* [Browser web clipper support tag `<img>` attribute `srcset`](https://github.com/siyuan-note/siyuan/issues/7810)
+* [Characters are lost when referenced in a block containing `))`](https://github.com/siyuan-note/siyuan/issues/7812)
+* [Move some buttons to more menu in PDF tab](https://github.com/siyuan-note/siyuan/issues/7813)
+* [The reminder message will no longer pop up when the subscription expires for more than 2 days](https://github.com/siyuan-note/siyuan/issues/7816)
+* [PDF export supports setting margins](https://github.com/siyuan-note/siyuan/issues/7823)
+* [Adjusted the YFM style with widget export](https://github.com/siyuan-note/siyuan/pull/7826)
+* [Add recent documents on mobile](https://github.com/siyuan-note/siyuan/issues/7828)
+
+### Bug
+
+* [Incorrect path when entering flashcard management from document tree](https://github.com/siyuan-note/siyuan/issues/7797)
+* [The document tag delete button is covered by the floating layer](https://github.com/siyuan-note/siyuan/issues/7799)
+* [An exception occurs when exporting HTML and PDF](https://github.com/siyuan-note/siyuan/issues/7800)
+* [Kernel panic on some systems on Windows](https://github.com/siyuan-note/siyuan/issues/7806)
+* [After entering `\` in the table, the next column is merged incorrectly](https://github.com/siyuan-note/siyuan/issues/7817)
+* [Rename tag in new window, prompt won't disappear](https://github.com/siyuan-note/siyuan/issues/7818)
+* [After the document is transferred to the heading, occurs two copies of the reference block](https://github.com/siyuan-note/siyuan/issues/7819)
+* [Wrong parsing virtual reference with `\` before it](https://github.com/siyuan-note/siyuan/issues/7821)
+* [Parsing and rendering YFM incorrectly when exporting widget block attribute `data-export-md`](https://github.com/siyuan-note/siyuan/issues/7824)
+* [Recent docs not updated after renaming](https://github.com/siyuan-note/siyuan/issues/7827)
+
 ## v2.8.1 / 2023-03-28
 
 ### 改进功能

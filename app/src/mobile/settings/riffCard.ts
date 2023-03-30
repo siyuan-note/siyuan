@@ -1,4 +1,4 @@
-import {openModel} from "../util/model";
+import {openModel} from "../menu/model";
 import {flashcard} from "../../config/flashcard";
 
 export const initRiffCard = () => {

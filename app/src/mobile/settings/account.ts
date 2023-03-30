@@ -1,4 +1,4 @@
-import {openModel} from "../util/model";
+import {openModel} from "../menu/model";
 import {getEventName} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {closePanel} from "../util/closePanel";

@@ -7,7 +7,7 @@ import {showMessage} from "../../dialog/message";
 import {openByMobile, writeText} from "../../protyle/util/compatibility";
 import {exitSiYuan, processSync} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
-import {openModel} from "../util/model";
+import {openModel} from "../menu/model";
 
 export const initAbout = () => {
     if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||

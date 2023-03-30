@@ -59,7 +59,7 @@ func IsOnline(checkURL string) bool {
 
 func isOnline(checkURL string) bool {
 	c := req.C().SetTimeout(1 * time.Second)
-	_, err := c.R().Head("https://www.baidu.com")
+	_, err := c.R().Head(checkURL)
 	return nil == err
 }
 

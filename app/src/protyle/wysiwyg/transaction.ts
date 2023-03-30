@@ -442,18 +442,20 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             }
         });
         let nodeAttrHTML = bookmarkHTML + nameHTML + aliasHTML + memoHTML;
-        if (protyle.block.rootID === operation.id && protyle.title) {
+        if (protyle.block.rootID === operation.id) {
             // 文档
-            const refElement = protyle.title.element.querySelector(".protyle-attr--refcount");
-            if (refElement) {
-                nodeAttrHTML += refElement.outerHTML;
+            if (protyle.title) {
+                const refElement = protyle.title.element.querySelector(".protyle-attr--refcount");
+                if (refElement) {
+                    nodeAttrHTML += refElement.outerHTML;
+                }
+                if (data.new["custom-riff-decks"]) {
+                    protyle.title.element.setAttribute("custom-riff-decks", data.new["custom-riff-decks"]);
+                } else {
+                    protyle.title.element.removeAttribute("custom-riff-decks");
+                }
+                protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
             }
-            if (data.new["custom-riff-decks"]) {
-                protyle.title.element.setAttribute("custom-riff-decks", data.new["custom-riff-decks"]);
-            } else {
-                protyle.title.element.removeAttribute("custom-riff-decks");
-            }
-            protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
             protyle.wysiwyg.renderCustom(attrsResult);
             if (data.new.icon !== data.old.icon) {
                 /// #if MOBILE

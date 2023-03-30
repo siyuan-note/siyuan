@@ -201,9 +201,9 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
     </label>
     <span class="fn__space"></span>
-    <span class="block__icon fn__flex-center b3-tooltips b3-tooltips__sw" style="opacity: 1" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+    <span class="block__icon block__icon--show fn__flex-center b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.random}"><svg><use xlink:href="#iconRefresh"></use></svg></span>
     <span class="fn__space"></span>
-    <span class="block__icon fn__flex-center b3-tooltips b3-tooltips__sw" style="opacity: 1" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
+    <span class="block__icon block__icon--show fn__flex-center b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
     <span class="fn__space"></span>
 </div>
 <div class="emojis__panel">${filterEmoji()}</div>

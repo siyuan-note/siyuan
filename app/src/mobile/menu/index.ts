@@ -1,18 +1,19 @@
 import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
-import {closePanel} from "./closePanel";
+import {closePanel} from "../util/closePanel";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {repos} from "../../config/repos";
 import {exitSiYuan, lockScreen, processSync} from "../../dialog/processSystem";
 import {openHistory} from "../../history/history";
 import {syncGuide} from "../../sync/syncGuide";
 import {openCard} from "../../card/openCard";
-import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
+import {activeBlur, hideKeyboardToolbar} from "../util/keyboardToolbar";
 import {initAI} from "../settings/ai";
 import {initRiffCard} from "../settings/riffCard";
 import {login, showAccountInfo} from "../settings/account";
 import {openModel} from "./model";
 import {initAbout} from "../settings/about";
+import {getRecentDocs} from "./getRecentDocs";
 
 export const popMenu = () => {
     activeBlur();
@@ -39,6 +40,9 @@ export const popMenu = () => {
 </div>
 <div class="b3-menu__separator"></div>
 ${accountHTML}
+<div id="menuRecent" class="b3-menu__item">
+    <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg><span class="b3-menu__label">${window.siyuan.languages.recentDocs}</span>
+</div>
 <div id="menuSearch" class="b3-menu__item">
     <svg class="b3-menu__icon"><use xlink:href="#iconSearch"></use></svg><span class="b3-menu__label">${window.siyuan.languages.search}</span>
 </div>
@@ -101,6 +105,11 @@ ${accountHTML}
                 break;
             } else if (target.id === "menuSearch") {
                 popSearch();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuRecent") {
+                getRecentDocs();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

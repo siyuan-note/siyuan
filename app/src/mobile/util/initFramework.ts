@@ -8,7 +8,7 @@ import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
 import {getOpenNotebookCount} from "../../util/pathName";
-import {popMenu} from "./menu";
+import {popMenu} from "../menu";
 import {MobileFiles} from "./MobileFiles";
 import {MobileOutline} from "./MobileOutline";
 import {hasTopClosestByTag} from "../../protyle/util/hasClosest";

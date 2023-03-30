@@ -1,4 +1,4 @@
-import {openModel} from "../util/model";
+import {openModel} from "../menu/model";
 import {ai} from "../../config/ai";
 
 export const initAI = () => {

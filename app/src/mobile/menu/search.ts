@@ -1,4 +1,4 @@
-import {closePanel} from "./closePanel";
+import {closePanel} from "../util/closePanel";
 import {openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";

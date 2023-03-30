@@ -5,7 +5,7 @@ import {MenuItem} from "../../menus/Menu";
 import {Dialog} from "../../dialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
-import {popSearch, toolbarSearchEvent} from "./search";
+import {popSearch, toolbarSearchEvent} from "../menu/search";
 
 export class MobileTags {
     public element: HTMLElement;

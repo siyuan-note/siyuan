@@ -19,6 +19,7 @@ import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
+import {initRightMenu} from "./menu";
 
 class App {
     constructor() {
@@ -63,15 +64,14 @@ class App {
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             initFramework();
+                            initRightMenu();
                         });
                     });
                     addGA();
                 });
             });
-            if (navigator.userAgent.indexOf("iPhone") > -1) {
-                document.addEventListener("touchstart", handleTouchStart, false);
-                document.addEventListener("touchmove", handleTouchMove, false);
-            }
+            document.addEventListener("touchstart", handleTouchStart, false);
+            document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", handleTouchEnd, false);
         });
         setNoteBook();

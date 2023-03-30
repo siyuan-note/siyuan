@@ -23,10 +23,10 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
                 element.firstElementChild.addEventListener("click", (event) => {
                     const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                     if (liElement) {
-                        openMobileFileById(liElement.dataset.nodeId, [Constants.CB_GET_SCROLL])
+                        openMobileFileById(liElement.dataset.nodeId, [Constants.CB_GET_SCROLL]);
                     }
                 });
             }
-        })
+        });
     });
-}
+};

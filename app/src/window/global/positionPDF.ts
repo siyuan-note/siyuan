@@ -7,5 +7,5 @@ export const positionPDF = (pathStr: string, page: string | number) => {
             tab.parent.switchTab(tab.headElement);
             tab.model.goToPage(page);
         }
-    })
-}
+    });
+};

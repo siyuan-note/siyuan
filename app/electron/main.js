@@ -946,9 +946,9 @@ powerMonitor.on("resume", async () => {
     // 桌面端系统休眠唤醒后判断网络连通性后再执行数据同步 https://github.com/siyuan-note/siyuan/issues/6687
     writeLog("system resume");
 
-    const eNet = require("electron").net
+    const eNet = require("electron").net;
     const isOnline = async () => {
-        return eNet.isOnline()
+        return eNet.isOnline();
     };
     let online = false;
     for (let i = 0; i < 7; i++) {

@@ -146,4 +146,4 @@ new App();
 // 再次点击新窗口已打开的 PDF 时，需进行定位
 window.newWindow = {
     positionPDF: positionPDF
-}
+};

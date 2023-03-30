@@ -255,14 +255,18 @@ func CheckUpdate(showMsg bool) {
 	}
 
 	ver := result["ver"].(string)
-	release := result["release"].(string)
+	releaseLang := result["release"].(string)
+	if releaseLangArg := result["release_"+Conf.Lang]; nil != releaseLangArg {
+		releaseLang = releaseLangArg.(string)
+	}
+
 	var msg string
 	var timeout int
 	if isVersionUpToDate(ver) {
 		msg = Conf.Language(10)
 		timeout = 3000
 	} else {
-		msg = fmt.Sprintf(Conf.Language(9), "<a href=\""+release+"\">"+release+"</a>")
+		msg = fmt.Sprintf(Conf.Language(9), "<a href=\""+releaseLang+"\">"+releaseLang+"</a>")
 		showMsg = true
 		timeout = 15000
 	}

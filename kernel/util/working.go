@@ -380,6 +380,9 @@ func initMime() {
 	mime.AddExtensionType(".dxf", "image/x-dxf")
 	mime.AddExtensionType(".dwf", "drawing/x-dwf")
 	mime.AddExtensionType(".pdf", "application/pdf")
+
+	// 文档数据文件
+	mime.AddExtensionType(".sy", "application/json")
 }
 
 func initPandoc() {

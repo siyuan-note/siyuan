@@ -18,7 +18,8 @@ export const initAbout = () => {
     openModel({
         title: window.siyuan.languages.about,
         icon: "iconInfo",
-        html: `<div class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
+        html: `<div>
+<div class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about11}
         <div class="b3-label__text">${window.siyuan.languages.about12}</div>
@@ -131,12 +132,13 @@ export const initAbout = () => {
     </div>
     <div style="color:var(--b3-theme-surface);font-family: cursive;">会泽百家&nbsp;至公天下</div>
     ${window.siyuan.languages.about1}
+</div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
             const workspaceDirElement = modelMainElement.querySelector("#workspaceDir");
             genWorkspace(workspaceDirElement);
             const importKeyElement = modelMainElement.querySelector("#importKey");
-            modelMainElement.addEventListener("click", (event) => {
+            modelMainElement.firstElementChild.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
                 while (target && !target.isSameNode(modelMainElement)) {
                     if (target.id === "authCode") {

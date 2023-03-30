@@ -20,7 +20,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
             icon: "iconList",
             html: `<ul class="b3-list b3-list--mobile">${html}</ul>`,
             bindEvent(element: HTMLElement) {
-                element.addEventListener("click", (event) => {
+                element.firstElementChild.addEventListener("click", (event) => {
                     const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                     if (liElement) {
                         openMobileFileById(liElement.dataset.nodeId, [Constants.CB_GET_SCROLL])

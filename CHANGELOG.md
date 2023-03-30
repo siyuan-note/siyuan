@@ -14,7 +14,7 @@
 * [Adjusted the YFM style with widget export](https://github.com/siyuan-note/siyuan/pull/7826)
 * [Add recent documents on mobile](https://github.com/siyuan-note/siyuan/issues/7828)
 
-### Bug
+### Bugfix
 
 * [Incorrect path when entering flashcard management from document tree](https://github.com/siyuan-note/siyuan/issues/7797)
 * [The document tag delete button is covered by the floating layer](https://github.com/siyuan-note/siyuan/issues/7799)

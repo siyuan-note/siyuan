@@ -29,14 +29,6 @@ export const exportConfig = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.export21}
-        <div class="b3-label__text">${window.siyuan.languages.export22}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="addFooter" type="checkbox"${window.siyuan.config.export.addFooter ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
         ${window.siyuan.languages.export23}
         <div class="b3-label__text">${window.siyuan.languages.export24}</div>
     </div>
@@ -137,7 +129,6 @@ export const exportConfig = {
             fetchPost("/api/setting/setExport", {
                 paragraphBeginningSpace: (exportConfig.element.querySelector("#paragraphBeginningSpace") as HTMLInputElement).checked,
                 addTitle: (exportConfig.element.querySelector("#addTitle") as HTMLInputElement).checked,
-                addFooter: (exportConfig.element.querySelector("#addFooter") as HTMLInputElement).checked,
                 markdownYFM: (exportConfig.element.querySelector("#markdownYFM") as HTMLInputElement).checked,
                 blockRefMode: parseInt((exportConfig.element.querySelector("#blockRefMode") as HTMLSelectElement).value, 10),
                 blockEmbedMode: parseInt((exportConfig.element.querySelector("#blockEmbedMode") as HTMLSelectElement).value, 10),

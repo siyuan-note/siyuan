@@ -39,7 +39,6 @@ export const exportImage = (id: string) => {
 `,
         content: `<div class="b3-dialog__content" style="max-height: 70vh;overflow: auto;${isMobile() ? "padding:8px;" : ""};background-color: var(--b3-theme-background)">
     <div style="${isMobile() ? "padding: 16px;margin: 16px 0" : "padding: 48px;margin: 8px 0 24px"};border: 1px solid var(--b3-border-color);border-radius: 10px;" class="export-img protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview"></div>
-    <div class="ft__smaller ft__on-surface fn__flex"><img style="height: 18px;margin: 0 8px" src="stage/icon.png">${window.siyuan.languages.exportBySiYuan}</div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
 </div>

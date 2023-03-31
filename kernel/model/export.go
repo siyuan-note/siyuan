@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/Masterminds/sprig/v3"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,6 +30,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 	"unicode/utf8"
 
@@ -711,6 +713,7 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 
 	processPDFBookmarks(pdfCtx, headings)
 	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
+	processPDFFooter(pdfCtx)
 
 	pdfcpu.VersionStr = "SiYuan v" + util.Ver
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
@@ -970,26 +973,49 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 	}
 }
 
-func annotRect(i int, w, h, d, l float64) *pdfcpu.Rectangle {
-	// d..distance between annotation rectangles
-	// l..side length of rectangle
+func processPDFFooter(pdfCtx *pdfcpu.Context) {
+	templateContent := strings.TrimSpace(Conf.Export.PDFFooter)
+	if "" == templateContent {
+		return
+	}
 
-	// max number of rectangles fitting into w
-	xmax := int((w - d) / (l + d))
+	footerTpl, err := template.New("").Funcs(sprig.TxtFuncMap()).Parse(templateContent)
+	if nil != err {
+		logging.LogErrorf("parse pdf footer template failed: %s", err)
+		return
+	}
 
-	// max number of rectangles fitting into h
-	ymax := int((h - d) / (l + d))
+	buf := &bytes.Buffer{}
+	buf.Grow(4096)
+	err = footerTpl.Execute(buf, nil)
+	if nil != err {
+		logging.LogErrorf("render pdf footer template failed: %s", err)
+		return
+	}
+	footer := buf.String()
 
-	col := float64(i % xmax)
-	row := float64(i / xmax % ymax)
+	fontName := "Times-Roman"
+	pos := "bc"
+	dx := 10
+	fillCol := "#000000"
+	desc := fmt.Sprintf("font:%s, points:12, sc:1 abs, pos:%s, off:%d 10, fillcol:%s, rot:0", fontName, pos, dx, fillCol)
+	footer = strings.ReplaceAll(footer, "%pages", strconv.Itoa(pdfCtx.PageCount))
+	m := map[int]*pdfcpu.Watermark{}
+	for i := 1; i <= pdfCtx.PageCount; i++ {
+		text := strings.ReplaceAll(footer, "%page", strconv.Itoa(i))
+		wm, watermarkErr := api.TextWatermark(text, desc, true, false, pdfcpu.POINTS)
+		if nil != watermarkErr {
+			logging.LogErrorf("add pdf footer failed: %s", watermarkErr)
+			return
+		}
 
-	llx := d + col*(l+d)
-	lly := d + row*(l+d)
+		m[i] = wm
+	}
 
-	urx := llx + l
-	ury := lly + l
-
-	return pdfcpu.Rect(llx, lly, urx, ury)
+	if watermarkErr := pdfCtx.AddWatermarksMap(m); nil != watermarkErr {
+		logging.LogErrorf("add pdf footer failed: %s", watermarkErr)
+		return
+	}
 }
 
 func ExportStdMarkdown(id string) string {

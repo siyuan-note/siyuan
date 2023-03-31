@@ -740,6 +740,8 @@
   "export18": "Après activation, insérez le titre du document comme titre 1 au début",
   "export19": "Chemin vers l'exécutable Pandoc",
   "export20": "L'exportation de fichiers Word .docx nécessite une conversion de format à l'aide de <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a>",
+  "export21": "Exporter le modèle de pied de page PDF",
+  "export22": "<code class='fn__code'>%page</code> est le numéro de page actuel, <code class='fn__code'>%pages</code> est le numéro de page total et prend en charge les fonctions de modèle Sprig ",
   "export23": "Exporter Markdown avec YFM",
   "export24": "Après l'activation, ajoutez des informations générales sur les métadonnées au début du fichier Markdown exporté",
   "blockRef": "Bloc Réf",

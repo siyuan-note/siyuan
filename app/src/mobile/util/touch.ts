@@ -46,7 +46,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         scrollEnable = true;
     }
 
-    const isXScroll = Math.abs(xDiff) > Math.abs(yDiff)
+    const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
     const menuElement = hasClosestByAttribute(target, "id", "menu");
     if (menuElement) {
         if (isXScroll) {
@@ -114,10 +114,10 @@ export const handleTouchEnd = (event: TouchEvent) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
-    firstDirection = null
-    xDiff = undefined
-    yDiff = undefined
-    lastClientX = undefined
+    firstDirection = null;
+    xDiff = undefined;
+    yDiff = undefined;
+    lastClientX = undefined;
     if (navigator.userAgent.indexOf("iPhone") > -1 ||
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
@@ -151,13 +151,13 @@ export const handleTouchMove = (event: TouchEvent) => {
             if (previousClientX > event.touches[0].clientX) {
                 lastClientX = event.touches[0].clientX;
             } else {
-                lastClientX = undefined
+                lastClientX = undefined;
             }
         } else if (firstDirection === "toLeft") {
             if (previousClientX < event.touches[0].clientX) {
                 lastClientX = event.touches[0].clientX;
             } else {
-                lastClientX = undefined
+                lastClientX = undefined;
             }
         }
     }

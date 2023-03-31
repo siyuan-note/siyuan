@@ -19,7 +19,6 @@ package conf
 type Export struct {
 	ParagraphBeginningSpace bool   `json:"paragraphBeginningSpace"` // 是否使用中文排版段落开头空两格
 	AddTitle                bool   `json:"addTitle"`                // 是否添加标题
-	AddFooter               bool   `json:"addFooter"`               // 是否添加页脚
 	BlockRefMode            int    `json:"blockRefMode"`            // 内容块引用导出模式，2：锚文本块链，3：仅锚文本，4：块引转脚注，（0：使用原始文本，1：使用 Blockquote。0 和 1 都已经废弃 https://github.com/siyuan-note/siyuan/issues/3155）
 	BlockEmbedMode          int    `json:"blockEmbedMode"`          // 内容块引用导出模式，0：使用原始文本，1：使用 Blockquote
 	BlockRefTextLeft        string `json:"blockRefTextLeft"`        // 内容块引用导出锚文本左侧符号，默认留空
@@ -35,7 +34,6 @@ func NewExport() *Export {
 	return &Export{
 		ParagraphBeginningSpace: false,
 		AddTitle:                true,
-		AddFooter:               true,
 		BlockRefMode:            3,
 		BlockEmbedMode:          1,
 		BlockRefTextLeft:        "",

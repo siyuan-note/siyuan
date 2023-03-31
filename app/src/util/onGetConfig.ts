@@ -275,7 +275,7 @@ export const initWindow = () => {
             };
             setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
             try {
-                if (window.siyuan.config.export.addFooter) {
+                if (false) { // TODO 已经移除了之前的“由思源笔记导出”页脚（https://github.com/siyuan-note/siyuan/issues/7838），后面如果需要的话换成自定义页脚
                     ipcData.pdfOptions.displayHeaderFooter = true;
                     ipcData.pdfOptions.headerTemplate = "<span></span>";
                     ipcData.pdfOptions.footerTemplate = `<div style="width:100%;margin-right:${ipcData.pdfOptions.margins.right}in;display: flex;line-height:12px;">

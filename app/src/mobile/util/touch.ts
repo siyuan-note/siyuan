@@ -1,4 +1,4 @@
-import {hasClosestByAttribute} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 
@@ -7,6 +7,8 @@ let clientY: number;
 let xDiff: number;
 let yDiff: number;
 let time: number;
+let firstDirection: "toLeft" | "toRight";
+let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
 
 export const handleTouchEnd = (event: TouchEvent) => {
     if (window.siyuan.mobile.editor) {
@@ -16,43 +18,95 @@ export const handleTouchEnd = (event: TouchEvent) => {
         window.siyuan.hideBreadcrumb = false;
     }
 
-    if (!clientX || !clientY || xDiff === 0) {
+    const target = event.target as HTMLElement;
+    if (!clientX || !clientY || typeof yDiff === "undefined" ||
+        hasClosestByClassName(target, "b3-dialog") ||
+        hasClosestByAttribute(target, "id", "model")
+    ) {
         return;
     }
 
-    const target = event.target as HTMLElement;
+    // 有些事件不经过 touchstart 和 touchmove，因此需设置为 null 不再继续执行
+    clientX = null;
+    // 有些事件不经过 touchmove
+
     let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable");
     if (scrollElement) {
         scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement);
-        if ((xDiff < 0 && scrollElement.scrollLeft > 0) ||
-            (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
+        if ((xDiff <= 0 && scrollElement.scrollLeft > 0) ||
+            (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
             return;
         }
     }
 
-    let show = false;
+    let scrollEnable = false;
     if (new Date().getTime() - time < 1000) {
-        show = true;
+        scrollEnable = true;
     } else if (Math.abs(xDiff) > window.innerWidth / 3) {
-        show = true;
+        scrollEnable = true;
     }
+
+    const isXScroll = Math.abs(xDiff) > Math.abs(yDiff)
     const menuElement = hasClosestByAttribute(target, "id", "menu");
-    if (show && menuElement && xDiff < 0) {
-        closePanel();
+    if (menuElement) {
+        if (isXScroll) {
+            if (scrollEnable) {
+                if (xDiff <= 0) {
+                    if (lastClientX) {
+                        popMenu();
+                    } else {
+                        closePanel();
+                    }
+                } else if (lastClientX) {
+                    closePanel();
+                }
+            }
+        } else {
+            if (xDiff > 0) {
+                popMenu();
+            } else if (menuElement.style.right !== "0px") {
+                closePanel();
+            }
+        }
         return;
     }
     const sideElement = hasClosestByAttribute(target, "id", "sidebar");
-    if (show && sideElement && xDiff > 0) {
+    if (sideElement) {
+        if (isXScroll) {
+            if (scrollEnable) {
+                if (xDiff >= 0) {
+                    if (lastClientX) {
+                        document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
+                    } else {
+                        closePanel();
+                    }
+                } else if (lastClientX) {
+                    closePanel();
+                }
+            }
+        } else {
+            if (xDiff < 0) {
+                document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
+            } else if (sideElement.style.left !== "0px") {
+                closePanel();
+            }
+        }
+        return;
+    }
+    if (!scrollEnable || !isXScroll) {
         closePanel();
         return;
     }
-    if (!show) {
-        closePanel();
-        return;
-    }
-    if (Math.abs(xDiff) > Math.abs(yDiff)) {
-        if (xDiff > 0) {
+
+    if (xDiff > 0) {
+        if (lastClientX) {
+            closePanel();
+        } else {
             popMenu();
+        }
+    } else {
+        if (lastClientX) {
+            closePanel();
         } else {
             document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
         }
@@ -60,8 +114,10 @@ export const handleTouchEnd = (event: TouchEvent) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
-    xDiff = 0;
-    yDiff = 0;
+    firstDirection = null
+    xDiff = undefined
+    yDiff = undefined
+    lastClientX = undefined
     if (navigator.userAgent.indexOf("iPhone") > -1 ||
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
@@ -75,15 +131,38 @@ export const handleTouchStart = (event: TouchEvent) => {
     }
 };
 
+
+let previousClientX: number;
 export const handleTouchMove = (event: TouchEvent) => {
-    if (!clientX || !clientY) {
+    const target = event.target as HTMLElement;
+    if (!clientX || !clientY ||
+        hasClosestByClassName(target, "b3-dialog") ||
+        hasClosestByAttribute(target, "id", "model")) {
         return;
     }
+
     xDiff = Math.floor(clientX - event.touches[0].clientX);
     yDiff = Math.floor(clientY - event.touches[0].clientY);
-
+    if (!firstDirection) {
+        firstDirection = xDiff > 0 ? "toLeft" : "toRight";
+    }
+    if (previousClientX) {
+        if (firstDirection === "toRight") {
+            if (previousClientX > event.touches[0].clientX) {
+                lastClientX = event.touches[0].clientX;
+            } else {
+                lastClientX = undefined
+            }
+        } else if (firstDirection === "toLeft") {
+            if (previousClientX < event.touches[0].clientX) {
+                lastClientX = event.touches[0].clientX;
+            } else {
+                lastClientX = undefined
+            }
+        }
+    }
+    previousClientX = event.touches[0].clientX;
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
-        const target = event.target as HTMLElement;
         let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable");
         if (scrollElement) {
             scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement);
@@ -92,18 +171,23 @@ export const handleTouchMove = (event: TouchEvent) => {
                 return;
             }
         }
+
+
         const menuElement = hasClosestByAttribute(target, "id", "menu");
-        if (menuElement && xDiff < 0) {
-            menuElement.style.right = xDiff + "px";
+        if (menuElement) {
+            if (xDiff < 0) {
+                menuElement.style.right = xDiff + "px";
+            }
             return;
         }
         const sideElement = hasClosestByAttribute(target, "id", "sidebar");
-        if (sideElement && xDiff > 0) {
-            sideElement.style.left = -xDiff + "px";
+        if (sideElement) {
+            if (xDiff > 0) {
+                sideElement.style.left = -xDiff + "px";
+            }
             return;
         }
-        console.log(event);
-        if (xDiff < 0) {
+        if (firstDirection === "toRight") {
             document.getElementById("sidebar").style.left = -window.innerWidth - xDiff + "px";
         } else {
             document.getElementById("menu").style.right = -window.innerWidth + xDiff + "px";

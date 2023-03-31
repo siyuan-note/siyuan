@@ -24,7 +24,7 @@ WYSIWYG.
 
 ### Free
 
-All local features are free.
+All local features are free, even for commercial use.
 
 * Content block
   * Block-level reference and two-way links

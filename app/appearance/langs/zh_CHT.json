@@ -740,6 +740,8 @@
   "export18": "啟用後將文檔標題以一級標題的形式插入到開頭",
   "export19": "Pandoc 可執行文件路徑",
   "export20": "導出 Word .docx 文件需要使用 <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a> 進行格式轉換",
+  "export21": "導出 PDF 頁腳模板",
+  "export22": "<code class='fn__code'>%page</code> 為當前頁碼，<code class='fn__code'>%pages</code> 為總頁碼，支持 Sprig 模板函數",
   "export23": "導出 Markdown 添加 YFM",
   "export24": "啟用後在導出的 Markdown 文件開頭處添加一些較為通用的元數據信息",
   "blockRef": "引用塊",

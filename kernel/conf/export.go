@@ -44,5 +44,6 @@ func NewExport() *Export {
 		FileAnnotationRefMode:   0,
 		PandocBin:               "",
 		MarkdownYFM:             false,
+		PDFFooter:               "%page / %pages",
 	}
 }

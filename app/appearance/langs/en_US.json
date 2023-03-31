@@ -740,6 +740,8 @@
   "export18": "After enabling, insert the document title as a heading 1 at the beginning",
   "export19": "Path to Pandoc executable",
   "export20": "Exporting Word .docx files requires format conversion using <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a>",
+  "export21": "Export PDF footer template",
+  "export22": "<code class='fn__code'>%page</code> is the current page number, <code class='fn__code'>%pages</code> is the total page number, and supports Sprig template functions",
   "export23": "Export Markdown wit YFM",
   "export24": "After enabling, add some general metadata information at the beginning of the exported Markdown file",
   "blockRef": "Ref Block",

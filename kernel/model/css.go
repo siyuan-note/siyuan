@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/css"
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -161,7 +162,7 @@ func ReadCustomCSS(themeName string) (ret map[string]map[string]string, err erro
 	custom := filepath.Join(themePath, "custom.css")
 
 	if !gulu.File.IsExist(custom) {
-		if err = gulu.File.CopyFile(theme, custom); nil != err {
+		if err = filelock.Copy(theme, custom); nil != err {
 			logging.LogErrorf("copy theme [%s] to [%s] failed: %s", theme, custom, err)
 			return
 		}

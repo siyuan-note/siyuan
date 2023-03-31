@@ -110,7 +110,7 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				name = "net-img-" + name
 				name = util.AssetName(name)
 				writePath := filepath.Join(assetsDirPath, name)
-				if err = gulu.File.Copy(u, writePath); nil != err {
+				if err = filelock.Copy(u, writePath); nil != err {
 					logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
 					return ast.WalkSkipChildren
 				}
@@ -412,7 +412,7 @@ func RemoveUnusedAssets() (ret []string) {
 	for _, p := range unusedAssets {
 		historyPath := filepath.Join(historyDir, p)
 		if p = filepath.Join(util.DataDir, p); gulu.File.IsExist(p) {
-			if err = gulu.File.Copy(p, historyPath); nil != err {
+			if err = filelock.Copy(p, historyPath); nil != err {
 				return
 			}
 
@@ -455,7 +455,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	newP := strings.TrimPrefix(absPath, util.DataDir)
 	historyPath := filepath.Join(historyDir, newP)
 	if gulu.File.IsExist(absPath) {
-		if err = gulu.File.Copy(absPath, historyPath); nil != err {
+		if err = filelock.Copy(absPath, historyPath); nil != err {
 			return
 		}
 

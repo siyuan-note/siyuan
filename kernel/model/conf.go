@@ -321,10 +321,10 @@ func InitConf() {
 	if nil == Conf.Flashcard {
 		Conf.Flashcard = conf.NewFlashcard()
 	}
-	if 1 > Conf.Flashcard.NewCardLimit {
+	if 0 > Conf.Flashcard.NewCardLimit {
 		Conf.Flashcard.NewCardLimit = 20
 	}
-	if 1 > Conf.Flashcard.ReviewCardLimit {
+	if 0 > Conf.Flashcard.ReviewCardLimit {
 		Conf.Flashcard.ReviewCardLimit = 200
 	}
 

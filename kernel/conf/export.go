@@ -28,6 +28,7 @@ type Export struct {
 	FileAnnotationRefMode   int    `json:"fileAnnotationRefMode"`   // 文件标注引用导出模式，0：文件名 - 页码 - 锚文本，1：仅锚文本
 	PandocBin               string `json:"pandocBin"`               // Pandoc 可执行文件路径
 	MarkdownYFM             bool   `json:"markdownYFM"`             // Markdown 导出时是否添加 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/7727
+	PDFFooter               string `json:"pdfFooter"`               // PDF 导出时页脚内容
 }
 
 func NewExport() *Export {

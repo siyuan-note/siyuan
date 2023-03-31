@@ -8,13 +8,13 @@ export const flashcard = {
         responsiveHTML = `<div class="b3-label">
     ${window.siyuan.languages.flashcardNewCardLimit}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="newCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.newCardLimit}"/>
+    <input class="b3-text-field fn__flex-center fn__block" id="newCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.newCardLimit}"/>
     <div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimitTip}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.flashcardReviewCardLimit}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="reviewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
+    <input class="b3-text-field fn__flex-center fn__block" id="reviewCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
     <div class="b3-label__text">${window.siyuan.languages.flashcardReviewCardLimitTip}</div>
 </div>`;
         /// #else
@@ -24,7 +24,7 @@ export const flashcard = {
         <div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimitTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="newCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.newCardLimit}"/>
+    <input class="b3-text-field fn__flex-center fn__size200" id="newCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.newCardLimit ? " checked" : "" } value="${window.siyuan.config.flashcard.newCardLimit}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -32,7 +32,7 @@ export const flashcard = {
         <div class="b3-label__text">${window.siyuan.languages.flashcardReviewCardLimitTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="reviewCardLimit" step="1" min="1" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
+    <input class="b3-text-field fn__flex-center fn__size200" id="reviewCardLimit" step="1" min="0" type="number"${window.siyuan.config.flashcard.reviewCardLimit ? " checked" : ""} value="${window.siyuan.config.flashcard.reviewCardLimit}"/>
 </label>`;
         /// #endif
         return `${responsiveHTML}

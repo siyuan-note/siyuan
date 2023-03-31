@@ -1357,6 +1357,16 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				continue
 			}
 
+			if !gulu.File.IsDir(srcPath) && strings.HasSuffix(strings.ToLower(srcPath), ".pdf") {
+				sya := srcPath + ".sya"
+				if gulu.File.IsExist(sya) {
+					// Related PDF annotation information is not exported when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/7836
+					if syaErr := filelock.Copy(sya, destPath+".sya"); nil != syaErr {
+						logging.LogErrorf("copy sya from [%s] to [%s] failed: %s", sya, destPath+".sya", syaErr)
+					}
+				}
+			}
+
 			copiedAssets.Add(asset)
 		}
 	}

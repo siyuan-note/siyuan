@@ -554,6 +554,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 });
                 return;
             } else if (value === Constants.ZWSP + 5) {
+                range.deleteContents();
                 AIChat(protyle, nodeElement);
                 return;
             } else if (Constants.INLINE_TYPE.includes(value)) {

@@ -273,7 +273,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	from := historyPath
 	to := filepath.Join(util.DataDir, "assets", filepath.Base(historyPath))
 
-	if err = gulu.File.Copy(from, to); nil != err {
+	if err = filelock.Copy(from, to); nil != err {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
@@ -290,7 +290,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	from := historyPath
 	to := filepath.Join(util.DataDir, filepath.Base(historyPath))
 
-	if err = gulu.File.Copy(from, to); nil != err {
+	if err = filelock.Copy(from, to); nil != err {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}

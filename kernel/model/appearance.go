@@ -27,6 +27,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/fsnotify/fsnotify"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -42,7 +43,7 @@ func InitAppearance() {
 
 	unloadThemes()
 	from := filepath.Join(util.WorkingDir, "appearance")
-	if err := gulu.File.Copy(from, util.AppearancePath); nil != err {
+	if err := filelock.Copy(from, util.AppearancePath); nil != err {
 		logging.LogErrorf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
 		util.ReportFileSysFatalError(err)
 		return

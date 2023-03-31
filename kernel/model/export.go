@@ -170,7 +170,7 @@ func ExportSystemLog() (zipPath string) {
 	appLog := filepath.Join(util.HomeDir, ".config", "siyuan", "app.log")
 	if gulu.File.IsExist(appLog) {
 		to := filepath.Join(exportFolder, "app.log")
-		if err := gulu.File.CopyFile(appLog, to); nil != err {
+		if err := filelock.Copy(appLog, to); nil != err {
 			logging.LogErrorf("copy app log from [%s] to [%s] failed: %s", err, appLog, to)
 		}
 	}
@@ -178,7 +178,7 @@ func ExportSystemLog() (zipPath string) {
 	kernelLog := filepath.Join(util.HomeDir, ".config", "siyuan", "kernel.log")
 	if gulu.File.IsExist(kernelLog) {
 		to := filepath.Join(exportFolder, "kernel.log")
-		if err := gulu.File.CopyFile(kernelLog, to); nil != err {
+		if err := filelock.Copy(kernelLog, to); nil != err {
 			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, kernelLog, to)
 		}
 	}
@@ -186,7 +186,7 @@ func ExportSystemLog() (zipPath string) {
 	siyuanLog := filepath.Join(util.TempDir, "siyuan.log")
 	if gulu.File.IsExist(siyuanLog) {
 		to := filepath.Join(exportFolder, "siyuan.log")
-		if err := gulu.File.CopyFile(siyuanLog, to); nil != err {
+		if err := filelock.Copy(siyuanLog, to); nil != err {
 			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, siyuanLog, to)
 		}
 	}
@@ -355,13 +355,13 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 		return errors.New(msg)
 	}
 
-	if err = gulu.File.Copy(tmpDocxPath, filepath.Join(savePath, name+".docx")); nil != err {
+	if err = filelock.Copy(tmpDocxPath, filepath.Join(savePath, name+".docx")); nil != err {
 		logging.LogErrorf("export docx failed: %s", err)
 		return errors.New(fmt.Sprintf(Conf.Language(14), err))
 	}
 
 	if tmpAssets := filepath.Join(tmpDir, "assets"); !removeAssets && gulu.File.IsDir(tmpAssets) {
-		if err = gulu.File.Copy(tmpAssets, filepath.Join(savePath, "assets")); nil != err {
+		if err = filelock.Copy(tmpAssets, filepath.Join(savePath, "assets")); nil != err {
 			logging.LogErrorf("export docx failed: %s", err)
 			return errors.New(fmt.Sprintf(Conf.Language(14), err))
 		}
@@ -409,7 +409,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 				continue
 			}
 			targetAbsPath := filepath.Join(savePath, asset)
-			if err = gulu.File.Copy(srcAbsPath, targetAbsPath); nil != err {
+			if err = filelock.Copy(srcAbsPath, targetAbsPath); nil != err {
 				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 			}
 		}
@@ -419,7 +419,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	for _, src := range srcs {
 		from := filepath.Join(util.WorkingDir, src)
 		to := filepath.Join(savePath, src)
-		if err := gulu.File.Copy(from, to); nil != err {
+		if err := filelock.Copy(from, to); nil != err {
 			logging.LogWarnf("copy stage from [%s] to [%s] failed: %s", from, savePath, err)
 			return
 		}
@@ -433,7 +433,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	for _, src := range srcs {
 		from := filepath.Join(util.AppearancePath, src)
 		to := filepath.Join(savePath, "appearance", src)
-		if err := gulu.File.Copy(from, to); nil != err {
+		if err := filelock.Copy(from, to); nil != err {
 			logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
 			return
 		}
@@ -444,7 +444,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	for _, emoji := range emojis {
 		from := filepath.Join(util.DataDir, emoji)
 		to := filepath.Join(savePath, emoji)
-		if err := gulu.File.Copy(from, to); nil != err {
+		if err := filelock.Copy(from, to); nil != err {
 			logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
 			return
 		}
@@ -546,7 +546,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 				continue
 			}
 			targetAbsPath := filepath.Join(savePath, asset)
-			if err = gulu.File.Copy(srcAbsPath, targetAbsPath); nil != err {
+			if err = filelock.Copy(srcAbsPath, targetAbsPath); nil != err {
 				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 			}
 		}
@@ -558,7 +558,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		for _, src := range srcs {
 			from := filepath.Join(util.WorkingDir, src)
 			to := filepath.Join(savePath, src)
-			if err := gulu.File.Copy(from, to); nil != err {
+			if err := filelock.Copy(from, to); nil != err {
 				logging.LogErrorf("copy stage from [%s] to [%s] failed: %s", from, savePath, err)
 				return
 			}
@@ -572,7 +572,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		for _, src := range srcs {
 			from := filepath.Join(util.AppearancePath, src)
 			to := filepath.Join(savePath, "appearance", src)
-			if err := gulu.File.Copy(from, to); nil != err {
+			if err := filelock.Copy(from, to); nil != err {
 				logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
 				return
 			}
@@ -583,7 +583,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		for _, emoji := range emojis {
 			from := filepath.Join(util.DataDir, emoji)
 			to := filepath.Join(savePath, emoji)
-			if err := gulu.File.Copy(from, to); nil != err {
+			if err := filelock.Copy(from, to); nil != err {
 				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
 				return
 			}
@@ -1124,11 +1124,7 @@ func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath
 			}
 
 			destPath := filepath.Join(writeFolder, asset)
-			if gulu.File.IsDir(srcPath) {
-				err = gulu.File.Copy(srcPath, destPath)
-			} else {
-				err = gulu.File.CopyFile(srcPath, destPath)
-			}
+			err = filelock.Copy(srcPath, destPath)
 			if nil != err {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
 				continue
@@ -1355,14 +1351,20 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 
 			destPath := filepath.Join(exportFolder, asset)
-			if gulu.File.IsDir(srcPath) {
-				assetErr = gulu.File.Copy(srcPath, destPath)
-			} else {
-				assetErr = gulu.File.CopyFile(srcPath, destPath)
-			}
+			assetErr = filelock.Copy(srcPath, destPath)
 			if nil != assetErr {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, assetErr)
 				continue
+			}
+
+			if !gulu.File.IsDir(srcPath) && strings.HasSuffix(strings.ToLower(srcPath), ".pdf") {
+				sya := srcPath + ".sya"
+				if gulu.File.IsExist(sya) {
+					// Related PDF annotation information is not exported when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/7836
+					if syaErr := filelock.Copy(sya, destPath+".sya"); nil != syaErr {
+						logging.LogErrorf("copy sya from [%s] to [%s] failed: %s", sya, destPath+".sya", syaErr)
+					}
+				}
 			}
 
 			copiedAssets.Add(asset)

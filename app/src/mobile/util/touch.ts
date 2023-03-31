@@ -1,6 +1,7 @@
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
+import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 
 let clientX: number;
 let clientY: number;
@@ -9,6 +10,16 @@ let yDiff: number;
 let time: number;
 let firstDirection: "toLeft" | "toRight";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
+
+const popSide = (render = true) => {
+    if (render) {
+        document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
+    } else {
+        hideKeyboardToolbar();
+        activeBlur();
+        document.getElementById("sidebar").style.left = "0";
+    }
+}
 
 export const handleTouchEnd = (event: TouchEvent) => {
     if (window.siyuan.mobile.editor) {
@@ -21,6 +32,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         hasClosestByClassName(target, "b3-dialog") ||
+        hasClosestByClassName(target, "keyboard") ||
         hasClosestByAttribute(target, "id", "model")
     ) {
         return;
@@ -50,46 +62,42 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const menuElement = hasClosestByAttribute(target, "id", "menu");
     if (menuElement) {
         if (isXScroll) {
-            if (scrollEnable) {
-                if (xDiff <= 0) {
-                    if (lastClientX) {
-                        popMenu();
-                    } else {
-                        closePanel();
-                    }
-                } else if (lastClientX) {
+            if (firstDirection === "toRight") {
+                if (lastClientX) {
+                    popMenu();
+                } else {
                     closePanel();
+                }
+            } else {
+                if (lastClientX) {
+                    closePanel();
+                } else {
+                    popMenu();
                 }
             }
         } else {
-            if (xDiff > 0) {
-                popMenu();
-            } else if (menuElement.style.right !== "0px") {
-                closePanel();
-            }
+            popMenu();
         }
         return;
     }
     const sideElement = hasClosestByAttribute(target, "id", "sidebar");
     if (sideElement) {
         if (isXScroll) {
-            if (scrollEnable) {
-                if (xDiff >= 0) {
-                    if (lastClientX) {
-                        document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
-                    } else {
-                        closePanel();
-                    }
-                } else if (lastClientX) {
+            if (firstDirection === "toLeft") {
+                if (lastClientX) {
+                    popSide(false);
+                } else {
                     closePanel();
+                }
+            } else {
+                if (lastClientX) {
+                    closePanel();
+                } else {
+                    popSide(false);
                 }
             }
         } else {
-            if (xDiff < 0) {
-                document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
-            } else if (sideElement.style.left !== "0px") {
-                closePanel();
-            }
+            popSide(false);
         }
         return;
     }
@@ -108,7 +116,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         if (lastClientX) {
             closePanel();
         } else {
-            document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
+            popSide();
         }
     }
 };
@@ -137,6 +145,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY ||
         hasClosestByClassName(target, "b3-dialog") ||
+        hasClosestByClassName(target, "keyboard") ||
         hasClosestByAttribute(target, "id", "model")) {
         return;
     }
@@ -172,11 +181,15 @@ export const handleTouchMove = (event: TouchEvent) => {
             }
         }
 
-
+        const windowWidth = window.innerWidth;
         const menuElement = hasClosestByAttribute(target, "id", "menu");
         if (menuElement) {
             if (xDiff < 0) {
                 menuElement.style.right = xDiff + "px";
+                transformMask(-xDiff / windowWidth);
+            } else {
+                menuElement.style.right = "0px";
+                transformMask(0);
             }
             return;
         }
@@ -184,13 +197,25 @@ export const handleTouchMove = (event: TouchEvent) => {
         if (sideElement) {
             if (xDiff > 0) {
                 sideElement.style.left = -xDiff + "px";
+                transformMask(xDiff / windowWidth);
+            } else {
+                sideElement.style.left = "0px";
+                transformMask(0);
             }
             return;
         }
         if (firstDirection === "toRight") {
-            document.getElementById("sidebar").style.left = -window.innerWidth - xDiff + "px";
+            document.getElementById("sidebar").style.left = -windowWidth - xDiff + "px";
+            transformMask((windowWidth + xDiff) / windowWidth);
         } else {
-            document.getElementById("menu").style.right = -window.innerWidth + xDiff + "px";
+            document.getElementById("menu").style.right = -windowWidth + xDiff + "px";
+            transformMask((windowWidth - xDiff) / windowWidth);
         }
     }
 };
+
+const transformMask = (opacity: number) => {
+    const maskElement = document.querySelector(".side-mask") as HTMLElement;
+    maskElement.classList.remove("fn__none");
+    maskElement.style.opacity = Math.min((1 - opacity), 0.86).toString();
+}

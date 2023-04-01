@@ -34,8 +34,7 @@ import (
 )
 
 var (
-	preferredPDFFonts          = []string{"Microsoft YaHei", "SimSun", "微软雅黑", "宋体", "仿宋", "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "sans-serif", "Arial"}
-	preferredPDFWatermarkFonts = []string{"MicrosoftYaHei", "SimSun", "LucidaSans", "Corbel", "Helvetica", "Arial", "sans-serif"}
+	preferredPDFWatermarkFonts = []string{"MicrosoftYaHei", "SimSun", "STHeitiSC-Light", "STHeitiTC-Light", "AquaHiraKaku", "AppleGothic", "Helvetica"}
 )
 
 func InstallPDFFonts() string {
@@ -46,7 +45,7 @@ func InstallPDFFonts() string {
 
 	finder := sysfont.NewFinder(&sysfont.FinderOpts{Extensions: []string{".ttf", ".ttc"}})
 	var fontPaths []string
-	for _, preferredFont := range preferredPDFFonts {
+	for _, preferredFont := range preferredPDFWatermarkFonts {
 		f := finder.Match(preferredFont)
 		if nil != f {
 			fontPaths = append(fontPaths, f.Filename)

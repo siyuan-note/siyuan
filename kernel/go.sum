@@ -12,6 +12,8 @@ github.com/88250/lute v1.7.6-0.20230330013439-8760e9c073db h1:VS58OzTzimPqjiw6WQ
 github.com/88250/lute v1.7.6-0.20230330013439-8760e9c073db/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390 h1:q2AR33VoQ87WYtvZ4pEvwj5gZkv22HK/yMlPWwF1oyc=
 github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
+github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c h1:Dl/8S9iLyPMTElnWIBxmjaLiWrkI5P4a21ivwAn5pU0=
+github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1/go.mod h1:U3pckKQIgxxkmZjV5yXQjHdGxQK0o/vEZeZ6cQsxfHw=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
@@ -29,6 +31,12 @@ github.com/PuerkitoBio/goquery v1.8.1 h1:uQxhNlArOIdbrH1tr0UXwdVFgDcZDrZVdcpygAc
 github.com/PuerkitoBio/goquery v1.8.1/go.mod h1:Q8ICL1kNUJ2sXGoAhPGUdYDJvgQgHzJsnnd3H7Ho5jQ=
 github.com/Xuanwo/go-locale v1.1.0 h1:51gUxhxl66oXAjI9uPGb2O0qwPECpriKQb2hl35mQkg=
 github.com/Xuanwo/go-locale v1.1.0/go.mod h1:UKrHoZB3FPIk9wIG2/tVSobnHgNnceGSH3Y8DY5cASs=
+github.com/adrg/strutil v0.2.2 h1:XSd9+o2xaOon2oRum0JymNT+f0nfLiAiDzGOcjcIsMI=
+github.com/adrg/strutil v0.2.2/go.mod h1:EF2fjOFlGTepljfI+FzgTG13oXthR7ZAil9/aginnNQ=
+github.com/adrg/sysfont v0.1.2 h1:MSU3KREM4RhsQ+7QgH7wPEPTgAgBIz0Hw6Nd4u7QgjE=
+github.com/adrg/sysfont v0.1.2/go.mod h1:6d3l7/BSjX9VaeXWJt9fcrftFaD/t7l11xgSywCPZGk=
+github.com/adrg/xdg v0.3.0 h1:BO+k4wFj0IoTolBF1Apn8oZrX3LQrEbBA8+/9vyW9J4=
+github.com/adrg/xdg v0.3.0/go.mod h1:7I2hH/IT30IsupOpKZ5ue7/qNi3CoKzD6tL3HwpaRMQ=
 github.com/alecthomas/chroma v0.10.0 h1:7XDcGkCQopCNKjZHfYrNLraA+M7e0fMiJ/Mfikbfjek=
 github.com/alecthomas/chroma v0.10.0/go.mod h1:jtJATyUxlIORhUOFNA9NZDWGAQ8wpxQQqNSB4rjA/1s=
 github.com/andybalholm/cascadia v1.3.1 h1:nhxRkql1kdYCc8Snf7D5/D3spOX+dBgjA6u8x004T2c=

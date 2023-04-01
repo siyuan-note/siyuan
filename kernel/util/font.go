@@ -22,7 +22,10 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/pdfcpu/pkg/api"
+	"github.com/88250/pdfcpu/pkg/font"
 	"github.com/ConradIrwin/font/sfnt"
+	"github.com/adrg/sysfont"
 	"github.com/flopp/go-findfont"
 	"github.com/siyuan-note/logging"
 	ttc "golang.org/x/image/font/sfnt"
@@ -31,23 +34,43 @@ import (
 )
 
 var (
-	preferredFonts = []string{"Microsoft YaHei", "SimSun", "微软雅黑", "宋体", "仿宋", "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "sans-serif", "Arial"}
+	preferredPDFFonts          = []string{"Microsoft YaHei", "SimSun", "微软雅黑", "宋体", "仿宋", "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "sans-serif", "Arial"}
+	preferredPDFWatermarkFonts = []string{"MicrosoftYaHei", "SimSun", "LucidaSans", "Corbel", "Helvetica", "Arial", "sans-serif"}
 )
 
-func GetPreferredFontFilePath(currentLanguage string) *Font {
-	fonts := loadFonts(currentLanguage)
-
-	for _, font := range fonts {
-		logging.LogInfof("font: %+v", font)
+func InstallPDFFonts() string {
+	names := font.UserFontNames()
+	if 0 < len(names) {
+		return getPreferredPDFWatermarkFont(names)
 	}
 
-	sort.Slice(fonts, func(i, j int) bool { return len(fonts[i].Family) > len(fonts[j].Family) })
-	for _, font := range fonts {
-		if gulu.Str.Contains(font.Family, preferredFonts) {
-			return font
+	finder := sysfont.NewFinder(&sysfont.FinderOpts{Extensions: []string{".ttf", ".ttc"}})
+	var fontPaths []string
+	for _, preferredFont := range preferredPDFFonts {
+		f := finder.Match(preferredFont)
+		if nil != f {
+			fontPaths = append(fontPaths, f.Filename)
 		}
 	}
-	return nil
+
+	if err := api.InstallFonts(fontPaths); nil != err {
+		logging.LogErrorf("install font failed: %s", err)
+	}
+
+	names = font.UserFontNames()
+	logging.LogInfof("pdf fonts [%s]", strings.Join(names, ", "))
+	return getPreferredPDFWatermarkFont(names)
+}
+
+func getPreferredPDFWatermarkFont(userFontNames []string) string {
+	for _, preferredFont := range preferredPDFWatermarkFonts {
+		for _, userFont := range userFontNames {
+			if preferredFont == userFont {
+				return preferredFont
+			}
+		}
+	}
+	return "Helvetica"
 }
 
 func GetSysFonts(currentLanguage string) (ret []string) {

@@ -7,7 +7,7 @@ require (
 	github.com/88250/css v0.1.2
 	github.com/88250/gulu v1.2.3-0.20230321113152-38c4a3d73c37
 	github.com/88250/lute v1.7.6-0.20230330013439-8760e9c073db
-	github.com/88250/pdfcpu v0.3.14-0.20230224021324-e51076eb6390
+	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20230220142845-f237b6348b3e
 	github.com/ConradIrwin/font v0.0.0-20210318200717-ce8d41cc0732
@@ -65,6 +65,9 @@ require (
 	dmitri.shuralyov.com/font/woff2 v0.0.0-20180220214647-957792cbbdab // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
+	github.com/adrg/strutil v0.2.2 // indirect
+	github.com/adrg/sysfont v0.1.2 // indirect
+	github.com/adrg/xdg v0.3.0 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect

@@ -3,16 +3,43 @@ import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../.
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
-import {hintSlash} from "../../protyle/hint/extend";
 
 let renderKeyboardToolbarTimeout: number;
 let showKeyboardToolbarUtil = false;
+
+const getSlashItem = (value: string, icon: string, text:string) => {
+    return  `<div class="keyboard__slash-item" data-value="${value}">
+    <svg class="keyboard__slash-icon"><use xlink:href="#${icon}"></use></svg>
+    <span class="keyboard__slash-text">${text}</span>
+</div>`
+}
 
 const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.splitChar = "/";
     protyle.hint.lastIndex = -1;
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
-    utilElement.innerHTML = protyle.hint.getHTMLByData(hintSlash("", protyle), false);
+    utilElement.innerHTML = `<div class="keyboard__slash-title">
+${window.siyuan.languages.general}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(Constants.ZWSP, "iconMarkdown", window.siyuan.languages.template)}
+    ${getSlashItem(Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget)}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
+    ${getSlashItem(Constants.ZWSP + 3, "iconRef", window.siyuan.languages.blockRef)}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed)}
+    ${getSlashItem(Constants.ZWSP + 5, "iconSparkles", "AI Chat")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(Constants.ZWSP + 4, "iconFile", window.siyuan.languages.newFile)}
+    <div class="keyboard__slash-empty"></div>
+</div>
+<div class="keyboard__slash-title">
+common
+</div>`;
     protyle.hint.bindUploadEvent(protyle, utilElement);
 };
 
@@ -201,7 +228,7 @@ export const initKeyboardToolbar = () => {
 <div class="keyboard__util"></div>`;
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
-        const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+        const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
         const protyle = window.siyuan.mobile.editor.protyle;
         if (slashBtnElement) {
             protyle.hint.fill(decodeURIComponent(slashBtnElement.getAttribute("data-value")), protyle);

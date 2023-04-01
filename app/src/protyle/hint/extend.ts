@@ -23,7 +23,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
         filter: ["模版", "moban", "mb", "template"],
         value: Constants.ZWSP,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic ft__error"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.template}</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.template}</span></div>`,
+    }, {
+        filter: ["挂件", "widget", "gj", "guajian"],
+        value: Constants.ZWSP + 1,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconBoth"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.widget}</span></div>`,
     }, {
         filter: ["资源", "assets", "zy", "ziyuan"],
         value: Constants.ZWSP + 2,
@@ -41,11 +45,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: Constants.ZWSP + 5,
         html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
     },
-    // {
-    //     filter: ["属性视图", "shuxingshitu", "sxst", "attribute view"],
-    //     value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
-    //     html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.attributeView}</span></div>`,
-    // },
+    {
+        filter: ["属性视图", "shuxingshitu", "sxst", "attribute view"],
+        value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.attributeView}</span></div>`,
+    },
     {
         filter: ["文档", "子文档", "wendang", "wd", "ziwendang", "zwd", "xjwd"],
         value: Constants.ZWSP + 4,
@@ -80,11 +84,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["无序列表", "wuxuliebiao", "wxlb", "unordered list"],
         value: "* " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.list}</span><span class="b3-menu__accelerator">*&nbsp;</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.list}</span><span class="b3-list-item__meta">*&nbsp;</span></div>`,
     }, {
         filter: ["有序列表", "youxuliebiao", "yxlb", "ordered list"],
         value: "1. " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconOrderedList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["ordered-list"]}</span><span class="b3-menu__accelerator">1.&nbsp;</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconOrderedList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["ordered-list"]}</span><span class="b3-list-item__meta">1.&nbsp;</span></div>`,
     }, {
         filter: ["任务列表", "renwuliebiao", "rwlb", "task list", "todo list"],
         value: "* [ ] " + Lute.Caret,
@@ -92,11 +96,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["引述", "yinshu", "ys", "bq", "blockquote"],
         value: "> " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span><span class="b3-menu__accelerator">&gt;</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span><span class="b3-list-item__meta">&gt;</span></div>`,
     }, {
         filter: ["代码块", "daimakuai", "dmk", "code block"],
         value: "```",
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.code}</span><span class="b3-menu__accelerator">\`\`\`Enter</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.code}</span><span class="b3-list-item__meta">\`\`\`Enter</span></div>`,
     }, {
         filter: ["表格", "biaoge", "bg", "table"],
         value: `| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`,
@@ -104,7 +108,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["分割线", "fengexian", "fgx", "divider"],
         value: "---",
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconLine"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.line}</span><span class="b3-menu__accelerator">---</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconLine"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.line}</span><span class="b3-list-item__meta">---</span></div>`,
     }, {
         filter: ["数学公式块", "shuxuegongshikuai", "sxgsk", "math block"],
         value: "$$",
@@ -119,7 +123,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["表情", "biaoqing", "bq", "emoji"],
         value: "emoji",
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconEmoji"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.emoji}</span><span class="b3-menu__accelerator">:</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconEmoji"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.emoji}</span><span class="b3-list-item__meta">:</span></div>`,
     }, {
         filter: ["链接", "lianjie", "lj", "link", "a"],
         value: "a",
@@ -243,11 +247,6 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: `style${Constants.ZWSP}`,
         html: `<div class="b3-list-item__first"><div class="color__square">A</div><span class="b3-list-item__text">${window.siyuan.languages.clearFontStyle}</span></div>`,
     }];
-    allList.splice(1, 0, {
-        filter: ["挂件", "widget", "gj", "guajian"],
-        value: Constants.ZWSP + 1,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconBoth"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.widget}</span></div>`,
-    });
     if (key === "") {
         return allList;
     }

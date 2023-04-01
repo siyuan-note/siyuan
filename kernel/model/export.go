@@ -628,7 +628,9 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 			first.InsertBefore(node)
 		}
 	}
+	ret.Path = bt.Path
 	ret.HPath = bt.HPath
+	ret.Box = bt.BoxID
 	return
 }
 

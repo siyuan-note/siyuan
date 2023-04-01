@@ -48,10 +48,23 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 	}
 
 	avID := operation.ParentID
+	var avs []*av.AttributeView
 	for _, id := range operation.SrcIDs {
-		if err = addAttributeViewBlock(id, avID, tree, tx); nil != err {
-			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: err.Error()}
+		var av *av.AttributeView
+		var avErr error
+		if av, avErr = addAttributeViewBlock(id, avID, tree, tx); nil != avErr {
+			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: avErr.Error()}
 		}
+
+		if nil == av {
+			continue
+		}
+
+		avs = append(avs, av)
+	}
+
+	for _, av := range avs {
+		sql.RebuildAttributeViewQueue(av)
 	}
 	return
 }
@@ -64,11 +77,24 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID}
 	}
 
+	var avs []*av.AttributeView
 	avID := operation.ParentID
 	for _, id := range operation.SrcIDs {
-		if err = removeAttributeViewBlock(id, avID, tree, tx); nil != err {
+		var av *av.AttributeView
+		var avErr error
+		if av, avErr = removeAttributeViewBlock(id, avID, tree); nil != avErr {
 			return &TxErr{code: TxErrWriteAttributeView, id: avID}
 		}
+
+		if nil == av {
+			continue
+		}
+
+		avs = append(avs, av)
+	}
+
+	for _, av := range avs {
+		sql.RebuildAttributeViewQueue(av)
 	}
 	return
 }
@@ -126,31 +152,31 @@ func removeAttributeViewColumn(columnID string, avID string) (err error) {
 	return
 }
 
-func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (err error) {
+func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (ret *av.AttributeView, err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
 		err = ErrBlockNotFound
 		return
 	}
 
-	attrView, err := av.ParseAttributeView(avID)
+	ret, err = av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
-	for i, row := range attrView.Rows {
+	for i, row := range ret.Rows {
 		if row.Cells[0].Value == blockID {
 			// 从行中移除，但是不移除属性
-			attrView.Rows = append(attrView.Rows[:i], attrView.Rows[i+1:]...)
+			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
 			break
 		}
 	}
 
-	err = av.SaveAttributeView(attrView)
+	err = av.SaveAttributeView(ret)
 	return
 }
 
-func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (ret *av.AttributeView, err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
 		err = ErrBlockNotFound
@@ -168,13 +194,13 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 		return
 	}
 
-	attrView, err := av.ParseAttributeView(avID)
+	ret, err = av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
 	// 不允许重复添加相同的块到属性视图中
-	for _, row := range attrView.Rows {
+	for _, row := range ret.Rows {
 		if row.Cells[0].Value == blockID {
 			return
 		}
@@ -182,11 +208,11 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 
 	row := av.NewRow()
 	row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: blockID})
-	if 1 < len(attrView.Columns) {
-		// 将列作为属性添加到块中
+	if 1 < len(ret.Columns) {
 		attrs := parse.IAL2Map(node.KramdownIAL)
-		for _, col := range attrView.Columns[1:] {
-			attrs["av"+col.ID] = ""
+		for _, col := range ret.Columns[1:] {
+			attrs["av"+col.ID] = "" // 将列作为属性添加到块中
+			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: ""})
 		}
 
 		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -194,7 +220,7 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 		}
 	}
 
-	attrView.Rows = append(attrView.Rows, row)
-	err = av.SaveAttributeView(attrView)
+	ret.Rows = append(ret.Rows, row)
+	err = av.SaveAttributeView(ret)
 	return
 }

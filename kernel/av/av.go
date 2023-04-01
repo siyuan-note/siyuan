@@ -18,6 +18,7 @@
 package av
 
 import (
+	"bytes"
 	"database/sql"
 	"os"
 	"path/filepath"
@@ -162,38 +163,45 @@ func getAttributeViewDataPath(avID string) (ret string) {
 	return
 }
 
-func dropAttributeViewTableColumn(db *sql.DB, avID string, column string) (err error) {
-	_, err = db.Exec("ALTER TABLE `av_" + avID + "` DROP COLUMN `" + column + "`")
-	if nil != err {
-		logging.LogErrorf("drop column [%s] failed: %s", column, err)
-		return
+func RebuildAttributeViewTable(tx *sql.Tx, av *AttributeView) (err error) {
+	avID := av.ID
+	var columns []string
+	for _, c := range av.Columns {
+		columns = append(columns, "`"+c.ID+"`")
 	}
-	return
-}
 
-func addAttributeViewTableColumn(db *sql.DB, avID string, column string) (err error) {
-	_, err = db.Exec("ALTER TABLE `av_" + avID + "` ADD COLUMN `" + column + "`")
-	if nil != err {
-		logging.LogErrorf("add column [%s] failed: %s", column, err)
-		return
-	}
-	return
-}
-
-func dropAttributeViewTable(db *sql.DB, avID string) (err error) {
-	_, err = db.Exec("DROP TABLE IF EXISTS `av_" + avID + "`")
+	_, err = tx.Exec("DROP TABLE IF EXISTS `av_" + avID + "`")
 	if nil != err {
 		logging.LogErrorf("drop table [%s] failed: %s", avID, err)
 		return
 	}
-	return
-}
 
-func createAttributeViewTable(db *sql.DB, avID string, column []string) (err error) {
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `av_" + avID + "` (id, " + strings.Join(column, ", ") + ")")
+	_, err = tx.Exec("CREATE TABLE IF NOT EXISTS `av_" + avID + "` (" + strings.Join(columns, ", ") + ")")
 	if nil != err {
 		logging.LogErrorf("create table [%s] failed: %s", avID, err)
 		return
 	}
+
+	for _, r := range av.Rows {
+		buf := bytes.Buffer{}
+		for i, _ := range r.Cells {
+			buf.WriteString("?")
+			if i < len(r.Cells)-1 {
+				buf.WriteString(", ")
+			}
+		}
+
+		var values []interface{}
+		for _, c := range r.Cells {
+			values = append(values, c.Value)
+		}
+
+		_, err = tx.Exec("INSERT INTO `av_"+avID+"` VALUES ("+buf.String()+")", values...)
+		if nil != err {
+			logging.LogErrorf("insert row [%s] failed: %s", r.ID, err)
+			return
+		}
+	}
+
 	return
 }

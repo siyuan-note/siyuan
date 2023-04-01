@@ -25,6 +25,8 @@ import (
 	"github.com/88250/pdfcpu/pkg/api"
 	"github.com/88250/pdfcpu/pkg/font"
 	"github.com/ConradIrwin/font/sfnt"
+	"github.com/adrg/strutil"
+	"github.com/adrg/strutil/metrics"
 	"github.com/adrg/sysfont"
 	"github.com/flopp/go-findfont"
 	"github.com/siyuan-note/logging"
@@ -61,15 +63,22 @@ func InstallPDFFonts() string {
 	return getPreferredPDFWatermarkFont(names)
 }
 
-func getPreferredPDFWatermarkFont(userFontNames []string) string {
+func getPreferredPDFWatermarkFont(userFontNames []string) (ret string) {
+	ret = "Helvetica"
+	if 1 > len(userFontNames) {
+		return
+	}
+
+	var score float64
 	for _, preferredFont := range preferredPDFWatermarkFonts {
 		for _, userFont := range userFontNames {
-			if preferredFont == userFont {
-				return preferredFont
+			if tmp := strutil.Similarity(preferredFont, userFont, &metrics.JaroWinkler{CaseSensitive: false}); score < tmp {
+				ret = preferredFont
+				score = tmp
 			}
 		}
 	}
-	return "Helvetica"
+	return
 }
 
 func GetSysFonts(currentLanguage string) (ret []string) {

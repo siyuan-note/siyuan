@@ -25,7 +25,7 @@ import (
 
 func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 	ret = rootTree
-	rootBlock := &Block{Box: rootTree.Box, ID: rootTree.ID, Path: rootTree.Path}
+	rootBlock := &Block{Box: rootTree.Box, ID: rootTree.ID, Path: rootTree.Path, HPath: rootTree.HPath}
 	if err = buildBlockChildren(rootBlock); nil != err {
 		return
 	}

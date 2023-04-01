@@ -36,6 +36,11 @@ var (
 
 func GetPreferredFontFilePath(currentLanguage string) *Font {
 	fonts := loadFonts(currentLanguage)
+
+	for _, font := range fonts {
+		logging.LogInfof("font: %+v", font)
+	}
+
 	sort.Slice(fonts, func(i, j int) bool { return len(fonts[i].Family) > len(fonts[j].Family) })
 	for _, font := range fonts {
 		if gulu.Str.Contains(font.Family, preferredFonts) {

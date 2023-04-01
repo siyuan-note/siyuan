@@ -34,7 +34,7 @@ import (
 )
 
 var (
-	preferredPDFWatermarkFonts = []string{"MicrosoftYaHei", "SimSun", "STHeitiSC-Light", "STHeitiTC-Light", "AquaHiraKaku", "AppleGothic", "Helvetica"}
+	preferredPDFWatermarkFonts = []string{"MicrosoftYaHei", "SimSun", "ArialUnicode", "Xihei", "Heiti", "AquaHiraKaku", "AppleGothic", "Helvetica"}
 )
 
 func InstallPDFFonts() string {

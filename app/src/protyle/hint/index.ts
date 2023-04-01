@@ -393,9 +393,11 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }
     }
 
-    public fill(value: string, protyle: IProtyle) {
+    public fill(value: string, protyle: IProtyle, updateRange = true) {
         hideElements(["hint", "toolbar"], protyle);
-        protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
+        if (updateRange) {
+            protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
+        }
         const range = protyle.toolbar.range;
         let nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer) as HTMLElement;
         if (!nodeElement) {

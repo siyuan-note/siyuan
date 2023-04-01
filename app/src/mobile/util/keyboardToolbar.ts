@@ -7,9 +7,15 @@ import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 let renderKeyboardToolbarTimeout: number;
 let showKeyboardToolbarUtil = false;
 
-const getSlashItem = (value: string, icon: string, text:string) => {
-    return  `<div class="keyboard__slash-item" data-value="${value}">
-    <svg class="keyboard__slash-icon"><use xlink:href="#${icon}"></use></svg>
+const getSlashItem = (value: string, icon: string, text: string, focus = "false") => {
+    let iconHTML
+    if (icon && icon.startsWith("icon")) {
+        iconHTML = `<svg class="keyboard__slash-icon"><use xlink:href="#${icon}"></use></svg>`
+    } else {
+        iconHTML = icon;
+    }
+    return `<div class="keyboard__slash-item" data-focus="${focus}" data-value="${encodeURIComponent(value)}">
+    ${iconHTML}
     <span class="keyboard__slash-text">${text}</span>
 </div>`
 }
@@ -18,27 +24,123 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.splitChar = "/";
     protyle.hint.lastIndex = -1;
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
-    utilElement.innerHTML = `<div class="keyboard__slash-title">
-${window.siyuan.languages.general}
-</div>
+    utilElement.innerHTML = `<div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
     ${getSlashItem(Constants.ZWSP, "iconMarkdown", window.siyuan.languages.template)}
     ${getSlashItem(Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget)}
 </div>
 <div class="keyboard__slash-block">
     ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
-    ${getSlashItem(Constants.ZWSP + 3, "iconRef", window.siyuan.languages.blockRef)}
+    ${getSlashItem("((", "iconRef", window.siyuan.languages.blockRef, "true")}
 </div>
 <div class="keyboard__slash-block">
-    ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed)}
+    ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
     ${getSlashItem(Constants.ZWSP + 5, "iconSparkles", "AI Chat")}
 </div>
 <div class="keyboard__slash-block">
     ${getSlashItem(Constants.ZWSP + 4, "iconFile", window.siyuan.languages.newFile)}
     <div class="keyboard__slash-empty"></div>
 </div>
-<div class="keyboard__slash-title">
-common
+<div class="keyboard__slash-title"></div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("# " + Lute.Caret, "iconH1", window.siyuan.languages.heading1, "true")}
+    ${getSlashItem("## " + Lute.Caret, "iconH2", window.siyuan.languages.heading2, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("### " + Lute.Caret, "iconH3", window.siyuan.languages.heading3, "true")}
+    ${getSlashItem("#### " + Lute.Caret, "iconH4", window.siyuan.languages.heading4, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("##### " + Lute.Caret, "iconH5", window.siyuan.languages.heading5, "true")}
+    ${getSlashItem("###### " + Lute.Caret, "iconH6", window.siyuan.languages.heading6, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("* " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
+    ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("* [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
+    ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("```", "iconCode", window.siyuan.languages.code, "true")}
+    ${getSlashItem(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, "iconTable", window.siyuan.languages.table, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("---", "iconLine", window.siyuan.languages.line, "true")}
+    ${getSlashItem("$$", "iconMath", window.siyuan.languages.math)}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("<div>", "iconHTML5", "HTML")}
+    <div class="keyboard__slash-empty"></div>
+</div>
+<div class="keyboard__slash-title"></div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
+    ${getSlashItem("a", "iconLink", window.siyuan.languages.link)}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("strong", "iconBold", window.siyuan.languages.bold, "true")}
+    ${getSlashItem("em", "iconItalic", window.siyuan.languages.italic, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("u", "iconUnderline", window.siyuan.languages.underline, "true")}
+    ${getSlashItem("s", "iconStrike", window.siyuan.languages.strike, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("mark", "iconMark", window.siyuan.languages.mark, "true")}
+    ${getSlashItem("sup", "iconSup", window.siyuan.languages.sup, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("sub", "iconSub", window.siyuan.languages.sub, "true")}
+    ${getSlashItem("tag", "iconTags", window.siyuan.languages.tag, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("code", "iconInlineCode", window.siyuan.languages["inline-code"], "true")}
+    ${getSlashItem("inline-math", "iconMath", window.siyuan.languages["inline-math"])}
+</div>
+<div class="keyboard__slash-title"></div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + '/>', "true")}
+    ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconLanguage", window.siyuan.languages.insertIframeURL, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
+    ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
+    <div class="keyboard__slash-empty"></div>
+</div>
+<div class="keyboard__slash-title"></div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("```abc\n```", "", window.siyuan.languages.staff, "true")}
+    ${getSlashItem("```echarts\n```", "", window.siyuan.languages.chart, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("```flowchart\n```", "", "Flow Chart", "true")}
+    ${getSlashItem("```graphviz\n```", "", "Graph", "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("```mermaid\n```", "", "Mermaid", "true")}
+    ${getSlashItem("```mindmap\n```", "", window.siyuan.languages.mindmap, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem("```plantuml\n```", "", "UML", "true")}
+    <div class="keyboard__slash-empty"></div>
+</div>
+<div class="keyboard__slash-title"></div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);`, '<div style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.infoStyle, "true")}
+    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);`, '<div style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.successStyle, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);`, '<div style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.warningStyle, "true")}
+    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);`, '<div style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.errorStyle, "true")}
+</div>
+<div class="keyboard__slash-block">
+    ${getSlashItem(`style${Constants.ZWSP}`, '<div class="keyboard__slash-icon">A</div>', window.siyuan.languages.clearFontStyle, "true")}
+    <div class="keyboard__slash-empty"></div>
 </div>`;
     protyle.hint.bindUploadEvent(protyle, utilElement);
 };
@@ -231,10 +333,15 @@ export const initKeyboardToolbar = () => {
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
         const protyle = window.siyuan.mobile.editor.protyle;
         if (slashBtnElement) {
-            protyle.hint.fill(decodeURIComponent(slashBtnElement.getAttribute("data-value")), protyle);
-            focusByRange(protyle.toolbar.range);
-            event.preventDefault();
-            event.stopPropagation();
+            const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"))
+            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
+            if (dataValue !== Constants.ZWSP + 3) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            if (slashBtnElement.getAttribute("data-focus") === "true") {
+                focusByRange(protyle.toolbar.range);
+            }
             return;
         }
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");

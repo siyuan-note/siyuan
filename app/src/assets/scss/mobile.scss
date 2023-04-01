@@ -322,10 +322,7 @@
 
   &__slash {
     &-title {
-      font-size: 12px;
-      color: var(--b3-theme-on-surface);
-      line-height: 12px;
-      padding: 8px;
+      height: 24px;
     }
 
     &-block {
@@ -340,6 +337,7 @@
       display: flex;
       align-items: center;
       margin-right: 8px;
+      position: relative;
       box-shadow: inset 0 0 0 .4px var(--b3-theme-on-surface-light);
     }
 
@@ -349,12 +347,19 @@
     }
 
     &-icon {
-      height: 24px;
-      width: 24px;
+      height: 20px;
+      width: 20px;
       padding: 6px;
       flex-shrink: 0;
-      margin: 6px 4px;
-      color: var(--b3-theme-on-surface);
+      margin: 8px 0 8px 8px;
+      font-size: 20px;
+      text-align: center;
+      line-height: 20px;
+    }
+
+    &-text {
+      line-height: 48px;
+      margin-left: 8px;
     }
   }
 }

@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/Masterminds/sprig/v3"
 	"net/http"
 	"net/url"
 	"os"
@@ -41,7 +40,9 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/88250/pdfcpu/pkg/api"
+	"github.com/88250/pdfcpu/pkg/font"
 	"github.com/88250/pdfcpu/pkg/pdfcpu"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/imroc/req/v3"
@@ -994,11 +995,23 @@ func processPDFFooter(pdfCtx *pdfcpu.Context) {
 	}
 	footer := buf.String()
 
-	fontName := "Times-Roman"
+	fontName := "Helvetica"
+	names := font.UserFontNames()
+	if 1 > len(names) {
+		preferredFont := util.GetPreferredFontFilePath(Conf.Lang)
+		if err = api.InstallFonts([]string{preferredFont.Path}); nil != err {
+			logging.LogErrorf("install font failed: %s", err)
+		} else {
+			names = font.UserFontNames()
+			logging.LogInfof("install pdf font: %s", names)
+		}
+	}
+	if 0 < len(names) {
+		fontName = names[0]
+	}
+
 	pos := "bc"
-	dx := 10
-	fillCol := "#000000"
-	desc := fmt.Sprintf("font:%s, points:12, sc:1 abs, pos:%s, off:%d 10, fillcol:%s, rot:0", fontName, pos, dx, fillCol)
+	desc := fmt.Sprintf("font:%s, points:8, sc:1 abs, pos:%s, off:10 10, fillc: 0.5 0.5 0.5, rot:0", fontName, pos)
 	footer = strings.ReplaceAll(footer, "%pages", strconv.Itoa(pdfCtx.PageCount))
 	m := map[int]*pdfcpu.Watermark{}
 	for i := 1; i <= pdfCtx.PageCount; i++ {

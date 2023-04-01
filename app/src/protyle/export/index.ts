@@ -107,6 +107,7 @@ const renderPDF = (id: string) => {
           overflow-y: auto;
           bottom: 0;
           overflow-x: hidden;
+          z-index: 1;
         }
         
         #preview {
@@ -232,7 +233,7 @@ const renderPDF = (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
+<div style="zoom:${localData.scale || 1}" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
     <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
 </div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
@@ -426,7 +427,9 @@ const renderPDF = (id: string) => {
         };
         
         actionElement.querySelector("#scale").addEventListener("input", () => {
-            actionElement.querySelector("#scaleTip").innerText = actionElement.querySelector("#scale").value;
+            const scale = actionElement.querySelector("#scale").value;
+            actionElement.querySelector("#scaleTip").innerText = scale;
+            previewElement.style.zoom = scale;
         })
         actionElement.querySelector("#pageSize").addEventListener('change', () => {
             fixBlockWidth();
@@ -483,6 +486,7 @@ const renderPDF = (id: string) => {
               rootTitle: response.data.name,
             })
             previewElement.classList.add("exporting");
+            previewElement.style.zoom = "";
             previewElement.style.paddingTop = "6px";
             previewElement.style.paddingBottom = "0";
             fixBlockWidth();

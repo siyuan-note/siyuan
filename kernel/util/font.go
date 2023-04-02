@@ -22,66 +22,13 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/pdfcpu/pkg/api"
-	"github.com/88250/pdfcpu/pkg/font"
 	"github.com/ConradIrwin/font/sfnt"
-	"github.com/adrg/strutil"
-	"github.com/adrg/strutil/metrics"
-	"github.com/adrg/sysfont"
 	"github.com/flopp/go-findfont"
 	"github.com/siyuan-note/logging"
 	ttc "golang.org/x/image/font/sfnt"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
-
-var (
-	preferredPDFWatermarkFonts = []string{"MicrosoftYaHei", "SimSun", "ArialUnicode", "Xihei", "Heiti", "AquaHiraKaku", "AppleGothic", "Helvetica"}
-)
-
-func InstallPDFFonts() string {
-	names := font.UserFontNames()
-	if 0 < len(names) {
-		return getPreferredPDFWatermarkFont(names)
-	}
-
-	finder := sysfont.NewFinder(&sysfont.FinderOpts{Extensions: []string{".ttf", ".ttc"}})
-	var fontPaths []string
-	for _, preferredFont := range preferredPDFWatermarkFonts {
-		f := finder.Match(preferredFont)
-		if nil != f {
-			fontPaths = append(fontPaths, f.Filename)
-		}
-	}
-
-	logging.LogInfof("installing fonts [%s]", strings.Join(fontPaths, ", "))
-	if err := api.InstallFonts(fontPaths); nil != err {
-		logging.LogErrorf("install font [%s] failed: %s", strings.Join(fontPaths, ", "), err)
-		return getPreferredPDFWatermarkFont(names)
-	}
-
-	names = font.UserFontNames()
-	return getPreferredPDFWatermarkFont(names)
-}
-
-func getPreferredPDFWatermarkFont(userFontNames []string) (ret string) {
-	ret = "Helvetica"
-	if 1 > len(userFontNames) {
-		return
-	}
-
-	var score float64
-	for _, preferredFont := range preferredPDFWatermarkFonts {
-		for _, userFont := range userFontNames {
-			if tmp := strutil.Similarity(preferredFont, userFont, &metrics.JaroWinkler{CaseSensitive: false}); score < tmp {
-				ret = preferredFont
-				score = tmp
-			}
-		}
-	}
-	logging.LogInfof("preferred PDF font [%s]", ret)
-	return
-}
 
 func GetSysFonts(currentLanguage string) (ret []string) {
 	fonts := loadFonts(currentLanguage)

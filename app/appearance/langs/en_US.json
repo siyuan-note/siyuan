@@ -1,4 +1,9 @@
 {
+  "searchTip1": "to navigate",
+  "searchTip2": "to open",
+  "searchTip3": "to switch to the next hit",
+  "searchTip4": "to open to the right",
+  "searchTip5": "to dismiss",
   "showRecentUpdatedBlocks": "The most recently updated blocks will be shown when the input is empty",
   "revisionCount": "Number of revisions",
   "flashcardNewCardLimit": "New Card Limit",

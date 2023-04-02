@@ -1,4 +1,9 @@
 {
+  "searchTip1": "導航",
+  "searchTip2": "打開",
+  "searchTip3": "切換到下一個命中",
+  "searchTip4": "右側分屏打開",
+  "searchTip5": "退出搜索",
   "showRecentUpdatedBlocks": "輸入為空時將顯示最近更新的塊",
   "revisionCount": "複習次數",
   "flashcardNewCardLimit": "新卡上限",

@@ -1,4 +1,9 @@
 {
+  "searchTip1": "pour naviguer",
+  "searchTip2": "pour ouvrir",
+  "searchTip3": "pour passer au résultat suivant",
+  "searchTip4": "pour ouvrir à droite",
+  "searchTip5": "pour ignorer",
   "showRecentUpdatedBlocks": "Les blocs les plus récemment mis à jour seront affichés lorsque l'entrée est vide",
   "revisionCount": "Nombre de révisions",
   "flashcardNewCardLimit": "Nouvelle limite de carte",

@@ -1,4 +1,5 @@
 {
+  "showRecentUpdatedBlocks": "Los bloques actualizados más recientemente se mostrarán cuando la entrada esté vacía",
   "revisionCount": "Número de revisiones",
   "flashcardNewCardLimit": "Límite de tarjeta nueva",
   "flashcardNewCardLimitTip": "Si hay muchas tarjetas nuevas, puede establecer la cantidad de tarjetas nuevas para revisar a través de este elemento",

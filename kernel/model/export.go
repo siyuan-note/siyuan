@@ -29,7 +29,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 	"unicode/utf8"
 
@@ -41,7 +40,6 @@ import (
 	"github.com/88250/lute/render"
 	"github.com/88250/pdfcpu/pkg/api"
 	"github.com/88250/pdfcpu/pkg/pdfcpu"
-	"github.com/Masterminds/sprig/v3"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/imroc/req/v3"
@@ -715,7 +713,6 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 
 	processPDFBookmarks(pdfCtx, headings)
 	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
-	processPDFFooter(pdfCtx)
 
 	pdfcpu.VersionStr = "SiYuan v" + util.Ver
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
@@ -972,50 +969,6 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 		}
 		entry.Object = append(annots, array...)
 		pdfCtx.EnsureVersionForWriting()
-	}
-}
-
-func processPDFFooter(pdfCtx *pdfcpu.Context) {
-	templateContent := strings.TrimSpace(Conf.Export.PDFFooter)
-	if "" == templateContent {
-		return
-	}
-
-	footerTpl, err := template.New("").Funcs(sprig.TxtFuncMap()).Parse(templateContent)
-	if nil != err {
-		logging.LogErrorf("parse pdf footer template failed: %s", err)
-		return
-	}
-
-	buf := &bytes.Buffer{}
-	buf.Grow(4096)
-	err = footerTpl.Execute(buf, nil)
-	if nil != err {
-		logging.LogErrorf("render pdf footer template failed: %s", err)
-		return
-	}
-	footer := buf.String()
-
-	fontName := util.InstallPDFFonts()
-
-	pos := "bc"
-	desc := fmt.Sprintf("font:%s, points:8, sc:1 abs, pos:%s, off:10 10, fillc: 0.5 0.5 0.5, rot:0", fontName, pos)
-	footer = strings.ReplaceAll(footer, "%pages", strconv.Itoa(pdfCtx.PageCount))
-	m := map[int]*pdfcpu.Watermark{}
-	for i := 1; i <= pdfCtx.PageCount; i++ {
-		text := strings.ReplaceAll(footer, "%page", strconv.Itoa(i))
-		wm, watermarkErr := api.TextWatermark(text, desc, true, false, pdfcpu.POINTS)
-		if nil != watermarkErr {
-			logging.LogErrorf("add pdf footer failed: %s", watermarkErr)
-			return
-		}
-
-		m[i] = wm
-	}
-
-	if watermarkErr := pdfCtx.AddWatermarksMap(m); nil != watermarkErr {
-		logging.LogErrorf("add pdf footer failed: %s", watermarkErr)
-		return
 	}
 }
 

@@ -5,4 +5,5 @@ export const closePanel = () => {
     const maskElement = document.querySelector(".side-mask") as HTMLElement;
     maskElement.classList.add("fn__none");
     maskElement.style.opacity = "";
+    window.siyuan.menus.menu.remove();
 };

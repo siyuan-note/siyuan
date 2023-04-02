@@ -126,12 +126,13 @@ export class Menu {
 <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
 <span class="b3-menu__label">${window.siyuan.languages.back}</span>
 </div><button class="b3-menu__separator"></button>`);
-        if (position === "bottom" ) {
-            this.element.querySelectorAll(".b3-menu__submenu").forEach((item:HTMLElement) => {
+        if (position === "bottom") {
+            this.element.querySelectorAll(".b3-menu__submenu").forEach((item: HTMLElement) => {
                 item.style.top = "calc(50vh + 48.5px)";
             });
         }
         this.popup({x: 0, y: position === "bottom" ? window.innerHeight / 2 : 0});
+        this.element.scrollTop = 0;
     }
 }
 

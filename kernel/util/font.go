@@ -54,12 +54,13 @@ func InstallPDFFonts() string {
 		}
 	}
 
+	logging.LogInfof("installing fonts [%s]", strings.Join(fontPaths, ", "))
 	if err := api.InstallFonts(fontPaths); nil != err {
-		logging.LogErrorf("install font failed: %s", err)
+		logging.LogErrorf("install font [%s] failed: %s", strings.Join(fontPaths, ", "), err)
+		return getPreferredPDFWatermarkFont(names)
 	}
 
 	names = font.UserFontNames()
-	logging.LogInfof("pdf fonts [%s]", strings.Join(names, ", "))
 	return getPreferredPDFWatermarkFont(names)
 }
 

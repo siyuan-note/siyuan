@@ -426,6 +426,13 @@
   @extend .fn__ellipsis;
 }
 
+// iPhone 右上角属性中对不齐
+.protyle-wysiwyg--attr .protyle-attr > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
+  max-width: 26vw;
+  white-space: nowrap;
+  display: block;
+}
+
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;

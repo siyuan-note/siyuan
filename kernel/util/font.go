@@ -78,6 +78,7 @@ func getPreferredPDFWatermarkFont(userFontNames []string) (ret string) {
 			}
 		}
 	}
+	logging.LogInfof("preferred PDF font [%s]", ret)
 	return
 }
 

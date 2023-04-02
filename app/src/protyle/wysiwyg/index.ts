@@ -62,6 +62,7 @@ import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 import {removeSearchMark} from "../toolbar/util";
+import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1539,6 +1540,8 @@ export class WYSIWYG {
                 fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                     /// #if MOBILE
                     openMobileFileById(refBlockId, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                    activeBlur();
+                    hideKeyboardToolbar();
                     /// #else
                     if (aElement) {
                         window.open(aElement.getAttribute("data-href"));
@@ -1669,6 +1672,8 @@ export class WYSIWYG {
                 const embedId = embedItemElement.getAttribute("data-id");
                 /// #if MOBILE
                 openMobileFileById(embedId, [Constants.CB_GET_ALL]);
+                activeBlur();
+                hideKeyboardToolbar();
                 /// #else
                 if (event.shiftKey) {
                     openFileById({

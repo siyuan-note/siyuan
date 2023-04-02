@@ -32,7 +32,6 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
         });
         if (blockElement) {
             pushBack();
-            focusBlock(blockElement);
             scrollCenter(window.siyuan.mobile.editor.protyle, blockElement, true);
             closePanel();
             return;

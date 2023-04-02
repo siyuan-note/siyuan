@@ -998,7 +998,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
             }
         }).element);
         if (!window.siyuan.config.readonly) {
-            sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort: number) => {
+            const subMenu  = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort: number) => {
                 window.siyuan.config.fileTree.sort = sort;
                 fetchPost("/api/setting/setFiletree", {
                     sort: window.siyuan.config.fileTree.sort,
@@ -1013,6 +1013,12 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
                     });
                 });
             });
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconSort",
+                label: window.siyuan.languages.sort,
+                type: "submenu",
+                submenu:subMenu,
+            }).element);
         }
         return window.siyuan.menus.menu;
     }

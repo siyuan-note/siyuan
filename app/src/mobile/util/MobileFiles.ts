@@ -12,7 +12,7 @@ import {unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {newFile} from "../../util/newFile";
-import {isMobile} from "../../util/functions";
+import {MenuItem} from "../../menus/Menu";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -118,7 +118,7 @@ export class MobileFiles extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "sort") {
-                    this.genSort(event);
+                    this.genSort();
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -167,8 +167,6 @@ export class MobileFiles extends Model {
                 } else if (target.classList.contains("b3-list-item__action")) {
                     const type = target.getAttribute("data-type");
                     const pathString = target.parentElement.getAttribute("data-path");
-                    const x = (event instanceof TouchEvent) ? event.touches[0].clientX : event.clientX;
-                    const y = (event instanceof TouchEvent) ? event.touches[0].clientY : event.clientY;
                     const ulElement = hasTopClosestByTag(target, "UL");
                     if (ulElement) {
                         const notebookId = ulElement.getAttribute("data-url");
@@ -176,28 +174,14 @@ export class MobileFiles extends Model {
                             if (type === "new") {
                                 newFile(notebookId, pathString);
                             } else if (type === "more-root") {
-                                initNavigationMenu(target.parentElement)
-                                if (isMobile()) {
-                                    window.siyuan.menus.menu.fullscreen("bottom");
-                                } else {
-                                    window.siyuan.menus.menu.popup({
-                                        x,
-                                        y
-                                    });
-                                }
+                                initNavigationMenu(target.parentElement);
+                                window.siyuan.menus.menu.fullscreen("bottom");
                                 window.siyuan.menus.menu.element.style.zIndex = "310";
                             }
                         }
                         if (type === "more-file") {
                             initFileMenu(notebookId, pathString, target.parentElement);
-                            if (isMobile()) {
-                                window.siyuan.menus.menu.fullscreen("bottom");
-                            } else {
-                                window.siyuan.menus.menu.popup({
-                                    x,
-                                    y
-                                });
-                            }
+                            window.siyuan.menus.menu.fullscreen("bottom");
                             window.siyuan.menus.menu.element.style.zIndex = "310";
                         }
                     }
@@ -227,9 +211,9 @@ export class MobileFiles extends Model {
         }
     }
 
-    private genSort(event: MouseEvent) {
+    private genSort() {
         window.siyuan.menus.menu.remove();
-        sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort: number) => {
+        const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort: number) => {
             window.siyuan.config.fileTree.sort = sort;
             fetchPost("/api/setting/setFiletree", {
                 sort: window.siyuan.config.fileTree.sort,
@@ -244,8 +228,11 @@ export class MobileFiles extends Model {
                 });
             });
         });
+        subMenu.forEach((item) => {
+            window.siyuan.menus.menu.append(new MenuItem(item).element);
+        });
+        window.siyuan.menus.menu.fullscreen("bottom");
         window.siyuan.menus.menu.element.style.zIndex = "310";
-        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }
 
     private genNotebook(item: INotebook) {

@@ -94,7 +94,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
                 });
             }
         }).element);
-        sortMenu("notebook", parseInt(liElement.parentElement.getAttribute("data-sortmode")), (sort) => {
+        const subMenu = sortMenu("notebook", parseInt(liElement.parentElement.getAttribute("data-sortmode")), (sort) => {
             fetchPost("/api/notebook/setNotebookConf", {
                 notebook: notebookId,
                 conf: {
@@ -117,6 +117,12 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             });
             return true;
         });
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconSort",
+            label: window.siyuan.languages.sort,
+            type: "submenu",
+            submenu: subMenu,
+        }).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.riffCard,
@@ -514,7 +520,7 @@ const genImportMenu = (notebookId: string, pathString: string) => {
 };
 
 export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, clickEvent: (sort: number) => void) => {
-    const submenu: IMenu[] = [{
+    const sortMenu: IMenu[] = [{
         icon: sortMode === 0 ? "iconSelect" : undefined,
         label: window.siyuan.languages.fileNameASC,
         click: () => {
@@ -606,7 +612,7 @@ export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, click
         }
     }];
     if (type === "notebook") {
-        submenu.push({
+        sortMenu.push({
             icon: sortMode === 15 ? "iconSelect" : undefined,
             label: window.siyuan.languages.sortByFiletree,
             click: () => {
@@ -614,10 +620,5 @@ export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, click
             }
         });
     }
-    window.siyuan.menus.menu.append(new MenuItem({
-        icon: "iconSort",
-        label: window.siyuan.languages.sort,
-        type: "submenu",
-        submenu,
-    }).element);
+    return sortMenu;
 };

@@ -120,13 +120,18 @@ export class Menu {
         setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 
-    public fullscreen() {
+    public fullscreen(position: "bottom" | "all" = "all") {
         this.element.classList.add("b3-menu--fullscreen");
         this.element.insertAdjacentHTML("afterbegin", `<div class="b3-menu__title">
 <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
 <span class="b3-menu__label">${window.siyuan.languages.back}</span>
 </div><button class="b3-menu__separator"></button>`);
-        this.popup({x: 0, y: 0});
+        if (position === "bottom" ) {
+            this.element.querySelectorAll(".b3-menu__submenu").forEach((item:HTMLElement) => {
+                item.style.top = "calc(50vh + 48.5px)";
+            })
+        }
+        this.popup({x: 0, y: position === "bottom" ? window.innerHeight / 2 : 0});
     }
 }
 

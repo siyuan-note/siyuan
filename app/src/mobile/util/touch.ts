@@ -48,6 +48,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
         scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement);
         if ((xDiff <= 0 && scrollElement.scrollLeft > 0) ||
             (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
+            // 左滑拉出菜单后右滑至代码块右侧有空间时，需关闭菜单
+            closePanel();
             return;
         }
     }
@@ -150,6 +152,13 @@ export const handleTouchMove = (event: TouchEvent) => {
         hasClosestByAttribute(target, "id", "commonMenu") ||
         hasClosestByAttribute(target, "id", "model")) {
         return;
+    }
+    if (getSelection().rangeCount > 0) {
+        // 选中后扩选的情况
+        const range = getSelection().getRangeAt(0);
+        if (range.toString() !== "" && window.siyuan.mobile.editor.protyle.wysiwyg.element.contains(range.startContainer)) {
+            return;
+        }
     }
 
     xDiff = Math.floor(clientX - event.touches[0].clientX);

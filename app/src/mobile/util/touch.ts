@@ -19,7 +19,7 @@ const popSide = (render = true) => {
         activeBlur();
         document.getElementById("sidebar").style.left = "0";
     }
-}
+};
 
 export const handleTouchEnd = (event: TouchEvent) => {
     if (window.siyuan.mobile.editor) {
@@ -218,4 +218,4 @@ const transformMask = (opacity: number) => {
     const maskElement = document.querySelector(".side-mask") as HTMLElement;
     maskElement.classList.remove("fn__none");
     maskElement.style.opacity = Math.min((1 - opacity), 0.86).toString();
-}
+};

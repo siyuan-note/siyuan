@@ -276,11 +276,11 @@ export const initWindow = () => {
             setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
             try {
                 if (window.siyuan.config.export.pdfFooter.trim()) {
-                    const response = await fetchSyncPost("/api/template/renderSprig", {template:window.siyuan.config.export.pdfFooter})
+                    const response = await fetchSyncPost("/api/template/renderSprig", {template:window.siyuan.config.export.pdfFooter});
                     ipcData.pdfOptions.displayHeaderFooter = true;
                     ipcData.pdfOptions.headerTemplate = "<span></span>";
                     ipcData.pdfOptions.footerTemplate = `<div style="text-align:center;width:100%;font-size:8px;line-height:12px;">
-${response.data.replace("%pages", '<span class=totalPages></span>').replace("%page", "<span class=pageNumber></span>")}
+${response.data.replace("%pages", "<span class=totalPages></span>").replace("%page", "<span class=pageNumber></span>")}
 </div>`;
                 }
                 window.siyuan.printWin.webContents.printToPDF(ipcData.pdfOptions).then((pdfData) => {

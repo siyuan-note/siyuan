@@ -129,7 +129,7 @@ export class Menu {
         if (position === "bottom" ) {
             this.element.querySelectorAll(".b3-menu__submenu").forEach((item:HTMLElement) => {
                 item.style.top = "calc(50vh + 48.5px)";
-            })
+            });
         }
         this.popup({x: 0, y: position === "bottom" ? window.innerHeight / 2 : 0});
     }

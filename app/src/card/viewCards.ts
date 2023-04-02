@@ -88,6 +88,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                         }
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks, title, deckType);
+                        listElement.scrollTop = 0;
                         getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();
@@ -107,6 +108,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                         }
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks, title, deckType);
+                        listElement.scrollTop = 0;
                         getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();

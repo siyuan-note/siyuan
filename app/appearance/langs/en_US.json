@@ -1,4 +1,5 @@
 {
+  "showRecentUpdatedBlocks": "The most recently updated blocks will be shown when the input is empty",
   "revisionCount": "Number of revisions",
   "flashcardNewCardLimit": "New Card Limit",
   "flashcardNewCardLimitTip": "If there are many new cards, you can set the number of new cards to review through this item",

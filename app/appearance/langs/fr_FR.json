@@ -1,4 +1,5 @@
 {
+  "showRecentUpdatedBlocks": "Les blocs les plus récemment mis à jour seront affichés lorsque l'entrée est vide",
   "revisionCount": "Nombre de révisions",
   "flashcardNewCardLimit": "Nouvelle limite de carte",
   "flashcardNewCardLimitTip": "S'il y a beaucoup de nouvelles cartes, vous pouvez définir le nombre de nouvelles cartes à examiner via cet élément",

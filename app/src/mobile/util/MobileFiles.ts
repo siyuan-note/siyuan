@@ -12,6 +12,7 @@ import {unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {newFile} from "../../util/newFile";
+import {isMobile} from "../../util/functions";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -175,15 +176,28 @@ export class MobileFiles extends Model {
                             if (type === "new") {
                                 newFile(notebookId, pathString);
                             } else if (type === "more-root") {
-                                initNavigationMenu(target.parentElement).popup({x, y});
+                                initNavigationMenu(target.parentElement)
+                                if (isMobile()) {
+                                    window.siyuan.menus.menu.fullscreen("bottom");
+                                } else {
+                                    window.siyuan.menus.menu.popup({
+                                        x,
+                                        y
+                                    });
+                                }
                                 window.siyuan.menus.menu.element.style.zIndex = "310";
                             }
                         }
                         if (type === "more-file") {
-                            initFileMenu(notebookId, pathString, target.parentElement).popup({
-                                x,
-                                y
-                            });
+                            initFileMenu(notebookId, pathString, target.parentElement);
+                            if (isMobile()) {
+                                window.siyuan.menus.menu.fullscreen("bottom");
+                            } else {
+                                window.siyuan.menus.menu.popup({
+                                    x,
+                                    y
+                                });
+                            }
                             window.siyuan.menus.menu.element.style.zIndex = "310";
                         }
                     }

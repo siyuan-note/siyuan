@@ -25,6 +25,7 @@ import {Background} from "./header/Background";
 import {disabledProtyle, enableProtyle, onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
+import {setEmpty} from "../mobile/util/setEmpty";
 
 export class Protyle {
 
@@ -149,13 +150,25 @@ export class Protyle {
                             }
                             break;
                         case "unmount":
-                            if (this.protyle.model && this.protyle.notebookId === data.data.box) {
-                                this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                            if (this.protyle.notebookId === data.data.box) {
+                                /// #if MOBILE
+                                setEmpty();
+                                /// #else
+                                if (this.protyle.model) {
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                                }
+                                /// #endif
                             }
                             break;
                         case "removeDoc":
-                            if (this.protyle.model && data.data.ids.includes(this.protyle.block.rootID)) {
-                                this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                            if (data.data.ids.includes(this.protyle.block.rootID)) {
+                                /// #if MOBILE
+                                setEmpty();
+                                /// #else
+                                if (this.protyle.model) {
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
+                                }
+                                /// #endif
                             }
                             break;
                     }

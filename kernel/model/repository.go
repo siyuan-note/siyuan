@@ -771,6 +771,15 @@ func IndexRepo(memo string) (err error) {
 var syncingFiles = sync.Map{}
 var syncingStorages = false
 
+func waitForSyncingStorages() {
+	for i := 0; i < 30; i++ {
+		if syncingStorages {
+			return
+		}
+		time.Sleep(time.Second)
+	}
+}
+
 func IsSyncingFile(rootID string) (ret bool) {
 	_, ret = syncingFiles.Load(rootID)
 	return

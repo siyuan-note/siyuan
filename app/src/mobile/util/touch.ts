@@ -33,6 +33,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
+        hasClosestByAttribute(target, "id", "commonMenu") ||
         hasClosestByAttribute(target, "id", "model")
     ) {
         return;
@@ -146,6 +147,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     if (!clientX || !clientY ||
         hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
+        hasClosestByAttribute(target, "id", "commonMenu") ||
         hasClosestByAttribute(target, "id", "model")) {
         return;
     }
@@ -217,5 +219,5 @@ export const handleTouchMove = (event: TouchEvent) => {
 const transformMask = (opacity: number) => {
     const maskElement = document.querySelector(".side-mask") as HTMLElement;
     maskElement.classList.remove("fn__none");
-    maskElement.style.opacity = Math.min((1 - opacity), 0.86).toString();
+    maskElement.style.opacity = Math.min((1 - opacity), 0.68).toString();
 };

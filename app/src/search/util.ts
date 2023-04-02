@@ -119,7 +119,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
             <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
         </span>
-        <input id="searchInput" style="padding-right: 60px" class="b3-text-field b3-text-field--text">
+        <input id="searchInput" style="padding-right: 60px" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
         <div id="searchHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
         <div class="block__icons">
             <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon b3-tooltips b3-tooltips__w">

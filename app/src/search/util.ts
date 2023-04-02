@@ -18,7 +18,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 
 const appendCriteria = (element: HTMLElement, data: ISearchOption[]) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
@@ -155,7 +155,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <svg class="fn__rotate fn__none svg" style="padding: 0 8px;align-self: center;"><use xlink:href="#iconRefresh"></use></svg>
         <button id="replaceAllBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>
         <div class="fn__space"></div>
-        <button id="replaceBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.replace}</button>
+        <button id="replaceBtn" class="b3-button b3-button--small b3-button--outline fn__flex-center">↵ ${window.siyuan.languages.replace}</button>
         <div class="fn__space"></div>
         <div id="replaceHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
@@ -189,6 +189,13 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         <div id="searchList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
         <div class="search__drag"></div>
         <div id="searchPreview" class="fn__flex-1 search__preview"></div>
+    </div>
+    <div class="search__tip">
+        <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
+        <kbd>Enter/Double Click</kbd> ${window.siyuan.languages.searchTip2}
+        <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
+        <kbd>${updateHotkeyTip("⌥Click")}</kbd> ${window.siyuan.languages.searchTip4}
+        <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;

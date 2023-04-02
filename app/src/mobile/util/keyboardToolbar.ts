@@ -8,17 +8,17 @@ let renderKeyboardToolbarTimeout: number;
 let showKeyboardToolbarUtil = false;
 
 const getSlashItem = (value: string, icon: string, text: string, focus = "false") => {
-    let iconHTML
+    let iconHTML;
     if (icon && icon.startsWith("icon")) {
-        iconHTML = `<svg class="keyboard__slash-icon"><use xlink:href="#${icon}"></use></svg>`
+        iconHTML = `<svg class="keyboard__slash-icon"><use xlink:href="#${icon}"></use></svg>`;
     } else {
         iconHTML = icon;
     }
     return `<div class="keyboard__slash-item" data-focus="${focus}" data-value="${encodeURIComponent(value)}">
     ${iconHTML}
     <span class="keyboard__slash-text">${text}</span>
-</div>`
-}
+</div>`;
+};
 
 const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.splitChar = "/";
@@ -101,7 +101,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + '/>', "true")}
+    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
     ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconLanguage", window.siyuan.languages.insertIframeURL, "true")}
 </div>
 <div class="keyboard__slash-block">
@@ -333,7 +333,7 @@ export const initKeyboardToolbar = () => {
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
         const protyle = window.siyuan.mobile.editor.protyle;
         if (slashBtnElement) {
-            const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"))
+            const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"));
             protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
             if (dataValue !== Constants.ZWSP + 3) {
                 event.preventDefault();

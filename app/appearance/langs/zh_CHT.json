@@ -1,4 +1,6 @@
 {
+  "enterNew": "回車創建",
+  "enterNewTip": "搜索結果為空，回車創建新文檔",
   "searchTip1": "導航",
   "searchTip2": "打開",
   "searchTip3": "切換到下一個命中",

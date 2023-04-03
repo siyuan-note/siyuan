@@ -1,4 +1,6 @@
 {
+  "enterNew": "回车创建",
+  "enterNewTip": "搜索结果为空，回车创建新文档",
   "searchTip1": "导航",
   "searchTip2": "打开",
   "searchTip3": "切换到下一个命中",

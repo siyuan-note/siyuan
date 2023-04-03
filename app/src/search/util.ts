@@ -19,6 +19,10 @@ import {unicode2Emoji} from "../emoji";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {replaceFileName} from "../editor/rename";
+import {hideElements} from "../protyle/ui/hideElements";
+import {getNewFilePath} from "../util/newFile";
+import {matchHotKey} from "../protyle/util/hotKey";
 
 const appendCriteria = (element: HTMLElement, data: ISearchOption[]) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
@@ -92,6 +96,24 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
     wnd.split("lr").addTab(tab);
     setPanelFocus(tab.panelElement);
 };
+
+const newEmptyFileByInput = (value: string) => {
+    const newData = getNewFilePath(true)
+    fetchPost("/api/filetree/getHPathByPath", {
+        notebook: newData.notebookId,
+        path: newData.currentPath,
+    }, (responsePath) => {
+        fetchPost("/api/filetree/createDocWithMd", {
+            notebook: newData.notebookId,
+            path: pathPosix().join(responsePath.data, replaceFileName(value.trim()) || "Untitled"),
+            markdown: ""
+        }, response => {
+            hideElements(["dialog"]);
+            openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+        });
+    });
+};
+
 // closeCB 不存在为页签搜索
 export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {
     let methodText = window.siyuan.languages.keyword;
@@ -529,6 +551,8 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 } else if (target.parentElement.id === "replaceHistoryList") {
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
+                } else if (target.getAttribute("data-type") === "search-new") {
+                    newEmptyFileByInput(searchInputElement.value)
                 } else if (target.getAttribute("data-type") === "search-item") {
                     if (event.detail === 1) {
                         clickTimeout = window.setTimeout(() => {
@@ -611,6 +635,35 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         if (!currentList || event.isComposing) {
             return;
         }
+        const focusIsNew = currentList.getAttribute("data-type") === "search-new"
+        if (focusIsNew && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
+            newEmptyFileByInput(searchInputElement.value);
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if (event.key === "Enter") {
+            if (focusIsNew) {
+                newEmptyFileByInput(searchInputElement.value)
+            } else {
+                const id = currentList.getAttribute("data-node-id");
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        id,
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                        zoomIn: foldResponse.data
+                    });
+                    if (closeCB) {
+                        closeCB();
+                    }
+                });
+            }
+            event.preventDefault();
+        }
+
+        if (focusIsNew) {
+            return;
+        }
         if (event.key === "ArrowDown") {
             currentList.classList.remove("b3-list-item--focus");
             if (!currentList.nextElementSibling) {
@@ -661,19 +714,6 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 id: currentList.getAttribute("data-node-id"),
                 k: getKey(currentList),
                 edit
-            });
-            event.preventDefault();
-        } else if (event.key === "Enter") {
-            const id = currentList.getAttribute("data-node-id");
-            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                openFileById({
-                    id,
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                    zoomIn: foldResponse.data
-                });
-                if (closeCB) {
-                    closeCB();
-                }
             });
             event.preventDefault();
         }
@@ -1413,5 +1453,15 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
         edit.protyle.element.classList.add("fn__none");
         element.querySelector(".search__drag").classList.add("fn__none");
     }
-    element.querySelector("#searchList").innerHTML = resultHTML || `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
+    element.querySelector("#searchList").innerHTML = resultHTML ||
+        `<div class="b3-list-item b3-list-item--focus" data-type="search-new">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+    <span class="b3-list-item__text">
+        ${window.siyuan.languages.newFile} <mark>${(element.querySelector("#searchInput") as HTMLInputElement).value}</mark>
+    </span>
+    <kbd class="b3-list-item__meta">${window.siyuan.languages.enterNew}</kbd>
+</div>
+<div class="search__empty">
+    ${window.siyuan.languages.enterNewTip}
+</div>`;
 };

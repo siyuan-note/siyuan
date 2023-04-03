@@ -347,7 +347,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	query = strings.TrimSpace(query)
 	beforeLen := 36
 	var blocks []*Block
-	orderByClause := buildOrderBy(orderBy)
+	orderByClause := buildOrderBy(method, orderBy)
 	switch method {
 	case 1: // 查询语法
 		filter := buildTypeFilter(types)
@@ -485,7 +485,7 @@ func buildPathsFilter(paths []string) string {
 	return builder.String()
 }
 
-func buildOrderBy(orderBy int) string {
+func buildOrderBy(method, orderBy int) string {
 	switch orderBy {
 	case 1:
 		return "ORDER BY created ASC"
@@ -496,8 +496,15 @@ func buildOrderBy(orderBy int) string {
 	case 4:
 		return "ORDER BY updated DESC"
 	case 6:
+		if 0 != method && 1 != method {
+			// 只有关键字搜索和查询语法搜索才支持按相关度升序 https://github.com/siyuan-note/siyuan/issues/7861
+			return "ORDER BY sort DESC"
+		}
 		return "ORDER BY rank DESC" // 默认是按相关度降序，所以按相关度升序要反过来使用 DESC
 	case 7:
+		if 0 != method && 1 != method {
+			return "ORDER BY sort ASC"
+		}
 		return "ORDER BY rank" // 默认是按相关度降序
 	default:
 		return "ORDER BY sort ASC"

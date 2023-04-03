@@ -401,12 +401,12 @@
 .dropdownToolbarButton {
   --scale-select-width: 140px;
   width: var(--scale-select-width);
+  margin: 4px 8px 0 0;
 
   select {
     width: inherit;
     min-width: auto;
     height: 24px;
-    margin: 4px 8px 0 0;
     line-height: 24px;
     padding: 0 8px;
   }

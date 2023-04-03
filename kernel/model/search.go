@@ -219,7 +219,13 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	var renameRoots []*ast.Node
 	renameRootTitles := map[string]string{}
 	cachedTrees := map[string]*parse.Tree{}
-	now := time.Now()
+
+	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	if nil != err {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+
 	for _, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
@@ -236,9 +242,26 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 			continue
 		}
 
-		generateReplaceHistory(tree, now)
+		historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
+		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
+			logging.LogErrorf("generate history failed: %s", err)
+			return
+		}
+
+		var data []byte
+		if data, err = filelock.ReadFile(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
+			logging.LogErrorf("generate history failed: %s", err)
+			return
+		}
+
+		if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
+			logging.LogErrorf("generate history failed: %s", err)
+			return
+		}
+
 		cachedTrees[bt.RootID] = tree
 	}
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
 	for _, id := range ids {
 		bt := treenode.GetBlockTree(id)
@@ -365,33 +388,6 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 		}()
 	}
 	return
-}
-
-func generateReplaceHistory(tree *parse.Tree, t time.Time) {
-	historyDir, err := getHistoryDir(HistoryOpReplace, t)
-	if nil != err {
-		logging.LogErrorf("get history dir failed: %s", err)
-		return
-	}
-
-	historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
-	if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
-		logging.LogErrorf("generate history failed: %s", err)
-		return
-	}
-
-	var data []byte
-	if data, err = filelock.ReadFile(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
-		logging.LogErrorf("generate history failed: %s", err)
-		return
-	}
-
-	if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
-		logging.LogErrorf("generate history failed: %s", err)
-		return
-	}
-
-	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 }
 
 // FullTextSearchBlock 搜索内容块。

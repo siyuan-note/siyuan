@@ -1285,18 +1285,34 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
                 reloadProtyle(item.editor.protyle);
             }
         });
-        if (!currentList.nextElementSibling && searchPanelElement.children[0]) {
-            searchPanelElement.children[0].classList.add("b3-list-item--focus");
-        } else {
+        if (currentList.nextElementSibling) {
             currentList.nextElementSibling.classList.add("b3-list-item--focus");
+        } else if (currentList.previousElementSibling) {
+            currentList.previousElementSibling.classList.add("b3-list-item--focus");
         }
-        currentList.remove();
-        if (searchPanelElement.childElementCount === 0) {
-            searchPanelElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
-            edit.protyle.element.classList.add("fn__none");
-            return;
+        if (config.group === 1) {
+            if (currentList.nextElementSibling || currentList.previousElementSibling) {
+                currentList.remove();
+            } else {
+                const nextDocElement = currentList.parentElement.nextElementSibling || currentList.parentElement.previousElementSibling.previousElementSibling?.previousElementSibling
+                if (nextDocElement) {
+                    nextDocElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
+                    nextDocElement.nextElementSibling.classList.remove("fn__none");
+                    nextDocElement.firstElementChild.firstElementChild.classList.add("b3-list-item__arrow--open");
+                }
+                currentList.parentElement.previousElementSibling.remove();
+                currentList.parentElement.remove();
+            }
+        } else {
+            currentList.remove();
         }
         currentList = searchPanelElement.querySelector(".b3-list-item--focus");
+        if (!currentList) {
+            searchPanelElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
+            edit.protyle.element.classList.add("fn__none");
+            element.querySelector(".search__drag").classList.add("fn__none");
+            return;
+        }
         if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + 30 ||
             searchPanelElement.scrollTop > currentList.offsetTop) {
             searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + 30;
@@ -1376,6 +1392,7 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
 
     if (data[0]) {
         edit.protyle.element.classList.remove("fn__none");
+        element.querySelector(".search__drag").classList.remove("fn__none");
         const contentElement = document.createElement("div");
         if (data[0].children) {
             contentElement.innerHTML = data[0].children[0].content;
@@ -1394,6 +1411,7 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
         }
     } else {
         edit.protyle.element.classList.add("fn__none");
+        element.querySelector(".search__drag").classList.add("fn__none");
     }
     element.querySelector("#searchList").innerHTML = resultHTML || `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
 };

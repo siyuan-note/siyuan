@@ -1080,7 +1080,8 @@ const editKeydown = (event: KeyboardEvent) => {
         return true;
     }
     const target = event.target as HTMLElement;
-    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || hasClosestByAttribute(target, "contenteditable", null)) {
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+        hasClosestByAttribute(target, "contenteditable", null)) {
         return false;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
@@ -1216,7 +1217,9 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
         return true;
     }
     const target = event.target as HTMLElement;
-    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || hasClosestByAttribute(target, "contenteditable", null)) {
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+        hasClosestByAttribute(target, "contenteditable", null) ||
+        hasClosestByClassName(target, "protyle", true)) {
         return false;
     }
     if (bindMenuKeydown(event)) {

@@ -13,6 +13,7 @@ const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
         }
     }
 };
+
 export const setTabPosition = () => {
     if (!isWindow()) {
         return;
@@ -34,19 +35,18 @@ export const setTabPosition = () => {
         const headersLastElement = headerElement.lastElementChild as HTMLElement;
         if ("darwin" === window.siyuan.config.system.os) {
             if (rect.top <= 0 && rect.left <= 0 && !getCurrentWindow().isFullScreen()) {
-                item.headersElement.style.paddingLeft = "69px";
+                item.headersElement.style.paddingLeft = "var(--b3-toolbar-left-mac)";
                 headersLastElement.style.paddingRight = "42px";
             } else {
                 item.headersElement.style.paddingLeft = "";
                 headersLastElement.style.paddingRight = "";
             }
+        }
+        // 显示器缩放后像素存在小数点偏差 https://github.com/siyuan-note/siyuan/issues/7355
+        if (rect.top <= 0 && rect.right + 8 >= window.innerWidth) {
+            headersLastElement.style.paddingRight = (42 * ("darwin" === window.siyuan.config.system.os ? 1 : 4)) + "px";
         } else {
-            // 显示器缩放后像素存在小数点偏差 https://github.com/siyuan-note/siyuan/issues/7355
-            if (rect.top <= 0 && rect.right + 8 >= window.innerWidth) {
-                headersLastElement.style.paddingRight = (42 * 4) + "px";
-            } else {
-                headersLastElement.style.paddingRight = "";
-            }
+            headersLastElement.style.paddingRight = "";
         }
     });
 };

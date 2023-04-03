@@ -117,7 +117,7 @@ html {
 
   & > .protyle-breadcrumb,
   & > .block__icons { // 关系图
-    padding-left: 69px;
+    padding-left: var(--b3-toolbar-left-mac);
     height: 32px;
   }
 
@@ -156,7 +156,7 @@ html {
   box-sizing: border-box;
   height: 32px;
   line-height: 32px;
-  padding: 0 5px 0 69px;
+  padding: 0 5px 0 var(--b3-toolbar-left-mac);
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {

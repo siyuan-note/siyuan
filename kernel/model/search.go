@@ -20,8 +20,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
+	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -35,10 +36,12 @@ import (
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/jinzhu/copier"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/xrash/smetrics"
@@ -215,16 +218,65 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	var renameRoots []*ast.Node
 	renameRootTitles := map[string]string{}
+	cachedTrees := map[string]*parse.Tree{}
+
+	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	if nil != err {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+
 	for _, id := range ids {
-		var tree *parse.Tree
-		tree, err = loadTreeByBlockID(id)
-		if nil != err {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			continue
+		}
+
+		tree := cachedTrees[bt.RootID]
+		if nil != tree {
+			continue
+		}
+
+		tree, _ = loadTreeByBlockID(id)
+		if nil == tree {
+			continue
+		}
+
+		historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
+		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
+			logging.LogErrorf("generate history failed: %s", err)
 			return
+		}
+
+		var data []byte
+		if data, err = filelock.ReadFile(filepath.Join(util.DataDir, tree.Box, tree.Path)); err != nil {
+			logging.LogErrorf("generate history failed: %s", err)
+			return
+		}
+
+		if err = gulu.File.WriteFileSafer(historyPath, data, 0644); err != nil {
+			logging.LogErrorf("generate history failed: %s", err)
+			return
+		}
+
+		cachedTrees[bt.RootID] = tree
+	}
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+
+	for _, id := range ids {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			continue
+		}
+
+		tree := cachedTrees[bt.RootID]
+		if nil == tree {
+			continue
 		}
 
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
-			return
+			continue
 		}
 
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {

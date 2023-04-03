@@ -547,15 +547,20 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 }
 
 const (
-	HistoryOpClean  = "clean"
-	HistoryOpUpdate = "update"
-	HistoryOpDelete = "delete"
-	HistoryOpFormat = "format"
-	HistoryOpSync   = "sync"
+	HistoryOpClean   = "clean"
+	HistoryOpUpdate  = "update"
+	HistoryOpDelete  = "delete"
+	HistoryOpFormat  = "format"
+	HistoryOpSync    = "sync"
+	HistoryOpReplace = "replace"
 )
 
 func GetHistoryDir(suffix string) (ret string, err error) {
-	ret = filepath.Join(util.HistoryDir, time.Now().Format("2006-01-02-150405")+"-"+suffix)
+	return getHistoryDir(suffix, time.Now())
+}
+
+func getHistoryDir(suffix string, t time.Time) (ret string, err error) {
+	ret = filepath.Join(util.HistoryDir, t.Format("2006-01-02-150405")+"-"+suffix)
 	if err = os.MkdirAll(ret, 0755); nil != err {
 		logging.LogErrorf("make history dir failed: %s", err)
 		return
@@ -584,7 +589,7 @@ func ReindexHistory() (err error) {
 	return
 }
 
-var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync}
+var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync, HistoryOpReplace}
 
 const (
 	HistoryTypeDocName = 0

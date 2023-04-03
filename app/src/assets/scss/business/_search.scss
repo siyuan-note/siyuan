@@ -185,4 +185,11 @@
       margin: 2px 4px 0 16px;
     }
   }
+
+  &__empty {
+    text-align: center;
+    font-size: 17px;
+    padding: 32px;
+    color: var(--b3-theme-on-surface);
+  }
 }

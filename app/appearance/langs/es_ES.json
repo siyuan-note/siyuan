@@ -1,4 +1,6 @@
 {
+  "enterNew": "Ingresar para crear",
+  "enterNewTip": "No se encontraron documentos, ingrese para crear un nuevo documento.",
   "searchTip1": "para navegar",
   "searchTip2": "para abrir",
   "searchTip3": "para cambiar al siguiente resultado",

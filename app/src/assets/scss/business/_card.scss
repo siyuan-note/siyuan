@@ -1,4 +1,20 @@
 .card {
+  &__main {
+    @extend .fn__flex-column;
+    box-sizing: border-box;
+    max-height: 100%;
+    background-color: var(--b3-theme-surface);
+
+    &.fullscreen > .b3-form__space--small {
+      padding-left: var(--b3-toolbar-left-mac);
+    }
+  }
+
+  &__header {
+    display: flex;
+    padding: 8px 8px 8px 12px;
+  }
+
   &__empty {
     display: flex;
     justify-content: center;

@@ -4,9 +4,10 @@ import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 import {needSubscribe} from "../util/needSubscribe";
+import {fullscreen} from "../protyle/breadcrumb/action";
 
 export const openCard = () => {
     const exit = window.siyuan.dialogs.find(item => {
@@ -39,10 +40,14 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
 </div>`;
     }
     const dialog = new Dialog({
-        content: `<div class="fn__flex-column" style="box-sizing: border-box;max-height: 100%">
-    <div class="fn__flex b3-form__space--small">
+        content: `<div class="card__main">
+    <div class="card__header">
         <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>
         ${html}
+        <div class="fn__space"></div>
+        <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
+            <svg><use xlink:href="#iconFullscreen"></use></svg>
+        </div>
     </div>
     <div class="card__block fn__flex-1${blocks.length === 0 ? " fn__none" : ""}${window.siyuan.config.flashcard.mark ? " card__block--hidemark" : ""}${window.siyuan.config.flashcard.superBlock ? " card__block--hidesb" : ""}${window.siyuan.config.flashcard.list ? " card__block--hideli" : ""}" data-type="render"></div>
     <div class="card__empty${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
@@ -130,6 +135,14 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     const selectElement = dialog.element.querySelector("select");
     const titleElement = countElement.previousElementSibling;
     dialog.element.addEventListener("click", (event) => {
+        const fullscreenElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "fullscreen");
+        if (fullscreenElement) {
+            fullscreen(dialog.element.querySelector(".card__main"),
+                dialog.element.querySelector('[data-type="fullscreen"]'));
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         let type = "";
         if (typeof event.detail === "string") {
             if (event.detail === "1" || event.detail === "j") {

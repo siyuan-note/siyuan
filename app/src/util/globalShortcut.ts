@@ -620,7 +620,7 @@ export const globalShortcut = () => {
         if (matchDock) {
             return;
         }
-        if (matchHotKey(window.siyuan.config.keymap.general.riffCard.custom, event)) {
+        if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.riffCard.custom, event)) {
             openCard();
             if (document.activeElement) {
                 (document.activeElement as HTMLElement).blur();

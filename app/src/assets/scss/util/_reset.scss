@@ -72,13 +72,14 @@ body {
       & > .protyle-breadcrumb,
       & > .block__icons {
         height: 42px;
+        padding-right: 42px;
       }
     }
 
     &.body--win32 .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {
-        padding-right: 126px;
+        padding-right: 168px;
       }
     }
 

@@ -3131,7 +3131,12 @@ function webViewerClick(evt) {
   if (!pdfInstance) {
     return
   }
-  pdfInstance.pdfViewer.focus();
+
+  // 点击后证快捷键可正常使用，select 也可正常使用 https://github.com/siyuan-note/siyuan/issues/7869
+  if (evt.target.tagName !== "SELECT") {
+    pdfInstance.pdfViewer.focus();
+  }
+
   if (!pdfInstance.secondaryToolbar?.isOpen) {
     return;
   }

@@ -266,6 +266,7 @@ export const openHistory = () => {
                     <option value="delete">delete</option>
                     <option value="format">format</option>
                     <option value="sync">sync</option>
+                    <option value="replace">replace</option>
                 </select>
                 <span class="fn__space"></span>
                 <select data-type="notebookselect" class="b3-select" style="min-width: auto">

@@ -49,14 +49,14 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
     let hPath = "";
     let idPath: string[] = [];
     if (notebookId) {
-        hPath = escapeHtml(getNotebookName(notebookId));
+        hPath = getNotebookName(notebookId);
         idPath.push(notebookId);
         if (searchPath && searchPath !== "/") {
             const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                 notebook: notebookId,
                 path: searchPath.endsWith(".sy") ? searchPath : searchPath + ".sy"
             });
-            hPath = pathPosix().join(hPath, escapeHtml(response.data));
+            hPath = pathPosix().join(hPath, response.data);
             idPath[0] = pathPosix().join(idPath[0], searchPath);
         }
     } else if (window.siyuan.config.keymap.general.globalSearch.custom === hotkey) {

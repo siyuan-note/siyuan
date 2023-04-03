@@ -484,7 +484,7 @@ const initKernel = (workspace, port, lang) => {
                             errorWindowId = showErrorWindow("⚠️ 初始化工作空间失败 Failed to create workspace directory", "<div>初始化工作空间失败。</div><div>Failed to init workspace.</div>");
                             break;
                         case 26:
-                            errorWindowId = showErrorWindow("⚠️ 文件系统读写错误 File system access error", "<div>请检查文件系统权限，并确保没有其他程序正在读写文件；<br>请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）<br>解决方案：请将工作空间移动到其他路径后再打开</div><div>Please check file system permissions and make sure no other programs are reading or writing to the file;<br>Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)<br>Solution: Please move the workspace to another path before opening it</div>");
+                            errorWindowId = showErrorWindow("⚠️ 文件系统读写错误 File system access error", "<div>1. 请检查文件系统权限，并确保没有其他程序正在读写文件<br>2. 请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）<br><br>解决方案：请将工作空间移动到其他路径后再打开</div><div>1. Please check file system permissions and make sure no other programs are reading or writing to the file<br>2. Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)<br><br>Solution: Please move the workspace to another path before opening it</div>");
                             break;
                         case 0:
                             break;

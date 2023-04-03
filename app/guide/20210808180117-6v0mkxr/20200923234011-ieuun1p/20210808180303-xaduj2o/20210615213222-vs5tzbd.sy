@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
-		"updated": "20220831210614"
+		"updated": "20230403114455"
 	},
 	"Children": [
 		{
@@ -183,7 +183,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-30uwxvd",
-				"updated": "20220831210614"
+				"updated": "20230403114455"
 			},
 			"Children": [
 				{
@@ -217,7 +217,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -226,7 +226,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -235,12 +235,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " make adjustments), and the suffix of the history folder is "
+									"Data": "​ make adjustments), and the suffix of the history folder is "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-update"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -274,6 +278,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -307,6 +315,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -351,6 +363,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-clean"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -365,7 +381,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-wzazz01",
-						"updated": "20220628203717"
+						"updated": "20230403114455"
 					},
 					"Children": [
 						{
@@ -373,7 +389,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-xldpw4q",
-								"updated": "20220628203717"
+								"updated": "20230403114455"
 							},
 							"Children": [
 								{
@@ -382,17 +398,69 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220628204454-hhxohv5",
+									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "Optimize typography"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " function, a history will be generated, and the suffix of the history folder is "
+									"Data": ", a history will be generated, and the suffix of the history folder is "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-format"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230403114321-4rwhj6j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230403114321-4rwhj6j",
+						"updated": "20230403114424"
+					},
+					"Children": [
+						{
+							"ID": "20230403114321-tou7etc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230403114321-tou7etc",
+								"updated": "20230403114424"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Search replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, a history will be generated, and the suffix of the history folder "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

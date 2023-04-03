@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20220831210638"
+		"updated": "20230403114310"
 	},
 	"Children": [
 		{
@@ -14,7 +14,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501134357-003dftr",
-				"updated": "20220501134417"
+				"updated": "20230403113939"
 			},
 			"Children": [
 				{
@@ -183,7 +183,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210403160319-ufy7jta",
-				"updated": "20220831210638"
+				"updated": "20230403114310"
 			},
 			"Children": [
 				{
@@ -217,7 +217,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -226,7 +226,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -235,12 +235,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 进行调整），历史文件夹后缀为 "
+									"Data": "​ 进行调整），历史文件夹后缀为 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-update"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -268,24 +272,16 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "云端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "同步时，本地被"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "云端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "覆盖的数据会生成历史，历史文件夹后缀为 "
+									"Data": "云端同步时，本地被云端覆盖的数据会生成历史，历史文件夹后缀为 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -313,20 +309,16 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "手动删除笔记本、文档和"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "资源文件"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "时会生成历史，历史文件夹后缀为 "
+									"Data": "手动删除笔记本、文档和资源文件时会生成历史，历史文件夹后缀为 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -371,6 +363,10 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "-clean"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -385,7 +381,7 @@
 					},
 					"Properties": {
 						"id": "20220501134920-qb6wh0b",
-						"updated": "20220628203857"
+						"updated": "20230403114300"
 					},
 					"Children": [
 						{
@@ -393,7 +389,55 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501134920-k403n1r",
-								"updated": "20220628203857"
+								"updated": "20230403114300"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220628204444-9n0y9h2",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "优化排版"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "时会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-format"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230403113929-44xkaoz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230403113929-44xkaoz",
+						"updated": "20230403114310"
+					},
+					"Children": [
+						{
+							"ID": "20230403113929-ud36ubv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230403113929-ud36ubv",
+								"updated": "20230403114310"
 							},
 							"Children": [
 								{
@@ -403,16 +447,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "优化排版"
+									"TextMarkTextContent": "搜索替换"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 功能时会生成历史，历史文件夹后缀为 "
+									"Data": "​ 时会生成历史，历史文件夹后缀为 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "-format"
+									"TextMarkTextContent": "-replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

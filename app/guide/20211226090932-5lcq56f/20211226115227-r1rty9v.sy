@@ -717,8 +717,8 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://teracloud.jp/",
-									"TextMarkTextContent": "TeraCLOUD"
+									"TextMarkAHref": "https://infini-cloud.net/",
+									"TextMarkTextContent": "InfiniCLOUD"
 								},
 								{
 									"Type": "NodeText",

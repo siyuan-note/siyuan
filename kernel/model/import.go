@@ -552,7 +552,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				logging.LogErrorf("parse tree [%s] failed", currentPath)
 				return nil
 			}
-			imgHtmlBlock2InlineImg(tree)
+
 			tree.ID = id
 			tree.Root.ID = id
 			tree.Root.SetIALAttr("id", tree.Root.ID)
@@ -563,7 +563,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			targetPaths[curRelPath] = targetPath
 			tree.HPath = hPath
 			tree.Root.Spec = "1"
-			parse.NestedInlines2FlattedSpans(tree)
 
 			docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -647,7 +646,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			logging.LogErrorf(msg)
 			return errors.New(msg)
 		}
-		imgHtmlBlock2InlineImg(tree)
+
 		tree.ID = id
 		tree.Root.ID = id
 		tree.Root.SetIALAttr("id", tree.Root.ID)
@@ -656,7 +655,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		tree.Path = targetPath
 		tree.HPath = path.Join(baseHPath, title)
 		tree.Root.Spec = "1"
-		parse.NestedInlines2FlattedSpans(tree)
 
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -724,7 +722,12 @@ func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	luteEngine.SetGFMAutoLink(false) // 导入 Markdown 时不自动转换超链接 https://github.com/siyuan-note/siyuan/issues/7682
 	luteEngine.SetImgPathAllowSpace(true)
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
+	if nil == ret {
+		return
+	}
 	genTreeID(ret)
+	imgHtmlBlock2InlineImg(ret)
+	parse.NestedInlines2FlattedSpansHybrid(ret)
 	return
 }
 

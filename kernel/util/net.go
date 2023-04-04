@@ -32,6 +32,12 @@ import (
 )
 
 func IsOnline(checkURL string) bool {
+	_, err := url.Parse(checkURL)
+	if nil != err {
+		logging.LogWarnf("invalid check URL [%s]", checkURL)
+		return false
+	}
+
 	if "" == checkURL {
 		return false
 	}

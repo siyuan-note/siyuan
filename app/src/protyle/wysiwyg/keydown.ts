@@ -1295,17 +1295,22 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (!nodeElement.classList.contains("code-block") && !event.repeat) {
-            const findToolbar = protyle.options.toolbar.find((menuItem: IMenuItem) => {
+            let findToolbar = false;
+            protyle.options.toolbar.find((menuItem: IMenuItem) => {
                 if (!menuItem.hotkey) {
                     return false;
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
-                    if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(menuItem.name)) {
-                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("click"));
+                    if (["block-ref", "text"].includes(menuItem.name) && protyle.toolbar.range.toString() === "") {
                         return true;
                     }
-                    protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");
+                    findToolbar = true;
+                    if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(menuItem.name)) {
+                        protyle.toolbar.element.querySelector(`[data-type="${menuItem.name}"]`).dispatchEvent(new CustomEvent("click"));
+                    } else {
+                        protyle.toolbar.setInlineMark(protyle, menuItem.name, "range");
+                    }
                     return true;
                 }
             });

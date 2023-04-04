@@ -43,9 +43,14 @@ export const handleTouchEnd = (event: TouchEvent) => {
     clientX = null;
     // 有些事件不经过 touchmove
 
-    let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable");
+    let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
+        hasClosestByAttribute(target, "data-type", "NodeTable");
     if (scrollElement) {
-        scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement);
+        if (scrollElement.classList.contains("table")) {
+            scrollElement = scrollElement.firstElementChild as HTMLElement
+        } else if (scrollElement.classList.contains("code-block")) {
+            scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement
+        }
         if ((xDiff <= 0 && scrollElement.scrollLeft > 0) ||
             (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
             // 左滑拉出菜单后右滑至代码块右侧有空间时，需关闭菜单
@@ -183,9 +188,14 @@ export const handleTouchMove = (event: TouchEvent) => {
     }
     previousClientX = event.touches[0].clientX;
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
-        let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") || hasClosestByAttribute(target, "data-type", "NodeTable");
+        let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
+            hasClosestByAttribute(target, "data-type", "NodeTable");
         if (scrollElement) {
-            scrollElement = scrollElement.classList.contains("table") ? (scrollElement.firstElementChild as HTMLElement) : (scrollElement.firstElementChild.nextElementSibling as HTMLElement);
+            if (scrollElement.classList.contains("table")) {
+                scrollElement = scrollElement.firstElementChild as HTMLElement
+            } else if (scrollElement.classList.contains("code-block")) {
+                scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement
+            }
             if ((xDiff < 0 && scrollElement.scrollLeft > 0) ||
                 (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
                 return;

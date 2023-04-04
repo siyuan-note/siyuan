@@ -576,7 +576,7 @@ func isProviderOnline() (ret bool) {
 		checkURL = Conf.Sync.WebDAV.Endpoint
 	default:
 		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
-		util.IsOnline("")
+		return false
 	}
 
 	if ret = util.IsOnline(checkURL); !ret {

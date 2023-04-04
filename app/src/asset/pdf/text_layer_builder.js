@@ -106,6 +106,12 @@ class TextLayerBuilder {
         this.#rotation = rotation;
       }
       this.show();
+      // NOTE
+      if (this.div.lastElementChild.previousElementSibling &&
+          this.div.lastElementChild.previousElementSibling.classList.contains("endOfContent")) {
+        this.div.lastElementChild.innerHTML = ""
+      }
+      getHighlight(this.div)
       return;
     }
 

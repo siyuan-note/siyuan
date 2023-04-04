@@ -1,3 +1,52 @@
+## v2.8.3 / 2023-04-04
+
+### Enhancement
+
+* [PDF export supports setting footer template](https://github.com/siyuan-note/siyuan/issues/7478)
+* [Improve the style of the slash menu on the mobile](https://github.com/siyuan-note/siyuan/issues/7596)
+* [Slide and pull out the left and right panel on the mobile](https://github.com/siyuan-note/siyuan/issues/7688)
+* [macOS support `⌥[` to enter default characters when no text is selected](https://github.com/siyuan-note/siyuan/issues/7721)
+* [Improve virtual reference split words](https://github.com/siyuan-note/siyuan/issues/7833)
+* [Remove the footer `Export by SiYuan` when exporting image and PDF ](https://github.com/siyuan-note/siyuan/issues/7838)
+* [Android check WebView version 75+](https://github.com/siyuan-note/siyuan/issues/7840)
+* [Flashcard new/review card limit support configure to 0](https://github.com/siyuan-note/siyuan/issues/7841)
+* [Remove `/` or `、` when trigger AI Chat](https://github.com/siyuan-note/siyuan/issues/7845)
+* [Support scaling when exporting pdf preview](https://github.com/siyuan-note/siyuan/issues/7850)
+* [Browser web clipper extension show tip while clipping images](https://github.com/siyuan-note/siyuan/issues/7851)
+* [Improve the menu style of the doc tree on the mobile](https://github.com/siyuan-note/siyuan/issues/7852)
+* [After opening the doc on the mobile, the editor is no longer focused to avoid the pop-up of the soft keyboard](https://github.com/siyuan-note/siyuan/issues/7853)
+* [Spaced repetition supports full screen mode](https://github.com/siyuan-note/siyuan/issues/7855)
+* [Create a new document from the search field](https://github.com/siyuan-note/siyuan/issues/7860)
+* [Prompt to search for the most recently updated block when the search keyword is empty](https://github.com/siyuan-note/siyuan/issues/7862)
+* [Add interaction tips at the bottom of the search dialog](https://github.com/siyuan-note/siyuan/issues/7863)
+* [Search replace generate file history](https://github.com/siyuan-note/siyuan/issues/7864)
+* [The merged cells of the table no longer add a space at the end](https://github.com/siyuan-note/siyuan/issues/7866)
+
+### Bugfix
+
+* [PDF annotation do not follow zoom](https://github.com/siyuan-note/siyuan/issues/7740)
+* [Data synchronization online check not using configured endpoint](https://github.com/siyuan-note/siyuan/issues/7831)
+* [API getFile/putFile does not perform read-write lock](https://github.com/siyuan-note/siyuan/issues/7832)
+* [Focused heading block export does not contain its following blocks](https://github.com/siyuan-note/siyuan/issues/7834)
+* [Related PDF annotation information is not exported when exporting .sy.zip](https://github.com/siyuan-note/siyuan/issues/7836)
+* [Markdown hyperlink parsing exception when using API `/api/block/*` to upsert block](https://github.com/siyuan-note/siyuan/issues/7846)
+* [Exporting PDF hangs after focusing heading block](https://github.com/siyuan-note/siyuan/issues/7848)
+* [The editor has not been closed after closing notebook or deleting doc on the mobile](https://github.com/siyuan-note/siyuan/issues/7854)
+* [The search fails in REGEXP/SQL with order by relevance](https://github.com/siyuan-note/siyuan/issues/7861)
+* [Group by Document Replace exceptions in some cases](https://github.com/siyuan-note/siyuan/issues/7865)
+* [Escape character `\` were not handled correctly when importing Markdown](https://github.com/siyuan-note/siyuan/issues/7867)
+* [Click search from the doc tree, pressing `Del` in the editor will delete the doc](https://github.com/siyuan-note/siyuan/issues/7868)
+* [Can't choose scale in PDF](https://github.com/siyuan-note/siyuan/issues/7869)
+
+### Refactor
+
+* [Improve copy file stability](https://github.com/siyuan-note/siyuan/issues/7837)
+* [Upgrade PDF.js](https://github.com/siyuan-note/siyuan/issues/7874)
+
+### Development
+
+* [Attribute View refresh data table queue](https://github.com/siyuan-note/siyuan/issues/7546)
+
 ## v2.8.2 / 2023-03-30
 
 ### Enhancement

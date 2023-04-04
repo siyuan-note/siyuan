@@ -59,8 +59,10 @@ body {
     }
 
     .card__main.fullscreen > .card__header {
-      padding-right: 108px;
-      padding-left: 12px;
+      padding: 2px 108px 2px 12px;
+      & > .fn__flex-1 {
+        -webkit-app-region: drag;
+      }
     }
 
     .fullscreen {

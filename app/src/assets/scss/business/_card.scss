@@ -6,7 +6,7 @@
     background-color: var(--b3-theme-surface);
 
     &.fullscreen > .card__header {
-      padding-left: var(--b3-toolbar-left-mac);
+      padding: 2px 8px 2px var(--b3-toolbar-left-mac);
     }
   }
 

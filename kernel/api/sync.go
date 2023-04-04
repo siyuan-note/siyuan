@@ -58,7 +58,7 @@ func performSync(c *gin.Context) {
 	}
 
 	if 3 != model.Conf.Sync.Mode {
-		model.SyncData(false, false, true)
+		model.SyncData(true)
 		return
 	}
 

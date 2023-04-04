@@ -126,7 +126,7 @@ func SyncDataJob() {
 		return
 	}
 
-	SyncData(false, false, false)
+	SyncData(false)
 }
 
 func BootSyncData() {
@@ -170,19 +170,19 @@ func BootSyncData() {
 	return
 }
 
-func SyncData(boot, exit, byHand bool) {
-	syncData(boot, exit, byHand)
+func SyncData(byHand bool) {
+	syncData(false, byHand)
 }
 
-func syncData(boot, exit, byHand bool) {
+func syncData(exit, byHand bool) {
 	defer logging.Recover()
 
-	if !checkSync(boot, exit, byHand) {
+	if !checkSync(false, exit, byHand) {
 		return
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !exit && !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -190,11 +190,6 @@ func syncData(boot, exit, byHand bool) {
 	syncLock.Lock()
 	defer syncLock.Unlock()
 
-	if boot {
-		util.IncBootProgress(3, "Syncing data from the cloud...")
-		BootSyncSucc = 0
-		logging.LogInfof("sync before boot")
-	}
 	if exit {
 		ExitSyncSucc = 0
 		logging.LogInfof("sync before exit")
@@ -576,7 +571,7 @@ func isProviderOnline() (ret bool) {
 		checkURL = Conf.Sync.WebDAV.Endpoint
 	default:
 		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
-		util.IsOnline("")
+		return false
 	}
 
 	if ret = util.IsOnline(checkURL); !ret {

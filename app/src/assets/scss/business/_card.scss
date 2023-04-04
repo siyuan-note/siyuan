@@ -5,7 +5,7 @@
     max-height: 100%;
     background-color: var(--b3-theme-surface);
 
-    &.fullscreen > .b3-form__space--small {
+    &.fullscreen > .card__header {
       padding-left: var(--b3-toolbar-left-mac);
     }
   }

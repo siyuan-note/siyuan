@@ -58,6 +58,10 @@ body {
       padding: 0 0 0 5px;
     }
 
+    .card__main.fullscreen > .card__header {
+      padding-right: 108px;
+    }
+
     .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {

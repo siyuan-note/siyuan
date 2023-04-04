@@ -64,8 +64,7 @@ class PDFSidebarResizer {
   _updateWidth(width = 0) {
     // Prevent the sidebar from becoming too narrow, or from occupying more
     // than half of the available viewer width.
-    // NOTE
-    const maxWidth = Math.floor(this.outerContainerWidth / 3 * 2);
+    const maxWidth = Math.floor(this.outerContainerWidth / 2);
     if (width > maxWidth) {
       width = maxWidth;
     }

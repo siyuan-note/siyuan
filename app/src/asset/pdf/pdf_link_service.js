@@ -336,7 +336,7 @@ class PDFLinkService {
    * @returns {string} The hyperlink to the PDF object.
    */
   getAnchorUrl(anchor) {
-    return (this.baseUrl || "") + anchor;
+    return this.baseUrl ? this.baseUrl + anchor : anchor;
   }
 
   /**
@@ -352,7 +352,7 @@ class PDFLinkService {
       if (params.has("search")) {
         this.eventBus.dispatch("findfromurlhash", {
           source: this,
-          query: params.get("search").replace(/"/g, ""),
+          query: params.get("search").replaceAll('"', ""),
           phraseSearch: params.get("phrase") === "true",
         });
       }

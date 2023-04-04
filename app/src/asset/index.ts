@@ -440,6 +440,11 @@ export class Asset extends Model {
         <input id="editorInkColor">
         <input id="editorInkThickness">
         <input id="editorInkOpacity">
+        <input id="download">
+        <input id="secondaryDownload">
+        <input id="editorFreeText">
+        <input id="openFile">
+        <input id="editorInk">
       </div>
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;

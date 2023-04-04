@@ -59,9 +59,8 @@ class SecondaryToolbar {
         eventName: "presentationmode",
         close: true,
       },
-      // NOTE
-      // { element: options.printButton, eventName: "print", close: true },
-      // { element: options.downloadButton, eventName: "download", close: true },
+      { element: options.printButton, eventName: "print", close: true },
+      { element: options.downloadButton, eventName: "download", close: true },
       { element: options.viewBookmarkButton, eventName: null, close: true },
       { element: options.firstPageButton, eventName: "firstpage", close: true },
       { element: options.lastPageButton, eventName: "lastpage", close: true },
@@ -205,11 +204,7 @@ class SecondaryToolbar {
     for (const { element, eventName, close, eventDetails } of this.buttons) {
       element.addEventListener("click", evt => {
         if (eventName !== null) {
-          const details = { source: this };
-          for (const property in eventDetails) {
-            details[property] = eventDetails[property];
-          }
-          this.eventBus.dispatch(eventName, details);
+          this.eventBus.dispatch(eventName, { source: this, ...eventDetails });
         }
         if (close) {
           this.close();

@@ -14,7 +14,6 @@
  */
 
 import { RenderingStates, ScrollMode, SpreadMode } from "./ui_utils.js";
-import { AppOptions } from "./app_options.js";
 import { LinkTarget } from "./pdf_link_service.js";
 import { PDFViewerApplication } from "./app.js";
 import { initAnno } from "../anno";
@@ -169,7 +168,7 @@ function getViewerConfiguration(element) {
         ? element.querySelector("#fileInput")
         : null,
     debuggerScriptPath: "./debugger.js",
-  }
+  };
 }
 
 // NOTE

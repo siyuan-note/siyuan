@@ -63,38 +63,36 @@ class Toolbar {
       { element: options.next, eventName: "nextpage" },
       { element: options.zoomIn, eventName: "zoomin" },
       { element: options.zoomOut, eventName: "zoomout" },
-      // NOTE
-      // { element: options.print, eventName: "print" },
-      // { element: options.download, eventName: "download" },
-      // {
-      //   element: options.editorFreeTextButton,
-      //   eventName: "switchannotationeditormode",
-      //   eventDetails: {
-      //     get mode() {
-      //       const { classList } = options.editorFreeTextButton;
-      //       return classList.contains("toggled")
-      //         ? AnnotationEditorType.NONE
-      //         : AnnotationEditorType.FREETEXT;
-      //     },
-      //   },
-      // },
-      // {
-      //   element: options.editorInkButton,
-      //   eventName: "switchannotationeditormode",
-      //   eventDetails: {
-      //     get mode() {
-      //       const { classList } = options.editorInkButton;
-      //       return classList.contains("toggled")
-      //         ? AnnotationEditorType.NONE
-      //         : AnnotationEditorType.INK;
-      //     },
-      //   },
-      // },
+      { element: options.print, eventName: "print" },
+      { element: options.download, eventName: "download" },
+      {
+        element: options.editorFreeTextButton,
+        eventName: "switchannotationeditormode",
+        eventDetails: {
+          get mode() {
+            const { classList } = options.editorFreeTextButton;
+            return classList.contains("toggled")
+              ? AnnotationEditorType.NONE
+              : AnnotationEditorType.FREETEXT;
+          },
+        },
+      },
+      {
+        element: options.editorInkButton,
+        eventName: "switchannotationeditormode",
+        eventDetails: {
+          get mode() {
+            const { classList } = options.editorInkButton;
+            return classList.contains("toggled")
+              ? AnnotationEditorType.NONE
+              : AnnotationEditorType.INK;
+          },
+        },
+      },
     ];
-    // NOTE
-    // if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
-    //   this.buttons.push({ element: options.openFile, eventName: "openfile" });
-    // }
+    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
+      this.buttons.push({ element: options.openFile, eventName: "openfile" });
+    }
     this.items = {
       numPages: options.numPages,
       pageNumber: options.pageNumber,
@@ -152,13 +150,7 @@ class Toolbar {
     for (const { element, eventName, eventDetails } of this.buttons) {
       element.addEventListener("click", evt => {
         if (eventName !== null) {
-          const details = { source: this };
-          if (eventDetails) {
-            for (const property in eventDetails) {
-              details[property] = eventDetails[property];
-            }
-          }
-          this.eventBus.dispatch(eventName, details);
+          this.eventBus.dispatch(eventName, { source: this, ...eventDetails });
         }
       });
     }

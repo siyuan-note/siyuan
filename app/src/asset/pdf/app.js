@@ -688,7 +688,7 @@ class PDFViewerApplication {
   get loadingBar() {
     // NOTE
     const bar = new ProgressBar(this.appConfig.appContainer.querySelector("#loadingBar"))
-    return shadow(this, 'loadingBar', bar)
+    return shadow(this, "loadingBar", bar);
   }
 
   get supportedMouseWheelZoomModifierKeys() {
@@ -894,7 +894,11 @@ class PDFViewerApplication {
     }
     // Set the necessary API parameters, using all the available options.
     const apiParams = AppOptions.getAll(OptionKind.API);
-    const params = { ...apiParams, ...args };
+    const params = {
+      canvasMaxAreaInBytes: this.externalServices.canvasMaxAreaInBytes,
+      ...apiParams,
+      ...args,
+    };
 
     if (typeof PDFJSDev === "undefined" || !PDFJSDev.test("PRODUCTION")) {
       params.docBaseUrl ||= document.URL.split("#")[0];
@@ -930,18 +934,18 @@ class PDFViewerApplication {
           return undefined; // Ignore errors for previously opened PDF files.
         }
 
-        // NOTE
-        let key = 'loadingError'
+        let key = "loadingError";
         if (reason instanceof InvalidPDFException) {
-          key = 'invalidFileError'
+          key = "invalidFileError";
         } else if (reason instanceof MissingPDFException) {
-          key = 'missingFileError'
+          key = "missingFileError";
         } else if (reason instanceof UnexpectedResponseException) {
-          key = 'unexpectedResponseError'
+          key = "unexpectedResponseError";
         }
+        // NOTE
         this._documentError(window.siyuan.languages[key], {message: reason?.message})
         throw reason
-      },
+      }
     );
   }
 
@@ -1114,20 +1118,17 @@ class PDFViewerApplication {
     this.toolbar?.setPagesCount(pdfDocument.numPages, false);
     this.secondaryToolbar?.setPagesCount(pdfDocument.numPages);
 
-    let baseDocumentUrl;
-    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
-      baseDocumentUrl = null;
-    } else if (PDFJSDev.test("MOZCENTRAL")) {
-      baseDocumentUrl = this.baseUrl;
-    } else if (PDFJSDev.test("CHROME")) {
-      baseDocumentUrl = location.href.split("#")[0];
-    }
-    if (baseDocumentUrl && isDataScheme(baseDocumentUrl)) {
+    if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("CHROME")) {
+      const baseUrl = location.href.split("#")[0];
       // Ignore "data:"-URLs for performance reasons, even though it may cause
       // internal links to not work perfectly in all cases (see bug 1803050).
-      baseDocumentUrl = null;
+      this.pdfLinkService.setDocument(
+        pdfDocument,
+        isDataScheme(baseUrl) ? null : baseUrl
+      );
+    } else {
+      this.pdfLinkService.setDocument(pdfDocument);
     }
-    this.pdfLinkService.setDocument(pdfDocument, baseDocumentUrl);
     this.pdfDocumentProperties?.setDocument(pdfDocument);
 
     const pdfViewer = this.pdfViewer;
@@ -2121,7 +2122,7 @@ async function loadFakeWorker() {
 
   if (typeof PDFJSDev === "undefined" || !PDFJSDev.test("PRODUCTION")) {
     // NOTE
-    window.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.js?v=3.4.120`)
+    window.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.js?v=3.5.141`)
     return;
   }
   await loadScript(PDFWorker.workerSrc);
@@ -2202,23 +2203,19 @@ function webViewerInitialized(pdf) {
 
   if (!pdf.supportsDocumentFonts) {
     AppOptions.set("disableFontFace", true);
-    // NOTE
     console.warn('Web fonts are disabled: unable to use embedded PDF fonts.')
   }
 
   if (!pdf.supportsPrinting) {
-    // NOTE
     appConfig.toolbar?.print.classList.add("fn__hidden");
     appConfig.secondaryToolbar?.printButton.classList.add("fn__hidden");
   }
 
   if (!pdf.supportsFullscreen) {
-    // NOTE
     appConfig.secondaryToolbar?.presentationModeButton.classList.add("fn__hidden");
   }
 
   if (pdf.supportsIntegratedFind) {
-    // NOTE
     appConfig.toolbar?.viewFind.classList.add("fn__hidden");
   }
 
@@ -2488,23 +2485,21 @@ function webViewerHashchange(evt) {
 if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
   // eslint-disable-next-line no-var
   var webViewerFileInputChange = function (evt) {
-    // NOTE
-    // if (PDFViewerApplication.pdfViewer?.isInPresentationMode) {
-    //   return; // Opening a new PDF file isn't supported in Presentation Mode.
-    // }
-    // const file = evt.fileInput.files[0];
-    //
-    // PDFViewerApplication.open({
-    //   url: URL.createObjectURL(file),
-    //   originalUrl: file.name,
-    // });
+    if (PDFViewerApplication.pdfViewer?.isInPresentationMode) {
+      return; // Opening a new PDF file isn't supported in Presentation Mode.
+    }
+    const file = evt.fileInput.files[0];
+
+    PDFViewerApplication.open({
+      url: URL.createObjectURL(file),
+      originalUrl: file.name,
+    });
   };
 
   // eslint-disable-next-line no-var
   var webViewerOpenFile = function (evt) {
-    // NOTE
-    // const fileInput = PDFViewerApplication.appConfig.openFileInput;
-    // fileInput.click();
+    const fileInput = PDFViewerApplication.appConfig.openFileInput;
+    fileInput.click();
   };
 }
 
@@ -2640,12 +2635,12 @@ function webViewerPageNumberChanged(evt) {
   // Ensure that the page number input displays the correct value, even if the
   // value entered by the user was invalid (e.g. a floating point number).
   if (
-      evt.value !== pdfViewer.currentPageNumber.toString() &&
-      evt.value !== pdfViewer.currentPageLabel
+    evt.value !== pdfViewer.currentPageNumber.toString() &&
+    evt.value !== pdfViewer.currentPageLabel
   ) {
     pdfInstance.toolbar?.setPageNumber(
-        pdfViewer.currentPageNumber,
-        pdfViewer.currentPageLabel
+      pdfViewer.currentPageNumber,
+      pdfViewer.currentPageLabel
     );
   }
 }
@@ -3102,7 +3097,7 @@ function webViewerTouchMove(evt) {
     }
   }
 
-  pdfInstance._centerAtPos(
+  PDFViewerApplication._centerAtPos(
     previousScale,
     (page0X + page1X) / 2,
     (page0Y + page1Y) / 2
@@ -3132,8 +3127,8 @@ function webViewerClick(evt) {
     return
   }
 
-  // 点击后证快捷键可正常使用，select 也可正常使用 https://github.com/siyuan-note/siyuan/issues/7869
-  if (evt.target.tagName !== "SELECT") {
+  // 点击后证快捷键可正常使用，select 等也可正常使用 https://github.com/siyuan-note/siyuan/issues/7869
+  if (!["SELECT", "TEXTAREA", "INPUT"].includes(evt.target.tagName)) {
     pdfInstance.pdfViewer.focus();
   }
 
@@ -3142,9 +3137,9 @@ function webViewerClick(evt) {
   }
   const appConfig = pdfInstance.appConfig;
   if (
-      pdfInstance.pdfViewer.containsElement(evt.target) ||
-      (appConfig.toolbar?.container.contains(evt.target) &&
-          !appConfig.secondaryToolbar.toggleButton.contains(evt.target)) // NOTE
+    pdfInstance.pdfViewer.containsElement(evt.target) ||
+    (appConfig.toolbar?.container.contains(evt.target) &&
+        !appConfig.secondaryToolbar.toggleButton.contains(evt.target)) // NOTE
   ) {
     pdfInstance.secondaryToolbar.close();
   }
@@ -3160,6 +3155,7 @@ function webViewerKeyUp(evt) {
   if (evt.key === "Control") {
     pdfInstance._isCtrlKeyDown = false;
   }
+  // 快捷键高亮取消
   if (evt.keyCode === 68 && pdfInstance.appConfig.toolbar.rectAnno.classList.contains('toggled')) {
     pdfInstance.appConfig.toolbar.rectAnno.dispatchEvent(
         new MouseEvent('click'))
@@ -3260,7 +3256,7 @@ function webViewerKeyDown(evt) {
           isViewerInPresentationMode ||
           pdfInstance.page < pdfInstance.pagesCount
         ) {
-          pdfInstance.page = pdfInstance.pagesCount;
+          PDFViewerApplication.page = PDFViewerApplication.pagesCount;
           handled = true;
           ensureViewerFocused = true;
         }
@@ -3519,9 +3515,9 @@ const PDFPrintServiceFactory = {
   },
 };
 
+// NOTE
 export {
   PDFPrintServiceFactory,
   PDFViewerApplication,
-  // NOTE
   webViewerPageNumberChanged,
 };

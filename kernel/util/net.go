@@ -33,19 +33,6 @@ import (
 
 func IsOnline(checkURL string) bool {
 	if "" == checkURL {
-		if isOnline("https://www.baidu.com") {
-			return true
-		}
-
-		if isOnline("https://icanhazip.com") {
-			return true
-		}
-
-		if isOnline("https://api.ipify.org") {
-			return true
-		}
-
-		logging.LogWarnf("network is offline")
 		return false
 	}
 
@@ -57,10 +44,16 @@ func IsOnline(checkURL string) bool {
 	return false
 }
 
-func isOnline(checkURL string) bool {
-	c := req.C().SetTimeout(1 * time.Second)
-	_, err := c.R().Head(checkURL)
-	return nil == err
+func isOnline(checkURL string) (ret bool) {
+	for i := 0; i < 3; i++ {
+		c := req.C().SetTimeout(3 * time.Second)
+		_, err := c.R().Head(checkURL)
+		ret = nil == err
+		if ret {
+			break
+		}
+	}
+	return
 }
 
 func GetRemoteAddr(session *melody.Session) string {

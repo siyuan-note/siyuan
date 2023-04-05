@@ -416,7 +416,7 @@
     }
 
     const walk = (dir, files = []) => {
-        var dirFiles;
+        let dirFiles;
         const fs = require('fs')
         try {
             if (!fs.existsSync(dir)) {

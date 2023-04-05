@@ -183,8 +183,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                         ids,
                         action: "Translate as follows to [ja-JP]"
                     }, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }, {

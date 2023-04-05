@@ -1,0 +1,604 @@
+{
+	"ID": "20230405172131-yb16aax",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f680",
+		"id": "20230405172131-yb16aax",
+		"title": "性能優化",
+		"updated": "20230405172342"
+	},
+	"Children": [
+		{
+			"ID": "20230405172204-a2fpv2e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230405172204-a2fpv2e",
+				"updated": "20230405172204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-vw3kp1u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230405172204-vw3kp1u",
+				"updated": "20230405172204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不同硬件配置、不同操作系統平台上性能表現是不一樣的。另外，隨著數據增多，性能下降無法避免。所以我們可能需要改變使用方式並調整一些配置項來提升性能，以獲得更流暢的使用體驗。"
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-rp9750k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230405172204-rp9750k",
+				"updated": "20230405172204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "整體性能"
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-lnet9qc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230405172204-lnet9qc",
+				"updated": "20230405172342"
+			},
+			"Children": [
+				{
+					"ID": "20230405172204-vfsgcx7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-vfsgcx7",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-9h9726e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-9h9726e",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊數量：內容塊數量對性能影響範圍較大，比如展開文檔樹、搜索、數據寫入等。但也不必太過擔心，通常情況下內容塊數量在百萬這個量級下不會產生太大影響，除非每個塊的大小較大"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-9g3qlr0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-9g3qlr0",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-ud4rakr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-ud4rakr",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "系統環境：操作系統當前負載會影響整體性能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-0muzhpd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-0muzhpd",
+						"updated": "20230405172342"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-2i19tk6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-2i19tk6",
+								"updated": "20230405172342"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "網絡環境：通過 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "網絡伺服"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 使用時網絡質量會影響請求響應時間"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-vg3yj04",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230405172204-vg3yj04",
+				"updated": "20230405172204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "優化建議："
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-asqqhb3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230405172204-asqqhb3",
+				"updated": "20230405172220"
+			},
+			"Children": [
+				{
+					"ID": "20230405172204-rg13omn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-rg13omn",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-xq9f663",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-xq9f663",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "將不常用的文檔或者剪藏的文檔單獨放置到 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "存檔筆記本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "剪藏筆記本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中，關閉它後將減少數據庫索引數量以提升性能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-emlf9x6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-emlf9x6",
+						"updated": "20230405172220"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-cm17y06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-cm17y06",
+								"updated": "20230405172220"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "調小 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "搜索結果顯示數"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，我們會對搜索請求響應時間進行性能監控，如果響應時間超過閾值，則會彈出提示用戶調小該配置項"
+								}
+							]
+						},
+						{
+							"ID": "20230405172204-jyz6cm1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-jyz6cm1",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "性能監控閾值可以通過環境變量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PERFORMANCE_TIMING"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 設置，單位毫秒，默認為 15000，即 15 秒"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-pku1j25",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-pku1j25",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-orpzg2i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-orpzg2i",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "保持足夠的系統資源"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-rch4cp1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-rch4cp1",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-rj69mn9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-rj69mn9",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用固態硬盤，將工作空間放置在固態硬盤上能夠有效提升整體性能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-b952apc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-b952apc",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-5h99cb5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-5h99cb5",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "升級硬件，這是提升性能最快的方式"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-kitngfu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230405172204-kitngfu",
+				"updated": "20230405172204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯器性能"
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-rwrw4h5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230405172204-rwrw4h5",
+				"updated": "20230405172204"
+			},
+			"Children": [
+				{
+					"ID": "20230405172204-73vvmgi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-73vvmgi",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-cawwvgz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-cawwvgz",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "葉子塊大小：單個葉子塊大小主要影響編輯器性能，如果一個葉子塊包含了大量字符，那麼編輯器可能會卡頓"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-yl6jz5a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-yl6jz5a",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-3q6o7u5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-3q6o7u5",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "動態加載塊數：加載塊數主要影響編輯器性能，特別是對於公式塊、代碼塊和圖表塊較多的情況，如果加載較多塊，那麼編輯器可能會卡頓"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-y2kynd5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-y2kynd5",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-92zmfvs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-92zmfvs",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "代碼塊行號：代碼塊行號主要影響編輯器性能，如果一個代碼塊內容較多且開啟了行號顯示，那麼編輯器可能會卡頓"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-3o54nkp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-3o54nkp",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-klp5sm8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-klp5sm8",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "圖片和圖表：圖片和圖表主要影響編輯器性能，如果文檔中包含了大量圖片和圖表，那麼編輯器可能會卡頓"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-mtqmu5i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230405172204-mtqmu5i",
+				"updated": "20230405172204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "優化建議："
+				}
+			]
+		},
+		{
+			"ID": "20230405172204-ncmh788",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230405172204-ncmh788",
+				"updated": "20230405172212"
+			},
+			"Children": [
+				{
+					"ID": "20230405172204-xnp4cms",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-xnp4cms",
+						"updated": "20230405172204"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-hniz9rz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-hniz9rz",
+								"updated": "20230405172204"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "避免使用過多軟換行，雖然不使用軟換行會增加塊數，但是少使用軟換行可以減小段落塊大小避免編輯器卡頓"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230405172204-o16oek3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230405172204-o16oek3",
+						"updated": "20230405172212"
+					},
+					"Children": [
+						{
+							"ID": "20230405172204-hr76fx8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230405172204-hr76fx8",
+								"updated": "20230405172212"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "調小 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "動態加載塊數"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，特別是對於公式塊、代碼塊或圖表塊較多的使用場景"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

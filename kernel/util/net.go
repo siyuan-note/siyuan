@@ -31,7 +31,7 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-func IsOnline(checkURL string) bool {
+func IsOnline(checkURL string, skipTlsVerify bool) bool {
 	_, err := url.Parse(checkURL)
 	if nil != err {
 		logging.LogWarnf("invalid check URL [%s]", checkURL)
@@ -42,7 +42,7 @@ func IsOnline(checkURL string) bool {
 		return false
 	}
 
-	if isOnline(checkURL) {
+	if isOnline(checkURL, skipTlsVerify) {
 		return true
 	}
 
@@ -50,10 +50,14 @@ func IsOnline(checkURL string) bool {
 	return false
 }
 
-func isOnline(checkURL string) (ret bool) {
+func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
+	c := req.C().SetTimeout(3 * time.Second)
+	if skipTlsVerify {
+		c.EnableInsecureSkipVerify()
+	}
+
 	for i := 0; i < 3; i++ {
-		c := req.C().SetTimeout(3 * time.Second)
-		_, err := c.R().Head(checkURL)
+		_, err := c.R().Get(checkURL)
 		ret = nil == err
 		if ret {
 			break

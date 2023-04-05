@@ -563,18 +563,21 @@ func planSyncAfter(d time.Duration) {
 
 func isProviderOnline() (ret bool) {
 	checkURL := util.SiYuanSyncServer
+	skipTlsVerify := false
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 	case conf.ProviderS3:
 		checkURL = Conf.Sync.S3.Endpoint
+		skipTlsVerify = Conf.Sync.S3.SkipTlsVerify
 	case conf.ProviderWebDAV:
 		checkURL = Conf.Sync.WebDAV.Endpoint
+		skipTlsVerify = Conf.Sync.WebDAV.SkipTlsVerify
 	default:
 		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
 		return false
 	}
 
-	if ret = util.IsOnline(checkURL); !ret {
+	if ret = util.IsOnline(checkURL, skipTlsVerify); !ret {
 		util.PushErrMsg(Conf.Language(76), 5000)
 	}
 	return

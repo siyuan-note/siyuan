@@ -9,6 +9,7 @@ import {blockRender} from "../../protyle/markdown/blockRender";
 import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../../protyle/util/onGet";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {closePanel} from "./closePanel";
+import {showMessage} from "../../dialog/message";
 
 const forwardStack: IBackStack[] = [];
 
@@ -133,7 +134,11 @@ export const goBack = () => {
         return;
     }
     if (window.JSAndroid && window.siyuan.backStack.length < 1) {
-        window.JSAndroid.returnDesktop();
+        if (document.querySelector('#message [data-id="exitTip"]')) {
+            window.JSAndroid.returnDesktop();
+        } else {
+            showMessage(window.siyuan.languages.returnDesktop, 3000, "info", "exitTip");
+        }
         return;
     }
     if (window.siyuan.backStack.length < 1) {

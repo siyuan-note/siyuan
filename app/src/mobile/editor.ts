@@ -5,7 +5,6 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
-import {focusBlock} from "../protyle/util/selection";
 import {scrollCenter} from "../util/highlightById";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {setEditMode} from "../protyle/util/setEditMode";

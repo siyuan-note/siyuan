@@ -29,7 +29,7 @@ export class Background {
         this.element = document.createElement("div");
         this.element.className = "protyle-background";
         this.element.innerHTML = `<div class="protyle-background__img">
-    <img class="fn__none">
+    <img class="fn__none" style="isMobile()? "200px" : "30vh"">
     <div class="protyle-icons">
         <span class="protyle-icon protyle-icon--first b3-tooltips b3-tooltips__sw" style="position: relative" aria-label="${window.siyuan.languages.upload}"><input type="file" style="position: absolute;width: 22px;height: 100%;top: 0;left: 0;opacity: .001;overflow: hidden;cursor: pointer;"><svg><use xlink:href="#iconUpload"></use></svg></span>
         <span class="protyle-icon b3-tooltips b3-tooltips__sw" data-type="link" aria-label="${window.siyuan.languages.link}"><svg><use xlink:href="#iconLink"></use></svg></span>
@@ -389,7 +389,8 @@ export class Background {
         }
 
         if (img) {
-            this.element.style.minHeight = "30vh";
+            // 移动端键盘弹起和点击加号需保持滚动高度一致
+            this.element.style.minHeight = isMobile() ? "200px" : "30vh";
         } else if (icon) {
             this.element.style.minHeight = (this.tagsElement.clientHeight + 56) + "px";
         } else if (tags) {

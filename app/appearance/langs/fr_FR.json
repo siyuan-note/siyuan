@@ -39,6 +39,8 @@
   "aiTranslate": "Traduire",
   "aiExtractSummary": "Résumé de l'extrait",
   "aiTranslate_zh_CN": "Chinois",
+  "aiTranslate_zh_Hans": "Chinois simplifié",
+  "aiTranslate_zh_Hant": "chinois traditionnel",
   "aiTranslate_ja_JP": "Japonais",
   "aiTranslate_ko_KR": "Coréen",
   "aiTranslate_en_US": "Anglais",

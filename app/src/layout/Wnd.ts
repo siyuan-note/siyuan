@@ -223,7 +223,7 @@ export class Wnd {
                 if (wnd instanceof Wnd) {
                     JSONToCenter(tabData, wnd);
                     oldTab = wnd.children[wnd.children.length - 1];
-                    ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data:  tabData.id});
+                    ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data: tabData.id});
                     it.querySelector("li[data-clone='true']").remove();
                     wnd.switchTab(oldTab.headElement);
                 }
@@ -684,7 +684,9 @@ export class Wnd {
                     if (item.headElement.classList.contains("item--focus")) {
                         let latestHeadElement: HTMLElement;
                         Array.from(item.headElement.parentElement.children).forEach((headItem: HTMLElement) => {
-                            if (!headItem.isSameNode(item.headElement)) {
+                            if (!headItem.isSameNode(item.headElement) &&
+                                headItem.style.maxWidth !== "0px"   // 不对比已移除但还在动画效果中的元素 https://github.com/siyuan-note/siyuan/issues/7878
+                            ) {
                                 if (!latestHeadElement) {
                                     latestHeadElement = headItem;
                                 } else if (headItem.getAttribute("data-activetime") > latestHeadElement.getAttribute("data-activetime")) {

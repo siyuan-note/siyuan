@@ -148,12 +148,13 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     window.siyuan.menus.menu.remove();
     showUtil = true;
+
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    const keyboardHeight = (parseInt(toolbarElement.getAttribute("data-keyboardheight")) + 42) + "px";
+    window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight;
+    window.siyuan.mobile.editor.protyle.contentElement.scrollTop = oldScrollTop;
     setTimeout(() => {
-        const toolbarElement = document.getElementById("keyboardToolbar");
-        const keyboardHeight = (parseInt(toolbarElement.getAttribute("data-keyboardheight")) + 42) + "px";
         toolbarElement.style.height = keyboardHeight;
-        window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight;
-        window.siyuan.mobile.editor.protyle.contentElement.scrollTop = oldScrollTop;
     }, Constants.TIMEOUT_TRANSITION); // 防止抖动
     setTimeout(() => {
         showUtil = false;

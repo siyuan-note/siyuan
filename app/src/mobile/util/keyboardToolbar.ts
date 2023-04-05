@@ -146,16 +146,18 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 };
 
 const showKeyboardToolbarUtil = (oldScrollTop: number) => {
-    const toolbarElement = document.getElementById("keyboardToolbar");
-    const keyboardHeight = (parseInt(toolbarElement.getAttribute("data-keyboardheight")) + 42) + "px";
-    toolbarElement.style.height = keyboardHeight;
-    window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight;
-    window.siyuan.mobile.editor.protyle.contentElement.scrollTop = oldScrollTop;
     window.siyuan.menus.menu.remove();
     showUtil = true;
     setTimeout(() => {
+        const toolbarElement = document.getElementById("keyboardToolbar");
+        const keyboardHeight = (parseInt(toolbarElement.getAttribute("data-keyboardheight")) + 42) + "px";
+        toolbarElement.style.height = keyboardHeight;
+        window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight;
+        window.siyuan.mobile.editor.protyle.contentElement.scrollTop = oldScrollTop;
+    }, Constants.TIMEOUT_TRANSITION); // 防止抖动
+    setTimeout(() => {
         showUtil = false;
-    }, 1000);
+    }, 1000);   // 防止光标改变后斜杆菜单消失
 };
 
 const hideKeyboardToolbarUtil = () => {

@@ -19,6 +19,7 @@ package model
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -227,6 +228,29 @@ func CheckAuth(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	c.Next()
+}
+
+var timingAPIs = map[string]bool{
+	"/api/search": true,
+}
+
+func Timing(c *gin.Context) {
+
+	now := time.Now().UnixMilli()
+	c.Next()
+	elapsed := time.Now().UnixMilli() - now
+	//if 000 < elapsed {
+	logging.LogInfof("[%s] elapsed [%dms]", c.Request.RequestURI, elapsed)
+	//}
+}
+
+func Recover(c *gin.Context) {
+	defer func() {
+		logging.Recover()
+		c.Status(500)
+	}()
 
 	c.Next()
 }

@@ -416,9 +416,21 @@
     }
 
     const walk = (dir, files = []) => {
+        let dirFiles;
         const fs = require('fs')
+        try {
+            if (!fs.existsSync(dir)) {
+                console.log("dir [" + dir + "] not exists")
+                return files
+            }
+
+            dirFiles = fs.readdirSync(dir)
+        } catch (e) {
+            console.error("read dir [" + dir + "] failed: ", e)
+            return files
+        }
+
         const path = require('path')
-        const dirFiles = fs.readdirSync(dir)
         for (const f of dirFiles) {
             let stat = fs.lstatSync(dir + path.sep + f)
             if (stat.isSymbolicLink()) {

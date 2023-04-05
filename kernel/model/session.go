@@ -18,7 +18,10 @@ package model
 
 import (
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -227,6 +230,44 @@ func CheckAuth(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	c.Next()
+}
+
+var timingAPIs = map[string]int{
+	"/api/search/fullTextSearchBlock": 200, // Monitor the search performance and suggest solutions https://github.com/siyuan-note/siyuan/issues/7873
+}
+
+func Timing(c *gin.Context) {
+	p := c.Request.URL.Path
+	tip, ok := timingAPIs[p]
+	if !ok {
+		c.Next()
+		return
+	}
+
+	timing := 15 * 1000
+	if timingEnv := os.Getenv("SIYUAN_PERFORMANCE_TIMING"); "" != timingEnv {
+		val, err := strconv.Atoi(timingEnv)
+		if nil == err {
+			timing = val
+		}
+	}
+
+	now := time.Now().UnixMilli()
+	c.Next()
+	elapsed := int(time.Now().UnixMilli() - now)
+	if timing < elapsed {
+		logging.LogWarnf("[%s] elapsed [%dms]", c.Request.RequestURI, elapsed)
+		util.PushMsg(Conf.Language(tip), 7000)
+	}
+}
+
+func Recover(c *gin.Context) {
+	defer func() {
+		logging.Recover()
+		c.Status(500)
+	}()
 
 	c.Next()
 }

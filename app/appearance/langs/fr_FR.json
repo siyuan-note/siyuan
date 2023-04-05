@@ -1,5 +1,5 @@
 {
-  "returnDesktop": "Appuyez à nouveau pour quitter.",
+  "returnDesktop": "Appuyez à nouveau sur le bureau",
   "enterNew": "Entrez pour créer",
   "enterNewTip": "Aucun document trouvé, entrez pour créer un nouveau document.",
   "searchTip1": "pour naviguer",
@@ -1157,6 +1157,7 @@
     "196": "Ne définissez pas l'espace de travail sous le chemin d'un disque de synchronisation tiers, sinon les données seront endommagées (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)",
     "197": "Actuellement, l'éditeur est en mode lecture seule. Si vous devez modifier le contenu, veuillez passer en mode édition",
     "198": "Ceci n'est pas une archive data.zip valide. Si l'archive a été exportée depuis [Doc tree], veuillez l'importer depuis [Doc tree]",
-    "199": "Ceci n'est pas une archive .sy.zip valide. Si l'archive a été exportée depuis [Paramètres], veuillez l'importer depuis [Paramètres]"
+    "199": "Ceci n'est pas une archive .sy.zip valide. Si l'archive a été exportée depuis [Paramètres], veuillez l'importer depuis [Paramètres]",
+    "200": "Le temps de réponse de la recherche globale est lent. Il est recommandé d'ajuster [Paramètres - Recherche - Nombre de résultats de recherche affichés] à 64 ou à une valeur inférieure. Pour plus de suggestions, veuillez vous référer au chapitre sur l'optimisation des performances de la notice"
   }
 }

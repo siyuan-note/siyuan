@@ -169,7 +169,9 @@ const renderKeyboardToolbar = () => {
         if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
             return;
         }
-        hideKeyboardToolbarUtil();
+        if (!showUtil) {
+            hideKeyboardToolbarUtil();
+        }
         if (window.innerHeight + 200 > ((window.orientation === 90 || window.orientation === -90) ? screen.width : screen.height)) {
             hideKeyboardToolbar();
             return;

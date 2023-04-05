@@ -18,6 +18,8 @@ package model
 
 import (
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -232,18 +234,33 @@ func CheckAuth(c *gin.Context) {
 	c.Next()
 }
 
-var timingAPIs = map[string]bool{
-	"/api/search": true,
+var timingAPIs = map[string]int{
+	"/api/search/fullTextSearchBlock": 200, // Monitor the search performance and suggest solutions https://github.com/siyuan-note/siyuan/issues/7873
 }
 
 func Timing(c *gin.Context) {
+	p := c.Request.URL.Path
+	tip, ok := timingAPIs[p]
+	if !ok {
+		c.Next()
+		return
+	}
+
+	timing := 15 * 1000
+	if timingEnv := os.Getenv("SIYUAN_PERFORMANCE_TIMING"); "" != timingEnv {
+		val, err := strconv.Atoi(timingEnv)
+		if nil == err {
+			timing = val
+		}
+	}
 
 	now := time.Now().UnixMilli()
 	c.Next()
-	elapsed := time.Now().UnixMilli() - now
-	//if 000 < elapsed {
-	logging.LogInfof("[%s] elapsed [%dms]", c.Request.RequestURI, elapsed)
-	//}
+	elapsed := int(time.Now().UnixMilli() - now)
+	if timing < elapsed {
+		logging.LogWarnf("[%s] elapsed [%dms]", c.Request.RequestURI, elapsed)
+		util.PushMsg(Conf.Language(tip), 7000)
+	}
 }
 
 func Recover(c *gin.Context) {

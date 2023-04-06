@@ -55,11 +55,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                     action: inputElement.value,
                 }, (response) => {
                     dialog.destroy();
-                    let respContent = "";
-                    if (response.data && "" !== response.data) {
-                        respContent = "\n\n" + response.data;
-                    }
-                    fillContent(protyle, `${inputElement.value}${respContent}`, elements);
+                    fillContent(protyle, response.data || "", elements);
                 });
             });
         }

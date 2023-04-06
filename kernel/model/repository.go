@@ -594,7 +594,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
 			return
 		}
-		err = errors.New(fmt.Sprintf(Conf.Language(84), formatErrorMsg(err)))
+		err = errors.New(fmt.Sprintf(Conf.Language(84), formatRepoErrorMsg(err)))
 		return
 	}
 	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, humanize.Bytes(uint64(uploadBytes)))
@@ -827,7 +827,7 @@ func syncRepoDownload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo download failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
 			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
@@ -894,7 +894,7 @@ func syncRepoUpload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo upload failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
 			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
@@ -978,7 +978,7 @@ func bootSyncRepo() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
 			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
@@ -1053,7 +1053,7 @@ func syncRepo(exit, byHand bool) (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo failed: %s", err)
-		msg := fmt.Sprintf(Conf.Language(80), formatErrorMsg(err))
+		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		if errors.Is(err, dejavu.ErrCloudStorageSizeExceeded) {
 			msg = fmt.Sprintf(Conf.Language(43), humanize.Bytes(uint64(Conf.User.UserSiYuanRepoSize)))
 			if 2 == Conf.User.UserSiYuanSubscriptionPlan {
@@ -1267,7 +1267,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (err error) {
 	}
 
 	if nil != err {
-		msg := fmt.Sprintf(Conf.Language(140), formatErrorMsg(err))
+		msg := fmt.Sprintf(Conf.Language(140), formatRepoErrorMsg(err))
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 12000)
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)

@@ -260,9 +260,13 @@ The first sub-block under the list item is the block icon omitted. You can move 
 
 ### Do I need to pay for it?
 
-Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/en/pricing.html) requires annual subscription.
+All local features are free, even for commercial use.
 
-Currently, only users in mainland China are supported to subscribe, and users who are not in mainland China should not subscribe.
+[Cloud Service](https://b3log.org/siyuan/pricing.html) requires an annual subscription. At present, only users in mainland China are supported to subscribe, and users outside of mainland China are not allowed to subscribe.
+
+If you don't need a subscription but would like to support development, you are welcome to make a donation:
+
+* [B3log - Open Collective](https://opencollective.com/b3log)
 
 ## 🙏 Acknowledgement
 

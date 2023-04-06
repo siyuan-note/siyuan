@@ -518,7 +518,6 @@ func formatErrorMsg(err error) string {
 			msg = Conf.Language(28)
 		}
 	}
-	msg = msg + " v" + util.Ver
 	return msg
 }
 

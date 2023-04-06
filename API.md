@@ -27,6 +27,7 @@
     * [Append blocks](#Append-blocks)
     * [Update a block](#Update-a-block)
     * [Delete a block](#Delete-a-block)
+    * [Move a block](#Move-a-block)
     * [Get a block kramdown](#Get-a-block-kramdown)
 * [Attributes](#Attributes)
     * [Set block attributes](#Set-block-attributes)
@@ -692,6 +693,50 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
         ],
        "undoOperations": null
       }
+    ]
+  }
+  ```
+
+### Move a block
+
+* `/api/block/moveBlock`
+* Parameters
+
+  ```json
+  {
+    "id": "20230406180530-3o1rqkc",
+    "previousID": "20230406152734-if5kyx6",
+    "parentID": "20230404183855-woe52ko"
+  }
+  ```
+
+  * `id`: Block ID to move
+  * `previousID`: The ID of the previous block, used to anchor the insertion position
+  * `parentID`: The ID of the parent block, used to anchor the insertion position, `previousID` and `parentID` cannot be empty at the same time, if they exist at the same time, `previousID` will be used first
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+        {
+            "doOperations": [
+                {
+                    "action": "move",
+                    "data": null,
+                    "id": "20230406180530-3o1rqkc",
+                    "parentID": "20230404183855-woe52ko",
+                    "previousID": "20230406152734-if5kyx6",
+                    "nextID": "",
+                    "retData": null,
+                    "srcIDs": null,
+                    "name": "",
+                    "type": ""
+                }
+            ],
+            "undoOperations": null
+        }
     ]
   }
   ```

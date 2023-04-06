@@ -50,10 +50,14 @@ func getChangelog(c *gin.Context) {
 		return
 	}
 
-	changelogPath := filepath.Join(changelogsDir, "v"+util.Ver+".md")
+	changelogPath := filepath.Join(changelogsDir, "v"+util.Ver+model.Conf.Lang+".md")
+
 	if !gulu.File.IsExist(changelogPath) {
-		logging.LogWarnf("changelog not found: %s", changelogPath)
-		return
+		changelogPath = filepath.Join(changelogsDir, "v"+util.Ver+".md")
+		if !gulu.File.IsExist(changelogPath) {
+			logging.LogWarnf("changelog not found: %s", changelogPath)
+			return
+		}
 	}
 
 	contentData, err := os.ReadFile(changelogPath)

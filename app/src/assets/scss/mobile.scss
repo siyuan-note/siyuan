@@ -302,20 +302,23 @@
       opacity: 0.38;
     }
 
-    &.protyle-toolbar__item--current {
-      color: var(--b3-theme-primary);
+    &.protyle-toolbar__item--current svg {
+      background-color: var(--b3-list-hover);
     }
 
     svg {
       height: 16px;
       width: 16px;
       float: left;
-      padding: 12px;
+      padding: 6px;
+      margin: 6px;
+      border-radius: 4px;
 
       &.keyboard__svg--big {
         width: 30px;
-        padding: 4px;
+        padding: 2px 6px;
         height: 32px;
+        margin: 2px 6px;
       }
     }
   }

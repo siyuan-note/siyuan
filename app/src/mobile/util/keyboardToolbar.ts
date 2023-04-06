@@ -162,7 +162,7 @@ const showKeyboardToolbarUtil = (oldScrollTop: number) => {
 };
 
 const hideKeyboardToolbarUtil = () => {
-    const toolbarElement = document.getElementById("keyboardToolbar")
+    const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.style.height = "";
     window.siyuan.mobile.editor.protyle.element.style.marginBottom = "42px";
     toolbarElement.querySelector('.keyboard__action[data-type="add"]').classList.remove("protyle-toolbar__item--current");

@@ -50,9 +50,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
         hasClosestByAttribute(target, "data-type", "NodeTable");
     if (scrollElement) {
         if (scrollElement.classList.contains("table")) {
-            scrollElement = scrollElement.firstElementChild as HTMLElement
+            scrollElement = scrollElement.firstElementChild as HTMLElement;
         } else if (scrollElement.classList.contains("code-block")) {
-            scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement
+            scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
         }
         if ((xDiff <= 0 && scrollElement.scrollLeft > 0) ||
             (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
@@ -196,9 +196,9 @@ export const handleTouchMove = (event: TouchEvent) => {
             hasClosestByAttribute(target, "data-type", "NodeTable");
         if (scrollElement) {
             if (scrollElement.classList.contains("table")) {
-                scrollElement = scrollElement.firstElementChild as HTMLElement
+                scrollElement = scrollElement.firstElementChild as HTMLElement;
             } else if (scrollElement.classList.contains("code-block")) {
-                scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement
+                scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
             }
             if ((xDiff < 0 && scrollElement.scrollLeft > 0) ||
                 (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {

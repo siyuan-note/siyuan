@@ -12,8 +12,8 @@ export const openChangelog = () => {
         const dialog = new Dialog({
             title: `v${Constants.SIYUAN_VERSION} ${window.siyuan.languages.update}`,
             width: isMobile() ? "80vw" : "520px",
-            content: `<div class="b3-dialog__content b3-typography b3-typography--default">${response.data.html}</div>`
+            content: `<div style="overflow:auto;height: ${isMobile() ? "80" : "70"}vh;" class="b3-dialog__content b3-typography b3-typography--default">${response.data.html}</div>`
         });
         highlightRender(dialog.element);
     });
-}
+};

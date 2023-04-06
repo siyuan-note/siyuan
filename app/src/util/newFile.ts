@@ -12,8 +12,8 @@ import {Constants} from "../constants";
 import {validateName} from "../editor/rename";
 
 export const getNewFilePath = (useSavePath: boolean) => {
-    let notebookId = ""
-    let currentPath = ""
+    let notebookId = "";
+    let currentPath = "";
     /// #if !MOBILE
     getAllModels().editor.find((item) => {
         const currentElement = item.parent.headElement;
@@ -57,8 +57,8 @@ export const getNewFilePath = (useSavePath: boolean) => {
             }
         });
     }
-    return {notebookId, currentPath}
-}
+    return {notebookId, currentPath};
+};
 
 export const newFile = (notebookId?: string, currentPath?: string, paths?: string[], useSavePath = false) => {
     if (getOpenNotebookCount() === 0) {
@@ -66,7 +66,7 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
         return;
     }
     if (!notebookId) {
-        const resultData = getNewFilePath(useSavePath)
+        const resultData = getNewFilePath(useSavePath);
         notebookId = resultData.notebookId;
         currentPath = resultData.currentPath;
     }

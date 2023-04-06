@@ -98,7 +98,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
 };
 
 const newEmptyFileByInput = (value: string) => {
-    const newData = getNewFilePath(true)
+    const newData = getNewFilePath(true);
     fetchPost("/api/filetree/getHPathByPath", {
         notebook: newData.notebookId,
         path: newData.currentPath,
@@ -552,7 +552,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
                 } else if (target.getAttribute("data-type") === "search-new") {
-                    newEmptyFileByInput(searchInputElement.value)
+                    newEmptyFileByInput(searchInputElement.value);
                 } else if (target.getAttribute("data-type") === "search-item") {
                     if (event.detail === 1) {
                         clickTimeout = window.setTimeout(() => {
@@ -635,7 +635,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         if (!currentList || event.isComposing) {
             return;
         }
-        const focusIsNew = currentList.getAttribute("data-type") === "search-new"
+        const focusIsNew = currentList.getAttribute("data-type") === "search-new";
         if (focusIsNew && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
             newEmptyFileByInput(searchInputElement.value);
             event.preventDefault();
@@ -644,7 +644,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         }
         if (event.key === "Enter") {
             if (focusIsNew) {
-                newEmptyFileByInput(searchInputElement.value)
+                newEmptyFileByInput(searchInputElement.value);
             } else {
                 const id = currentList.getAttribute("data-node-id");
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
@@ -1334,7 +1334,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
             if (currentList.nextElementSibling || currentList.previousElementSibling) {
                 currentList.remove();
             } else {
-                const nextDocElement = currentList.parentElement.nextElementSibling || currentList.parentElement.previousElementSibling.previousElementSibling?.previousElementSibling
+                const nextDocElement = currentList.parentElement.nextElementSibling || currentList.parentElement.previousElementSibling.previousElementSibling?.previousElementSibling;
                 if (nextDocElement) {
                     nextDocElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
                     nextDocElement.nextElementSibling.classList.remove("fn__none");

@@ -365,7 +365,7 @@ export const globalShortcut = () => {
                 const currentType = currentLiElement.getAttribute("data-type");
                 if (currentType) {
                     if (currentType === "riffCard") {
-                        openCard()
+                        openCard();
                     } else {
                         getDockByType(currentType as TDockType).toggleModel(currentType as TDockType, true);
                     }
@@ -931,7 +931,7 @@ const dialogArrow = (element: HTMLElement, event: KeyboardEvent) => {
             const currentType = currentLiElement.getAttribute("data-type");
             if (currentType) {
                 if (currentType === "riffCard") {
-                    openCard()
+                    openCard();
                 } else {
                     getDockByType(currentType as TDockType).toggleModel(currentType as TDockType, true);
                 }

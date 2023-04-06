@@ -12,7 +12,7 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         if (protyle.options.render.breadcrumb) {
             protyle.breadcrumb?.element.classList.add("fn__none");
             if (protyle.block.showAll) {
-                const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]')
+                const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
                 exitFocusElement.classList.add("fn__none");
                 exitFocusElement.nextElementSibling.classList.add("fn__none");
             }
@@ -32,7 +32,7 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         if (protyle.options.render.breadcrumb) {
             protyle.breadcrumb?.element.classList.remove("fn__none");
             if (protyle.block.showAll) {
-                const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]')
+                const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
                 exitFocusElement.classList.remove("fn__none");
                 exitFocusElement.nextElementSibling.classList.remove("fn__none");
             }

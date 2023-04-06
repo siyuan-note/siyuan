@@ -1,6 +1,6 @@
 import {MenuItem} from "../menus/Menu";
 import {fetchPost} from "../util/fetch";
-import {focusByRange, setLastNodeRange} from "../protyle/util/selection";
+import {setLastNodeRange} from "../protyle/util/selection";
 import {insertHTML} from "../protyle/util/insertHTML";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";

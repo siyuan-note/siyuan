@@ -1,4 +1,3 @@
-import {escapeHtml} from "../util/escape";
 import {getNotebookName, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";

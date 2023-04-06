@@ -39,6 +39,8 @@
   "aiTranslate": "翻譯",
   "aiExtractSummary": "提取摘要",
   "aiTranslate_zh_CN": "中文",
+  "aiTranslate_zh_Hans": "簡體中文",
+  "aiTranslate_zh_Hant": "繁體中文",
   "aiTranslate_ja_JP": "日文",
   "aiTranslate_ko_KR": "韓文",
   "aiTranslate_en_US": "英文",

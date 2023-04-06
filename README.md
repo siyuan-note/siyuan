@@ -132,6 +132,17 @@ Use NGINX reverse proxy to hide port 6806, please note:
 
 * Configure WebSocket reverse proxy `/ws`
 
+#### Note
+
+* Be sure to confirm the correctness of the mounted volume, otherwise the data will be lost after the container is deleted
+* Do not use URL rewriting for redirection, otherwise there may be problems with authentication, it is recommended to configure a reverse proxy
+
+#### Limitations
+
+* Does not support desktop and mobile application connections, only supports use on browsers
+* Export to PDF, HTML and Word formats is not supported
+* Import Markdown file is not supported
+
 </details>
 
 ### Installation Package

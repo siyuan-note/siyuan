@@ -38,7 +38,6 @@ func getChangelog(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	data := map[string]interface{}{"show": false, "html": ""}
-
 	ret.Data = data
 
 	changelogsDir := filepath.Join(util.WorkingDir, "changelogs")
@@ -54,7 +53,7 @@ func getChangelog(c *gin.Context) {
 	if !gulu.File.IsExist(changelogPath) {
 		changelogPath = filepath.Join(changelogsDir, "v"+util.Ver+".md")
 		if !gulu.File.IsExist(changelogPath) {
-			logging.LogWarnf("changelog not found: %s", changelogPath)
+			logging.LogErrorf("changelog not found: %s", changelogPath)
 			return
 		}
 	}

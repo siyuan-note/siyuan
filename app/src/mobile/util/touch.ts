@@ -31,6 +31,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
 
     const target = event.target as HTMLElement;
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
+        target.tagName === "AUDIO" ||
         hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByAttribute(target, "id", "commonMenu") ||
@@ -152,6 +153,7 @@ let previousClientX: number;
 export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY ||
+        target.tagName === "AUDIO" ||
         hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByAttribute(target, "id", "commonMenu") ||

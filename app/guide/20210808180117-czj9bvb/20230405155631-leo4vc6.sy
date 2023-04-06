@@ -6,7 +6,7 @@
 		"icon": "1f680",
 		"id": "20230405155631-leo4vc6",
 		"title": "性能优化",
-		"updated": "20230405172057"
+		"updated": "20230406155719"
 	},
 	"Children": [
 		{
@@ -523,7 +523,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405171539-llfg8mm",
-				"updated": "20230405171758"
+				"updated": "20230406155719"
 			},
 			"Children": [
 				{
@@ -535,7 +535,7 @@
 					},
 					"Properties": {
 						"id": "20230405170725-q5rqhcg",
-						"updated": "20230405171658"
+						"updated": "20230406155719"
 					},
 					"Children": [
 						{
@@ -543,7 +543,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405170725-tys4mfj",
-								"updated": "20230405171658"
+								"updated": "20230406155719"
 							},
 							"Children": [
 								{
@@ -585,7 +585,44 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，特别是对于公式块、代码块或图表块较多的使用场景"
+									"Data": "​​，特别是对于公式块、代码块或图表块较多的使用场景"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406155101-uk1h843",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406155101-uk1h843",
+						"updated": "20230406155342"
+					},
+					"Children": [
+						{
+							"ID": "20230406155101-n6ptkcm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406155101-n6ptkcm",
+								"updated": "20230406155342"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "聚焦"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 减少元素从而提升编辑器性能"
 								}
 							]
 						}

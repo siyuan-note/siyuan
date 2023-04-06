@@ -142,7 +142,6 @@ func PushMsg(msg string, timeout int) (msgId string) {
 
 func PushErrMsg(msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
-	msg += msg + " v" + Ver // Add version info at the end of message in all error notifications https://github.com/siyuan-note/siyuan/issues/7899
 	BroadcastByType("main", "msg", -1, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
 	return
 }

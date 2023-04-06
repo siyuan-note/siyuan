@@ -21,6 +21,7 @@ import {escapeHtml} from "../util/escape";
 import {viewCards} from "../card/viewCards";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -133,7 +134,11 @@ export const workspaceMenu = (rect: DOMRect) => {
                     }
                     const hadName = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: ISaveLayout) => {
                         if (item.name === value) {
-                            showMessage(window.siyuan.languages.duplicate);
+                            saveDialog.destroy();
+                            confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, () => {
+                                item.layout = exportLayout(false, undefined, true);
+                                setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
+                            });
                             return true;
                         }
                     });
@@ -152,7 +157,7 @@ export const workspaceMenu = (rect: DOMRect) => {
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
                 iconHTML: Constants.ZWSP,
-                action:"iconCloseRound",
+                action: "iconCloseRound",
                 label: item.name,
                 bind(menuElement) {
                     menuElement.addEventListener("click", (event) => {

@@ -164,6 +164,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/appendBlock", model.CheckAuth, model.CheckReadonly, appendBlock)
 	ginServer.Handle("POST", "/api/block/updateBlock", model.CheckAuth, model.CheckReadonly, updateBlock)
 	ginServer.Handle("POST", "/api/block/deleteBlock", model.CheckAuth, model.CheckReadonly, deleteBlock)
+	ginServer.Handle("POST", "/api/block/moveBlock", model.CheckAuth, model.CheckReadonly, moveBlock)
 	ginServer.Handle("POST", "/api/block/setBlockReminder", model.CheckAuth, model.CheckReadonly, setBlockReminder)
 	ginServer.Handle("POST", "/api/block/getHeadingLevelTransaction", model.CheckAuth, getHeadingLevelTransaction)
 	ginServer.Handle("POST", "/api/block/getHeadingDeleteTransaction", model.CheckAuth, getHeadingDeleteTransaction)

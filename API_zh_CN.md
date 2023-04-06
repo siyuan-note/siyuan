@@ -27,6 +27,7 @@
     * [插入后置子块](#插入后置子块)
     * [更新块](#更新块)
     * [删除块](#删除块)
+    * [移动块](#移动块)
     * [获取块 kramdown 源码](#获取块-kramdown-源码)
 * [属性](#属性)
     * [设置块属性](#设置块属性)
@@ -686,6 +687,50 @@
         ],
        "undoOperations": null
       }
+    ]
+  }
+  ```
+
+### 移动块
+
+* `/api/block/moveBlock`
+* 参数
+
+  ```json
+  {
+    "id": "20230406180530-3o1rqkc",
+    "previousID": "20230406152734-if5kyx6",
+    "parentID": "20230404183855-woe52ko"
+  }
+  ```
+
+    * `id`：待移动块 ID
+    * `previousID`：前一个块的 ID，用于锚定插入位置
+    * `parentID`：父块的 ID，用于锚定插入位置，`previousID` 和 `parentID` 不能同时为空，同时存在的话优先使用 `previousID`
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+        {
+            "doOperations": [
+                {
+                    "action": "move",
+                    "data": null,
+                    "id": "20230406180530-3o1rqkc",
+                    "parentID": "20230404183855-woe52ko",
+                    "previousID": "20230406152734-if5kyx6",
+                    "nextID": "",
+                    "retData": null,
+                    "srcIDs": null,
+                    "name": "",
+                    "type": ""
+                }
+            ],
+            "undoOperations": null
+        }
     ]
   }
   ```

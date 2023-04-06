@@ -29,6 +29,54 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func moveBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	var parentID, previousID string
+	if nil != arg["parentID"] {
+		parentID = arg["parentID"].(string)
+		if util.InvalidIDPattern(parentID, ret) {
+			return
+		}
+	}
+	if nil != arg["previousID"] {
+		previousID = arg["previousID"].(string)
+		if util.InvalidIDPattern(previousID, ret) {
+			return
+		}
+	}
+
+	transactions := []*model.Transaction{
+		{
+			DoOperations: []*model.Operation{
+				{
+					Action:     "move",
+					ID:         id,
+					PreviousID: previousID,
+					ParentID:   parentID,
+				},
+			},
+		},
+	}
+
+	model.PerformTransactions(&transactions)
+	model.WaitForWritingFiles()
+
+	ret.Data = transactions
+	broadcastTransactions(transactions)
+}
+
 func appendBlock(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -4,8 +4,9 @@ import {isMobile} from "../util/functions";
 import {escapeHtml} from "../util/escape";
 import {writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
+import {openModel} from "../mobile/menu/model";
 
-export const onGetnotebookconf = (data: {
+declare interface INotebookConf {
     name: string,
     box: string,
     conf: {
@@ -14,7 +15,9 @@ export const onGetnotebookconf = (data: {
         dailyNoteSavePath: string
         dailyNoteTemplatePath: string
     }
-}) => {
+}
+
+export const onGetnotebookconf = (data: INotebookConf) => {
     const titleHTML = `<div class="fn__flex">${escapeHtml(data.name)}
 <div class="fn__space"></div>
 <button class="b3-button b3-button--small">${window.siyuan.languages.copy} ID</button></div>`;
@@ -46,11 +49,14 @@ export const onGetnotebookconf = (data: {
 </div></div>`;
     let contentElement;
     if (isMobile()) {
-        contentElement = document.getElementById("model");
-        contentElement.style.top = "0";
-        contentElement.querySelector(".toolbar__icon").innerHTML = '<use xlink:href="#iconSettings"></use>';
-        contentElement.querySelector(".toolbar__text").innerHTML = titleHTML;
-        contentElement.querySelector("#modelMain").innerHTML = contentHTML;
+        openModel({
+            title: titleHTML,
+            icon: "iconSettings",
+            html: `<div>${contentHTML}</div>`,
+            bindEvent() {
+                bindSettingEvent(document.querySelector("#model"), data);
+            }
+        })
     } else {
         const dialog = new Dialog({
             width: "80vw",
@@ -58,7 +64,11 @@ export const onGetnotebookconf = (data: {
             content: contentHTML
         });
         contentElement = dialog.element;
+        bindSettingEvent(contentElement, data);
     }
+};
+
+const bindSettingEvent = (contentElement: Element, data: INotebookConf) => {
     contentElement.querySelector(".b3-button--small").addEventListener("click", () => {
         writeText(data.box);
         showMessage(window.siyuan.languages.copied);
@@ -84,4 +94,4 @@ export const onGetnotebookconf = (data: {
             });
         });
     });
-};
+}

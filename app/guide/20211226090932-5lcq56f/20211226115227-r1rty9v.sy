@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230112002617"
+		"updated": "20230406111957"
 	},
 	"Children": [
 		{
@@ -1976,40 +1976,91 @@
 			]
 		},
 		{
-			"ID": "20211226115356-flfljlv",
+			"ID": "20230406111448-cuahrpa",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226115356-flfljlv",
-				"updated": "20211225214824"
+				"id": "20230406111448-cuahrpa",
+				"updated": "20230406111448"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "本地功能完全免費使用，"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/pricing.html",
-					"TextMarkTextContent": "雲端服務"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "需要年付訂閱。"
+					"Data": "所有本地功能都是免費的，即使是在商業環境下使用。"
 				}
 			]
 		},
 		{
-			"ID": "20211226115356-zk19o1w",
+			"ID": "20230406111448-rqncida",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226115356-zk19o1w",
-				"updated": "20221112210745"
+				"id": "20230406111448-rqncida",
+				"updated": "20230406111448"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/pricing.html",
+					"TextMarkTextContent": "雲端服務"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "需要年付訂閱。目前僅支持中國大陸地區用戶訂閱，非中國大陸地區用戶請勿訂閱。"
+				}
+			]
+		},
+		{
+			"ID": "20230406111957-2x6i7jd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230406111957-2x6i7jd",
+				"updated": "20230406111957"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "目前僅支持中國大陸地區用戶訂閱，非中國大陸地區用戶請勿訂閱。"
+					"Data": "如果你沒有訂閱需求但又想支持開發，歡迎進行捐贈："
+				}
+			]
+		},
+		{
+			"ID": "20230406111957-oashpwx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230406111957-oashpwx",
+				"updated": "20230406111957"
+			},
+			"Children": [
+				{
+					"ID": "20230406111957-9ufzoez",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406111957-9ufzoez",
+						"updated": "20230406111957"
+					},
+					"Children": [
+						{
+							"ID": "20230406111957-veoua0c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406111957-veoua0c",
+								"updated": "20230406111957"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://opencollective.com/b3log",
+									"TextMarkTextContent": "B3log - Open Collective"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

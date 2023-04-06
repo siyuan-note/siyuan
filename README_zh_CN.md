@@ -271,9 +271,14 @@
 
 ### 使用需要付费吗？
 
-本地功能完全免费使用，[云端服务](https://b3log.org/siyuan/pricing.html)需要年付订阅。
+所有本地功能都是免费的，即使是在商业环境下使用。
 
-目前仅支持中国大陆地区用户订阅，非中国大陆地区用户请勿订阅。
+[云端服务](https://b3log.org/siyuan/pricing.html)需要年付订阅。目前仅支持中国大陆地区用户订阅，非中国大陆地区用户请勿订阅。
+
+如果你没有订阅需求但又想支持开发，欢迎进行捐赠：
+
+* [靠爱发电 - 链滴](https://ld246.com/sponsor)
+* [B3log - Open Collective](https://opencollective.com/b3log)
 
 ## 🙏 鸣谢
 

@@ -288,7 +288,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	data := filepath.Join(util.WorkspaceDir, "data")
 	if err = filelock.RoboCopy(data, exportFolder); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
-		err = errors.New(fmt.Sprintf(Conf.Language(14), formatErrorMsg(err)))
+		err = errors.New(fmt.Sprintf(Conf.Language(14), err.Error()))
 		return
 	}
 

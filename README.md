@@ -223,7 +223,7 @@ For more details, please refer to [Development Guide](https://github.com/siyuan-
 * If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
 * If it is installed by manual installation package, please download the installation package again to install
 
-You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or by following [GitHub Releases](https ://github.com/siyuan-note/siyuan/releases) or [SiYuan Announcement](https://ld246.com/tag/siyuan-announcement) to get the new version.
+You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or by following [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) or [SiYuan Announcement](https://ld246.com/tag/siyuan-announcement) to get the new version.
 
 **Note**: Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory
 
@@ -260,9 +260,13 @@ The first sub-block under the list item is the block icon omitted. You can move 
 
 ### Do I need to pay for it?
 
-Local functions are completely free to use, [Cloud services](https://b3log.org/siyuan/en/pricing.html) requires annual subscription.
+All local features are free, even for commercial use.
 
-Currently, only users in mainland China are supported to subscribe, and users who are not in mainland China should not subscribe.
+[Cloud Service](https://b3log.org/siyuan/pricing.html) requires an annual subscription. At present, only users in mainland China are supported to subscribe, and users outside of mainland China are not allowed to subscribe.
+
+If you don't need a subscription but would like to support development, you are welcome to make a donation:
+
+* [B3log - Open Collective](https://opencollective.com/b3log)
 
 ## 🙏 Acknowledgement
 

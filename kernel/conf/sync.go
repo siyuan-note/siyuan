@@ -63,6 +63,14 @@ const (
 	ProviderWebDAV = 3 // ProviderWebDAV 为 WebDAV 协议提供的云端存储服务
 )
 
-func NewSyncProviderCheckURL() string {
-	return "https://www.baidu.com"
+func ProviderToStr(provider int) string {
+	switch provider {
+	case ProviderSiYuan:
+		return "SiYuan"
+	case ProviderS3:
+		return "S3"
+	case ProviderWebDAV:
+		return "WebDAV"
+	}
+	return "Unknown"
 }

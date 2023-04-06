@@ -10,19 +10,21 @@ import {onWindowsMsg} from "../window/onWindowsMsg";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
-import {globalShortcut} from "./globalShortcut";
-import {fetchPost, fetchSyncPost} from "./fetch";
-import {addGA, initAssets, setInlineStyle} from "./assets";
+import {globalShortcut} from "../boot/globalShortcut";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {addGA, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
-import {getSearch, isWindow} from "./functions";
+import {getSearch, isWindow} from "../util/functions";
 import {initStatus} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {setTabPosition} from "../window/setHeader";
 import {initBar} from "../layout/topBar";
+import {setProxy} from "../config/util/setProxy";
+import {openChangelog} from "./openChangelog";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -81,23 +83,6 @@ const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edito
     return match;
 };
 
-export const setProxy = () => {
-    /// #if !BROWSER
-    if ("" === window.siyuan.config.system.networkProxy.scheme) {
-        console.log("network proxy [system]");
-        return;
-    }
-
-    const session = getCurrentWindow().webContents.session;
-    session.closeAllConnections().then(() => {
-        const proxyURL = `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`;
-        session.setProxy({proxyRules: proxyURL}).then(
-            () => console.log("network proxy [" + proxyURL + "]"),
-        );
-    });
-    /// #endif
-};
-
 export const onGetConfig = (isStart: boolean) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
@@ -149,6 +134,7 @@ export const onGetConfig = (isStart: boolean) => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
             JSONToLayout(isStart);
+            openChangelog();
             if (window.JSAndroid) {
                 window.openFileByURL(window.JSAndroid.getBlockURL());
             }
@@ -157,6 +143,7 @@ export const onGetConfig = (isStart: boolean) => {
         }
     });
     initBar();
+    setProxy();
     initStatus();
     initWindow();
     appearance.onSetappearance(window.siyuan.config.appearance);

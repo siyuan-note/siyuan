@@ -9,7 +9,6 @@ import {MenuItem} from "../menus/Menu";
 import {setMode} from "../util/assets";
 import {openSetting} from "../config";
 import {openSearch} from "../search/spread";
-import {setProxy} from "../util/onGetConfig";
 
 export const updateEditModeElement = () => {
     const target = document.querySelector("#barReadonly");
@@ -23,6 +22,7 @@ export const updateEditModeElement = () => {
         target.querySelector("use").setAttribute("xlink:href", "#iconEdit");
     }
 };
+
 export const initBar = () => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `
@@ -126,5 +126,4 @@ export const initBar = () => {
             target = target.parentElement;
         }
     });
-    setProxy();
 };

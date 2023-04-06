@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {webFrame} from "electron";
-import {globalShortcut} from "../util/globalShortcut";
+import {globalShortcut} from "../boot/globalShortcut";
 import {fetchPost} from "../util/fetch";
 import {JSONToCenter, resizeTabs} from "../layout/util";
 import {initStatus} from "../layout/status";
@@ -8,7 +8,7 @@ import {appearance} from "../config/appearance";
 import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
-import {initWindow} from "../util/onGetConfig";
+import {initWindow} from "../boot/onGetConfig";
 
 export const init = () => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);

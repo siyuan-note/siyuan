@@ -1,7 +1,7 @@
 import {Constants} from "./constants";
 import {Menus} from "./menus";
 import {Model} from "./layout/Model";
-import {onGetConfig} from "./util/onGetConfig";
+import {onGetConfig} from "./boot/onGetConfig";
 import "./assets/scss/base.scss";
 import {initBlockPopover} from "./block/popover";
 import {account} from "./config/account";

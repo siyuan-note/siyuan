@@ -11,7 +11,7 @@ import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {setProxy} from "../util/onGetConfig";
+import { setProxy } from "./util/setProxy";
 
 export const about = {
     element: undefined as Element,

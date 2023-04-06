@@ -232,6 +232,8 @@ export const handleTouchMove = (event: TouchEvent) => {
             document.getElementById("menu").style.right = -windowWidth + xDiff + "px";
             transformMask((windowWidth - xDiff) / windowWidth);
         }
+        activeBlur();
+        hideKeyboardToolbar();
     }
 };
 

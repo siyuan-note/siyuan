@@ -6,7 +6,7 @@
 		"id": "20201227201128-m1wrouw",
 		"title": "Docker hosting",
 		"type": "doc",
-		"updated": "20220521231639"
+		"updated": "20230406105617"
 	},
 	"Children": [
 		{
@@ -686,6 +686,203 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "/ws"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-bzg0oxo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230406105311-bzg0oxo",
+				"updated": "20230406105313"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-ryrh0n4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230406105311-ryrh0n4",
+				"updated": "20230406105311"
+			},
+			"Children": [
+				{
+					"ID": "20230406105311-a36930z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-a36930z",
+						"updated": "20230406105311"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-z04t407",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-z04t407",
+								"updated": "20230406105311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Be sure to confirm the correctness of the mounted volume, otherwise the data will be lost after the container is deleted"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406105311-ejgppdg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-ejgppdg",
+						"updated": "20230406105311"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-mem3ai2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-mem3ai2",
+								"updated": "20230406105311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not use URL rewriting for redirection, otherwise there may be problems with authentication, it is recommended to configure a reverse proxy"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-sq5f3qj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230406105311-sq5f3qj",
+				"updated": "20230406105334"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Limitations"
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-jvtmuhi",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230406105311-jvtmuhi",
+				"updated": "20230406105617"
+			},
+			"Children": [
+				{
+					"ID": "20230406105311-qz00ob2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-qz00ob2",
+						"updated": "20230406105311"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-gvr6z7v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-gvr6z7v",
+								"updated": "20230406105311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Does not support desktop and mobile application connections, only supports use on browsers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406105311-rz3umi0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-rz3umi0",
+						"updated": "20230406105311"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-bhdrf8a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-bhdrf8a",
+								"updated": "20230406105311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Export to PDF, HTML and Word formats is not supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406105311-3rrhrq2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-3rrhrq2",
+						"updated": "20230406105617"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-w0rmhgz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-w0rmhgz",
+								"updated": "20230406105617"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Import Markdown file is not supported"
 								}
 							]
 						}

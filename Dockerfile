@@ -14,6 +14,7 @@ RUN apk add --no-cache gcc musl-dev git && \
     mv /go/src/github.com/siyuan-note/siyuan/app/appearance/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/stage/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/guide/ /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/app/changelogs/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/kernel/kernel /opt/siyuan/ && \
     find /opt/siyuan/ -name .git | xargs rm -rf
 

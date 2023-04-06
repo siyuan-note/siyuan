@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/88250/lute"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -31,6 +32,43 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func getChangelog(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	data := map[string]interface{}{"show": false, "html": ""}
+
+	ret.Data = data
+
+	changelogsDir := filepath.Join(util.WorkingDir, "changelogs")
+	if !gulu.File.IsDir(changelogsDir) {
+		return
+	}
+
+	if !model.Conf.ShowChangelog {
+		return
+	}
+
+	changelogPath := filepath.Join(changelogsDir, "v"+util.Ver+".md")
+	if !gulu.File.IsExist(changelogPath) {
+		logging.LogWarnf("changelog not found: %s", changelogPath)
+		return
+	}
+
+	contentData, err := os.ReadFile(changelogPath)
+	if nil != err {
+		logging.LogErrorf("read changelog failed: %s", err)
+		return
+	}
+
+	luteEngine := lute.New()
+	htmlContent := luteEngine.Markdown("", contentData)
+
+	data["show"] = true
+	data["html"] = htmlContent
+	ret.Data = data
+}
 
 func getEmojiConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

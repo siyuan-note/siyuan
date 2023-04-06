@@ -264,6 +264,7 @@ const renderPDF = (id: string) => {
               width = isLandscape ? 1632 : 1056
               break;
         }
+        width = width / parseFloat(document.querySelector("#scale").value);
         previewElement.style.width = width + "px";
         width = width - parseFloat(previewElement.style.paddingLeft) * 96 * 2;
         // 为保持代码块宽度一致，全部都进行宽度设定 https://github.com/siyuan-note/siyuan/issues/7692 
@@ -430,6 +431,7 @@ const renderPDF = (id: string) => {
             const scale = actionElement.querySelector("#scale").value;
             actionElement.querySelector("#scaleTip").innerText = scale;
             previewElement.style.zoom = scale;
+            fixBlockWidth();
         })
         actionElement.querySelector("#pageSize").addEventListener('change', () => {
             fixBlockWidth();

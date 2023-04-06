@@ -14,6 +14,9 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {escapeAttr, escapeHtml} from "../util/escape";
 
 export const fillContent = (protyle: IProtyle, data: string, elements: Element[]) => {
+    if (!data) {
+        return;
+    }
     setLastNodeRange(getContenteditableElement(elements[elements.length - 1]), protyle.toolbar.range);
     protyle.toolbar.range.collapse(true);
     insertHTML(data, protyle, true, true);
@@ -55,7 +58,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                     action: inputElement.value,
                 }, (response) => {
                     dialog.destroy();
-                    fillContent(protyle, response.data || "", elements);
+                    fillContent(protyle, response.data, elements);
                 });
             });
         }
@@ -119,11 +122,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                             ids,
                             action: item.memo,
                         }, (response) => {
-                            let respContent = "";
-                            if (response.data && "" !== response.data) {
-                                respContent = "\n\n" + response.data;
-                            }
-                            fillContent(protyle, `${item.memo}${respContent}`, elements);
+                            fillContent(protyle, response.data, elements);
                         });
                         window.siyuan.menus.menu.remove();
                     }

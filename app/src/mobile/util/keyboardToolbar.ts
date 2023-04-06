@@ -193,12 +193,14 @@ const renderKeyboardToolbar = () => {
         }
 
         const selectText = range.toString();
-        if (!selectText && dynamicElements[0].classList.contains("fn__none") && dynamicElements[1].classList.contains("fn__none")) {
-            dynamicElements[0].classList.remove("fn__none");
-        } else if (selectText) {
+        if (selectText || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current")) {
             dynamicElements[0].classList.add("fn__none");
             dynamicElements[1].classList.remove("fn__none");
+        } else {
+            dynamicElements[0].classList.remove("fn__none");
+            dynamicElements[1].classList.add("fn__none");
         }
+
         const protyle = window.siyuan.mobile.editor.protyle;
         if (!dynamicElements[0].classList.contains("fn__none")) {
             if (protyle.undo.undoStack.length === 0) {
@@ -225,6 +227,7 @@ const renderKeyboardToolbar = () => {
                 }
             }
         }
+
         if (!dynamicElements[1].classList.contains("fn__none")) {
             dynamicElements[1].querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
                 item.classList.remove("protyle-toolbar__item--current");
@@ -392,6 +395,7 @@ export const initKeyboardToolbar = () => {
         }
         // inline element
         if (type === "goback") {
+            toolbarElement.querySelector('.keyboard__action[data-type="goinline"]').classList.remove("protyle-toolbar__item--current");
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[0].classList.remove("fn__none");
             dynamicElements[1].classList.add("fn__none");
@@ -402,6 +406,7 @@ export const initKeyboardToolbar = () => {
             }, 1000);
             return;
         } else if (type === "goinline") {
+            buttonElement.classList.add("protyle-toolbar__item--current");
             const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
             dynamicElements[1].classList.remove("fn__none");
             dynamicElements[0].classList.add("fn__none");

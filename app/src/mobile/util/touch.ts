@@ -17,7 +17,7 @@ const popSide = (render = true) => {
     } else {
         hideKeyboardToolbar();
         activeBlur();
-        document.getElementById("sidebar").style.left = "0";
+        document.getElementById("sidebar").style.transform = "translateX(0)";
     }
 };
 
@@ -39,6 +39,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
     ) {
         return;
     }
+
+    window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "";
 
     // 有些事件不经过 touchstart 和 touchmove，因此需设置为 null 不再继续执行
     clientX = null;
@@ -208,10 +210,10 @@ export const handleTouchMove = (event: TouchEvent) => {
         const menuElement = hasClosestByAttribute(target, "id", "menu");
         if (menuElement) {
             if (xDiff < 0) {
-                menuElement.style.right = xDiff + "px";
+                menuElement.style.transform = `translateX(${-xDiff}px)`;
                 transformMask(-xDiff / windowWidth);
             } else {
-                menuElement.style.right = "0px";
+                menuElement.style.transform = "translateX(0)";
                 transformMask(0);
             }
             return;
@@ -219,23 +221,24 @@ export const handleTouchMove = (event: TouchEvent) => {
         const sideElement = hasClosestByAttribute(target, "id", "sidebar");
         if (sideElement) {
             if (xDiff > 0) {
-                sideElement.style.left = -xDiff + "px";
+                sideElement.style.transform = `translateX(${-xDiff}px)`;
                 transformMask(xDiff / windowWidth);
             } else {
-                sideElement.style.left = "0px";
+                sideElement.style.transform = "translateX(0)";
                 transformMask(0);
             }
             return;
         }
         if (firstDirection === "toRight") {
-            document.getElementById("sidebar").style.left = -windowWidth - xDiff + "px";
+            document.getElementById("sidebar").style.transform = `translateX(${-xDiff - windowWidth}px)`;
             transformMask((windowWidth + xDiff) / windowWidth);
         } else {
-            document.getElementById("menu").style.right = -windowWidth + xDiff + "px";
+            document.getElementById("menu").style.transform = `translateX(${windowWidth - xDiff}px)`;
             transformMask((windowWidth - xDiff) / windowWidth);
         }
         activeBlur();
         hideKeyboardToolbar();
+        window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
     }
 };
 

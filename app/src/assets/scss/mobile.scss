@@ -149,20 +149,16 @@
 }
 
 .side-panel {
-  top: 0;
-  left: -110vw;
-  right: auto;
   position: fixed;
   background-color: var(--b3-theme-surface);
   height: 100vh;
   width: 100vw;
   z-index: 220;
-  transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms, left .15s cubic-bezier(0, 0, .2, 1) 0ms;
+  transform: translateX(-100vw);
+  transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
   &--all {
-    left: 0;
-    right: 0;
-    top: -200vh;
+    transform: translateY(-100vh);
   }
 }
 
@@ -246,10 +242,9 @@
 }
 
 #menu {
-  transition: right 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
+  transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
   z-index: 220;
-  right: -110vw;
-  left: auto;
+  transform: translateX(100vw);
 }
 
 .keyboard {

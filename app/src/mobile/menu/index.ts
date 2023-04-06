@@ -18,7 +18,7 @@ import {getRecentDocs} from "./getRecentDocs";
 export const popMenu = () => {
     activeBlur();
     hideKeyboardToolbar();
-    document.getElementById("menu").style.right = "0";
+    document.getElementById("menu").style.transform = "translateX(0)";
 };
 
 export const initRightMenu = () => {

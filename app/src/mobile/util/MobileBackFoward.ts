@@ -103,9 +103,9 @@ export const goForward = () => {
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
-    } else if (document.getElementById("model").style.top === "0px" ||
-        document.getElementById("menu").style.right === "0px" ||
-        document.getElementById("sidebar").style.left === "0px") {
+    } else if (document.getElementById("model").style.transform === "translateY(0)" ||
+        document.getElementById("menu").style.transform === "translateX(0)" ||
+        document.getElementById("sidebar").style.transform === "translateX(0)") {
         closePanel();
         return;
     }
@@ -125,11 +125,11 @@ export const goBack = () => {
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;
-    } else if (document.getElementById("model").style.top === "0px") {
-        document.getElementById("model").style.top = "-200vh";
+    } else if (document.getElementById("model").style.transform === "translateY(0)") {
+        document.getElementById("model").style.transform = "";
         return;
-    } else if (document.getElementById("menu").style.right === "0px" ||
-        document.getElementById("sidebar").style.left === "0px") {
+    } else if (document.getElementById("menu").style.transform === "translateX(0)" ||
+        document.getElementById("sidebar").style.transform === "translateX(0)") {
         closePanel();
         return;
     }

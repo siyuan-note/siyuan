@@ -85,7 +85,7 @@ export const initFramework = () => {
     document.getElementById("toolbarFile").addEventListener("click", () => {
         hideKeyboardToolbar();
         activeBlur();
-        sidebarElement.style.left = "0";
+        sidebarElement.style.transform = "translateX(0)";
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
         if (type === "sidebar-outline-tab") {
             outline.update();
@@ -131,7 +131,7 @@ export const initFramework = () => {
         }, Constants.TIMEOUT_INPUT);
     }
     document.getElementById("modelClose").addEventListener("click", () => {
-        document.getElementById("model").style.top = "-200vh";
+        document.getElementById("model").style.transform = "";
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {

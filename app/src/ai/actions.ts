@@ -151,11 +151,22 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             type: "submenu",
             submenu: [{
                 iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.aiTranslate_zh_CN,
+                label: window.siyuan.languages.aiTranslate_zh_Hans,
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {
                         ids,
-                        action: "Translate as follows to [zh_CN]"
+                        action: "Translate as follows to [zh-Hans]"
+                    }, (response) => {
+                        fillContent(protyle, response.data, elements);
+                    });
+                }
+            }, {
+                iconHTML: Constants.ZWSP,
+                label: window.siyuan.languages.aiTranslate_zh_Hant,
+                click() {
+                    fetchPost("/api/ai/chatGPTWithAction", {
+                        ids,
+                        action: "Translate as follows to [zh-Hant]"
                     }, (response) => {
                         fillContent(protyle, response.data, elements);
                     });
@@ -166,10 +177,9 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {
                         ids,
-                        action: "Translate as follows to [ja_JP]"
+                        action: "Translate as follows to [ja-JP]"
                     }, (response) => {
-                        focusByRange(protyle.toolbar.range);
-                        insertHTML(response.data, protyle, true);
+                        fillContent(protyle, response.data, elements);
                     });
                 }
             }, {
@@ -178,7 +188,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {
                         ids,
-                        action: "Translate as follows to [ko_KR]"
+                        action: "Translate as follows to [ko-KR]"
                     }, (response) => {
                         fillContent(protyle, response.data, elements);
                     });
@@ -189,7 +199,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {
                         ids,
-                        action: "Translate as follows to [en_US]"
+                        action: "Translate as follows to [en-US]"
                     }, (response) => {
                         fillContent(protyle, response.data, elements);
                     });
@@ -200,7 +210,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {
                         ids,
-                        action: "Translate as follows to [es_ES]"
+                        action: "Translate as follows to [es-ES]"
                     }, (response) => {
                         fillContent(protyle, response.data, elements);
                     });
@@ -211,7 +221,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {
                         ids,
-                        action: "Translate as follows to [fr_FR]"
+                        action: "Translate as follows to [fr-FR]"
                     }, (response) => {
                         fillContent(protyle, response.data, elements);
                     });
@@ -222,7 +232,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 click() {
                     fetchPost("/api/ai/chatGPTWithAction", {
                         ids,
-                        action: "Translate as follows to [de_DE]"
+                        action: "Translate as follows to [de-DE]"
                     }, (response) => {
                         fillContent(protyle, response.data, elements);
                     });

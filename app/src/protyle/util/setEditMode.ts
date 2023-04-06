@@ -11,6 +11,11 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         protyle.scroll?.element.classList.add("fn__none");
         if (protyle.options.render.breadcrumb) {
             protyle.breadcrumb?.element.classList.add("fn__none");
+            if (protyle.block.showAll) {
+                const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]')
+                exitFocusElement.classList.add("fn__none");
+                exitFocusElement.nextElementSibling.classList.add("fn__none");
+            }
         }
         protyle.preview.render(protyle);
     } else if (type === "wysiwyg") {
@@ -26,7 +31,12 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         }
         if (protyle.options.render.breadcrumb) {
             protyle.breadcrumb?.element.classList.remove("fn__none");
+            if (protyle.block.showAll) {
+                const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]')
+                exitFocusElement.classList.remove("fn__none");
+                exitFocusElement.nextElementSibling.classList.remove("fn__none");
+            }
         }
     }
-    hideElements( ["gutter", "toolbar", "select", "hint", "util"], protyle);
+    hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
 };

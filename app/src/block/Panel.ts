@@ -243,7 +243,7 @@ export class BlockPanel {
 
     private initProtyle(editorElement: HTMLElement) {
         const index = parseInt(editorElement.getAttribute("data-index"));
-        fetchPost("api/block/getBlockInfo", {id: this.nodeIds[index]}, (response) => {
+        fetchPost("/api/block/getBlockInfo", {id: this.nodeIds[index]}, (response) => {
             if (response.code === 3) {
                 showMessage(response.msg);
                 return;

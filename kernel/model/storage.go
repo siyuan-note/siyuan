@@ -293,11 +293,7 @@ func RemoveLocalStorageVals(keys []string) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
-	localStorage, err := getLocalStorage()
-	if nil != err {
-		return
-	}
-
+	localStorage := getLocalStorage()
 	for _, key := range keys {
 		delete(localStorage, key)
 	}
@@ -308,11 +304,7 @@ func SetLocalStorageVal(key string, val interface{}) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
-	localStorage, err := getLocalStorage()
-	if nil != err {
-		return
-	}
-
+	localStorage := getLocalStorage()
 	localStorage[key] = val
 	return setLocalStorage(localStorage)
 }
@@ -323,7 +315,7 @@ func SetLocalStorage(val interface{}) (err error) {
 	return setLocalStorage(val)
 }
 
-func GetLocalStorage() (ret map[string]interface{}, err error) {
+func GetLocalStorage() (ret map[string]interface{}) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 	return getLocalStorage()
@@ -355,7 +347,8 @@ func setLocalStorage(val interface{}) (err error) {
 	return
 }
 
-func getLocalStorage() (ret map[string]interface{}, err error) {
+func getLocalStorage() (ret map[string]interface{}) {
+	// When local.json is corrupted, clear the file to avoid being unable to enter the main interface https://github.com/siyuan-note/siyuan/issues/7911
 	ret = map[string]interface{}{}
 	lsPath := filepath.Join(util.DataDir, "storage/local.json")
 	if !gulu.File.IsExist(lsPath) {

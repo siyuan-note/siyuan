@@ -64,9 +64,23 @@ const initToolbarSearch = () => {
 
 export const popSearch = () => {
     openModel({
-        title: '<input id="toolbarSearch" style="background-color: var(--b3-theme-surface);border: 0;" class="b3-text-field fn__block">',
+        title: `<input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" style="background-color: var(--b3-theme-surface);border: 0;" class="b3-text-field fn__block">`,
         icon:"iconSearch",
-        html: '<div id="searchPanel"></div>',
+        html: `<div class="fn__flex-column" style="height: 100%">
+    <div id="searchPanel" style="overflow:auto;" class="fn__flex-1"></div>
+    <div class="toolbar">
+        <span class="fn__flex-1"></span>
+        <svg class="toolbar__icon"><use xlink:href="#iconReplace"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconRegex"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconFilter"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconCopy"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconFolder"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
+        <svg class="toolbar__icon"><use xlink:href="#iconMore"></use></svg>
+        <span class="fn__flex-1"></span>
+     </div>
+</div>`,
         bindEvent() {
             initToolbarSearch();
             const searchElement = document.getElementById("searchPanel");

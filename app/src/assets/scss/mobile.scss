@@ -113,15 +113,14 @@
     flex-shrink: 0;
     margin: 6px 4px;
     color: var(--b3-theme-on-surface);
+    border-radius: 4px;
 
     &[disabled] {
       opacity: 0.38;
     }
 
     &--active {
-      background-color: var(--b3-theme-primary);
-      border-radius: 4px;
-      color: var(--b3-theme-on-primary);
+      background-color: var(--b3-list-hover);
     }
   }
 

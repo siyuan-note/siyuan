@@ -85,7 +85,7 @@ export const initFramework = () => {
     document.getElementById("toolbarFile").addEventListener("click", () => {
         hideKeyboardToolbar();
         activeBlur();
-        sidebarElement.style.transform = "translateX(0)";
+        sidebarElement.style.transform = "translateX(0px)";
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
         if (type === "sidebar-outline-tab") {
             outline.update();

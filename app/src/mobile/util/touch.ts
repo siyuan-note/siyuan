@@ -17,7 +17,7 @@ const popSide = (render = true) => {
     } else {
         hideKeyboardToolbar();
         activeBlur();
-        document.getElementById("sidebar").style.transform = "translateX(0)";
+        document.getElementById("sidebar").style.transform = "translateX(0px)";
     }
 };
 
@@ -213,7 +213,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                 menuElement.style.transform = `translateX(${-xDiff}px)`;
                 transformMask(-xDiff / windowWidth);
             } else {
-                menuElement.style.transform = "translateX(0)";
+                menuElement.style.transform = "translateX(0px)";
                 transformMask(0);
             }
             return;
@@ -224,7 +224,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                 sideElement.style.transform = `translateX(${-xDiff}px)`;
                 transformMask(xDiff / windowWidth);
             } else {
-                sideElement.style.transform = "translateX(0)";
+                sideElement.style.transform = "translateX(0px)";
                 transformMask(0);
             }
             return;

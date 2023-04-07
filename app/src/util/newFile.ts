@@ -9,7 +9,10 @@ import {openFileById} from "../editor/util";
 import {fetchPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {Constants} from "../constants";
-import {validateName} from "../editor/rename";
+import {replaceFileName, validateName} from "../editor/rename";
+import {hideElements} from "../protyle/ui/hideElements";
+import {isMobile} from "./functions";
+import {openMobileFileById} from "../mobile/editor";
 
 export const getNewFilePath = (useSavePath: boolean) => {
     let notebookId = "";
@@ -147,5 +150,26 @@ export const getSavePath = (pathString: string, notebookId: string, cb: (p: stri
                 cb(getDisplayName(response.data, false, true));
             });
         }
+    });
+};
+
+export const newFileByName = (value: string) => {
+    const newData = getNewFilePath(true);
+    fetchPost("/api/filetree/getHPathByPath", {
+        notebook: newData.notebookId,
+        path: newData.currentPath,
+    }, (responsePath) => {
+        fetchPost("/api/filetree/createDocWithMd", {
+            notebook: newData.notebookId,
+            path: pathPosix().join(responsePath.data, replaceFileName(value.trim()) || "Untitled"),
+            markdown: ""
+        }, response => {
+            hideElements(["dialog"]);
+            if (isMobile()) {
+                openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+            } else {
+                openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+            }
+        });
     });
 };

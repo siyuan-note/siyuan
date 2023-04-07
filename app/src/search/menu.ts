@@ -371,3 +371,11 @@ export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[]) =>
         }
     });
 };
+
+export const getKeyByLiElement = (element: HTMLElement) => {
+    const keys: string[] = [];
+    element.querySelectorAll("mark").forEach(item => {
+        keys.push(item.textContent);
+    });
+    return [...new Set(keys)].join(" ");
+};

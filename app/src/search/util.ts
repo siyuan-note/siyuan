@@ -16,14 +16,11 @@ import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {addLoading, setPadding} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
-import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
-import {replaceFileName} from "../editor/rename";
-import {hideElements} from "../protyle/ui/hideElements";
-import {getNewFilePath} from "../util/newFile";
+import {newFileByName} from "../util/newFile";
 import {matchHotKey} from "../protyle/util/hotKey";
-import {filterMenu, initCriteriaMenu, moreMenu, queryMenu} from "./menu";
+import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu} from "./menu";
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
@@ -80,23 +77,6 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
     });
     wnd.split("lr").addTab(tab);
     setPanelFocus(tab.panelElement);
-};
-
-const newEmptyFileByInput = (value: string) => {
-    const newData = getNewFilePath(true);
-    fetchPost("/api/filetree/getHPathByPath", {
-        notebook: newData.notebookId,
-        path: newData.currentPath,
-    }, (responsePath) => {
-        fetchPost("/api/filetree/createDocWithMd", {
-            notebook: newData.notebookId,
-            path: pathPosix().join(responsePath.data, replaceFileName(value.trim()) || "Untitled"),
-            markdown: ""
-        }, response => {
-            hideElements(["dialog"]);
-            openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
-        });
-    });
 };
 
 // closeCB 不存在为页签搜索
@@ -621,7 +601,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
                 } else if (target.getAttribute("data-type") === "search-new") {
-                    newEmptyFileByInput(searchInputElement.value);
+                    newFileByName(searchInputElement.value);
                 } else if (target.getAttribute("data-type") === "search-item") {
                     if (event.detail === 1) {
                         clickTimeout = window.setTimeout(() => {
@@ -644,7 +624,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                                 getArticle({
                                     edit,
                                     id: target.getAttribute("data-node-id"),
-                                    k: getKey(target)
+                                    k: getKeyByLiElement(target)
                                 });
                                 searchInputElement.focus();
                             } else if (target.classList.contains("b3-list-item--focus")) {
@@ -706,14 +686,14 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         }
         const focusIsNew = currentList.getAttribute("data-type") === "search-new";
         if (focusIsNew && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
-            newEmptyFileByInput(searchInputElement.value);
+            newFileByName(searchInputElement.value);
             event.preventDefault();
             event.stopPropagation();
             return;
         }
         if (event.key === "Enter") {
             if (focusIsNew) {
-                newEmptyFileByInput(searchInputElement.value);
+                newFileByName(searchInputElement.value);
             } else {
                 const id = currentList.getAttribute("data-node-id");
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
@@ -755,7 +735,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             }
             getArticle({
                 id: currentList.getAttribute("data-node-id"),
-                k: getKey(currentList),
+                k: getKeyByLiElement(currentList),
                 edit
             });
             event.preventDefault();
@@ -781,7 +761,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             }
             getArticle({
                 id: currentList.getAttribute("data-node-id"),
-                k: getKey(currentList),
+                k: getKeyByLiElement(currentList),
                 edit
             });
             event.preventDefault();
@@ -877,14 +857,6 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     window.siyuan.menus.menu.remove();
 };
 
-const getKey = (element: HTMLElement) => {
-    const keys: string[] = [];
-    element.querySelectorAll("mark").forEach(item => {
-        keys.push(item.textContent);
-    });
-    return [...new Set(keys)].join(" ");
-};
-
 const renderNextSearchMark = (options: {
     id: string,
     edit: Protyle,
@@ -973,7 +945,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         rootIds = [currentList.getAttribute("data-root-id")];
     }
     fetchPost("/api/search/findReplace", {
-        k: config.method === 0 ? getKey(currentList) : (element.querySelector("#searchInput") as HTMLInputElement).value,
+        k: config.method === 0 ? getKeyByLiElement(currentList) : (element.querySelector("#searchInput") as HTMLInputElement).value,
         r: replaceInputElement.value,
         ids,
         types: config.types,
@@ -1027,7 +999,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         getArticle({
             edit,
             id: currentList.getAttribute("data-node-id"),
-            k: getKey(currentList)
+            k: getKeyByLiElement(currentList)
         });
     });
 };
@@ -1106,14 +1078,14 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
             getArticle({
                 edit,
                 id: data[0].children[0].id,
-                k: getKey(contentElement),
+                k: getKeyByLiElement(contentElement),
             });
         } else {
             contentElement.innerHTML = data[0].content;
             getArticle({
                 edit,
                 id: data[0].id,
-                k: getKey(contentElement),
+                k: getKeyByLiElement(contentElement),
             });
         }
     } else {

@@ -14,6 +14,7 @@ import {login, showAccountInfo} from "../settings/account";
 import {openModel} from "./model";
 import {initAbout} from "../settings/about";
 import {getRecentDocs} from "./getRecentDocs";
+import {initEditor} from "../settings/editor";
 
 export const popMenu = () => {
     activeBlur();
@@ -69,6 +70,9 @@ ${accountHTML}
     <svg class="b3-menu__icon"><use xlink:href="#iconQuit"></use></svg><span class="b3-menu__label">${window.siyuan.languages.safeQuit}</span>
 </div>
 <div class="b3-menu__separator"></div>
+<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuEditor">
+    <svg class="b3-menu__icon"><use xlink:href="#iconEdit"></use></svg><span class="b3-menu__label">${window.siyuan.languages.editor}</span>
+</div>
 <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuRiffCard">
     <svg class="b3-menu__icon"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-menu__label">${window.siyuan.languages.riffCard}</span>
 </div>
@@ -124,6 +128,11 @@ ${accountHTML}
                 break;
             } else if (target.id === "menuRiffCard") {
                 initRiffCard();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuEditor") {
+                initEditor();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

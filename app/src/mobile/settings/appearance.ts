@@ -44,25 +44,8 @@ export const initAppearance = () => {
     <div class="fn__hr"></div>
     <select id="lang" class="b3-select fn__block">${genOptions(window.siyuan.config.langs, window.siyuan.config.appearance.lang)}</select>
     <div class="b3-label__text">${window.siyuan.languages.language1}</div>
-</div>
-<div class="b3-label">
-    ${window.siyuan.languages.fontSize} <span id="fontSize" class="ft__on-surface">${window.siyuan.config.editor.fontSize}px</span>
-    <div class="fn__hr"></div>
-    <input class="b3-slider fn__block" max="72" min="9" step="1" type="range" value="${window.siyuan.config.editor.fontSize}">
-    <div class="b3-label__text">${window.siyuan.languages.fontSizeTip}</div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
-            modelMainElement.querySelector(".b3-slider").addEventListener("input", (event: InputEvent & {
-                target: HTMLInputElement
-            }) => {
-                modelMainElement.querySelector("#fontSize").textContent = event.target.value + "px";
-                window.siyuan.config.editor.fontSize = parseInt(event.target.value);
-                fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                    window.siyuan.config.editor = response.data;
-                    reloadProtyle(window.siyuan.mobile.editor.protyle);
-                    setInlineStyle();
-                });
-            });
             modelMainElement.querySelectorAll("select").forEach(item => {
                 item.addEventListener("change", () => {
                     const modeElementValue = parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value);

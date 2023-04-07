@@ -89,6 +89,7 @@ a.b3-chip:hover {
     transition: var(--b3-transition);
     cursor: pointer;
     opacity: .68;
+    flex-shrink: 0;
 
     &:hover {
       // 不明原因 https://github.com/siyuan-note/siyuan/issues/7756#issuecomment-1484057954

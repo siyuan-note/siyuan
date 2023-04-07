@@ -154,7 +154,11 @@ export const getLocalStorage = (cb: () => void) => {
             rowTab: "",
             layoutTab: 0
         };
-        defaultStorage[Constants.LOCAL_PDFTHEME] = {light: "light", dark: "dark", annoColor: "var(--b3-pdf-background1)"};
+        defaultStorage[Constants.LOCAL_PDFTHEME] = {
+            light: "light",
+            dark: "dark",
+            annoColor: "var(--b3-pdf-background1)"
+        };
         defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}}
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_BAZAAR] = {
@@ -206,16 +210,15 @@ export const getLocalStorage = (cb: () => void) => {
             }
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
-        defaultStorage[Constants.LOCAL_SEARCHKEY] = "";
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
             Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHDATA,
-            Constants.LOCAL_ZOOM, Constants.LOCAL_SEARCHKEY, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI].forEach((key) => {
+            Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     window.siyuan.storage[key] = Object.assign(defaultStorage[key], JSON.parse(response.data[key]));
                 } catch (e) {
-                    window.siyuan.storage[key] = key === Constants.LOCAL_SEARCHKEY ? (response.data[key] || "") : defaultStorage[key];
+                    window.siyuan.storage[key] = defaultStorage[key];
                 }
             } else if (typeof response.data[key] === "undefined") {
                 window.siyuan.storage[key] = defaultStorage[key];
@@ -226,7 +229,7 @@ export const getLocalStorage = (cb: () => void) => {
         // 数据兼容，移除历史数据，3.8.4 移除
         fetchPost("/api/storage/removeLocalStorageVals", {
             app: Constants.SIYUAN_APPID,
-            keys:["leftColumn", "local-searchedata", "local-searchekeys", "local-searchetabdata", "rightColumn", "topBar"]
+            keys: ["leftColumn", "local-searchkey", "local-searchedata", "local-searchekeys", "local-searchetabdata", "rightColumn", "topBar"]
         });
     });
 };

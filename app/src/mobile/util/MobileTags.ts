@@ -5,7 +5,8 @@ import {MenuItem} from "../../menus/Menu";
 import {Dialog} from "../../dialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
-import {popSearch, toolbarSearchEvent} from "../menu/search";
+import {popSearch} from "../menu/search";
+import {Constants} from "../../constants";
 
 export class MobileTags {
     public element: HTMLElement;
@@ -65,9 +66,9 @@ export class MobileTags {
                         });
                     }
                 } else {
-                    popSearch();
-                    (document.getElementById("toolbarSearch") as HTMLInputElement).value = `#${element.getAttribute("data-label")}#`;
-                    toolbarSearchEvent();
+                    const searchOption = Object.assign({}, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
+                    searchOption.k = `#${element.getAttribute("data-label")}#`
+                    popSearch(searchOption);
                 }
             },
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action" data-type="edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>'

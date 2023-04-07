@@ -179,7 +179,7 @@ ${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
     ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis"">${escapeGreat(title)}</span>
+<span class="b3-list-item__text b3-list-item__meta" style="margin-top: -4px">${escapeGreat(title)}</span>
 </div>`;
         }
     });
@@ -350,7 +350,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "include") {
+            } else if (type === "include" && !target.hasAttribute("disabled")){
                 target.classList.toggle("toolbar__icon--active");
                 if (target.classList.contains("toolbar__icon--active")) {
                     config.idPath.forEach((item, index) => {
@@ -486,7 +486,7 @@ export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHD
         html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border${config.hasReplace ? "" : " fn__none"}">
         <svg class="toolbar__icon"><use xlink:href="#iconReplace"></use></svg>
-        <input id="toolbarReplace" class="b3-text-field fn__flex-1">
+        <input id="toolbarReplace" style="font-size: 17px" class="b3-text-field fn__flex-1">
         <svg class="fn__rotate fn__none toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
         <div class="fn__space"></div>
         <button data-type="replace-all" class="b3-button b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>

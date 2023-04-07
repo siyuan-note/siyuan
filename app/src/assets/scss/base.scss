@@ -55,15 +55,15 @@ ctrl+p 搜索: 202
 // 需大于 .block__popover
 .b3-menu: 210
 
-// 需大于 mobile .status
-.keyboard: 222
-
 // 需小于 .b3-dialog 关于中的锁屏密码设置
 #menu & .side-panel: 220
 
 // 需小于 #windowControls
 // 需大于 .protyle-util https://github.com/siyuan-note/siyuan/issues/5069
 .b3-dialog: 305
+
+// 需大于 mobile .status、.b3-dialog
+.keyboard: 306
 
 // 历史中切换笔记本需临时大于 .b3-dialog https://github.com/siyuan-note/siyuan/issues/5107
 // 移动端排序和菜单需临时大于 .side-panel https://github.com/siyuan-note/siyuan/issues/5254

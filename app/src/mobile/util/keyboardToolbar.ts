@@ -258,6 +258,10 @@ export const showKeyboardToolbar = (height: number) => {
         return;
     }
     toolbarElement.classList.remove("fn__none");
+    const searchPathElement = document.getElementById("searchPath");
+    if (searchPathElement) {
+        (searchPathElement.nextElementSibling as HTMLElement).style.marginBottom = "42px"
+    }
     const range = getSelection().getRangeAt(0);
     if (!window.siyuan.mobile.editor ||
         !window.siyuan.mobile.editor.protyle.wysiwyg.element.contains(range.startContainer)) {
@@ -286,6 +290,10 @@ export const hideKeyboardToolbar = () => {
     toolbarElement.classList.add("fn__none");
     toolbarElement.style.height = "";
     window.siyuan.mobile.editor.protyle.element.style.marginBottom = "";
+    const searchPathElement = document.getElementById("searchPath");
+    if (searchPathElement) {
+        (searchPathElement.nextElementSibling as HTMLElement).style.marginBottom = ""
+    }
 };
 
 export const activeBlur = () => {

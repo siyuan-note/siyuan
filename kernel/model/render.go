@@ -33,19 +33,26 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
-	if nil == node {
+func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
+	if nil == heading {
 		return ""
 	}
 
-	if ast.NodeDocument == node.Type {
-		return node.IALAttr("title")
+	if ast.NodeDocument == heading.Type {
+		return heading.IALAttr("title")
 	}
 
 	buf := bytes.Buffer{}
 	buf.Grow(4096)
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	ast.Walk(heading, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
+			switch n.Type {
+			case ast.NodeHeading:
+				// Show heading block appearance style in the Outline Panel https://github.com/siyuan-note/siyuan/issues/7872
+				if style := n.IALAttr("style"); "" != style {
+					buf.WriteString("</span>")
+				}
+			}
 			return ast.WalkContinue
 		}
 
@@ -57,6 +64,13 @@ func renderOutline(node *ast.Node, luteEngine *lute.Lute) (ret string) {
 		}
 
 		switch n.Type {
+		case ast.NodeHeading:
+			// Show heading block appearance style in the Outline Panel https://github.com/siyuan-note/siyuan/issues/7872
+			if style := n.IALAttr("style"); "" != style {
+				buf.WriteString("<span style=\"")
+				buf.WriteString(style)
+				buf.WriteString("\">")
+			}
 		case ast.NodeText, ast.NodeLinkText, ast.NodeCodeBlockCode, ast.NodeMathBlockContent:
 			tokens := html.EscapeHTML(n.Tokens)
 			tokens = bytes.ReplaceAll(tokens, []byte(" "), []byte("&nbsp;")) // 大纲面板条目中无法显示多个空格 https://github.com/siyuan-note/siyuan/issues/4370

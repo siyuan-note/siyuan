@@ -1174,7 +1174,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     }
     const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
     if (liElements.length === 0) {
-        if (event.key.startsWith("Arrow")) {
+        if (event.key.startsWith("Arrow") && !isCtrl(event)) {
             const liElement = files.element.querySelector(".b3-list-item");
             if (liElement) {
                 liElement.classList.add("b3-list-item--focus");
@@ -1301,7 +1301,7 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
             }
         }
         return;
-    } else {
+    } else if (!isCtrl(event)) {
         files.element.querySelector('[select-end="true"]')?.removeAttribute("select-end");
         files.element.querySelector('[select-start="true"]')?.removeAttribute("select-start");
         if ((event.key === "ArrowRight" && !liElements[0].querySelector(".b3-list-item__arrow--open") && !liElements[0].querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||

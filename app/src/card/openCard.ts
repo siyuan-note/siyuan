@@ -44,8 +44,10 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
     <div class="card__header">
         <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>
         ${html}
-        ${isMobile() ? "" : `<div class="fn__space"></div>
-        <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
+        <div class="fn__space"></div>
+        ${isMobile() ? `<div data-type="close" class="block__icon block__icon--show">
+            <svg><use xlink:href="#iconCloseRound"></use></svg>
+        </div>` : `<div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
             <svg><use xlink:href="#iconFullscreen"></use></svg>
         </div>`}
     </div>
@@ -100,8 +102,8 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         </div>
     </div>
 </div>`,
-        width: isMobile() ? "98vw" : "80vw",
-        height: isMobile() ? "80vh" : "70vh",
+        width: isMobile() ? "100vw" : "80vw",
+        height: isMobile() ? "100vh" : "70vh",
     });
     (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
     (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
@@ -138,6 +140,13 @@ export const openCardByData = (cardsData: ICard[], html = "") => {
         if (fullscreenElement) {
             fullscreen(dialog.element.querySelector(".card__main"),
                 dialog.element.querySelector('[data-type="fullscreen"]'));
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
+        const closeElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "close");
+        if (closeElement) {
+            dialog.destroy();
             event.stopPropagation();
             event.preventDefault();
             return;

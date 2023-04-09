@@ -126,12 +126,21 @@ export class Menu {
 <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
 <span class="b3-menu__label">${window.siyuan.languages.back}</span>
 </div><button class="b3-menu__separator"></button>`);
+        this.popup({x: 0, y: position === "bottom" ? window.innerHeight / 2 : 0});
         if (position === "bottom") {
             this.element.querySelectorAll(".b3-menu__submenu").forEach((item: HTMLElement) => {
-                item.style.top = "calc(50vh + 48.5px)";
+                item.style.top = "calc(100vh - 500px + 48.5px)";
+            });
+             // 解决部分机型非全屏菜单无效
+            // 解决方案一，对应的 item.style.top 为 calc(50vh + 48.5px)
+            // this.element.style.top = "50vh";
+            // 解决方案二，需要联动上面的 item.style.top
+            this.element.style.position = "sticky";
+            this.element.style.height = "500px";
+            this.element.querySelectorAll(".b3-menu__separator").forEach((item: HTMLElement) => {
+                item.style.pointerEvents = "none"; // 解决手机端分割线点击交互陷阱
             });
         }
-        this.popup({x: 0, y: position === "bottom" ? window.innerHeight / 2 : 0});
         this.element.scrollTop = 0;
     }
 }

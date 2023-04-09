@@ -1,7 +1,7 @@
 import {Tab} from "../layout/Tab";
 import {MenuItem} from "./Menu";
 import {Editor} from "../editor";
-import {copyTab} from "../layout/util";
+import {copyTab, resizeTabs} from "../layout/util";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
 /// #endif
@@ -132,6 +132,7 @@ const splitSubMenu = (tab: Tab) => {
                 newWnd.headersElement.append(tab.headElement);
                 newWnd.headersElement.parentElement.classList.remove("fn__none");
                 newWnd.moveTab(tab);
+                resizeTabs();
             }
         });
     }
@@ -152,6 +153,7 @@ const splitSubMenu = (tab: Tab) => {
                 newWnd.headersElement.append(tab.headElement);
                 newWnd.headersElement.parentElement.classList.remove("fn__none");
                 newWnd.moveTab(tab);
+                resizeTabs();
             }
         });
     }

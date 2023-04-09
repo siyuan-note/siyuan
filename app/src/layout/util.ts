@@ -16,7 +16,7 @@ import {getAllModels, getAllTabs} from "./getAll";
 import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -79,7 +79,35 @@ export const getDockByType = (type: TDockType) => {
 };
 
 export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
+    // DOM 移动后 range 会变化
+    const rangeDatas: {
+        id: string,
+        start: number,
+        end: number
+    }[] = [];
+    targetWnd.children.forEach((item) => {
+        if (item.model instanceof Editor && item.model.editor.protyle.toolbar.range) {
+            const blockElement = hasClosestBlock(item.model.editor.protyle.toolbar.range.startContainer);
+            if (blockElement) {
+                const startEnd = getSelectionOffset(blockElement, undefined, item.model.editor.protyle.toolbar.range);
+                rangeDatas.push({
+                    id: blockElement.getAttribute("data-node-id"),
+                    start: startEnd.start,
+                    end: startEnd.end
+                })
+            }
+        }
+    })
     newWnd.element.after(targetWnd.element);
+    targetWnd.children.forEach((item) => {
+        if (item.model instanceof Editor) {
+            const rangeData = rangeDatas.splice(0, 1)[0];
+            const range = focusByOffset(item.model.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${rangeData.id}"]`), rangeData.start, rangeData.end);
+            if (range) {
+                item.model.editor.protyle.toolbar.range = range;
+            }
+        }
+    })
     // 分割线
     newWnd.element.after(newWnd.element.previousElementSibling);
     newWnd.parent.children.find((item, index) => {
@@ -160,7 +188,7 @@ export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false,
         } else if (cb) {
             cb();
         }
-        return ;
+        return;
     }
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {

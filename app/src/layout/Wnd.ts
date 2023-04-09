@@ -12,7 +12,7 @@ import {Tab} from "./Tab";
 import {Model} from "./Model";
 import {Editor} from "../editor";
 import {Graph} from "./dock/Graph";
-import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 /// #if !BROWSER
 import {webFrame, ipcRenderer} from "electron";
@@ -32,6 +32,7 @@ import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
+import {focusByOffset, getSelectionOffset, getSelectionPosition} from "../protyle/util/selection";
 
 export class Wnd {
     public id: string;
@@ -369,6 +370,7 @@ export class Wnd {
                         switchWnd(newWnd, targetWnd);
                     }
                 }
+                resizeTabs();
                 /// #if !BROWSER
                 setTabPosition();
                 /// #endif
@@ -754,10 +756,29 @@ export class Wnd {
     }
 
     public moveTab(tab: Tab, nextId?: string) {
+        let rangeData: {
+            id: string,
+            start: number,
+            end: number
+        }
+        if (tab.model instanceof Editor && tab.model.editor.protyle.toolbar.range) {
+            const blockElement = hasClosestBlock(tab.model.editor.protyle.toolbar.range.startContainer);
+            if (blockElement) {
+                const startEnd = getSelectionOffset(blockElement, undefined, tab.model.editor.protyle.toolbar.range);
+                rangeData = {
+                    id: blockElement.getAttribute("data-node-id"),
+                    start: startEnd.start,
+                    end: startEnd.end
+                }
+            }
+        }
         this.element.querySelector(".layout-tab-container").append(tab.panelElement);
-        if (tab.model instanceof Editor) {
-            // DOM 移动后 range 会变化，因此置空
-            tab.model.editor.protyle.toolbar.range = null;
+        if (rangeData && tab.model instanceof Editor) {
+            // DOM 移动后 range 会变化
+            const range = focusByOffset(tab.model.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${rangeData.id}"]`), rangeData.start, rangeData.end);
+            if (range) {
+                tab.model.editor.protyle.toolbar.range = range;
+            }
         }
         if (nextId) {
             // 只能用 find https://github.com/siyuan-note/siyuan/issues/3455
@@ -802,7 +823,6 @@ export class Wnd {
             }
         }
         tab.parent = this;
-        resizeTabs();
         hideAllElements(["toolbar"]);
     }
 

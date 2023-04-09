@@ -34,7 +34,6 @@ class App {
             dialogs: [],
             blockPanels: [],
             mobile: {},
-            menus: new Menus(),
             ws: new Model({
                 id: genUUID(),
                 type: "main",
@@ -55,6 +54,7 @@ class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;
+                    window.siyuan.menus = new Menus();
                     document.title = window.siyuan.languages.siyuanNote;
                     bootSync();
                     loadAssets(confResponse.data.conf.appearance);

@@ -12,6 +12,7 @@ export class Menu {
         this.wheelEvent = "onwheel" in document.createElement("div") ? "wheel" : "mousewheel";
 
         this.element = document.getElementById("commonMenu");
+        this.element.querySelector(".b3-menu__title .b3-menu__label").innerHTML = window.siyuan.languages.back;
         this.element.addEventListener(isMobile() ? "click" : "mouseover", (event) => {
             const target = event.target as Element;
             if (isMobile()) {
@@ -92,7 +93,8 @@ export class Menu {
             window.removeEventListener(this.wheelEvent, this.preventDefault, false);
         }
 
-        this.element.innerHTML = "";
+        this.element.firstElementChild.classList.add("fn__none");
+        this.element.lastElementChild.innerHTML = "";
         this.element.classList.add("fn__none");
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
@@ -103,11 +105,11 @@ export class Menu {
         if (!element) {
             return;
         }
-        this.element.append(element);
+        this.element.lastElementChild.append(element);
     }
 
     public popup(options: { x: number, y: number, h?: number, w?: number }, isLeft = false) {
-        if (this.element.innerHTML === "") {
+        if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
         if (isMobile()) {
@@ -122,27 +124,19 @@ export class Menu {
 
     public fullscreen(position: "bottom" | "all" = "all") {
         this.element.classList.add("b3-menu--fullscreen");
-        this.element.insertAdjacentHTML("afterbegin", `<div class="b3-menu__title">
-<svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
-<span class="b3-menu__label">${window.siyuan.languages.back}</span>
-</div><button class="b3-menu__separator"></button>`);
-        if (isMobile()) {
-            window.addEventListener("touchmove", this.preventDefault, {passive: false});
-        } else {
-            window.addEventListener(this.wheelEvent, this.preventDefault, {passive: false});
-        }
+        this.element.firstElementChild.classList.remove("fn__none");
         this.element.classList.remove("fn__none");
-        this.element.style.left = "0";
+        window.addEventListener("touchmove", this.preventDefault, {passive: false});
 
-        if (position === "bottom") {
-            this.element.querySelectorAll(".b3-menu__submenu").forEach((item: HTMLElement) => {
-                item.style.top = "calc(50vh + 48.5px)";
-            });
-            this.element.style.top = "50vh";
-        } else {
-            this.element.style.top = "0";
-        }
-        this.element.scrollTop = 0;
+        setTimeout(() => {
+            if (position === "bottom") {
+                this.element.style.transform = "translateY(-50vh)";
+                this.element.style.height = "50vh";
+            } else {
+                this.element.style.transform = "translateY(-100vh)";
+            }
+        })
+        this.element.lastElementChild.scrollTop = 0;
     }
 }
 
@@ -232,9 +226,9 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         let actionMenuElement;
         if (!currentElement) {
             if (event.code === "ArrowUp") {
-                actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.lastElementChild, false);
+                actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.lastElementChild.lastElementChild, false);
             } else {
-                actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.firstElementChild, true);
+                actionMenuElement = getActionMenu(window.siyuan.menus.menu.element.lastElementChild.firstElementChild, true);
             }
         } else {
             currentElement.classList.remove("b3-menu__item--current", "b3-menu__item--show");

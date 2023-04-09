@@ -193,7 +193,7 @@ export const addEmoji = (unicode: string) => {
 
 export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = false) => {
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.innerHTML = `<div class="emojis" style="width: ${isMobile() ? "80vw" : "360px"}">
+    window.siyuan.menus.menu.element.lastElementChild.innerHTML = `<div class="emojis" style="width: ${isMobile() ? "80vw" : "360px"}">
 <div class="fn__flex">
     <span class="fn__space"></span>
     <label class="b3-form__icon fn__flex-1">
@@ -220,7 +220,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
     <div data-type="9" class="emojis__type" aria-label="${window.siyuan.emojis[8][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f6a9")}</div>
 </div>
 </div>`;
-    window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item").classList.add("emojis__item--current");
+    window.siyuan.menus.menu.element.querySelector(".emojis__item").classList.add("emojis__item--current");
     const rect = target.getBoundingClientRect();
     window.siyuan.menus.menu.popup({x: rect.left, y: rect.top + rect.height});
     const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
@@ -233,7 +233,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
             emojisContentElement.nextElementSibling.classList.remove("fn__none");
         }
         emojisContentElement.scrollTop = 0;
-        window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+        window.siyuan.menus.menu.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
         if (inputElement.value === "") {
             lazyLoadEmoji(window.siyuan.menus.menu.element);
         }
@@ -250,7 +250,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
             emojisContentElement.nextElementSibling.classList.remove("fn__none");
         }
         emojisContentElement.scrollTop = 0;
-        window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+        window.siyuan.menus.menu.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
         if (inputElement.value === "") {
             lazyLoadEmoji(window.siyuan.menus.menu.element);
         }
@@ -263,7 +263,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
         if (event.key.indexOf("Arrow") === -1 && event.key !== "Enter") {
             return;
         }
-        const currentElement = window.siyuan.menus.menu.element.firstElementChild.querySelector(".emojis__item--current");
+        const currentElement = window.siyuan.menus.menu.element.querySelector(".emojis__item--current");
         if (!currentElement) {
             return;
         }
@@ -335,7 +335,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
     lazyLoadEmoji(window.siyuan.menus.menu.element);
     lazyLoadEmojiImg(window.siyuan.menus.menu.element);
     // 不能使用 getEventName 否则 https://github.com/siyuan-note/siyuan/issues/5472
-    window.siyuan.menus.menu.element.firstElementChild.addEventListener("click", (event) => {
+    window.siyuan.menus.menu.element.lastElementChild.firstElementChild.addEventListener("click", (event) => {
         const eventTarget = event.target as HTMLElement;
         const typeElement = hasClosestByClassName(eventTarget, "emojis__type");
         if (typeElement) {

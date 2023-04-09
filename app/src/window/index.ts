@@ -119,13 +119,13 @@ class App {
                     }
                 }
             }),
-            menus: new Menus()
         };
         fetchPost("/api/system/getConf", {}, response => {
             window.siyuan.config = response.data.conf;
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;
+                    window.siyuan.menus = new Menus();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
                         init();

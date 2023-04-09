@@ -56,7 +56,13 @@
     </div>
     <div id="modelMain" class="fn__flex-1"></div>
 </div>
-<div id="commonMenu" class="b3-menu fn__none"></div>
+<div id="commonMenu" class="b3-menu fn__none">
+    <div class="b3-menu__title fn__none">
+        <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
+        <span class="b3-menu__label"></span>
+    </div>
+    <div class="b3-menu__items"></div>
+</div>
 <div id="message" class="b3-snackbars"></div>
 <div id="status" class="status status--hide"></div>
 <div id="keyboardToolbar" class="keyboard fn__none"></div>

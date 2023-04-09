@@ -7,6 +7,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {viewCards} from "./viewCards";
 import {Constants} from "../constants";
 import {escapeAttr, escapeHtml} from "../util/escape";
+import {transaction} from "../protyle/wysiwyg/transaction";
 
 export const genCardItem = (item: ICardPackage) => {
     return `<li data-id="${item.id}" data-name="${escapeAttr(item.name)}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
@@ -176,7 +177,7 @@ export const makeCard = (ids: string[]) => {
     });
 };
 
-export const quickMakeCard = (nodeElement: Element[]) => {
+export const quickMakeCard = (protyle: IProtyle, nodeElement: Element[]) => {
     let isRemove = true;
     const ids: string[] = [];
     nodeElement.forEach(item => {
@@ -190,15 +191,25 @@ export const quickMakeCard = (nodeElement: Element[]) => {
         }
     });
     if (isRemove) {
-        fetchPost("/api/riff/removeRiffCards", {
+        transaction(protyle, [{
+            action: "removeFlashcards",
             deckID: Constants.QUICK_DECK_ID,
             blockIDs: ids
-        });
+        }], [{
+            action: "addFlashcards",
+            deckID: Constants.QUICK_DECK_ID,
+            blockIDs: ids
+        }]);
     } else {
-        fetchPost("/api/riff/addRiffCards", {
+        transaction(protyle, [{
+            action: "addFlashcards",
             deckID: Constants.QUICK_DECK_ID,
             blockIDs: ids
-        });
+        }], [{
+            action: "removeFlashcards",
+            deckID: Constants.QUICK_DECK_ID,
+            blockIDs: ids
+        }]);
     }
 };
 

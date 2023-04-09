@@ -1009,7 +1009,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectElement.length === 0) {
                 selectElement.push(nodeElement);
             }
-            quickMakeCard(selectElement);
+            quickMakeCard(protyle, selectElement);
             event.preventDefault();
             event.stopPropagation();
             return true;

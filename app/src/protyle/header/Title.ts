@@ -135,7 +135,7 @@ export class Title {
                 event.preventDefault();
                 event.stopPropagation();
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-                quickMakeCard([this.element]);
+                quickMakeCard(protyle, [this.element]);
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
@@ -387,7 +387,7 @@ export class Title {
                 label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 click: () => {
-                    quickMakeCard([this.element]);
+                    quickMakeCard(protyle, [this.element]);
                 }
             }];
             if (window.siyuan.config.flashcard.deck) {

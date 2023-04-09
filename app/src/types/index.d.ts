@@ -27,6 +27,8 @@ type TOperation =
     | "append"
     | "insertAttrViewBlock"
     | "removeAttrViewBlock"
+    | "addFlashcards"
+    | "removeFlashcards"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes"
 declare module "blueimp-md5"
 
@@ -247,13 +249,15 @@ interface IScrollAttr {
 
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
-    id: string,
+    id?: string,
     data?: string, // updateAttr 时为  { old: IObject, new: IObject }
     parentID?: string   // 为 insertAttrViewBlock 传 avid
     previousID?: string
     retData?: any
     nextID?: string // insert 专享
     srcIDs?: string[] // insertAttrViewBlock 专享
+    deckID?: string // add/removeFlashcards 专享
+    blockIDs?: string[] // add/removeFlashcards 专享
 }
 
 interface IObject {

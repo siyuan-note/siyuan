@@ -680,7 +680,7 @@ export class Gutter {
             iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
             icon: "iconRiffCard",
             click() {
-                quickMakeCard(selectsElement);
+                quickMakeCard(protyle, selectsElement);
             }
         }).element);
         if (window.siyuan.config.flashcard.deck) {
@@ -1468,7 +1468,7 @@ export class Gutter {
                 iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
                 icon: "iconRiffCard",
                 click() {
-                    quickMakeCard([nodeElement]);
+                    quickMakeCard(protyle, [nodeElement]);
                 }
             }).element);
             if (window.siyuan.config.flashcard.deck) {

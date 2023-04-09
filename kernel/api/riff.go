@@ -216,12 +216,21 @@ func removeRiffCards(c *gin.Context) {
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
 	}
-	err := model.RemoveFlashcardsByBlockIDs(deckID, blockIDs)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+
+	transactions := []*model.Transaction{
+		{
+			DoOperations: []*model.Operation{
+				{
+					Action:   "removeFlashcards",
+					DeckID:   deckID,
+					BlockIDs: blockIDs,
+				},
+			},
+		},
 	}
+
+	model.PerformTransactions(&transactions)
+	model.WaitForWritingFiles()
 
 	if "" != deckID {
 		deck := model.Decks[deckID]
@@ -245,12 +254,21 @@ func addRiffCards(c *gin.Context) {
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
 	}
-	err := model.AddFlashcards(deckID, blockIDs)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+
+	transactions := []*model.Transaction{
+		{
+			DoOperations: []*model.Operation{
+				{
+					Action:   "addFlashcards",
+					DeckID:   deckID,
+					BlockIDs: blockIDs,
+				},
+			},
+		},
 	}
+
+	model.PerformTransactions(&transactions)
+	model.WaitForWritingFiles()
 
 	deck := model.Decks[deckID]
 	ret.Data = deckData(deck)

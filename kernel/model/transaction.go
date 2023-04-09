@@ -106,6 +106,8 @@ func flushTx() {
 		case TxErrCodeBlockNotFound:
 			util.PushTxErr("Transaction failed", txErr.code, nil)
 			return
+		case TxErrCodeDataIsSyncing:
+			util.PushErrMsg(Conf.Language(81), 5000)
 		default:
 			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed: %s", txErr.msg)
 		}
@@ -155,6 +157,7 @@ func PerformTransactions(transactions *[]*Transaction) {
 
 const (
 	TxErrCodeBlockNotFound  = 0
+	TxErrCodeDataIsSyncing  = 1
 	TxErrCodeWriteTree      = 2
 	TxErrWriteAttributeView = 3
 )
@@ -208,7 +211,11 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		case "unfoldHeading":
 			ret = tx.doUnfoldHeading(op)
 		case "setAttrs":
-			ret = tx.setAttrs(op)
+			ret = tx.doSetAttrs(op)
+		case "addFlashcards":
+			ret = tx.doAddFlashcards(op)
+		case "removeFlashcards":
+			ret = tx.doRemoveFlashcards(op)
 		case "insertAttrViewBlock":
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
@@ -927,7 +934,7 @@ func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func (tx *Transaction) setAttrs(operation *Operation) (ret *TxErr) {
+func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
 	if nil != err {
@@ -968,7 +975,7 @@ func (tx *Transaction) setAttrs(operation *Operation) (ret *TxErr) {
 		}
 	}
 
-	if err = indexWriteJSONQueue(tree); nil != err {
+	if err = tx.writeTree(tree); nil != err {
 		return
 	}
 	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
@@ -1007,6 +1014,9 @@ type Operation struct {
 	PreviousID string      `json:"previousID"`
 	NextID     string      `json:"nextID"`
 	RetData    interface{} `json:"retData"`
+	BlockIDs   []string    `json:"blockIDs"`
+
+	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
 	SrcIDs []string `json:"srcIDs"` // 用于将块拖拽到属性视图中
 	Name   string   `json:"name"`   // 用于属性视图列名

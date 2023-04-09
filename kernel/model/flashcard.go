@@ -456,95 +456,20 @@ func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard) {
 	return
 }
 
-func RemoveFlashcardsByCardIDs(deckID string, cardIDs []string) (err error) {
+func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
 	if syncingStorages {
-		err = errors.New(Conf.Language(81))
+		ret = &TxErr{code: TxErrCodeDataIsSyncing}
 		return
 	}
 
-	var needRemoveDeckAttrBlockIDs []string
-	if "" == deckID {
-		// 在 All 卡包中移除
-		var affectedBlockIDs []string
-		for _, deck := range Decks {
-			changed := false
-			for _, cardID := range cardIDs {
-				card := deck.GetCard(cardID)
-				if nil == card {
-					continue
-				}
+	deckID := operation.DeckID
+	blockIDs := operation.BlockIDs
 
-				affectedBlockIDs = append(affectedBlockIDs, card.BlockID())
-				deck.RemoveCard(cardID)
-				changed = true
-			}
-
-			if changed {
-				if err = deck.Save(); nil != err {
-					return
-				}
-			}
-
-			// 检查刚刚移除的卡片关联的块是否还存在更多关联的卡片
-			affectedBlockIDs = gulu.Str.RemoveDuplicatedElem(affectedBlockIDs)
-			for _, blockID := range affectedBlockIDs {
-				moreRelatedCards := deck.GetCardsByBlockID(blockID)
-				if 1 > len(moreRelatedCards) {
-					needRemoveDeckAttrBlockIDs = append(needRemoveDeckAttrBlockIDs, blockID)
-				}
-			}
-		}
-	} else {
-		// 在指定卡包中移除
-		deck := Decks[deckID]
-		if nil == deck {
-			return
-		}
-
-		var affectedBlockIDs []string
-		for _, cardID := range cardIDs {
-			card := deck.GetCard(cardID)
-			if nil == card {
-				continue
-			}
-
-			affectedBlockIDs = append(affectedBlockIDs, card.BlockID())
-			deck.RemoveCard(cardID)
-			if err = deck.Save(); nil != err {
-				return
-			}
-		}
-
-		// 检查刚刚移除的卡片关联的块是否还存在更多关联的卡片
-		affectedBlockIDs = gulu.Str.RemoveDuplicatedElem(affectedBlockIDs)
-		for _, blockID := range affectedBlockIDs {
-			moreRelatedCards := deck.GetCardsByBlockID(blockID)
-			if 1 > len(moreRelatedCards) {
-				needRemoveDeckAttrBlockIDs = append(needRemoveDeckAttrBlockIDs, blockID)
-			}
-		}
-	}
-
-	if err = removeBlocksDeckAttr(needRemoveDeckAttrBlockIDs, deckID); nil != err {
-		return
-	}
-	return
-}
-
-func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
-	deckLock.Lock()
-	defer deckLock.Unlock()
-
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
-
-	if err = removeBlocksDeckAttr(blockIDs, deckID); nil != err {
-		return
+	if err := tx.removeBlocksDeckAttr(blockIDs, deckID); nil != err {
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
 	}
 
 	if "" == deckID { // 支持在 All 卡包中移除闪卡 https://github.com/siyuan-note/siyuan/issues/7425
@@ -557,7 +482,7 @@ func RemoveFlashcardsByBlockIDs(deckID string, blockIDs []string) (err error) {
 	return
 }
 
-func removeBlocksDeckAttr(blockIDs []string, deckID string) (err error) {
+func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (err error) {
 	var rootIDs []string
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
@@ -577,7 +502,7 @@ func removeBlocksDeckAttr(blockIDs []string, deckID string) (err error) {
 
 		tree := trees[rootID]
 		if nil == tree {
-			tree, _ = loadTreeByBlockID(blockID)
+			tree, _ = tx.loadTree(blockID)
 		}
 		if nil == tree {
 			continue
@@ -612,7 +537,7 @@ func removeBlocksDeckAttr(blockIDs []string, deckID string) (err error) {
 			node.SetIALAttr("custom-riff-decks", val)
 		}
 
-		if err = indexWriteJSONQueue(tree); nil != err {
+		if err = tx.writeTree(tree); nil != err {
 			return
 		}
 
@@ -643,14 +568,17 @@ func removeFlashcardsByBlockIDs(blockIDs []string, deck *riff.Deck) {
 	}
 }
 
-func AddFlashcards(deckID string, blockIDs []string) (err error) {
+func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
 	if syncingStorages {
-		err = errors.New(Conf.Language(81))
+		ret = &TxErr{code: TxErrCodeDataIsSyncing}
 		return
 	}
+
+	deckID := operation.DeckID
+	blockIDs := operation.BlockIDs
 
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
@@ -668,7 +596,7 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 
 		tree := trees[rootID]
 		if nil == tree {
-			tree, _ = loadTreeByBlockID(blockID)
+			tree, _ = tx.loadTree(blockID)
 		}
 		if nil == tree {
 			continue
@@ -691,8 +619,8 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 		val = strings.TrimSuffix(val, ",")
 		node.SetIALAttr("custom-riff-decks", val)
 
-		if err = indexWriteJSONQueue(tree); nil != err {
-			return
+		if err := tx.writeTree(tree); nil != err {
+			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
 		}
 
 		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
@@ -715,8 +643,8 @@ func AddFlashcards(deckID string, blockIDs []string) (err error) {
 		cardID := ast.NewNodeID()
 		deck.AddCard(cardID, blockID)
 	}
-	err = deck.Save()
-	if nil != err {
+
+	if err := deck.Save(); nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}

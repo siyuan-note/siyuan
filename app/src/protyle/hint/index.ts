@@ -162,6 +162,19 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             return;
         }
 
+        // https://github.com/siyuan-note/siyuan/issues/7933
+        if (this.splitChar === "#" ) {
+            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+            if (blockElement && blockElement.getAttribute("data-type") === "NodeHeading") {
+                const blockIndex = getSelectionOffset(protyle.toolbar.range.startContainer, blockElement).start
+                if (blockElement.textContent.startsWith("#".repeat(blockIndex))) {
+                    this.element.classList.add("fn__none");
+                    clearTimeout(this.timeId);
+                    return;
+                }
+            }
+        }
+
         if (this.splitChar === ":") {
             clearTimeout(this.timeId);
             if (key) {

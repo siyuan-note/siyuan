@@ -434,6 +434,10 @@
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;
     flex-wrap: initial;
+
+    & > div {
+      margin-right: 0;
+    }
   }
 }
 

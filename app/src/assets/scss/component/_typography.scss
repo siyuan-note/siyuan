@@ -29,6 +29,7 @@
     line-height: 1.625;
     padding: 4px;
     margin: 4px 0;
+    border-radius: 4px;
   }
 
   ins > iframe {
@@ -304,7 +305,7 @@
   }
 
   .hljs {
-    border-radius: 0 4px 4px 0;
+    border-radius: 4px;
     padding: 22px 4px;
     font-size: 85%;
     overflow: auto;

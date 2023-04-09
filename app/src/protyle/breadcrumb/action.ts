@@ -43,6 +43,10 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
 };
 
 export const fullscreen = (element: Element, btnElement?: Element) => {
+    setTimeout(() => {
+        hideAllElements(["gutter"]);
+    }, Constants.TIMEOUT_TRANSITION);   // 等待页面动画结束
+
     const isFullscreen = element.className.includes("fullscreen");
     if (isFullscreen) {
         element.classList.remove("fullscreen");
@@ -76,11 +80,6 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
     }
     /// #if !MOBILE
     if (element.classList.contains("protyle")) {
-        // 等待页面动画结束
-        setTimeout(() => {
-            hideAllElements(["gutter"]);
-        }, Constants.TIMEOUT_TRANSITION);
-
         window.siyuan.editorIsFullscreen = !isFullscreen;
     }
     getAllModels().editor.forEach(item => {

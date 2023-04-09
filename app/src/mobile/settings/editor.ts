@@ -7,7 +7,7 @@ const reloadEditor = (data: IEditor) => {
     window.siyuan.config.editor = data;
     reloadProtyle(window.siyuan.mobile.editor.protyle);
     setInlineStyle();
-}
+};
 
 export const initEditor = () => {
     openModel({
@@ -32,16 +32,16 @@ export const initEditor = () => {
                 modelMainElement.querySelector("#fontSize").textContent = event.target.value + "px";
                 window.siyuan.config.editor.fontSize = parseInt(event.target.value);
                 fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                    reloadEditor(response.data)
+                    reloadEditor(response.data);
                 });
             });
             const katexMacrosElement = modelMainElement.querySelector("#katexMacros") as HTMLTextAreaElement;
             katexMacrosElement.addEventListener("blur", () => {
                 window.siyuan.config.editor.katexMacros = katexMacrosElement.value;
                 fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                    reloadEditor(response.data)
+                    reloadEditor(response.data);
                 });
-            })
+            });
         }
     });
 };

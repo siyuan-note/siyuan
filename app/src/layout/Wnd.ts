@@ -32,7 +32,7 @@ import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
-import {focusByOffset, getSelectionOffset, getSelectionPosition} from "../protyle/util/selection";
+import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 
 export class Wnd {
     public id: string;
@@ -760,7 +760,7 @@ export class Wnd {
             id: string,
             start: number,
             end: number
-        }
+        };
         if (tab.model instanceof Editor && tab.model.editor.protyle.toolbar.range) {
             const blockElement = hasClosestBlock(tab.model.editor.protyle.toolbar.range.startContainer);
             if (blockElement) {
@@ -769,7 +769,7 @@ export class Wnd {
                     id: blockElement.getAttribute("data-node-id"),
                     start: startEnd.start,
                     end: startEnd.end
-                }
+                };
             }
         }
         this.element.querySelector(".layout-tab-container").append(tab.panelElement);

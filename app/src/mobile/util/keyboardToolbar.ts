@@ -260,7 +260,7 @@ export const showKeyboardToolbar = (height: number) => {
     toolbarElement.classList.remove("fn__none");
     const searchPathElement = document.getElementById("searchPath");
     if (searchPathElement) {
-        (searchPathElement.nextElementSibling as HTMLElement).style.marginBottom = "42px"
+        (searchPathElement.nextElementSibling as HTMLElement).style.marginBottom = "42px";
     }
     const range = getSelection().getRangeAt(0);
     if (!window.siyuan.mobile.editor ||
@@ -292,7 +292,7 @@ export const hideKeyboardToolbar = () => {
     window.siyuan.mobile.editor.protyle.element.style.marginBottom = "";
     const searchPathElement = document.getElementById("searchPath");
     if (searchPathElement) {
-        (searchPathElement.nextElementSibling as HTMLElement).style.marginBottom = ""
+        (searchPathElement.nextElementSibling as HTMLElement).style.marginBottom = "";
     }
 };
 

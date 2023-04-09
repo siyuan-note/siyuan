@@ -166,7 +166,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         if (this.splitChar === "#" ) {
             const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
             if (blockElement && blockElement.getAttribute("data-type") === "NodeHeading") {
-                const blockIndex = getSelectionOffset(protyle.toolbar.range.startContainer, blockElement).start
+                const blockIndex = getSelectionOffset(protyle.toolbar.range.startContainer, blockElement).start;
                 if (blockElement.textContent.startsWith("#".repeat(blockIndex))) {
                     this.element.classList.add("fn__none");
                     clearTimeout(this.timeId);

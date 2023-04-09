@@ -1,7 +1,6 @@
 import {exportLayout, getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {fetchPost} from "../util/fetch";
-import {isWindow} from "../util/functions";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);

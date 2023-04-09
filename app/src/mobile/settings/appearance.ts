@@ -1,7 +1,5 @@
 import {fetchPost} from "../../util/fetch";
-import {setInlineStyle} from "../../util/assets";
 import {genOptions} from "../../util/genOptions";
-import {reloadProtyle} from "../../protyle/util/reload";
 import {openModel} from "../menu/model";
 
 export const initAppearance = () => {

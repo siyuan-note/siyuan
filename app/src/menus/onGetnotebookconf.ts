@@ -56,7 +56,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
             bindEvent() {
                 bindSettingEvent(document.querySelector("#model"), data);
             }
-        })
+        });
     } else {
         const dialog = new Dialog({
             width: "80vw",
@@ -94,4 +94,4 @@ const bindSettingEvent = (contentElement: Element, data: INotebookConf) => {
             });
         });
     });
-}
+};

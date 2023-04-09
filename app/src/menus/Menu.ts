@@ -135,7 +135,7 @@ export class Menu {
             } else {
                 this.element.style.transform = "translateY(-100vh)";
             }
-        })
+        });
         this.element.lastElementChild.scrollTop = 0;
     }
 }

@@ -794,8 +794,8 @@ const getQueryTip = (method: number) => {
             methodTip += window.siyuan.languages.regex;
             break;
     }
-    return methodTip
-}
+    return methodTip;
+};
 
 const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle) => {
     const dialogElement = hasClosestByClassName(element, "b3-dialog--open");

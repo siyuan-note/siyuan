@@ -107,10 +107,10 @@ const updateConfig = (element: Element, newConfig: ISearchOption, config: ISearc
     }
     const searchPathElement = element.querySelector("#searchPath");
     if (newConfig.hPath) {
-        searchPathElement.classList.remove("fn__none")
+        searchPathElement.classList.remove("fn__none");
         searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(newConfig.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     } else {
-        searchPathElement.classList.add("fn__none")
+        searchPathElement.classList.add("fn__none");
     }
     if (config.group !== newConfig.group) {
         if (newConfig.group === 0) {
@@ -152,7 +152,7 @@ const updateConfig = (element: Element, newConfig: ISearchOption, config: ISearc
 };
 
 const onRecentBlocks = (data: IBlock[], matchedRootCount?: number, matchedBlockCount?: number) => {
-    const listElement = document.querySelector("#searchList")
+    const listElement = document.querySelector("#searchList");
     let resultHTML = "";
     data.forEach((item: IBlock, index: number) => {
         const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
@@ -191,7 +191,7 @@ ${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
     </span>
 </div>`;
     listElement.scrollTop = 0;
-    let countHTML = ""
+    let countHTML = "";
     if (matchedBlockCount) {
         countHTML = `<div class="b3-list--empty">${window.siyuan.languages.findInDoc.replace("${x}", matchedRootCount).replace("${y}", matchedBlockCount)}</div>`;
     }
@@ -242,8 +242,8 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
         }
         updateSearchResult(config, element);
     });
-    const replaceInputElement = element.querySelector(".toolbar .b3-text-field") as HTMLInputElement
-    replaceInputElement.value = config.r || ""
+    const replaceInputElement = element.querySelector(".toolbar .b3-text-field") as HTMLInputElement;
+    replaceInputElement.value = config.r || "";
 
     const criteriaData: ISearchOption[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData);
@@ -285,7 +285,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
             } else if (type === "remove-path") {
                 config.idPath = [];
                 config.hPath = "";
-                element.querySelector("#searchPath").classList.add("fn__none")
+                element.querySelector("#searchPath").classList.add("fn__none");
                 updateSearchResult(config, element);
                 const includeElement = element.querySelector('[data-type="include"]');
                 includeElement.classList.remove("toolbar__icon--active");
@@ -333,7 +333,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                         }
                         config.hPath = hPathList.join(" ");
 
-                        const searchPathElement = element.querySelector("#searchPath")
+                        const searchPathElement = element.querySelector("#searchPath");
                         searchPathElement.classList.remove("fn__none");
                         element.querySelector("#searchPath").innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
 
@@ -405,7 +405,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                             embedBlock: window.siyuan.config.search.embedBlock,
                         }
                     }, config);
-                })
+                });
                 window.siyuan.menus.menu.element.style.zIndex = "220";
                 window.siyuan.menus.menu.fullscreen();
                 event.stopPropagation();
@@ -413,14 +413,14 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                 break;
             } else if (type === "filter") {
                 filterMenu(config, () => {
-                    updateSearchResult(config, element)
+                    updateSearchResult(config, element);
                 });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "query") {
                 queryMenu(config, () => {
-                    updateSearchResult(config, element)
+                    updateSearchResult(config, element);
                 });
                 window.siyuan.menus.menu.element.style.zIndex = "220";
                 window.siyuan.menus.menu.fullscreen();

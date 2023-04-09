@@ -1,7 +1,6 @@
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 /// #endif
-import {isWindow} from "./functions";
 import {hideMessage, showMessage} from "../dialog/message";
 
 export const processMessage = (response: IWebSocketData) => {

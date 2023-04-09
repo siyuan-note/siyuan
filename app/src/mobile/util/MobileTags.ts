@@ -67,7 +67,7 @@ export class MobileTags {
                     }
                 } else {
                     const searchOption = Object.assign({}, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
-                    searchOption.k = `#${element.getAttribute("data-label")}#`
+                    searchOption.k = `#${element.getAttribute("data-label")}#`;
                     popSearch(searchOption);
                 }
             },

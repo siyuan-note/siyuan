@@ -94,10 +94,10 @@ export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
                     id: blockElement.getAttribute("data-node-id"),
                     start: startEnd.start,
                     end: startEnd.end
-                })
+                });
             }
         }
-    })
+    });
     newWnd.element.after(targetWnd.element);
     targetWnd.children.forEach((item) => {
         if (item.model instanceof Editor) {
@@ -107,7 +107,7 @@ export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
                 item.model.editor.protyle.toolbar.range = range;
             }
         }
-    })
+    });
     // 分割线
     newWnd.element.after(newWnd.element.previousElementSibling);
     newWnd.parent.children.find((item, index) => {

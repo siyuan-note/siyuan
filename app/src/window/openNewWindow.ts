@@ -21,7 +21,7 @@ export const openNewWindow = (tab: Tab) => {
 };
 
 export const openNewWindowById = (id: string) => {
-    fetchPost("api/block/getBlockInfo", {id}, (response) => {
+    fetchPost("/api/block/getBlockInfo", {id}, (response) => {
         if (response.code === 3) {
             showMessage(response.msg);
             return;

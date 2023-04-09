@@ -721,6 +721,10 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-init", async (event, data) => {
         const exitWS = workspaces.find(item => {
             if (data.id === item.id && item.workspaceDir) {
+                if (item.tray && "win32" === process.platform || "linux" === process.platform) {
+                    // Tray menu text does not change with the appearance language https://github.com/siyuan-note/siyuan/issues/7935
+                    resetTrayMenu(item.tray, data.languages, item.browserWindow);
+                }
                 return true;
             }
         });

@@ -18,7 +18,7 @@ export const previewImage = (src: string, id: string) => {
             });
             imagesElement.innerHTML = html;
             // @ts-ignore
-            const viewer = new Viewer(imagesElement, {
+            window.siyuan.viewer = new Viewer(imagesElement, {
                 title: [1, (image: HTMLImageElement, imageData: IObject) => {
                     let name = image.alt;
                     if (!name) {
@@ -31,7 +31,7 @@ export const previewImage = (src: string, id: string) => {
                 initialViewIndex,
                 transition: false,
                 hidden: function () {
-                    viewer.destroy();
+                    window.siyuan.viewer.destroy();
                 },
                 toolbar: {
                     zoomIn: true,
@@ -46,11 +46,11 @@ export const previewImage = (src: string, id: string) => {
                     flipHorizontal: true,
                     flipVertical: true,
                     close: function () {
-                        viewer.destroy();
+                        window.siyuan.viewer.destroy();
                     },
                 },
             });
-            viewer.show();
+            window.siyuan.viewer.show();
         });
     });
 };

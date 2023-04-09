@@ -235,6 +235,11 @@ interface ISiyuan {
     bookmarkLabel?: string[]
     blockPanels: import("../block/Panel").BlockPanel[],
     dialogs: import("../dialog").Dialog[],
+    viewer?: {
+        destroyed: boolean,
+        show: () => void,
+        destroy: () => void,
+    }
 }
 
 interface IScrollAttr {

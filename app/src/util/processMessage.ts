@@ -24,11 +24,7 @@ export const processMessage = (response: IWebSocketData) => {
         /// #if MOBILE
         window.location.reload();
         /// #else
-        if (isWindow()) {
-            window.location.reload();
-        } else {
-            exportLayout(true);
-        }
+        exportLayout(true);
         /// #endif
         return false;
     }

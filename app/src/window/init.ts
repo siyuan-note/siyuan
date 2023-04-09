@@ -15,6 +15,13 @@ export const init = () => {
     globalShortcut();
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
+
+        const layout = JSON.parse(sessionStorage.getItem("layout") || "{}");
+        if (layout.layout) {
+            JSONToCenter(layout.layout);
+            window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
+            return;
+        }
         const tabJSON = JSON.parse(getSearch("json"));
         tabJSON.active = true;
         JSONToCenter({
@@ -29,6 +36,7 @@ export const init = () => {
             }]
         });
         window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
+
     });
     initStatus(true);
     initWindow();

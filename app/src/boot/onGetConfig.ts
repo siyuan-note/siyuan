@@ -451,12 +451,12 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
-        window.addEventListener("beforeunload", () => {
-            exportLayout(false);
-        }, false);
-        window.addEventListener("pagehide", () => {
-            exportLayout(false);
-        }, false);
     }
+    window.addEventListener("beforeunload", () => {
+        exportLayout(false);
+    }, false);
+    window.addEventListener("pagehide", () => {
+        exportLayout(false);
+    }, false);
     /// #endif
 };

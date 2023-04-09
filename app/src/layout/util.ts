@@ -146,6 +146,22 @@ export const resetLayout = () => {
 };
 
 export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false, errorExit = false) => {
+    if (isWindow()) {
+        const layoutJSON: any = {
+            layout: {},
+        };
+        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
+        if (onlyData) {
+            return layoutJSON;
+        }
+        sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
+        if (reload) {
+            window.location.reload();
+        } else if (cb) {
+            cb();
+        }
+        return ;
+    }
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {
         return;

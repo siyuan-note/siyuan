@@ -15,15 +15,11 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
             closeTab(ipcData);
             break;
         case "lockscreen":
-            if (isWindow()) {
-                window.location.href = `/check-auth?url=${window.location.href}`;
-            } else {
-                exportLayout(false, () => {
-                    fetchPost("/api/system/logoutAuth", {}, () => {
-                        window.location.href = `/check-auth?url=${window.location.href}`;
-                    });
-                }, false, false);
-            }
+            exportLayout(false, () => {
+                fetchPost("/api/system/logoutAuth", {}, () => {
+                    window.location.href = `/check-auth?url=${window.location.href}`;
+                });
+            }, false, false);
             break;
     }
 };

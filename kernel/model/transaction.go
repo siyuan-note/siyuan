@@ -106,6 +106,8 @@ func flushTx() {
 		case TxErrCodeBlockNotFound:
 			util.PushTxErr("Transaction failed", txErr.code, nil)
 			return
+		case TxErrCodeDataIsSyncing:
+			util.PushErrMsg(Conf.Language(81), 5000)
 		default:
 			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed: %s", txErr.msg)
 		}

@@ -1185,7 +1185,11 @@ export class WYSIWYG {
                     focusSideBlock(embedElement);
                 }
                 protyle.gutter.renderMenu(protyle, embedElement);
+                /// #if MOBILE
+                window.siyuan.menus.menu.fullscreen();
+                /// #else
                 window.siyuan.menus.menu.popup({x, y});
+                /// #endif
                 return false;
             }
             protyle.toolbar.range = getEditorRange(protyle.element);
@@ -1252,7 +1256,11 @@ export class WYSIWYG {
                 if (protyle.gutter) {
                     protyle.gutter.renderMenu(protyle, nodeElement);
                 }
+                /// #if MOBILE
+                window.siyuan.menus.menu.fullscreen();
+                /// #else
                 window.siyuan.menus.menu.popup({x, y});
+                /// #endif
                 protyle.toolbar?.element.classList.add("fn__none");
             }
         });
@@ -1747,11 +1755,15 @@ export class WYSIWYG {
             const menuElement = hasClosestByClassName(event.target, "protyle-action__menu");
             if (menuElement) {
                 protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
+                /// #if MOBILE
+                window.siyuan.menus.menu.fullscreen();
+                /// #else
                 const rect = menuElement.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({
                     x: rect.left,
                     y: rect.top
                 }, true);
+                /// #endif
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1840,10 +1852,14 @@ export class WYSIWYG {
                             updateTransaction(protyle, actionElement.parentElement.getAttribute("data-node-id"), actionElement.parentElement.outerHTML, html);
                         } else {
                             protyle.gutter.renderMenu(protyle, actionElement.parentElement);
+                            /// #if MOBILE
+                            window.siyuan.menus.menu.fullscreen();
+                            /// #else
                             window.siyuan.menus.menu.popup({
                                 x: event.clientX - 16,
                                 y: event.clientY - 16
                             }, true);
+                            /// #endif
                         }
                     }
                 }

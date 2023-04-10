@@ -170,15 +170,18 @@ const hideKeyboardToolbarUtil = () => {
     toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconKeyboardHide");
 };
 
-const renderKeyboardToolbar = () => {
+export const renderKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
-        if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly ||
+        if (getSelection().rangeCount === 0 ||
+            window.siyuan.config.editor.readOnly ||
+            window.siyuan.config.readonly ||
             !document.activeElement || (
                 document.activeElement &&
                 document.activeElement.tagName !== "INPUT" &&
                 document.activeElement.tagName !== "TEXTAREA" &&
-                !document.activeElement.classList.contains("protyle-wysiwyg")
+                !document.activeElement.classList.contains("protyle-wysiwyg") &&
+                document.activeElement.getAttribute("contenteditable") !== "true"
             )) {
             hideKeyboardToolbar();
             return;

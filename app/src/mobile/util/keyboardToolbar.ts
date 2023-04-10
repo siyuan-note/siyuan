@@ -255,6 +255,9 @@ const renderKeyboardToolbar = () => {
 };
 
 export const showKeyboardToolbar = () => {
+    if (!showUtil) {
+        hideKeyboardToolbarUtil();
+    }
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (!toolbarElement.classList.contains("fn__none")) {
         return;

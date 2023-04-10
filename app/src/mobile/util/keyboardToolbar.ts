@@ -150,7 +150,8 @@ const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     showUtil = true;
 
     const toolbarElement = document.getElementById("keyboardToolbar");
-    const keyboardHeight = (parseInt(toolbarElement.getAttribute("data-keyboardheight")) + 42) + "px";
+    let keyboardHeight = toolbarElement.getAttribute("data-keyboardheight")
+    keyboardHeight = (keyboardHeight ? (parseInt(keyboardHeight) + 42) : window.innerHeight / 2) + "px";
     window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight;
     window.siyuan.mobile.editor.protyle.contentElement.scrollTop = oldScrollTop;
     setTimeout(() => {
@@ -172,17 +173,20 @@ const hideKeyboardToolbarUtil = () => {
 const renderKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
-        if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
+        if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly ||
+            !document.activeElement || (
+                document.activeElement &&
+                document.activeElement.tagName !== "INPUT" &&
+                document.activeElement.tagName !== "TEXTAREA" &&
+                !document.activeElement.classList.contains("protyle-wysiwyg")
+            )) {
+            hideKeyboardToolbar();
             return;
         }
         if (!showUtil) {
             hideKeyboardToolbarUtil();
         }
-        if (window.innerHeight + 200 > ((window.orientation === 90 || window.orientation === -90) ? screen.width : screen.height)) {
-            hideKeyboardToolbar();
-            return;
-        }
-
+        showKeyboardToolbar();
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = getSelection().getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
@@ -247,13 +251,8 @@ const renderKeyboardToolbar = () => {
     }, 620); // 需等待 range 更新
 };
 
-export const showKeyboardToolbar = (height: number) => {
-    if (getSelection().rangeCount === 0 || window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
-        return;
-    }
+const showKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
-    toolbarElement.setAttribute("data-keyboardheight", height.toString());
-    hideKeyboardToolbarUtil();
     if (!toolbarElement.classList.contains("fn__none")) {
         return;
     }

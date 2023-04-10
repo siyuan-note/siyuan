@@ -15,7 +15,7 @@ import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
-import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
+import {hideKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
@@ -84,7 +84,9 @@ class App {
 new App();
 
 window.goBack = goBack;
-window.showKeyboardToolbar = showKeyboardToolbar;
+window.showKeyboardToolbar = (height) => {
+    document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.innerHeight / 2 - 42).toString());
+};
 window.hideKeyboardToolbar = hideKeyboardToolbar;
 window.openFileByURL = (openURL) => {
     if (openURL && /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(openURL)) {

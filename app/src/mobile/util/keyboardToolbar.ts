@@ -170,7 +170,7 @@ const hideKeyboardToolbarUtil = () => {
     toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconKeyboardHide");
 };
 
-export const renderKeyboardToolbar = () => {
+const renderKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
         if (getSelection().rangeCount === 0 ||
@@ -254,7 +254,7 @@ export const renderKeyboardToolbar = () => {
     }, 620); // 需等待 range 更新
 };
 
-const showKeyboardToolbar = () => {
+export const showKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (!toolbarElement.classList.contains("fn__none")) {
         return;

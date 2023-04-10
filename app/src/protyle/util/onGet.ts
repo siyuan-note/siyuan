@@ -18,6 +18,7 @@ import {restoreScroll} from "../scroll/saveScroll";
 import {removeLoading} from "../ui/initUI";
 import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
+import {showMessage} from "../../dialog/message";
 
 export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: IScrollAttr, renderTitle = false) => {
     protyle.wysiwyg.element.removeAttribute("data-top");
@@ -294,8 +295,10 @@ const setHTML = (options: {
 
 export const disabledForeverProtyle = (protyle: IProtyle) => {
     disabledProtyle(protyle);
-    if (protyle.breadcrumb) {
+    if (protyle.breadcrumb && !isMobile()) {
         protyle.breadcrumb.element.nextElementSibling.textContent = window.siyuan.languages["_kernel"][81];
+    } else {
+        showMessage(window.siyuan.languages["_kernel"][81]);
     }
     protyle.element.setAttribute("disabled-forever", "true");
 };

@@ -135,6 +135,10 @@ export const goBack = () => {
         document.getElementById("sidebar").style.transform === "translateX(0px)") {
         closePanel();
         return;
+    } else if (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) {
+        hideElements(["util"], window.siyuan.mobile.editor.protyle);
+        closePanel();
+        return;
     }
     if (window.JSAndroid && window.siyuan.backStack.length < 1) {
         if (document.querySelector('#message [data-id="exitTip"]')) {

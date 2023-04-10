@@ -1340,6 +1340,154 @@ export class Toolbar {
         this.range = range;
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
+        this.subElement.style.width = "";
+        this.subElement.style.padding = "";
+        this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
+<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "min-width: 260px;max-width:50vw"}">
+    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
+        <input class="b3-text-field fn__flex-1"/>
+        <span class="fn__space"></span>
+        <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
+    </div>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
+</div>
+<div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none" : ""};overflow: auto;"></div>
+</div>`;
+        const listElement = this.subElement.querySelector(".b3-list");
+        const previewElement = this.subElement.firstElementChild.lastElementChild;
+        let previewPath = listElement.firstElementChild.getAttribute("data-value");
+        previewTemplate(previewPath, previewElement, protyle.block.parentID);
+        listElement.addEventListener("mouseover", (event) => {
+            const target = event.target as HTMLElement;
+            const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
+            if (!hoverItemElement) {
+                return;
+            }
+            const currentPath = hoverItemElement.getAttribute("data-value");
+            if (previewPath === currentPath) {
+                return;
+            }
+            previewPath = currentPath;
+            previewTemplate(previewPath, previewElement, protyle.block.parentID);
+        });
+        const inputElement = this.subElement.querySelector("input");
+        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            event.stopPropagation();
+            if (event.isComposing) {
+                return;
+            }
+            const isEmpty = !this.subElement.querySelector(".b3-list-item");
+            if (!isEmpty) {
+                const currentElement = upDownHint(listElement, event);
+                if (currentElement) {
+                    const currentPath = currentElement.getAttribute("data-value");
+                    if (previewPath === currentPath) {
+                        return;
+                    }
+                    previewPath = currentPath;
+                    previewTemplate(previewPath, previewElement, protyle.block.parentID);
+                }
+            }
+            if (event.key === "Enter") {
+                if (!isEmpty) {
+                    hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
+                } else {
+                    focusByRange(this.range);
+                }
+                this.subElement.classList.add("fn__none");
+                event.preventDefault();
+            } else if (event.key === "Escape") {
+                this.subElement.classList.add("fn__none");
+                focusByRange(this.range);
+            }
+        });
+        inputElement.addEventListener("input", (event) => {
+            event.stopPropagation();
+            fetchPost("/api/search/searchTemplate", {
+                k: inputElement.value,
+            }, (response) => {
+                let searchHTML = "";
+                response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
+                    searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
+                });
+                listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                const currentPath = response.data.blocks[0]?.path;
+                if (previewPath === currentPath) {
+                    return;
+                }
+                previewPath = currentPath;
+                previewTemplate(previewPath, previewElement, protyle.block.parentID);
+            });
+        });
+        this.subElement.lastElementChild.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            if (target.classList.contains("b3-list--empty")) {
+                this.subElement.classList.add("fn__none");
+                focusByRange(this.range);
+                event.stopPropagation();
+                return;
+            }
+            const iconElement = hasClosestByClassName(target, "b3-list-item__action");
+            /// #if !BROWSER
+            if (iconElement && iconElement.getAttribute("data-type") === "open") {
+                openBy(iconElement.parentElement.getAttribute("data-value"), "folder");
+                event.stopPropagation();
+                return;
+            }
+            /// #endif
+            if (iconElement && iconElement.getAttribute("data-type") === "remove") {
+                confirmDialog(window.siyuan.languages.remove, window.siyuan.languages.confirmDelete + "?", () => {
+                    fetchPost("/api/search/removeTemplate", {path: iconElement.parentElement.getAttribute("data-value")}, () => {
+                        if (iconElement.parentElement.parentElement.childElementCount === 1) {
+                            iconElement.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                            previewTemplate("", previewElement, protyle.block.parentID);
+                        } else {
+                            if (iconElement.parentElement.classList.contains("b3-list-item--focus")) {
+                                const sideElement = iconElement.parentElement.previousElementSibling || iconElement.parentElement.nextElementSibling;
+                                sideElement.classList.add("b3-list-item--focus");
+                                const currentPath = sideElement.getAttribute("data-value");
+                                if (previewPath === currentPath) {
+                                    return;
+                                }
+                                previewPath = currentPath;
+                                previewTemplate(previewPath, previewElement, protyle.block.parentID);
+                            }
+                            iconElement.parentElement.remove();
+                        }
+                    });
+                });
+                event.stopPropagation();
+                return;
+            }
+            const previousElement = hasClosestByAttribute(target, "data-type", "previous");
+            if (previousElement) {
+                inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
+                event.stopPropagation();
+                return;
+            }
+            const nextElement = hasClosestByAttribute(target, "data-type", "next");
+            if (nextElement) {
+                inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
+                event.stopPropagation();
+                return;
+            }
+            const listElement = hasClosestByClassName(target, "b3-list-item");
+            if (listElement) {
+                hintRenderTemplate(decodeURIComponent(listElement.getAttribute("data-value")), protyle, nodeElement);
+                event.stopPropagation();
+            }
+        });
+        this.subElement.classList.remove("fn__none");
+        this.subElementCloseCB = undefined;
+        /// #if !MOBILE
+        const rangePosition = getSelectionPosition(nodeElement, range);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+        (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
+        /// #endif
+        this.element.classList.add("fn__none");
+        inputElement.select();
         fetchPost("/api/search/searchTemplate", {
             k: "",
         }, (response) => {
@@ -1359,154 +1507,7 @@ export class Toolbar {
             if (html === "") {
                 html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             }
-            this.subElement.style.width = "";
-            this.subElement.style.padding = "";
-            this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "min-width: 260px;max-width:50vw"}">
-    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
-        <input class="b3-text-field fn__flex-1"/>
-        <span class="fn__space"></span>
-        <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
-        <span class="fn__space"></span>
-        <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
-    </div>
-    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
-</div>
-<div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none" : ""};overflow: auto;"></div>
-</div>`;
-            const listElement = this.subElement.querySelector(".b3-list");
-            const previewElement = this.subElement.firstElementChild.lastElementChild;
-            let previewPath = listElement.firstElementChild.getAttribute("data-value");
-            previewTemplate(previewPath, previewElement, protyle.block.parentID);
-            listElement.addEventListener("mouseover", (event) => {
-                const target = event.target as HTMLElement;
-                const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
-                if (!hoverItemElement) {
-                    return;
-                }
-                const currentPath = hoverItemElement.getAttribute("data-value");
-                if (previewPath === currentPath) {
-                    return;
-                }
-                previewPath = currentPath;
-                previewTemplate(previewPath, previewElement, protyle.block.parentID);
-            });
-            const inputElement = this.subElement.querySelector("input");
-            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                event.stopPropagation();
-                if (event.isComposing) {
-                    return;
-                }
-                const isEmpty = !this.subElement.querySelector(".b3-list-item");
-                if (!isEmpty) {
-                    const currentElement = upDownHint(listElement, event);
-                    if (currentElement) {
-                        const currentPath = currentElement.getAttribute("data-value");
-                        if (previewPath === currentPath) {
-                            return;
-                        }
-                        previewPath = currentPath;
-                        previewTemplate(previewPath, previewElement, protyle.block.parentID);
-                    }
-                }
-                if (event.key === "Enter") {
-                    if (!isEmpty) {
-                        hintRenderTemplate(decodeURIComponent(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value")), protyle, nodeElement);
-                    } else {
-                        focusByRange(this.range);
-                    }
-                    this.subElement.classList.add("fn__none");
-                    event.preventDefault();
-                } else if (event.key === "Escape") {
-                    this.subElement.classList.add("fn__none");
-                    focusByRange(this.range);
-                }
-            });
-            inputElement.addEventListener("input", (event) => {
-                event.stopPropagation();
-                fetchPost("/api/search/searchTemplate", {
-                    k: inputElement.value,
-                }, (response) => {
-                    let searchHTML = "";
-                    response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
-                        searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
-                    });
-                    listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                    const currentPath = response.data.blocks[0]?.path;
-                    if (previewPath === currentPath) {
-                        return;
-                    }
-                    previewPath = currentPath;
-                    previewTemplate(previewPath, previewElement, protyle.block.parentID);
-                });
-            });
-            this.subElement.lastElementChild.addEventListener("click", (event) => {
-                const target = event.target as HTMLElement;
-                if (target.classList.contains("b3-list--empty")) {
-                    this.subElement.classList.add("fn__none");
-                    focusByRange(this.range);
-                    event.stopPropagation();
-                    return;
-                }
-                const iconElement = hasClosestByClassName(target, "b3-list-item__action");
-                /// #if !BROWSER
-                if (iconElement && iconElement.getAttribute("data-type") === "open") {
-                    openBy(iconElement.parentElement.getAttribute("data-value"), "folder");
-                    event.stopPropagation();
-                    return;
-                }
-                /// #endif
-                if (iconElement && iconElement.getAttribute("data-type") === "remove") {
-                    confirmDialog(window.siyuan.languages.remove, window.siyuan.languages.confirmDelete + "?", () => {
-                        fetchPost("/api/search/removeTemplate", {path: iconElement.parentElement.getAttribute("data-value")}, () => {
-                            if (iconElement.parentElement.parentElement.childElementCount === 1) {
-                                iconElement.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                                previewTemplate("", previewElement, protyle.block.parentID);
-                            } else {
-                                if (iconElement.parentElement.classList.contains("b3-list-item--focus")) {
-                                    const sideElement = iconElement.parentElement.previousElementSibling || iconElement.parentElement.nextElementSibling;
-                                    sideElement.classList.add("b3-list-item--focus");
-                                    const currentPath = sideElement.getAttribute("data-value");
-                                    if (previewPath === currentPath) {
-                                        return;
-                                    }
-                                    previewPath = currentPath;
-                                    previewTemplate(previewPath, previewElement, protyle.block.parentID);
-                                }
-                                iconElement.parentElement.remove();
-                            }
-                        });
-                    });
-                    event.stopPropagation();
-                    return;
-                }
-                const previousElement = hasClosestByAttribute(target, "data-type", "previous");
-                if (previousElement) {
-                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
-                    event.stopPropagation();
-                    return;
-                }
-                const nextElement = hasClosestByAttribute(target, "data-type", "next");
-                if (nextElement) {
-                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
-                    event.stopPropagation();
-                    return;
-                }
-                const listElement = hasClosestByClassName(target, "b3-list-item");
-                if (listElement) {
-                    hintRenderTemplate(decodeURIComponent(listElement.getAttribute("data-value")), protyle, nodeElement);
-                    event.stopPropagation();
-                }
-            });
-            this.subElement.classList.remove("fn__none");
-            this.subElementCloseCB = undefined;
-            /// #if !MOBILE
-            const rangePosition = getSelectionPosition(nodeElement, range);
-            setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-            (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
-            /// #endif
-            this.element.classList.add("fn__none");
-            inputElement.select();
+            this.subElement.querySelector(".b3-list--background").innerHTML = html;
         });
     }
 
@@ -1514,6 +1515,56 @@ export class Toolbar {
         this.range = range;
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
+        this.subElement.style.width = "";
+        this.subElement.style.padding = "";
+        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+<div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height:64px" src="/stage/loading-pure.svg"></div>
+</div>`;
+
+        const inputElement = this.subElement.querySelector("input");
+        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            event.stopPropagation();
+            if (event.isComposing) {
+                return;
+            }
+            upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
+            if (event.key === "Enter") {
+                hintRenderWidget(this.subElement.querySelector(".b3-list-item--focus").textContent, protyle);
+                this.subElement.classList.add("fn__none");
+                event.preventDefault();
+            } else if (event.key === "Escape") {
+                this.subElement.classList.add("fn__none");
+                focusByRange(this.range);
+            }
+        });
+        inputElement.addEventListener("input", (event) => {
+            event.stopPropagation();
+            fetchPost("/api/search/searchWidget", {
+                k: inputElement.value,
+            }, (response) => {
+                let searchHTML = "";
+                response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
+                    searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
+                });
+                this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML;
+            });
+        });
+        this.subElement.lastElementChild.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            const listElement = hasClosestByClassName(target, "b3-list-item");
+            if (!listElement) {
+                return;
+            }
+            hintRenderWidget(listElement.textContent, protyle);
+        });
+        this.subElement.classList.remove("fn__none");
+        this.subElementCloseCB = undefined;
+        /// #if !MOBILE
+        const rangePosition = getSelectionPosition(nodeElement, range);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+        /// #endif
+        this.element.classList.add("fn__none");
+        inputElement.select();
         fetchPost("/api/search/searchWidget", {
             k: "",
         }, (response) => {
@@ -1521,56 +1572,7 @@ export class Toolbar {
             response.data.blocks.forEach((item: { content: string }, index: number) => {
                 html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
             });
-            this.subElement.style.width = "";
-            this.subElement.style.padding = "";
-            this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
-<div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
-</div>`;
-
-            const inputElement = this.subElement.querySelector("input");
-            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                event.stopPropagation();
-                if (event.isComposing) {
-                    return;
-                }
-                upDownHint(this.subElement.lastElementChild.lastElementChild as HTMLElement, event);
-                if (event.key === "Enter") {
-                    hintRenderWidget(this.subElement.querySelector(".b3-list-item--focus").textContent, protyle);
-                    this.subElement.classList.add("fn__none");
-                    event.preventDefault();
-                } else if (event.key === "Escape") {
-                    this.subElement.classList.add("fn__none");
-                    focusByRange(this.range);
-                }
-            });
-            inputElement.addEventListener("input", (event) => {
-                event.stopPropagation();
-                fetchPost("/api/search/searchWidget", {
-                    k: inputElement.value,
-                }, (response) => {
-                    let searchHTML = "";
-                    response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
-                        searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
-                    });
-                    this.subElement.firstElementChild.lastElementChild.innerHTML = searchHTML;
-                });
-            });
-            this.subElement.lastElementChild.addEventListener("click", (event) => {
-                const target = event.target as HTMLElement;
-                const listElement = hasClosestByClassName(target, "b3-list-item");
-                if (!listElement) {
-                    return;
-                }
-                hintRenderWidget(listElement.textContent, protyle);
-            });
-            this.subElement.classList.remove("fn__none");
-            this.subElementCloseCB = undefined;
-            /// #if !MOBILE
-            const rangePosition = getSelectionPosition(nodeElement, range);
-            setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-            /// #endif
-            this.element.classList.add("fn__none");
-            inputElement.select();
+            this.subElement.querySelector(".b3-list--background").innerHTML = html;
         });
     }
 
@@ -1578,6 +1580,107 @@ export class Toolbar {
         this.range = range;
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
+        this.subElement.style.width = "";
+        this.subElement.style.padding = "";
+        this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
+<div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:50vw"}">
+    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
+        <input class="b3-text-field fn__flex-1"/>
+        <span class="fn__space"></span>
+        <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
+        <span class="fn__space"></span>
+        <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
+    </div>
+    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
+</div>
+<div style="width: 260px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
+</div>`;
+        const listElement = this.subElement.querySelector(".b3-list");
+        listElement.addEventListener("mouseover", (event) => {
+            const target = event.target as HTMLElement;
+            const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
+            if (!hoverItemElement) {
+                return;
+            }
+            previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
+        });
+        const previewElement = this.subElement.firstElementChild.lastElementChild;
+        previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
+        const inputElement = this.subElement.querySelector("input");
+        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            event.stopPropagation();
+            if (event.isComposing) {
+                return;
+            }
+            const isEmpty = !this.subElement.querySelector(".b3-list-item");
+            if (!isEmpty) {
+                const currentElement = upDownHint(listElement, event);
+                if (currentElement) {
+                    previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
+                }
+            }
+
+            if (event.key === "Enter") {
+                if (!isEmpty) {
+                    hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
+                } else {
+                    focusByRange(this.range);
+                }
+                this.subElement.classList.add("fn__none");
+                // 空行处插入 mp3 会多一个空的 mp3 块
+                event.preventDefault();
+            } else if (event.key === "Escape") {
+                this.subElement.classList.add("fn__none");
+                focusByRange(this.range);
+            }
+        });
+        inputElement.addEventListener("input", (event) => {
+            event.stopPropagation();
+            fetchPost("/api/search/searchAsset", {
+                k: inputElement.value,
+            }, (response) => {
+                let searchHTML = "";
+                response.data.forEach((item: { path: string, hName: string }, index: number) => {
+                    searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
+                });
+                listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
+            });
+        });
+        this.subElement.lastElementChild.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            const previousElement = hasClosestByAttribute(target, "data-type", "previous");
+            if (previousElement) {
+                inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
+                event.stopPropagation();
+                return;
+            }
+            const nextElement = hasClosestByAttribute(target, "data-type", "next");
+            if (nextElement) {
+                inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
+                event.stopPropagation();
+                return;
+            }
+            if (target.classList.contains("b3-list--empty")) {
+                this.subElement.classList.add("fn__none");
+                focusByRange(this.range);
+                event.stopPropagation();
+                return;
+            }
+            const listItemElement = hasClosestByClassName(target, "b3-list-item");
+            if (listItemElement) {
+                event.stopPropagation();
+                hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
+            }
+        });
+        this.subElement.classList.remove("fn__none");
+        this.subElementCloseCB = undefined;
+        /// #if !MOBILE
+        const rangePosition = getSelectionPosition(nodeElement, range);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+        /// #endif
+        this.element.classList.add("fn__none");
+        inputElement.select();
         fetchPost("/api/search/searchAsset", {
             k: "",
         }, (response) => {
@@ -1588,107 +1691,7 @@ export class Toolbar {
             if (html === "") {
                 html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             }
-            this.subElement.style.width = "";
-            this.subElement.style.padding = "";
-            this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;${isMobile() ? "" : "max-width:50vw"}">
-    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
-        <input class="b3-text-field fn__flex-1"/>
-        <span class="fn__space"></span>
-        <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
-        <span class="fn__space"></span>
-        <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
-    </div>
-    <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
-</div>
-<div style="width: 260px;display: ${isMobile() || window.outerWidth < window.outerWidth / 2 + 260 ? "none" : "flex"};padding: 8px;overflow: auto;justify-content: center;align-items: center;"></div>
-</div>`;
-            const listElement = this.subElement.querySelector(".b3-list");
-            listElement.addEventListener("mouseover", (event) => {
-                const target = event.target as HTMLElement;
-                const hoverItemElement = hasClosestByClassName(target, "b3-list-item");
-                if (!hoverItemElement) {
-                    return;
-                }
-                previewElement.innerHTML = renderAssetsPreview(hoverItemElement.getAttribute("data-value"));
-            });
-            const previewElement = this.subElement.firstElementChild.lastElementChild;
-            previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
-            const inputElement = this.subElement.querySelector("input");
-            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                event.stopPropagation();
-                if (event.isComposing) {
-                    return;
-                }
-                const isEmpty = !this.subElement.querySelector(".b3-list-item");
-                if (!isEmpty) {
-                    const currentElement = upDownHint(listElement, event);
-                    if (currentElement) {
-                        previewElement.innerHTML = renderAssetsPreview(currentElement.getAttribute("data-value"));
-                    }
-                }
-
-                if (event.key === "Enter") {
-                    if (!isEmpty) {
-                        hintRenderAssets(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-value"), protyle);
-                    } else {
-                        focusByRange(this.range);
-                    }
-                    this.subElement.classList.add("fn__none");
-                    // 空行处插入 mp3 会多一个空的 mp3 块
-                    event.preventDefault();
-                } else if (event.key === "Escape") {
-                    this.subElement.classList.add("fn__none");
-                    focusByRange(this.range);
-                }
-            });
-            inputElement.addEventListener("input", (event) => {
-                event.stopPropagation();
-                fetchPost("/api/search/searchAsset", {
-                    k: inputElement.value,
-                }, (response) => {
-                    let searchHTML = "";
-                    response.data.forEach((item: { path: string, hName: string }, index: number) => {
-                        searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.hName}</div>`;
-                    });
-                    listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                    previewElement.innerHTML = renderAssetsPreview(listElement.firstElementChild.getAttribute("data-value"));
-                });
-            });
-            this.subElement.lastElementChild.addEventListener("click", (event) => {
-                const target = event.target as HTMLElement;
-                const previousElement = hasClosestByAttribute(target, "data-type", "previous");
-                if (previousElement) {
-                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
-                    event.stopPropagation();
-                    return;
-                }
-                const nextElement = hasClosestByAttribute(target, "data-type", "next");
-                if (nextElement) {
-                    inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
-                    event.stopPropagation();
-                    return;
-                }
-                if (target.classList.contains("b3-list--empty")) {
-                    this.subElement.classList.add("fn__none");
-                    focusByRange(this.range);
-                    event.stopPropagation();
-                    return;
-                }
-                const listItemElement = hasClosestByClassName(target, "b3-list-item");
-                if (listItemElement) {
-                    event.stopPropagation();
-                    hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
-                }
-            });
-            this.subElement.classList.remove("fn__none");
-            this.subElementCloseCB = undefined;
-            /// #if !MOBILE
-            const rangePosition = getSelectionPosition(nodeElement, range);
-            setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-            /// #endif
-            this.element.classList.add("fn__none");
-            inputElement.select();
+            this.subElement.querySelector(".b3-list--background").innerHTML = html;
         });
     }
 }

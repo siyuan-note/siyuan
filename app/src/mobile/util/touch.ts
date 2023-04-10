@@ -32,6 +32,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
+        (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
         hasClosestByClassName(target, "viewer-container") ||
         hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
@@ -157,6 +158,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY ||
         target.tagName === "AUDIO" ||
+        (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
         hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByClassName(target, "viewer-container") ||

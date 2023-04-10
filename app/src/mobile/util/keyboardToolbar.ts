@@ -385,6 +385,7 @@ export const initKeyboardToolbar = () => {
         const type = buttonElement.getAttribute("data-type");
         if (type === "done") {
             if (toolbarElement.clientHeight > 100) {
+                hideKeyboardToolbarUtil();
                 focusByRange(range);
             } else {
                 activeBlur();

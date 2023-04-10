@@ -164,6 +164,9 @@ const showKeyboardToolbarUtil = (oldScrollTop: number) => {
 
 const hideKeyboardToolbarUtil = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
+    if (toolbarElement.style.height === "") {
+        return;
+    }
     toolbarElement.style.height = "";
     window.siyuan.mobile.editor.protyle.element.style.marginBottom = "42px";
     toolbarElement.querySelector('.keyboard__action[data-type="add"]').classList.remove("protyle-toolbar__item--current");
@@ -441,6 +444,7 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
+                hideKeyboardToolbarUtil();
                 focusByRange(range);
             } else {
                 buttonElement.classList.add("protyle-toolbar__item--current");

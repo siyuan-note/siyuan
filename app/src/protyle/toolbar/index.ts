@@ -57,7 +57,11 @@ export class Toolbar {
         element.className = "protyle-toolbar fn__none";
         this.element = element;
         this.subElement = document.createElement("div");
+        /// #if MOBILE
+        this.subElement.className = "protyle-util fn__none protyle-util--mobile";
+        /// #else
         this.subElement.className = "protyle-util fn__none";
+        /// #endif
         this.toolbarHeight = 29;
 
         options.toolbar.forEach((menuItem: IMenuItem) => {
@@ -741,7 +745,6 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
         const html = nodeElement.outerHTML;
-        this.subElement.style.width = isMobile() ? "80vw" : Math.min(480, window.innerWidth) + "px";
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div class="b3-form__space--small">
 <label class="fn__flex">
@@ -801,8 +804,11 @@ export class Toolbar {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
         };
+        /// #if !MOBILE
+        this.subElement.style.width = Math.min(480, window.innerWidth) + "px";
         const nodeRect = refElement.getBoundingClientRect();
         setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height + 4);
+        /// #endif
         this.element.classList.add("fn__none");
         anchorElement.select();
     }
@@ -865,7 +871,7 @@ export class Toolbar {
             pinData.styleH = textElement.style.height;
             pinData.styleW = textElement.style.width;
         } else {
-            this.subElement.style.width = isMobile() ? "100vw" : "";
+            this.subElement.style.width = "";
             this.subElement.style.padding = "0";
         }
         this.subElement.innerHTML = `<div ${(isPin && this.subElement.firstElementChild.getAttribute("data-drag") === "true") ? 'data-drag="true"' : ""} class="block__popover--move"><div class="block__icons block__icons--border fn__flex">
@@ -883,11 +889,10 @@ export class Toolbar {
     <span class="fn__space"></span>
     <button data-type="close" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></button>
 </div>
-<textarea spellcheck="false" class="b3-text-field b3-text-field--text fn__block" placeholder="${placeholder}" style="width:${isMobile() ? "100vw" : Math.max(480, renderElement.clientWidth * 0.7) + "px"};max-height:50vh"></textarea></div>`;
+<textarea spellcheck="false" class="b3-text-field b3-text-field--text fn__block" placeholder="${placeholder}" style="${isMobile() ? "" : "width:" + Math.max(480, renderElement.clientWidth * 0.7) + "px"};max-height:50vh"></textarea></div>`;
         const autoHeight = () => {
             textElement.style.height = textElement.scrollHeight + "px";
             if (isMobile()) {
-                setPosition(this.subElement, 0, 0);
                 return;
             }
             if (this.subElement.firstElementChild.getAttribute("data-drag") === "true") {
@@ -1084,7 +1089,6 @@ export class Toolbar {
                 return;
             }
         });
-        this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = () => {
             if (!renderElement.parentElement) {
                 return;
@@ -1187,6 +1191,7 @@ export class Toolbar {
             }
             updateTransaction(protyle, id, newHTML, html);
         };
+        this.subElement.classList.remove("fn__none");
         const nodeRect = renderElement.getBoundingClientRect();
         this.element.classList.add("fn__none");
         if (isPin) {
@@ -1323,8 +1328,10 @@ export class Toolbar {
         });
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
+        /// #if !MOBILE
         const nodeRect = languageElement.getBoundingClientRect();
         setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height);
+        /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
     }
@@ -1355,7 +1362,7 @@ export class Toolbar {
             this.subElement.style.width = "";
             this.subElement.style.padding = "";
             this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="min-width: 260px;${isMobile() ? "" : "max-width:50vw"}">
+<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "min-width: 260px;max-width:50vw"}">
     <div class="fn__flex" style="margin: 4px 8px 8px 8px">
         <input class="b3-text-field fn__flex-1"/>
         <span class="fn__space"></span>
@@ -1491,11 +1498,13 @@ export class Toolbar {
                     event.stopPropagation();
                 }
             });
-            const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");
             this.subElementCloseCB = undefined;
+            /// #if !MOBILE
+            const rangePosition = getSelectionPosition(nodeElement, range);
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-            (this.subElement.firstElementChild as HTMLElement).style.maxHeight = (window.innerHeight - this.subElement.getBoundingClientRect().top - 16) + "px";
+            (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
+            /// #endif
             this.element.classList.add("fn__none");
             inputElement.select();
         });
@@ -1554,10 +1563,12 @@ export class Toolbar {
                 }
                 hintRenderWidget(listElement.textContent, protyle);
             });
-            const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");
             this.subElementCloseCB = undefined;
+            /// #if !MOBILE
+            const rangePosition = getSelectionPosition(nodeElement, range);
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+            /// #endif
             this.element.classList.add("fn__none");
             inputElement.select();
         });
@@ -1670,10 +1681,12 @@ export class Toolbar {
                     hintRenderAssets(listItemElement.getAttribute("data-value"), protyle);
                 }
             });
-            const rangePosition = getSelectionPosition(nodeElement, range);
             this.subElement.classList.remove("fn__none");
             this.subElementCloseCB = undefined;
+            /// #if !MOBILE
+            const rangePosition = getSelectionPosition(nodeElement, range);
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+            /// #endif
             this.element.classList.add("fn__none");
             inputElement.select();
         });

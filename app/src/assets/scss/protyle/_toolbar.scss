@@ -68,6 +68,13 @@
     padding: 8px;
     max-height: 80vh;
     z-index: 4;
+    box-sizing: border-box;
+
+    &--mobile {
+      top: 0;
+      left: 0;
+      width: 100vw;
+    }
   }
 
   &-font {

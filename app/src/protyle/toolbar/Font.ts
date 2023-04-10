@@ -22,8 +22,10 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElement.classList.remove("fn__none");
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
+            /// #if !MOBILE
             const position = getSelectionPosition(protyle.wysiwyg.element, protyle.toolbar.range);
             setPosition(protyle.toolbar.subElement, position.left, position.top + 18, 26);
+            /// #endif
         });
     }
 }
@@ -49,10 +51,13 @@ const fontMenu = (protyle: IProtyle) => {
     let lastColorHTML = "";
     const lastFonts = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (lastFonts.length > 0) {
-        lastColorHTML = `<div style="margin-bottom: 2px" class="fn__flex">
-    ${window.siyuan.languages.lastUsed}<span class="fn__space"></span>
-    <small class="ft__on-surface fn__flex-center">${updateHotkeyTip(window.siyuan.config.keymap.editor.insert.lastUsed.custom)}</small>
-</div><div class="fn__flex" style="align-items: center">`;
+        lastColorHTML = `<div class="fn__flex">
+    ${window.siyuan.languages.lastUsed}
+    <span class="fn__space"></span>
+    <kbd class="ft__on-surface fn__flex-center">${updateHotkeyTip(window.siyuan.config.keymap.editor.insert.lastUsed.custom)}</kbd>
+</div>
+<div class="fn__hr--small"></div>
+<div class="fn__flex" style="align-items: center">`;
         lastFonts.forEach((item: string) => {
             const lastFontStatus = item.split(Constants.ZWSP);
             switch (lastFontStatus[0]) {
@@ -83,20 +88,29 @@ const fontMenu = (protyle: IProtyle) => {
     if (textElement) {
         fontSize = textElement.style.fontSize || "16px";
     }
-    element.innerHTML = `${lastColorHTML}<div style="margin: 4px 0 2px">${window.siyuan.languages.colorFont}</div>
+    element.innerHTML = `${lastColorHTML}
+<div class="fn__hr"></div>
+<div>${window.siyuan.languages.colorFont}</div>
+<div class="fn__hr--small"></div>
 <div class="fn__flex">
     ${colorHTML}
 </div>
-<div style="margin: 4px 0 2px">${window.siyuan.languages["--b3-theme-background"]}</div>
+<div class="fn__hr"></div>
+<div>${window.siyuan.languages["--b3-theme-background"]}</div>
+<div class="fn__hr--small"></div>
 <div class="fn__flex">
     ${bgHTML}
 </div>
-<div style="margin: 4px 0 2px">${window.siyuan.languages.fontStyle}</div>
+<div class="fn__hr"></div>
+<div>${window.siyuan.languages.fontStyle}</div>
+<div class="fn__hr--small"></div>
 <div class="fn__flex">
     <button data-type="style2" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>
     <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>
 </div>
-<div style="margin: 4px 0 2px">${window.siyuan.languages.fontSize}</div>
+<div class="fn__hr"></div>
+<div>${window.siyuan.languages.fontSize}</div>
+<div class="fn__hr--small"></div>
 <div class="fn__flex">
     <select class="b3-select fn__block">
         <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
@@ -114,7 +128,9 @@ const fontMenu = (protyle: IProtyle) => {
     </select>
 </div>
 <div class="fn__hr"></div>
-<button class="b3-button b3-button--cancel" data-type="clear"><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.clearFontStyle}</button>`;
+<button class="b3-button b3-button--cancel" data-type="clear">
+    <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.clearFontStyle}
+</button>`;
     element.addEventListener("click", function (event: Event) {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {

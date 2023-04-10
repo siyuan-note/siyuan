@@ -430,6 +430,19 @@
   display: block;
 }
 
+.protyle{
+  &-util {
+    .color__square {
+      height: 24px;
+      width: 24px;
+    }
+  }
+
+  &-font {
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;

@@ -132,6 +132,8 @@ export const initFramework = () => {
     }
     document.getElementById("modelClose").addEventListener("click", () => {
         document.getElementById("model").style.transform = "";
+        activeBlur();
+        hideKeyboardToolbar();
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {

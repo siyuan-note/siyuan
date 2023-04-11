@@ -135,14 +135,17 @@ func getNotebookRiffDueCards(c *gin.Context) {
 
 	notebookID := arg["notebook"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
-	cards, err := model.GetNotebookDueFlashcards(notebookID, reviewedCardIDs)
+	cards, unreviewedCount, err := model.GetNotebookDueFlashcards(notebookID, reviewedCardIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	ret.Data = cards
+	ret.Data = map[string]interface{}{
+		"cards":           cards,
+		"unreviewedCount": unreviewedCount,
+	}
 }
 
 func getTreeRiffDueCards(c *gin.Context) {
@@ -156,14 +159,17 @@ func getTreeRiffDueCards(c *gin.Context) {
 
 	rootID := arg["rootID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
-	cards, err := model.GetTreeDueFlashcards(rootID, reviewedCardIDs)
+	cards, unreviewedCount, err := model.GetTreeDueFlashcards(rootID, reviewedCardIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	ret.Data = cards
+	ret.Data = map[string]interface{}{
+		"cards":           cards,
+		"unreviewedCount": unreviewedCount,
+	}
 }
 
 func getRiffDueCards(c *gin.Context) {
@@ -177,14 +183,17 @@ func getRiffDueCards(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
-	cards, err := model.GetDueFlashcards(deckID, reviewedCardIDs)
+	cards, unreviewedCount, err := model.GetDueFlashcards(deckID, reviewedCardIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	ret.Data = cards
+	ret.Data = map[string]interface{}{
+		"cards":           cards,
+		"unreviewedCount": unreviewedCount,
+	}
 }
 
 func getReviewedCards(arg map[string]interface{}) (ret []string) {

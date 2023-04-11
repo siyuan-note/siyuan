@@ -150,7 +150,7 @@ const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     showUtil = true;
 
     const toolbarElement = document.getElementById("keyboardToolbar");
-    let keyboardHeight = toolbarElement.getAttribute("data-keyboardheight")
+    let keyboardHeight = toolbarElement.getAttribute("data-keyboardheight");
     keyboardHeight = (keyboardHeight ? (parseInt(keyboardHeight) + 42) : window.innerHeight / 2) + "px";
     window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight;
     window.siyuan.mobile.editor.protyle.contentElement.scrollTop = oldScrollTop;

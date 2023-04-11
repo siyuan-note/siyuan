@@ -139,6 +139,10 @@ export const goBack = () => {
         hideElements(["util"], window.siyuan.mobile.editor.protyle);
         closePanel();
         return;
+    } else if (window.siyuan.dialogs.length !== 0) {
+        hideElements(["dialog"]);
+        closePanel();
+        return;
     }
     if (window.JSAndroid && window.siyuan.backStack.length < 1) {
         if (document.querySelector('#message [data-id="exitTip"]')) {

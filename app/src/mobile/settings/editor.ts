@@ -11,8 +11,8 @@ const reloadEditor = (data: IEditor) => {
 
 export const initEditor = () => {
     openModel({
-        title: window.siyuan.languages.riffCard,
-        icon: "iconRiffCard",
+        title: window.siyuan.languages.editor,
+        icon: "iconEdit",
         html: `<div class="b3-label">
     ${window.siyuan.languages.fontSize} <span id="fontSize" class="ft__on-surface">${window.siyuan.config.editor.fontSize}px</span>
     <div class="fn__hr"></div>

@@ -1095,15 +1095,17 @@ export class Toolbar {
             }
             let inlineLastNode: Element;
             if (types.includes("NodeHTMLBlock")) {
-                // 需 div 包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
                 let html = textElement.value;
                 if (html) {
+                    // 需 div 包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
                     if (!html.startsWith("<div>\n")) {
                         html = `<div>\n${html}`;
                     }
                     if (!html.endsWith("\n</div>")) {
                         html = `${html}\n</div>`;
                     }
+                    // 需移除换行 https://github.com/siyuan-note/siyuan/issues/7921
+                    html = html.replace(/\n\n/g, "\n");
                 }
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(html));
             } else if (isInlineMemo) {

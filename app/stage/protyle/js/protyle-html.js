@@ -13,8 +13,7 @@ class ProtyleHtml extends HTMLElement {
 
   attributeChangedCallback (name, oldValue, newValue) {
     if (name === 'data-content') {
-      const dataContent = Lute.UnEscapeHTMLStr(
-        this.getAttribute('data-content'))
+      const dataContent = Lute.UnEscapeHTMLStr(this.getAttribute('data-content'))
       this.display.innerHTML = dataContent
 
       const el = document.createElement('div')

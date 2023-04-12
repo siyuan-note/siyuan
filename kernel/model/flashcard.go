@@ -33,7 +33,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -367,32 +366,9 @@ func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDs []string) {
 		return
 	}
 
-	trees := []*parse.Tree{tree}
-	box := Conf.Box(tree.Box)
-	luteEngine := util.NewLute()
-	files := box.ListFiles(tree.Path)
-	for _, subFile := range files {
-		if !strings.HasSuffix(subFile.path, ".sy") {
-			continue
-		}
-
-		subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, luteEngine)
-		if nil != loadErr {
-			continue
-		}
-
-		trees = append(trees, subTree)
-	}
-
-	for _, t := range trees {
-		ast.Walk(t.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || !n.IsBlock() {
-				return ast.WalkContinue
-			}
-
-			treeBlockIDs = append(treeBlockIDs, n.ID)
-			return ast.WalkContinue
-		})
+	bts := treenode.GetBlockTreesByPathPrefix(strings.TrimSuffix(tree.Path, ".sy"))
+	for _, bt := range bts {
+		treeBlockIDs = append(treeBlockIDs, bt.ID)
 	}
 	return
 }

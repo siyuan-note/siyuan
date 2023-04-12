@@ -180,6 +180,21 @@ func RemoveBlockTreesByRootID(rootID string) {
 	}
 }
 
+func GetBlockTreesByPathPrefix(pathPrefix string) (ret []*BlockTree) {
+	blockTrees.Range(func(key, value interface{}) bool {
+		slice := value.(*btSlice)
+		slice.m.Lock()
+		for _, b := range slice.data {
+			if strings.HasPrefix(b.Path, pathPrefix) {
+				ret = append(ret, b)
+			}
+		}
+		slice.m.Unlock()
+		return true
+	})
+	return
+}
+
 func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 	var ids []string
 	blockTrees.Range(func(key, value interface{}) bool {

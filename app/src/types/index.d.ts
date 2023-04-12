@@ -198,6 +198,7 @@ interface ISiyuan {
     backStack?: IBackStack[],
     mobile?: {
         editor?: import("../protyle").Protyle
+        popEditor?: import("../protyle").Protyle
         files?: import("../mobile/util/MobileFiles").MobileFiles
     },
     user?: {

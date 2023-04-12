@@ -3,6 +3,7 @@ import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../.
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
+import {getCurrentEditor} from "../editor";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -152,8 +153,11 @@ const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     let keyboardHeight = toolbarElement.getAttribute("data-keyboardheight");
     keyboardHeight = (keyboardHeight ? (parseInt(keyboardHeight) + 42) : window.innerHeight / 2) + "px";
-    window.siyuan.mobile.editor.protyle.element.style.marginBottom = keyboardHeight;
-    window.siyuan.mobile.editor.protyle.contentElement.scrollTop = oldScrollTop;
+    const editor = getCurrentEditor();
+    if (editor) {
+        editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight;
+        editor.protyle.contentElement.scrollTop = oldScrollTop;
+    }
     setTimeout(() => {
         toolbarElement.style.height = keyboardHeight;
     }, Constants.TIMEOUT_TRANSITION); // 防止抖动
@@ -165,7 +169,10 @@ const showKeyboardToolbarUtil = (oldScrollTop: number) => {
 const hideKeyboardToolbarUtil = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.style.height = "";
-    window.siyuan.mobile.editor.protyle.element.style.marginBottom = "42px";
+    const editor = getCurrentEditor();
+    if (editor) {
+        editor.protyle.element.parentElement.style.paddingBottom = "42px";
+    }
     toolbarElement.querySelector('.keyboard__action[data-type="add"]').classList.remove("protyle-toolbar__item--current");
     toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconKeyboardHide");
 };
@@ -268,22 +275,23 @@ export const showKeyboardToolbar = () => {
         modelElement.style.paddingBottom = "42px";
     }
     const range = getSelection().getRangeAt(0);
-    if (!window.siyuan.mobile.editor ||
-        !window.siyuan.mobile.editor.protyle.wysiwyg.element.contains(range.startContainer)) {
-        return;
+    const editor = getCurrentEditor();
+    if (editor && editor.protyle.wysiwyg.element.contains(range.startContainer)) {
+        editor.protyle.element.parentElement.style.paddingBottom = "42px";
     }
-    window.siyuan.mobile.editor.protyle.element.style.marginBottom = "42px";
     setTimeout(() => {
-        const contentElement = window.siyuan.mobile.editor.protyle.contentElement;
-        const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
-        if (cursorTop < window.innerHeight - 96) {
-            return;
+        const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
+        if (contentElement) {
+            const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
+            if (cursorTop < window.innerHeight - 96) {
+                return;
+            }
+            contentElement.scroll({
+                top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 65) / 2 - 30),
+                left: contentElement.scrollLeft,
+                behavior: "smooth"
+            });
         }
-        contentElement.scroll({
-            top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 65) / 2 - 30),
-            left: contentElement.scrollLeft,
-            behavior: "smooth"
-        });
     }, Constants.TIMEOUT_TRANSITION);
 };
 
@@ -294,7 +302,10 @@ export const hideKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.classList.add("fn__none");
     toolbarElement.style.height = "";
-    window.siyuan.mobile.editor.protyle.element.style.marginBottom = "";
+    const editor = getCurrentEditor();
+    if (editor) {
+        editor.protyle.element.parentElement.style.paddingBottom = "";
+    }
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {
         modelElement.style.paddingBottom = "";

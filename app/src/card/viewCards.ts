@@ -39,11 +39,12 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
         <div class="fn__flex-1 card__empty">${window.siyuan.languages.emptyContent}</div>
     </div>
 </div>`,
-            width: isMobile() ? "98vw" : "80vw",
-            height: isMobile() ? "80vh" : "70vh",
+            width: isMobile() ? "100vw" : "80vw",
+            height: isMobile() ? "100vh" : "70vh",
             destroyCallback() {
                 if (edit) {
                     edit.destroy();
+                    window.siyuan.mobile.popEditor = null;
                 }
             }
         });
@@ -57,6 +58,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                 breadcrumbDocName: true
             },
         });
+        window.siyuan.mobile.popEditor = edit;
         if (window.siyuan.config.editor.readOnly) {
             disabledProtyle(edit.protyle);
         }

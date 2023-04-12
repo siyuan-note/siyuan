@@ -104,6 +104,12 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
 </div>`,
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100vh" : "70vh",
+        destroyCallback() {
+            if (editor) {
+                editor.destroy();
+                window.siyuan.mobile.popEditor = null;
+            }
+        }
     });
     (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
     (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
@@ -118,6 +124,7 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
         },
         typewriterMode: false
     });
+    window.siyuan.mobile.popEditor = editor;
     if (window.siyuan.config.editor.readOnly) {
         disabledProtyle(editor.protyle);
     }
@@ -137,7 +144,7 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
     const selectElement = dialog.element.querySelector("select");
     dialog.element.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
-        const titleElement = countElement.previousElementSibling;
+        const titleElement = countElement?.previousElementSibling;
         let type = "";
         if (typeof event.detail === "string") {
             if (event.detail === "1" || event.detail === "j") {
@@ -294,7 +301,7 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
     }
     selectElement.addEventListener("change", () => {
         fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {
-            blocks = cardsChangeResponse.data.blocks;
+            blocks = cardsChangeResponse.data.cards;
             index = 0;
             if (blocks.length > 0) {
                 nextCard({

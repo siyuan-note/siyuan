@@ -14,6 +14,10 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 
+export const getCurrentEditor = () => {
+    return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
+}
+
 export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id, action};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);

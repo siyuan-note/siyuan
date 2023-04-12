@@ -33,6 +33,9 @@ func importSY(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(200, ret)
 
+	util.PushEndlessProgress(model.Conf.Language(73))
+	defer util.ClearPushProgress(100)
+
 	form, err := c.MultipartForm()
 	if nil != err {
 		logging.LogErrorf("parse import .sy.zip failed: %s", err)
@@ -96,6 +99,9 @@ func importSY(c *gin.Context) {
 func importData(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+
+	util.PushEndlessProgress(model.Conf.Language(73))
+	defer util.ClearPushProgress(100)
 
 	form, err := c.MultipartForm()
 	if nil != err {

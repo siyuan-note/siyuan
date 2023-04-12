@@ -1,4 +1,6 @@
 {
+  "continueReview1": "繼續複習",
+  "continueReview2": "還有 <code class='fn__code'>${count}</code> 張卡片待複習，是否繼續？",
   "whatsNewInSiYuan": "思源筆記最新變化",
   "returnDesktop": "再按一次返回桌面",
   "enterNew": "回車創建",

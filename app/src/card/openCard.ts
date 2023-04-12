@@ -199,7 +199,7 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
                         index,
                         blocks
                     });
-                })
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -358,8 +358,8 @@ const nextCard = (options: {
 const allDone = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>) => {
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
-    const emptyElement = editor.protyle.element.nextElementSibling
-    emptyElement.innerHTML = `<div>🔮</div>${window.siyuan.languages.noDueCard}`
+    const emptyElement = editor.protyle.element.nextElementSibling;
+    emptyElement.innerHTML = `<div>🔮</div>${window.siyuan.languages.noDueCard}`;
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
@@ -376,4 +376,4 @@ const newRound = (countElement: Element, editor: Protyle, actionElements: NodeLi
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
-}
+};

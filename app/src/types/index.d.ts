@@ -346,7 +346,7 @@ declare interface IEditor {
     codeLigatures: boolean;
     codeTabSpaces: number;
     fontFamily: string;
-    virtualBlockRef: string;
+    virtualBlockRef: boolean;
     virtualBlockRefExclude: string;
     virtualBlockRefInclude: string;
     blockRefDynamicAnchorTextMaxLen: number;

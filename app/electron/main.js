@@ -357,13 +357,15 @@ const boot = () => {
     Menu.setApplicationMenu(menu);
     // 当前页面链接使用浏览器打开
     currentWindow.webContents.on("will-navigate", (event, url) => {
-        const currentURL = new URL(event.sender.getURL());
-        if (url.startsWith(getServer(currentURL.port))) {
+        if (event.sender) {
+          const currentURL = new URL(event.sender.getURL());
+          if (url.startsWith(getServer(currentURL.port))) {
             return;
-        }
+          }
 
-        event.preventDefault();
-        shell.openExternal(url);
+          event.preventDefault();
+          shell.openExternal(url);
+        }
     });
 
     currentWindow.on("close", (event) => {

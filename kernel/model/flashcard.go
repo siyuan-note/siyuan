@@ -320,7 +320,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 		return
 	}
 
-	cards, unreviewdCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs)
+	cards, unreviewedCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs)
 	now := time.Now()
 	for _, card := range cards {
 		blockID := card.BlockID()
@@ -329,7 +329,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 	if 1 > len(ret) {
 		ret = []*Flashcard{}
 	}
-	unreviewedCount = unreviewdCnt
+	unreviewedCount = unreviewedCnt
 	return
 }
 
@@ -444,6 +444,7 @@ func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewed
 	now := time.Now()
 	for _, deck := range Decks {
 		cards, unreviewedCnt := getDeckDueCards(deck, reviewedCardIDs, nil)
+		unreviewedCount += unreviewedCnt
 		for _, card := range cards {
 			blockID := card.BlockID()
 			if nil == treenode.GetBlockTree(blockID) {
@@ -451,7 +452,6 @@ func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewed
 			}
 
 			ret = append(ret, newFlashcard(card, blockID, deck.ID, now))
-			unreviewedCount += unreviewedCnt
 		}
 	}
 	if 1 > len(ret) {

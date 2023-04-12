@@ -37,6 +37,7 @@ import {openCardByData} from "../../card/openCard";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {viewCards} from "../../card/viewCards";
 import {getNotebookName, pathPosix} from "../../util/pathName";
+import {commonClick} from "../wysiwyg/commonClick";
 
 export class Title {
     public element: HTMLElement;
@@ -245,33 +246,7 @@ export class Title {
             fetchPost("/api/block/getDocInfo", {
                 id: protyle.block.rootID
             }, (response) => {
-                const attrBookmarkElement = hasClosestByClassName(event.target, "protyle-attr--bookmark");
-                if (attrBookmarkElement) {
-                    openFileAttr(response.data.ial, protyle.block.rootID, "bookmark");
-                    event.stopPropagation();
-                    return;
-                }
-
-                const attrNameElement = hasClosestByClassName(event.target, "protyle-attr--name");
-                if (attrNameElement) {
-                    openFileAttr(response.data.ial, protyle.block.rootID, "name");
-                    event.stopPropagation();
-                    return;
-                }
-
-                const attrAliasElement = hasClosestByClassName(event.target, "protyle-attr--alias");
-                if (attrAliasElement) {
-                    openFileAttr(response.data.ial, protyle.block.rootID, "alias");
-                    event.stopPropagation();
-                    return;
-                }
-
-                const attrMemoElement = hasClosestByClassName(event.target, "protyle-attr--memo");
-                if (attrMemoElement) {
-                    openFileAttr(response.data.ial, protyle.block.rootID, "memo");
-                    event.stopPropagation();
-                    return;
-                }
+                commonClick(event, protyle, response.data.ial);
             });
         });
     }

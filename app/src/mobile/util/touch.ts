@@ -42,8 +42,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
     ) {
         return;
     }
-
-    window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "";
+    if (window.siyuan.mobile.editor) {
+        window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "";
+    }
 
     // 有些事件不经过 touchstart 和 touchmove，因此需设置为 null 不再继续执行
     clientX = null;
@@ -243,7 +244,9 @@ export const handleTouchMove = (event: TouchEvent) => {
         }
         activeBlur();
         hideKeyboardToolbar();
-        window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
+        if (window.siyuan.mobile.editor) {
+            window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
+        }
     }
 };
 

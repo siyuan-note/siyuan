@@ -86,17 +86,36 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
         } else if (response.code !== 1) {
             syncListHTML = '<div class="fn__hr"></div><ul class="b3-list b3-list--background fn__flex-1" style="overflow: auto;">';
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
-                syncListHTML += `<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
+                /// #if MOBILE
+                syncListHTML += `<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--two">
+    <div class="b3-list-item__first">
+        <input type="radio" name="cloudName"${item.cloudName === response.data.checkedSyncDir ? " checked" : ""}/>
+        <span class="fn__space"></span>
+        <span>${item.cloudName}</span>
+        <span class="fn__flex-1 fn__space"></span>
+        <span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>
+        </span>
+    </div>
+    <div class="b3-list-item__meta fn__flex">
+        <span>${item.hSize}</span>
+        <span class="fn__flex-1 fn__space"></span>
+        <span>${item.updated}</span>
+    </div>
+</li>`;
+                /// #else
+                syncListHTML += `<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--hide-action">
 <input type="radio" name="cloudName"${item.cloudName === response.data.checkedSyncDir ? " checked" : ""}/>
 <span class="fn__space"></span>
 <span>${item.cloudName}</span>
 <span class="fn__space"></span>
 <span class="ft__on-surface">${item.hSize}</span>
-<span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${item.updated}</span>
+<span class="b3-list-item__meta">${item.updated}</span>
 <span class="fn__flex-1 fn__space"></span>
 <span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span></li>`;
+                /// #endif
             });
             syncListHTML += `</ul>
 <div class="fn__hr"></div>

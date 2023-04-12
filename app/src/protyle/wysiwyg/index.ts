@@ -1490,9 +1490,12 @@ export class WYSIWYG {
                 const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id");
                 if (breadcrumbId) {
                     if (ctrlIsPressed) {
-                        openFileById({
-                            id: breadcrumbId,
-                            action: breadcrumbId === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
+                        fetchPost("/api/block/checkBlockFold", {id: breadcrumbId}, (foldResponse) => {
+                            openFileById({
+                                id: breadcrumbId,
+                                action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                                zoomIn: foldResponse.data
+                            });
                         });
                     } else {
                         loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);

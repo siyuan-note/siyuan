@@ -258,12 +258,12 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
                         deckID: selectElement?.value,
                         notebook: titleElement.getAttribute("data-notebookid"),
                         reviewedCards: blocks
-                    }, (treeCards) => {
+                    }, (result) => {
                         index = 0;
-                        blocks = treeCards.data.cards;
+                        blocks = result.data.cards;
                         if (blocks.length === 0) {
-                            if (treeCards.data.unreviewedCount > 0) {
-                                newRound(countElement, editor, actionElements);
+                            if (result.data.unreviewedCount > 0) {
+                                newRound(countElement, editor, actionElements, result.data.unreviewedCount);
                             } else {
                                 allDone(countElement, editor, actionElements);
                             }
@@ -354,12 +354,12 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
     actionElements[1].classList.add("fn__none");
 };
 
-const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>) => {
+const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
-    emptyElement.innerHTML = `<div>🆕</div>
-<button data-type="newround" class="b3-button">Start</button>`;
+    emptyElement.innerHTML = `<div>♻️ ${window.siyuan.languages.continueReview2.replace("${count}", unreviewedCount)}</div>
+<button data-type="newround" class="b3-button">${window.siyuan.languages.continueReview1}</button>`;
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");

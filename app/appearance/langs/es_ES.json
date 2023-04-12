@@ -1,4 +1,6 @@
 {
+  "continueReview1": "Continuar revisión",
+  "continueReview2": "Todavía hay tarjetas <code class='fn__code'>${count}</code> para revisar, ¿continuar?",
   "whatsNewInSiYuan": "Novedades en SiYuan",
   "returnDesktop": "Presiona volver de nuevo al escritorio",
   "enterNew": "Ingresar para crear",

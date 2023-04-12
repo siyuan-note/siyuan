@@ -30,6 +30,10 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
         <span class="fn__flex-center ft__on-surface">${pageIndex}/${response.data.pageCount || 1}</span>
         <span class="fn__space"></span>
         <span class="counter">${response.data.total}</span>
+        ${isMobile() ? `<span class="fn__space"></span>
+<div data-type="close" class="block__icon block__icon--show">
+    <svg><use xlink:href="#iconCloseRound"></use></svg>
+</div>` : ""}
     </div>
     <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1" style="min-height: auto">
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
@@ -74,7 +78,12 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
             let target = event.target as HTMLElement;
             while (target && !dialog.element.isSameNode(target)) {
                 const type = target.getAttribute("data-type");
-                if (type === "previous") {
+                if (type === "close") {
+                    dialog.destroy();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "previous") {
                     if (pageIndex <= 1) {
                         return;
                     }

@@ -403,6 +403,10 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	assets := assetsLinkDestsInTree(tree)
 	for _, asset := range assets {
 		if strings.HasPrefix(asset, "assets/") {
+			if strings.Contains(asset, "?") {
+				asset = asset[:strings.LastIndex(asset, "?")]
+			}
+
 			srcAbsPath, err := GetAssetAbsPath(asset)
 			if nil != err {
 				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)

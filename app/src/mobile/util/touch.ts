@@ -2,6 +2,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/h
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
+import {getCurrentEditor} from "../editor";
 
 let clientX: number;
 let clientY: number;
@@ -22,7 +23,7 @@ const popSide = (render = true) => {
 };
 
 export const handleTouchEnd = (event: TouchEvent) => {
-    if (window.siyuan.mobile.editor) {
+    if (getCurrentEditor()) {
         document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
             item.classList.remove("protyle-breadcrumb__bar--hide");
         });
@@ -32,9 +33,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
+        hasClosestByClassName(target, "b3-dialog", true) ||
         (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
         hasClosestByClassName(target, "viewer-container") ||
-        hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByAttribute(target, "id", "commonMenu") ||
         hasClosestByAttribute(target, "id", "model")
@@ -158,8 +159,8 @@ export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY ||
         target.tagName === "AUDIO" ||
+        hasClosestByClassName(target, "b3-dialog", true) ||
         (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
-        hasClosestByClassName(target, "b3-dialog") ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByClassName(target, "viewer-container") ||
         hasClosestByAttribute(target, "id", "commonMenu") ||

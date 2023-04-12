@@ -193,6 +193,16 @@ const renderKeyboardToolbar = () => {
             hideKeyboardToolbar();
             return;
         }
+        // 编辑器设置界面点击空白或关闭，焦点不知何故会飘移到编辑器上
+        if (document.activeElement &&
+            document.activeElement.tagName !== "INPUT" &&
+            document.activeElement.tagName !== "TEXTAREA" && (
+                document.getElementById("menu").style.transform === "translateX(0px)" ||
+                document.getElementById("model").style.transform === "translateY(0px)"
+            )) {
+            hideKeyboardToolbar();
+            return;
+        }
         if (!showUtil) {
             hideKeyboardToolbarUtil();
         }

@@ -107,7 +107,9 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
         destroyCallback() {
             if (editor) {
                 editor.destroy();
-                window.siyuan.mobile.popEditor = null;
+                if (window.siyuan.mobile) {
+                    window.siyuan.mobile.popEditor = null;
+                }
             }
         }
     });
@@ -124,7 +126,9 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
         },
         typewriterMode: false
     });
-    window.siyuan.mobile.popEditor = editor;
+    if (window.siyuan.mobile) {
+        window.siyuan.mobile.popEditor = editor;
+    }
     if (window.siyuan.config.editor.readOnly) {
         disabledProtyle(editor.protyle);
     }
@@ -365,7 +369,9 @@ const newRound = (countElement: Element, editor: Protyle, actionElements: NodeLi
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
-    emptyElement.innerHTML = `<div>♻️ ${window.siyuan.languages.continueReview2.replace("${count}", unreviewedCount)}</div>
+    emptyElement.innerHTML = `<div>♻️ </div>
+<span>${window.siyuan.languages.continueReview2.replace("${count}", unreviewedCount)}</span>
+<div class="fn__hr"></div>
 <button data-type="newround" class="b3-button">${window.siyuan.languages.continueReview1}</button>`;
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");

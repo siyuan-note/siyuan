@@ -48,7 +48,9 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
             destroyCallback() {
                 if (edit) {
                     edit.destroy();
-                    window.siyuan.mobile.popEditor = null;
+                    if (window.siyuan.mobile) {
+                        window.siyuan.mobile.popEditor = null;
+                    }
                 }
             }
         });
@@ -62,7 +64,9 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                 breadcrumbDocName: true
             },
         });
-        window.siyuan.mobile.popEditor = edit;
+        if (window.siyuan.mobile) {
+            window.siyuan.mobile.popEditor = edit;
+        }
         if (window.siyuan.config.editor.readOnly) {
             disabledProtyle(edit.protyle);
         }

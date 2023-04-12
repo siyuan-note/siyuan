@@ -578,7 +578,7 @@ func isProviderOnline() (ret bool) {
 	}
 
 	if ret = util.IsOnline(checkURL, skipTlsVerify); !ret {
-		util.PushErrMsg(Conf.Language(76), 5000)
+		util.PushErrMsg(Conf.Language(76) + " (Provider: " + conf.ProviderToStr(Conf.Sync.Provider) + ")", 5000)
 	}
 	return
 }

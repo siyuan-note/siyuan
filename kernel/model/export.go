@@ -592,8 +592,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 				return
 			}
 		}
-	} else if pdf && !image { // 导出 PDF 需要将资源文件路径改为 HTTP 伺服
-		luteEngine.RenderOptions.LinkBase = "http://" + util.LocalHost + ":" + util.ServerPort + "/"
 	}
 
 	if pdf {
@@ -685,21 +683,10 @@ func ProcessPDF(id, p string, merge, removeAssets bool) (err error) {
 	}
 
 	var headings []*ast.Node
-	var assetDests []string
+	assetDests := assetsLinkDestsInTree(tree)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
-		}
-
-		if n.IsTextMarkType("a") {
-			dest := n.TextMarkAHref
-			if util.IsAssetLinkDest([]byte(dest)) {
-				assetDests = append(assetDests, dest)
-			}
-		} else if ast.NodeLinkDest == n.Type {
-			if util.IsAssetLinkDest(n.Tokens) {
-				assetDests = append(assetDests, string(n.Tokens))
-			}
 		}
 
 		if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
@@ -833,6 +820,9 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 	for _, link := range assetLinks {
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/export/temp/", "")
 		link.URI, _ = url.PathUnescape(link.URI)
+		if idx := strings.Index(link.URI, "?"); 0 < idx {
+			link.URI = link.URI[:idx]
+		}
 
 		if !removeAssets {
 			// 不移除资源文件夹的话将超链接指向资源文件夹

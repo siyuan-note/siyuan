@@ -47,14 +47,24 @@ func GetFlashcardNotebooks() (ret []*Box) {
 
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
-		if isNotebookContainFlashcard(box.ID, deckBlockIDs) {
+		if isBoxContainFlashcard(box.ID, deckBlockIDs) {
 			ret = append(ret, box)
 		}
 	}
 	return
 }
 
-func isNotebookContainFlashcard(boxID string, deckBlockIDs []string) (ret bool) {
+func isTreeContainFlashcard(rootID string, deckBlockIDs []string) (ret bool) {
+	blockIDs := getTreeSubTreeChildBlocks(rootID)
+	for _, blockID := range deckBlockIDs {
+		if gulu.Str.Contains(blockID, blockIDs) {
+			return true
+		}
+	}
+	return
+}
+
+func isBoxContainFlashcard(boxID string, deckBlockIDs []string) (ret bool) {
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
 	if nil != err {
 		logging.LogErrorf("read dir failed: %s", err)
@@ -71,11 +81,8 @@ func isNotebookContainFlashcard(boxID string, deckBlockIDs []string) (ret bool) 
 		}
 
 		rootID := strings.TrimSuffix(entry.Name(), ".sy")
-		blockIDs := getTreeSubTreeChildBlocks(rootID)
-		for _, blockID := range deckBlockIDs {
-			if gulu.Str.Contains(blockID, blockIDs) {
-				return true
-			}
+		if isTreeContainFlashcard(rootID, deckBlockIDs) {
+			return true
 		}
 	}
 	return

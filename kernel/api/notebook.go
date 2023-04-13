@@ -308,9 +308,25 @@ func lsNotebooks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	notebooks, err := model.ListNotebooks()
-	if nil != err {
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
 		return
+	}
+
+	flashcard := false
+	if arg["flashcard"] != nil {
+		flashcard = arg["flashcard"].(bool)
+	}
+
+	var notebooks []*model.Box
+	if flashcard {
+		notebooks = model.GetFlashcardNotebooks()
+	} else {
+		var err error
+		notebooks, err = model.ListNotebooks()
+		if nil != err {
+			return
+		}
 	}
 
 	ret.Data = map[string]interface{}{

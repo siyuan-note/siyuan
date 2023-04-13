@@ -27,16 +27,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getRiffCardNotebooks(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	notebooks := model.GetFlashcardNotebooks()
-	ret.Data = map[string]interface{}{
-		"notebooks": notebooks,
-	}
-}
-
 func getNotebookRiffCards(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

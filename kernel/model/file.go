@@ -141,8 +141,17 @@ func (box *Box) moveCorruptedData(filePath string) {
 	logging.LogWarnf("moved corrupted data file [%s] to [%s]", filePath, to)
 }
 
-func SearchDocsByKeyword(keyword string) (ret []map[string]string) {
+func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]string) {
 	ret = []map[string]string{}
+
+	var deckBlockIDs []string
+	if flashcard {
+		deck := Decks[builtinDeckID]
+		if nil != deck {
+			return
+		}
+		deckBlockIDs = deck.GetBlockIDs()
+	}
 
 	openedBoxes := Conf.GetOpenedBoxes()
 	boxes := map[string]*Box{}
@@ -154,7 +163,13 @@ func SearchDocsByKeyword(keyword string) (ret []map[string]string) {
 	if "" != keyword {
 		for _, box := range boxes {
 			if strings.Contains(box.Name, keyword) {
-				ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+				if flashcard {
+					if isBoxContainFlashcard(box.ID, deckBlockIDs) {
+						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+					}
+				} else {
+					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+				}
 			}
 		}
 
@@ -168,17 +183,29 @@ func SearchDocsByKeyword(keyword string) (ret []map[string]string) {
 		rootBlocks = sql.QueryRootBlockByCondition(condition)
 	} else {
 		for _, box := range boxes {
-			ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+			if flashcard {
+				if isBoxContainFlashcard(box.ID, deckBlockIDs) {
+					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+				}
+			} else {
+				ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+			}
 		}
 	}
 
-	for _, block := range rootBlocks {
-		b := boxes[block.Box]
+	for _, rootBlock := range rootBlocks {
+		b := boxes[rootBlock.Box]
 		if nil == b {
 			continue
 		}
-		hPath := b.Name + block.HPath
-		ret = append(ret, map[string]string{"path": block.Path, "hPath": hPath, "box": block.Box, "boxIcon": b.Icon})
+		hPath := b.Name + rootBlock.HPath
+		if flashcard {
+			if isTreeContainFlashcard(rootBlock.ID, deckBlockIDs) {
+				ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon})
+			}
+		} else {
+			ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon})
+		}
 	}
 
 	sort.Slice(ret, func(i, j int) bool {
@@ -194,13 +221,22 @@ type FileInfo struct {
 	isdir bool
 }
 
-func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err error) {
+func ListDocTree(boxID, path string, sortMode int, flashcard bool) (ret []*File, totals int, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")
 	//pprof.StartCPUProfile(cpuProfile)
 	//defer pprof.StopCPUProfile()
 
 	ret = []*File{}
+
+	var deckBlockIDs []string
+	if flashcard {
+		deck := Decks[builtinDeckID]
+		if nil != deck {
+			return
+		}
+		deckBlockIDs = deck.GetBlockIDs()
+	}
 
 	box := Conf.Box(boxID)
 	if nil == box {
@@ -247,7 +283,15 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 						}
 					}
 				}
-				docs = append(docs, doc)
+
+				if flashcard {
+					rootID := strings.TrimSuffix(filepath.Base(parentDocPath), ".sy")
+					if isTreeContainFlashcard(rootID, deckBlockIDs) {
+						docs = append(docs, doc)
+					}
+				} else {
+					docs = append(docs, doc)
+				}
 			}
 			continue
 		}
@@ -259,8 +303,15 @@ func ListDocTree(boxID, path string, sortMode int) (ret []*File, totals int, err
 
 		if ial := box.docIAL(file.path); nil != ial {
 			doc := box.docFromFileInfo(file, ial)
-			docs = append(docs, doc)
-			continue
+
+			if flashcard {
+				rootID := strings.TrimSuffix(filepath.Base(file.path), ".sy")
+				if isTreeContainFlashcard(rootID, deckBlockIDs) {
+					docs = append(docs, doc)
+				}
+			} else {
+				docs = append(docs, doc)
+			}
 		}
 	}
 	elapsed = time.Now().Sub(start).Milliseconds()

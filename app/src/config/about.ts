@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 /// #if !BROWSER
-import {app, shell} from "electron";
+import {ipcRenderer, shell} from "electron";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
@@ -11,7 +11,7 @@ import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
-import { setProxy } from "./util/setProxy";
+import {setProxy} from "./util/setProxy";
 
 export const about = {
     element: undefined as Element,
@@ -338,7 +338,7 @@ export const about = {
         autoLaunchElement.addEventListener("change", () => {
             fetchPost("/api/system/setAutoLaunch", {autoLaunch: autoLaunchElement.checked}, () => {
                 window.siyuan.config.system.autoLaunch = autoLaunchElement.checked;
-                app.setLoginItemSettings({openAtLogin: autoLaunchElement.checked});
+                ipcRenderer.send(Constants.SIYUAN_AUTO_LAUNCH, {openAtLogin: autoLaunchElement.checked});
             });
         });
         /// #endif

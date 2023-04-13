@@ -358,13 +358,13 @@ const boot = () => {
     // 当前页面链接使用浏览器打开
     currentWindow.webContents.on("will-navigate", (event, url) => {
         if (event.sender) {
-          const currentURL = new URL(event.sender.getURL());
-          if (url.startsWith(getServer(currentURL.port))) {
-            return;
-          }
+            const currentURL = new URL(event.sender.getURL());
+            if (url.startsWith(getServer(currentURL.port))) {
+                return;
+            }
 
-          event.preventDefault();
-          shell.openExternal(url);
+            event.preventDefault();
+            shell.openExternal(url);
         }
     });
 
@@ -792,6 +792,9 @@ app.whenReady().then(() => {
         BrowserWindow.getAllWindows().forEach(item => {
             item.webContents.send("siyuan-send_windows", data);
         });
+    });
+    ipcMain.on("siyuan-auto-launch", (event, data) => {
+        app.setLoginItemSettings({openAtLogin: data.openAtLogin});
     });
 
     if (firstOpen) {

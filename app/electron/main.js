@@ -713,7 +713,7 @@ app.whenReady().then(() => {
             }
         });
         if (!foundWorkspace) {
-            initKernel(data.workspace, "", data.lang).then((isSucc) => {
+            initKernel(data.workspace, "", "").then((isSucc) => {
                 if (isSucc) {
                     boot();
                 }

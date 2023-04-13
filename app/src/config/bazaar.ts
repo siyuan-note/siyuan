@@ -346,7 +346,7 @@ export const bazaar = {
             bazaar._onBazaar(response, "themes", false);
             bazaar._data.themes = response.data.packages;
         });
-        bazaar.element.addEventListener("click", (event) => {
+        bazaar.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(bazaar.element)) {
                 const type = target.getAttribute("data-type");

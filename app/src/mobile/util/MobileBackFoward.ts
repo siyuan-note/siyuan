@@ -123,7 +123,6 @@ export const goForward = () => {
 
 export const goBack = () => {
     const editor = getCurrentEditor();
-    const protyle = editor.protyle;
     if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
@@ -139,7 +138,7 @@ export const goBack = () => {
         closePanel();
         return;
     } else if (editor && !editor.protyle.toolbar.subElement.classList.contains("fn__none")) {
-        hideElements(["util"], protyle);
+        hideElements(["util"], editor.protyle);
         closePanel();
         return;
     } else if (window.siyuan.dialogs.length !== 0) {
@@ -158,7 +157,8 @@ export const goBack = () => {
     if (window.siyuan.backStack.length < 1) {
         return;
     }
-    if (forwardStack.length === 0) {
+    if (forwardStack.length === 0 && editor) {
+        const protyle = editor.protyle;
         forwardStack.push({
             id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
             endId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") + Constants.ZWSP + protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),

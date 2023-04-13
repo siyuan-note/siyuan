@@ -16,7 +16,6 @@ import {
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {Constants} from "../../constants";
-import {hasClosestByClassName} from "../util/hasClosest";
 import {matchHotKey} from "../util/hotKey";
 import {readText, updateHotkeyTip, writeText} from "../util/compatibility";
 import {escapeHtml} from "../../util/escape";

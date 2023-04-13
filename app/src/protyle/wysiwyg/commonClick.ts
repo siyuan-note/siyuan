@@ -76,4 +76,4 @@ export const commonClick = (event: MouseEvent & {
         event.stopPropagation();
         return true;
     }
-}
+};

@@ -78,7 +78,29 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
             nextElement.removeAttribute("disabled");
         }
         dialog.element.style.zIndex = "200";
+        dialog.element.setAttribute("data-key", "viewCards");
         dialog.element.addEventListener("click", (event) => {
+            if (typeof event.detail === "string") {
+                let currentElement = listElement.querySelector(".b3-list-item--focus");
+                if (currentElement) {
+                    currentElement.classList.remove("b3-list-item--focus");
+                    if (event.detail === "arrowup") {
+                        currentElement = currentElement.previousElementSibling || currentElement.parentElement.lastElementChild;
+                    } else if (event.detail === "arrowdown") {
+                        currentElement = currentElement.nextElementSibling || currentElement.parentElement.firstElementChild;
+                    }
+                    const currentRect = currentElement.getBoundingClientRect();
+                    const parentRect = currentElement.parentElement.getBoundingClientRect();
+                    if (currentRect.top < parentRect.top || currentRect.bottom > parentRect.bottom) {
+                        currentElement.scrollIntoView(currentRect.top < parentRect.top);
+                    }
+                    getArticle(edit, currentElement.getAttribute("data-id"));
+                    currentElement.classList.add("b3-list-item--focus");
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             let target = event.target as HTMLElement;
             while (target && !dialog.element.isSameNode(target)) {
                 const type = target.getAttribute("data-type");

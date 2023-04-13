@@ -17,14 +17,19 @@
 
   &__empty {
     display: flex;
-    justify-content: center;
-    flex-direction: column;
     flex: 1;
     text-align: center;
     background-color: var(--b3-theme-background);
     font-size: 16px;
+    box-sizing: border-box;
+    flex-direction: column;
+    justify-content: center;
+    color: var(--b3-theme-on-surface);
     align-items: center;
-    padding: 16px;
+
+    &--space {
+      padding: 16px;
+    }
 
     & > div {
       font-size: 64px;

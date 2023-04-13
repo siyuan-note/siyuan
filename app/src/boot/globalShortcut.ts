@@ -424,6 +424,7 @@ export const globalShortcut = () => {
                 window.siyuan.ctrlIsPressed = false;
             }
         }
+
         if (!event.altKey && event.shiftKey && !isCtrl(event)) {
             if (event.key === "Shift") {
                 window.siyuan.shiftIsPressed = true;
@@ -431,6 +432,7 @@ export const globalShortcut = () => {
                 window.siyuan.shiftIsPressed = false;
             }
         }
+
         if (event.altKey && !event.shiftKey && !isCtrl(event)) {
             if (event.key === "Alt") {
                 window.siyuan.altIsPressed = true;
@@ -443,6 +445,7 @@ export const globalShortcut = () => {
             dialogArrow(switchDialog.element, event);
             return;
         }
+
         const isTabWindow = isWindow();
         if (event.ctrlKey && !event.metaKey && event.key === "Tab") {
             if (switchDialog && switchDialog.element.parentElement) {
@@ -549,6 +552,20 @@ export const globalShortcut = () => {
             event.preventDefault();
             return;
         }
+
+        if (event.key === "ArrowUp" || event.key === "ArrowDown" ) {
+            const viewCardsDialog = window.siyuan.dialogs.find(item => {
+                if (item.element.getAttribute("data-key") === "viewCards") {
+                    return true;
+                }
+            });
+            if (viewCardsDialog) {
+                viewCardsDialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
+                event.preventDefault();
+                return;
+            }
+        }
+
         /// #if !BROWSER
         if (matchHotKey("⌘=", event) && !hasClosestByClassName(target, "pdf__outer")) {
             Constants.SIZE_ZOOM.find((item, index) => {

@@ -901,14 +901,15 @@ export class Toolbar {
                 }
                 return;
             }
-            if (this.subElement.clientHeight <= window.innerHeight - nodeRect.bottom || this.subElement.clientHeight <= nodeRect.top) {
+            const bottom = nodeRect.bottom === nodeRect.top ? nodeRect.bottom + 26 : nodeRect.bottom;
+            if (this.subElement.clientHeight <= window.innerHeight - bottom || this.subElement.clientHeight <= nodeRect.top) {
                 if (types.includes("inline-math") || isInlineMemo) {
-                    setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height);
+                    setPosition(this.subElement, nodeRect.left, bottom, nodeRect.height || 26);
                 } else {
-                    setPosition(this.subElement, nodeRect.left + (nodeRect.width - this.subElement.clientWidth) / 2, nodeRect.bottom, nodeRect.height);
+                    setPosition(this.subElement, nodeRect.left + (nodeRect.width - this.subElement.clientWidth) / 2, bottom, nodeRect.height || 26);
                 }
             } else {
-                setPosition(this.subElement, nodeRect.right, nodeRect.bottom);
+                setPosition(this.subElement, nodeRect.right, bottom);
             }
         };
         const headerElement = this.subElement.querySelector(".block__icons");

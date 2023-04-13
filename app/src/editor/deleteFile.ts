@@ -4,8 +4,9 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
+import {escapeHtml} from "../util/escape";
 
-export const deleteFile = (notebookId: string, pathString: string, name: string) => {
+export const deleteFile = (notebookId: string, pathString: string) => {
     if (window.siyuan.config.fileTree.removeDocWithoutConfirm) {
         fetchPost("/api/filetree/removeDoc", {
             notebook: notebookId,
@@ -16,9 +17,10 @@ export const deleteFile = (notebookId: string, pathString: string, name: string)
     fetchPost("/api/block/getDocInfo", {
         id: getDisplayName(pathString, true, true)
     }, (response) => {
-        let tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b>?`;
+        const fileName = escapeHtml(response.data.name);
+        let tip = `${window.siyuan.languages.confirmDelete} <b>${fileName}</b>?`;
         if (response.data.subFileCount > 0) {
-            tip = `${window.siyuan.languages.confirmDelete} <b>${name}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
+            tip = `${window.siyuan.languages.confirmDelete} <b>${fileName}</b> ${window.siyuan.languages.andSubFile.replace("x", response.data.subFileCount)}?`;
         }
         confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, () => {
             fetchPost("/api/filetree/removeDoc", {
@@ -35,7 +37,7 @@ export const deleteFiles = (liElements: Element[]) => {
         if (itemTopULElement) {
             const itemNotebookId = itemTopULElement.getAttribute("data-url");
             if (liElements[0].getAttribute("data-type") === "navigation-file") {
-                deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"), getDisplayName(liElements[0].getAttribute("data-name"), false, true));
+                deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
             } else {
                 confirmDialog(window.siyuan.languages.deleteOpConfirm,
                     `${window.siyuan.languages.confirmDelete} <b>${Lute.EscapeHTMLStr(getNotebookName(itemNotebookId))}</b>?`, () => {

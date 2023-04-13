@@ -26,6 +26,7 @@ import {saveScroll} from "../scroll/saveScroll";
 import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
+import {deleteFile} from "../../editor/deleteFile";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -316,6 +317,13 @@ export class Breadcrumb {
                 label: window.siyuan.languages.refresh,
                 click: () => {
                     reloadProtyle(protyle);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: window.siyuan.languages.delete,
+                click: () => {
+                    deleteFile(protyle.notebookId, protyle.path);
                 }
             }).element);
             if (!isMobile()) {

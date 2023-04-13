@@ -363,7 +363,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     const newElement = genEmptyElement(false, false);
     const selectNode = range.extractContents();
-    if (selectNode.firstChild.nodeType !== 3 && selectNode.firstChild.textContent === "") {
+    if (selectNode.firstChild && selectNode.firstChild.nodeType !== 3 && selectNode.firstChild.textContent === "") {
         // 回车移除空元素 https://github.com/siyuan-note/insider/issues/480
         selectNode.firstChild.after(document.createElement("wbr"));
         selectNode.firstChild.remove();

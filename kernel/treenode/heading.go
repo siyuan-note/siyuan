@@ -50,8 +50,8 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 	})
 	for _, h := range updateFoldHeadings {
 		children := foldHeadings[h.ID]
-		for _, c := range children {
-			h.Next.InsertAfter(c) // Next 是 Block IAL
+		for i := len(children) - 1; 0 <= i; i-- {
+			h.Next.InsertAfter(children[i]) // Next 是 Block IAL
 		}
 	}
 	return

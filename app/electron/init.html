@@ -358,10 +358,19 @@
                 const {ipcRenderer} = require('electron')
                 const fs = require('fs')
                 const initPath = result.filePaths[0]
-                if (isCloudDrivePath(initPath)) {
-                    let msg = '⚠️ This folder may be a cloud sync disk folder, please change to another path'
+                if (isICloudPath(initPath)) {
+                    let msg = '⚠️ This folder is under the iCloud sync path, please change another path'
                     if ('zh_CN' === currentLang) {
-                        msg = '⚠️ 该文件夹可能是云同步盘文件夹，请更换其他路径'
+                        msg = '⚠️ 该文件夹位于 iCloud 同步路径下，请更换其他路径'
+                    }
+                    alert(msg)
+                    return
+                }
+
+                if (isCloudDrivePath(initPath)) {
+                    let msg = '⚠️ The folder path can not contain onedrive, dropbox, google drive, pcloud and 坚果云, please change another path'
+                    if ('zh_CN' === currentLang) {
+                        msg = '⚠️ 文件夹路径不能包含 onedrive、dropbox、google drive、pcloud 和 坚果云，请更换其他路径'
                     }
                     alert(msg)
                     return
@@ -388,10 +397,6 @@
 
     const isCloudDrivePath = (absPath) => {
         const absPathLower = absPath.toLowerCase()
-        if (isICloudPath(absPathLower)) {
-            return true
-        }
-
         return -1 < absPathLower.indexOf("onedrive") || -1 < absPathLower.indexOf("dropbox") ||
             -1 < absPathLower.indexOf("google drive") || -1 < absPathLower.indexOf("pcloud") ||
             -1 < absPathLower.indexOf("坚果云")

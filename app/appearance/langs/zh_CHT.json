@@ -35,7 +35,7 @@
   "apiBaseURL": "API 基礎地址",
   "apiBaseURLTip": "發起請求的基礎地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
   "skip": "跳過",
-  "reboot": "重啟",
+  "nextRound": "下一輪",
   "save": "保存",
   "ai": "人工智能",
   "aiContinueWrite": "續寫",

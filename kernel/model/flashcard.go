@@ -818,6 +818,12 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string) (ret [
 	}
 	dues = tmp
 
+	if 1 > len(reviewedCardIDs) {
+		// 未传入已复习的卡片 ID，说明是开始新的复习，需要清空缓存
+		reviewCardCache = map[string]riff.Card{}
+		skipCardCache = map[string]riff.Card{}
+	}
+
 	newCount := 0
 	reviewCount := 0
 	for _, c := range dues {

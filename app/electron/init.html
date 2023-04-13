@@ -358,8 +358,7 @@
                 const {ipcRenderer} = require('electron')
                 const fs = require('fs')
                 const initPath = result.filePaths[0]
-                const absPathLower = initPath.toLowerCase()
-                if (isICloudPath(absPathLower)) {
+                if (isICloudPath(initPath)) {
                     let msg = '⚠️ This folder is under the iCloud sync path, please change another path'
                     if ('zh_CN' === currentLang) {
                         msg = '⚠️ 该文件夹位于 iCloud 同步路径下，请更换其他路径'
@@ -367,7 +366,6 @@
                     alert(msg)
                     return
                 }
-
 
                 if (isCloudDrivePath(initPath)) {
                     let msg = '⚠️ The folder path can not contain onedrive, dropbox, google drive, pcloud and 坚果云, please change another path'

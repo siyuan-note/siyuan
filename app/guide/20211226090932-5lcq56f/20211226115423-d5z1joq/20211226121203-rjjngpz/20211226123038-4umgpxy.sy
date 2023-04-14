@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230414202408"
+		"updated": "20230414203110"
 	},
 	"Children": [
 		{
@@ -986,11 +986,26 @@
 			]
 		},
 		{
-			"ID": "20230414202351-u1zvtxx",
+			"ID": "20230414203058-foirrwk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230414203058-foirrwk",
+				"updated": "20230414203058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動調整 OCR 結果"
+				}
+			]
+		},
+		{
+			"ID": "20230414203058-td34ii9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230414202351-u1zvtxx",
-				"updated": "20230414202351"
+				"id": "20230414203058-td34ii9",
+				"updated": "20230414203058"
 			},
 			"Children": [
 				{
@@ -1004,65 +1019,65 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中，如果需要重新 OCR 或者調整提取結果："
+					"Data": "​ 中，可通過下面的方式調整 OCR 結果："
 				}
 			]
 		},
 		{
-			"ID": "20230414202351-ri59se5",
+			"ID": "20230414203058-twp0v1x",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20230414202351-ri59se5",
-				"updated": "20230414202408"
+				"id": "20230414203058-twp0v1x",
+				"updated": "20230414203110"
 			},
 			"Children": [
 				{
-					"ID": "20230414202351-q7nz7nx",
+					"ID": "20230414203058-bof05ob",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230414202351-q7nz7nx",
-						"updated": "20230414202351"
+						"id": "20230414203058-bof05ob",
+						"updated": "20230414203058"
 					},
 					"Children": [
 						{
-							"ID": "20230414202351-das1wrr",
+							"ID": "20230414203058-4t9mxdd",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230414202351-das1wrr",
-								"updated": "20230414202351"
+								"id": "20230414203058-4t9mxdd",
+								"updated": "20230414203058"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "可以在關閉思源的情況下刪除或修改該文件，啟動思源以後手動重建索引"
+									"Data": "退出思源後下在文件系統上修改該文件（請注意 JSON 格式的正確性）"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230414202351-tpwayz5",
+					"ID": "20230414203058-hwxlrkd",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230414202351-tpwayz5",
-						"updated": "20230414202408"
+						"id": "20230414203058-hwxlrkd",
+						"updated": "20230414203110"
 					},
 					"Children": [
 						{
-							"ID": "20230414202351-mxla3bm",
+							"ID": "20230414203058-dn0g8im",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230414202351-mxla3bm",
-								"updated": "20230414202408"
+								"id": "20230414203058-dn0g8im",
+								"updated": "20230414203110"
 							},
 							"Children": [
 								{
@@ -1081,6 +1096,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230414203058-pvk5pnz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230414203058-pvk5pnz",
+				"updated": "20230414203058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "調整完以後需要手動重建索引。"
 				}
 			]
 		}

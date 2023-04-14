@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20230414202309"
+		"updated": "20230414203014"
 	},
 	"Children": [
 		{
@@ -1008,11 +1008,26 @@
 			]
 		},
 		{
+			"ID": "20230414202710-a51lo76",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230414202710-a51lo76",
+				"updated": "20230414202726"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动调整 OCR 结果"
+				}
+			]
+		},
+		{
 			"ID": "20230117003118-da7wjvx",
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003118-da7wjvx",
-				"updated": "20230414202215"
+				"updated": "20230414202825"
 			},
 			"Children": [
 				{
@@ -1026,7 +1041,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中，如果需要重新 OCR 或者调整提取结果："
+					"Data": "​ 中，可通过下面的方式调整 OCR 结果："
 				}
 			]
 		},
@@ -1036,7 +1051,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230414202215-wv6v759",
-				"updated": "20230414202309"
+				"updated": "20230414203014"
 			},
 			"Children": [
 				{
@@ -1048,7 +1063,7 @@
 					},
 					"Properties": {
 						"id": "20230414202216-6ib46sp",
-						"updated": "20230414202216"
+						"updated": "20230414203014"
 					},
 					"Children": [
 						{
@@ -1056,12 +1071,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230414202216-7lh8lft",
-								"updated": "20230414202221"
+								"updated": "20230414203014"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "可以在关闭思源的情况下删除或修改该文件，启动思源以后手动重建索引"
+									"Data": "退出思源后下在文件系统上修改该文件（请注意 JSON 格式的正确性）"
 								}
 							]
 						}
@@ -1076,7 +1091,7 @@
 					},
 					"Properties": {
 						"id": "20230414202222-wbxjz0f",
-						"updated": "20230414202309"
+						"updated": "20230414202849"
 					},
 					"Children": [
 						{
@@ -1084,7 +1099,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230414202222-oelakfd",
-								"updated": "20230414202309"
+								"updated": "20230414202849"
 							},
 							"Children": [
 								{
@@ -1103,6 +1118,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230414202749-qbcnypq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230414202749-qbcnypq",
+				"updated": "20230414202900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "调整完以后需要手动重建索引。"
 				}
 			]
 		}

@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230414202515"
+		"updated": "20230414203046"
 	},
 	"Children": [
 		{
@@ -981,11 +981,26 @@
 			]
 		},
 		{
-			"ID": "20230414202455-itauu1x",
+			"ID": "20230414202934-1h96or8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230414202934-1h96or8",
+				"updated": "20230414202934"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manually adjust OCR results"
+				}
+			]
+		},
+		{
+			"ID": "20230414203027-6py4l9z",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230414202455-itauu1x",
-				"updated": "20230414202455"
+				"id": "20230414203027-6py4l9z",
+				"updated": "20230414203027"
 			},
 			"Children": [
 				{
@@ -999,65 +1014,65 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, if you need to re-OCR or adjust the extraction results:"
+					"Data": "​, and the OCR results can be adjusted in the following ways:"
 				}
 			]
 		},
 		{
-			"ID": "20230414202455-9vob8o4",
+			"ID": "20230414203027-ga8zni5",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20230414202455-9vob8o4",
-				"updated": "20230414202515"
+				"id": "20230414203027-ga8zni5",
+				"updated": "20230414203046"
 			},
 			"Children": [
 				{
-					"ID": "20230414202455-kcjywr7",
+					"ID": "20230414203027-n8cc4ra",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230414202455-kcjywr7",
-						"updated": "20230414202515"
+						"id": "20230414203027-n8cc4ra",
+						"updated": "20230414203036"
 					},
 					"Children": [
 						{
-							"ID": "20230414202455-bggjnen",
+							"ID": "20230414203027-epcrauz",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230414202455-bggjnen",
-								"updated": "20230414202515"
+								"id": "20230414203027-epcrauz",
+								"updated": "20230414203036"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "You can delete or modify this file when SiYuan is closed, and manually rebuild the index after starting SiYuan"
+									"Data": "After exiting SiYuan, modify the file on the file system (please pay attention to the correctness of the JSON format)"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230414202455-67sj3rv",
+					"ID": "20230414203027-zdq3yuf",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230414202455-67sj3rv",
-						"updated": "20230414202502"
+						"id": "20230414203027-zdq3yuf",
+						"updated": "20230414203046"
 					},
 					"Children": [
 						{
-							"ID": "20230414202455-m58zpdi",
+							"ID": "20230414203027-ouvsa2g",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230414202455-m58zpdi",
-								"updated": "20230414202502"
+								"id": "20230414203027-ouvsa2g",
+								"updated": "20230414203046"
 							},
 							"Children": [
 								{
@@ -1076,6 +1091,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230414203027-chylp3d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230414203027-chylp3d",
+				"updated": "20230414203027"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the adjustment, you need to manually rebuild the index."
 				}
 			]
 		}

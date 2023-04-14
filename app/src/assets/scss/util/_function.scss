@@ -136,6 +136,11 @@
 }
 
 .ft {
+
+  &__breakword {
+    word-break: break-word;
+  }
+
   &__smaller {
     font-size: 12px;
   }

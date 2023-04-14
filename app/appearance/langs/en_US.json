@@ -1,4 +1,6 @@
 {
+  "ocrResult": "OCR result text",
+  "reOCR": "Re OCR",
   "continueReview1": "Continue Review",
   "continueReview2": "There are still <code class='fn__code'>${count}</code> cards to review, continue?",
   "whatsNewInSiYuan": "What's New in SiYuan",

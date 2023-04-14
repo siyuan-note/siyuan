@@ -1,4 +1,7 @@
 {
+  "ocrResult": "Texte du résultat OCR",
+  "ocrResult": "Texto de resultado de OCR",
+  "reOCR": "Re-OCR",
   "continueReview1": "Continuar revisión",
   "continueReview2": "Todavía hay tarjetas <code class='fn__code'>${count}</code> para revisar, ¿continuar?",
   "whatsNewInSiYuan": "Novedades en SiYuan",

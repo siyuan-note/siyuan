@@ -1,4 +1,6 @@
 {
+  "ocrResult": "OCR 結果文本",
+  "reOCR": "重新 OCR",
   "continueReview1": "繼續複習",
   "continueReview2": "還有 <code class='fn__code'>${count}</code> 張卡片待複習，是否繼續？",
   "whatsNewInSiYuan": "思源筆記最新變化",

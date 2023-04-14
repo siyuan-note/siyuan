@@ -624,7 +624,7 @@ func listDocsByPath(c *gin.Context) {
 	if arg["maxListCount"] != nil {
 		// API `listDocsByPath` add an optional parameter `maxListCount` https://github.com/siyuan-note/siyuan/issues/7993
 		maxListCount = int(arg["maxListCount"].(float64))
-		if 0 == maxListCount {
+		if 0 >= maxListCount {
 			maxListCount = math.MaxInt
 		}
 	}

@@ -18,10 +18,10 @@
     "build:export": "webpack --mode production --config webpack.export.js",
     "start": "NODE_ENV=development electron ./electron/main.js",
     "dist-appx": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-appx-builder.yml",
-    "dist": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-builder.yml",
-    "dist-darwin": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml",
-    "dist-darwin-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml",
-    "dist-linux": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml"
+    "dist": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
+    "dist-darwin": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",
+    "dist-darwin-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml --publish=never",
+    "dist-linux": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml --publish=never"
   },
   "keywords": [
     "markdown",

@@ -593,7 +593,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         label: "OCR",
         submenu: [{
             iconHTML: Constants.ZWSP,
-            label: window.siyuan.languages.refresh,
+            label: window.siyuan.languages.reOCR,
             click() {
                 fetchPost("/api/asset/getImageOCRText", {
                     path: imgElement.getAttribute("src"),
@@ -602,7 +602,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             }
         }, {
             iconHTML: Constants.ZWSP,
-            label: `<div class="fn__hr--small"></div><textarea data-type="ocr" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.update}"></textarea><div class="fn__hr--small"></div>`,
+            label: `<div class="fn__hr--small"></div><textarea data-type="ocr" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.ocrResult}"></textarea><div class="fn__hr--small"></div>`,
             bind(element) {
                 fetchPost("/api/asset/getImageOCRText", {
                     path: imgElement.getAttribute("src"),

@@ -1,4 +1,5 @@
 {
+  "reOCR": "ReOCR",
   "continueReview1": "Continuer la révision",
   "continueReview2": "Il reste encore des fiches <code class='fn__code'>${count}</code> à examiner, continuer ?",
   "whatsNewInSiYuan": "Quoi de neuf dans SiYuan",

@@ -18,6 +18,7 @@ package api
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"path"
 	"regexp"
@@ -621,7 +622,11 @@ func listDocsByPath(c *gin.Context) {
 	}
 	maxListCount := model.Conf.FileTree.MaxListCount
 	if arg["maxListCount"] != nil {
+		// API `listDocsByPath` add an optional parameter `maxListCount` https://github.com/siyuan-note/siyuan/issues/7993
 		maxListCount = int(arg["maxListCount"].(float64))
+		if 0 == maxListCount {
+			maxListCount = math.MaxInt
+		}
 	}
 
 	files, totals, err := model.ListDocTree(notebook, p, sortMode, flashcard, maxListCount)

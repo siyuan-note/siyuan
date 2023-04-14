@@ -548,7 +548,7 @@
   "kernelFault1": "Veuillez vérifier si la connexion réseau et les processus du noyau sont normaux",
   "kernelFault2": "Si le problème persiste après le redémarrage, veuillez le signaler via <a href=\"https://github.com/siyuan-note/siyuan/issues\" target=\"_blank\">GitHub Issues</a>",
   "fontSize": "Taille de la police",
-  "fontSizeTip": "La taille de la police par défaut est de 16px, ce paramètre n'affecte que la taille de la police affichée dans l'éditeur.",
+  "fontSizeTip": "La taille de police par défaut est de 16px, ce paramètre affecte l'éditeur et l'affichage de la taille de police PDF/HTML exportée",
   "font1": "Ce paramètre n'affecte que l'affichage de la famille de polices dans l'éditeur, choisissez <code class='fn__code'>Default</code> pour utiliser la famille de polices du thème.",
   "newNameFile": "Le nom du nouveau sous-document est",
   "newNameSettingFile": "Le nom du nouveau document est",

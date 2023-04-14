@@ -548,7 +548,7 @@
   "kernelFault1": "請檢查網絡連接和內核進程是否正常",
   "kernelFault2": "如果重啟後仍然出現該問題，請通過<a href=\"https://ld246.com/article/1649901726096\" target=\"_blank\">這裡回饋</a>",
   "fontSize": "字型大小",
-  "fontSizeTip": "字型大小預設為 16px，該設置僅影響編輯器內字體大小顯示",
+  "fontSizeTip": "字號默認為 16px，該設置影響編輯器和導出 PDF/HTML 字體大小顯示",
   "font1": "該設置僅影響編輯器內字體顯示，選擇 <code class='fn__code'>預設</code> 則使用主題自帶字體",
   "newNameFile": "新建子文檔名為",
   "newNameSettingFile": "新建文檔名為",

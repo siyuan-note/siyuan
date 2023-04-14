@@ -548,7 +548,7 @@
   "kernelFault1": "Please check if the network connection and kernel process is normal",
   "kernelFault2": "If the problem still occurs after restarting, please report it via <a href=\"https://github.com/siyuan-note/siyuan/issues\" target=\"_blank\">GitHub Issues</a>",
   "fontSize": "Font Size",
-  "fontSizeTip": "The default font size is 16px, this setting only affects the font size display in the editor",
+  "fontSizeTip": "The default font size is 16px, this setting affects the editor and exported PDF/HTML font size display",
   "font1": "This setting only affects the font family display in the editor, choose <code class='fn__code'>Default</code> to use the theme&#039;s font family",
   "newNameFile": "The name of the new subdocument is",
   "newNameSettingFile": "The name of the new document is",

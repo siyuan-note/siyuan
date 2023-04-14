@@ -52,7 +52,7 @@ NPM 镜像：
 
 ### Android
 
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm,android/arm64' ./kernel/mobile/`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' ./kernel/mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 移动端请参考对应项目仓库。

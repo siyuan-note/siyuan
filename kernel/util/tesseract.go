@@ -44,21 +44,31 @@ var (
 	TesseractLangs []string
 )
 
-func GetAssetText(asset string) string {
+func SetAssetText(asset, text string) {
 	AssetsTextsLock.Lock()
-	ret, ok := AssetsTexts[asset]
+	AssetsTexts[asset] = text
 	AssetsTextsLock.Unlock()
-	if ok {
-		return ret
+	AssetsTextsChanged = true
+}
+
+func GetAssetText(asset string, force bool) string {
+	if !force {
+		AssetsTextsLock.Lock()
+		ret, ok := AssetsTexts[asset]
+		AssetsTextsLock.Unlock()
+		if ok {
+			return ret
+		}
 	}
 
 	assetsPath := GetDataAssetsAbsPath()
 	assetAbsPath := strings.TrimPrefix(asset, "assets")
 	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
-	ret = Tesseract(assetAbsPath)
+	ret := Tesseract(assetAbsPath)
 	AssetsTextsLock.Lock()
 	AssetsTexts[asset] = ret
 	AssetsTextsLock.Unlock()
+	AssetsTextsChanged = true
 	return ret
 }
 

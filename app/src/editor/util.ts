@@ -34,6 +34,7 @@ export const openFileById = async (options: {
     keepCursor?: boolean
     zoomIn?: boolean
     removeCurrentTab?: boolean
+    afterOpen?: () => void
 }) => {
     fetchPost("/api/block/getBlockInfo", {id: options.id}, (data) => {
         if (data.code === 3) {
@@ -53,7 +54,8 @@ export const openFileById = async (options: {
             action: options.action,
             zoomIn: options.zoomIn,
             keepCursor: options.keepCursor,
-            removeCurrentTab: options.removeCurrentTab
+            removeCurrentTab: options.removeCurrentTab,
+            afterOpen: options.afterOpen
         });
     });
 };
@@ -82,6 +84,9 @@ const openFile = (options: IOpenFileOptions) => {
             }
         });
         if (asset) {
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
             return;
         }
     } else if (!options.position) {
@@ -105,11 +110,17 @@ const openFile = (options: IOpenFileOptions) => {
             if (!pdfIsLoading(editor.parent.parent.element)) {
                 switchEditor(editor, options, allModels);
             }
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
             return true;
         }
         // 没有初始化的页签无法检测到
         const hasEditor = getUnInitTab(options);
         if (hasEditor) {
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
             return;
         }
     }
@@ -134,6 +145,9 @@ const openFile = (options: IOpenFileOptions) => {
     });
     /// #endif
     if (hasOpen) {
+        if (options.afterOpen) {
+            options.afterOpen();
+        }
         return;
     }
 
@@ -165,6 +179,9 @@ const openFile = (options: IOpenFileOptions) => {
             }
             if (targetWnd) {
                 if (pdfIsLoading(targetWnd.element)) {
+                    if (options.afterOpen) {
+                        options.afterOpen();
+                    }
                     return;
                 }
                 // 在右侧/下侧打开已有页签将进行页签切换 https://github.com/siyuan-note/siyuan/issues/5366
@@ -184,9 +201,15 @@ const openFile = (options: IOpenFileOptions) => {
                 wnd.split(direction).addTab(newTab(options));
             }
             wnd.showHeading();
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
             return;
         }
         if (pdfIsLoading(wnd.element)) {
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
             return;
         }
         if (options.keepCursor && wnd.children[0].headElement) {
@@ -213,6 +236,9 @@ const openFile = (options: IOpenFileOptions) => {
             wnd.addTab(newTab(options));
         }
         wnd.showHeading();
+        if (options.afterOpen) {
+            options.afterOpen();
+        }
     }
 };
 

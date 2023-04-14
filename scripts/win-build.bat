@@ -1,5 +1,5 @@
 @echo off
-echo 'use ".\scripts\sillot-win-build.bat" instead of "sillot-win-build.bat"'
+echo 'use ".\scripts\win-build.bat" instead of "win-build.bat"'
 
 echo ===== Building UI =====
 cd app

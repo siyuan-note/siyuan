@@ -168,7 +168,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		}
 
 		go func() {
-			time.Sleep(time.Second * 5)
+			time.Sleep(time.Second * 3)
 			util.PushErrMsg(Conf.Language(52), 7000)
 
 			// 每次打开帮助文档时自动检查版本更新并提醒 https://github.com/siyuan-note/siyuan/issues/5057

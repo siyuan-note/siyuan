@@ -107,6 +107,8 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				}
 
 				name := filepath.Base(u)
+				name = util.FilterFileName(name)
+				name = util.TruncateLenFileName(name)
 				name = "net-img-" + name
 				name = util.AssetName(name)
 				writePath := filepath.Join(assetsDirPath, name)

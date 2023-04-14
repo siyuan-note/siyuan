@@ -343,7 +343,7 @@ export class Title {
                 label: window.siyuan.languages.spaceRepetition,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(response.data, `<span data-id="${protyle.block.rootID}"  class="fn__flex-center">${escapeHtml(this.editElement.textContent)}</span>`);
+                        openCardByData(response.data, "doc", protyle.block.rootID, this.editElement.textContent);
                     });
                 }
             }, {

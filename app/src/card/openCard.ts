@@ -8,6 +8,9 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasC
 import {hideElements} from "../protyle/ui/hideElements";
 import {needSubscribe} from "../util/needSubscribe";
 import {fullscreen} from "../protyle/breadcrumb/action";
+import {MenuItem} from "../menus/Menu";
+import {escapeHtml} from "../util/escape";
+import {getDisplayName, movePathTo} from "../util/pathName";
 
 export const openCard = () => {
     const exit = window.siyuan.dialogs.find(item => {
@@ -19,31 +22,27 @@ export const openCard = () => {
     if (exit) {
         return;
     }
-    let decksHTML = '<option value="">All</option>';
-    fetchPost("/api/riff/getRiffDecks", {}, (response) => {
-        response.data.forEach((deck: { id: string, name: string }) => {
-            decksHTML += `<option value="${deck.id}">${deck.name}</option>`;
-        });
-        fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-            openCardByData(cardsResponse.data, `<select class="b3-select">${decksHTML}</select>`);
-        });
+    fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
+        openCardByData(cardsResponse.data, "all");
     });
 };
 
-export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: number }, html = "") => {
+export const openCardByData = (cardsData: {
+    cards: ICard[],
+    unreviewedCount: number
+}, cardType: "doc" | "notebook" | "all", id?: string, title?: string) => {
     let blocks = cardsData.cards;
     let index = 0;
-    if (blocks.length > 0) {
-        html += `<div class="fn__flex" style="align-items: center" data-type="count">
-    <span class="fn__space"></span>
-    <div class="ft__on-surface ft__smaller"><span>1</span>/<span>${blocks.length}</span></div>
-</div>`;
-    }
     const dialog = new Dialog({
         content: `<div class="card__main">
     <div class="card__header">
         <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>
-        ${html}
+        <span class="fn__space"></span>
+        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}">1/${blocks.length}</span></div>
+        <div class="fn__space"></div>
+        <div data-id="${id}" data-cardtype="${cardType}" data-type="filter" class="block__icon block__icon--show">
+            <svg><use xlink:href="#iconFilter"></use></svg>
+        </div>
         <div class="fn__space"></div>
         ${isMobile() ? `<div data-type="close" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconCloseRound"></use></svg>
@@ -145,10 +144,33 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
     dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
     const countElement = dialog.element.querySelector('[data-type="count"]');
     const actionElements = dialog.element.querySelectorAll(".card__action");
-    const selectElement = dialog.element.querySelector("select");
+    const filterElement = dialog.element.querySelector('[data-type="filter"]');
+    const fetchNewRound = () => {
+        const currentCardType = filterElement.getAttribute("data-cardtype")
+        fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
+            (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
+            rootID: filterElement.getAttribute("data-id"),
+            deckID: filterElement.getAttribute("data-id"),
+            notebook: filterElement.getAttribute("data-id"),
+        }, (treeCards) => {
+            index = 0;
+            blocks = treeCards.data.cards;
+            if (blocks.length > 0) {
+                nextCard({
+                    countElement,
+                    editor,
+                    actionElements,
+                    index,
+                    blocks
+                });
+            } else {
+                allDone(countElement, editor, actionElements);
+            }
+        });
+    }
+
     dialog.element.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
-        const titleElement = countElement?.previousElementSibling;
         let type = "";
         if (typeof event.detail === "string") {
             if (event.detail === "1" || event.detail === "j") {
@@ -182,24 +204,65 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
                 event.preventDefault();
                 return;
             }
+            const filterTempElement = hasClosestByAttribute(target, "data-type", "filter");
+            if (filterTempElement) {
+                fetchPost("/api/riff/getRiffDecks", {}, (response) => {
+                    window.siyuan.menus.menu.remove();
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        iconHTML: Constants.ZWSP,
+                        label: window.siyuan.languages.all,
+                        click() {
+                            filterElement.setAttribute("data-id", "")
+                            filterElement.setAttribute("data-cardtype", "all")
+                            fetchNewRound()
+                        },
+                    }).element);
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        iconHTML: Constants.ZWSP,
+                        label: window.siyuan.languages.fileTree,
+                        click() {
+                            movePathTo((toPath, toNotebook) => {
+                                filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true))
+                                filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc")
+                                fetchNewRound();
+                            })
+                        }
+                    }).element);
+                    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                    if (title) {
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            iconHTML: Constants.ZWSP,
+                            label: escapeHtml(title),
+                            click() {
+                                filterElement.setAttribute("data-id", id)
+                                filterElement.setAttribute("data-cardtype", cardType)
+                                fetchNewRound()
+                            },
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                    }
+                    response.data.forEach((deck: { id: string, name: string }) => {
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            iconHTML: Constants.ZWSP,
+                            label: escapeHtml(deck.name),
+                            click() {
+                                filterElement.setAttribute("data-id", deck.id)
+                                filterElement.setAttribute("data-cardtype", "all")
+                                fetchNewRound()
+                            },
+                        }).element);
+                    });
+                    const filterRect = filterTempElement.getBoundingClientRect()
+                    window.siyuan.menus.menu.popup({x: filterRect.left, y: filterRect.bottom});
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+
             const newroundElement = hasClosestByAttribute(target, "data-type", "newround");
             if (newroundElement) {
-                fetchPost(selectElement ? "/api/riff/getRiffDueCards" :
-                    (titleElement.getAttribute("data-id") ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                    rootID: titleElement.getAttribute("data-id"),
-                    deckID: selectElement?.value,
-                    notebook: titleElement.getAttribute("data-notebookid"),
-                }, (treeCards) => {
-                    index = 0;
-                    blocks = treeCards.data.cards;
-                    nextCard({
-                        countElement,
-                        editor,
-                        actionElements,
-                        index,
-                        blocks
-                    });
-                });
+                fetchNewRound();
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -263,11 +326,12 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
                 /// #endif
                 index++;
                 if (index > blocks.length - 1) {
-                    fetchPost(selectElement ? "/api/riff/getRiffDueCards" :
-                        (titleElement.getAttribute("data-id") ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                        rootID: titleElement.getAttribute("data-id"),
-                        deckID: selectElement?.value,
-                        notebook: titleElement.getAttribute("data-notebookid"),
+                    const currentCardType = filterElement.getAttribute("data-cardtype")
+                    fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
+                        (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
+                        rootID: filterElement.getAttribute("data-id"),
+                        deckID: filterElement.getAttribute("data-id"),
+                        notebook: filterElement.getAttribute("data-id"),
                         reviewedCards: blocks
                     }, (result) => {
                         index = 0;
@@ -300,26 +364,6 @@ export const openCardByData = (cardsData: { cards: ICard[], unreviewedCount: num
             });
         }
     });
-    if (!selectElement) {
-        return;
-    }
-    selectElement.addEventListener("change", () => {
-        fetchPost("/api/riff/getRiffDueCards", {deckID: selectElement.value}, (cardsChangeResponse) => {
-            blocks = cardsChangeResponse.data.cards;
-            index = 0;
-            if (blocks.length > 0) {
-                nextCard({
-                    countElement,
-                    editor,
-                    actionElements,
-                    index,
-                    blocks
-                });
-            } else {
-                allDone(countElement, editor, actionElements);
-            }
-        });
-    });
 };
 
 const nextCard = (options: {
@@ -339,7 +383,7 @@ const nextCard = (options: {
     options.actionElements[1].classList.add("fn__none");
     options.editor.protyle.element.classList.remove("fn__none");
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
-    options.countElement.lastElementChild.innerHTML = `<span>${options.index + 1}</span>/${options.blocks.length}`;
+    options.countElement.innerHTML = `${options.index + 1}/${options.blocks.length}`;
     options.countElement.classList.remove("fn__none");
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");

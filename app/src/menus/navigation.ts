@@ -133,7 +133,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             label: window.siyuan.languages.spaceRepetition,
             click: () => {
                 fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                    openCardByData(response.data, `<span data-notebookid="${notebookId}" class="fn__flex-center">${escapeHtml(name)}</span>`);
+                    openCardByData(response.data, "notebook", notebookId, title);
                 });
                 /// #if MOBILE
                 closePanel();
@@ -342,7 +342,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 label: window.siyuan.languages.spaceRepetition,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                        openCardByData(response.data, `<span data-id="${id}"  class="fn__flex-center">${name}</span>`);
+                        openCardByData(response.data, "doc", id, name);
                     });
                     /// #if MOBILE
                     closePanel();

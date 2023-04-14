@@ -589,6 +589,30 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         }
     }).element);
     /// #if !BROWSER
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: "OCR",
+        submenu: [{
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.refresh,
+            click() {
+                fetchPost("/api/asset/getImageOCRText", {
+                    path: imgElement.getAttribute("src"),
+                    force: true
+                })
+            }
+        }, {
+            iconHTML: Constants.ZWSP,
+            label: `<div class="fn__hr--small"></div><textarea data-type="ocr" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.update}"></textarea><div class="fn__hr--small"></div>`,
+            bind(element) {
+                fetchPost("/api/asset/getImageOCRText", {
+                    path: imgElement.getAttribute("src"),
+                    force: false
+                }, (response) => {
+                    element.querySelector("textarea").value = response.data.text
+                })
+            }
+        }],
+    }).element);
     window.siyuan.menus.menu.append(new MenuItem(exportAsset(imgElement.getAttribute("data-src"))).element);
     /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
@@ -684,6 +708,13 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
     textElements[0].focus();
     window.siyuan.menus.menu.removeCB = () => {
+        const ocrElemennt = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement
+        if (ocrElemennt) {
+            fetchPost("/api/asset/setImageOCRText", {
+                path: imgElement.getAttribute("src"),
+                text: ocrElemennt.value
+            });
+        }
         imgElement.setAttribute("alt", textElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, id, nodeElement.outerHTML, html);

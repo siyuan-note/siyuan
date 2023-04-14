@@ -179,6 +179,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     </div>
     <div class="search__tip">
         <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
+        <kbd>${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</kbd> ${window.siyuan.languages.new}
         <kbd>Enter/Double Click</kbd> ${window.siyuan.languages.searchTip2}
         <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
         <kbd>${updateHotkeyTip("⌥Click")}</kbd> ${window.siyuan.languages.searchTip4}
@@ -684,13 +685,13 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         if (!currentList || event.isComposing) {
             return;
         }
-        const focusIsNew = currentList.getAttribute("data-type") === "search-new";
-        if (focusIsNew && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
+        if (searchInputElement.value && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
             newFileByName(searchInputElement.value);
             event.preventDefault();
             event.stopPropagation();
             return;
         }
+        const focusIsNew = currentList.getAttribute("data-type") === "search-new";
         if (event.key === "Enter") {
             if (focusIsNew) {
                 newFileByName(searchInputElement.value);

@@ -147,7 +147,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 	var deckBlockIDs []string
 	if flashcard {
 		deck := Decks[builtinDeckID]
-		if nil != deck {
+		if nil == deck {
 			return
 		}
 		deckBlockIDs = deck.GetBlockIDs()
@@ -232,7 +232,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 	var deckBlockIDs []string
 	if flashcard {
 		deck := Decks[builtinDeckID]
-		if nil != deck {
+		if nil == deck {
 			return
 		}
 		deckBlockIDs = deck.GetBlockIDs()

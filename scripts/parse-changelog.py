@@ -3,8 +3,8 @@ import re
 from argparse import ArgumentParser
 from collections import defaultdict
 
-import github
-
+import github  # pip install PyGithub
+# ensure the milestone is open before run this
 docmap = {
     "Feature": "Feature",
     "Enhancement": "Enhancement",
@@ -35,7 +35,7 @@ def generate_msg_from_repo(repo_name, tag_name, lastestRelease):
     repo = gh.get_repo(repo_name)
     milestone = find_milestone(repo, tag_name, lastestRelease)
 
-    for issue in repo.get_issues(state="closed", milestone=milestone):
+    for issue in repo.get_issues(state="closed", milestone=milestone):  # type: ignore
         # REF https://pygithub.readthedocs.io/en/latest/github_objects/Issue.html#github.Issue.Issue
         desc_mapping[get_issue_first_label(issue)].append(
             {"title": issue.title, "url": issue.html_url}

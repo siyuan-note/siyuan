@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230211103259"
+		"updated": "20230414202408"
 	},
 	"Children": [
 		{
@@ -986,11 +986,11 @@
 			]
 		},
 		{
-			"ID": "20230117003901-ds4ok9s",
+			"ID": "20230414202351-u1zvtxx",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230117003901-ds4ok9s",
-				"updated": "20230117003901"
+				"id": "20230414202351-u1zvtxx",
+				"updated": "20230414202351"
 			},
 			"Children": [
 				{
@@ -1004,7 +1004,83 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中，如果需要重新 OCR 或者調整提取結果，可以在關閉思源的情況下刪除或修改該文件，啟動思源以後手動重建索引。"
+					"Data": "​ 中，如果需要重新 OCR 或者調整提取結果："
+				}
+			]
+		},
+		{
+			"ID": "20230414202351-ri59se5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230414202351-ri59se5",
+				"updated": "20230414202408"
+			},
+			"Children": [
+				{
+					"ID": "20230414202351-q7nz7nx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202351-q7nz7nx",
+						"updated": "20230414202351"
+					},
+					"Children": [
+						{
+							"ID": "20230414202351-das1wrr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202351-das1wrr",
+								"updated": "20230414202351"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可以在關閉思源的情況下刪除或修改該文件，啟動思源以後手動重建索引"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230414202351-tpwayz5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202351-tpwayz5",
+						"updated": "20230414202408"
+					},
+					"Children": [
+						{
+							"ID": "20230414202351-mxla3bm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202351-mxla3bm",
+								"updated": "20230414202408"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "或者在編輯器中的圖片元素菜單中選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "OCR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

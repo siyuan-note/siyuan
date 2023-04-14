@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230211103249"
+		"updated": "20230414202515"
 	},
 	"Children": [
 		{
@@ -981,11 +981,11 @@
 			]
 		},
 		{
-			"ID": "20230117003636-iel5zll",
+			"ID": "20230414202455-itauu1x",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230117003636-iel5zll",
-				"updated": "20230117003842"
+				"id": "20230414202455-itauu1x",
+				"updated": "20230414202455"
 			},
 			"Children": [
 				{
@@ -999,7 +999,83 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​. If you need to re-OCR or adjust the extraction results, you can delete or modify this file when SiYuan is closed, and manually rebuild the index after starting SiYuan."
+					"Data": "​, if you need to re-OCR or adjust the extraction results:"
+				}
+			]
+		},
+		{
+			"ID": "20230414202455-9vob8o4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230414202455-9vob8o4",
+				"updated": "20230414202515"
+			},
+			"Children": [
+				{
+					"ID": "20230414202455-kcjywr7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202455-kcjywr7",
+						"updated": "20230414202515"
+					},
+					"Children": [
+						{
+							"ID": "20230414202455-bggjnen",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202455-bggjnen",
+								"updated": "20230414202515"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "You can delete or modify this file when SiYuan is closed, and manually rebuild the index after starting SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230414202455-67sj3rv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202455-67sj3rv",
+						"updated": "20230414202502"
+					},
+					"Children": [
+						{
+							"ID": "20230414202455-m58zpdi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202455-m58zpdi",
+								"updated": "20230414202502"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Or select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "OCR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ from the image element menu in the editor"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

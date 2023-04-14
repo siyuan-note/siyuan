@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20230211103308"
+		"updated": "20230414202309"
 	},
 	"Children": [
 		{
@@ -199,7 +199,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210512171633-u3iy2xx",
-				"updated": "20220824172745"
+				"updated": "20230414202246"
 			},
 			"Children": [
 				{
@@ -1012,7 +1012,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003118-da7wjvx",
-				"updated": "20230117003434"
+				"updated": "20230414202215"
 			},
 			"Children": [
 				{
@@ -1026,7 +1026,83 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中，如果需要重新 OCR 或者调整提取结果，可以在关闭思源的情况下删除或修改该文件，启动思源以后手动重建索引。"
+					"Data": "​ 中，如果需要重新 OCR 或者调整提取结果："
+				}
+			]
+		},
+		{
+			"ID": "20230414202215-wv6v759",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230414202215-wv6v759",
+				"updated": "20230414202309"
+			},
+			"Children": [
+				{
+					"ID": "20230414202216-6ib46sp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202216-6ib46sp",
+						"updated": "20230414202216"
+					},
+					"Children": [
+						{
+							"ID": "20230414202216-7lh8lft",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202216-7lh8lft",
+								"updated": "20230414202221"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可以在关闭思源的情况下删除或修改该文件，启动思源以后手动重建索引"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230414202222-wbxjz0f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202222-wbxjz0f",
+						"updated": "20230414202309"
+					},
+					"Children": [
+						{
+							"ID": "20230414202222-oelakfd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202222-oelakfd",
+								"updated": "20230414202309"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "或者在编辑器中的图片元素菜单中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "OCR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

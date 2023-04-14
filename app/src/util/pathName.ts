@@ -89,7 +89,7 @@ export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: stri
     });
 };
 
-export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void, paths?: string[], range?: Range, title?: string) => {
+export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void, paths?: string[], range?: Range, title?: string, flashcard = false) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
             item.destroy();
@@ -129,10 +129,11 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     }
     const searchListElement = dialog.element.querySelector("#foldList");
     const searchTreeElement = dialog.element.querySelector("#foldTree");
-    let html = "";
-    window.siyuan.notebooks.forEach((item) => {
-        if (!item.closed) {
-            html += `<ul class="b3-list b3-list--background">
+    setNoteBook((notebooks) => {
+        let html = "";
+        notebooks.forEach((item) => {
+            if (!item.closed) {
+                html += `<ul class="b3-list b3-list--background">
 <li class="b3-list-item${html === "" ? " b3-list-item--focus" : ""}" data-path="/" data-box="${item.id}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
@@ -140,9 +141,11 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
 </li></ul>`;
-        }
-    });
-    searchTreeElement.innerHTML = html;
+            }
+        });
+        searchTreeElement.innerHTML = html;
+    }, flashcard);
+
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.focus();
     const inputEvent = (event?: InputEvent) => {
@@ -158,7 +161,8 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         searchListElement.classList.remove("fn__none");
         searchListElement.scrollTo(0, 0);
         fetchPost("/api/filetree/searchDocs", {
-            k: inputElement.value
+            k: inputElement.value,
+            flashcard,
         }, (data) => {
             let fileHTML = "";
             data.data.forEach((item: { boxIcon: string, box: string, hPath: string, path: string }) => {
@@ -198,7 +202,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         if (searchListElement.classList.contains("fn__none")) {
             if ((event.key === "ArrowRight" && !currentItemElement.querySelector(".b3-list-item__arrow--open") && !currentItemElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
                 (event.key === "ArrowLeft" && currentItemElement.querySelector(".b3-list-item__arrow--open"))) {
-                getLeaf(currentItemElement);
+                getLeaf(currentItemElement, flashcard);
                 event.preventDefault();
                 return;
             }
@@ -340,7 +344,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
             if (target.classList.contains("b3-list-item__toggle")) {
-                getLeaf(target.parentElement);
+                getLeaf(target.parentElement, flashcard);
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -392,7 +396,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     });
 };
 
-const getLeaf = (liElement: HTMLElement) => {
+const getLeaf = (liElement: HTMLElement, flashcard:boolean) => {
     const toggleElement = liElement.querySelector(".b3-list-item__arrow");
     if (toggleElement.classList.contains("b3-list-item__arrow--open")) {
         toggleElement.classList.remove("b3-list-item__arrow--open");
@@ -412,6 +416,7 @@ const getLeaf = (liElement: HTMLElement) => {
         notebook: notebookId,
         path: liElement.getAttribute("data-path"),
         sort: window.siyuan.config.fileTree.sort,
+        flashcard,
     }, response => {
         if (response.data.path === "/" && response.data.files.length === 0) {
             showMessage(window.siyuan.languages.emptyContent);
@@ -490,9 +495,13 @@ export const getOpenNotebookCount = () => {
     return count;
 };
 
-export const setNoteBook = (cb?: (notebook: INotebook[]) => void) => {
-    fetchPost("/api/notebook/lsNotebooks", {}, (response) => {
-        window.siyuan.notebooks = response.data.notebooks;
+export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = false) => {
+    fetchPost("/api/notebook/lsNotebooks", {
+        flashcard
+    }, (response) => {
+        if (!flashcard) {
+            window.siyuan.notebooks = response.data.notebooks;
+        }
         if (cb) {
             cb(response.data.notebooks);
         }

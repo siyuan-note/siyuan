@@ -146,7 +146,7 @@ export const openCardByData = (cardsData: {
     const actionElements = dialog.element.querySelectorAll(".card__action");
     const filterElement = dialog.element.querySelector('[data-type="filter"]');
     const fetchNewRound = () => {
-        const currentCardType = filterElement.getAttribute("data-cardtype")
+        const currentCardType = filterElement.getAttribute("data-cardtype");
         fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
             (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
             rootID: filterElement.getAttribute("data-id"),
@@ -167,7 +167,7 @@ export const openCardByData = (cardsData: {
                 allDone(countElement, editor, actionElements);
             }
         });
-    }
+    };
 
     dialog.element.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
@@ -212,9 +212,9 @@ export const openCardByData = (cardsData: {
                         iconHTML: Constants.ZWSP,
                         label: window.siyuan.languages.all,
                         click() {
-                            filterElement.setAttribute("data-id", "")
-                            filterElement.setAttribute("data-cardtype", "all")
-                            fetchNewRound()
+                            filterElement.setAttribute("data-id", "");
+                            filterElement.setAttribute("data-cardtype", "all");
+                            fetchNewRound();
                         },
                     }).element);
                     window.siyuan.menus.menu.append(new MenuItem({
@@ -222,10 +222,10 @@ export const openCardByData = (cardsData: {
                         label: window.siyuan.languages.fileTree,
                         click() {
                             movePathTo((toPath, toNotebook) => {
-                                filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true))
-                                filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc")
+                                filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true));
+                                filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc");
                                 fetchNewRound();
-                            }, [], undefined, window.siyuan.languages.specifyPath, true)
+                            }, [], undefined, window.siyuan.languages.specifyPath, true);
                         }
                     }).element);
                     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -234,9 +234,9 @@ export const openCardByData = (cardsData: {
                             iconHTML: Constants.ZWSP,
                             label: escapeHtml(title),
                             click() {
-                                filterElement.setAttribute("data-id", id)
-                                filterElement.setAttribute("data-cardtype", cardType)
-                                fetchNewRound()
+                                filterElement.setAttribute("data-id", id);
+                                filterElement.setAttribute("data-cardtype", cardType);
+                                fetchNewRound();
                             },
                         }).element);
                         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -246,13 +246,13 @@ export const openCardByData = (cardsData: {
                             iconHTML: Constants.ZWSP,
                             label: escapeHtml(deck.name),
                             click() {
-                                filterElement.setAttribute("data-id", deck.id)
-                                filterElement.setAttribute("data-cardtype", "all")
-                                fetchNewRound()
+                                filterElement.setAttribute("data-id", deck.id);
+                                filterElement.setAttribute("data-cardtype", "all");
+                                fetchNewRound();
                             },
                         }).element);
                     });
-                    const filterRect = filterTempElement.getBoundingClientRect()
+                    const filterRect = filterTempElement.getBoundingClientRect();
                     window.siyuan.menus.menu.popup({x: filterRect.left, y: filterRect.bottom});
                 });
                 event.stopPropagation();
@@ -326,7 +326,7 @@ export const openCardByData = (cardsData: {
                 /// #endif
                 index++;
                 if (index > blocks.length - 1) {
-                    const currentCardType = filterElement.getAttribute("data-cardtype")
+                    const currentCardType = filterElement.getAttribute("data-cardtype");
                     fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
                         (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
                         rootID: filterElement.getAttribute("data-id"),

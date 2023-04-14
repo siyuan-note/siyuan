@@ -26,7 +26,7 @@ import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {getSearch} from "../util/functions";
 
-export const openFileById = (options: {
+export const openFileById = async (options: {
     id: string,
     position?: string,
     mode?: TEditorMode,

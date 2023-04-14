@@ -1105,8 +1105,8 @@ export class Toolbar {
                     if (!html.endsWith("\n</div>")) {
                         html = `${html}\n</div>`;
                     }
-                    // 需移除换行 https://github.com/siyuan-note/siyuan/issues/7921
-                    html = html.replace(/\n\n/g, "\n");
+                    // 需移除连续的换行 (空行) https://github.com/siyuan-note/siyuan/issues/7921
+                    html = html.replace(/\n+/g, "\n");
                 }
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(html));
             } else if (isInlineMemo) {

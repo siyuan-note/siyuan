@@ -350,7 +350,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "include" && !target.hasAttribute("disabled")){
+            } else if (type === "include" && !target.hasAttribute("disabled")) {
                 target.classList.toggle("toolbar__icon--active");
                 if (target.classList.contains("toolbar__icon--active")) {
                     config.idPath.forEach((item, index) => {

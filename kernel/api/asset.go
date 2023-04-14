@@ -29,6 +29,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getImageOCRText(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	force := false
+	if forceArg := arg["force"]; nil != forceArg {
+		force = forceArg.(bool)
+	}
+
+	ret.Data = map[string]interface{}{
+		"text": util.GetAssetText(path, force),
+	}
+}
+
+func setImageOCRText(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	text := arg["text"].(string)
+	util.SetAssetText(path, text)
+}
+
 func renameAsset(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

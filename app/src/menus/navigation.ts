@@ -133,7 +133,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             label: window.siyuan.languages.spaceRepetition,
             click: () => {
                 fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                    openCardByData(response.data, "notebook", notebookId, title);
+                    openCardByData(response.data, "notebook", notebookId, name);
                 });
                 /// #if MOBILE
                 closePanel();

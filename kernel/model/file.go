@@ -221,7 +221,7 @@ type FileInfo struct {
 	isdir bool
 }
 
-func ListDocTree(boxID, path string, sortMode int, flashcard bool) (ret []*File, totals int, err error) {
+func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount int) (ret []*File, totals int, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -363,8 +363,8 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool) (ret []*File,
 			return fileTreeFiles[i].Sort < fileTreeFiles[j].Sort
 		})
 		ret = append(ret, fileTreeFiles...)
-		if Conf.FileTree.MaxListCount < len(ret) {
-			ret = ret[:Conf.FileTree.MaxListCount]
+		if maxListCount < len(ret) {
+			ret = ret[:maxListCount]
 		}
 		ret = ret[:]
 		return
@@ -390,8 +390,8 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool) (ret []*File,
 		ret = append(ret, docs...)
 	}
 
-	if Conf.FileTree.MaxListCount < len(ret) {
-		ret = ret[:Conf.FileTree.MaxListCount]
+	if maxListCount < len(ret) {
+		ret = ret[:maxListCount]
 	}
 	ret = ret[:]
 

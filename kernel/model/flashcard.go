@@ -38,8 +38,60 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var Decks = map[string]*riff.Deck{}
-var deckLock = sync.Mutex{}
+func GetFlashcardNotebooks() (ret []*Box) {
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+	deckBlockIDs := deck.GetBlockIDs()
+
+	boxes := Conf.GetOpenedBoxes()
+	for _, box := range boxes {
+		if isBoxContainFlashcard(box.ID, deckBlockIDs) {
+			ret = append(ret, box)
+		}
+	}
+	return
+}
+
+func isTreeContainFlashcard(rootID string, deckBlockIDs []string) (ret bool) {
+	blockIDs := getTreeSubTreeChildBlocks(rootID)
+	for _, blockID := range deckBlockIDs {
+		if gulu.Str.Contains(blockID, blockIDs) {
+			return true
+		}
+	}
+	return
+}
+
+func isBoxContainFlashcard(boxID string, deckBlockIDs []string) (ret bool) {
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
+	if nil != err {
+		logging.LogErrorf("read dir failed: %s", err)
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		if !strings.HasSuffix(entry.Name(), ".sy") {
+			continue
+		}
+
+		rootID := strings.TrimSuffix(entry.Name(), ".sy")
+		if isTreeContainFlashcard(rootID, deckBlockIDs) {
+			return true
+		}
+	}
+	return
+}
+
+var (
+	Decks    = map[string]*riff.Deck{}
+	deckLock = sync.Mutex{}
+)
 
 func GetNotebookFlashcards(boxID string, page int) (blocks []*Block, total, pageCount int) {
 	blocks = []*Block{}
@@ -66,9 +118,7 @@ func GetNotebookFlashcards(boxID string, page int) (blocks []*Block, total, page
 	var treeBlockIDs []string
 	for _, rootID := range rootIDs {
 		blockIDs := getTreeSubTreeChildBlocks(rootID)
-		for _, blockID := range blockIDs {
-			treeBlockIDs = append(treeBlockIDs, blockID)
-		}
+		treeBlockIDs = append(treeBlockIDs, blockIDs...)
 	}
 	treeBlockIDs = gulu.Str.RemoveDuplicatedElem(treeBlockIDs)
 
@@ -307,9 +357,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 	var treeBlockIDs []string
 	for _, rootID := range rootIDs {
 		blockIDs := getTreeSubTreeChildBlocks(rootID)
-		for _, blockID := range blockIDs {
-			treeBlockIDs = append(treeBlockIDs, blockID)
-		}
+		treeBlockIDs = append(treeBlockIDs, blockIDs...)
 	}
 	treeBlockIDs = gulu.Str.RemoveDuplicatedElem(treeBlockIDs)
 

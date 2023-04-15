@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230406111957"
+		"updated": "20230415112115"
 	},
 	"Children": [
 		{
@@ -2061,6 +2061,49 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230415112040-xyakvb0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230415112040-xyakvb0",
+				"updated": "20230415112102"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“思源”命名的由來"
+				}
+			]
+		},
+		{
+			"ID": "20230415112115-cu92dxe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230415112115-cu92dxe",
+				"updated": "20230415112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源這個名字取自中國古代成語“飲水思源”，其字面意思是“喝水的時候，要想到水是從哪裡來的”，比喻不忘本、知感恩。"
+				}
+			]
+		},
+		{
+			"ID": "20230415112115-5o2ogev",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230415112115-5o2ogev",
+				"updated": "20230415112115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我們希望用戶在使用思源筆記進行知識管理的時候不要忘記知識的出處和關聯，更重要的是不要忘記通過自己的所學回報社會，回報全人類。"
 				}
 			]
 		}

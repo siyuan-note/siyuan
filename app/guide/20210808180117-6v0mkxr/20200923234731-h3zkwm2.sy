@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230406112010"
+		"updated": "20230415112018"
 	},
 	"Children": [
 		{
@@ -2070,6 +2070,49 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230415111951-vt4y4gg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230415111951-vt4y4gg",
+				"updated": "20230415112008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Origin of the name \"SiYuan\""
+				}
+			]
+		},
+		{
+			"ID": "20230415112018-2o1sxi9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230415112018-2o1sxi9",
+				"updated": "20230415112018"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The name \"SiYuan\" comes from the Chinese idiom \"饮水思源\", which means \"when drinking water, one should remember where it comes from\" and is used to describe the virtues of not forgetting one's roots and gratitude."
+				}
+			]
+		},
+		{
+			"ID": "20230415112018-tl4v3cu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230415112018-tl4v3cu",
+				"updated": "20230415112018"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We hope that users of SiYuan note-taking software for knowledge management will not forget the sources and connections of their knowledge, and more importantly, will not forget to contribute to society and all of humanity with what they have learned."
 				}
 			]
 		}

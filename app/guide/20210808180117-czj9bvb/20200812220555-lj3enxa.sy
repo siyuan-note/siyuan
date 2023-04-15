@@ -8,7 +8,7 @@
 		"title": "请从这里开始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20221114173007"
+		"updated": "20230415112508"
 	},
 	"Children": [
 		{
@@ -33,19 +33,44 @@
 			"Properties": {
 				"id": "20210428212840-8rqwn5o",
 				"style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);",
-				"updated": "20210622232119"
+				"updated": "20230415112508"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，唯一重要的核心概念是"
+					"Data": "在"
 				},
 				{
 					"Type": "NodeTextMark",
+					"Properties": {
+						"parent-style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);"
+					},
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230415111858-vgohvf3",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "思源"
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: parent-style=\"color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "中，唯一重要的核心概念是"
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"parent-style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);"
+					},
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20200813004931-q4cu8na",
 					"TextMarkBlockRefSubtype": "s",
 					"TextMarkTextContent": "内容块"
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: parent-style=\"color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);\"}"
 				},
 				{
 					"Type": "NodeText",

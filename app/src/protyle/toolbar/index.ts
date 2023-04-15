@@ -1098,15 +1098,12 @@ export class Toolbar {
             if (types.includes("NodeHTMLBlock")) {
                 let html = textElement.value;
                 if (html) {
-                    // 需 div 包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
-                    if (!html.startsWith("<div>\n")) {
-                        html = `<div>\n${html}`;
+                    // 需移除首尾的空白字符与连续的换行 (空行) https://github.com/siyuan-note/siyuan/issues/7921
+                    html = html.trim().replace(/\n+/g, "\n");
+                    // 需一对 div 标签包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
+                    if (!(html.startsWith("<div>") && html.endsWith("</div>"))) {
+                        html = `<div>\n${html}\n</div>`;
                     }
-                    if (!html.endsWith("\n</div>")) {
-                        html = `${html}\n</div>`;
-                    }
-                    // 需移除连续的换行 (空行) https://github.com/siyuan-note/siyuan/issues/7921
-                    html = html.replace(/\n+/g, "\n");
                 }
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(html));
             } else if (isInlineMemo) {

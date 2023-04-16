@@ -420,7 +420,7 @@
   if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} === 1) {
     document.body.classList.add('dark')
   }
-  if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
     document.querySelector('.b3-button--white').remove()
   }
 
@@ -437,7 +437,7 @@
     try {
       const {ipcRenderer} = require('electron')
       const {getCurrentWindow} = require('@electron/remote')
-      ipcRenderer.send('siyuan-quit', location.port)
+      ipcRenderer.send('siyuan-quit', window.location.port)
     } catch (e) {
       if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid) {
         window.location.href = 'siyuan://api/system/exit'
@@ -505,7 +505,8 @@
       return response.json()
     }).then((response) => {
       if (0 === response.code) {
-        window.location.href = window.location.search.replace('?url=', '') || "/"
+        const url = new URL(window.location)
+        window.location.href = url.searchParams.get("to") || "/"
         return
       }
 

@@ -46,3 +46,11 @@ export const isFileAnnotation = (text: string) => {
 export const looseJsonParse = (text: string) => {
     return Function(`"use strict";return (${text})`)();
 };
+
+/* redirect to auth page */
+export const redirectToCheckAuth = (to: string = window.location.href) => {
+    const url = new URL(window.location.origin);
+    url.pathname = '/check-auth';
+    url.searchParams.set('to', to);
+    window.location.href = url.href;
+}

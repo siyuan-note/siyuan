@@ -18,6 +18,7 @@ package model
 
 import (
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -221,7 +222,11 @@ func CheckAuth(c *gin.Context) {
 				return
 			}
 
-			c.Redirect(302, "/check-auth")
+			queryParams := url.Values{}
+			queryParams.Set("to", c.Request.URL.String())
+			c.Request.URL.RawQuery = queryParams.Encode()
+			c.Request.URL.Path = "/check-auth"
+			c.Redirect(302, c.Request.URL.String())
 			c.Abort()
 			return
 		}

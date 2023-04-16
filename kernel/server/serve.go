@@ -260,7 +260,10 @@ func serveAppearance(ginServer *gin.Engine) {
 	})
 
 	siyuan.Static("/stage/", filepath.Join(util.WorkingDir, "stage"))
+
 	siyuan.StaticFile("favicon.ico", filepath.Join(util.WorkingDir, "stage", "icon.png"))
+	siyuan.StaticFile("manifest.json", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
+	siyuan.StaticFile("manifest.webmanifest", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
 
 	siyuan.GET("/check-auth", serveCheckAuth)
 }

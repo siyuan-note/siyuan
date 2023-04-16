@@ -222,11 +222,12 @@ func CheckAuth(c *gin.Context) {
 				return
 			}
 
+			location := url.URL{}
 			queryParams := url.Values{}
 			queryParams.Set("to", c.Request.URL.String())
-			c.Request.URL.RawQuery = queryParams.Encode()
-			c.Request.URL.Path = "/check-auth"
-			c.Redirect(302, c.Request.URL.String())
+			location.RawQuery = queryParams.Encode()
+			location.Path = "/check-auth"
+			c.Redirect(302, location.String())
 			c.Abort()
 			return
 		}

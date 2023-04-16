@@ -54,3 +54,19 @@ export const redirectToCheckAuth = (to: string = window.location.href) => {
     url.searchParams.set('to', to);
     window.location.href = url.href;
 }
+
+export const isSiyuanUrl = (url: string) => {
+    return /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
+}
+
+export const isWebSiyuanUrl = (url: string) => {
+    return /^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
+}
+
+export const getIdFromSiyuanUrl = (url: string) => {
+    return url.substring(16, 16 + 22);
+}
+
+export const getIdFromWebSiyuanUrl = (url: string) => {
+    return url.substring(20, 20 + 22);
+}

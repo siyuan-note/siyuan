@@ -22,7 +22,7 @@ export class Graph extends Model {
     public rootId: string; // "local" 必填
     private timeout: number;
     public graphData: {
-        nodes: { box: string, id: string, path: string, type: string }[],
+        nodes: { box: string, id: string, path: string, type: string, color: string }[],
         links: Record<string, unknown>[],
         box: string
     };
@@ -492,6 +492,52 @@ export class Graph extends Model {
             this.graphElement.firstElementChild.classList.add("fn__none");
             return;
         }
+        // 使用颜色
+        const rootStyle = getComputedStyle(document.body);
+        this.graphData.nodes.forEach(item => {
+            switch (item.type) {
+                case "NodeDocument":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-doc-point").trim()
+                    break;
+                case "NodeParagraph":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-p-point").trim()
+                    break;
+                case "NodeHeading":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-heading-point").trim()
+                    break;
+                case "NodeMathBlock":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-math-point").trim()
+                    break;
+                case "NodeCodeBlock":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-code-point").trim()
+                    break;
+                case "NodeTable":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-table-point").trim()
+                    break;
+                case "NodeList":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-list-point").trim()
+                    break;
+                case "NodeListItem":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-listitem-point").trim()
+                    break;
+                case "NodeBlockquote":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-bq-point").trim()
+                    break;
+                case "NodeSuperBlock":
+                    item.color = rootStyle.getPropertyValue("--b3-graph-super-point").trim()
+                    break;
+                default:
+                    item.color = rootStyle.getPropertyValue("--b3-graph-p-point").trim()
+                    break;
+            }
+        })
+        this.graphData.links.forEach(item => {
+            if (item.ref) {
+                item.color = rootStyle.getPropertyValue("--b3-graph-ref-line").trim();
+            } else {
+                item.color = rootStyle.getPropertyValue("--b3-graph-line").trim();
+            }
+        })
         clearTimeout(this.timeout);
         addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.2`, "protyleVisScript").then(() => {
             this.timeout = window.setTimeout(() => {
@@ -502,7 +548,6 @@ export class Graph extends Model {
                     nodes: this.graphData.nodes,
                     edges: this.graphData.links,
                 };
-                const rootStyle = getComputedStyle(document.body);
                 const options = {
                     autoResize: true,
                     interaction: {

@@ -266,8 +266,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/getCloudUser", model.CheckAuth, getCloudUser)
 	ginServer.Handle("POST", "/api/setting/logoutCloudUser", model.CheckAuth, model.CheckReadonly, logoutCloudUser)
 	ginServer.Handle("POST", "/api/setting/login2faCloudUser", model.CheckAuth, model.CheckReadonly, login2faCloudUser)
-	ginServer.Handle("POST", "/api/setting/getCustomCSS", model.CheckAuth, getCustomCSS)
-	ginServer.Handle("POST", "/api/setting/setCustomCSS", model.CheckAuth, model.CheckReadonly, setCustomCSS)
 	ginServer.Handle("POST", "/api/setting/setEmoji", model.CheckAuth, model.CheckReadonly, setEmoji)
 	ginServer.Handle("POST", "/api/setting/setFlashcard", model.CheckAuth, model.CheckReadonly, setFlashcard)
 	ginServer.Handle("POST", "/api/setting/setAI", model.CheckAuth, model.CheckReadonly, setAI)

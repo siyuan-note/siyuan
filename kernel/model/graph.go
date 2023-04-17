@@ -33,32 +33,22 @@ import (
 )
 
 type GraphNode struct {
-	ID    string          `json:"id"`
-	Box   string          `json:"box"`
-	Path  string          `json:"path"`
-	Size  float64         `json:"size"`
-	Title string          `json:"title,omitempty"`
-	Label string          `json:"label"`
-	Type  string          `json:"type"`
-	Refs  int             `json:"refs"`
-	Defs  int             `json:"defs"`
-	Color *GraphNodeColor `json:"color"`
-}
-
-type GraphNodeColor struct {
-	Background string `json:"background"`
+	ID    string  `json:"id"`
+	Box   string  `json:"box"`
+	Path  string  `json:"path"`
+	Size  float64 `json:"size"`
+	Title string  `json:"title,omitempty"`
+	Label string  `json:"label"`
+	Type  string  `json:"type"`
+	Refs  int     `json:"refs"`
+	Defs  int     `json:"defs"`
 }
 
 type GraphLink struct {
-	From   string          `json:"from"`
-	To     string          `json:"to"`
-	Ref    bool            `json:"-"`
-	Color  *GraphLinkColor `json:"color"`
-	Arrows *GraphArrows    `json:"arrows"`
-}
-
-type GraphLinkColor struct {
-	Color string `json:"color"`
+	From   string       `json:"from"`
+	To     string       `json:"to"`
+	Ref    bool         `json:"-"`
+	Arrows *GraphArrows `json:"arrows"`
 }
 
 type GraphArrows struct {
@@ -158,15 +148,15 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 			}
 		}
 	}
-	style := graphStyle(true)
-	genTreeNodes(blocks, &nodes, &links, true, style)
+
+	genTreeNodes(blocks, &nodes, &links, true)
 	growTreeGraph(&forwardlinks, &backlinks, &nodes)
 	blocks = append(blocks, forwardlinks...)
 	blocks = append(blocks, backlinks...)
-	buildLinks(&blocks, &links, style, true)
+	buildLinks(&blocks, &links, true)
 	if Conf.Graph.Local.Tag {
 		p := sqlBlock.Path
-		linkTagBlocks(&blocks, &nodes, &links, p, style)
+		linkTagBlocks(&blocks, &nodes, &links, p)
 	}
 	markLinkedNodes(&nodes, &links, true)
 	nodes = removeDuplicatedUnescape(nodes)
@@ -186,7 +176,6 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 
 	var blocks []*Block
 	roots := sql.GetAllRootBlocks()
-	style := graphStyle(false)
 	if 0 < len(roots) {
 		boxID = roots[0].Box
 	}
@@ -198,7 +187,7 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 
 	sqlBlocks := sql.GetAllChildBlocks(rootIDs, stmt)
 	treeBlocks := fromSQLBlocks(&sqlBlocks, "", 0)
-	genTreeNodes(treeBlocks, &nodes, &links, false, style)
+	genTreeNodes(treeBlocks, &nodes, &links, false)
 	blocks = append(blocks, treeBlocks...)
 
 	// 文档块关联
@@ -216,9 +205,9 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 	growTreeGraph(&forwardlinks, &backlinks, &nodes)
 	blocks = append(blocks, forwardlinks...)
 	blocks = append(blocks, backlinks...)
-	buildLinks(&blocks, &links, style, false)
+	buildLinks(&blocks, &links, false)
 	if Conf.Graph.Global.Tag {
-		linkTagBlocks(&blocks, &nodes, &links, "", style)
+		linkTagBlocks(&blocks, &nodes, &links, "")
 	}
 	markLinkedNodes(&nodes, &links, false)
 	pruneUnref(&nodes, &links)
@@ -226,7 +215,7 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 	return
 }
 
-func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p string, style map[string]string) {
+func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p string) {
 	tagSpans := sql.QueryTagSpans(p)
 	if 1 > len(tagSpans) {
 		return
@@ -247,7 +236,6 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 				Label: tagSpan.Content,
 				Size:  nodeSize,
 				Type:  tagSpan.Type,
-				Color: &GraphNodeColor{Background: style["--b3-graph-tag-point"]},
 			}
 			*nodes = append(*nodes, node)
 			tagNodes = append(tagNodes, node)
@@ -260,17 +248,15 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 			if isGlobal { // 全局关系图将标签链接到文档块上
 				if block.RootID == tagSpan.RootID { // 局部关系图将标签链接到子块上
 					*links = append(*links, &GraphLink{
-						From:  tagSpan.Content,
-						To:    block.RootID,
-						Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
+						From: tagSpan.Content,
+						To:   block.RootID,
 					})
 				}
 			} else {
 				if block.ID == tagSpan.BlockID { // 局部关系图将标签链接到子块上
 					*links = append(*links, &GraphLink{
-						From:  tagSpan.Content,
-						To:    block.ID,
-						Color: &GraphLinkColor{Color: style["--b3-graph-tag-line"]},
+						From: tagSpan.Content,
+						To:   block.ID,
 					})
 				}
 			}
@@ -288,9 +274,8 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 			if targetTag := tagNodeIn(tagNodes, targetID); nil != targetTag {
 
 				*links = append(*links, &GraphLink{
-					From:  tagNode.ID,
-					To:    targetID,
-					Color: &GraphLinkColor{Color: style["--b3-graph-tag-tag-line"]},
+					From: tagNode.ID,
+					To:   targetID,
 				})
 			}
 		}
@@ -388,14 +373,13 @@ func existNodes(nodes *[]*GraphNode, id string) bool {
 	return false
 }
 
-func buildLinks(defs *[]*Block, links *[]*GraphLink, style map[string]string, local bool) {
+func buildLinks(defs *[]*Block, links *[]*GraphLink, local bool) {
 	for _, def := range *defs {
 		for _, ref := range def.Refs {
 			link := &GraphLink{
-				From:  ref.ID,
-				To:    def.ID,
-				Ref:   true,
-				Color: linkColor(true, style),
+				From: ref.ID,
+				To:   def.ID,
+				Ref:  true,
 			}
 			if local {
 				if Conf.Graph.Local.Arrow {
@@ -411,7 +395,7 @@ func buildLinks(defs *[]*Block, links *[]*GraphLink, style map[string]string, lo
 	}
 }
 
-func genTreeNodes(blocks []*Block, nodes *[]*GraphNode, links *[]*GraphLink, local bool, style map[string]string) {
+func genTreeNodes(blocks []*Block, nodes *[]*GraphNode, links *[]*GraphLink, local bool) {
 	nodeSize := Conf.Graph.Local.NodeSize
 	if !local {
 		nodeSize = Conf.Graph.Global.NodeSize
@@ -419,21 +403,19 @@ func genTreeNodes(blocks []*Block, nodes *[]*GraphNode, links *[]*GraphLink, loc
 
 	for _, block := range blocks {
 		node := &GraphNode{
-			ID:    block.ID,
-			Box:   block.Box,
-			Path:  block.Path,
-			Type:  block.Type,
-			Size:  nodeSize,
-			Color: &GraphNodeColor{Background: nodeColor(block.Type, style)},
+			ID:   block.ID,
+			Box:  block.Box,
+			Path: block.Path,
+			Type: block.Type,
+			Size: nodeSize,
 		}
 		nodeTitleLabel(node, nodeContentByBlock(block))
 		*nodes = append(*nodes, node)
 
 		*links = append(*links, &GraphLink{
-			From:  block.ParentID,
-			To:    block.ID,
-			Ref:   false,
-			Color: linkColor(false, style),
+			From: block.ParentID,
+			To:   block.ID,
+			Ref:  false,
 		})
 	}
 }
@@ -554,42 +536,6 @@ func nodeContentByNode(node *ast.Node, text string) (ret string) {
 	return
 }
 
-func linkColor(ref bool, style map[string]string) (ret *GraphLinkColor) {
-	ret = &GraphLinkColor{}
-	if ref {
-		ret.Color = style["--b3-graph-ref-line"]
-		return
-	}
-	ret.Color = style["--b3-graph-line"]
-	return
-}
-
-func nodeColor(typ string, style map[string]string) string {
-	switch typ {
-	case "NodeDocument":
-		return style["--b3-graph-doc-point"]
-	case "NodeParagraph":
-		return style["--b3-graph-p-point"]
-	case "NodeHeading":
-		return style["--b3-graph-heading-point"]
-	case "NodeMathBlock":
-		return style["--b3-graph-math-point"]
-	case "NodeCodeBlock":
-		return style["--b3-graph-code-point"]
-	case "NodeTable":
-		return style["--b3-graph-table-point"]
-	case "NodeList":
-		return style["--b3-graph-list-point"]
-	case "NodeListItem":
-		return style["--b3-graph-listitem-point"]
-	case "NodeBlockquote":
-		return style["--b3-graph-bq-point"]
-	case "NodeSuperBlock":
-		return style["--b3-graph-super-point"]
-	}
-	return style["--b3-graph-p-point"]
-}
-
 func graphTypeFilter(local bool) string {
 	var inList []string
 
@@ -700,28 +646,6 @@ func dailyNotePaths(local bool) (ret []string) {
 		}
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	return
-}
-
-func graphStyle(local bool) (ret map[string]string) {
-	ret = map[string]string{}
-	ret["--b3-graph-doc-point"] = currentCSSValue("--b3-graph-doc-point")
-	ret["--b3-graph-p-point"] = currentCSSValue("--b3-graph-p-point")
-	ret["--b3-graph-heading-point"] = currentCSSValue("--b3-graph-heading-point")
-	ret["--b3-graph-math-point"] = currentCSSValue("--b3-graph-math-point")
-	ret["--b3-graph-code-point"] = currentCSSValue("--b3-graph-code-point")
-	ret["--b3-graph-table-point"] = currentCSSValue("--b3-graph-table-point")
-	ret["--b3-graph-list-point"] = currentCSSValue("--b3-graph-list-point")
-	ret["--b3-graph-listitem-point"] = currentCSSValue("--b3-graph-listitem-point")
-	ret["--b3-graph-bq-point"] = currentCSSValue("--b3-graph-bq-point")
-	ret["--b3-graph-super-point"] = currentCSSValue("--b3-graph-super-point")
-
-	ret["--b3-graph-line"] = currentCSSValue("--b3-graph-line")
-	ret["--b3-graph-ref-line"] = currentCSSValue("--b3-graph-ref-line")
-	ret["--b3-graph-tag-line"] = currentCSSValue("--b3-graph-tag-line")
-	ret["--b3-graph-tag-tag-line"] = currentCSSValue("--b3-graph-tag-tag-line")
-	ret["--b3-graph-asset-line"] = currentCSSValue("--b3-graph-asset-line")
-
 	return
 }
 

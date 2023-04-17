@@ -335,8 +335,13 @@ func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs, refTexts []
 	return
 }
 
-func QueryRefsRecent() (ret []*Ref) {
-	rows, err := query("SELECT * FROM refs GROUP BY def_block_id ORDER BY id desc LIMIT 32")
+func QueryRefsRecent(onlyDoc bool) (ret []*Ref) {
+	stmt := "SELECT * FROM refs"
+	if onlyDoc {
+		stmt = "SELECT * FROM refs WHERE def_block_type = 'd'"
+	}
+	stmt += " GROUP BY def_block_id ORDER BY id DESC LIMIT 32"
+	rows, err := query(stmt)
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

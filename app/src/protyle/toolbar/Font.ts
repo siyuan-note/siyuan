@@ -96,7 +96,7 @@ const fontMenu = (protyle: IProtyle) => {
     ${colorHTML}
 </div>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages["--b3-theme-background"]}</div>
+<div>${window.siyuan.languages.colorPrimary}</div>
 <div class="fn__hr--small"></div>
 <div class="fn__flex">
     ${bgHTML}

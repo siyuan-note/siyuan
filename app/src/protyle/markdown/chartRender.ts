@@ -29,7 +29,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                         });
                     }
                 }
-                echartsElements.forEach((e: HTMLDivElement) => {
+                echartsElements.forEach(async (e: HTMLDivElement) => {
                     if (e.getAttribute("data-render") === "true") {
                         return;
                     }
@@ -39,7 +39,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                     try {
                         renderElement.style.height = e.style.height;
-                        const option = looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
+                        const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
                         echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
                         e.setAttribute("data-render", "true");
                         renderElement.classList.remove("ft__error");

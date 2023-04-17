@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20221114172705"
+		"updated": "20230417141231"
 	},
 	"Children": [
 		{
@@ -32,7 +32,7 @@
 			},
 			"Properties": {
 				"id": "20220806104355-9smwbwz",
-				"updated": "20220806104606"
+				"updated": "20230417141231"
 			},
 			"Children": [
 				{
@@ -46,7 +46,7 @@
 					},
 					"Properties": {
 						"id": "20220806104408-dzqx5tq",
-						"updated": "20220806104408"
+						"updated": "20230417141231"
 					},
 					"Children": [
 						{
@@ -54,12 +54,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220806104408-6buoa98",
-								"updated": "20220806104443"
+								"updated": "20230417141231"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "前往 "
+									"Data": "打开  "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -68,7 +68,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -77,12 +77,45 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中开启 "
+									"Data": "​ ，点击 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "自定义当前主题"
+									"TextMarkTextContent": "代码片段设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，选中 CSS 页签"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141127-5xeqn2w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230417141127-5xeqn2w"
+					},
+					"Children": [
+						{
+							"ID": "20230417141127-ykva27k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141127-ykva27k",
+								"updated": "20230417141132"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "填入标题"
 								}
 							]
 						}
@@ -94,8 +127,8 @@
 					"ListData": {
 						"Typ": 1,
 						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
+						"Marker": "My4=",
+						"Num": 3
 					},
 					"Properties": {
 						"id": "20220806104453-r93vur1"
@@ -106,44 +139,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220806104453-w1275cy",
-								"updated": "20220806104551"
+								"updated": "20230417141054"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
-								},
-								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "根据主题和 theme.css 中的变量参照如下写法进行编码后填入代码片段中"
+								}
+							]
+						},
+						{
+							"ID": "20230417140641-qkwfqkh",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20230417140641-qkwfqkh",
+								"updated": "20230417140651"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "外观"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "Y3Nz"
 								},
 								{
-									"Type": "NodeText",
-									"Data": " - "
+									"Type": "NodeCodeBlockCode",
+									"Data": "html[data-light-theme=\"daylight\"][data-theme-mode=\"light\"] {\n    --b3-theme-primary: red;\n}\n\nhtml[data-light-theme=\"daylight\"][data-theme-mode=\"dark\"] {\n    --b3-theme-primary: blue;\n}\n"
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "主题"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "打开主题文件夹"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
 								}
 							]
 						}
@@ -155,8 +183,8 @@
 					"ListData": {
 						"Typ": 1,
 						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
+						"Marker": "NC4=",
+						"Num": 4
 					},
 					"Properties": {
 						"id": "20220806104553-x0zop0s",
@@ -168,21 +196,42 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220806104553-fnd0qjf",
-								"updated": "20220806104606"
+								"updated": "20230417141206"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "修改对应的主题的 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "custom.css"
-								},
+									"Data": "开启该代码片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141206-1re3sk4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20230417141206-1re3sk4",
+						"updated": "20230417141216"
+					},
+					"Children": [
+						{
+							"ID": "20230417141206-wv1436f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141206-wv1436f",
+								"updated": "20230417141216"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": " 文件"
+									"Data": "点击确定按钮"
 								}
 							]
 						}

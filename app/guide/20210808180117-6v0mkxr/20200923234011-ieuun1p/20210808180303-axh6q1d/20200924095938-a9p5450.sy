@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20221114173347"
+		"updated": "20230417141811"
 	},
 	"Children": [
 		{
@@ -25,18 +25,18 @@
 			]
 		},
 		{
-			"ID": "20220806105232-4kpzaaj",
+			"ID": "20230417141558-see765c",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20220806105232-4kpzaaj",
-				"updated": "20220806105333"
+				"id": "20230417141558-see765c",
+				"updated": "20230417141811"
 			},
 			"Children": [
 				{
-					"ID": "20220806105232-03276uj",
+					"ID": "20230417141558-d8vl4m7",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -45,16 +45,16 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20220806105232-03276uj",
-						"updated": "20220806105254"
+						"id": "20230417141558-d8vl4m7",
+						"updated": "20230417141558"
 					},
 					"Children": [
 						{
-							"ID": "20220806105232-wd95q09",
+							"ID": "20230417141558-f6keda3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220806105232-wd95q09",
-								"updated": "20220806105254"
+								"id": "20230417141558-f6keda3",
+								"updated": "20230417141653"
 							},
 							"Children": [
 								{
@@ -68,7 +68,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -77,19 +77,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " and enable "
+									"Data": "​ and click  "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Customize the current theme"
+									"TextMarkTextContent": "Code Snippet"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, select CSS tab"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220806105232-2cmqwox",
+					"ID": "20230417141705-gm3l4qc",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -98,56 +102,28 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20220806105232-2cmqwox",
-						"updated": "20220806105311"
+						"id": "20230417141705-gm3l4qc",
+						"updated": "20230417141708"
 					},
 					"Children": [
 						{
-							"ID": "20220806105232-iuinsnb",
+							"ID": "20230417141705-u38pf60",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220806105232-iuinsnb",
-								"updated": "20220806105311"
+								"id": "20230417141705-u38pf60",
+								"updated": "20230417141708"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Settings"
-								},
-								{
 									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Appearance"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Themes"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Open the theme folder"
+									"Data": "Input title"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220806105232-6srr6mz",
+					"ID": "20230417141558-bmkmmsg",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -156,30 +132,108 @@
 						"Num": 3
 					},
 					"Properties": {
-						"id": "20220806105232-6srr6mz",
-						"updated": "20220806105333"
+						"id": "20230417141558-bmkmmsg",
+						"updated": "20230417141811"
 					},
 					"Children": [
 						{
-							"ID": "20220806105232-z3bosch",
+							"ID": "20230417141558-727zvva",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220806105232-z3bosch",
-								"updated": "20220806105333"
+								"id": "20230417141558-727zvva",
+								"updated": "20230417141811"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Modify the "
+									"Data": "According to the theme and the variables in theme.css, refer to the following writing method to encode and fill in the code snippet"
+								}
+							]
+						},
+						{
+							"ID": "20230417141558-79fewv8",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20230417141558-79fewv8",
+								"updated": "20230417141558"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "custom.css"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "Y3Nz"
 								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "html[data-light-theme=\"daylight\"][data-theme-mode=\"light\"] {\n    --b3-theme-primary: red;\n}\n\nhtml[data-light-theme=\"daylight\"][data-theme-mode=\"dark\"] {\n    --b3-theme-primary: blue;\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141558-fr8x3k5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230417141558-fr8x3k5",
+						"updated": "20230417141722"
+					},
+					"Children": [
+						{
+							"ID": "20230417141558-4qxft8w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141558-4qxft8w",
+								"updated": "20230417141722"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": " file"
+									"Data": "Enable this code snippet"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141558-dr3lydv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20230417141558-dr3lydv",
+						"updated": "20230417141747"
+					},
+					"Children": [
+						{
+							"ID": "20230417141558-x0xfwm6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141558-x0xfwm6",
+								"updated": "20230417141747"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click the Confirm button"
 								}
 							]
 						}

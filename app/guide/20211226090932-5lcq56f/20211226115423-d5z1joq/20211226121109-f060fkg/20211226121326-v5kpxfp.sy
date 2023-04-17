@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121326-v5kpxfp",
 		"title": "主题",
-		"updated": "20221114173638"
+		"updated": "20230417142023"
 	},
 	"Children": [
 		{
@@ -24,18 +24,18 @@
 			]
 		},
 		{
-			"ID": "20220806105512-xmsbhev",
+			"ID": "20230417141958-yemp12k",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20220806105512-xmsbhev",
-				"updated": "20220806105512"
+				"id": "20230417141958-yemp12k",
+				"updated": "20230417142023"
 			},
 			"Children": [
 				{
-					"ID": "20220806105512-bo7bdu7",
+					"ID": "20230417141958-141fdej",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -44,21 +44,21 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20220806105512-bo7bdu7",
-						"updated": "20220806105512"
+						"id": "20230417141958-141fdej",
+						"updated": "20230417142023"
 					},
 					"Children": [
 						{
-							"ID": "20220806105512-0klhfcq",
+							"ID": "20230417141958-m3qhlu1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220806105512-0klhfcq",
-								"updated": "20220806105512"
+								"id": "20230417141958-m3qhlu1",
+								"updated": "20230417142023"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "前往 "
+									"Data": "打開  "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -67,7 +67,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -76,19 +76,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中開啟 "
+									"Data": "​，點擊 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "自定義當前主題"
+									"TextMarkTextContent": "代碼片段設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，選中 CSS 頁簽"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220806105512-nl1ablk",
+					"ID": "20230417141958-slzg8hh",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -97,56 +101,28 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20220806105512-nl1ablk",
-						"updated": "20220806105512"
+						"id": "20230417141958-slzg8hh",
+						"updated": "20230417141958"
 					},
 					"Children": [
 						{
-							"ID": "20220806105512-n3a0b53",
+							"ID": "20230417141958-9xigs5p",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220806105512-n3a0b53",
-								"updated": "20220806105512"
+								"id": "20230417141958-9xigs5p",
+								"updated": "20230417141958"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置"
-								},
-								{
 									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "外觀"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "主題"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "打開主題文件夾"
+									"Data": "填入標題"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220806105512-kyevp1k",
+					"ID": "20230417141958-r7aflkw",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -155,30 +131,108 @@
 						"Num": 3
 					},
 					"Properties": {
-						"id": "20220806105512-kyevp1k",
-						"updated": "20220806105512"
+						"id": "20230417141958-r7aflkw",
+						"updated": "20230417141958"
 					},
 					"Children": [
 						{
-							"ID": "20220806105512-apqdwf7",
+							"ID": "20230417141958-oonruqo",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220806105512-apqdwf7",
-								"updated": "20220806105512"
+								"id": "20230417141958-oonruqo",
+								"updated": "20230417141958"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "修改對應的主題的 "
+									"Data": "根據主題和 theme.css 中的變量參照如下寫法進行編碼後填入代碼片段中"
+								}
+							]
+						},
+						{
+							"ID": "20230417141958-fzl7p5c",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20230417141958-fzl7p5c",
+								"updated": "20230417141958"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "custom.css"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "Y3Nz"
 								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "html[data-light-theme=\"daylight\"][data-theme-mode=\"light\"] {\n    --b3-theme-primary: red;\n}\n\nhtml[data-light-theme=\"daylight\"][data-theme-mode=\"dark\"] {\n    --b3-theme-primary: blue;\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141958-lti6wgc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230417141958-lti6wgc",
+						"updated": "20230417141958"
+					},
+					"Children": [
+						{
+							"ID": "20230417141958-rit2pvw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141958-rit2pvw",
+								"updated": "20230417141958"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": " 文件"
+									"Data": "開啟該代碼片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141958-088cu1s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20230417141958-088cu1s",
+						"updated": "20230417141958"
+					},
+					"Children": [
+						{
+							"ID": "20230417141958-wjn3w7f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141958-wjn3w7f",
+								"updated": "20230417141958"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "點擊確定按鈕"
 								}
 							]
 						}

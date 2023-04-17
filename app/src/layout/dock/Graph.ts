@@ -497,47 +497,47 @@ export class Graph extends Model {
         this.graphData.nodes.forEach(item => {
             switch (item.type) {
                 case "NodeDocument":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-doc-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-doc-point").trim()};
                     break;
                 case "NodeParagraph":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-p-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-p-point").trim()};
                     break;
                 case "NodeHeading":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-heading-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-heading-point").trim()};
                     break;
                 case "NodeMathBlock":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-math-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-math-point").trim()};
                     break;
                 case "NodeCodeBlock":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-code-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-code-point").trim()};
                     break;
                 case "NodeTable":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-table-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-table-point").trim()};
                     break;
                 case "NodeList":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-list-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-list-point").trim()};
                     break;
                 case "NodeListItem":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-listitem-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-listitem-point").trim()};
                     break;
                 case "NodeBlockquote":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-bq-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-bq-point").trim()};
                     break;
                 case "NodeSuperBlock":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-super-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-super-point").trim()};
                     break;
                 default:
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-p-point").trim()}
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-p-point").trim()};
                     break;
             }
-        })
+        });
         this.graphData.links.forEach(item => {
             if (item.ref) {
                 item.color = {color: rootStyle.getPropertyValue("--b3-graph-ref-line").trim()};
             } else {
                 item.color = {color: rootStyle.getPropertyValue("--b3-graph-line").trim()};
             }
-        })
+        });
         clearTimeout(this.timeout);
         addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.2`, "protyleVisScript").then(() => {
             this.timeout = window.setTimeout(() => {

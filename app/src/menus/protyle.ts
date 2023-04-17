@@ -290,7 +290,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
 export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     const range = getEditorRange(nodeElement);
     window.siyuan.menus.menu.remove();
-    if (range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList.contains("emoji")) {
+    if (range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji")) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCopy",
             accelerator: "⌘C",

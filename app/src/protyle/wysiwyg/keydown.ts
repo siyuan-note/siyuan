@@ -1646,7 +1646,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         /// #endif
 
-        /// #if !BROWSER
         if (matchHotKey("⇧⌘V", event)) {
             event.returnValue = false;
             event.preventDefault();
@@ -1655,6 +1654,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
+        /// #if !BROWSER
         if (matchHotKey(window.siyuan.config.keymap.editor.general.showInFolder.custom, event)) {
             const aElement = hasClosestByAttribute(range.startContainer, "data-type", "a");
             if (aElement) {

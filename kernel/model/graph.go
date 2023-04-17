@@ -47,7 +47,7 @@ type GraphNode struct {
 type GraphLink struct {
 	From   string       `json:"from"`
 	To     string       `json:"to"`
-	Ref    bool         `json:"-"`
+	Ref    bool         `json:"ref"`
 	Arrows *GraphArrows `json:"arrows"`
 }
 

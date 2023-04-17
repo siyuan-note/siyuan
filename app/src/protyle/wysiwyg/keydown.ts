@@ -1270,7 +1270,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return true;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.insert.code.custom, event) && nodeElement.getAttribute("data-type") !== "NodeCodeBlock") {
+        if (matchHotKey(window.siyuan.config.keymap.editor.insert.code.custom, event) &&
+            !["NodeCodeBlock", "NodeHeading"].includes(nodeElement.getAttribute("data-type"))) {
             const id = nodeElement.getAttribute("data-node-id");
             const html = nodeElement.outerHTML;
             const editElement = getContenteditableElement(nodeElement);

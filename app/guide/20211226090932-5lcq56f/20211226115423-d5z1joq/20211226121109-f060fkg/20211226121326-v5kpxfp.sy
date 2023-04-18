@@ -5,21 +5,117 @@
 	"Properties": {
 		"id": "20211226121326-v5kpxfp",
 		"title": "主题",
-		"updated": "20230417142023"
+		"updated": "20230418094752"
 	},
 	"Children": [
+		{
+			"ID": "20230418093600-j6ii2qs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230418093600-j6ii2qs",
+				"updated": "20230418093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230418093600-savcdrb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093600-savcdrb",
+				"updated": "20230418093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有兩種方式自定義主題："
+				}
+			]
+		},
+		{
+			"ID": "20230418093600-pvpd2nw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230418093600-pvpd2nw",
+				"updated": "20230418093600"
+			},
+			"Children": [
+				{
+					"ID": "20230418093600-3l1xco0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093600-3l1xco0",
+						"updated": "20230418093600"
+					},
+					"Children": [
+						{
+							"ID": "20230418093600-uuj8og1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093600-uuj8og1",
+								"updated": "20230418093600"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "代碼片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230418093600-axttrrp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093600-axttrrp",
+						"updated": "20230418093600"
+					},
+					"Children": [
+						{
+							"ID": "20230418093600-3ogagqr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093600-3ogagqr",
+								"updated": "20230418093600"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主題包"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20220806105512-qod53ij",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806105512-qod53ij",
-				"updated": "20220806105512"
+				"updated": "20230418093608"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自定義 CSS"
+					"Data": "代碼片段"
 				}
 			]
 		},
@@ -31,7 +127,7 @@
 			},
 			"Properties": {
 				"id": "20230417141958-yemp12k",
-				"updated": "20230417142023"
+				"updated": "20230417141958"
 			},
 			"Children": [
 				{
@@ -241,17 +337,149 @@
 			]
 		},
 		{
-			"ID": "20211226121625-clsxl7k",
+			"ID": "20230418093635-7nkc3rv",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20211226121625-clsxl7k",
-				"updated": "20211226004432"
+				"id": "20230418093635-7nkc3rv",
+				"updated": "20230418093635"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "安裝"
+					"Data": "主題包"
+				}
+			]
+		},
+		{
+			"ID": "20230418093635-r9dyxtr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093635-r9dyxtr",
+				"updated": "20230418093635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主題包可以從社區集市下載或者手動安裝。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-afma4ct",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226121625-afma4ct",
+				"updated": "20211226004500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "社區集市"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-yv8muau",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121625-yv8muau",
+				"updated": "20230418094608"
+			},
+			"Children": [
+				{
+					"ID": "20211226121625-vu61b5u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-vu61b5u",
+						"updated": "20230418094608"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-63qu17b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-63qu17b",
+								"updated": "20230418094608"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外觀"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "集市"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "主題"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中線上瀏覽社區開發者貢獻的主題"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-2vzqih2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-2vzqih2",
+						"updated": "20211228125156"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-5aqcun6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-5aqcun6",
+								"updated": "20211228125156"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選擇所需主題線上安裝或者更新"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -261,12 +489,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121625-9gvolt7",
-				"updated": "20211226004500"
+				"updated": "20230418093711"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "手動"
+					"Data": "手動安裝"
 				}
 			]
 		},
@@ -451,130 +679,12 @@
 			]
 		},
 		{
-			"ID": "20211226121625-afma4ct",
+			"ID": "20211226121625-vzxo6di",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20211226121625-afma4ct",
-				"updated": "20211226004500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "社區集市"
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-yv8muau",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20211226121625-yv8muau",
-				"updated": "20211228125201"
-			},
-			"Children": [
-				{
-					"ID": "20211226121625-vu61b5u",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-vu61b5u",
-						"updated": "20211228125201"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-63qu17b",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-63qu17b",
-								"updated": "20211228125201"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "在 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "外觀"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "主題"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "集市"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 中線上瀏覽社區開發者貢獻的主題"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20211226121625-2vzqih2",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20211226121625-2vzqih2",
-						"updated": "20211228125156"
-					},
-					"Children": [
-						{
-							"ID": "20211226121625-5aqcun6",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-5aqcun6",
-								"updated": "20211228125156"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "選擇所需主題線上安裝或者更新"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20211226121625-vzxo6di",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
 				"id": "20211226121625-vzxo6di",
-				"updated": "20211226004500"
+				"updated": "20230418094752"
 			},
 			"Children": [
 				{

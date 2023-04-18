@@ -6,21 +6,117 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20230417141231"
+		"updated": "20230418094746"
 	},
 	"Children": [
+		{
+			"ID": "20230418093311-dtukze4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230418093311-dtukze4",
+				"updated": "20230418093313"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230418093313-fueu0yj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093313-fueu0yj",
+				"updated": "20230418093332"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有两种方式自定义主题："
+				}
+			]
+		},
+		{
+			"ID": "20230418093332-aum07c0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230418093332-aum07c0",
+				"updated": "20230418093337"
+			},
+			"Children": [
+				{
+					"ID": "20230418093333-9d0zaqr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093333-9d0zaqr",
+						"updated": "20230418093333"
+					},
+					"Children": [
+						{
+							"ID": "20230418093333-mjktix8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093333-mjktix8",
+								"updated": "20230418093335"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "代码片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230418093335-4grt4ej",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093335-4grt4ej",
+						"updated": "20230418093337"
+					},
+					"Children": [
+						{
+							"ID": "20230418093335-hr6njpv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093335-hr6njpv",
+								"updated": "20230418093337"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主题包"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20220806104349-3cpwtum",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806104349-3cpwtum",
-				"updated": "20220806104523"
+				"updated": "20230418093340"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自定义 CSS"
+					"Data": "代码片段"
 				}
 			]
 		},
@@ -244,16 +340,157 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201225202158-ujxvje1"
+				"id": "20201225202158-ujxvje1",
+				"updated": "20230418093345"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
+					"Type": "NodeText",
+					"Data": "主题包"
+				}
+			]
+		},
+		{
+			"ID": "20230418093505-9hxv3vu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093505-9hxv3vu",
+				"updated": "20230418093505"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "安装"
+					"Data": "主题包可以从社区集市下载或者手动安装。"
+				}
+			]
+		},
+		{
+			"ID": "20201225215903-j4268ow",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201225215903-j4268ow",
+				"updated": "20230418093422"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "社区集市"
+				}
+			]
+		},
+		{
+			"ID": "20201225215906-gvitxza",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201225215906-gvitxza",
+				"updated": "20230418094522"
+			},
+			"Children": [
+				{
+					"ID": "20201225215955-syy5xzl",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201225215955-syy5xzl",
+						"updated": "20230418094522"
+					},
+					"Children": [
+						{
+							"ID": "20210131160321-j0wwiky",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131160321-j0wwiky",
+								"updated": "20230418094522"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外观"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "集市"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "主题"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中在线浏览社区开发者贡献的主题"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201225220022-g74mq39",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201225220022-g74mq39"
+					},
+					"Children": [
+						{
+							"ID": "20210131160321-bk8a32k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131160321-bk8a32k"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "选择所需主题在线安装或者更新"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -262,16 +499,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225212421-oqvirjy"
+				"id": "20201225212421-oqvirjy",
+				"updated": "20230418093408"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "手动"
+					"Data": "手动安装"
 				}
 			]
 		},
@@ -480,148 +714,14 @@
 			]
 		},
 		{
-			"ID": "20201225215903-j4268ow",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20201225215903-j4268ow"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "社区集市"
-				}
-			]
-		},
-		{
-			"ID": "20201225215906-gvitxza",
-			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
-			"Properties": {
-				"id": "20201225215906-gvitxza"
-			},
-			"Children": [
-				{
-					"ID": "20201225215955-syy5xzl",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20201225215955-syy5xzl"
-					},
-					"Children": [
-						{
-							"ID": "20210131160321-j0wwiky",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131160321-j0wwiky",
-								"updated": "20210512161148"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "在 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "外观"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "主题"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "集市"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 中在线浏览社区开发者贡献的主题"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20201225220022-g74mq39",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20201225220022-g74mq39"
-					},
-					"Children": [
-						{
-							"ID": "20210131160321-bk8a32k",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131160321-bk8a32k"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "选择所需主题在线安装或者更新"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
 			"ID": "20201225202158-c0ipfiy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201225202158-c0ipfiy"
+				"id": "20201225202158-c0ipfiy",
+				"updated": "20230418094746"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "开发"

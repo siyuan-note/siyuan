@@ -6,53 +6,168 @@
 		"id": "20200922101913-d5yitmq",
 		"title": "图标",
 		"type": "doc",
-		"updated": "20221114172712"
+		"updated": "20230418095522"
 	},
 	"Children": [
 		{
-			"ID": "20220806104618-j1n63pi",
+			"ID": "20230418094115-f5isydz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20220806104618-j1n63pi",
-				"updated": "20220806104628"
+				"id": "20230418094115-f5isydz",
+				"updated": "20230418094115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "自定义图标"
+					"Data": "概述"
 				}
 			]
 		},
 		{
-			"ID": "20220806104629-y6yc1uz",
+			"ID": "20230418094115-5odh8dg",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220806104629-y6yc1uz",
-				"updated": "20220806104806"
+				"id": "20230418094115-5odh8dg",
+				"updated": "20230418094115"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "不可直接修改已有图标的 JS 文件，否则在集市中更新或重启后将被覆盖。"
+					"Data": "图标包可以从社区集市下载或者手动安装。"
+				}
+			]
+		},
+		{
+			"ID": "20230418094130-0tddfdk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230418094130-0tddfdk",
+				"updated": "20230418094130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "社区集市"
+				}
+			]
+		},
+		{
+			"ID": "20230418094130-6a2zpka",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230418094130-6a2zpka",
+				"updated": "20230418095522"
+			},
+			"Children": [
+				{
+					"ID": "20230418094130-2slk6q2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418094130-2slk6q2",
+						"updated": "20230418095519"
+					},
+					"Children": [
+						{
+							"ID": "20230418094130-jzo93fs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418094130-jzo93fs",
+								"updated": "20230418095519"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外观"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "集市"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "图标"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中在线浏览社区开发者贡献的图标"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230418094130-31mcytj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418094130-31mcytj",
+						"updated": "20230418095522"
+					},
+					"Children": [
+						{
+							"ID": "20230418094130-xnqfvf3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418094130-xnqfvf3",
+								"updated": "20230418095522"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "选择所需图标在线安装或者更新"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
 			"ID": "20210104091325-fw63px7",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104091325-fw63px7"
+				"id": "20210104091325-fw63px7",
+				"updated": "20230418093910"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "安装"
+					"Data": "手动安装"
 				}
 			]
 		},
@@ -641,7 +756,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091325-fc6zzjm",
-				"updated": "20210104091325"
+				"updated": "20230418095315"
 			},
 			"Children": [
 				{
@@ -652,14 +767,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091325-gt0s4ir"
+						"id": "20210104091325-gt0s4ir",
+						"updated": "20230418094912"
 					},
 					"Children": [
 						{
 							"ID": "20210104091325-vakixwi",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210104091325-vakixwi"
+								"id": "20210104091325-vakixwi",
+								"updated": "20230418094912"
 							},
 							"Children": [
 								{
@@ -668,16 +785,12 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code"
-								},
-								{
-									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "index.html"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件"
+									"Data": "​ 文件"
 								}
 							]
 						}
@@ -825,14 +938,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091325-yutcfaf"
+						"id": "20210104091325-yutcfaf",
+						"updated": "20230418095315"
 					},
 					"Children": [
 						{
 							"ID": "20210104091325-59sizpj",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210104091325-59sizpj"
+								"id": "20210104091325-59sizpj",
+								"updated": "20230418094909"
 							},
 							"Children": [
 								{
@@ -851,12 +966,12 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code"
-								},
-								{
-									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "icon.js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -865,7 +980,8 @@
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20210104091325-2fa1wel"
+								"id": "20210104091325-2fa1wel",
+								"updated": "20230418095315"
 							},
 							"Children": [
 								{
@@ -876,14 +992,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091325-0fb0hhd"
+										"id": "20210104091325-0fb0hhd",
+										"updated": "20230418094908"
 									},
 									"Children": [
 										{
 											"ID": "20210302223418-kji3v4y",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210302223418-kji3v4y"
+												"id": "20210302223418-kji3v4y",
+												"updated": "20230418094908"
 											},
 											"Children": [
 												{
@@ -892,16 +1010,12 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "Import Icons"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 导入上一步制作好的图片"
+													"Data": "​ 导入上一步制作好的图片"
 												}
 											]
 										}
@@ -1035,14 +1149,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091325-3a5giw4"
+										"id": "20210104091325-3a5giw4",
+										"updated": "20230418095200"
 									},
 									"Children": [
 										{
 											"ID": "20210302223418-c3win0p",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210302223418-c3win0p"
+												"id": "20210302223418-c3win0p",
+												"updated": "20230418095200"
 											},
 											"Children": [
 												{
@@ -1051,20 +1167,12 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
-													"TextMarkTextContent": "\u003csymbol id=\"icon-markdown\" viewBox=\"0 0 32 32\"\u003e"
+													"TextMarkTextContent": "\u0026lt;symbol id=\u0026quot;iconMarkdown\u0026quot; viewBox=\u0026quot;0 0 32 32\u0026quot;\u0026gt;"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 中的 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ 中的 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1073,11 +1181,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 为 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ 为 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1086,7 +1190,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 对应的图标名"
+													"Data": "​ 对应的图标名"
 												}
 											]
 										}
@@ -1100,36 +1204,30 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091325-welbdbd"
+										"id": "20210104091325-welbdbd",
+										"updated": "20230418095315"
 									},
 									"Children": [
 										{
 											"ID": "20210302223418-d597wat",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210302223418-d597wat"
+												"id": "20210302223418-d597wat",
+												"updated": "20230418095315"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "将 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "将 ​"
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
-													"TextMarkTextContent": "\u003cdefs\u003e...\u003c/defs\u003e"
+													"TextMarkTextContent": "\u0026lt;defs\u0026gt;...\u0026lt;/defs\u0026gt;"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 中的内容替换到 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ 中的内容替换到 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1138,7 +1236,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 中对应的位置"
+													"Data": "​ 中对应的位置"
 												}
 											]
 										}
@@ -1156,7 +1254,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091325-j3nfwg0"
+						"id": "20210104091325-j3nfwg0",
+						"updated": "20230418094838"
 					},
 					"Children": [
 						{
@@ -1177,7 +1276,8 @@
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20210104091325-ser1zxy"
+								"id": "20210104091325-ser1zxy",
+								"updated": "20230418094838"
 							},
 							"Children": [
 								{
@@ -1188,14 +1288,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091325-7chws27"
+										"id": "20210104091325-7chws27",
+										"updated": "20230418094838"
 									},
 									"Children": [
 										{
 											"ID": "20210104091325-rwv4aef",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210104091325-rwv4aef"
+												"id": "20210104091325-rwv4aef",
+												"updated": "20230418094838"
 											},
 											"Children": [
 												{
@@ -1204,20 +1306,12 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "index.html"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 中 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ 中 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1226,16 +1320,16 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 替换为 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ 替换为 "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "alice"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
 												}
 											]
 										},
@@ -1279,14 +1373,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091325-23t441o"
+										"id": "20210104091325-23t441o",
+										"updated": "20230418094834"
 									},
 									"Children": [
 										{
 											"ID": "20210104091325-8z3dotf",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210104091325-8z3dotf"
+												"id": "20210104091325-8z3dotf",
+												"updated": "20230418094834"
 											},
 											"Children": [
 												{
@@ -1295,16 +1391,12 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "index.html"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 查看最终效果"
+													"Data": "​ 查看最终效果"
 												}
 											]
 										}

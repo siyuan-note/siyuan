@@ -17,7 +17,7 @@ export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
         return;
     }
     if (abcElements.length > 0) {
-        addScript(`${cdn}/js/abcjs/abcjs-basic-min.js?v=6.2.1`, "protyleAbcjsScript").then(() => {
+        addScript(`${cdn}/js/abcjs/abcjs-basic-min.js?v=6.2.2`, "protyleAbcjsScript").then(() => {
             abcElements.forEach((e: HTMLDivElement) => {
                 if (e.getAttribute("data-render") === "true") {
                     return;

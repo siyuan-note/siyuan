@@ -8,7 +8,7 @@
 		"title": "Please Start Here",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20210428231747"
+		"updated": "20230418085821"
 	},
 	"Children": [
 		{
@@ -33,19 +33,44 @@
 			"Properties": {
 				"id": "20210428222033-bhbz6yg",
 				"style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);",
-				"updated": "20210512150301"
+				"updated": "20230415112503"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In SiYuan, the only important core concept is "
+					"Data": "In "
 				},
 				{
 					"Type": "NodeTextMark",
+					"Properties": {
+						"parent-style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);"
+					},
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230415111951-vt4y4gg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "SiYuan"
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: parent-style=\"color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", the only important core concept is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"parent-style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);"
+					},
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20200924101106-19z4kaa",
 					"TextMarkBlockRefSubtype": "s",
 					"TextMarkTextContent": "Content block"
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: parent-style=\"color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);\"}"
 				},
 				{
 					"Type": "NodeText",
@@ -366,7 +391,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20210528120236-zyh2t7d",
-				"updated": "20210428231747"
+				"updated": "20230418085821"
 			},
 			"Children": [
 				{
@@ -459,7 +484,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20210528120308-9wuiyyz",
-						"updated": "20221114173245"
+						"updated": "20230418085821"
 					},
 					"Children": [
 						{
@@ -490,7 +515,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20210317214434-nx9mt0d",
-								"updated": "20221114173245"
+								"updated": "20230418085821"
 							},
 							"Children": [
 								{
@@ -533,7 +558,7 @@
 									},
 									"Properties": {
 										"id": "20221114173201-njmd9n7",
-										"updated": "20221114173211"
+										"updated": "20230418085821"
 									},
 									"Children": [
 										{
@@ -541,14 +566,14 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20221114173201-7ilqkuo",
-												"updated": "20221114173211"
+												"updated": "20230418085821"
 											},
 											"Children": [
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "a",
 													"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-													"TextMarkTextContent": "Community bazaar"
+													"TextMarkTextContent": "Community marketplace"
 												}
 											]
 										}

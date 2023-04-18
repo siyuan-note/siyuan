@@ -24,7 +24,7 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gabriel-vasile/mimetype v1.4.2
-	github.com/getsentry/sentry-go v0.19.0
+	github.com/getsentry/sentry-go v0.20.0
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.0
@@ -47,7 +47,7 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20230322095009-c0109a321c0c
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
-	github.com/siyuan-note/filelock v0.0.0-20230321113304-79a32917cc9f
+	github.com/siyuan-note/filelock v0.0.0-20230417044524-125ee78b5cc9
 	github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7
@@ -131,7 +131,7 @@ require (
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
 	google.golang.org/protobuf v1.29.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

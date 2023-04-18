@@ -290,7 +290,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
 export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     const range = getEditorRange(nodeElement);
     window.siyuan.menus.menu.remove();
-    if (range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList.contains("emoji")) {
+    if (range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji")) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCopy",
             accelerator: "⌘C",
@@ -340,71 +340,73 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }
         }).element);
     }
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.paste,
-        accelerator: "⌘V",
-        async click() {
-            if (document.queryCommandSupported("paste")) {
-                document.execCommand("paste");
-            } else {
+    if (!protyle.disabled) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.paste,
+            accelerator: "⌘V",
+            async click() {
+                if (document.queryCommandSupported("paste")) {
+                    document.execCommand("paste");
+                } else {
+                    try {
+                        const clipText = await readText();
+                        pasteText(protyle, clipText, nodeElement);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+            }
+        }).element);
+        /// #if !BROWSER
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.pasteAsPlainText,
+            accelerator: "⇧⌘V",
+            click() {
+                focusByRange(getEditorRange(nodeElement));
+                pasteAsPlainText(protyle);
+            }
+        }).element);
+        /// #endif
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.pasteEscaped,
+            async click() {
                 try {
-                    const clipText = await readText();
+                    // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
+                    let clipText = await readText();
+                    // https://github.com/siyuan-note/siyuan/issues/5446
+                    // A\B\C\D\
+                    // E
+                    // task-blog-2~default~baiduj 无法原义粘贴含有 `~foo~` 的文本 https://github.com/siyuan-note/siyuan/issues/5523
+
+                    // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
+                    // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符 https://github.com/siyuan-note/siyuan/issues/6341
+                    clipText = clipText.replace(/\\/g, "\\\\\\\\")
+                        .replace(/\*/g, "\\\\\\*")
+                        .replace(/\_/g, "\\\\\\_")
+                        .replace(/\[/g, "\\\\\\[")
+                        .replace(/\]/g, "\\\\\\]")
+                        .replace(/\!/g, "\\\\\\!")
+                        .replace(/\`/g, "\\\\\\`")
+                        .replace(/\</g, "\\\\\\<")
+                        .replace(/\>/g, "\\\\\\>")
+                        .replace(/\&/g, "\\\\\\&")
+                        .replace(/\~/g, "\\\\\\~")
+                        .replace(/\{/g, "\\\\\\{")
+                        .replace(/\}/g, "\\\\\\}")
+                        .replace(/\(/g, "\\\\\\(")
+                        .replace(/\)/g, "\\\\\\)")
+                        .replace(/\=/g, "\\\\\\=")
+                        .replace(/\#/g, "\\\\\\#")
+                        .replace(/\$/g, "\\\\\\$")
+                        .replace(/\^/g, "\\\\\\^")
+                        .replace(/\|/g, "\\\\\\|");
                     pasteText(protyle, clipText, nodeElement);
                 } catch (e) {
                     console.log(e);
                 }
             }
-        }
-    }).element);
-    /// #if !BROWSER
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.pasteAsPlainText,
-        accelerator: "⇧⌘V",
-        click() {
-            focusByRange(getEditorRange(nodeElement));
-            pasteAsPlainText(protyle);
-        }
-    }).element);
-    /// #endif
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.pasteEscaped,
-        async click() {
-            try {
-                // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
-                let clipText = await readText();
-                // https://github.com/siyuan-note/siyuan/issues/5446
-                // A\B\C\D\
-                // E
-                // task-blog-2~default~baiduj 无法原义粘贴含有 `~foo~` 的文本 https://github.com/siyuan-note/siyuan/issues/5523
-
-                // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
-                // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符 https://github.com/siyuan-note/siyuan/issues/6341
-                clipText = clipText.replace(/\\/g, "\\\\\\\\")
-                    .replace(/\*/g, "\\\\\\*")
-                    .replace(/\_/g, "\\\\\\_")
-                    .replace(/\[/g, "\\\\\\[")
-                    .replace(/\]/g, "\\\\\\]")
-                    .replace(/\!/g, "\\\\\\!")
-                    .replace(/\`/g, "\\\\\\`")
-                    .replace(/\</g, "\\\\\\<")
-                    .replace(/\>/g, "\\\\\\>")
-                    .replace(/\&/g, "\\\\\\&")
-                    .replace(/\~/g, "\\\\\\~")
-                    .replace(/\{/g, "\\\\\\{")
-                    .replace(/\}/g, "\\\\\\}")
-                    .replace(/\(/g, "\\\\\\(")
-                    .replace(/\)/g, "\\\\\\)")
-                    .replace(/\=/g, "\\\\\\=")
-                    .replace(/\#/g, "\\\\\\#")
-                    .replace(/\$/g, "\\\\\\$")
-                    .replace(/\^/g, "\\\\\\^")
-                    .replace(/\|/g, "\\\\\\|");
-                pasteText(protyle, clipText, nodeElement);
-            } catch (e) {
-                console.log(e);
-            }
-        }
-    }).element);
+        }).element);
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.selectAll,
         accelerator: "⌘A",
@@ -593,23 +595,23 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         label: "OCR",
         submenu: [{
             iconHTML: Constants.ZWSP,
-            label: window.siyuan.languages.refresh,
+            label: window.siyuan.languages.reOCR,
             click() {
                 fetchPost("/api/asset/getImageOCRText", {
                     path: imgElement.getAttribute("src"),
                     force: true
-                })
+                });
             }
         }, {
             iconHTML: Constants.ZWSP,
-            label: `<div class="fn__hr--small"></div><textarea data-type="ocr" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.update}"></textarea><div class="fn__hr--small"></div>`,
+            label: `<div class="fn__hr--small"></div><textarea data-type="ocr" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.ocrResult}"></textarea><div class="fn__hr--small"></div>`,
             bind(element) {
                 fetchPost("/api/asset/getImageOCRText", {
                     path: imgElement.getAttribute("src"),
                     force: false
                 }, (response) => {
-                    element.querySelector("textarea").value = response.data.text
-                })
+                    element.querySelector("textarea").value = response.data.text;
+                });
             }
         }],
     }).element);
@@ -708,7 +710,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
     textElements[0].focus();
     window.siyuan.menus.menu.removeCB = () => {
-        const ocrElemennt = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement
+        const ocrElemennt = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
         if (ocrElemennt) {
             fetchPost("/api/asset/setImageOCRText", {
                 path: imgElement.getAttribute("src"),

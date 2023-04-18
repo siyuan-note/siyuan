@@ -15,6 +15,7 @@ export abstract class Constants {
     public static readonly ASSETS_ADDRESS: string = "https://assets.b3logfile.com/siyuan/";
     public static readonly PROTYLE_CDN: string = "/stage/protyle";
     public static readonly UPLOAD_ADDRESS: string = "/upload";
+    public static readonly SERVICE_WORKER_PATH: string = "/service-worker.js";
 
     // drop 事件
     public static readonly SIYUAN_DROP_FILE: string = "application/siyuan-file";
@@ -113,7 +114,7 @@ export abstract class Constants {
     };
     // 冲突不使用 "⌘S/Q"
     // "⌘", "⇧", "⌥", "⌃"
-    // "⌘A", "⌘X", "⌘C", "⌘V", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←",
+    // "⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←",
     // "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {

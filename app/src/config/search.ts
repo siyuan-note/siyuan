@@ -47,7 +47,7 @@ export const initConfigSearch = (element: HTMLElement) => {
                 "appearance5", "appearance6", "appearance8", "appearance9", "appearance10", "appearance11",
                 "appearance14", "appearance15", "appearance16", "appearance17",
                 "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
-                "theme2", "theme11", "theme12", "theme13", "theme14", "customEmoji", "customEmojiTip", "refresh"])),
+                "theme2", "theme11", "theme12", "customEmoji", "customEmojiTip", "refresh"])),
 
         // 集市
         getLang(["bazaar", "theme", "template", "icon", "widget"]),

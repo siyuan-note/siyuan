@@ -1,10 +1,10 @@
 {
   "name": "SiYuan",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "description": "Build Your Eternal Digital Garden",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@7.27.0",
+  "packageManager": "pnpm@8.2.0",
   "scripts": {
     "lint": "eslint . --fix --cache",
     "dev": "webpack --mode development",
@@ -18,10 +18,10 @@
     "build:export": "webpack --mode production --config webpack.export.js",
     "start": "NODE_ENV=development electron ./electron/main.js",
     "dist-appx": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-appx-builder.yml",
-    "dist": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-builder.yml",
-    "dist-darwin": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml",
-    "dist-darwin-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml",
-    "dist-linux": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml"
+    "dist": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
+    "dist-darwin": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",
+    "dist-darwin-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml --publish=never",
+    "dist-linux": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml --publish=never"
   },
   "keywords": [
     "markdown",
@@ -46,7 +46,6 @@
     }
   ],
   "devDependencies": {
-    "@simonwep/pickr": "^1.8.2",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",

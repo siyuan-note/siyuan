@@ -31,7 +31,6 @@ type Appearance struct {
 	CodeBlockThemeLight string   `json:"codeBlockThemeLight"` // 明亮模式下代码块主题
 	CodeBlockThemeDark  string   `json:"codeBlockThemeDark"`  // 暗黑模式下代码块主题
 	Lang                string   `json:"lang"`                // 选择的界面语言，同 AppConf.Lang
-	CustomCSS           bool     `json:"customCSS"`           // 是否启用自定义主题
 	ThemeJS             bool     `json:"themeJS"`             // 是否启用了主题 JavaScript
 	CloseButtonBehavior int      `json:"closeButtonBehavior"` // 关闭按钮行为，0：退出，1：最小化到托盘
 	HideStatusBar       bool     `json:"hideStatusBar"`       // 是否隐藏底部状态栏
@@ -48,7 +47,6 @@ func NewAppearance() *Appearance {
 		CodeBlockThemeLight: "github",
 		CodeBlockThemeDark:  "base16/dracula",
 		Lang:                "en_US",
-		CustomCSS:           false,
 		CloseButtonBehavior: 0,
 		HideStatusBar:       false,
 	}

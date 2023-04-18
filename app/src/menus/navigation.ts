@@ -27,7 +27,6 @@ import {getDockByType} from "../layout/util";
 import {Files} from "../layout/dock/Files";
 import {openNewWindowById} from "../window/openNewWindow";
 import {openCardByData} from "../card/openCard";
-import {escapeHtml} from "../util/escape";
 /// #if MOBILE
 import {closePanel} from "../mobile/util/closePanel";
 /// #endif

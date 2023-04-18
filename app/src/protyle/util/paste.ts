@@ -32,8 +32,8 @@ const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
 };
 
 export const pasteAsPlainText = async (protyle: IProtyle) => {
-    /// #if !BROWSER
     let localFiles: string[] = [];
+    /// #if !BROWSER
     if ("darwin" === window.siyuan.config.system.os) {
         const xmlString = clipboard.read("NSFilenamesPboardType");
         const domParser = new DOMParser();
@@ -50,10 +50,14 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     if (localFiles.length > 0) {
         uploadLocalFiles(localFiles, protyle, false);
         writeText("");
-    } else {
-        getCurrentWindow().webContents.pasteAndMatchStyle();
     }
     /// #endif
+    if (localFiles.length === 0) {
+        // https://github.com/siyuan-note/siyuan/issues/8010
+        navigator.clipboard.readText().then(textPlain => {
+            insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.Md2BlockDOM(textPlain)), protyle);
+        });
+    }
 };
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {

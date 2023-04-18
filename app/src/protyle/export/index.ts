@@ -76,12 +76,13 @@ const renderPDF = (id: string) => {
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
     let themeStyle = "";
     if (!isDefault) {
-        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>`;
+        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
+    <base href="${servePath}/">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
@@ -89,7 +90,7 @@ const renderPDF = (id: string) => {
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
-    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/appearance/themes/daylight/${(window.siyuan.config.appearance.customCSS && isDefault) ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/appearance/themes/daylight/theme.css?${Constants.SIYUAN_VERSION}"/>
     ${themeStyle}
     <title>${window.siyuan.languages.export} PDF</title>
     <style>
@@ -594,7 +595,7 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
     let themeStyle = "";
     if (!isDefault) {
-        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/${themeName}/${window.siyuan.config.appearance.customCSS ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>`;
+        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
@@ -606,7 +607,7 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="baseStyle" href="stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
-    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="appearance/themes/${themeName}/${(window.siyuan.config.appearance.customCSS && isDefault) ? "custom" : "theme"}.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>
     ${themeStyle}
     <title>${pathPosix().basename(filePath)} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
     <style>

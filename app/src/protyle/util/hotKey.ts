@@ -92,6 +92,46 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         return false;
     }
 
+    // 是否匹配 ⌃[] / ⌃⌥[] / ⌃⇧[]/ ⌃⌥⇧[]
+    if (hotKey.startsWith("⌃")) {
+        let keyCode = hotKeys.length === 3 ? hotKeys[2] : hotKeys[1];
+        if (hotKeys.length === 4) {
+            keyCode = hotKeys[3];
+        }
+
+        let isMatchKey = (/^[0-9]$/.test(keyCode) ? (event.code === "Digit" + keyCode || event.code === "Numpad" + keyCode) : event.code === "Key" + keyCode) ||
+            event.code === keyCode ||
+            event.key === keyCode;  // 小键盘上的 /*-+.
+        if (Constants.KEYCODE[event.keyCode]) {
+            if (event.shiftKey) {
+                isMatchKey = Constants.KEYCODE[event.keyCode][1] === keyCode;
+            } else {
+                isMatchKey = Constants.KEYCODE[event.keyCode][0] === keyCode;
+            }
+        }
+        // 是否匹配 ⌃[]
+        if (isMatchKey && hotKeys.length === 2 &&
+            event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
+            return true;
+        }
+        // ⌃⇧[]
+        if (isMatchKey && hotKey.startsWith("⌃⇧") && hotKeys.length === 3 &&
+            event.ctrlKey && !event.altKey && event.shiftKey && !event.metaKey) {
+            return true;
+        }
+        // ⌃⌥[]
+        if (isMatchKey && hotKey.startsWith("⌃⌥") && hotKeys.length === 3 &&
+            event.ctrlKey && event.altKey && !event.shiftKey && !event.metaKey) {
+            return true;
+        }
+        // ⌃⌥⇧[]
+        if (isMatchKey && hotKey.startsWith("⌃⌥⇧") && hotKeys.length === 4 &&
+            event.ctrlKey && event.altKey && event.shiftKey && !event.metaKey) {
+            return true;
+        }
+        return false;
+    }
+
     // 是否匹配 ⇧⌘[] / ⌘[]
     const hasShift = hotKeys.length > 2 && (hotKeys[0] === "⇧");
     if (isCtrl(event) && !event.altKey && ((!hasShift && !event.shiftKey) || (hasShift && event.shiftKey))) {

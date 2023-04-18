@@ -17,7 +17,7 @@ import {renderSnippet} from "../config/util/snippets";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
-import {getSearch, isWindow} from "../util/functions";
+import {getSearch, isWindow, isSiyuanUrl, getIdFromSiyuanUrl} from "../util/functions";
 import {initStatus} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
@@ -212,10 +212,10 @@ export const initWindow = () => {
     });
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-            if (!/^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url)) {
+            if (!isSiyuanUrl(url)) {
                 return;
             }
-            const id = url.substr(16, 22);
+            const id = getIdFromSiyuanUrl(url);
             fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                 if (existResponse.data) {
                     openFileById({

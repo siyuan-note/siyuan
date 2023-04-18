@@ -291,6 +291,7 @@ declare interface IOpenFileOptions {
     keepCursor?: boolean // file，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
+    afterOpen?: () => void // 打开后回调
 }
 
 declare interface ILayoutOptions {
@@ -369,7 +370,6 @@ declare interface IAppearance {
     modeOS: boolean,
     hideStatusBar: boolean,
     nativeEmoji: boolean,
-    customCSS: boolean,
     themeJS: boolean,
     mode: number, // 1 暗黑；0 明亮
     icon: string,

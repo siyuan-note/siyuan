@@ -53,11 +53,10 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     }
     /// #endif
     if (localFiles.length === 0) {
-        getCurrentWindow().webContents.pasteAndMatchStyle();
-        // 下个版本再进行修改 https://github.com/siyuan-note/siyuan/issues/8010
-        // navigator.clipboard.readText().then(async textPlain => {
-        //     insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.Md2BlockDOM(textPlain)), protyle);
-        // });
+        // https://github.com/siyuan-note/siyuan/issues/8010
+        navigator.clipboard.readText().then(textPlain => {
+            insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.Md2BlockDOM(textPlain)), protyle);
+        });
     }
 };
 

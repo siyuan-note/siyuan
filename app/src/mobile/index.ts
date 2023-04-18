@@ -18,7 +18,7 @@ import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {openMobileFileById} from "./editor";
-import {getSearch} from "../util/functions";
+import {getSearch, isSiyuanUrl, getIdFromSiyuanUrl} from "../util/functions";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 
@@ -90,8 +90,8 @@ window.showKeyboardToolbar = (height) => {
 };
 window.hideKeyboardToolbar = hideKeyboardToolbar;
 window.openFileByURL = (openURL) => {
-    if (openURL && /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(openURL)) {
-        openMobileFileById(openURL.substr(16, 22),
+    if (openURL && isSiyuanUrl(openURL)) {
+        openMobileFileById(getIdFromSiyuanUrl(openURL),
             getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
         return true;
     }

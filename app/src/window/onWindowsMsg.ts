@@ -1,6 +1,7 @@
 import {exportLayout, getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {fetchPost} from "../util/fetch";
+import {redirectToCheckAuth} from "../util/functions";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);
@@ -16,7 +17,7 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
         case "lockscreen":
             exportLayout(false, () => {
                 fetchPost("/api/system/logoutAuth", {}, () => {
-                    window.location.href = `/check-auth?url=${window.location.href}`;
+                    redirectToCheckAuth();
                 });
             }, false, false);
             break;

@@ -9,7 +9,7 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {hideMessage, showMessage} from "./message";
 import {Dialog} from "./index";
-import {isMobile} from "../util/functions";
+import {isMobile, redirectToCheckAuth} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
@@ -21,7 +21,7 @@ export const lockScreen = () => {
     }
     /// #if BROWSER
     fetchPost("/api/system/logoutAuth", {}, () => {
-        window.location.href = `/check-auth?url=${window.location.href}`;
+        redirectToCheckAuth();
     });
     /// #else
     ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "lockscreen"});

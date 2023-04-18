@@ -181,22 +181,30 @@ func serveTemplates(ginServer *gin.Engine) {
 }
 
 func serveAppearance(ginServer *gin.Engine) {
+	ginServer.StaticFile("favicon.ico", filepath.Join(util.WorkingDir, "stage", "icon.png"))
+	ginServer.StaticFile("manifest.json", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
+	ginServer.StaticFile("manifest.webmanifest", filepath.Join(util.WorkingDir, "stage", "manifest.webmanifest"))
+
 	siyuan := ginServer.Group("", model.CheckAuth)
 
 	siyuan.Handle("GET", "/", func(c *gin.Context) {
 		userAgentHeader := c.GetHeader("User-Agent")
+
+		/* Carry query parameters when redirecting */
+		location := url.URL{}
+		queryParams := c.Request.URL.Query()
+		queryParams.Set("r", gulu.Rand.String(7))
+		location.RawQuery = queryParams.Encode()
+
 		if strings.Contains(userAgentHeader, "Electron") {
-			c.Redirect(302, "/stage/build/app/?r="+gulu.Rand.String(7))
-			return
+			location.Path = "/stage/build/app/"
+		} else if user_agent.New(userAgentHeader).Mobile() {
+			location.Path = "/stage/build/mobile/"
+		} else {
+			location.Path = "/stage/build/desktop/"
 		}
 
-		ua := user_agent.New(userAgentHeader)
-		if ua.Mobile() {
-			c.Redirect(302, "/stage/build/mobile/?r="+gulu.Rand.String(7))
-			return
-		}
-
-		c.Redirect(302, "/stage/build/desktop/?r="+gulu.Rand.String(7))
+		c.Redirect(302, location.String())
 	})
 
 	appearancePath := util.AppearancePath
@@ -260,7 +268,7 @@ func serveAppearance(ginServer *gin.Engine) {
 	})
 
 	siyuan.Static("/stage/", filepath.Join(util.WorkingDir, "stage"))
-	siyuan.StaticFile("favicon.ico", filepath.Join(util.WorkingDir, "stage", "icon.png"))
+	ginServer.StaticFile("service-worker.js", filepath.Join(util.WorkingDir, "stage", "service-worker.js"))
 
 	siyuan.GET("/check-auth", serveCheckAuth)
 }

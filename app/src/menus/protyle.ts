@@ -340,71 +340,73 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }
         }).element);
     }
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.paste,
-        accelerator: "⌘V",
-        async click() {
-            if (document.queryCommandSupported("paste")) {
-                document.execCommand("paste");
-            } else {
+    if (!protyle.disabled) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.paste,
+            accelerator: "⌘V",
+            async click() {
+                if (document.queryCommandSupported("paste")) {
+                    document.execCommand("paste");
+                } else {
+                    try {
+                        const clipText = await readText();
+                        pasteText(protyle, clipText, nodeElement);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+            }
+        }).element);
+        /// #if !BROWSER
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.pasteAsPlainText,
+            accelerator: "⇧⌘V",
+            click() {
+                focusByRange(getEditorRange(nodeElement));
+                pasteAsPlainText(protyle);
+            }
+        }).element);
+        /// #endif
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.pasteEscaped,
+            async click() {
                 try {
-                    const clipText = await readText();
+                    // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
+                    let clipText = await readText();
+                    // https://github.com/siyuan-note/siyuan/issues/5446
+                    // A\B\C\D\
+                    // E
+                    // task-blog-2~default~baiduj 无法原义粘贴含有 `~foo~` 的文本 https://github.com/siyuan-note/siyuan/issues/5523
+
+                    // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
+                    // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符 https://github.com/siyuan-note/siyuan/issues/6341
+                    clipText = clipText.replace(/\\/g, "\\\\\\\\")
+                        .replace(/\*/g, "\\\\\\*")
+                        .replace(/\_/g, "\\\\\\_")
+                        .replace(/\[/g, "\\\\\\[")
+                        .replace(/\]/g, "\\\\\\]")
+                        .replace(/\!/g, "\\\\\\!")
+                        .replace(/\`/g, "\\\\\\`")
+                        .replace(/\</g, "\\\\\\<")
+                        .replace(/\>/g, "\\\\\\>")
+                        .replace(/\&/g, "\\\\\\&")
+                        .replace(/\~/g, "\\\\\\~")
+                        .replace(/\{/g, "\\\\\\{")
+                        .replace(/\}/g, "\\\\\\}")
+                        .replace(/\(/g, "\\\\\\(")
+                        .replace(/\)/g, "\\\\\\)")
+                        .replace(/\=/g, "\\\\\\=")
+                        .replace(/\#/g, "\\\\\\#")
+                        .replace(/\$/g, "\\\\\\$")
+                        .replace(/\^/g, "\\\\\\^")
+                        .replace(/\|/g, "\\\\\\|");
                     pasteText(protyle, clipText, nodeElement);
                 } catch (e) {
                     console.log(e);
                 }
             }
-        }
-    }).element);
-    /// #if !BROWSER
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.pasteAsPlainText,
-        accelerator: "⇧⌘V",
-        click() {
-            focusByRange(getEditorRange(nodeElement));
-            pasteAsPlainText(protyle);
-        }
-    }).element);
-    /// #endif
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.pasteEscaped,
-        async click() {
-            try {
-                // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
-                let clipText = await readText();
-                // https://github.com/siyuan-note/siyuan/issues/5446
-                // A\B\C\D\
-                // E
-                // task-blog-2~default~baiduj 无法原义粘贴含有 `~foo~` 的文本 https://github.com/siyuan-note/siyuan/issues/5523
-
-                // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
-                // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符 https://github.com/siyuan-note/siyuan/issues/6341
-                clipText = clipText.replace(/\\/g, "\\\\\\\\")
-                    .replace(/\*/g, "\\\\\\*")
-                    .replace(/\_/g, "\\\\\\_")
-                    .replace(/\[/g, "\\\\\\[")
-                    .replace(/\]/g, "\\\\\\]")
-                    .replace(/\!/g, "\\\\\\!")
-                    .replace(/\`/g, "\\\\\\`")
-                    .replace(/\</g, "\\\\\\<")
-                    .replace(/\>/g, "\\\\\\>")
-                    .replace(/\&/g, "\\\\\\&")
-                    .replace(/\~/g, "\\\\\\~")
-                    .replace(/\{/g, "\\\\\\{")
-                    .replace(/\}/g, "\\\\\\}")
-                    .replace(/\(/g, "\\\\\\(")
-                    .replace(/\)/g, "\\\\\\)")
-                    .replace(/\=/g, "\\\\\\=")
-                    .replace(/\#/g, "\\\\\\#")
-                    .replace(/\$/g, "\\\\\\$")
-                    .replace(/\^/g, "\\\\\\^")
-                    .replace(/\|/g, "\\\\\\|");
-                pasteText(protyle, clipText, nodeElement);
-            } catch (e) {
-                console.log(e);
-            }
-        }
-    }).element);
+        }).element);
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.selectAll,
         accelerator: "⌘A",

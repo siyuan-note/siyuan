@@ -6,7 +6,7 @@
 		"id": "20200924100110-vcg96wy",
 		"title": "Icon",
 		"type": "doc",
-		"updated": "20221114173333"
+		"updated": "20230418085910"
 	},
 	"Children": [
 		{
@@ -633,7 +633,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091404-ewdyw7f",
-				"updated": "20210104091404"
+				"updated": "20230418085705"
 			},
 			"Children": [
 				{
@@ -817,7 +817,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091404-dkmivym"
+						"id": "20210104091404-dkmivym",
+						"updated": "20230418085705"
 					},
 					"Children": [
 						{
@@ -857,7 +858,8 @@
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20210104091404-rfqjpsy"
+								"id": "20210104091404-rfqjpsy",
+								"updated": "20230418085705"
 							},
 							"Children": [
 								{
@@ -868,14 +870,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091404-08zo0iy"
+										"id": "20210104091404-08zo0iy",
+										"updated": "20230418085705"
 									},
 									"Children": [
 										{
 											"ID": "20210302223515-3y0helv",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210302223515-3y0helv"
+												"id": "20210302223515-3y0helv",
+												"updated": "20230418085705"
 											},
 											"Children": [
 												{
@@ -884,16 +888,12 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "Import Icons"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " in the upper right corner to import the pictures made in the previous step"
+													"Data": "​ in the upper right corner to import the pictures made in the previous step"
 												}
 											]
 										}
@@ -1359,12 +1359,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210601103837-057w6ot",
-				"updated": "20210601103841"
+				"updated": "20230418085722"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Push to icon bazaar"
+					"Data": "Push to icon marketplace"
 				}
 			]
 		},
@@ -1373,7 +1373,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173333-rfx8ewj",
-				"updated": "20221114173333"
+				"updated": "20230418085910"
 			},
 			"Children": [
 				{
@@ -1384,7 +1384,7 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community Bazaar README"
+					"TextMarkTextContent": "Community marketplace README"
 				},
 				{
 					"Type": "NodeText",

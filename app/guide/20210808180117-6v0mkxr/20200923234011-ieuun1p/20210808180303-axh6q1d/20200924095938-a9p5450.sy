@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20230417141811"
+		"updated": "20230418085902"
 	},
 	"Children": [
 		{
@@ -482,16 +482,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225221416-enetgqg"
+				"id": "20201225221416-enetgqg",
+				"updated": "20230418085213"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "Community Bazaar"
+					"Data": "Community Marketplace"
 				}
 			]
 		},
@@ -506,7 +503,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20201225221416-chyd31p"
+				"id": "20201225221416-chyd31p",
+				"updated": "20230418085223"
 			},
 			"Children": [
 				{
@@ -521,7 +519,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20201225221416-fwq6l32"
+						"id": "20201225221416-fwq6l32",
+						"updated": "20230418085223"
 					},
 					"Children": [
 						{
@@ -529,7 +528,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-dtskbvb",
-								"updated": "20210512161531"
+								"updated": "20230418085223"
 							},
 							"Children": [
 								{
@@ -543,7 +542,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -552,7 +551,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -561,16 +560,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Bazaar"
+									"TextMarkTextContent": "Marketplace"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", browse online themes contributed by community developers"
+									"Data": "​, browse online themes contributed by community developers"
 								}
 							]
 						}
@@ -1324,12 +1323,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225222754-u4sica8",
-				"updated": "20201225222754"
+				"updated": "20230418085639"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Push to theme bazaar"
+					"Data": "Push to theme marketplace"
 				}
 			]
 		},
@@ -1338,7 +1337,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173346-65wavr3",
-				"updated": "20221114173347"
+				"updated": "20230418085902"
 			},
 			"Children": [
 				{
@@ -1349,7 +1348,7 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community Bazaar README"
+					"TextMarkTextContent": "Community marketplace README"
 				},
 				{
 					"Type": "NodeText",

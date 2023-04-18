@@ -9,11 +9,13 @@ import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
 import {addBaseURL, setNoteBook} from "./util/pathName";
+import {registerServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
 import {
     bootSync,
     downloadProgress,
-    processSync, progressBackgroundTask,
+    processSync,
+    progressBackgroundTask,
     progressLoading,
     progressStatus,
     setTitle,
@@ -25,11 +27,19 @@ import {resizeDrag} from "./layout/util";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {updateEditModeElement} from "./layout/topBar";
-import {getSearch} from "./util/functions";
+import {getIdFromSiyuanUrl, getSearch, isSiyuanUrl} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
+import {initPluginSystem} from 'siyuan-petal';
 
 class App {
     constructor() {
+        /// #if BROWSER
+        registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
+        /// #endif
+        /// #if MOBILE
+        registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
+        /// #endif
+
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
@@ -160,6 +170,7 @@ class App {
                         resizeDrag();
                         setTitle(window.siyuan.languages.siyuanNote);
                         initMessage();
+                        initPluginSystem();
                     });
                 });
             });
@@ -172,10 +183,10 @@ class App {
 
 new App();
 window.openFileByURL = (openURL) => {
-    if (openURL && /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(openURL)) {
+    if (openURL && isSiyuanUrl(openURL)) {
         openFileById({
-            id: openURL.substr(16, 22),
-            action:getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+            id: getIdFromSiyuanUrl(openURL),
+            action: getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
         });
         return true;
     }

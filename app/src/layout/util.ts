@@ -27,7 +27,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
-import {getSearch, isWindow} from "../util/functions";
+import {getSearch, isWindow, isSiyuanUrl, isWebSiyuanUrl, getIdFromSiyuanUrl, getIdFromWebSiyuanUrl} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {setTabPosition} from "../window/setHeader";
 
@@ -365,15 +365,35 @@ export const JSONToLayout = (isStart: boolean) => {
         });
     }
 
+    // PWA 捕获 siyuan://
+    const searchParams = new URLSearchParams(window.location.search);
+    const url = searchParams.get("url");
+    if (isSiyuanUrl(url) || isWebSiyuanUrl(url)) {
+        searchParams.delete("url");
+        switch (true) {
+            case isSiyuanUrl(url):
+                searchParams.set("id", getIdFromSiyuanUrl(url));
+                break;
+            case isWebSiyuanUrl(url):
+                searchParams.set("id", getIdFromWebSiyuanUrl(url));
+                break;
+        }
+
+        const focus = getSearch("focus", url);
+        if (focus) {
+            searchParams.set("focus", focus);
+        }
+    }
+
     // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
-    const openId = getSearch("id");
+    const openId = searchParams.get("id");
     if (openId) {
         // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟
         setTimeout(() => {
             openFileById({
                 id: openId,
                 action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                zoomIn: getSearch("focus") === "1"
+                zoomIn: searchParams.get("focus") === "1"
             });
         }, Constants.TIMEOUT_BLOCKLOAD);
     }

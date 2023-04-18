@@ -6,21 +6,117 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20230418085902"
+		"updated": "20230418094804"
 	},
 	"Children": [
+		{
+			"ID": "20230418092908-veis529",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230418092908-veis529",
+				"updated": "20230418092916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230418093102-2g28qyx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093102-2g28qyx",
+				"updated": "20230418093102"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There are two ways to customize the theme:"
+				}
+			]
+		},
+		{
+			"ID": "20230418093102-xdcepe2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230418093102-xdcepe2",
+				"updated": "20230418093111"
+			},
+			"Children": [
+				{
+					"ID": "20230418093102-n9gnhlu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093102-n9gnhlu",
+						"updated": "20230418093111"
+					},
+					"Children": [
+						{
+							"ID": "20230418093102-50qtvw2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093102-50qtvw2",
+								"updated": "20230418093111"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Code snippet"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230418093102-ytnrq7i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093102-ytnrq7i",
+						"updated": "20230418093102"
+					},
+					"Children": [
+						{
+							"ID": "20230418093102-ch71mab",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093102-ch71mab",
+								"updated": "20230418093102"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Theme pack"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20220806105232-qhlgs5w",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806105232-qhlgs5w",
-				"updated": "20220806105235"
+				"updated": "20230418093116"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Custom CSS"
+					"Data": "Code snippet"
 				}
 			]
 		},
@@ -247,34 +343,171 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225174048-t626xpi",
-				"updated": "20210302223520"
+				"updated": "20230418093157"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
+					"Type": "NodeText",
+					"Data": "Theme pack"
+				}
+			]
+		},
+		{
+			"ID": "20230418093432-pr8dn8u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093432-pr8dn8u",
+				"updated": "20230418093502"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Installation"
+					"Data": "Theme packs can be downloaded from the community marketplace or installed manually."
+				}
+			]
+		},
+		{
+			"ID": "20201225221416-enetgqg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201225221416-enetgqg",
+				"updated": "20230418085213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Community Marketplace"
+				}
+			]
+		},
+		{
+			"ID": "20201225221416-chyd31p",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201225221416-chyd31p",
+				"updated": "20230418094552"
+			},
+			"Children": [
+				{
+					"ID": "20201225221416-fwq6l32",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201225221416-fwq6l32",
+						"updated": "20230418094552"
+					},
+					"Children": [
+						{
+							"ID": "20210131162108-dtskbvb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162108-dtskbvb",
+								"updated": "20230418094552"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Marketplace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Theme"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, browse online themes contributed by community developers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201225221416-6qqqwni",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201225221416-6qqqwni"
+					},
+					"Children": [
+						{
+							"ID": "20210131162108-2wwmc9r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162108-2wwmc9r"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Choose the required theme to install or update online"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
 			"ID": "20201225221416-aotw0re",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201225221416-aotw0re"
+				"id": "20201225221416-aotw0re",
+				"updated": "20230418093526"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "Manual"
+					"Data": "Manual installation"
 				}
 			]
 		},
@@ -478,147 +711,14 @@
 			]
 		},
 		{
-			"ID": "20201225221416-enetgqg",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20201225221416-enetgqg",
-				"updated": "20230418085213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Community Marketplace"
-				}
-			]
-		},
-		{
-			"ID": "20201225221416-chyd31p",
-			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
-			"Properties": {
-				"id": "20201225221416-chyd31p",
-				"updated": "20230418085223"
-			},
-			"Children": [
-				{
-					"ID": "20201225221416-fwq6l32",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20201225221416-fwq6l32",
-						"updated": "20230418085223"
-					},
-					"Children": [
-						{
-							"ID": "20210131162108-dtskbvb",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162108-dtskbvb",
-								"updated": "20230418085223"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "In "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Settings"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Appearance"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Theme"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Marketplace"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​, browse online themes contributed by community developers"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20201225221416-6qqqwni",
-					"Type": "NodeListItem",
-					"Data": "*",
-					"ListData": {
-						"Tight": true,
-						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
-					},
-					"Properties": {
-						"id": "20201225221416-6qqqwni"
-					},
-					"Children": [
-						{
-							"ID": "20210131162108-2wwmc9r",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210131162108-2wwmc9r"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Choose the required theme to install or update online"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
 			"ID": "20201225174048-i781zxp",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201225174048-i781zxp"
+				"id": "20201225174048-i781zxp",
+				"updated": "20230418094804"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "Development"

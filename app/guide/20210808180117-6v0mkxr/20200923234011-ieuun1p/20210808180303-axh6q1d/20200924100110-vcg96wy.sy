@@ -6,54 +6,168 @@
 		"id": "20200924100110-vcg96wy",
 		"title": "Icon",
 		"type": "doc",
-		"updated": "20230418085910"
+		"updated": "20230418095635"
 	},
 	"Children": [
 		{
-			"ID": "20220806105145-agiyg51",
+			"ID": "20230418095541-fpmceu9",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20220806105145-agiyg51",
-				"updated": "20220806105148"
+				"id": "20230418095541-fpmceu9",
+				"updated": "20230418095541"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Custom icon"
+					"Data": "Overview"
 				}
 			]
 		},
 		{
-			"ID": "20220806105145-sr4nlfm",
+			"ID": "20230418095541-d6duesn",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220806105145-sr4nlfm",
-				"updated": "20220806105213"
+				"id": "20230418095541-d6duesn",
+				"updated": "20230418095541"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Do not directly modify the JS file of the existing icon, otherwise it will be overwritten after updating in the market or restarting."
+					"Data": "Icon packs can be downloaded from the community marketplace or installed manually."
+				}
+			]
+		},
+		{
+			"ID": "20230418095541-bsc11b6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230418095541-bsc11b6",
+				"updated": "20230418095545"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Community Marketplace"
+				}
+			]
+		},
+		{
+			"ID": "20230418095541-k9npqv9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230418095541-k9npqv9",
+				"updated": "20230418095622"
+			},
+			"Children": [
+				{
+					"ID": "20230418095541-l3xbikd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418095541-l3xbikd",
+						"updated": "20230418095622"
+					},
+					"Children": [
+						{
+							"ID": "20230418095541-uia79kk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418095541-uia79kk",
+								"updated": "20230418095622"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Browse icons contributed by community developers online in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Appearance"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Marketplace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Icons"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230418095541-xm1n9wf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418095541-xm1n9wf",
+						"updated": "20230418095541"
+					},
+					"Children": [
+						{
+							"ID": "20230418095541-28smvef",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418095541-28smvef",
+								"updated": "20230418095541"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select the desired icon to install or update online"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
 			"ID": "20210104091404-emngxx4",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091404-emngxx4",
-				"updated": "20210302223517"
+				"updated": "20230418095635"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "Installation"
+					"Data": "Manual installation"
 				}
 			]
 		},
@@ -633,7 +747,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091404-ewdyw7f",
-				"updated": "20230418085705"
+				"updated": "20230418095355"
 			},
 			"Children": [
 				{
@@ -644,14 +758,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091404-ioq4e81"
+						"id": "20210104091404-ioq4e81",
+						"updated": "20230418095331"
 					},
 					"Children": [
 						{
 							"ID": "20210104091404-tt2x38y",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210104091404-tt2x38y"
+								"id": "20210104091404-tt2x38y",
+								"updated": "20230418095331"
 							},
 							"Children": [
 								{
@@ -660,16 +776,12 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code"
-								},
-								{
-									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "index.html"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " file in the icon folder"
+									"Data": "​ file in the icon folder"
 								}
 							]
 						}
@@ -818,14 +930,15 @@
 					},
 					"Properties": {
 						"id": "20210104091404-dkmivym",
-						"updated": "20230418085705"
+						"updated": "20230418095355"
 					},
 					"Children": [
 						{
 							"ID": "20210104091404-foonnfg",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210104091404-foonnfg"
+								"id": "20210104091404-foonnfg",
+								"updated": "20230418095329"
 							},
 							"Children": [
 								{
@@ -844,12 +957,12 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code"
-								},
-								{
-									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "icon.js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -859,7 +972,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20210104091404-rfqjpsy",
-								"updated": "20230418085705"
+								"updated": "20230418095355"
 							},
 							"Children": [
 								{
@@ -1027,14 +1140,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091404-emihiqw"
+										"id": "20210104091404-emihiqw",
+										"updated": "20230418095355"
 									},
 									"Children": [
 										{
 											"ID": "20210302223515-o22v67z",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210302223515-o22v67z"
+												"id": "20210302223515-o22v67z",
+												"updated": "20230418095355"
 											},
 											"Children": [
 												{
@@ -1043,38 +1158,30 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "id"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " in "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ in "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
-													"TextMarkTextContent": "\u003csymbol id=\"icon-markdown\" viewBox=\"0 0 32 32\"\u003e"
+													"TextMarkTextContent": "\u0026lt;symbol id=\u0026quot;iconMarkdown\u0026quot; viewBox=\u0026quot;0 0 32 32\u0026quot;\u0026gt;"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " to the icon name corresponding to "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ to the icon name corresponding to "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "index.html"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
 												}
 											]
 										}
@@ -1088,14 +1195,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091404-m0zpn8g"
+										"id": "20210104091404-m0zpn8g",
+										"updated": "20230418095308"
 									},
 									"Children": [
 										{
 											"ID": "20210302223515-sf1sm6z",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210302223515-sf1sm6z"
+												"id": "20210302223515-sf1sm6z",
+												"updated": "20230418095308"
 											},
 											"Children": [
 												{
@@ -1104,25 +1213,21 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
-													"TextMarkTextContent": "\u003cdefs\u003e...\u003c/defs\u003e"
+													"TextMarkTextContent": "\u0026lt;defs\u0026gt;...\u0026lt;/defs\u0026gt;"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " to the corresponding position in "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ to the corresponding position in "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "icon.js"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
 												}
 											]
 										}
@@ -1140,7 +1245,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091404-s8l7xu3"
+						"id": "20210104091404-s8l7xu3",
+						"updated": "20230418095324"
 					},
 					"Children": [
 						{
@@ -1161,7 +1267,8 @@
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20210104091404-pvo2ori"
+								"id": "20210104091404-pvo2ori",
+								"updated": "20230418095324"
 							},
 							"Children": [
 								{
@@ -1172,14 +1279,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091404-0cijd7s"
+										"id": "20210104091404-0cijd7s",
+										"updated": "20230418095320"
 									},
 									"Children": [
 										{
 											"ID": "20210104091404-azquhxu",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210104091404-azquhxu"
+												"id": "20210104091404-azquhxu",
+												"updated": "20230418095320"
 											},
 											"Children": [
 												{
@@ -1188,20 +1297,12 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "material"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " in "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ in "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1210,16 +1311,16 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " with "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "code"
+													"Data": "​ with "
 												},
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "alice"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
 												}
 											]
 										},
@@ -1263,14 +1364,16 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20210104091404-jx50ge9"
+										"id": "20210104091404-jx50ge9",
+										"updated": "20230418095324"
 									},
 									"Children": [
 										{
 											"ID": "20210104091404-shk25pp",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20210104091404-shk25pp"
+												"id": "20210104091404-shk25pp",
+												"updated": "20230418095324"
 											},
 											"Children": [
 												{
@@ -1279,16 +1382,12 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code"
-												},
-												{
-													"Type": "NodeTextMark",
 													"TextMarkType": "code",
 													"TextMarkTextContent": "index.html"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " to see the final result"
+													"Data": "​ to see the final result"
 												}
 											]
 										}

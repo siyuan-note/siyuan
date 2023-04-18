@@ -453,6 +453,10 @@ export class WYSIWYG {
                 return;
             }
 
+            // https://ld246.com/article/1681778773806
+            if (["IMG", "VIDEO", "AUDIO"].includes(target.tagName)) {
+                return;
+            }
             // 多选节点
             let x = event.clientX;
             if (event.clientX > mostRight) {

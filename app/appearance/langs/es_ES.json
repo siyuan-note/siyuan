@@ -1,5 +1,4 @@
 {
-  "ocrResult": "Texte du résultat OCR",
   "ocrResult": "Texto de resultado de OCR",
   "reOCR": "Re-OCR",
   "continueReview1": "Continuar revisión",
@@ -542,7 +541,7 @@
   "download": "Descargar",
   "uninstall": "Desinstalar",
   "all": "Todo",
-  "bazaar": "Bazar",
+  "bazaar": "Mercado",
   "revolve": "Girar",
   "useDefault": "Abrir con el programa por defecto",
   "previous": "Anterior",

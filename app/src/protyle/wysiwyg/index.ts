@@ -185,7 +185,7 @@ export class WYSIWYG {
         /// #endif
     }
 
-    private emojiToMd(element:HTMLElement) {
+    private emojiToMd(element: HTMLElement) {
         element.querySelectorAll(".emoji").forEach((item: HTMLElement) => {
             item.outerHTML = `:${item.getAttribute("alt")}:`;
         });
@@ -1208,12 +1208,12 @@ export class WYSIWYG {
                 return false;
             }
             protyle.toolbar.range = getEditorRange(protyle.element);
-            if (target.tagName === "SPAN" && !protyle.disabled) { // https://ld246.com/article/1665141518103
+            if (target.tagName === "SPAN") { // https://ld246.com/article/1665141518103
                 const types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
                 if (types.length > 0) {
                     removeSearchMark(target);
                 }
-                if (types.includes("block-ref")) {
+                if (types.includes("block-ref") && !protyle.disabled) {
                     refMenu(protyle, target);
                     // 阻止 popover
                     target.setAttribute("prevent-popover", "true");
@@ -1221,16 +1221,16 @@ export class WYSIWYG {
                         target.removeAttribute("prevent-popover");
                     }, 620);
                     return false;
-                } else if (types.includes("file-annotation-ref")) {
+                } else if (types.includes("file-annotation-ref") && !protyle.disabled) {
                     protyle.toolbar.showFileAnnotationRef(protyle, target);
                     return false;
-                } else if (types.includes("tag")) {
+                } else if (types.includes("tag") && !protyle.disabled) {
                     tagMenu(protyle, target);
                     return false;
                 } else if (types.includes("inline-memo")) {
                     protyle.toolbar.showRender(protyle, target);
                     return false;
-                } else if (types.includes("a")) {
+                } else if (types.includes("a") && !protyle.disabled) {
                     linkMenu(protyle, target);
                     if (window.siyuan.config.editor.floatWindowMode === 0 &&
                         target.getAttribute("data-href")?.startsWith("siyuan://blocks")) {

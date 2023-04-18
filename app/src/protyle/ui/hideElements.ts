@@ -1,3 +1,9 @@
+/// #if MOBILE
+import {getCurrentEditor} from "../../mobile/editor";
+/// #else
+import {getAllModels} from "../../layout/getAll";
+/// #endif
+
 // "gutter", "toolbar", "select", "hint", "util", "dialog"
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
     if (!protyle) {
@@ -44,13 +50,31 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     }
 };
 
-// "toolbar", "pdfutil", "gutter"
+// "toolbar", "pdfutil", "gutter", "util"
 export const hideAllElements = (types: string[]) => {
     if (types.includes("toolbar")) {
         document.querySelectorAll(".protyle-toolbar").forEach((item: HTMLElement) => {
             item.classList.add("fn__none");
             item.style.display = "";
         });
+    }
+    if (types.includes("util")) {
+        /// #if MOBILE
+        const editor = getCurrentEditor()
+        editor.protyle.toolbar.subElement.classList.add("fn__none");
+        if (editor.protyle.toolbar.subElementCloseCB) {
+            editor.protyle.toolbar.subElementCloseCB();
+            editor.protyle.toolbar.subElementCloseCB = undefined;
+        }
+        /// #else
+        getAllModels().editor.forEach(item => {
+            item.editor.protyle.toolbar.subElement.classList.add("fn__none");
+            if (item.editor.protyle.toolbar.subElementCloseCB) {
+                item.editor.protyle.toolbar.subElementCloseCB();
+                item.editor.protyle.toolbar.subElementCloseCB = undefined;
+            }
+        })
+        /// #endif
     }
     if (types.includes("pdfutil")) {
         document.querySelectorAll(".pdf__util").forEach(item => {

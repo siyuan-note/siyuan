@@ -75,6 +75,9 @@ devDependencies:
   sass-loader:
     specifier: ^12.6.0
     version: 12.6.0(sass@1.53.0)(webpack@5.73.0)
+  siyuan-petal:
+    specifier: ^0.7.1
+    version: 0.7.1
   typescript:
     specifier: ^4.7.4
     version: 4.7.4
@@ -3411,6 +3414,10 @@ packages:
       '@polka/url': 1.0.0-next.21
       mrmime: 1.0.1
       totalist: 1.1.0
+    dev: true
+
+  /siyuan-petal@0.7.1:
+    resolution: {integrity: sha512-jUxQrK83T2AMgADOQJe5W6rqbtkO3oHLGx/oaTec69JvyYfABVjARV0YxX4daKhgMl9lykdT1fLyYxg2YDV4Mw==}
     dev: true
 
   /slash@3.0.0:

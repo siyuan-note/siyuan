@@ -35,10 +35,10 @@ export const setTabPosition = () => {
         const headersLastElement = headerElement.lastElementChild as HTMLElement;
         if ("darwin" === window.siyuan.config.system.os) {
             if (rect.top <= 0 && rect.left <= 0 && !getCurrentWindow().isFullScreen()) {
-                item.headersElement.style.paddingLeft = "var(--b3-toolbar-left-mac)";
+                item.headersElement.style.marginLeft = "var(--b3-toolbar-left-mac)";
                 headersLastElement.style.paddingRight = "42px";
             } else {
-                item.headersElement.style.paddingLeft = "";
+                item.headersElement.style.marginLeft = "";
                 headersLastElement.style.paddingRight = "";
             }
         }

@@ -90,7 +90,7 @@ export class Outline extends Model {
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="b3-list-item"></div>
+<div class="b3-list-item fn__none"></div>
 <div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
         this.element = options.tab.panelElement.lastElementChild as HTMLElement;
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
@@ -176,19 +176,22 @@ export class Outline extends Model {
     }
 
     public updateDocTitle(ial?: IObject) {
+        const docTitleElement = this.headerElement.nextElementSibling as HTMLElement
         if (this.type === "pin") {
             if (ial) {
                 let iconHTML = `${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true)}`;
-                if (ial.icon === Constants.ZWSP && this.headerElement.nextElementSibling.firstElementChild) {
-                    iconHTML = this.headerElement.nextElementSibling.firstElementChild.outerHTML;
+                if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
+                    iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }
-                this.headerElement.nextElementSibling.innerHTML = `${iconHTML}
+                docTitleElement.innerHTML = `${iconHTML}
 <span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
-                this.headerElement.nextElementSibling.setAttribute("title", ial.title);
+                docTitleElement.setAttribute("title", ial.title);
+                docTitleElement.classList.remove("fn__none")
             } else {
-                this.headerElement.nextElementSibling.innerHTML = "";
-                this.headerElement.nextElementSibling.removeAttribute("title");
+                docTitleElement.classList.add("fn__none")
             }
+        } else {
+            docTitleElement.classList.add("fn__none")
         }
     }
 

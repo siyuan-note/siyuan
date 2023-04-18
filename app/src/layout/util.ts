@@ -29,6 +29,7 @@ import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {getSearch, isWindow} from "../util/functions";
 import {showMessage} from "../dialog/message";
+import {setTabPosition} from "../window/setHeader";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -102,6 +103,9 @@ export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
     targetWnd.children.forEach((item) => {
         if (item.model instanceof Editor) {
             const rangeData = rangeDatas.splice(0, 1)[0];
+            if (!rangeData) {
+                return;
+            }
             const range = focusByOffset(item.model.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${rangeData.id}"]`), rangeData.start, rangeData.end);
             if (range) {
                 item.model.editor.protyle.toolbar.range = range;
@@ -121,6 +125,7 @@ export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
             return true;
         }
     });
+    setTabPosition();
 };
 
 export const getWndByLayout: (layout: Layout) => Wnd = (layout: Layout) => {

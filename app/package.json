@@ -1,6 +1,6 @@
 {
   "name": "SiYuan",
-  "version": "2.8.4",
+  "version": "2.8.5",
   "description": "Build Your Eternal Digital Garden",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
@@ -46,7 +46,6 @@
     }
   ],
   "devDependencies": {
-    "@simonwep/pickr": "^1.8.2",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",

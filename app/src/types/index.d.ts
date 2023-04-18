@@ -370,7 +370,6 @@ declare interface IAppearance {
     modeOS: boolean,
     hideStatusBar: boolean,
     nativeEmoji: boolean,
-    customCSS: boolean,
     themeJS: boolean,
     mode: number, // 1 暗黑；0 明亮
     icon: string,

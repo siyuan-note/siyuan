@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20221114173406"
+		"updated": "20230418085914"
 	},
 	"Children": [
 		{
@@ -668,12 +668,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210131162806-sk9tg4q"
+				"id": "20210131162806-sk9tg4q",
+				"updated": "20230418085727"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Push to template bazaar"
+					"Data": "Push to template marketplace"
 				}
 			]
 		},
@@ -682,7 +683,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173406-3h4imbx",
-				"updated": "20221114173406"
+				"updated": "20230418085914"
 			},
 			"Children": [
 				{
@@ -693,7 +694,7 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community Bazaar README"
+					"TextMarkTextContent": "Community marketplace README"
 				},
 				{
 					"Type": "NodeText",

@@ -15,14 +15,14 @@ export const openByMobile = (uri: string) => {
     }
 };
 
-export const readText = async () => {
+export const readText = () => {
     if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
         return window.JSAndroid.readClipboard();
     }
     return navigator.clipboard.readText();
 };
 
-export const writeText = async (text: string) => {
+export const writeText = (text: string) => {
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0).cloneRange();
@@ -37,7 +37,6 @@ export const writeText = async (text: string) => {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
             return;
         }
-
         navigator.clipboard.writeText(text);
     } catch (e) {
         if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {

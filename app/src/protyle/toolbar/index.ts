@@ -879,17 +879,17 @@ export class Toolbar {
     <span class="fn__flex-1"></span>
     <button data-type="refresh" class="block__icon b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) ? "" : " block__icon--active"}${types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="before" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-before"]}"><svg><use xlink:href="#iconBefore"></use></svg></button>
-    <span class="fn__space"></span>
-    <button data-type="after" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages["insert-after"]}"><svg><use xlink:href="#iconAfter"></use></svg></button>
-    <span class="fn__space"></span>
+    <button data-type="before" class="block__icon b3-tooltips b3-tooltips__nw${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages["insert-before"]}"><svg><use xlink:href="#iconBefore"></use></svg></button>
+    <span class="fn__space${protyle.disabled ? " fn__none" : ""}"></span>
+    <button data-type="after" class="block__icon b3-tooltips b3-tooltips__nw${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages["insert-after"]}"><svg><use xlink:href="#iconAfter"></use></svg></button>
+    <span class="fn__space${protyle.disabled ? " fn__none" : ""}"></span>
     <button data-type="export" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.export} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconImage"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="pin" class="block__icon b3-tooltips b3-tooltips__nw${isPin ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="close" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></button>
 </div>
-<textarea spellcheck="false" class="b3-text-field b3-text-field--text fn__block" placeholder="${placeholder}" style="${isMobile() ? "" : "width:" + Math.max(480, renderElement.clientWidth * 0.7) + "px"};max-height:50vh"></textarea></div>`;
+<textarea ${protyle.disabled ? " readonly" : ""} spellcheck="false" class="b3-text-field b3-text-field--text fn__block" placeholder="${placeholder}" style="${isMobile() ? "" : "width:" + Math.max(480, renderElement.clientWidth * 0.7) + "px"};max-height:50vh"></textarea></div>`;
         const autoHeight = () => {
             textElement.style.height = textElement.scrollHeight + "px";
             if (isMobile()) {
@@ -1091,22 +1091,19 @@ export class Toolbar {
             }
         });
         this.subElementCloseCB = () => {
-            if (!renderElement.parentElement) {
+            if (!renderElement.parentElement || protyle.disabled) {
                 return;
             }
             let inlineLastNode: Element;
             if (types.includes("NodeHTMLBlock")) {
                 let html = textElement.value;
                 if (html) {
-                    // 需 div 包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
-                    if (!html.startsWith("<div>\n")) {
-                        html = `<div>\n${html}`;
+                    // 需移除首尾的空白字符与连续的换行 (空行) https://github.com/siyuan-note/siyuan/issues/7921
+                    html = html.trim().replace(/\n+/g, "\n");
+                    // 需一对 div 标签包裹，否则行内元素会解析错误 https://github.com/siyuan-note/siyuan/issues/6764
+                    if (!(html.startsWith("<div>") && html.endsWith("</div>"))) {
+                        html = `<div>\n${html}\n</div>`;
                     }
-                    if (!html.endsWith("\n</div>")) {
-                        html = `${html}\n</div>`;
-                    }
-                    // 需移除连续的换行 (空行) https://github.com/siyuan-note/siyuan/issues/7921
-                    html = html.replace(/\n+/g, "\n");
                 }
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(html));
             } else if (isInlineMemo) {
@@ -1207,7 +1204,9 @@ export class Toolbar {
         } else {
             autoHeight();
         }
-        textElement.select();
+        if (!protyle.disabled) {
+            textElement.select();
+        }
     }
 
     public showCodeLanguage(protyle: IProtyle, languageElement: HTMLElement) {

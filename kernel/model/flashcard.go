@@ -608,6 +608,20 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 	deckID := operation.DeckID
 	blockIDs := operation.BlockIDs
 
+	foundDeck := false
+	for _, deck := range Decks {
+		if deckID == deck.ID {
+			foundDeck = true
+			break
+		}
+	}
+	if !foundDeck {
+		deck, createErr := createDeck0("Built-in Deck", builtinDeckID)
+		if nil == createErr {
+			Decks[deck.ID] = deck
+		}
+	}
+
 	blockRoots := map[string]string{}
 	for _, blockID := range blockIDs {
 		bt := treenode.GetBlockTree(blockID)
@@ -711,21 +725,6 @@ func LoadFlashcards() {
 			}
 
 			Decks[deckID] = deck
-		}
-	}
-
-	// 支持基于文档复习闪卡 https://github.com/siyuan-note/siyuan/issues/7057
-	foundBuiltinDeck := false
-	for _, deck := range Decks {
-		if builtinDeckID == deck.ID {
-			foundBuiltinDeck = true
-			break
-		}
-	}
-	if !foundBuiltinDeck {
-		deck, createErr := createDeck0("Built-in Deck", builtinDeckID)
-		if nil == createErr {
-			Decks[deck.ID] = deck
 		}
 	}
 }

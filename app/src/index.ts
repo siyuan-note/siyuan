@@ -27,6 +27,7 @@ import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {updateEditModeElement} from "./layout/topBar";
 import {getSearch, isSiyuanUrl, getIdFromSiyuanUrl} from "./util/functions";
+import {hideAllElements} from "./protyle/ui/hideElements";
 
 class App {
     constructor() {
@@ -58,6 +59,7 @@ class App {
                             case "readonly":
                                 window.siyuan.config.editor.readOnly = data.data;
                                 updateEditModeElement();
+                                hideAllElements(["util"]);
                                 break;
                             case "progress":
                                 progressLoading(data);
@@ -120,9 +122,6 @@ class App {
                                 progressBackgroundTask(data.data.tasks);
                                 break;
                             case "refreshtheme":
-                                if (!window.siyuan.config.appearance.customCSS && data.data.theme.indexOf("custom.css") > -1) {
-                                    return;
-                                }
                                 if ((window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark !== "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight !== "daylight")) {
                                     (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
                                 } else {

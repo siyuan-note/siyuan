@@ -266,8 +266,7 @@ func watchTheme(folder string) {
 				}
 
 				//logging.LogInfof(event.String())
-				if event.Op&fsnotify.Write == fsnotify.Write &&
-					(strings.HasSuffix(event.Name, "theme.css") || strings.HasSuffix(event.Name, "custom.css")) {
+				if event.Op&fsnotify.Write == fsnotify.Write && (strings.HasSuffix(event.Name, "theme.css")) {
 					var themeName string
 					if themeName = isCurrentUseTheme(event.Name); "" == themeName {
 						break
@@ -276,13 +275,6 @@ func watchTheme(folder string) {
 					if strings.HasSuffix(event.Name, "theme.css") {
 						util.BroadcastByType("main", "refreshtheme", 0, "", map[string]interface{}{
 							"theme": "/appearance/themes/" + themeName + "/theme.css?" + fmt.Sprintf("%d", time.Now().Unix()),
-						})
-						break
-					}
-
-					if strings.HasSuffix(event.Name, "custom.css") {
-						util.BroadcastByType("main", "refreshtheme", 0, "", map[string]interface{}{
-							"theme": "/appearance/themes/" + themeName + "/custom.css?" + fmt.Sprintf("%d", time.Now().Unix()),
 						})
 						break
 					}

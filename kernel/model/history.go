@@ -235,7 +235,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		return
 	}
 
-	if err = filelock.Copy(srcPath, destPath); nil != err {
+	if err = filelock.CopyNewtimes(srcPath, destPath); nil != err {
 		return
 	}
 
@@ -273,7 +273,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	from := historyPath
 	to := filepath.Join(util.DataDir, "assets", filepath.Base(historyPath))
 
-	if err = filelock.Copy(from, to); nil != err {
+	if err = filelock.CopyNewtimes(from, to); nil != err {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
@@ -290,7 +290,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	from := historyPath
 	to := filepath.Join(util.DataDir, filepath.Base(historyPath))
 
-	if err = filelock.Copy(from, to); nil != err {
+	if err = filelock.CopyNewtimes(from, to); nil != err {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}

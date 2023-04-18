@@ -40,7 +40,7 @@ export const openCardByData = (cardsData: {
         <span class="fn__space"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}">1/${blocks.length}</span></div>
         <div class="fn__space"></div>
-        <div data-id="${id}" data-cardtype="${cardType}" data-type="filter" class="block__icon block__icon--show">
+        <div data-id="${id || ""}" data-cardtype="${cardType}" data-type="filter" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconFilter"></use></svg>
         </div>
         <div class="fn__space"></div>
@@ -228,7 +228,9 @@ export const openCardByData = (cardsData: {
                             }, [], undefined, window.siyuan.languages.specifyPath, true);
                         }
                     }).element);
-                    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                    if (title || response.data.length > 0) {
+                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                    }
                     if (title) {
                         window.siyuan.menus.menu.append(new MenuItem({
                             iconHTML: Constants.ZWSP,

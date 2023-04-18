@@ -60,7 +60,7 @@ export const hideAllElements = (types: string[]) => {
     }
     if (types.includes("util")) {
         /// #if MOBILE
-        const editor = getCurrentEditor()
+        const editor = getCurrentEditor();
         editor.protyle.toolbar.subElement.classList.add("fn__none");
         if (editor.protyle.toolbar.subElementCloseCB) {
             editor.protyle.toolbar.subElementCloseCB();
@@ -73,7 +73,7 @@ export const hideAllElements = (types: string[]) => {
                 item.editor.protyle.toolbar.subElementCloseCB();
                 item.editor.protyle.toolbar.subElementCloseCB = undefined;
             }
-        })
+        });
         /// #endif
     }
     if (types.includes("pdfutil")) {

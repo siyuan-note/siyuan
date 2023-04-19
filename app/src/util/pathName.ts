@@ -2,12 +2,35 @@ import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {escapeHtml} from "./escape";
-import {isMobile} from "./functions";
+import {getSearch, isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
 import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 
+export  const getIdZoomInByPath = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const PWAURL = searchParams.get("url");
+    let id = "";
+    let isZoomIn = false;
+    if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
+        // PWA 捕获 web+siyuan://blocks/20221031001313-rk7sd0e?focus=1
+        id = PWAURL.substring(20, 20 + 22)
+        isZoomIn = getSearch("focus", PWAURL) === "1";
+    } else if (window.JSAndroid) {
+        // PAD 通过思源协议打开
+        const SYURL = window.JSAndroid.getBlockURL();
+        id = getIdFromSYProtocol(SYURL);
+        isZoomIn = getSearch("focus", SYURL) === "1"
+    } else {
+        // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
+        id = searchParams.get("id");
+        isZoomIn = searchParams.get("focus") === "1";
+    }
+    return {
+        id, isZoomIn
+    }
+}
 export const isSYProtocol = (url: string) => {
     return /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
 };

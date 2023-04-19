@@ -7,7 +7,7 @@ import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
-import {getOpenNotebookCount} from "../../util/pathName";
+import {getIdZoomInByPath, getOpenNotebookCount} from "../../util/pathName";
 import {popMenu} from "../menu";
 import {MobileFiles} from "./MobileFiles";
 import {MobileOutline} from "./MobileOutline";
@@ -140,10 +140,10 @@ export const initFramework = () => {
         if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {
             return;
         }
-        const openId = getSearch("id");
-        if (openId) {
-            openMobileFileById(openId,
-                getSearch("focus") === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
+        const idZoomIn = getIdZoomInByPath();
+        if (idZoomIn.id) {
+            openMobileFileById(idZoomIn.id,
+                idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
             return;
         }
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];

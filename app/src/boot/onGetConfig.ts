@@ -136,9 +136,6 @@ export const onGetConfig = (isStart: boolean) => {
         try {
             JSONToLayout(isStart);
             openChangelog();
-            if (window.JSAndroid) {
-                window.openFileByURL(window.JSAndroid.getBlockURL());
-            }
         } catch (e) {
             resetLayout();
         }

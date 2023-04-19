@@ -32,7 +32,7 @@ import {getSearch, isWindow} from "../util/functions";
 import {setTabPosition} from "../window/setHeader";
 /// #endif
 import {showMessage} from "../dialog/message";
-import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
+import {getIdZoomInByPath} from "../util/pathName";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -369,38 +369,15 @@ export const JSONToLayout = (isStart: boolean) => {
             }
         });
     }
+    const idZoomIn = getIdZoomInByPath();
 
-    // TODO PWA 捕获 siyuan://
-    const searchParams = new URLSearchParams(window.location.search);
-    const url = searchParams.get("url");
-
-    const isWebSiyuanUrl = /^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
-    if (isSYProtocol(url) || isWebSiyuanUrl) {
-        searchParams.delete("url");
-        switch (true) {
-            case isSYProtocol(url):
-                searchParams.set("id", getIdFromSYProtocol(url));
-                break;
-            case isWebSiyuanUrl:
-                searchParams.set("id", url.substring(20, 20 + 22));
-                break;
-        }
-
-        const focus = getSearch("focus", url);
-        if (focus) {
-            searchParams.set("focus", focus);
-        }
-    }
-
-    // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
-    const openId = searchParams.get("id");
-    if (openId) {
-        // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟
+    // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟
+    if (idZoomIn.id) {
         setTimeout(() => {
             openFileById({
-                id: openId,
-                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                zoomIn: searchParams.get("focus") === "1"
+                id: idZoomIn.id,
+                action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                zoomIn: idZoomIn.isZoomIn
             });
         }, Constants.TIMEOUT_BLOCKLOAD);
     }

@@ -6,7 +6,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20220623201559"
+		"updated": "20230419153642"
 	},
 	"Children": [
 		{
@@ -340,11 +340,131 @@
 			]
 		},
 		{
-			"ID": "20210127204434-9izt7pe",
+			"ID": "20230419153621-jw11s0z",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210127204434-9izt7pe"
-			}
+				"id": "20230419153621-jw11s0z",
+				"updated": "20230419153625"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20230419153621-c80sc5z",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230419153621-c80sc5z",
+				"updated": "20230419153642"
+			},
+			"Children": [
+				{
+					"ID": "20230419153621-08jsrq5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230419153621-08jsrq5",
+						"updated": "20230419153621"
+					},
+					"Children": [
+						{
+							"ID": "20230419153621-anbp5lj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230419153621-anbp5lj",
+								"updated": "20230419153621"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The name is unique, only one name can be set for a block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230419153621-8d4uul5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230419153621-8d4uul5",
+						"updated": "20230419153621"
+					},
+					"Children": [
+						{
+							"ID": "20230419153621-ekwrodk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230419153621-ekwrodk",
+								"updated": "20230419153621"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Multiple aliases can be set, separated by commas ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ","
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​) in English"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230419153621-iukqnpo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230419153621-iukqnpo",
+						"updated": "20230419153642"
+					},
+					"Children": [
+						{
+							"ID": "20230419153621-ij7hh67",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230419153621-ij7hh67",
+								"updated": "20230419153642"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Memos only support plain text"
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	]
 }

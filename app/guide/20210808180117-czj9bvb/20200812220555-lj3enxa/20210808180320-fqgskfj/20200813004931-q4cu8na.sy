@@ -6,7 +6,7 @@
 		"id": "20200813004931-q4cu8na",
 		"title": "什么是内容块",
 		"type": "doc",
-		"updated": "20221026234721"
+		"updated": "20230419153534"
 	},
 	"Children": [
 		{
@@ -233,15 +233,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我们可以为每个"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "内容块"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "命名、添加别名和备注。命名和别名主要用于反链"
+					"Data": "我们可以为每个内容块命名、添加别名和备注。命名和别名主要用于反链"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -352,8 +344,127 @@
 			"ID": "20210127204409-yjgww90",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210127204409-yjgww90"
-			}
+				"id": "20210127204409-yjgww90",
+				"updated": "20230419153442"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20230419153207-l40wjv2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230419153207-l40wjv2",
+				"updated": "20230419153534"
+			},
+			"Children": [
+				{
+					"ID": "20230419153259-2do0vsl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230419153259-2do0vsl",
+						"updated": "20230419153259"
+					},
+					"Children": [
+						{
+							"ID": "20230419153259-02ihc3r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230419153259-02ihc3r",
+								"updated": "20230419153308"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "命名是唯一的，一个块只能设置一个命名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230419153308-89l1o1c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230419153308-89l1o1c"
+					},
+					"Children": [
+						{
+							"ID": "20230419153308-60o6t5t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230419153308-60o6t5t",
+								"updated": "20230419153317"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "别名可以设置多个，通过英文状态下的逗号（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ","
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​）分隔"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230419153321-lxs2x7d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230419153321-lxs2x7d",
+						"updated": "20230419153534"
+					},
+					"Children": [
+						{
+							"ID": "20230419153321-56fxsqz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230419153321-56fxsqz",
+								"updated": "20230419153534"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "备注仅支持纯文本"
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	]
 }

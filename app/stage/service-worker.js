@@ -53,7 +53,7 @@ self.addEventListener("fetch", event => {
     // Don't care about widget requests.
     if (!url.pathname.startsWith("/stage/") && !url.pathname.startsWith("/appearance/") &&
         "/favicon.ico" !== url.pathname &&
-        url.href.indexOf("https://assets.b3logfile.com/assets.b3logfile.com/avatar/") === -1) {
+        url.href.indexOf("https://assets.b3logfile.com/avatar/") === -1) {
         return;
     }
 

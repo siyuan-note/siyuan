@@ -24,6 +24,17 @@
       .b3-form__icon {
         margin: 0 8px 8px;
       }
+
+      .b3-list-item {
+        line-height: 38px;
+
+        &__graphic {
+          margin-right: 0;
+          padding:0 10px 0 5px;
+          height: 16px;
+          width: 16px;
+        }
+      }
     }
   }
 

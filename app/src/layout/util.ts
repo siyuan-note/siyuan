@@ -27,11 +27,12 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
-import {getSearch, isWindow, isSiyuanUrl, isWebSiyuanUrl, getIdFromSiyuanUrl, getIdFromWebSiyuanUrl} from "../util/functions";
+import {getSearch, isWindow} from "../util/functions";
 /// #if !BROWSER
 import {setTabPosition} from "../window/setHeader";
 /// #endif
 import {showMessage} from "../dialog/message";
+import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -369,17 +370,19 @@ export const JSONToLayout = (isStart: boolean) => {
         });
     }
 
-    // PWA 捕获 siyuan://
+    // TODO PWA 捕获 siyuan://
     const searchParams = new URLSearchParams(window.location.search);
     const url = searchParams.get("url");
-    if (isSiyuanUrl(url) || isWebSiyuanUrl(url)) {
+
+    const isWebSiyuanUrl = /^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
+    if (isSYProtocol(url) || isWebSiyuanUrl) {
         searchParams.delete("url");
         switch (true) {
-            case isSiyuanUrl(url):
-                searchParams.set("id", getIdFromSiyuanUrl(url));
+            case isSYProtocol(url):
+                searchParams.set("id", getIdFromSYProtocol(url));
                 break;
-            case isWebSiyuanUrl(url):
-                searchParams.set("id", getIdFromWebSiyuanUrl(url));
+            case isWebSiyuanUrl:
+                searchParams.set("id", url.substring(20, 20 + 22));
                 break;
         }
 

@@ -1,8 +1,8 @@
 import {BlockPanel} from "./Panel";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchSyncPost} from "../util/fetch";
-import {getIdFromSiyuanUrl} from "../util/functions";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
+import {getIdFromSYProtocol} from "../util/pathName";
 
 let popoverTargetElement: HTMLElement;
 export const initBlockPopover = () => {
@@ -200,7 +200,7 @@ export const showPopover = async () => {
         }
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
         // 以思源协议开头的链接
-        ids = [getIdFromSiyuanUrl(popoverTargetElement.getAttribute("data-href"))];
+        ids = [getIdFromSYProtocol(popoverTargetElement.getAttribute("data-href"))];
     } else {
         // pdf
         let targetId;

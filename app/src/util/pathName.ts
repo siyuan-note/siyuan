@@ -8,6 +8,22 @@ import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 
+export const isSYProtocol = (url: string) => {
+    return /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
+}
+
+export const getIdFromSYProtocol = (url: string) => {
+    return url.substring(16, 16 + 22);
+}
+
+/* redirect to auth page */
+export const redirectToCheckAuth = (to: string = window.location.href) => {
+    const url = new URL(window.location.origin);
+    url.pathname = '/check-auth';
+    url.searchParams.set('to', to);
+    window.location.href = url.href;
+}
+
 export const addBaseURL = () => {
     let baseURLElement = document.getElementById("baseURL");
     if (!baseURLElement) {

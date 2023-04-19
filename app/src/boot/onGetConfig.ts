@@ -17,7 +17,7 @@ import {renderSnippet} from "../config/util/snippets";
 import {openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
-import {getSearch, isWindow, isSiyuanUrl, getIdFromSiyuanUrl} from "../util/functions";
+import {getSearch, isWindow} from "../util/functions";
 import {initStatus} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
@@ -25,6 +25,7 @@ import {setTabPosition} from "../window/setHeader";
 import {initBar} from "../layout/topBar";
 import {setProxy} from "../config/util/setProxy";
 import {openChangelog} from "./openChangelog";
+import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -212,10 +213,10 @@ export const initWindow = () => {
     });
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-            if (!isSiyuanUrl(url)) {
+            if (!isSYProtocol(url)) {
                 return;
             }
-            const id = getIdFromSiyuanUrl(url);
+            const id = getIdFromSYProtocol(url);
             fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                 if (existResponse.data) {
                     openFileById({

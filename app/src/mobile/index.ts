@@ -6,7 +6,7 @@ import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
-import {addBaseURL, setNoteBook} from "../util/pathName";
+import {addBaseURL, getIdFromSYProtocol, isSYProtocol, setNoteBook} from "../util/pathName";
 import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
@@ -18,7 +18,7 @@ import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {openMobileFileById} from "./editor";
-import {getSearch, isSiyuanUrl, getIdFromSiyuanUrl} from "../util/functions";
+import {getSearch} from "../util/functions";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 
@@ -90,8 +90,8 @@ window.showKeyboardToolbar = (height) => {
 };
 window.hideKeyboardToolbar = hideKeyboardToolbar;
 window.openFileByURL = (openURL) => {
-    if (openURL && isSiyuanUrl(openURL)) {
-        openMobileFileById(getIdFromSiyuanUrl(openURL),
+    if (openURL && isSYProtocol(openURL)) {
+        openMobileFileById(getIdFromSYProtocol(openURL),
             getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
         return true;
     }

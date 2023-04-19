@@ -1,7 +1,7 @@
 import {exportLayout, getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {fetchPost} from "../util/fetch";
-import {redirectToCheckAuth} from "../util/functions";
+import {redirectToCheckAuth} from "../util/pathName";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);

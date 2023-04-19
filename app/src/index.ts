@@ -8,7 +8,7 @@ import {account} from "./config/account";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
-import {addBaseURL, setNoteBook} from "./util/pathName";
+import {addBaseURL, getIdFromSYProtocol, isSYProtocol, setNoteBook} from "./util/pathName";
 import {registerServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
 import {
@@ -27,12 +27,13 @@ import {resizeDrag} from "./layout/util";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {updateEditModeElement} from "./layout/topBar";
-import {getIdFromSiyuanUrl, getSearch, isSiyuanUrl} from "./util/functions";
+import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
 import {initPluginSystem} from 'siyuan-petal';
 
 class App {
     constructor() {
+        // TODO
         /// #if BROWSER
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         /// #endif
@@ -183,9 +184,9 @@ class App {
 
 new App();
 window.openFileByURL = (openURL) => {
-    if (openURL && isSiyuanUrl(openURL)) {
+    if (openURL && isSYProtocol(openURL)) {
         openFileById({
-            id: getIdFromSiyuanUrl(openURL),
+            id: getIdFromSYProtocol(openURL),
             action: getSearch("focus", openURL) === "1" ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
         });
         return true;

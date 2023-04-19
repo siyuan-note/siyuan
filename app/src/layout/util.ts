@@ -28,8 +28,10 @@ import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {getSearch, isWindow, isSiyuanUrl, isWebSiyuanUrl, getIdFromSiyuanUrl, getIdFromWebSiyuanUrl} from "../util/functions";
-import {showMessage} from "../dialog/message";
+/// #if !BROWSER
 import {setTabPosition} from "../window/setHeader";
+/// #endif
+import {showMessage} from "../dialog/message";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -125,7 +127,9 @@ export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
             return true;
         }
     });
+    /// #if !BROWSER
     setTabPosition();
+    /// #endif
 };
 
 export const getWndByLayout: (layout: Layout) => Wnd = (layout: Layout) => {

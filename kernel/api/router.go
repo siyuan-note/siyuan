@@ -52,7 +52,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setAppearanceMode", model.CheckAuth, setAppearanceMode)
 	ginServer.Handle("POST", "/api/system/getSysFonts", model.CheckAuth, getSysFonts)
 	ginServer.Handle("POST", "/api/system/exit", model.CheckAuth, exit)
-	ginServer.Handle("POST", "/api/system/setUILayout", model.CheckAuth, setUILayout)
+	ginServer.Handle("POST", "/api/system/setUILayout", setUILayout) // 这里不加鉴权 After modifying the access authentication code on the browser side, the other side does not refresh https://github.com/siyuan-note/siyuan/issues/8028
 	ginServer.Handle("POST", "/api/system/getConf", model.CheckAuth, getConf)
 	ginServer.Handle("POST", "/api/system/checkUpdate", model.CheckAuth, checkUpdate)
 	ginServer.Handle("POST", "/api/system/exportLog", model.CheckAuth, exportLog)

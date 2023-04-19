@@ -113,7 +113,7 @@ export const initConfigSearch = (element: HTMLElement) => {
                     return;
                 }
                 // 右侧面板过滤
-                const panelElement = element.querySelector(`.config__tab-container[data-name="${type}"]`)
+                const panelElement = element.querySelector(`.config__tab-container[data-name="${type}"]`);
                 if (panelElement.innerHTML === "") {
                     genItemPanel(type, panelElement);
                 }
@@ -126,7 +126,7 @@ export const initConfigSearch = (element: HTMLElement) => {
                 } else {
                     panelElement.querySelectorAll(`.config__tab-container[data-name="${type}"] .b3-label`).forEach((itemElement: HTMLElement) => {
                         if (!itemElement.classList.contains("fn__none")) {
-                            const text = itemElement.textContent.toLowerCase()
+                            const text = itemElement.textContent.toLowerCase();
                             if (text.indexOf(inputValue.toLowerCase()) > -1 || inputValue.toLowerCase().indexOf(text) > -1) {
                                 itemElement.style.display = "";
                             } else {

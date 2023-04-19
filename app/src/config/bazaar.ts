@@ -339,7 +339,7 @@ export const bazaar = {
                 highlightRender(mdElement);
             });
         }
-        readmeElement.classList.add("config-bazaar__readme--show")
+        readmeElement.classList.add("config-bazaar__readme--show");
     },
     bindEvent() {
         fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
@@ -377,7 +377,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "goBack") {
-                    bazaar.element.querySelector("#configBazaarReadme").classList.remove("config-bazaar__readme--show")
+                    bazaar.element.querySelector("#configBazaarReadme").classList.remove("config-bazaar__readme--show");
                     event.preventDefault();
                     event.stopPropagation();
                     break;

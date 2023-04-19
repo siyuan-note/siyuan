@@ -79,7 +79,7 @@ export const genItemPanel = (type: string, containerElement:Element) => {
         default:
             break;
     }
-}
+};
 
 export const openSetting = () => {
     const exitDialog = window.siyuan.dialogs.find((item) => {

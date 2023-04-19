@@ -176,7 +176,7 @@ export class Outline extends Model {
     }
 
     public updateDocTitle(ial?: IObject) {
-        const docTitleElement = this.headerElement.nextElementSibling as HTMLElement
+        const docTitleElement = this.headerElement.nextElementSibling as HTMLElement;
         if (this.type === "pin") {
             if (ial) {
                 let iconHTML = `${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true)}`;
@@ -186,12 +186,12 @@ export class Outline extends Model {
                 docTitleElement.innerHTML = `${iconHTML}
 <span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
                 docTitleElement.setAttribute("title", ial.title);
-                docTitleElement.classList.remove("fn__none")
+                docTitleElement.classList.remove("fn__none");
             } else {
-                docTitleElement.classList.add("fn__none")
+                docTitleElement.classList.add("fn__none");
             }
         } else {
-            docTitleElement.classList.add("fn__none")
+            docTitleElement.classList.add("fn__none");
         }
     }
 

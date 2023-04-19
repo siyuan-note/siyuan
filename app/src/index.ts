@@ -181,7 +181,7 @@ new App();
 
 window.openFileByURL = (openURL) => {
     if (openURL && isSYProtocol(openURL)) {
-        const isZoomIn = getSearch("focus", openURL) === "1"
+        const isZoomIn = getSearch("focus", openURL) === "1";
         openFileById({
             id: getIdFromSYProtocol(openURL),
             action: isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],

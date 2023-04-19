@@ -27,7 +27,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
-import {getSearch, isWindow} from "../util/functions";
+import {isWindow} from "../util/functions";
 /// #if !BROWSER
 import {setTabPosition} from "../window/setHeader";
 /// #endif

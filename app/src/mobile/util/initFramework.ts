@@ -16,7 +16,6 @@ import {MobileBacklinks} from "./MobileBacklinks";
 import {MobileBookmarks} from "./MobileBookmarks";
 import {MobileTags} from "./MobileTags";
 import {activeBlur, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardToolbar";
-import {getSearch} from "../../util/functions";
 import {syncGuide} from "../../sync/syncGuide";
 
 export const initFramework = () => {

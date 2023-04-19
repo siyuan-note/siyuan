@@ -14,6 +14,73 @@ import {Dialog} from "../dialog";
 import {ai} from "./ai";
 import {flashcard} from "./flashcard";
 
+export const genItemPanel = (type: string, containerElement:Element) => {
+    switch (type) {
+        case "filetree":
+            containerElement.innerHTML = fileTree.genHTML();
+            fileTree.element = containerElement;
+            fileTree.bindEvent();
+            break;
+        case "AI":
+            containerElement.innerHTML = ai.genHTML();
+            ai.element = containerElement;
+            ai.bindEvent();
+            break;
+        case "card":
+            containerElement.innerHTML = flashcard.genHTML();
+            flashcard.element = containerElement;
+            flashcard.bindEvent();
+            break;
+        case "image":
+            containerElement.innerHTML = image.genHTML();
+            image.element = containerElement;
+            image.bindEvent();
+            break;
+        case "export":
+            containerElement.innerHTML = exportConfig.genHTML();
+            exportConfig.element = containerElement;
+            exportConfig.bindEvent();
+            break;
+        case "appearance":
+            containerElement.innerHTML = appearance.genHTML();
+            appearance.element = containerElement;
+            appearance.bindEvent();
+            break;
+        case "keymap":
+            containerElement.innerHTML = keymap.genHTML();
+            keymap.element = containerElement;
+            keymap.bindEvent();
+            break;
+        case "bazaar":
+            bazaar.element = containerElement;
+            containerElement.innerHTML = bazaar.genHTML();
+            bazaar.bindEvent();
+            break;
+        case "account":
+            containerElement.innerHTML = account.genHTML();
+            account.element = containerElement;
+            account.bindEvent(account.element);
+            break;
+        case "repos":
+            containerElement.innerHTML = repos.genHTML();
+            repos.element = containerElement;
+            repos.bindEvent();
+            break;
+        case "about":
+            containerElement.innerHTML = about.genHTML();
+            about.element = containerElement;
+            about.bindEvent();
+            break;
+        case "search":
+            containerElement.innerHTML = query.genHTML();
+            query.element = containerElement;
+            query.bindEvent();
+            break;
+        default:
+            break;
+    }
+}
+
 export const openSetting = () => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector(".config__tab-container")) {
@@ -72,70 +139,7 @@ export const openSetting = () => {
             item.classList.add("b3-list-item--focus");
             containerElement.classList.remove("fn__none");
             if (containerElement.innerHTML === "" || type === "repos" || type === "bazaar") {
-                switch (type) {
-                    case "filetree":
-                        containerElement.innerHTML = fileTree.genHTML();
-                        fileTree.element = dialog.element.querySelector('.config__tab-container[data-name="filetree"]');
-                        fileTree.bindEvent();
-                        break;
-                    case "AI":
-                        containerElement.innerHTML = ai.genHTML();
-                        ai.element = dialog.element.querySelector('.config__tab-container[data-name="AI"]');
-                        ai.bindEvent();
-                        break;
-                    case "card":
-                        containerElement.innerHTML = flashcard.genHTML();
-                        flashcard.element = dialog.element.querySelector('.config__tab-container[data-name="card"]');
-                        flashcard.bindEvent();
-                        break;
-                    case "image":
-                        containerElement.innerHTML = image.genHTML();
-                        image.element = dialog.element.querySelector('.config__tab-container[data-name="image"]');
-                        image.bindEvent();
-                        break;
-                    case "export":
-                        containerElement.innerHTML = exportConfig.genHTML();
-                        exportConfig.element = dialog.element.querySelector('.config__tab-container[data-name="export"]');
-                        exportConfig.bindEvent();
-                        break;
-                    case "appearance":
-                        containerElement.innerHTML = appearance.genHTML();
-                        appearance.element = dialog.element.querySelector('.config__tab-container[data-name="appearance"]');
-                        appearance.bindEvent();
-                        break;
-                    case "keymap":
-                        containerElement.innerHTML = keymap.genHTML();
-                        keymap.element = dialog.element.querySelector('.config__tab-container[data-name="keymap"]');
-                        keymap.bindEvent();
-                        break;
-                    case "bazaar":
-                        bazaar.element = dialog.element.querySelector('.config__tab-container[data-name="bazaar"]');
-                        containerElement.innerHTML = bazaar.genHTML();
-                        bazaar.bindEvent();
-                        break;
-                    case "account":
-                        containerElement.innerHTML = account.genHTML();
-                        account.element = dialog.element.querySelector('.config__tab-container[data-name="account"]');
-                        account.bindEvent(account.element);
-                        break;
-                    case "repos":
-                        containerElement.innerHTML = repos.genHTML();
-                        repos.element = dialog.element.querySelector('.config__tab-container[data-name="repos"]');
-                        repos.bindEvent();
-                        break;
-                    case "about":
-                        containerElement.innerHTML = about.genHTML();
-                        about.element = dialog.element.querySelector('.config__tab-container[data-name="about"]');
-                        about.bindEvent();
-                        break;
-                    case "search":
-                        containerElement.innerHTML = query.genHTML();
-                        query.element = dialog.element.querySelector('.config__tab-container[data-name="search"]');
-                        query.bindEvent();
-                        break;
-                    default:
-                        break;
-                }
+                genItemPanel(type, containerElement);
             }
         });
     });

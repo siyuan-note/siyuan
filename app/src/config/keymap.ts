@@ -144,7 +144,7 @@ export const keymap = {
             /// #endif
         });
     },
-    _search(value: string, keymapString: string) {
+    search(value: string, keymapString: string) {
         keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
             const liElement = item.parentElement;
             let matchedKeymap = false;
@@ -201,24 +201,24 @@ export const keymap = {
         const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;
         const searchKeymapElement = keymap.element.querySelector("#searchByKey") as HTMLInputElement;
         searchElement.addEventListener("compositionend", () => {
-            keymap._search(searchElement.value, searchKeymapElement.value);
+            keymap.search(searchElement.value, searchKeymapElement.value);
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            keymap._search(searchElement.value, searchKeymapElement.value);
+            keymap.search(searchElement.value, searchKeymapElement.value);
         });
         searchKeymapElement.addEventListener("keydown", function (event: KeyboardEvent) {
             event.stopPropagation();
             event.preventDefault();
             const keymapStr = keymap._getKeymapString(event, this);
-            keymap._search(searchElement.value, keymapStr);
+            keymap.search(searchElement.value, keymapStr);
         });
         keymap.element.querySelector("#clearSearchBtn").addEventListener("click", () => {
             searchElement.value = "";
             searchKeymapElement.value = "";
-            keymap._search("", "");
+            keymap.search("", "");
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {
             confirmDialog(window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {

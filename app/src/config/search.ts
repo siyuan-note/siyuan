@@ -1,4 +1,6 @@
 import {Constants} from "../constants";
+import {genItemPanel} from "./index";
+import {keymap} from "./keymap";
 
 const getLang = (keys: string[]) => {
     const langArray: string[] = [];
@@ -29,7 +31,8 @@ export const initConfigSearch = (element: HTMLElement) => {
         getLang(["riffCard"]),
 
         // AI
-        ["AI"].concat(getLang(["ai"])),
+        ["AI"].concat(getLang(["ai", "apiTimeout", "apiTimeoutTip", "apiMaxTokens", "apiMaxTokensTip", "apiKey",
+            "apiKeyTip", "apiProxy", "apiProxyTip", "apiBaseURL", "apiBaseURLTip"])),
 
         // 图片
         getLang(["assets", "clearUnused"]),
@@ -39,21 +42,18 @@ export const initConfigSearch = (element: HTMLElement) => {
             "export13", "export14", "export15", "export19", "export20", "blockRef", "blockEmbed"]),
 
         // 外观
-        window.siyuan.config.appearance.darkThemes.concat(window.siyuan.config.appearance.icons).concat(window.siyuan.config.appearance.lightThemes)
-            .concat(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE)
-            .concat(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE)
-            .concat(["English", "简体中文"]).concat(getLang(["language", "language1"]))
-            .concat(getLang(["appearance", "appearance1", "appearance2", "appearance3", "appearance4",
-                "appearance5", "appearance6", "appearance8", "appearance9", "appearance10", "appearance11",
-                "appearance14", "appearance15", "appearance16", "appearance17",
-                "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
-                "theme2", "theme11", "theme12", "customEmoji", "customEmojiTip", "refresh"])),
+        getLang(["language", "language1", "appearance", "appearance1", "appearance2",
+            "appearance3", "appearance4",
+            "appearance5", "appearance6", "appearance8", "appearance9", "appearance10", "appearance11",
+            "appearance14", "appearance15", "appearance16", "appearance17",
+            "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
+            "theme2", "theme11", "theme12", "customEmoji", "customEmojiTip", "refresh"]),
 
         // 集市
         getLang(["bazaar", "theme", "template", "icon", "widget"]),
 
         // 搜索
-        getLang(["search", "searchLimit", "searchLimit1", "memo", "name", "alias","keywordsLimit",
+        getLang(["search", "searchLimit", "searchLimit1", "memo", "name", "alias", "keywordsLimit",
             "doc", "headings", "list1", "listItem", "code", "math", "table", "quote", "superBlock", "paragraph"]),
 
         // 快捷键
@@ -95,7 +95,7 @@ export const initConfigSearch = (element: HTMLElement) => {
                 if (!subItem) {
                     console.warn("Search config miss language: ", item, index);
                 }
-                if (subItem && (inputValue.toLowerCase().indexOf(subItem) > -1 || subItem.toLowerCase().indexOf(inputValue) > -1)) {
+                if (subItem && (inputValue.toLowerCase().indexOf(subItem.toLowerCase()) > -1 || subItem.toLowerCase().indexOf(inputValue.toLowerCase()) > -1)) {
                     indexList.push(index);
                 }
             });
@@ -107,7 +107,34 @@ export const initConfigSearch = (element: HTMLElement) => {
                 if (!currentTabElement) {
                     currentTabElement = item;
                 }
+                const type = item.getAttribute("data-name");
                 item.style.display = "";
+                if (["image", "bazaar", "account"].includes(type)) {
+                    return;
+                }
+                // 右侧面板过滤
+                const panelElement = element.querySelector(`.config__tab-container[data-name="${type}"]`)
+                if (panelElement.innerHTML === "") {
+                    genItemPanel(type, panelElement);
+                }
+                if (type === "keymap") {
+                    const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;
+                    const searchKeymapElement = keymap.element.querySelector("#searchByKey") as HTMLInputElement;
+                    searchElement.value = inputValue;
+                    searchKeymapElement.value = "";
+                    keymap.search(searchElement.value, searchKeymapElement.value);
+                } else {
+                    panelElement.querySelectorAll(`.config__tab-container[data-name="${type}"] .b3-label`).forEach((itemElement: HTMLElement) => {
+                        if (!itemElement.classList.contains("fn__none")) {
+                            const text = itemElement.textContent.toLowerCase()
+                            if (text.indexOf(inputValue.toLowerCase()) > -1 || inputValue.toLowerCase().indexOf(text) > -1) {
+                                itemElement.style.display = "";
+                            } else {
+                                itemElement.style.display = "none";
+                            }
+                        }
+                    });
+                }
             } else {
                 item.style.display = "none";
             }

@@ -4,7 +4,8 @@
       & > .b3-tab-bar {
         width: auto;
 
-        .b3-list-item__text {
+        .b3-list-item__text,
+        .b3-form__icon {
           display: none;
         }
 

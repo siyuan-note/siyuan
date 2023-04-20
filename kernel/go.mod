@@ -31,7 +31,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/goccy/go-json v0.10.1
 	github.com/gofrs/flock v0.8.1
-	github.com/imroc/req/v3 v3.33.2
+	github.com/imroc/req/v3 v3.33.1
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -44,7 +44,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-gpt3 v1.4.0
 	github.com/shirou/gopsutil/v3 v3.23.2
-	github.com/siyuan-note/dejavu v0.0.0-20230420080412-a5dabc68fa8f
+	github.com/siyuan-note/dejavu v0.0.0-20230420110939-9dd849c38341
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20230417044524-125ee78b5cc9

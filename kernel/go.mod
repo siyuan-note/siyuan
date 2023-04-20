@@ -44,11 +44,11 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-gpt3 v1.4.0
 	github.com/shirou/gopsutil/v3 v3.23.2
-	github.com/siyuan-note/dejavu v0.0.0-20230420113002-72c88cb42b81
+	github.com/siyuan-note/dejavu v0.0.0-20230420114155-e49d9fac7e77
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20230417044524-125ee78b5cc9
-	github.com/siyuan-note/httpclient v0.0.0-20230309131049-f703795de6bc
+	github.com/siyuan-note/httpclient v0.0.0-20230420113830-aaaf2c3bc514
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7
 	github.com/steambap/captcha v1.4.1
@@ -139,6 +139,8 @@ require (
 )
 
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5
+
+replace github.com/quic-go/quic-go => github.com/lucas-clemente/quic-go v0.33.0
 
 //replace github.com/siyuan-note/dejavu => D:\88250\dejavu
 //replace github.com/siyuan-note/riff => D:\88250\riff

@@ -54,23 +54,22 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
                 }
             }
         });
-        if (response.data.blocks.length === 0) {
-            return;
+        if (response.data.blocks.length > 0) {
+            edit = new Protyle(dialog.element.querySelector("#cardPreview") as HTMLElement, {
+                blockId: "",
+                render: {
+                    gutter: true,
+                    breadcrumbDocName: true
+                },
+            });
+            if (window.siyuan.mobile) {
+                window.siyuan.mobile.popEditor = edit;
+            }
+            if (window.siyuan.config.editor.readOnly) {
+                disabledProtyle(edit.protyle);
+            }
+            getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         }
-        edit = new Protyle(dialog.element.querySelector("#cardPreview") as HTMLElement, {
-            blockId: "",
-            render: {
-                gutter: true,
-                breadcrumbDocName: true
-            },
-        });
-        if (window.siyuan.mobile) {
-            window.siyuan.mobile.popEditor = edit;
-        }
-        if (window.siyuan.config.editor.readOnly) {
-            disabledProtyle(edit.protyle);
-        }
-        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         const previousElement = dialog.element.querySelector('[data-type="previous"]');
         const nextElement = dialog.element.querySelector('[data-type="next"]');
         const listElement = dialog.element.querySelector(".b3-list--background");

@@ -38,7 +38,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         hasClosestByClassName(target, "viewer-container") ||
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByAttribute(target, "id", "commonMenu") ||
-        hasClosestByAttribute(target, "id", "model")
+        hasClosestByAttribute(target, "id", "model", true)
     ) {
         return;
     }
@@ -165,7 +165,7 @@ export const handleTouchMove = (event: TouchEvent) => {
         hasClosestByClassName(target, "keyboard") ||
         hasClosestByClassName(target, "viewer-container") ||
         hasClosestByAttribute(target, "id", "commonMenu") ||
-        hasClosestByAttribute(target, "id", "model")) {
+        hasClosestByAttribute(target, "id", "model", true)) {
         return;
     }
     if (getSelection().rangeCount > 0) {

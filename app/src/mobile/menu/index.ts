@@ -195,7 +195,6 @@ export const initRightMenu = () => {
                 break;
             } else if (target.id === "menuHistory" && !window.siyuan.config.readonly) {
                 openHistory();
-                closePanel();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

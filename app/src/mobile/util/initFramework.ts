@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {closePanel} from "./closePanel";
+import {closeModel, closePanel} from "./closePanel";
 import {openMobileFileById} from "../editor";
 import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
@@ -130,9 +130,7 @@ export const initFramework = () => {
         }, Constants.TIMEOUT_INPUT);
     }
     document.getElementById("modelClose").addEventListener("click", () => {
-        document.getElementById("model").style.transform = "";
-        activeBlur();
-        hideKeyboardToolbar();
+        closeModel();
     });
     initEditorName();
     if (getOpenNotebookCount() > 0) {

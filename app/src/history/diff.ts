@@ -112,8 +112,8 @@ export const showDiff = (data: { id: string, time: string }[]) => {
     fetchPost("/api/repo/diffRepoSnapshots", {left, right}, (response) => {
         const dialog = new Dialog({
             title: window.siyuan.languages.compare,
-            content: `<div class="fn__flex" style="height: 100%">
-    <div class="history__diff">
+            content: `<div class="fn__flex" style="height: 100%;${isMobile() ? "flex-direction: column;" : ""}">
+    <div class="history__diff"${isMobile() ? 'style="flex:1;width:auto"' : ""}>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">

@@ -64,7 +64,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         }
     }, {
         iconHTML: Constants.ZWSP,
-        label: window.siyuan.languages.save,
+        label: `${window.siyuan.languages.aiCustomAction} & ${window.siyuan.languages.save}`,
         click() {
             const dialog = new Dialog({
                 title: window.siyuan.languages.save,
@@ -89,11 +89,19 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 dialog.destroy();
             });
             btnsElement[1].addEventListener("click", () => {
+                const memo = dialog.element.querySelector("textarea").value;
                 window.siyuan.storage[Constants.LOCAL_AI].push({
                     name: inputElement.value,
-                    memo: dialog.element.querySelector("textarea").value,
+                    memo
                 });
                 setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
+                fetchPost("/api/ai/chatGPTWithAction", {
+                    ids,
+                    action: memo,
+                }, (response) => {
+                    dialog.destroy();
+                    fillContent(protyle, response.data, elements);
+                });
                 dialog.destroy();
             });
         }

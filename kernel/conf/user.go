@@ -34,6 +34,8 @@ type User struct {
 	UserSiYuanAssetSize             float64      `json:"userSiYuanAssetSize"`
 	UserTrafficUpload               float64      `json:"userTrafficUpload"`
 	UserTrafficDownload             float64      `json:"userTrafficDownload"`
+	UserTrafficAPIGet               float64      `json:"userTrafficAPIGet"`
+	UserTrafficAPIPut               float64      `json:"userTrafficAPIPut"`
 	UserTrafficTime                 float64      `json:"userTrafficTime"`
 	UserSiYuanSubscriptionPlan      float64      `json:"userSiYuanSubscriptionPlan"`   // -1：未订阅，0：标准订阅，1：教育订阅，2：试用
 	UserSiYuanSubscriptionStatus    float64      `json:"userSiYuanSubscriptionStatus"` // -1：未订阅，0：订阅可用，1：订阅封禁，2：订阅过期

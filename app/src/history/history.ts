@@ -230,7 +230,7 @@ export const openHistory = () => {
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
-            <div style="overflow:auto;">
+            <div style="${isMobile() ? "overflow:auto;" : ""}">
                 <div class="block__icons" style="min-width: 845px">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
@@ -277,7 +277,7 @@ export const openHistory = () => {
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
         </ul>
         <div data-type="repo" class="fn__none history__repo">
-            <div style="overflow:auto;">
+            <div style="${isMobile() ? "overflow:auto;" : ""}">
                 <div class="block__icons" style="min-width: 446px">
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>

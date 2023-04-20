@@ -10,23 +10,13 @@
   }
 
   &__repo {
-    background-color: var(--b3-theme-background);
+    background-color: var(--b3-theme-surface);
     display: flex;
     flex-direction: column;
     height: 100%;
     box-sizing: border-box;
     border-radius: 0 0 4px 4px;
     overflow: hidden;
-  }
-
-  &__repoheader {
-    padding: 8px 16px;
-    flex-wrap: wrap;
-
-    .block__icon {
-      opacity: 1;
-      z-index: 1;
-    }
   }
 
   &__date {

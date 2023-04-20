@@ -243,10 +243,10 @@ export const openHistory = () => {
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
-            <div class="fn__flex history__repoheader">
-                <span data-type="docprevious" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+            <div class="block__icons">
+                <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                 <span class="fn__space"></span>
-                <span data-type="docnext" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
                 <div style="position: relative">
                     <svg class="b3-form__icon-icon ft__on-surface"><use xlink:href="#iconSearch"></use></svg>
@@ -284,14 +284,14 @@ export const openHistory = () => {
                 <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
             </div>
         </div>
-        <ul data-type="notebook" style="background-color: var(--b3-theme-background);border-radius: 0 0 4px 4px;padding-bottom: 8px;" class="fn__none b3-list b3-list--background">
+        <ul data-type="notebook" style="padding: 8px 0;" class="fn__none b3-list b3-list--background">
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
         </ul>
         <div data-type="repo" class="fn__none history__repo">
-            <div class="fn__flex history__repoheader">
-                <span data-type="previous" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+            <div class="block__icons">
+                <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                 <span class="fn__space"></span>
-                <span data-type="next" class="block__icon b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                 <div class="fn__flex-1"></div>
                 <select class="b3-select" style="min-width: auto">
                     <option value="0">${window.siyuan.languages.localSnapshot}</option>
@@ -305,7 +305,7 @@ export const openHistory = () => {
                 <span class="fn__space"></span>
                 <button class="b3-button b3-button--outline" disabled data-type="compare">${window.siyuan.languages.compare}</button>
             </div>    
-            <ul style="background: var(--b3-theme-background);padding-bottom: 8px;" class="b3-list b3-list--background fn__flex-1">
+            <ul class="b3-list b3-list--background fn__flex-1" style="padding-bottom: 8px">
                 <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
             </ul>
         </div>

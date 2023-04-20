@@ -115,7 +115,7 @@
     &:after {
       content: "";
       display: block;
-      background-color: var(--b3-border-color);
+      background-color: var(--b3-theme-surface-lighter);
       position: absolute;
       left: 0;
       transition: var(--b3-transition);

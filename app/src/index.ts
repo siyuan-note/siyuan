@@ -29,7 +29,6 @@ import {getLocalStorage} from "./protyle/util/compatibility";
 import {updateEditModeElement} from "./layout/topBar";
 import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
-import {initPluginSystem} from "siyuan-petal";
 
 class App {
     constructor() {
@@ -166,7 +165,6 @@ class App {
                         resizeDrag();
                         setTitle(window.siyuan.languages.siyuanNote);
                         initMessage();
-                        initPluginSystem();
                     });
                 });
             });

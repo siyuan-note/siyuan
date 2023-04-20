@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20220623201408"
+		"updated": "20230420123252"
 	},
 	"Children": [
 		{
@@ -489,6 +489,106 @@
 								{
 									"Type": "NodeText",
 									"Data": "Clear the anchor text in the pop-up menu after right-clicking the reference element, this will use dynamic anchor text"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230420123242-xsz318y",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230420123242-xsz318y",
+				"updated": "20230420123245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Filter"
+				}
+			]
+		},
+		{
+			"ID": "20230420123242-7uymi9i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230420123242-7uymi9i",
+				"updated": "20230420123252"
+			},
+			"Children": [
+				{
+					"ID": "20230420123242-gn62yz6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420123242-gn62yz6",
+						"updated": "20230420123242"
+					},
+					"Children": [
+						{
+							"ID": "20230420123242-sbvr7xx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420123242-sbvr7xx",
+								"updated": "20230420123242"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "(("
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to search in all types of blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230420123242-gm0o5hw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420123242-gm0o5hw",
+						"updated": "20230420123252"
+					},
+					"Children": [
+						{
+							"ID": "20230420123242-ba8ysjk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420123242-ba8ysjk",
+								"updated": "20230420123252"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to search only within doc blocks"
 								}
 							]
 						}

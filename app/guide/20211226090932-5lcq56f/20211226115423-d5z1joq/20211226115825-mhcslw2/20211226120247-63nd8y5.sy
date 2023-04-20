@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
-		"updated": "20230420123224"
+		"updated": "20230420190022"
 	},
 	"Children": [
 		{
@@ -494,6 +494,132 @@
 								{
 									"Type": "NodeText",
 									"Data": "元素後在彈出的菜單中清空錨文本，這樣將使用動態錨文本"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230420185856-hoesuce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230420185856-hoesuce",
+				"updated": "20230420185856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 搜索結果列表中："
+				}
+			]
+		},
+		{
+			"ID": "20230420185856-fpkt2wv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230420185856-fpkt2wv",
+				"updated": "20230420190022"
+			},
+			"Children": [
+				{
+					"ID": "20230420185856-4v3g6nz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185856-4v3g6nz",
+						"updated": "20230420190021"
+					},
+					"Children": [
+						{
+							"ID": "20230420185856-tnhsmet",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185856-tnhsmet",
+								"updated": "20230420190021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "直接 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 或者 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 將使用動態錨文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230420185856-jg6anpy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185856-jg6anpy",
+						"updated": "20230420190022"
+					},
+					"Children": [
+						{
+							"ID": "20230420185856-nh72xao",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185856-nh72xao",
+								"updated": "20230420190022"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按住 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 或者 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 將使用靜態錨文本"
 								}
 							]
 						}

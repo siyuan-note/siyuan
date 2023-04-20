@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20230420123252"
+		"updated": "20230420190018"
 	},
 	"Children": [
 		{
@@ -489,6 +489,132 @@
 								{
 									"Type": "NodeText",
 									"Data": "Clear the anchor text in the pop-up menu after right-clicking the reference element, this will use dynamic anchor text"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230420185940-emsw72v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230420185940-emsw72v",
+				"updated": "20230420185940"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ search result list:"
+				}
+			]
+		},
+		{
+			"ID": "20230420185940-z74ufig",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230420185940-z74ufig",
+				"updated": "20230420190018"
+			},
+			"Children": [
+				{
+					"ID": "20230420185940-g8mpohi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185940-g8mpohi",
+						"updated": "20230420190018"
+					},
+					"Children": [
+						{
+							"ID": "20230420185940-ro5d977",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185940-ro5d977",
+								"updated": "20230420190018"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Direct "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ will use dynamic anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230420185940-ksegxpq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185940-ksegxpq",
+						"updated": "20230420190017"
+					},
+					"Children": [
+						{
+							"ID": "20230420185940-ajmbc76",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185940-ajmbc76",
+								"updated": "20230420190017"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Press "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl+Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to use static anchor text"
 								}
 							]
 						}

@@ -8,8 +8,6 @@ github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5 h1:8HdZozCsXS
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20230321113152-38c4a3d73c37 h1:7ZMvlXDbH2sqaxowoAFcLjcdRN7ncVE0U1S2ukpUgac=
 github.com/88250/gulu v1.2.3-0.20230321113152-38c4a3d73c37/go.mod h1:pTWnjt+6qUqNnP9xltswsJxgCBVu3C7eW09u48LWX0k=
-github.com/88250/lute v1.7.6-0.20230410031701-6a4620b2bb83 h1:OzqkeGCDjZ+vlgk0tTbMIhh8oVEK3Tt6lqzTsCsOqxM=
-github.com/88250/lute v1.7.6-0.20230410031701-6a4620b2bb83/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/lute v1.7.6-0.20230420041521-254a14e6b604 h1:exMPD8kyMIcyj2BmVepsScEVokMnBjblLSrNViAFQXY=
 github.com/88250/lute v1.7.6-0.20230420041521-254a14e6b604/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c h1:Dl/8S9iLyPMTElnWIBxmjaLiWrkI5P4a21ivwAn5pU0=
@@ -256,8 +254,6 @@ github.com/quic-go/qtls-go1-19 v0.3.2 h1:tFxjCFcTQzK+oMxG6Zcvp4Dq8dx4yD3dDiIiyc8
 github.com/quic-go/qtls-go1-19 v0.3.2/go.mod h1:ySOI96ew8lnoKPtSqx2BlI5wCpUVPT05RMAlajtnyOI=
 github.com/quic-go/qtls-go1-20 v0.2.2 h1:WLOPx6OY/hxtTxKV1Zrq20FtXtDEkeY00CGQm8GEa3E=
 github.com/quic-go/qtls-go1-20 v0.2.2/go.mod h1:JKtK6mjbAVcUTN/9jZpvLbGxvdWIKS8uT7EiStoU1SM=
-github.com/quic-go/quic-go v0.33.0 h1:ItNoTDN/Fm/zBlq769lLJc8ECe9gYaW40veHCCco7y0=
-github.com/quic-go/quic-go v0.33.0/go.mod h1:YMuhaAV9/jIu0XclDXwZPAsP/2Kgr5yMYhe9oxhhOFA=
 github.com/quic-go/quic-go v0.34.0 h1:OvOJ9LFjTySgwOTYUZmNoq0FzVicP8YujpV0kB7m2lU=
 github.com/quic-go/quic-go v0.34.0/go.mod h1:+4CVgVppm0FNjpG3UcX8Joi/frKOH7/ciD5yGcwOO1g=
 github.com/radovskyb/watcher v1.0.7 h1:AYePLih6dpmS32vlHfhCeli8127LzkIgwJGcwwe8tUE=
@@ -281,8 +277,6 @@ github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5g
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
-github.com/siyuan-note/dejavu v0.0.0-20230420022535-782a2dbfb757 h1:WZ0ahzQ2rLJlry4GgMbVXYyG1tJpmbU2VXsdRZAq/D4=
-github.com/siyuan-note/dejavu v0.0.0-20230420022535-782a2dbfb757/go.mod h1:ltB1VyRo4A178+ykH74f3AEUliU0UwC6Dn7Ed6tF/8Y=
 github.com/siyuan-note/dejavu v0.0.0-20230420080412-a5dabc68fa8f h1:zAD1wMuJA/6JRUvazVA18tfPo5mTPbY82rOkY+mHicc=
 github.com/siyuan-note/dejavu v0.0.0-20230420080412-a5dabc68fa8f/go.mod h1:ltB1VyRo4A178+ykH74f3AEUliU0UwC6Dn7Ed6tF/8Y=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=

@@ -18,7 +18,7 @@ export const addCloudName = (cloudPanelElement: Element) => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "80vw" : "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
     const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
@@ -191,7 +191,7 @@ const syncNow = () => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "80vw" : "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
     const btnsElement = manualDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
@@ -229,7 +229,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
             dialog = new Dialog({
                 title: window.siyuan.languages.cloudSyncDir,
                 content: listHTML,
-                width: isMobile() ? "80vw" : "520px",
+                width: isMobile() ? "92vw" : "520px",
             });
         }
         const contentElement = dialog.element.querySelector(".b3-dialog__content").lastElementChild;
@@ -279,7 +279,7 @@ const setKey = () => {
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
-        width: isMobile() ? "80vw" : "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();

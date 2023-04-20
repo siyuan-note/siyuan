@@ -49,6 +49,7 @@ export const newDailyNote = () => {
             }
         });
         const dialog = new Dialog({
+            title: window.siyuan.languages.plsChoose,
             content: `<div class="b3-dialog__content">
     <select class="b3-select fn__block">${optionsHTML}</select>
 </div>
@@ -56,7 +57,7 @@ export const newDailyNote = () => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-            width: isMobile() ? "80vw" : "520px",
+            width: isMobile() ? "92vw" : "520px",
         });
         dialog.element.setAttribute("data-key", window.siyuan.config.keymap.general.dailyNote.custom);
         const btnsElement = dialog.element.querySelectorAll(".b3-button");
@@ -97,7 +98,7 @@ export const newNotebook = () => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "80vw" : "520px"
+        width: isMobile() ? "92vw" : "520px"
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(dialog.element.querySelector("input"), () => {

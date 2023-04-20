@@ -154,7 +154,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "90vw" : "50vw",
+        width: isMobile() ? "92vw" : "50vw",
         destroyCallback() {
             if (range) {
                 focusByRange(range);

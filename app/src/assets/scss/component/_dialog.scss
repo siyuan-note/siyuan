@@ -77,12 +77,13 @@
   &__close {
     position: absolute;
     cursor: pointer;
-    top: 10px;
-    right: -32px;
+    top: -2px;
+    right: -36px;
     height: 18px;
     width: 18px;
     opacity: .68;
     color: var(--b3-theme-on-surface);
+    padding: 8px;
 
     &:hover {
       opacity: 1;

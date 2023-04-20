@@ -11,7 +11,7 @@ export const confirmDialog = (title: string, text: string, confirm?: () => void,
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text" id="confirmDialogConfirmBtn">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "80vw" : "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {

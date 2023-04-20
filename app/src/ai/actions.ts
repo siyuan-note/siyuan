@@ -41,7 +41,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                width: isMobile() ? "80vw" : "520px",
+                width: isMobile() ? "92vw" : "520px",
             });
             const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
             const btnsElement = dialog.element.querySelectorAll(".b3-button");
@@ -77,7 +77,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                width: isMobile() ? "80vw" : "520px",
+                width: isMobile() ? "92vw" : "520px",
             });
             const inputElement = dialog.element.querySelector("input");
             const btnsElement = dialog.element.querySelectorAll(".b3-button");

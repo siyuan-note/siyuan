@@ -133,7 +133,7 @@ export const transactionError = () => {
     <div class="fn__space"></div>
     <button class="b3-button">${window.siyuan.languages.rebuildIndex}</button>
 </div>`,
-        width: isMobile() ? "80vw" : "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
@@ -224,7 +224,7 @@ export const bootSync = () => {
     fetchPost("/api/sync/getBootSync", {}, response => {
         if (response.code === 1) {
             const dialog = new Dialog({
-                width: isMobile() ? "80vw" : "50vw",
+                width: isMobile() ? "92vw" : "50vw",
                 title: "🌩️ " + window.siyuan.languages.bootSyncFailed,
                 content: `<div class="b3-dialog__content">${response.msg}</div>
 <div class="b3-dialog__action">

@@ -6,6 +6,7 @@ import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {escapeHtml} from "../util/escape";
 import * as dayjs from "dayjs";
+import {isMobile} from "../util/functions";
 
 const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
     if (!data || data.length === 0) {
@@ -154,7 +155,7 @@ export const showDiff = (data: { id: string, time: string }[]) => {
         </div>
     </div>
 </div>`,
-            width: "80vw",
+            width: isMobile() ? "92vw" : "80vw",
             height: "80vh",
             destroyCallback() {
                 leftEditor = undefined;

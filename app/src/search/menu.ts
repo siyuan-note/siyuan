@@ -123,7 +123,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "90vw" : "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
@@ -313,7 +313,7 @@ export const moreMenu = async (config: ISearchOption,
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                width: isMobile() ? "80vw" : "520px",
+                width: isMobile() ? "92vw" : "520px",
             });
             const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
             saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {

@@ -305,7 +305,7 @@ export class Background {
                 } else if (type === "link") {
                     const dialog = new Dialog({
                         title: window.siyuan.languages.link,
-                        width: isMobile() ? "80vw" : "520px",
+                        width: isMobile() ? "92vw" : "520px",
                         content: `<div class="b3-dialog__content">
         <input class="b3-text-field fn__block">
 </div>

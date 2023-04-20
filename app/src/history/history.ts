@@ -520,7 +520,7 @@ export const openHistory = () => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                    width: isMobile() ? "80vw" : "520px",
+                    width: isMobile() ? "92vw" : "520px",
                 });
                 const textareaElement = genRepoDialog.element.querySelector("textarea");
                 textareaElement.focus();
@@ -569,7 +569,7 @@ export const openHistory = () => {
     <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshot}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshotUpload}</button>
 </div>`,
-                    width: isMobile() ? "80vw" : "520px",
+                    width: isMobile() ? "92vw" : "520px",
                 });
                 const inputElement = genTagDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
                 inputElement.select();

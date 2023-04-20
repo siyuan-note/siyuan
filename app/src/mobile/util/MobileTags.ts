@@ -45,7 +45,7 @@ export class MobileTags {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-                            width: "80vw",
+                            width: "92vw",
                         });
                         const btnsElement = dialog.element.querySelectorAll(".b3-button");
                         btnsElement[0].addEventListener("click", () => {

@@ -211,6 +211,10 @@
   "dataRepoKeyTip1": "El repositorio de datos se utiliza para cifrar y guardar instantáneas de datos. Las instantáneas pueden crearse y revertirse en el historial de datos",
   "dataRepoKeyTip2": "Todos los dispositivos deben usar la misma clave, si las claves son inconsistentes, los datos no se pueden sincronizar con la nube",
   "dataRepoKey": "Clave del repositorio de datos",
+  "dataRepoPurge": "Purga del repositorio de datos",
+  "dataRepoPurgeConfirm": "La purga del repositorio de datos eliminará por completo todas las instantáneas sin referencia y los objetos de datos relacionados, ¿está seguro de purgar?",
+  "purge": "Purgar",
+  "dataRepoPurgeTip": "Purga todas las instantáneas sin referencia y los objetos de datos relacionados",
   "plsChoose": "Por favor, elija primero",
   "clearMessage": "Leer",
   "freeSub": "Suscripción de prueba gratuita",
@@ -1109,6 +1113,9 @@
     "197": "Actualmente, el editor se encuentra en modo de solo lectura. Si necesita editar contenido, cambie al modo de edición",
     "198": "Este no es un archivo data.zip válido. Si el archivo se exportó de [Árbol de documentos], importalo de [Árbol de documentos]",
     "199": "Este no es un archivo .sy.zip válido. Si el archivo se exportó desde [Configuración], impórtelo desde [Configuración]",
-    "200": "El tiempo de respuesta de la búsqueda global es lento. Se recomienda ajustar [Configuración - Búsqueda - Número de resultados de búsqueda mostrados] a 64 o un valor menor. Para obtener más sugerencias, consulte el capítulo de optimización del rendimiento de la guía del usuario"
+    "200": "El tiempo de respuesta de la búsqueda global es lento. Se recomienda ajustar [Configuración - Búsqueda - Número de resultados de búsqueda mostrados] a 64 o un valor menor. Para obtener más sugerencias, consulte el capítulo de optimización del rendimiento de la guía del usuario",
+    "201": "Error al purgar el repositorio de datos: %s",
+    "202": "Limpiando repositorio de datos...",
+    "203": "El repositorio de datos se purgó, [%d] instantáneas y [%d] objetos de datos se eliminaron y se liberó un total de [%s] espacio en disco"
   }
 }

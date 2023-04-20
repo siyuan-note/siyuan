@@ -110,6 +110,16 @@ export const about = {
 </div>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.dataRepoPurge}
+        <div class="b3-label__text">${window.siyuan.languages.dataRepoPurgeTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button id="purgeRepo" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.purge}
+    </button>
+</label>
+<label class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
         <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
     </div>
@@ -302,6 +312,12 @@ export const about = {
                     processSync();
                     importKeyElement.parentElement.classList.remove("fn__none");
                     importKeyElement.parentElement.nextElementSibling.classList.add("fn__none");
+                });
+            });
+        });
+        about.element.querySelector("#purgeRepo").addEventListener("click", () => {
+            confirmDialog("♻️ " + window.siyuan.languages.dataRepoPurge, window.siyuan.languages.dataRepoPurgeConfirm, () => {
+                fetchPost("/api/repo/purgeRepo", {}, () => {
                 });
             });
         });

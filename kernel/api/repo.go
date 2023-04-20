@@ -349,3 +349,15 @@ func resetRepo(c *gin.Context) {
 		return
 	}
 }
+
+func purgeRepo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if err := model.PurgeRepo(); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(201), err.Error())
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+}

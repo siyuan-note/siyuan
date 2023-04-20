@@ -210,6 +210,10 @@
   "dataRepoKeyTip1": "Le référentiel de données est utilisé pour chiffrer et enregistrer des instantanés de données. Des instantanés peuvent être créés et restaurés dans l'historique des données",
   "dataRepoKeyTip2": "Tous les appareils doivent utiliser la même clé, si les clés sont incohérentes, les données ne peuvent pas être synchronisées avec le cloud",
   "dataRepoKey": "Clé de référentiel de données",
+  "dataRepoPurge": "Purger le référentiel de données",
+  "dataRepoPurgeTip": "Purger tous les instantanés non référencés et les objets de données associés",
+  "dataRepoPurgeConfirm": "La purge du référentiel de données supprimera complètement tous les instantanés non référencés et les objets de données associés, êtes-vous sûr de purger ?",
+  "purge": "Purger",
   "plsChoose": "Veuillez d'abord choisir",
   "clearMessage": "Lire",
   "freeSub": "Abonnement d'essai gratuit",
@@ -776,7 +780,7 @@
   "about2": "Utiliser sur le navigateur",
   "about3": "Veuillez utiliser le navigateur Chrome et le garder sur le même réseau que l'ordinateur, port <code class='fn__code'>${port}</code>(En plus du port aléatoire, le premier espace de travail démarré écoutera également automatiquement <code class='fn__code'>6806</code> en tant que port fixe, de sorte qu'il est pratique pour le navigateur de couper des extensions ou d'autres programmes externes pour appeler l'interface du noyau), les adresses pouvant être connectées sont les suivantes: ",
   "about4": "Ouvrir le navigateur",
-  "about5": "Accès Code d'autorisation",
+  "about5": "Accès code d'autorisation",
   "about6": "Configuré comme mot de passe d'authentification d'accès, laisser vide pour désactiver l'authentification.",
   "about9": "Télécharger automatiquement les messages d'erreur et les données de diagnostic",
   "about10": "Après l'activation, il télécharge automatiquement les informations d'erreur et les données de diagnostic via le SDK <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a>, qui n'implique pas de données de confidentialité personnelles afin que les développeurs peut corriger des bogues.  L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
@@ -1108,6 +1112,9 @@
     "197": "Actuellement, l'éditeur est en mode lecture seule. Si vous devez modifier le contenu, veuillez passer en mode édition",
     "198": "Ceci n'est pas une archive data.zip valide. Si l'archive a été exportée depuis [Doc tree], veuillez l'importer depuis [Doc tree]",
     "199": "Ceci n'est pas une archive .sy.zip valide. Si l'archive a été exportée depuis [Paramètres], veuillez l'importer depuis [Paramètres]",
-    "200": "Le temps de réponse de la recherche globale est lent. Il est recommandé d'ajuster [Paramètres - Recherche - Nombre de résultats de recherche affichés] à 64 ou à une valeur inférieure. Pour plus de suggestions, veuillez vous référer au chapitre sur l'optimisation des performances de la notice"
+    "200": "Le temps de réponse de la recherche globale est lent. Il est recommandé d'ajuster [Paramètres - Recherche - Nombre de résultats de recherche affichés] à 64 ou à une valeur inférieure. Pour plus de suggestions, veuillez vous référer au chapitre sur l'optimisation des performances de la notice",
+    "201": "Échec de la purge du référentiel de données : %s",
+    "202": "Nettoyage du référentiel de données...",
+    "203": "Le référentiel de données est purgé, [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré"
   }
 }

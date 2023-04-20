@@ -72,6 +72,14 @@ export const initAbout = () => {
     <div class="b3-label__text ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
 </div>
 <div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
+    ${window.siyuan.languages.dataRepoPurge}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="purgeRepo">
+        <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.purge}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.dataRepoPurgeTip}</div>
+</div>
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.about13}
     <span class="b3-label__text">${window.siyuan.config.api.token}</span>
     <div class="fn__hr"></div>
@@ -238,6 +246,14 @@ export const initAbout = () => {
                                 processSync();
                                 importKeyElement.parentElement.classList.remove("fn__none");
                                 importKeyElement.parentElement.nextElementSibling.classList.add("fn__none");
+                            });
+                        });
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (target.id === "purgeRepo") {
+                        confirmDialog("♻️ " + window.siyuan.languages.dataRepoPurge, window.siyuan.languages.dataRepoPurgeConfirm, () => {
+                            fetchPost("/api/repo/purgeRepo", {}, () => {
                             });
                         });
                         event.preventDefault();

@@ -423,6 +423,29 @@ func ResetRepo() (err error) {
 	return
 }
 
+func PurgeRepo() (err error) {
+	msg := Conf.Language(202)
+	util.PushEndlessProgress(msg)
+	defer util.PushClearProgress()
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	stat, err := repo.Purge()
+	if nil != err {
+		return
+	}
+
+	deletedIndexes := stat.Indexes
+	deletedObjects := stat.Objects
+	deletedSize := humanize.Bytes(uint64(stat.Size))
+	msg = fmt.Sprintf(Conf.Language(203), deletedIndexes, deletedObjects, deletedSize)
+	util.PushMsg(msg, 5000)
+	return
+}
+
 func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	passphrase = gulu.Str.RemoveInvisible(passphrase)
 	passphrase = strings.TrimSpace(passphrase)

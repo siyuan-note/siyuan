@@ -31,6 +31,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
+import {isCtrl} from "../util/compatibility";
 
 export class Hint {
     public timeId: number;
@@ -56,7 +57,7 @@ export class Hint {
             const btnElement = hasClosestByMatchTag(eventTarget, "BUTTON");
             if (btnElement && !btnElement.classList.contains("emojis__item")) {
                 if (btnElement.parentElement.classList.contains("b3-list")) {
-                    this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle);
+                    this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, isCtrl(event));
                 } else {
                     // 划选引用点击，需先重置 range
                     setTimeout(() => {
@@ -163,7 +164,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }
 
         // https://github.com/siyuan-note/siyuan/issues/7933
-        if (this.splitChar === "#" ) {
+        if (this.splitChar === "#") {
             const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
             if (blockElement && blockElement.getAttribute("data-type") === "NodeHeading") {
                 const blockIndex = getSelectionOffset(protyle.toolbar.range.startContainer, blockElement).start;
@@ -406,7 +407,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
         }
     }
 
-    public fill(value: string, protyle: IProtyle, updateRange = true) {
+    public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
         hideElements(["hint", "toolbar"], protyle);
         if (updateRange) {
             protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
@@ -486,6 +487,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
+            if (refIsS) {
+                tempElement.setAttribute("data-subtype", "s");
+                tempElement.innerText = range.toString().replace(this.splitChar, "");
+            }
             protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
@@ -743,7 +748,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 if (mark === Constants.ZWSP + 3) {
                     (this.element.querySelector(".b3-list-item--focus input") as HTMLElement).click();
                 } else {
-                    this.fill(mark, protyle);
+                    this.fill(mark, protyle, true, isCtrl(event));
                 }
             }
             event.preventDefault();

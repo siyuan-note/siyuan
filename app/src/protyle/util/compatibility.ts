@@ -74,7 +74,7 @@ export const getEventName = () => {
 };
 
 // 区别 mac 上的 ctrl 和 meta
-export const isCtrl = (event: KeyboardEvent) => {
+export const isCtrl = (event: KeyboardEvent | MouseEvent) => {
     if (isMac()) {
         // mac
         if (event.metaKey && !event.ctrlKey) {

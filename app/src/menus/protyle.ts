@@ -54,7 +54,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     let oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.append(new MenuItem({
-        label: `<input style="margin: 4px 0" class="b3-text-field" placeholder="${window.siyuan.languages.anchor}">`,
+        label: `<input style="margin: 4px 0" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.anchor}">`,
         bind(menuItemElement) {
             const inputElement = menuItemElement.querySelector("input");
             inputElement.value = element.getAttribute("data-subtype") === "d" ? "" : element.textContent;

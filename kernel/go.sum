@@ -163,8 +163,8 @@ github.com/huandu/xstrings v1.4.0/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq
 github.com/imdario/mergo v0.3.11/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
 github.com/imdario/mergo v0.3.13 h1:lFzP57bqS/wsqKssCGmtLAb8A0wKjLGrve2q3PPVcBk=
 github.com/imdario/mergo v0.3.13/go.mod h1:4lJ1jqUDcsbIECGy0RUJAXNIhg+6ocWgb1ALK2O4oXg=
-github.com/imroc/req/v3 v3.33.1 h1:BZnyl+K0hXcJlZBHY2CqbPgmVc1pPJDzjn6aJfB6shI=
-github.com/imroc/req/v3 v3.33.1/go.mod h1:cZ+7C3L/AYOr4tLGG16hZF90F1WzAdAdzt1xFSlizXY=
+github.com/imroc/req/v3 v3.33.2 h1:mqphLIo++p+IPYdjgP/Wd5rqXUjKvuEIst2U+EsLIwQ=
+github.com/imroc/req/v3 v3.33.2/go.mod h1:cZ+7C3L/AYOr4tLGG16hZF90F1WzAdAdzt1xFSlizXY=
 github.com/jinzhu/copier v0.3.5 h1:GlvfUwHk62RokgqVNvYsku0TATCF7bAHVwEXoBh3iJg=
 github.com/jinzhu/copier v0.3.5/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
@@ -277,8 +277,8 @@ github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5g
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
-github.com/siyuan-note/dejavu v0.0.0-20230420110939-9dd849c38341 h1:blIO+U273UDKZIY//CTjIZxJwt7VVVN+z1vlZ0k4tKs=
-github.com/siyuan-note/dejavu v0.0.0-20230420110939-9dd849c38341/go.mod h1:d3IU0Q9bbX/dwALEsTn56IWMvW63FML+OM83A+XCKb4=
+github.com/siyuan-note/dejavu v0.0.0-20230420113002-72c88cb42b81 h1:6fbK5wLo2B00fCBdVoUI/p1BCIvy5TCXj70xnK7g06A=
+github.com/siyuan-note/dejavu v0.0.0-20230420113002-72c88cb42b81/go.mod h1:d3IU0Q9bbX/dwALEsTn56IWMvW63FML+OM83A+XCKb4=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b h1:828lTUW2C0uNiolODqoACu7J8sDUzswD4Xo04mUombg=

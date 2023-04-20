@@ -309,9 +309,9 @@ export const openHistory = () => {
             icon: "iconHistory",
             title: window.siyuan.languages.dataHistory,
             bindEvent(element) {
-                bindEvent(element.firstElementChild)
+                bindEvent(element.firstElementChild);
             }
-        })
+        });
     } else {
         const dialog = new Dialog({
             content: contentHTML,
@@ -321,7 +321,7 @@ export const openHistory = () => {
                 historyEditor = undefined;
             }
         });
-        bindEvent(dialog.element, dialog)
+        bindEvent(dialog.element, dialog);
     }
 };
 
@@ -623,7 +623,7 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                     dialog.destroy();
                 } else {
                     closeModel();
-                    historyEditor = undefined
+                    historyEditor = undefined;
                 }
                 break;
             } else if (type === "compare") {
@@ -633,4 +633,4 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
             target = target.parentElement;
         }
     });
-}
+};

@@ -175,9 +175,6 @@ func getRepoSnapshots(c *gin.Context) {
 		"pageCount":  pageCount,
 		"totalCount": totalCount,
 	}
-
-	model.GetCloudRepoSnapshots("")
-
 }
 
 func getCloudRepoSnapshots(c *gin.Context) {

@@ -32,7 +32,7 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     }
     loadElement.classList.remove("fn__none");
     loadElement.nextElementSibling.classList.add("fn__none");
-
+    searchListElement.previousElementSibling.innerHTML = "";
     let ids: string[] = [];
     if (isAll) {
         searchListElement.querySelectorAll('.b3-list-item[data-type="search-item"]').forEach(item => {
@@ -94,8 +94,6 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
 };
 
 const updateConfig = (element: Element, newConfig: ISearchOption, config: ISearchOption) => {
-    newConfig.hPath = config.hPath;
-    newConfig.idPath = config.idPath.join(",").split(",");
     if (config.hasReplace !== newConfig.hasReplace) {
         if (newConfig.hasReplace) {
             element.querySelector('[data-type="toggle-replace"]').classList.add("toolbar__icon--active");
@@ -151,7 +149,7 @@ const updateConfig = (element: Element, newConfig: ISearchOption, config: ISearc
     window.siyuan.menus.menu.remove();
 };
 
-const onRecentBlocks = (data: IBlock[], matchedRootCount?: number, matchedBlockCount?: number) => {
+const onRecentBlocks = (data: IBlock[], config: ISearchOption, response?:IWebSocketData) => {
     const listElement = document.querySelector("#searchList");
     let resultHTML = "";
     data.forEach((item: IBlock, index: number) => {
@@ -192,26 +190,38 @@ ${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
 </div>`;
     listElement.scrollTop = 0;
     let countHTML = "";
-    if (matchedBlockCount) {
-        countHTML = `<div class="b3-list--empty">${window.siyuan.languages.findInDoc.replace("${x}", matchedRootCount).replace("${y}", matchedBlockCount)}</div>`;
+    if (response) {
+        countHTML = `<div class="b3-list--empty">
+    ${config.page}/${response.data.pageCount || 1}
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}
+</div>`;
     }
     listElement.previousElementSibling.innerHTML = countHTML;
-
 };
 
 let toolbarSearchTimeout = 0;
-export const updateSearchResult = (config: ISearchOption, element: Element) => {
+const updateSearchResult = (config: ISearchOption, element: Element) => {
     clearTimeout(toolbarSearchTimeout);
     toolbarSearchTimeout = window.setTimeout(() => {
         const loadingElement = element.querySelector(".fn__loading--top");
         loadingElement.classList.remove("fn__none");
+        const previousElement = element.querySelector('[data-type="previous"]');
+        const nextElement = element.querySelector('[data-type="next"]');
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
         if (inputElement.value === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                onRecentBlocks(response.data);
+                onRecentBlocks(response.data, config);
                 loadingElement.classList.add("fn__none");
+                previousElement.setAttribute("disabled", "true");
+                nextElement.setAttribute("disabled", "true");
             });
         } else {
+            if (config.page > 1) {
+                previousElement.removeAttribute("disabled");
+            } else {
+                previousElement.setAttribute("disabled", "disabled");
+            }
             fetchPost("/api/search/fullTextSearchBlock", {
                 query: inputElement.value,
                 method: config.method,
@@ -219,9 +229,15 @@ export const updateSearchResult = (config: ISearchOption, element: Element) => {
                 paths: config.idPath || [],
                 groupBy: config.group,
                 orderBy: config.sort,
+                page: config.page,
             }, (response) => {
-                onRecentBlocks(response.data.blocks, response.data.matchedRootCount, response.data.matchedBlockCount);
+                onRecentBlocks(response.data.blocks, config, response);
                 loadingElement.classList.add("fn__none");
+                if (config.page < response.data.pageCount) {
+                    nextElement.removeAttribute("disabled");
+                } else {
+                    nextElement.setAttribute("disabled", "disabled");
+                }
             });
         }
     }, Constants.TIMEOUT_SEARCH);
@@ -234,13 +250,22 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
         if (event && event.isComposing) {
             return;
         }
+        config.page = 1;
         updateSearchResult(config, element);
     });
     searchInputElement.addEventListener("input", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;
         }
+        config.page = 1;
         updateSearchResult(config, element);
+    });
+    searchInputElement.addEventListener("blur", () => {
+        if (config.removed) {
+            config.k = searchInputElement.value;
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+            setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
+        }
     });
     const replaceInputElement = element.querySelector(".toolbar .b3-text-field") as HTMLInputElement;
     replaceInputElement.value = config.r || "";
@@ -253,7 +278,23 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
         let target = event.target as HTMLElement;
         while (target && !target.isSameNode(element)) {
             const type = target.getAttribute("data-type");
-            if (type === "set-criteria") {
+            if (type === "previous") {
+                if (!target.getAttribute("disabled")) {
+                    config.page--;
+                    updateSearchResult(config, element);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "next") {
+                if (!target.getAttribute("disabled")) {
+                    config.page++;
+                    updateSearchResult(config, element);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "set-criteria") {
                 config.removed = false;
                 criteriaData.find(item => {
                     if (item.name === target.innerText.trim()) {
@@ -286,6 +327,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                 config.idPath = [];
                 config.hPath = "";
                 element.querySelector("#searchPath").classList.add("fn__none");
+                config.page = 1;
                 updateSearchResult(config, element);
                 const includeElement = element.querySelector('[data-type="include"]');
                 includeElement.classList.remove("toolbar__icon--active");
@@ -344,6 +386,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                         } else {
                             includeElement.setAttribute("disabled", "disabled");
                         }
+                        config.page = 1;
                         updateSearchResult(config, element);
                     });
                 }, [], undefined, window.siyuan.languages.specifyPath);
@@ -365,6 +408,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                         }
                     });
                 }
+                config.page = 1;
                 updateSearchResult(config, element);
                 event.stopPropagation();
                 event.preventDefault();
@@ -378,6 +422,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                 break;
             } else if (type === "more") {
                 moreMenu(config, criteriaData, element, () => {
+                    config.page = 1;
                     updateSearchResult(config, element);
                 }, () => {
                     updateConfig(element, {
@@ -390,6 +435,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                         idPath: [],
                         k: "",
                         r: "",
+                        page: 1,
                         types: {
                             document: window.siyuan.config.search.document,
                             heading: window.siyuan.config.search.heading,
@@ -420,6 +466,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                 break;
             } else if (type === "query") {
                 queryMenu(config, () => {
+                    config.page = 1;
                     updateSearchResult(config, element);
                 });
                 window.siyuan.menus.menu.element.style.zIndex = "220";
@@ -495,7 +542,7 @@ export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHD
         <div class="fn__space"></div>
     </div>
     <div id="criteria" style="background-color: var(--b3-theme-background);" class="b3-chips"></div>
-    <div style="background-color: var(--b3-theme-background);"></div>
+    <div></div>
     <div id="searchList" style="overflow:auto;" class="fn__flex-1 b3-list b3-list--background"></div>
     <div id="searchPath" class="b3-chips${config.hPath ? "" : " fn__none"}" style="background-color: var(--b3-theme-background);">
         <div class="b3-chip b3-chip--middle">
@@ -505,6 +552,8 @@ export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHD
     </div>
     <div class="toolbar">
         <span class="fn__flex-1"></span>
+        <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
+        <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
         <svg data-type="toggle-replace" class="toolbar__icon${config.hasReplace ? " toolbar__icon--active" : ""}"><use xlink:href="#iconReplace"></use></svg>
         <svg data-type="query" class="toolbar__icon"><use xlink:href="#iconRegex"></use></svg>
         <svg data-type="filter" class="toolbar__icon"><use xlink:href="#iconFilter"></use></svg>

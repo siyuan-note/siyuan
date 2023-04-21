@@ -66,9 +66,20 @@ export class MobileTags {
                         });
                     }
                 } else {
-                    const searchOption = Object.assign({}, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
-                    searchOption.k = `#${element.getAttribute("data-label")}#`;
-                    popSearch(searchOption);
+                    const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+                    popSearch({
+                        removed: searchOption.removed,
+                        sort: searchOption.sort,
+                        group: searchOption.group,
+                        hasReplace: false,
+                        method: 0,
+                        hPath: "",
+                        idPath: [],
+                        k: `#${element.getAttribute("data-label")}#`,
+                        r: "",
+                        page: 1,
+                        types: Object.assign({}, searchOption.types)
+                    });
                 }
             },
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action" data-type="edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>'

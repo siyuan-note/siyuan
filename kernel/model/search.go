@@ -390,12 +390,14 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	return
 }
 
+const pageSize = 32
+
 // FullTextSearchBlock 搜索内容块。
 //
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 // orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
-func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount, totalCount int) {
 	query = strings.TrimSpace(query)
 	beforeLen := 36
 	var blocks []*Block
@@ -405,19 +407,19 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		filter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, filter, orderByClause, beforeLen)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, filter, orderByClause, beforeLen, page)
 	case 2: // SQL
 		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen)
 	case 3: // 正则表达式
 		typeFilter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, typeFilter, orderByClause, beforeLen)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, typeFilter, orderByClause, beforeLen, page)
 	default: // 关键字
 		filter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, filter, orderByClause, beforeLen)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, filter, orderByClause, beforeLen, page)
 	}
 
 	switch groupBy {
@@ -677,33 +679,33 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	return
 }
 
-func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if ast.IsNodeIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
 		return
 	}
-	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen)
+	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page)
 }
 
-func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, orderBy string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if ast.IsNodeIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen)
 		return
 	}
 	query = stringQuery(query)
-	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen)
+	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page)
 }
 
-func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	exp = gulu.Str.RemoveInvisible(exp)
 
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
-	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
+	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
@@ -718,7 +720,6 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter string) 
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
-	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
 	result, _ := sql.Query(stmt)
 	if 1 > len(result) {
 		return
@@ -728,7 +729,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter string) 
 	return
 }
 
-func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
@@ -745,7 +746,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 	stmt += ") AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
-	stmt += " LIMIT " + strconv.Itoa(Conf.Search.Limit)
+	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	blocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {

@@ -218,6 +218,14 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
+	page := 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	if 0 >= page {
+		page = 1
+	}
+
 	query := arg["query"].(string)
 	pathsArg := arg["paths"]
 	var paths, boxes []string
@@ -259,10 +267,12 @@ func fullTextSearchBlock(c *gin.Context) {
 	if nil != groupByArg {
 		groupBy = int(groupByArg.(float64))
 	}
-	blocks, matchedBlockCount, matchedRootCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy)
+	blocks, matchedBlockCount, matchedRootCount, pageCount, totalCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page)
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,
 		"matchedRootCount":  matchedRootCount,
+		"pageCount":         pageCount,
+		"totalCount":        totalCount,
 	}
 }

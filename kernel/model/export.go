@@ -1862,7 +1862,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 					stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 					stmt = html.UnescapeString(stmt)
 					stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-					sqlBlocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
+					sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
 					for _, b := range sqlBlocks {
 						subNodes := renderBlockMarkdownR0(b.ID, &rendered)
 						for _, subNode := range subNodes {

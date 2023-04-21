@@ -668,7 +668,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 	buf.WriteString(" ORDER BY id DESC LIMIT " + strconv.Itoa(Conf.Search.Limit))
 	query := buf.String()
 
-	sqlBlocks := sql.SelectBlocksRawStmt(query, Conf.Search.Limit)
+	sqlBlocks := sql.SelectBlocksRawStmt(query, 1, Conf.Search.Limit)
 	terms := mentionKeywords
 	if "" != keyword {
 		terms = append(terms, keyword)

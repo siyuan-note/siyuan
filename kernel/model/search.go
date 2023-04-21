@@ -35,6 +35,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
+	"github.com/88250/vitess-sqlparser/sqlparser"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -604,7 +605,7 @@ func buildTypeFilter(types map[string]bool) string {
 func searchBySQL(stmt string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	stmt = gulu.Str.RemoveInvisible(stmt)
 	stmt = strings.TrimSpace(stmt)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, Conf.Search.Limit)
+	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -617,6 +618,7 @@ func searchBySQL(stmt string, beforeLen, page int) (ret []*Block, matchedBlockCo
 	} else {
 		stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
 	}
+	stmt = removeLimitClause(stmt)
 	result, _ := sql.Query(stmt)
 	if 1 > len(ret) {
 		return
@@ -625,6 +627,23 @@ func searchBySQL(stmt string, beforeLen, page int) (ret []*Block, matchedBlockCo
 	matchedBlockCount = int(result[0]["matches"].(int64))
 	matchedRootCount = int(result[0]["docs"].(int64))
 	return
+}
+
+func removeLimitClause(stmt string) string {
+	parsedStmt, err := sqlparser.Parse(stmt)
+	if nil != err {
+		return stmt
+	}
+
+	switch parsedStmt.(type) {
+	case *sqlparser.Select:
+		slct := parsedStmt.(*sqlparser.Select)
+		if nil != slct.Limit {
+			slct.Limit = nil
+		}
+		stmt = sqlparser.String(slct)
+	}
+	return stmt
 }
 
 func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
@@ -748,7 +767,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, Conf.Search.Limit)
+	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}

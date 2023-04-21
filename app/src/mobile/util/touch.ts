@@ -3,6 +3,7 @@ import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 import {getCurrentEditor} from "../editor";
+import {linkMenu, refMenu, tagMenu} from "../../menus/protyle";
 
 let clientX: number;
 let clientY: number;
@@ -23,14 +24,36 @@ const popSide = (render = true) => {
 };
 
 export const handleTouchEnd = (event: TouchEvent) => {
-    if (getCurrentEditor()) {
+    const editor = getCurrentEditor()
+    if (editor) {
         document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
             item.classList.remove("protyle-breadcrumb__bar--hide");
         });
         window.siyuan.hideBreadcrumb = false;
     }
-
     const target = event.target as HTMLElement;
+    if (editor && typeof yDiff === "undefined" && new Date().getTime() - time > 900 &&
+        target.tagName === "SPAN" && window.webkit?.messageHandlers &&
+        !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
+        // ios 长按行内元素弹出菜单
+        const types = target.getAttribute("data-type").split(" ")
+        if (types.includes("inline-memo")) {
+            editor.protyle.toolbar.showRender(editor.protyle, target);
+        }
+        if (editor.protyle.disabled) {
+            return;
+        }
+        if (types.includes("block-ref")) {
+            refMenu(editor.protyle, target);
+        } else if (types.includes("file-annotation-ref")) {
+            editor.protyle.toolbar.showFileAnnotationRef(editor.protyle, target);
+        } else if (types.includes("tag")) {
+            tagMenu(editor.protyle, target);
+        } else if (types.includes("a")) {
+            linkMenu(editor.protyle, target);
+        }
+        return;
+    }
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
         hasClosestByClassName(target, "b3-dialog", true) ||

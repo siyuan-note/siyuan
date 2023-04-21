@@ -13,6 +13,7 @@ import {unicode2Emoji} from "../../emoji";
 import {newFileByName} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
 import {reloadProtyle} from "../../protyle/util/reload";
+import {activeBlur, hideKeyboardToolbar} from "../util/keyboardToolbar";
 
 const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -215,6 +216,9 @@ const updateSearchResult = (config: ISearchOption, element: Element) => {
                 nextElement.setAttribute("disabled", "true");
             });
         } else {
+            if (!config.page) {
+                config.page = 1
+            }
             if (config.page > 1) {
                 previousElement.removeAttribute("disabled");
             } else {
@@ -514,6 +518,8 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
 };
 
 export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHDATA] as ISearchOption) => {
+    activeBlur();
+    hideKeyboardToolbar();
     let includeChild = true;
     let enableIncludeChild = false;
     config.idPath.forEach(item => {

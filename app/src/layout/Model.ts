@@ -63,8 +63,7 @@ export class Model {
             }
         };
         ws.onerror = (err: Event & { target: { url: string, readyState: number } }) => {
-            const logElement = document.getElementById("errorLog");
-            if (err.target.url.endsWith("&type=main") && err.target.readyState === 3 && !logElement) {
+            if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 kernelError();
             }
         };

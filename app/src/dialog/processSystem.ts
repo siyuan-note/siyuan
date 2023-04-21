@@ -30,6 +30,9 @@ export const lockScreen = () => {
 };
 
 export const kernelError = () => {
+    if (document.querySelector("#errorLog")){
+        return;
+    }
     let iosReStart = "";
     if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
         iosReStart = `<div class="fn__hr"></div><div class="fn__flex"><div class="fn__flex-1"></div><button class="b3-button">${window.siyuan.languages.retry}</button></div>`;

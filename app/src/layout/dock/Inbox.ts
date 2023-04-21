@@ -1,5 +1,7 @@
+/// #if !MOBILE
 import {Tab} from "../Tab";
 import {getDockByType, setPanelFocus} from "../util";
+/// #endif
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {Model} from "../Model";
@@ -11,6 +13,7 @@ import {replaceFileName} from "../../editor/rename";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {Constants} from "../../constants";
+import {isMobile} from "../../util/functions";
 
 export class Inbox extends Model {
     private element: Element;
@@ -19,11 +22,41 @@ export class Inbox extends Model {
     private pageCount = 1;
     private data: { [key: string]: IInbox } = {};
 
-    constructor(tab: Tab) {
+    constructor(tab: Tab | Element) {
         super({id: tab.id});
-        this.element = tab.panelElement;
+        if (tab instanceof Element) {
+            this.element = tab;
+        } else {
+            this.element = tab.panelElement;
+        }
+        /// #if MOBILE
+        this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
+    <div class="fn__space"></div>
+    <div class="toolbar__text">
+        ${window.siyuan.languages.inbox}
+        <span class="fn__space"></span>
+        <span class="inboxSelectCount ft__smaller ft__on-surface"></span>
+    </div>
+    <span class="fn__flex-1"></span>
+    <span class="fn__space"></span>
+    <div class="fn__flex">
+        <input class="fn__flex-center toolbar__icon" data-type="selectall" type="checkbox">  
+        <svg class="toolbar__icon" data-type="refresh"><use xlink:href='#iconRefresh'></use></svg>
+        <svg data-type="more" class="toolbar__icon fn__none"><use xlink:href='#iconMore'></use></svg>
+        <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
+        <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconRight'></use></svg>
+    </div>
+    <div class="fn__flex fn__none">
+        <svg data-type="back" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
+        <svg data-type="refreshDetails" class="toolbar__icon"><use xlink:href='#iconRefresh'></use></svg>
+        <svg data-type="move" class="toolbar__icon"><use xlink:href='#iconMove'></use></svg>
+        <svg data-type="delete" class="toolbar__icon"><use xlink:href='#iconTrashcan'></use></svg>
+    </div>
+</div>
+<div class="inbox__details fn__none"></div>
+<div class="fn__flex-1 inbox__list"></div>`;
+        /// #else
         this.element.classList.add("fn__flex-column", "file-tree", "sy__inbox");
-
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo">
         <svg><use xlink:href="#iconInbox"></use></svg>
@@ -56,11 +89,14 @@ export class Inbox extends Model {
 </div>
 <div class="inbox__details fn__none"></div>
 <div class="fn__flex-1 inbox__list"></div>`;
+        /// #endif
         const countElement = this.element.querySelector(".inboxSelectCount");
         const detailsElement = this.element.querySelector(".inbox__details");
         const selectAllElement = this.element.querySelector(".block__icons input") as HTMLInputElement;
         this.element.addEventListener("click", (event: MouseEvent) => {
+                /// #if !MOBILE
                 setPanelFocus(this.element);
+                /// #endif
                 let target = event.target as HTMLElement;
                 while (target && !target.isEqualNode(this.element)) {
                     const typeElement = hasClosestByAttribute(target, "data-type", null);
@@ -181,7 +217,9 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             }
         );
         this.update();
+        /// #if !MOBILE
         setPanelFocus(this.element);
+        /// #endif
     }
 
     private updateAction() {
@@ -296,7 +334,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
 </ul>`;
             return;
         }
-        const refreshElement = this.element.querySelector('[data-type="refresh"] svg');
+        const refreshElement = this.element.querySelector(`[data-type="refresh"]${isMobile() ? "" : " svg"}`);
         if (refreshElement.classList.contains("fn__rotate")) {
             return;
         }
@@ -327,8 +365,8 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             this.pageCount = response.data.data.pagination.paginationRecordCount;
             this.element.querySelector(".inboxSelectCount").innerHTML = `${this.selectIds.length}/${this.pageCount}`;
 
-            const previousElement = this.element.querySelector('span[data-type="previous"]');
-            const nextElement = this.element.querySelector('span[data-type="next"]');
+            const previousElement = this.element.querySelector('[data-type="previous"]');
+            const nextElement = this.element.querySelector('[data-type="next"]');
             if (response.data.data.pagination.paginationPageCount > this.currentPage) {
                 nextElement.removeAttribute("disabled");
             } else {
@@ -340,7 +378,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
                 previousElement.removeAttribute("disabled");
             }
             const selectCount = this.element.lastElementChild.querySelectorAll(".b3-list-item").length;
-            (this.element.querySelector(".block__icons input") as HTMLInputElement).checked = this.element.lastElementChild.querySelectorAll("input:checked").length === selectCount && selectCount !== 0;
+            this.element.firstElementChild.querySelector("input").checked = this.element.lastElementChild.querySelectorAll("input:checked").length === selectCount && selectCount !== 0;
         });
     }
 }

@@ -532,7 +532,7 @@ export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHD
     });
 
     openModel({
-        title: `<input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="b3-text-field fn__block">`,
+        title: `<input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block">`,
         icon: "iconSearch",
         html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border${config.hasReplace ? "" : " fn__none"}">

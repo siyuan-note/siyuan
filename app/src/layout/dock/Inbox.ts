@@ -105,7 +105,6 @@ export class Inbox extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "selectall") {
-                    console.log((target as HTMLInputElement).checked)
                     if ((target as HTMLInputElement).checked) {
                         this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
                             item.querySelector("input").checked = true;

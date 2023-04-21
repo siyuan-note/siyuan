@@ -36,7 +36,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         target.tagName === "SPAN" && window.webkit?.messageHandlers &&
         !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
         // ios 长按行内元素弹出菜单
-        const types = target.getAttribute("data-type").split(" ")
+        const types = (target.getAttribute("data-type") || "").split(" ")
         if (types.includes("inline-memo")) {
             editor.protyle.toolbar.showRender(editor.protyle, target);
         }

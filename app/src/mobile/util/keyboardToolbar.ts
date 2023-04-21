@@ -394,7 +394,7 @@ export const initKeyboardToolbar = () => {
             return;
         }
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
-        if (!buttonElement || buttonElement.getAttribute("disabled")) {
+        if (!buttonElement || buttonElement.getAttribute("disabled") || getSelection().rangeCount === 0) {
             return;
         }
         event.preventDefault();

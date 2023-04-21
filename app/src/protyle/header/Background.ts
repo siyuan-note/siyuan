@@ -13,9 +13,12 @@ import {
 import {upDownHint} from "../../util/upDownHint";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../search/util";
+/// #else
+import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
+import {Constants} from "../../constants";
 
 export class Background {
     public element: HTMLElement;
@@ -335,6 +338,21 @@ export class Background {
                 } else if (type === "open-search") {
                     /// #if !MOBILE
                     openGlobalSearch(`#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
+                    /// #else
+                    const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+                    popSearch({
+                        removed: searchOption.removed,
+                        sort: searchOption.sort,
+                        group: searchOption.group,
+                        hasReplace: false,
+                        method: 0,
+                        hPath: "",
+                        idPath: [],
+                        k: `#${target.textContent}#`,
+                        r: "",
+                        page: 1,
+                        types: Object.assign({}, searchOption.types)
+                    });
                     /// #endif
                     event.preventDefault();
                     event.stopPropagation();

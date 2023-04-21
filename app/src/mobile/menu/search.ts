@@ -149,7 +149,7 @@ const updateConfig = (element: Element, newConfig: ISearchOption, config: ISearc
     window.siyuan.menus.menu.remove();
 };
 
-const onRecentBlocks = (data: IBlock[], config: ISearchOption, response?:IWebSocketData) => {
+const onRecentBlocks = (data: IBlock[], config: ISearchOption, response?: IWebSocketData) => {
     const listElement = document.querySelector("#searchList");
     let resultHTML = "";
     data.forEach((item: IBlock, index: number) => {
@@ -191,13 +191,11 @@ ${unicode2Emoji(childItem.ial.icon, false, "b3-list-item__graphic", true)}
     listElement.scrollTop = 0;
     let countHTML = "";
     if (response) {
-        countHTML = `<div class="b3-list--empty">
-    ${config.page}/${response.data.pageCount || 1}
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}
-</div>`;
+        countHTML = `${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}
+<span class="fn__flex-1"></span>
+${config.page}/${response.data.pageCount || 1}`;
     }
-    listElement.previousElementSibling.innerHTML = countHTML;
+    listElement.previousElementSibling.querySelector('[data-type="result"]').innerHTML = countHTML;
 };
 
 let toolbarSearchTimeout = 0;
@@ -542,7 +540,13 @@ export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHD
         <div class="fn__space"></div>
     </div>
     <div id="criteria" style="background-color: var(--b3-theme-background);" class="b3-chips"></div>
-    <div></div>
+    <div class="toolbar">
+        <span class="fn__space"></span>
+        <span data-type="result" class="fn__flex-1 fn__flex"></span>
+        <span class="fn__space"></span>
+        <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
+        <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
+    </div>
     <div id="searchList" style="overflow:auto;" class="fn__flex-1 b3-list b3-list--background"></div>
     <div id="searchPath" class="b3-chips${config.hPath ? "" : " fn__none"}" style="background-color: var(--b3-theme-background);">
         <div class="b3-chip b3-chip--middle">
@@ -552,8 +556,6 @@ export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHD
     </div>
     <div class="toolbar">
         <span class="fn__flex-1"></span>
-        <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
-        <svg data-type="next" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
         <svg data-type="toggle-replace" class="toolbar__icon${config.hasReplace ? " toolbar__icon--active" : ""}"><use xlink:href="#iconReplace"></use></svg>
         <svg data-type="query" class="toolbar__icon"><use xlink:href="#iconRegex"></use></svg>
         <svg data-type="filter" class="toolbar__icon"><use xlink:href="#iconFilter"></use></svg>

@@ -51,6 +51,8 @@ import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";
 import {openAsset, openBy, openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
+/// #else
+import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
 import {isCtrl, openByMobile} from "../util/compatibility";
@@ -1684,14 +1686,29 @@ export class WYSIWYG {
                 return;
             }
 
-            /// #if !MOBILE
             const tagElement = hasClosestByAttribute(event.target, "data-type", "tag");
-            if (tagElement && !event.altKey && protyle.model) {
+            if (tagElement && !event.altKey) {
+                /// #if !MOBILE
                 openGlobalSearch(`#${tagElement.textContent}#`, !ctrlIsPressed);
                 hideElements(["dialog"]);
+                /// #else
+                const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+                popSearch({
+                    removed: searchOption.removed,
+                    sort: searchOption.sort,
+                    group: searchOption.group,
+                    hasReplace: false,
+                    method: 0,
+                    hPath: "",
+                    idPath: [],
+                    k: `#${tagElement.textContent}#`,
+                    r: "",
+                    page: 1,
+                    types: Object.assign({}, searchOption.types)
+                });
+                /// #endif
                 return;
             }
-            /// #endif
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {

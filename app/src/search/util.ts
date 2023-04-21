@@ -1078,7 +1078,6 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 } else {
                     nextElement.setAttribute("disabled", "disabled");
                 }
-                nextElement.setAttribute("disabled", "true");
                 onSearch(response.data.blocks, edit, element);
                 element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
                 loadingElement.classList.add("fn__none");

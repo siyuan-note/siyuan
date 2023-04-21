@@ -182,6 +182,7 @@
   "keepLazyLoad": "Keep loaded content",
   "localSnapshot": "Local snapshot",
   "localTagSnapshot": "Local tag snapshot",
+  "cloudSnapshot": "Cloud snapshot",
   "cloudTagSnapshot": "Cloud tag snapshot",
   "cloudBackupTip": "Please go to [Data History - Data Snapshot] to operate",
   "snapshotMemo": "Snapshot Memo",

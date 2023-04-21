@@ -181,6 +181,7 @@
   "keepLazyLoad": "Conserver le contenu chargé",
   "localSnapshot": "Instantané local",
   "localTagSnapshot": "Instantané de balise locale",
+  "cloudSnapshot": "Instantané cloud",
   "cloudTagSnapshot": "Instantané de balise cloud",
   "cloudBackupTip": "Veuillez accéder à [Historique des données - Instantané des données] pour opérer",
   "snapshotMemo": "Mémo d'instantané",

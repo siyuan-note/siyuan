@@ -182,6 +182,7 @@
   "keepLazyLoad": "Mantener el contenido cargado",
   "localSnapshot": "Instantánea local",
   "localTagSnapshot": "Instantánea de etiqueta local",
+  "cloudSnapshot": "Instantánea de la nube",
   "cloudTagSnapshot": "Instantánea de etiquetas en la nube",
   "cloudBackupTip": "Vaya a [Historial de datos - Instantánea de datos] para operar",
   "snapshotMemo": "Memo de Instantánea",

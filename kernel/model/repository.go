@@ -672,6 +672,29 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 	return
 }
 
+func GetCloudRepoSnapshots(marker string) (ret []*dejavu.Log, nextMarker string, err error) {
+	ret = []*dejavu.Log{}
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if nil != err {
+		return
+	}
+
+	logs, nextMarker, err := repo.GetCloudRepoLogs(marker)
+	if nil != err {
+		return
+	}
+	ret = logs
+	if 1 > len(ret) {
+		ret = []*dejavu.Log{}
+	}
+	return
+}
+
 func GetTagSnapshots() (ret []*Snapshot, err error) {
 	ret = []*Snapshot{}
 	if 1 > len(Conf.Repo.Key) {

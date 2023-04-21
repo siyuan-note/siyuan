@@ -182,6 +182,7 @@
   "keepLazyLoad": "保持已加载的内容",
   "localSnapshot": "本地快照",
   "localTagSnapshot": "本地标记的快照",
+  "cloudSnapshot": "云端快照",
   "cloudTagSnapshot": "云端标记的快照",
   "cloudBackupTip": "请到 [数据历史 - 数据快照] 中进行操作",
   "snapshotMemo": "快照备注",

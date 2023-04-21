@@ -305,6 +305,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/getRepoTagSnapshots", model.CheckAuth, getRepoTagSnapshots)
 	ginServer.Handle("POST", "/api/repo/removeRepoTagSnapshot", model.CheckAuth, model.CheckReadonly, removeRepoTagSnapshot)
 	ginServer.Handle("POST", "/api/repo/getCloudRepoTagSnapshots", model.CheckAuth, getCloudRepoTagSnapshots)
+	ginServer.Handle("POST", "/api/repo/getCloudRepoSnapshots", model.CheckAuth, getCloudRepoSnapshots)
 	ginServer.Handle("POST", "/api/repo/removeCloudRepoTagSnapshot", model.CheckAuth, model.CheckReadonly, removeCloudRepoTagSnapshot)
 	ginServer.Handle("POST", "/api/repo/uploadCloudSnapshot", model.CheckAuth, model.CheckReadonly, uploadCloudSnapshot)
 	ginServer.Handle("POST", "/api/repo/downloadCloudSnapshot", model.CheckAuth, model.CheckReadonly, downloadCloudSnapshot)

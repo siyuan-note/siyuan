@@ -111,7 +111,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
     </div>
     <div>
-        <span class="ft__smaller ft__on-surface">${item.hCreated}</span>
+        <span class="ft__smaller ft__on-surface"><code class='fn__code'>${item.id.substring(0, 7)}</code> ${item.hCreated}</span>
         <span class="b3-list-item__meta">${window.siyuan.languages.fileSize} ${item.hSize}</span>
         <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>`;
         let statHTML = "";
@@ -146,7 +146,12 @@ const renderRepo = (element: Element, currentPage: number) => {
                 renderRepoItem(response, element, "cloudTag");
             });
         } else if (currentPage === -3) {
-            fetchPost("/api/repo/getCloudRepoSnapshots", {marker: ""}, (response) => {
+            fetchPost("/api/repo/getCloudRepoSnapshots", {page: currentPage}, (response) => {
+                if (currentPage < response.data.pageCount) {
+                    nextElement.removeAttribute("disabled");
+                } else {
+                    nextElement.setAttribute("disabled", "disabled");
+                }
                 renderRepoItem(response, element, "cloud");
             });
         }

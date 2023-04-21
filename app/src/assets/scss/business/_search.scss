@@ -7,6 +7,8 @@
 
     &--row {
       flex-direction: row;
+      border-top: 1px solid var(--b3-theme-surface-lighter);
+      border-bottom: 1px solid var(--b3-theme-surface-lighter);
 
       .search__preview {
         border-top: 0;
@@ -96,12 +98,6 @@
   &__preview {
     background-color: var(--b3-theme-background);
     border-top: 1px solid var(--b3-theme-surface-lighter);
-  }
-
-  &__result {
-    white-space: nowrap;
-    margin-left: 5px;
-    line-height: 24px;
   }
 
   &__drag {

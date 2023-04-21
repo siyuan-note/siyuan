@@ -54,6 +54,10 @@
     font-size: 12px;
   }
 
+  &--mid {
+    padding: 2px 8px;
+  }
+
   &--text,
   &--cancel {
     color: var(--b3-theme-primary);

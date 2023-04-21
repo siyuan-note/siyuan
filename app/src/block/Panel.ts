@@ -318,7 +318,7 @@ export class BlockPanel {
 <span class="fn__space"></span>`;
         }
         /// #endif
-        let html = `<div class="block__icons block__icons--border">
+        let html = `<div class="block__icons block__icons--menu">
     <span class="fn__space fn__flex-1"></span>${openHTML}
     <span data-type="pin" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></span>
     <span class="fn__space"></span>

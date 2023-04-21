@@ -137,8 +137,8 @@
     height: 42px;
     flex-shrink: 0;
 
-    &--border {
-      background-color: var(--b3-theme-surface);
+    &--menu {
+      background-color: var(--b3-menu-background);
     }
 
     &:hover .block__icon:not([disabled]) {

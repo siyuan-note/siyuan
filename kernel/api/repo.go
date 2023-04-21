@@ -186,9 +186,9 @@ func getCloudRepoSnapshots(c *gin.Context) {
 		return
 	}
 
-	marker := arg["marker"].(string)
+	page := int(arg["page"].(float64))
 
-	snapshots, nextMarker, err := model.GetCloudRepoSnapshots(marker)
+	snapshots, pageCount, totalCount, err := model.GetCloudRepoSnapshots(page)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -197,7 +197,8 @@ func getCloudRepoSnapshots(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"snapshots":  snapshots,
-		"nextMarker": nextMarker,
+		"pageCount":  pageCount,
+		"totalCount": totalCount,
 	}
 }
 

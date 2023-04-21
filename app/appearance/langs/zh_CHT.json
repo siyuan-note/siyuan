@@ -457,7 +457,7 @@
   "keymapTip2": "使用預設快捷鍵",
   "searchLimit": "搜索結果顯示數",
   "searchLimit1": "如果資料量較大，該值請勿配置過大，預設為 <code class='fn__code'>64</code>",
-  "searchLimit2": "該配置項影響所有涉及搜索的功能，例如：搜索、文件歷史、查詢嵌入塊、標籤面板和模板函數 queryBlocks/querySpans",
+  "searchLimit2": "該配置項影響所有涉及搜索的功能，例如：塊引搜索、文件歷史、查詢嵌入塊、標籤面板和模板函數 queryBlocks/querySpans",
   "searchCaseSensitive": "區分大小寫",
   "searchCaseSensitive1": "啟用後所有搜索相關功能將區分大小寫",
   "toggleWin": "隱藏/顯示視窗",

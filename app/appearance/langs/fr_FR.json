@@ -456,7 +456,7 @@
   "keymapTip2": "Utiliser les touches de raccourci par défaut",
   "searchLimit": "Le nombre de résultats de recherche affichés",
   "searchLimit1": "Si la quantité de données est importante, ne configurez pas la valeur trop grande, la valeur par défaut est <code class='fn__code'>64</code>",
-  "searchLimit2": "Cet élément de configuration affecte toutes les fonctions liées à la recherche, telles que : la recherche, l'historique des fichiers, le bloc d'intégration de requête, le panneau d'onglets et la fonction de modèle queryBlocks/querySpans",
+  "searchLimit2": "Cet élément de configuration affecte toutes les fonctions liées aux recherches, telles que la recherche de référence de bloc, l'historique des fichiers, le bloc d'intégration de requête, le panneau d'onglets et la fonction de modèle queryBlocks/querySpans",
   "searchCaseSensitive": "Sensible à la casse",
   "searchCaseSensitive1": "Après l'activation, toutes les fonctions liées à la recherche seront sensibles à la casse.",
   "toggleWin": "Masquer/afficher fenêtres",

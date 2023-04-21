@@ -457,7 +457,7 @@
   "keymapTip2": "Use default shortcut keys",
   "searchLimit": "The number of search results displayed",
   "searchLimit1": "If the amount of data is large, do not configure the value too large, the default is <code class='fn__code'>64</code>",
-  "searchLimit2": "This configuration item affects all functions related to search, such as: search, file history, query embed block, tab panel and template function queryBlocks/querySpans",
+  "searchLimit2": "This configuration item affects all functions related to searches, such as block ref search, file history, query embed block, tab panel, and template function queryBlocks/querySpans",
   "searchCaseSensitive": "Case Sensitive",
   "searchCaseSensitive1": "After enabling, all search-related functions will be case sensitive",
   "toggleWin": "Hide/Show Window",

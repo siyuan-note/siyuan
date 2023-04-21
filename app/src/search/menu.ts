@@ -5,6 +5,7 @@ import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export const filterMenu = (config: ISearchOption, cb: () => void) => {
     const filterDialog = new Dialog({
@@ -335,9 +336,12 @@ export const moreMenu = async (config: ISearchOption,
                     config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
                     config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
                 }
+                config.removed = false;
                 const criterion = config;
                 criterion.name = value;
                 criteriaData.push(Object.assign({}, criterion));
+                window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+                setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
                 fetchPost("/api/storage/setCriterion", {criterion}, () => {
                     saveDialog.destroy();
                     const criteriaElement = element.querySelector("#criteria");

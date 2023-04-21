@@ -96,7 +96,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         group: localData.group,
         sort: localData.sort,
         types: localData.types,
-        page: localData.page
+        page: key ? 1 : localData.page
     }, dialog.element.querySelector(".b3-dialog__container").lastElementChild, () => {
         dialog.destroy();
     });

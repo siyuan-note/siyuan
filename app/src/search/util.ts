@@ -69,7 +69,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     sort: localData.sort,
                     types: localData.types,
                     removed: localData.removed,
-                    page: localData.page
+                    page: 1
                 }
             });
             tab.addModel(asset);
@@ -1073,13 +1073,17 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 orderBy: config.sort,
                 page: config.page || 1,
             }, (response) => {
+                if (!config.page) {
+                    config.page = 1
+                }
                 if (config.page < response.data.pageCount) {
                     nextElement.removeAttribute("disabled");
                 } else {
                     nextElement.setAttribute("disabled", "disabled");
                 }
                 onSearch(response.data.blocks, edit, element);
-                element.querySelector("#searchResult").innerHTML = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
+                element.querySelector("#searchResult").innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>` +
+                    window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
                 loadingElement.classList.add("fn__none");
             });
         }

@@ -588,7 +588,14 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	}
 
 	defer util.PushClearProgress()
-	downloadFileCount, downloadChunkCount, downloadBytes, err := repo.DownloadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+
+	var downloadFileCount, downloadChunkCount int
+	var downloadBytes int64
+	if "" == tag {
+		downloadFileCount, downloadChunkCount, downloadBytes, err = repo.DownloadIndex(id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	} else {
+		downloadFileCount, downloadChunkCount, downloadBytes, err = repo.DownloadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	}
 	if nil != err {
 		return
 	}

@@ -1034,7 +1034,7 @@
     "119": "Téléchargement de l'image Web [%s]",
     "120": "Téléchargement terminé, [%d] fichiers au total",
     "121": "Il n'y a pas d'image réseau dans ce document",
-    "122": "Cette fonction doit être configurée sur le bureau SiYuan",
+    "122": "Cette fonction doit être configurée sur le bureau SiYuan. Si vous l'avez déjà configurée, veuillez l'actualiser dans les paramètres supérieurs du compte",
     "123": "Ajouter/sélectionner un répertoire de synchronisation Cloud avant d'activer la synchronisation",
     "124": "Veuillez activer la synchronisation cloud dans [Paramètres - Activer la synchronisation cloud]",
     "125": "Il y a trop d'échecs de téléchargement dans la synchronisation automatique. Veuillez essayer de déclencher manuellement la synchronisation. Si le problème persiste, veuillez le signaler via <a href=\"https://github.com/siyuan-note/siyuan/issues\" target=\"_blank\">GitHub Issues</a>",

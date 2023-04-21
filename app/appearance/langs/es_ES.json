@@ -1035,7 +1035,7 @@
     "119": "Descargando imagen web [%s]",
     "120": "Descarga completa, [%d] archivos en total",
     "121": "No hay ninguna imagen de red en este documento",
-    "122": "Esta función necesita ser configurada en el escritorio de SiYuan",
+    "122": "Esta funci\u00f3n debe configurarse en el escritorio de SiYuan. Si ya la configur\u00f3, actualice en la configuraci\u00f3n de la cuenta superior",
     "123": "La función de sincronización solo puede activarse después de añadir/seleccionar el directorio de sincronización en la nube",
     "124": "Por favor, active la sincronización en la nube en [Configuración - Activar sincronización en la nube]",
     "125": "La sincronización automática ha fallado demasiadas veces, por favor intente activar la sincronización manualmente, si todavía hay un problema, por favor infórmelo a través de <a href=\"https://github.com/siyuan-note/siyuan/issues\" target=\"_blank\">Problemas GitHub</a>",

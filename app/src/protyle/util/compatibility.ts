@@ -185,6 +185,7 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {
+            page: 1,
             sort: 0,
             group: 0,
             hasReplace: false,

@@ -196,7 +196,7 @@ func renderTemplate(p, id string) (string, error) {
 		for _, arg := range args {
 			stmt = strings.Replace(stmt, "?", arg, 1)
 		}
-		ret = sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
+		ret = sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
 		return
 	}
 	funcMap["querySpans"] = func(stmt string, args ...string) (ret []*sql.Span) {

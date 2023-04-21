@@ -219,7 +219,7 @@ func renderBlockMarkdownR0(id string, rendered *[]string) (ret []*ast.Node) {
 				stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 				stmt = html.UnescapeString(stmt)
 				stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-				sqlBlocks := sql.SelectBlocksRawStmt(stmt, Conf.Search.Limit)
+				sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
 				for _, sqlBlock := range sqlBlocks {
 					subNodes := renderBlockMarkdownR0(sqlBlock.ID, rendered)
 					for _, subNode := range subNodes {

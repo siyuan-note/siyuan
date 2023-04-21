@@ -83,28 +83,6 @@ html {
   left: 0;
 }
 
-.inbox {
-  &__details {
-    position: absolute;
-    background: var(--b3-theme-surface);
-    left: 0;
-    top: 30px;
-    bottom: 0;
-    overflow: auto;
-    z-index: 1;
-    right: 0;
-    padding: 4px 8px;
-    word-break: break-all;
-    user-select: text;
-  }
-
-  &__list {
-    label {
-      height: 28px;
-    }
-  }
-}
-
 .fullscreen {
   position: fixed;
   top: 0;

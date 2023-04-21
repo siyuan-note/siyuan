@@ -7,7 +7,6 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {Model} from "../Model";
 import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
-import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {replaceFileName} from "../../editor/rename";
 import {escapeHtml} from "../../util/escape";
@@ -53,8 +52,8 @@ export class Inbox extends Model {
         <svg data-type="delete" class="toolbar__icon"><use xlink:href='#iconTrashcan'></use></svg>
     </div>
 </div>
-<div class="inbox__details fn__none"></div>
-<div class="fn__flex-1 inbox__list"></div>`;
+<div class="fn__flex-1 fn__none inboxDetails ft__breakword" style="padding: 4px"></div>
+<div class="fn__flex-1"></div>`;
         /// #else
         this.element.classList.add("fn__flex-column", "file-tree", "sy__inbox");
         this.element.innerHTML = `<div class="block__icons">
@@ -87,117 +86,132 @@ export class Inbox extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="inbox__details fn__none"></div>
-<div class="fn__flex-1 inbox__list"></div>`;
+<div class="fn__flex-1 fn__none inboxDetails ft__breakword" style="padding: 8px"></div>
+<div class="fn__flex-1"></div>`;
         /// #endif
         const countElement = this.element.querySelector(".inboxSelectCount");
-        const detailsElement = this.element.querySelector(".inbox__details");
-        const selectAllElement = this.element.querySelector(".block__icons input") as HTMLInputElement;
+        const detailsElement = this.element.querySelector(".inboxDetails");
+        const selectAllElement = this.element.firstElementChild.querySelector("input");
         this.element.addEventListener("click", (event: MouseEvent) => {
-                /// #if !MOBILE
-                setPanelFocus(this.element);
-                /// #endif
-                let target = event.target as HTMLElement;
-                while (target && !target.isEqualNode(this.element)) {
-                    const typeElement = hasClosestByAttribute(target, "data-type", null);
-                    if (typeElement && this.element.contains(typeElement)) {
-                        const type = typeElement.getAttribute("data-type");
-                        switch (type) {
-                            case "min":
-                                getDockByType("inbox").toggleModel("inbox");
-                                break;
-                            case "selectall":
-                                if ((typeElement as HTMLInputElement).checked) {
-                                    this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
-                                        item.querySelector("input").checked = true;
-                                        this.selectIds.push(item.getAttribute("data-id"));
-                                        this.selectIds = [...new Set(this.selectIds)];
-                                    });
-                                } else {
-                                    this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
-                                        item.querySelector("input").checked = false;
-                                        this.selectIds.splice(this.selectIds.indexOf(item.getAttribute("data-id")), 1);
-                                    });
-                                }
-                                this.updateAction();
-                                countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
-                                break;
-                            case "select":
-                                if ((typeElement.firstElementChild.nextElementSibling as HTMLInputElement).checked) {
-                                    this.selectIds.push(typeElement.parentElement.getAttribute("data-id"));
-                                    this.selectIds = [...new Set(this.selectIds)];
-                                } else {
-                                    this.selectIds.splice(this.selectIds.indexOf(typeElement.parentElement.getAttribute("data-id")), 1);
-                                }
-                                this.updateAction();
-                                countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
-                                selectAllElement.checked = this.element.lastElementChild.querySelectorAll("input:checked").length === this.element.lastElementChild.querySelectorAll(".b3-list-item").length;
-                                break;
-                            case "previous":
-                                if (typeElement.getAttribute("disabled") !== "disabled") {
-                                    this.currentPage--;
-                                    this.update();
-                                }
-                                break;
-                            case "next":
-                                if (typeElement.getAttribute("disabled") !== "disabled") {
-                                    this.currentPage++;
-                                    this.update();
-                                }
-                                break;
-                            case "refresh":
-                                this.currentPage = 1;
-                                this.update();
-                                break;
-                            case "refreshDetails":
-                                fetchPost("/api/inbox/getShorthand", {
-                                    id: detailsElement.getAttribute("data-id")
-                                }, (response) => {
-                                    detailsElement.innerHTML = `<h3 class="fn__ellipsis">${response.data.shorthandTitle}</h3>
+            /// #if !MOBILE
+            setPanelFocus(this.element);
+            /// #endif
+            let target = event.target as HTMLElement;
+            while (target && !target.isEqualNode(this.element)) {
+                const type = target.getAttribute("data-type");
+                if (type === "min") {
+                    getDockByType("inbox").toggleModel("inbox");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "selectall") {
+                    console.log((target as HTMLInputElement).checked)
+                    if ((target as HTMLInputElement).checked) {
+                        this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
+                            item.querySelector("input").checked = true;
+                            this.selectIds.push(item.getAttribute("data-id"));
+                            this.selectIds = [...new Set(this.selectIds)];
+                        });
+                    } else {
+                        this.element.lastElementChild.querySelectorAll(".b3-list-item").forEach(item => {
+                            item.querySelector("input").checked = false;
+                            this.selectIds.splice(this.selectIds.indexOf(item.getAttribute("data-id")), 1);
+                        });
+                    }
+                    this.updateAction();
+                    countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
+                    event.stopPropagation();
+                    break;
+                } else if (type === "select") {
+                    if ((target.firstElementChild.nextElementSibling as HTMLInputElement).checked) {
+                        this.selectIds.push(target.parentElement.getAttribute("data-id"));
+                        this.selectIds = [...new Set(this.selectIds)];
+                    } else {
+                        this.selectIds.splice(this.selectIds.indexOf(target.parentElement.getAttribute("data-id")), 1);
+                    }
+                    this.updateAction();
+                    countElement.innerHTML = `${this.selectIds.length.toString()}/${this.pageCount.toString()}`;
+                    selectAllElement.checked = this.element.lastElementChild.querySelectorAll("input:checked").length === this.element.lastElementChild.querySelectorAll(".b3-list-item").length;
+                    event.stopPropagation();
+                    break;
+                } else if (type === "previous") {
+                    if (target.getAttribute("disabled") !== "disabled") {
+                        this.currentPage--;
+                        this.update();
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "next") {
+                    if (target.getAttribute("disabled") !== "disabled") {
+                        this.currentPage++;
+                        this.update();
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "refresh") {
+                    this.currentPage = 1;
+                    this.update();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "back") {
+                    this.back();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "more") {
+                    this.more(event);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "refreshDetails") {
+                    fetchPost("/api/inbox/getShorthand", {
+                        id: detailsElement.getAttribute("data-id")
+                    }, (response) => {
+                        detailsElement.innerHTML = `<h3 class="fn__ellipsis">${response.data.shorthandTitle}</h3>
 <div class="fn__hr"></div>
 <a href="${response.data.shorthandURL}" target="_blank">${response.data.shorthandURL}</a>
 <div class="fn__hr"></div>
 <div class="b3-typography b3-typography--default">
 ${(Lute.New()).MarkdownStr("", response.data.shorthandContent)}
 </div>`;
-                                    detailsElement.scrollTop = 0;
-                                });
-                                break;
-                            case "delete":
-                                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {
-                                    this.remove(detailsElement.getAttribute("data-id"));
-                                });
-                                break;
-                            case "move":
-                                window.siyuan.menus.menu.remove();
-                                window.siyuan.notebooks.forEach((item) => {
-                                    if (!item.closed) {
-                                        window.siyuan.menus.menu.append(new MenuItem({
-                                            iconHTML: `${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-menu__icon", true)}`,
-                                            label: escapeHtml(item.name),
-                                            click: () => {
-                                                this.move(item.id, detailsElement.getAttribute("data-id"));
-                                            }
-                                        }).element);
-                                    }
-                                });
-                                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
-                                break;
-                            case "back":
-                                this.back();
-                                break;
-                            case "more":
-                                this.more(event);
-                                break;
+                        detailsElement.scrollTop = 0;
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "delete") {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete + "?", () => {
+                        this.remove(detailsElement.getAttribute("data-id"));
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "move") {
+                    window.siyuan.menus.menu.remove();
+                    window.siyuan.notebooks.forEach((item) => {
+                        if (!item.closed) {
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                iconHTML: `${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-menu__icon", true)}`,
+                                label: escapeHtml(item.name),
+                                click: () => {
+                                    this.move(item.id, detailsElement.getAttribute("data-id"));
+                                }
+                            }).element);
                         }
-                        break;
-                    } else {
-                        const itemElement = hasClosestByClassName(target, "b3-list-item");
-                        if (itemElement) {
-                            const data = this.data[itemElement.getAttribute("data-id")];
-                            this.element.querySelector('[data-type="back"]').parentElement.classList.remove("fn__none");
-                            this.element.querySelector('[data-type="more"]').parentElement.classList.add("fn__none");
-                            detailsElement.innerHTML = `<h3 class="fn__ellipsis">
+                    });
+                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                    window.siyuan.menus.menu.element.style.zIndex = "221";  // 移动端被右侧栏遮挡
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (target.classList.contains("b3-list-item")) {
+                    const data = this.data[target.getAttribute("data-id")];
+                    this.element.querySelector('[data-type="back"]').parentElement.classList.remove("fn__none");
+                    this.element.querySelector('[data-type="more"]').parentElement.classList.add("fn__none");
+                    detailsElement.innerHTML = `<h3 class="fn__ellipsis">
 ${data.shorthandTitle}
 </h3>
 <div class="fn__hr"></div>
@@ -206,16 +220,17 @@ ${data.shorthandTitle}
 <div class="b3-typography b3-typography--default">
 ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
 </div>`;
-                            detailsElement.setAttribute("data-id", data.oId);
-                            detailsElement.classList.remove("fn__none");
-                            detailsElement.scrollTop = 0;
-                            break;
-                        }
-                    }
-                    target = target.parentElement;
+                    detailsElement.setAttribute("data-id", data.oId);
+                    detailsElement.classList.remove("fn__none");
+                    detailsElement.scrollTop = 0;
+                    this.element.lastElementChild.classList.add("fn__none");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
                 }
+                target = target.parentElement;
             }
-        );
+        });
         this.update();
         /// #if !MOBILE
         setPanelFocus(this.element);
@@ -235,7 +250,8 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
     private back() {
         this.element.querySelector('[data-type="back"]').parentElement.classList.add("fn__none");
         this.element.querySelector('[data-type="more"]').parentElement.classList.remove("fn__none");
-        this.element.querySelector(".inbox__details").classList.add("fn__none");
+        this.element.querySelector(".inboxDetails").classList.add("fn__none");
+        this.element.lastElementChild.classList.remove("fn__none");
     }
 
     private more(event: MouseEvent) {
@@ -275,6 +291,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             }
         }).element);
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+        window.siyuan.menus.menu.element.style.zIndex = "221";  // 移动端被右侧栏遮挡
     }
 
     private remove(id?: string) {
@@ -379,6 +396,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             }
             const selectCount = this.element.lastElementChild.querySelectorAll(".b3-list-item").length;
             this.element.firstElementChild.querySelector("input").checked = this.element.lastElementChild.querySelectorAll("input:checked").length === selectCount && selectCount !== 0;
+            this.element.lastElementChild.scrollTop = 0;
         });
     }
 }

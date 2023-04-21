@@ -441,14 +441,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!protyle.block.showAll) {
                 const ids = protyle.path.split("/");
                 if (ids.length > 2) {
-                    /// #if MOBILE
-                    openMobileFileById(ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
-                    /// #else
                     openFileById({
                         id: ids[ids.length - 2],
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
-                    /// #endif
                 }
             } else {
                 zoomOut(protyle, protyle.block.parent2ID, nodeElement.getAttribute("data-node-id"));

@@ -1082,8 +1082,8 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                     nextElement.setAttribute("disabled", "disabled");
                 }
                 onSearch(response.data.blocks, edit, element);
-                element.querySelector("#searchResult").innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>` +
-                    window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
+                element.querySelector("#searchResult").innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
+<span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>`;
                 loadingElement.classList.add("fn__none");
             });
         }

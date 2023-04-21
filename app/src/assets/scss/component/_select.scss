@@ -9,13 +9,13 @@
   min-width: 200px;
   height: 28px;
   font-size: 14px;
-  box-shadow: inset 0 0 0 0.4px var(--b3-theme-on-surface-light);
+  box-shadow: inset 0 0 0 0.6px var(--b3-theme-on-surface-light);
   background: var(--b3-select-background);
   appearance: none;
   cursor: pointer;
 
   &:hover {
-    box-shadow: inset 0 0 0 .4px var(--b3-theme-on-background);
+    box-shadow: inset 0 0 0 .6px var(--b3-theme-on-background);
     background-color: var(--b3-theme-background-light);
   }
 

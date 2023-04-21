@@ -83,6 +83,8 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     if (type === "cloudTag") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
+    } else if (type === "cloud") {
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`;
     } else if (type === "localTag") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
@@ -139,10 +141,13 @@ const renderRepo = (element: Element, currentPage: number) => {
             fetchPost("/api/repo/getRepoTagSnapshots", {}, (response) => {
                 renderRepoItem(response, element, "localTag");
             });
-        }
-        if (currentPage === -2) {
+        } else if (currentPage === -2) {
             fetchPost("/api/repo/getCloudRepoTagSnapshots", {}, (response) => {
                 renderRepoItem(response, element, "cloudTag");
+            });
+        } else if (currentPage === -3) {
+            fetchPost("/api/repo/getCloudRepoSnapshots", {marker: ""}, (response) => {
+                renderRepoItem(response, element, "cloud");
             });
         }
         previousElement.classList.add("fn__none");
@@ -286,6 +291,7 @@ export const openHistory = () => {
                     <select class="b3-select" style="min-width: auto">
                         <option value="0">${window.siyuan.languages.localSnapshot}</option>
                         <option value="1">${window.siyuan.languages.localTagSnapshot}</option>
+                        <option value="3">${window.siyuan.languages.cloudSnapshot}</option>
                         <option value="2">${window.siyuan.languages.cloudTagSnapshot}</option>
                     </select>
                     <span class="fn__space"></span>
@@ -368,9 +374,11 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
             renderRepo(repoElement, -1);
         } else if (value === "2") {
             renderRepo(repoElement, -2);
+        } else if (value === "3") {
+            renderRepo(repoElement, -3);
         }
         const btnElement = element.querySelector(".b3-button[data-type='compare']");
-        btnElement.removeAttribute("disabled");
+        btnElement.setAttribute("disabled", "disabled");
         btnElement.removeAttribute("data-ids");
     });
     element.addEventListener("click", (event) => {

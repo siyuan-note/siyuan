@@ -146,7 +146,12 @@ const renderRepo = (element: Element, currentPage: number) => {
                 renderRepoItem(response, element, "cloudTag");
             });
         } else if (currentPage === -3) {
-            fetchPost("/api/repo/getCloudRepoSnapshots", {marker: ""}, (response) => {
+            fetchPost("/api/repo/getCloudRepoSnapshots", {page: currentPage}, (response) => {
+                if (currentPage < response.data.pageCount) {
+                    nextElement.removeAttribute("disabled");
+                } else {
+                    nextElement.setAttribute("disabled", "disabled");
+                }
                 renderRepoItem(response, element, "cloud");
             });
         }

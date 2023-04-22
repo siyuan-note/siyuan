@@ -185,9 +185,11 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 				buf.WriteByte(' ')
 			}
 			if nil != linkDest {
-				buf.Write(linkDest.Tokens)
-				buf.WriteByte(' ')
-
+				if !bytes.HasPrefix(linkDest.Tokens, []byte("assets/")) {
+					// Assets hyperlinks are no longer included in the search index https://github.com/siyuan-note/siyuan/issues/8076
+					buf.Write(linkDest.Tokens)
+					buf.WriteByte(' ')
+				}
 			}
 			if linkTitle := n.ChildByType(ast.NodeLinkTitle); nil != linkTitle {
 				buf.Write(linkTitle.Tokens)
@@ -229,7 +231,11 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 				if "" != n.TextMarkATitle {
 					buf.WriteString(" " + n.TextMarkATitle)
 				}
-				buf.WriteString(" " + n.TextMarkAHref)
+
+				if !strings.HasPrefix(n.TextMarkAHref, "assets/") {
+					// Assets hyperlinks are no longer included in the search index https://github.com/siyuan-note/siyuan/issues/8076
+					buf.WriteString(" " + n.TextMarkAHref)
+				}
 			}
 		case ast.NodeBackslash:
 			buf.WriteByte(lex.ItemBackslash)

@@ -163,27 +163,29 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         tag: string,
         typesCount: { type: string, count: number }[]
     }) => {
-        let statHTML = `<div class="b3-list-item__meta">
-    ${window.siyuan.languages.fileCount} ${item.count}`;
+        let statHTML = "";
         if (item.typesCount) {
+            statHTML = '<div class="b3-list-item__meta">';
             item.typesCount.forEach(subItem => {
-                statHTML += `<span class="fn__space"></span>${subItem.type} ${subItem.count}`;
+                statHTML += `${subItem.type} ${subItem.count}<span class="fn__space"></span>`;
             });
+            statHTML += "</div>";
         }
-        statHTML+="</div>";
-
         const infoHTML = `<div>
     ${escapeHtml(item.memo)}
     <span class="fn__space"></span>
     <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
-    <span class="fn__space"></span>
+</div>
+<div class="b3-list-item__meta">
     <code class="fn__code">${item.id.substring(0, 7)}</code> 
-    <span class="b3-list-item__meta">
-        <span data-type="hCreated">${item.hCreated}</span>
-        <span class="fn__space"></span>
-        ${window.siyuan.languages.fileSize} ${item.hSize}
-    </span>
-</div>${statHTML}`;
+    <span class="fn__space"></span>
+    <span data-type="hCreated">${item.hCreated}</span>
+    <span class="fn__space"></span>
+    ${item.hSize}
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.fileCount} ${item.count}
+</div>
+${statHTML}`;
         /// #if MOBILE
         repoHTML += `<li class="b3-list-item" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
 <div class="fn__flex-1">

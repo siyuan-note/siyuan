@@ -1,7 +1,7 @@
 class ProtyleHtml extends HTMLElement {
   constructor () {
     super()
-    const shadowRoot = this.attachShadow({mode: 'open'})
+    const shadowRoot = this.attachShadow({ mode: 'open' })
     this.display = this.shadowRoot
     const dataContent = Lute.UnEscapeHTMLStr(this.getAttribute('data-content'))
     this.display.innerHTML = dataContent
@@ -20,13 +20,16 @@ class ProtyleHtml extends HTMLElement {
       el.innerHTML = dataContent
       const scripts = el.getElementsByTagName('script')
       let fatalHTML = ''
-      for (let i = 0; i < scripts.length; i++) {
-        if (scripts[i].textContent.indexOf('document.write') > -1) {
+      for (const script of scripts) {
+        if (script.textContent.indexOf('document.write') > -1) {
           fatalHTML += `<div style="color:var(--b3-theme-error);font-size: 12px">${window.siyuan.languages.htmlBlockError}</div>
-<textarea style="width: 100%;box-sizing: border-box;height: 120px"><script>${scripts[i].textContent}</script></textarea>`
+<textarea style="width: 100%;box-sizing: border-box;height: 120px"><script>${script.textContent}</script></textarea>`
         } else {
           const s = document.createElement('script')
-          s.textContent = scripts[i].textContent
+          for (const attr of script.attributes) {
+            s.setAttributeNode(attr);
+          }
+          s.textContent = script.textContent
           this.display.appendChild(s)
         }
       }

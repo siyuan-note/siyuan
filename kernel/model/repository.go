@@ -69,7 +69,7 @@ type TypeCount struct {
 	Count int    `json:"count"`
 }
 
-func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc bool, err error) {
+func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -80,7 +80,7 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 		return
 	}
 	luteEngine := NewLute()
-	isLargeDoc, snapshotTree, err := parseTreeInSnapshot(fileID, repo, luteEngine)
+	isLargeDoc, snapshotTree, updated, err := parseTreeInSnapshot(fileID, repo, luteEngine)
 	if nil != err {
 		logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 		return
@@ -270,7 +270,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	return
 }
 
-func parseTreeInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
+func parseTreeInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, updated int64, err error) {
 	file, err := repo.GetFile(fileID)
 	if nil != err {
 		return
@@ -286,6 +286,8 @@ func parseTreeInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute
 	if nil != err {
 		return
 	}
+
+	updated = file.Updated
 	return
 }
 

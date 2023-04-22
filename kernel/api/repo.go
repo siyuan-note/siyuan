@@ -36,7 +36,7 @@ func openRepoSnapshotDoc(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	id, rootID, content, isLargeDoc, err := model.OpenRepoSnapshotDoc(id)
+	id, rootID, content, isLargeDoc, updated, err := model.OpenRepoSnapshotDoc(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -48,6 +48,7 @@ func openRepoSnapshotDoc(c *gin.Context) {
 		"rootID":     rootID,
 		"content":    content,
 		"isLargeDoc": isLargeDoc,
+		"updated":    updated,
 	}
 }
 

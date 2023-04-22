@@ -144,10 +144,10 @@ export const showDiff = (data: { id: string, time: string }[]) => {
             } else if (target.classList.contains("block__icon")) {
                 if (target.getAttribute("data-direct") === "left") {
                     target.setAttribute("data-direct", "right")
-                    genHTML(right, left, dialog);
+                    genHTML(right, left, dialog, "right");
                 } else {
                     target.setAttribute("data-direct", "left")
-                    genHTML(left, right, dialog);
+                    genHTML(left, right, dialog, "left");
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -156,20 +156,25 @@ export const showDiff = (data: { id: string, time: string }[]) => {
             target = target.parentElement;
         }
     });
-    genHTML(left, right, dialog);
+    genHTML(left, right, dialog, "left");
 };
 
-const genHTML = (left: string, right: string, dialog: Dialog) => {
+const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => {
     leftEditor = undefined;
     rightEditor = undefined;
+    const isPhone = isMobile();
     fetchPost("/api/repo/diffRepoSnapshots", {left, right}, (response) => {
         const headElement = dialog.element.querySelector(".b3-dialog__header");
         headElement.innerHTML = `<div style="padding: 0;min-height: auto;" class="block__icons">
     <span class="fn__flex-1"></span>
+    <code class="fn__code${isPhone ? " fn__none" : ''}">${left.substring(0, 7)}</code>
+    ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__space"></span>
-    <span class="block__icon block__icon--show" data-direct="left"><svg><use xlink:href="#iconForward"></use></svg></span>
+    <span class="block__icon block__icon--show" data-direct="${direct}"><svg><use xlink:href="#iconForward"></use></svg></span>
     <span class="fn__space"></span>
+    <code class="fn__code${isPhone ? " fn__none" : ''}">${right.substring(0, 7)}</code>
+    ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__flex-1"></span>
 </div>`

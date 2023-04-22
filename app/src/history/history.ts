@@ -80,6 +80,65 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         return;
     }
     let actionHTML = "";
+    /// #if MOBILE
+    if (type === "getCloudRepoTagSnapshots") {
+        actionHTML = `<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="downloadSnapshot">
+    <svg><use xlink:href="#iconDownload"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.download}
+</span>
+<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="removeCloudRepoTagSnapshot">
+    <svg><use xlink:href="#iconTrashcan"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.remove}
+</span>
+<span class="fn__flex-1"></span>`;
+    } else if (type === "getCloudRepoSnapshots") {
+        actionHTML = `<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="downloadSnapshot">
+    <svg><use xlink:href="#iconDownload"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.download}
+</span>
+<span class="fn__flex-1"></span>`;
+    } else if (type === "getRepoTagSnapshots") {
+        actionHTML = `<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="uploadSnapshot">
+    <svg><use xlink:href="#iconUpload"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.upload}
+</span>
+<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="rollback">
+    <svg><use xlink:href="#iconUndo"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.rollback}
+</span>
+<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="removeRepoTagSnapshot">
+    <svg><use xlink:href="#iconTrashcan"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.remove}
+</span>
+<span class="fn__flex-1"></span>`;
+    } else if (type === "getRepoSnapshots") {
+        actionHTML = `<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="genTag">
+    <svg><use xlink:href="#iconTags"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.tagSnapshot}
+</span>
+<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="rollback">
+    <svg><use xlink:href="#iconUndo"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.rollback}
+</span>
+<span class="fn__flex-1"></span>`;
+    }
+    /// #else
     if (type === "getCloudRepoTagSnapshots") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
@@ -93,8 +152,8 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTags"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
+    /// #endif
     let repoHTML = "";
-    const isPhone = isMobile();
     response.data.snapshots.forEach((item: {
         memo: string,
         id: string,
@@ -104,30 +163,42 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         tag: string,
         typesCount: { type: string, count: number }[]
     }) => {
-        repoHTML += `<li class="b3-list-item ${isPhone ? "" : "b3-list-item--hide-action"}" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
-<div class="fn__flex-1">
-    <div class="b3-list-item__text">
-        ${escapeHtml(item.memo)}
-        <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
-    </div>
-    <div>
-        <span class="ft__smaller ft__on-surface"><code class='fn__code'>${item.id.substring(0, 7)}</code> ${item.hCreated}</span>
-        <span class="b3-list-item__meta">${window.siyuan.languages.fileSize} ${item.hSize}</span>
-        <span class="b3-list-item__meta">${window.siyuan.languages.fileCount} ${item.count}</span>`;
-        let statHTML = "";
-        if (item.typesCount && 0 < item.typesCount.length && !isPhone) {
-            statHTML += `
-           <span class="b3-list-item__meta">
-            ${item.typesCount.map((type: { type: string, count: number }) => {
-                return `${type.type} ${type.count}`;
-            }).join("&nbsp;&nbsp;")}`;
+        let statHTML = `<div class="b3-list-item__meta">
+    ${window.siyuan.languages.fileCount} ${item.count}`;
+        if (item.typesCount) {
+            item.typesCount.forEach(subItem => {
+                statHTML += `<span class="fn__space"></span>${subItem.type} ${subItem.count}`;
+            })
         }
-        repoHTML += `${statHTML}   
-            </span>
-        </div>
+        statHTML+="</div>";
+
+        const infoHTML = `<div>
+    ${escapeHtml(item.memo)}
+    <span class="fn__space"></span>
+    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
+    <span class="fn__space"></span>
+    <code class="fn__code">${item.id.substring(0, 7)}</code> 
+    <span class="b3-list-item__meta">
+        <span data-type="hCreated">${item.hCreated}</span>
+        <span class="fn__space"></span>
+        ${window.siyuan.languages.fileSize} ${item.hSize}
+    </span>
+</div>${statHTML}`
+        /// #if MOBILE
+        repoHTML += `<li class="b3-list-item" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
+<div class="fn__flex-1">
+    ${infoHTML}
+    <div class="fn__flex" style="height: 26px" data-id="${item.id}" data-tag="${item.tag}">
+        ${actionHTML}
     </div>
-    ${actionHTML}
+</div>
 </li>`;
+        /// #else
+        repoHTML += `<li class="b3-list-item" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
+<div class="fn__flex-1">${infoHTML}</div>
+${actionHTML}
+</li>`;
+        /// #endif
     });
     element.lastElementChild.innerHTML = `${repoHTML}`;
 };
@@ -186,8 +257,8 @@ const renderRmNotebook = (element: HTMLElement) => {
                     logsHTML += `<li data-type="notebook" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 32px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action" data-type="rollback">
-        <svg><use xlink:href="#iconUndo"></use></svg><span class="fn__space"></span>${window.siyuan.languages.rollback}
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
 </li>`;
                 });
@@ -227,7 +298,7 @@ export const openHistory = () => {
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
             <div style="${isMobile() ? "overflow:auto;" : ""}">
-                <div class="block__icons" style="min-width: 845px">
+                <div class="block__icons" style="min-width: 870px">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
                     <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
@@ -434,7 +505,7 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                             iconElement.classList.add("b3-list-item__arrow--open");
                             let html = "";
                             response.data.items.forEach((docItem: { title: string, path: string }) => {
-                                html += `<li title="${escapeAttr(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 44px">
+                                html += `<li title="${escapeAttr(docItem.title)}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item" style="padding-left: 40px">
     <span class="b3-list-item__text">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -470,7 +541,7 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                             target.parentElement.querySelector(`.b3-list-item[data-id="${idJSON.splice(0, 1)[0].id}"]`)?.classList.remove("b3-list-item--focus");
                         }
                     }
-                    idJSON.push({id, time: target.querySelector(".ft__smaller").textContent});
+                    idJSON.push({id, time: target.querySelector('[data-type="hCreated"]').textContent});
                 }
 
                 if (idJSON.length === 2) {

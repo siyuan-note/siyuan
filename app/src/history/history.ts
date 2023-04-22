@@ -357,7 +357,7 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
     disabledProtyle(historyEditor.protyle);
     const repoElement = element.querySelector('#historyContainer [data-type="repo"]');
     const repoSelectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
-    repoSelectElement.querySelector(".b3-select").addEventListener("change", () => {
+    repoSelectElement.addEventListener("change", () => {
         renderRepo(repoElement, 1);
         const btnElement = element.querySelector(".b3-button[data-type='compare']");
         btnElement.setAttribute("disabled", "disabled");

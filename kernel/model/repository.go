@@ -392,12 +392,7 @@ func ImportRepoKey(base64Key string) (err error) {
 		return
 	}
 
-	time.Sleep(1 * time.Second)
-	util.PushMsg(Conf.Language(138), 3000)
-	time.Sleep(1 * time.Second)
-	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
-		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), initErr), 0)
-	}
+	initDataRepo()
 	return
 }
 
@@ -479,12 +474,7 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	Conf.Repo.Key = key
 	Conf.Save()
 
-	time.Sleep(1 * time.Second)
-	util.PushMsg(Conf.Language(138), 3000)
-	time.Sleep(1 * time.Second)
-	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
-		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), initErr), 0)
-	}
+	initDataRepo()
 	return
 }
 
@@ -520,13 +510,17 @@ func InitRepoKey() (err error) {
 	Conf.Repo.Key = key
 	Conf.Save()
 
+	initDataRepo()
+	return
+}
+
+func initDataRepo() {
 	time.Sleep(1 * time.Second)
 	util.PushMsg(Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := IndexRepo("[Init] Init data repo"); nil != initErr {
+	if initErr := IndexRepo("[Init] Init local data repo"); nil != initErr {
 		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), initErr), 0)
 	}
-	return
 }
 
 func CheckoutRepo(id string) {
@@ -689,6 +683,10 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 	repo, err := newRepository()
 	if nil != err {
 		return
+	}
+
+	if 1 > page {
+		page = 1
 	}
 
 	logs, pageCount, totalCount, err := repo.GetCloudRepoLogs(page)

@@ -7,7 +7,7 @@
 		"id": "20210117215840-jcl17fx",
 		"title": "Data Security",
 		"type": "doc",
-		"updated": "20220626214222"
+		"updated": "20230422123335"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721113914-eyp2qea",
-				"updated": "20210721113914"
+				"updated": "20230422123335"
 			},
 			"Children": [
 				{
@@ -56,19 +56,28 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210721113914-l3m6qaz"
+						"id": "20210721113914-l3m6qaz",
+						"updated": "20230422123335"
 					},
 					"Children": [
 						{
 							"ID": "20210721113914-tv2xupw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210721113914-tv2xupw"
+								"id": "20210721113914-tv2xupw",
+								"updated": "20230422123335"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230422120504-ns837kr",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Availability"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "Availability: no data loss, no conflict, keep the data complete and consistent"
+									"Data": ": no data loss, keep the data complete and consistent"
 								}
 							]
 						}
@@ -269,7 +278,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721113914-m1bcp7i",
-				"updated": "20220703223851"
+				"updated": "20230422122808"
 			},
 			"Children": [
 				{
@@ -281,7 +290,7 @@
 					},
 					"Properties": {
 						"id": "20210721113914-fg1idfp",
-						"updated": "20220703223851"
+						"updated": "20230422122808"
 					},
 					"Children": [
 						{
@@ -289,12 +298,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210721113914-rmfboog",
-								"updated": "20220703223851"
+								"updated": "20230422122808"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Regularly back up data, refer to 321 Backup Guidelines (Minimum 3 copies, 2 media, and 1 offsite storage)"
+									"Data": "Regularly back up data, refer to 321 Backup Guidelines (Minimum 3 copies, 2 media, and 1 offline storage)"
 								}
 							]
 						}

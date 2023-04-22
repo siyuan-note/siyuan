@@ -12,7 +12,6 @@ import {replaceFileName} from "../../editor/rename";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {Constants} from "../../constants";
-import {isMobile} from "../../util/functions";
 
 export class Inbox extends Model {
     private element: Element;

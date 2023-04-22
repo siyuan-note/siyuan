@@ -488,7 +488,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
-                const staticText = range.toString().replace(this.splitChar, "")
+                const staticText = range.toString().replace(this.splitChar, "");
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;

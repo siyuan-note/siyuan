@@ -253,8 +253,7 @@ export const initAbout = () => {
                         break;
                     } else if (target.id === "purgeRepo") {
                         confirmDialog("♻️ " + window.siyuan.languages.dataRepoPurge, window.siyuan.languages.dataRepoPurgeConfirm, () => {
-                            fetchPost("/api/repo/purgeRepo", {}, () => {
-                            });
+                            fetchPost("/api/repo/purgeRepo");
                         });
                         event.preventDefault();
                         event.stopPropagation();

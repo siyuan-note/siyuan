@@ -286,7 +286,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
         while (target && !target.isSameNode(element)) {
-            const type = target.getAttribute("data-type")
+            const type = target.getAttribute("data-type");
             if (type === "next") {
                 if (!target.getAttribute("disabled")) {
                     config.page++;
@@ -1074,7 +1074,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 page: config.page || 1,
             }, (response) => {
                 if (!config.page) {
-                    config.page = 1
+                    config.page = 1;
                 }
                 if (config.page < response.data.pageCount) {
                     nextElement.removeAttribute("disabled");

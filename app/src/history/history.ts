@@ -168,7 +168,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         if (item.typesCount) {
             item.typesCount.forEach(subItem => {
                 statHTML += `<span class="fn__space"></span>${subItem.type} ${subItem.count}`;
-            })
+            });
         }
         statHTML+="</div>";
 
@@ -183,7 +183,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         <span class="fn__space"></span>
         ${window.siyuan.languages.fileSize} ${item.hSize}
     </span>
-</div>${statHTML}`
+</div>${statHTML}`;
         /// #if MOBILE
         repoHTML += `<li class="b3-list-item" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
 <div class="fn__flex-1">
@@ -204,7 +204,7 @@ ${actionHTML}
 };
 
 const renderRepo = (element: Element, currentPage: number) => {
-    const selectValue = (element.querySelector(".b3-select") as HTMLSelectElement).value
+    const selectValue = (element.querySelector(".b3-select") as HTMLSelectElement).value;
     element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     const previousElement = element.querySelector('[data-type="previous"]');
     const nextElement = element.querySelector('[data-type="next"]');

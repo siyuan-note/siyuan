@@ -217,7 +217,7 @@ const updateSearchResult = (config: ISearchOption, element: Element) => {
             });
         } else {
             if (!config.page) {
-                config.page = 1
+                config.page = 1;
             }
             if (config.page > 1) {
                 previousElement.removeAttribute("disabled");

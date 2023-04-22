@@ -307,6 +307,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
         id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
         rootID: protyle.block.rootID,
+        isSquareBrackets:  ["[[", "【【"].includes(protyle.hint.splitChar)
     }, (response) => {
         const dataList: IHintData[] = [];
         if (response.data.newDoc) {

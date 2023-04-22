@@ -121,12 +121,17 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 	return
 }
 
-func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, newDoc bool) {
+func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets bool) (ret []*Block, newDoc bool) {
 	cachedTrees := map[string]*parse.Tree{}
+
+	onlyDoc := false
+	if isSquareBrackets {
+		onlyDoc = Conf.Editor.OnlySearchForDoc
+	}
 
 	if "" == keyword {
 		// 查询为空时默认的块引排序规则按最近使用优先 https://github.com/siyuan-note/siyuan/issues/3218
-		refs := sql.QueryRefsRecent(Conf.Editor.OnlySearchForDoc)
+		refs := sql.QueryRefsRecent(onlyDoc)
 		for _, ref := range refs {
 			tree := cachedTrees[ref.DefBlockRootID]
 			if nil == tree {
@@ -158,7 +163,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int) (ret []*Block, ne
 		return
 	}
 
-	ret = fullTextSearchRefBlock(keyword, beforeLen)
+	ret = fullTextSearchRefBlock(keyword, beforeLen, onlyDoc)
 	tmp := ret[:0]
 	for _, b := range ret {
 		tree := cachedTrees[b.RootID]
@@ -646,7 +651,7 @@ func removeLimitClause(stmt string) string {
 	return stmt
 }
 
-func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
+func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
 	keyword = gulu.Str.RemoveInvisible(keyword)
 
 	if ast.IsNodeIDPattern(keyword) {
@@ -669,7 +674,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int) (ret []*Block) {
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + quotedKeyword + ")' AND type"
-	if Conf.Editor.OnlySearchForDoc {
+	if onlyDoc {
 		stmt += " = 'd'"
 	} else {
 		stmt += " IN " + Conf.Search.TypeFilter()

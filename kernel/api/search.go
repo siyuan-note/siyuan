@@ -191,11 +191,16 @@ func searchRefBlock(c *gin.Context) {
 		return
 	}
 
+	isSquareBrackets := false
+	if isSquareBracketsArg := arg["isSquareBrackets"]; nil != isSquareBracketsArg {
+		isSquareBrackets = isSquareBracketsArg.(bool)
+	}
+
 	rootID := arg["rootID"].(string)
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)
 	beforeLen := int(arg["beforeLen"].(float64))
-	blocks, newDoc := model.SearchRefBlock(id, rootID, keyword, beforeLen)
+	blocks, newDoc := model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets)
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 		"newDoc": newDoc,

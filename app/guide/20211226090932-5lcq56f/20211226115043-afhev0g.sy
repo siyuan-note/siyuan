@@ -6,7 +6,7 @@
 		"icon": "1f50f",
 		"id": "20211226115043-afhev0g",
 		"title": "資料安全",
-		"updated": "20220626214021"
+		"updated": "20230422123349"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115155-2bnjxep",
-				"updated": "20211228141318"
+				"updated": "20230422123349"
 			},
 			"Children": [
 				{
@@ -56,7 +56,7 @@
 					},
 					"Properties": {
 						"id": "20211226115155-r4hwqlr",
-						"updated": "20211228141318"
+						"updated": "20230422123349"
 					},
 					"Children": [
 						{
@@ -64,12 +64,19 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115155-n4d8iqg",
-								"updated": "20211228141318"
+								"updated": "20230422123349"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230422120236-58nari9",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "可用性"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "可用性：資料不遺失、不沖突，保持資料的完整和一致"
+									"Data": "：資料不遺失，保持資料的完整和一致"
 								}
 							]
 						}

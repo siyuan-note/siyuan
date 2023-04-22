@@ -7,7 +7,7 @@
 		"id": "20210117211155-56n4odu",
 		"title": "数据安全",
 		"type": "doc",
-		"updated": "20220626213125"
+		"updated": "20230422123357"
 	},
 	"Children": [
 		{
@@ -45,43 +45,42 @@
 		{
 			"ID": "20210302223430-kskwppo",
 			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
+			"ListData": {},
 			"Properties": {
 				"id": "20210302223430-kskwppo",
-				"updated": "20210525220618"
+				"updated": "20230422123357"
 			},
 			"Children": [
 				{
 					"ID": "20210525220618-mb42ynt",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210525220618-mb42ynt"
+						"id": "20210525220618-mb42ynt",
+						"updated": "20230422123357"
 					},
 					"Children": [
 						{
 							"ID": "20210525220618-ctad9jk",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210525220618-ctad9jk"
+								"id": "20210525220618-ctad9jk",
+								"updated": "20230422123357"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230422103807-d46wjhs",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "可用性"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "可用性：数据不丢失、不冲突，保持数据的完整和一致"
+									"Data": "：数据不丢失，保持数据的完整和一致"
 								}
 							]
 						}
@@ -90,16 +89,13 @@
 				{
 					"ID": "20210525220623-i1o11y5",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210525220623-i1o11y5"
+						"id": "20210525220623-i1o11y5",
+						"updated": "20210525220623"
 					},
 					"Children": [
 						{

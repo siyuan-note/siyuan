@@ -1,4 +1,6 @@
 {
+  "onlySearchForDoc": "<code class='fn__code'>[[</code> rechercher uniquement les documents",
+  "onlySearchForDocTip": "Après l'activation, [[ ou 【【 pour rechercher des références de bloc uniquement dans les blocs doc",
   "reOCR": "ReOCR",
   "continueReview1": "Continuer la révision",
   "continueReview2": "Il reste encore des fiches <code class='fn__code'>${count}</code> à examiner, continuer ?",

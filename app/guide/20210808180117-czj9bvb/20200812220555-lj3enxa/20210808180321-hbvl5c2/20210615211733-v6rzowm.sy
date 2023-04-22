@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
-		"updated": "20230403114310"
+		"updated": "20230422102226"
 	},
 	"Children": [
 		{
@@ -1498,24 +1498,193 @@
 		},
 		{
 			"ID": "20220615115758-ajl5l83",
-			"Type": "NodeParagraph",
+			"Type": "NodeList",
+			"ListData": {},
 			"Properties": {
 				"id": "20220615115758-ajl5l83",
-				"updated": "20220615115831"
+				"updated": "20230422102226"
 			},
 			"Children": [
 				{
-					"Type": "NodeText",
-					"Data": "手动删除 "
+					"ID": "20230422101107-ihb3kxp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422101107-ihb3kxp",
+						"updated": "20230422102226"
+					},
+					"Children": [
+						{
+							"ID": "20230422101107-zxq6qh2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422101107-zxq6qh2",
+								"updated": "20230422102226"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "关于"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据仓库清理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将删除所有未引用的快照和相关数据对象。“引用的快照”指的是 repo/refs/ 下指向的快照："
+								}
+							]
+						},
+						{
+							"ID": "20230422101343-wvt2y4r",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230422101343-wvt2y4r",
+								"updated": "20230422101936"
+							},
+							"Children": [
+								{
+									"ID": "20230422101343-obxopx6",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422101343-obxopx6",
+										"updated": "20230422101934"
+									},
+									"Children": [
+										{
+											"ID": "20230422101343-f5w2p8p",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422101343-f5w2p8p",
+												"updated": "20230422101934"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "latest"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 指向最新一个快照"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230422101357-4ugrbw1",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422101357-4ugrbw1",
+										"updated": "20230422101936"
+									},
+									"Children": [
+										{
+											"ID": "20230422101357-istm02i",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422101357-istm02i",
+												"updated": "20230422101936"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "tags/*"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 指向手动标记的快照"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
 				},
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "工作空间/repo/"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 文件夹可以清空全部数据快照。"
+					"ID": "20230422101105-vdd9m4g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422101105-vdd9m4g",
+						"updated": "20230422101105"
+					},
+					"Children": [
+						{
+							"ID": "20230422101105-0csmuf6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422101105-0csmuf6",
+								"updated": "20230422101106"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "手动删除 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/repo/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ 文件夹可以清空全部"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据快照"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

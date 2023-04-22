@@ -121,8 +121,13 @@ func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMod
 	return
 }
 
-func SearchRefBlock(id, rootID, keyword string, beforeLen int, onlyDoc bool) (ret []*Block, newDoc bool) {
+func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets bool) (ret []*Block, newDoc bool) {
 	cachedTrees := map[string]*parse.Tree{}
+
+	onlyDoc := false
+	if isSquareBrackets {
+		onlyDoc = Conf.Editor.OnlySearchForDoc
+	}
 
 	if "" == keyword {
 		// 查询为空时默认的块引排序规则按最近使用优先 https://github.com/siyuan-note/siyuan/issues/3218

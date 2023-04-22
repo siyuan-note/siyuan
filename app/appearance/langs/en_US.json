@@ -1,4 +1,6 @@
 {
+  "onlySearchForDoc": "<code class='fn__code'>[[</code> only search documents",
+  "onlySearchForDocTip": "After enabling, [[ or 【【 to search for block references only in doc blocks",
   "ocrResult": "OCR result text",
   "reOCR": "Re OCR",
   "continueReview1": "Continue Review",
@@ -239,7 +241,7 @@
   "turnToStatic": "Static anchor text",
   "turnToDynamic": "Dynamic anchor text",
   "sizeLimit": "Limit",
-  "trafficStat": "Traffic Statistics",
+  "trafficStat": "Traffic statistics",
   "hideHeadingBelowBlocks": "Hide blocks below heading",
   "matchDiacritics": "Match Diacritics",
   "copyHPath": "Copy readable path",

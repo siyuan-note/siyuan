@@ -43,6 +43,7 @@ type Editor struct {
 	Justify                         bool     `json:"justify"`                         // 是否两端对齐
 	RTL                             bool     `json:"rtl"`                             // 是否从右到左显示
 	Spellcheck                      bool     `json:"spellcheck"`                      // 是否启用拼写检查
+	OnlySearchForDoc                bool     `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
 	BacklinkExpandCount             int      `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int      `json:"backmentionExpandCount"`          // 反链提及默认展开数量
 }

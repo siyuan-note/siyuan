@@ -1,4 +1,6 @@
 {
+  "onlySearchForDoc": "<code class='fn__code'>[[</code> 仅搜索文档",
+  "onlySearchForDocTip": "启用后使用 [[ 搜索块引用时将只在文档块中进行搜索",
   "ocrResult": "OCR 结果文本",
   "reOCR": "重新 OCR",
   "continueReview1": "继续复习",

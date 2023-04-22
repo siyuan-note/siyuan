@@ -191,16 +191,11 @@ func searchRefBlock(c *gin.Context) {
 		return
 	}
 
-	onlyDoc := false
-	if nil != arg["onlyDoc"] {
-		onlyDoc = arg["onlyDoc"].(bool)
-	}
-
 	rootID := arg["rootID"].(string)
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)
 	beforeLen := int(arg["beforeLen"].(float64))
-	blocks, newDoc := model.SearchRefBlock(id, rootID, keyword, beforeLen, onlyDoc)
+	blocks, newDoc := model.SearchRefBlock(id, rootID, keyword, beforeLen)
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 		"newDoc": newDoc,

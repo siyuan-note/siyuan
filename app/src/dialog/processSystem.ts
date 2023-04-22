@@ -30,7 +30,7 @@ export const lockScreen = () => {
 };
 
 export const kernelError = () => {
-    if (document.querySelector("#errorLog")){
+    if (document.querySelector("#errorLog")) {
         return;
     }
     let iosReStart = "";
@@ -41,7 +41,7 @@ export const kernelError = () => {
         disableClose: true,
         title: `💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small>`,
         width: isMobile() ? "92vw" : "520px",
-        content: `<div id="errorLog" class="b3-dialog__content">
+        content: `<div class="b3-dialog__content">
 <div class="ft__breakword">
     <div>${window.siyuan.languages.kernelFault1}</div>
     <div class="fn__hr"></div>
@@ -50,6 +50,7 @@ export const kernelError = () => {
 </div>
 </div>`
     });
+    dialog.element.id = 'errorLog'
     const restartElement = dialog.element.querySelector(".b3-button");
     if (restartElement) {
         restartElement.addEventListener("click", () => {

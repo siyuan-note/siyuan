@@ -27,7 +27,7 @@ class ProtyleHtml extends HTMLElement {
         } else {
           const s = document.createElement('script')
           for (const attr of script.attributes) {
-            s.setAttributeNode(attr);
+            s.setAttribute(attr.name, attr.value);
           }
           s.textContent = script.textContent
           this.display.appendChild(s)

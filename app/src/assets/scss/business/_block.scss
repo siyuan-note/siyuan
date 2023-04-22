@@ -134,7 +134,7 @@
     padding: 0 8px;
     display: flex;
     align-items: center;
-    height: 42px;
+    min-height: 42px;
     flex-shrink: 0;
 
     &--menu {
@@ -193,10 +193,10 @@
     svg {
       height: 16px;
       width: 16px;
-      padding: 8px 4px 8px 0;
+      padding: 4px;
+      flex-shrink: 0;
     }
 
-    white-space: nowrap;
     margin-right: 8px;
     display: flex;
     align-items: center;

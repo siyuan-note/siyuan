@@ -50,7 +50,7 @@ export const kernelError = () => {
 </div>
 </div>`
     });
-    dialog.element.id = 'errorLog'
+    dialog.element.id = "errorLog";
     const restartElement = dialog.element.querySelector(".b3-button");
     if (restartElement) {
         restartElement.addEventListener("click", () => {

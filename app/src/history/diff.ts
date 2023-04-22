@@ -75,7 +75,7 @@ const renderCompare = (element: HTMLElement) => {
             leftElement.lastElementChild.classList.remove("fn__none");
             onGet(response, leftEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
         }
-        textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm")
+        textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
     });
     const id2 = element.getAttribute("data-id2");
     if (id2) {
@@ -91,7 +91,7 @@ const renderCompare = (element: HTMLElement) => {
                 rightElement.lastElementChild.classList.remove("fn__none");
                 onGet(response, rightEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
             }
-            textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm")
+            textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
         });
     } else {
         rightElement.classList.add("fn__none");
@@ -143,10 +143,10 @@ export const showDiff = (data: { id: string, time: string }[]) => {
                 break;
             } else if (target.classList.contains("block__icon")) {
                 if (target.getAttribute("data-direct") === "left") {
-                    target.setAttribute("data-direct", "right")
+                    target.setAttribute("data-direct", "right");
                     genHTML(right, left, dialog, "right");
                 } else {
-                    target.setAttribute("data-direct", "left")
+                    target.setAttribute("data-direct", "left");
                     genHTML(left, right, dialog, "left");
                 }
                 event.preventDefault();
@@ -167,17 +167,17 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => 
         const headElement = dialog.element.querySelector(".b3-dialog__header");
         headElement.innerHTML = `<div style="padding: 0;min-height: auto;" class="block__icons">
     <span class="fn__flex-1"></span>
-    <code class="fn__code${isPhone ? " fn__none" : ''}">${left.substring(0, 7)}</code>
+    <code class="fn__code${isPhone ? " fn__none" : ""}">${left.substring(0, 7)}</code>
     ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__space"></span>
     <span class="block__icon block__icon--show" data-direct="${direct}"><svg><use xlink:href="#iconForward"></use></svg></span>
     <span class="fn__space"></span>
-    <code class="fn__code${isPhone ? " fn__none" : ''}">${right.substring(0, 7)}</code>
+    <code class="fn__code${isPhone ? " fn__none" : ""}">${right.substring(0, 7)}</code>
     ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__flex-1"></span>
-</div>`
+</div>`;
         headElement.nextElementSibling.innerHTML = `<div class="fn__flex" style="height: 100%;${isMobile() ? "flex-direction: column;" : ""}">
     <div class="history__diff"${isMobile() ? 'style="flex:1;width:auto"' : ""}>
         <ul class="b3-list b3-list--background">
@@ -222,4 +222,4 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => 
     </div>
 </div>`;
     });
-}
+};

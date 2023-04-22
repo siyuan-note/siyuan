@@ -34,7 +34,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     let id = blockElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
-    const isNodeCodeBlock = blockElement.getAttribute("data-type") === "NodeCodeBlock"
+    const isNodeCodeBlock = blockElement.getAttribute("data-type") === "NodeCodeBlock";
     if (!isBlock &&
         (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();

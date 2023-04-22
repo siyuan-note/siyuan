@@ -6,16 +6,14 @@ import {writeText} from "./compatibility";
 import {clipboard} from "electron";
 /// #endif
 import {hasClosestBlock} from "./hasClosest";
-import {focusByWbr, getEditorRange} from "./selection";
+import {getEditorRange} from "./selection";
 import {blockRender} from "../markdown/blockRender";
 import {highlightRender} from "../markdown/highlightRender";
-import {updateTransaction} from "../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
-import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 
 const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     let needRender = true;

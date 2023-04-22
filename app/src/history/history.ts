@@ -80,16 +80,16 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         return;
     }
     let actionHTML = "";
-    if (type === "cloudTag") {
+    if (type === "getCloudRepoTagSnapshots") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
-    } else if (type === "cloud") {
+    } else if (type === "getCloudRepoSnapshots") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`;
-    } else if (type === "localTag") {
+    } else if (type === "getRepoTagSnapshots") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
-    } else if (type === "local") {
+    } else if (type === "getRepoSnapshots") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTags"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
@@ -133,47 +133,33 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 };
 
 const renderRepo = (element: Element, currentPage: number) => {
+    const selectValue = (element.querySelector(".b3-select") as HTMLSelectElement).value
     element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     const previousElement = element.querySelector('[data-type="previous"]');
     const nextElement = element.querySelector('[data-type="next"]');
-    if (currentPage < 0) {
-        if (currentPage === -1) {
-            fetchPost("/api/repo/getRepoTagSnapshots", {}, (response) => {
-                renderRepoItem(response, element, "localTag");
-            });
-        } else if (currentPage === -2) {
-            fetchPost("/api/repo/getCloudRepoTagSnapshots", {}, (response) => {
-                renderRepoItem(response, element, "cloudTag");
-            });
-        } else if (currentPage === -3) {
-            fetchPost("/api/repo/getCloudRepoSnapshots", {page: currentPage}, (response) => {
-                if (currentPage < response.data.pageCount) {
-                    nextElement.removeAttribute("disabled");
-                } else {
-                    nextElement.setAttribute("disabled", "disabled");
-                }
-                renderRepoItem(response, element, "cloud");
-            });
-        }
+    element.setAttribute("data-init", "true");
+    if (selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots") {
+        fetchPost(`/api/repo/${selectValue}`, {}, (response) => {
+            renderRepoItem(response, element, selectValue);
+        });
         previousElement.classList.add("fn__none");
         nextElement.classList.add("fn__none");
     } else {
         previousElement.classList.remove("fn__none");
         nextElement.classList.remove("fn__none");
-        element.setAttribute("data-init", "true");
         element.setAttribute("data-page", currentPage.toString());
         if (currentPage > 1) {
             previousElement.removeAttribute("disabled");
         } else {
             previousElement.setAttribute("disabled", "disabled");
         }
-        fetchPost("/api/repo/getRepoSnapshots", {page: currentPage}, (response) => {
+        fetchPost(`/api/repo/${selectValue}`, {page: currentPage}, (response) => {
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
             } else {
                 nextElement.setAttribute("disabled", "disabled");
             }
-            renderRepoItem(response, element, "local");
+            renderRepoItem(response, element, selectValue);
         });
     }
 };
@@ -294,10 +280,10 @@ export const openHistory = () => {
                     <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <div class="fn__flex-1"></div>
                     <select class="b3-select" style="min-width: auto">
-                        <option value="0">${window.siyuan.languages.localSnapshot}</option>
-                        <option value="1">${window.siyuan.languages.localTagSnapshot}</option>
-                        <option value="3">${window.siyuan.languages.cloudSnapshot}</option>
-                        <option value="2">${window.siyuan.languages.cloudTagSnapshot}</option>
+                        <option value="getRepoSnapshots">${window.siyuan.languages.localSnapshot}</option>
+                        <option value="getRepoTagSnapshots">${window.siyuan.languages.localTagSnapshot}</option>
+                        <option value="getCloudRepoSnapshots">${window.siyuan.languages.cloudSnapshot}</option>
+                        <option value="getCloudRepoTagSnapshots">${window.siyuan.languages.cloudTagSnapshot}</option>
                     </select>
                     <span class="fn__space"></span>
                     <button class="b3-button b3-button--outline" disabled data-type="compare">${window.siyuan.languages.compare}</button>
@@ -370,18 +356,9 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
     });
     disabledProtyle(historyEditor.protyle);
     const repoElement = element.querySelector('#historyContainer [data-type="repo"]');
-    const selectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
-    selectElement.addEventListener("change", () => {
-        const value = selectElement.value;
-        if (value === "0") {
-            renderRepo(repoElement, 1);
-        } else if (value === "1") {
-            renderRepo(repoElement, -1);
-        } else if (value === "2") {
-            renderRepo(repoElement, -2);
-        } else if (value === "3") {
-            renderRepo(repoElement, -3);
-        }
+    const repoSelectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
+    repoSelectElement.querySelector(".b3-select").addEventListener("change", () => {
+        renderRepo(repoElement, 1);
         const btnElement = element.querySelector(".b3-button[data-type='compare']");
         btnElement.setAttribute("disabled", "disabled");
         btnElement.removeAttribute("data-ids");
@@ -474,7 +451,8 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                 target.nextElementSibling.classList.toggle("fn__none");
                 target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
                 break;
-            } else if (target.classList.contains("b3-list-item") && type === "repoitem") {
+            } else if (target.classList.contains("b3-list-item") && type === "repoitem" &&
+                ["getRepoSnapshots", "getRepoTagSnapshots"].includes(repoSelectElement.value)) {
                 const btnElement = element.querySelector(".b3-button[data-type='compare']");
                 const idJSON = JSON.parse(btnElement.getAttribute("data-ids") || "[]");
                 const id = target.getAttribute("data-id");
@@ -563,7 +541,7 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                 const tag = target.parentElement.getAttribute("data-tag");
                 confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
-                        renderRepo(repoElement, type === "removeRepoTagSnapshot" ? -1 : -2);
+                        renderRepo(repoElement, 1);
                     });
                 });
                 break;
@@ -639,7 +617,7 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                     historyEditor = undefined;
                 }
                 break;
-            } else if (type === "compare") {
+            } else if (type === "compare" && !target.getAttribute("disabled")) {
                 showDiff(JSON.parse(target.getAttribute("data-ids") || "[]"));
                 break;
             }

@@ -267,10 +267,10 @@ export class Asset extends Model {
                 <button id="sidebarToggle" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
                     <svg><use xlink:href="#iconLayoutRight"></use></svg>
                 </button>
-                <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__s" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search} ${updateHotkeyTip("⌘F")}">
+                <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search} ${updateHotkeyTip("⌘F")}">
                   <svg><use xlink:href="#iconSearch"></use></svg>
                 </button>
-                <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__s" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation} ${updateHotkeyTip("⌘D")}/${updateHotkeyTip("⌥D")}">
+                <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation} ${updateHotkeyTip("⌘D")}/${updateHotkeyTip("⌥D")}">
                   <svg><use xlink:href="#iconLeftTop"></use></svg>
                 </button>
                 <input type="number" id="pageNumber" class="toolbarField pageNumber b3-text-field" value="1" size="4" min="1" autocomplete="off">

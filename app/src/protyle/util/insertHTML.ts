@@ -34,14 +34,19 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     let id = blockElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
+    const isNodeCodeBlock = blockElement.getAttribute("data-type") === "NodeCodeBlock"
     if (!isBlock &&
-        (blockElement.getAttribute("data-type") === "NodeCodeBlock" || protyle.toolbar.getCurrentType(range).includes("code"))) {
+        (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
         range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
         range.collapse(false);
         range.insertNode(document.createElement("wbr"));
-        getContenteditableElement(blockElement).removeAttribute("data-render");
-        highlightRender(blockElement);
+        if (isNodeCodeBlock) {
+            getContenteditableElement(blockElement).removeAttribute("data-render");
+            highlightRender(blockElement);
+        } else {
+            focusByWbr(blockElement, range);
+        }
         blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
         setTimeout(() => {

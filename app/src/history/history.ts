@@ -229,7 +229,7 @@ export const openHistory = () => {
     let notebookSelectHTML = "";
     window.siyuan.notebooks.forEach((item) => {
         if (!item.closed) {
-            notebookSelectHTML += ` <option value="${item.id}"${item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] ? " selected" : ""}>${item.name}</option>`;
+            notebookSelectHTML += ` <option value="${item.id}"${item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] ? " selected" : ""}>${escapeHtml(item.name)}</option>`;
         }
     });
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">

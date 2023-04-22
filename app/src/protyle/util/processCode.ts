@@ -33,7 +33,7 @@ export const processPasteCode = (html: string, text: string) => {
         if (/\n/.test(code)) {
             return `<div data-type="NodeCodeBlock" class="code-block" data-node-id="${Lute.NewNodeID()}"><div class="protyle-action"><span class="protyle-action--first protyle-action__language" contenteditable="false">${window.siyuan.storage[Constants.LOCAL_CODELANG]}</span><span class="fn__flex-1"></span><span class="protyle-icon protyle-icon--first protyle-action__copy"><svg><use xlink:href="#iconCopy"></use></svg></span><span class="protyle-icon protyle-icon--last protyle-action__menu"><svg><use xlink:href="#iconMore"></use></svg></span></div><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}">${code.replace(/&/g, "&amp;").replace(/</g, "&lt;")}<wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         } else {
-            return code;
+            return "`" + code + "`";
         }
     }
     return false;

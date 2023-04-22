@@ -34,7 +34,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     let id = blockElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
-    if (!isBlock && blockElement.getAttribute("data-type") === "NodeCodeBlock") {
+    if (!isBlock &&
+        (blockElement.getAttribute("data-type") === "NodeCodeBlock" || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
         range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
         range.collapse(false);

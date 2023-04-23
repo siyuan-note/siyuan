@@ -67,7 +67,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
                     idPath: [],
                     group: localData.group,
                     sort: localData.sort,
-                    types: localData.types,
+                    types: Object.assign({}, localData.types),
                     removed: localData.removed,
                     page: 1
                 }

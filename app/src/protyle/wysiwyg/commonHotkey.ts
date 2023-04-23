@@ -40,6 +40,12 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         event.stopPropagation();
         return;
     }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) ||
+        matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
+        // 阻止输入 https://ld246.com/article/1679618995926
+        event.preventDefault();
+        return true;
+    }
     /// #if !MOBILE
     if (protyle.model) {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {

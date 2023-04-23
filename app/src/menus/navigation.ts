@@ -130,6 +130,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
         submenu: [{
             iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.spaceRepetition,
+            accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
             click: () => {
                 fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
                     openCardByData(response.data, "notebook", notebookId, name);
@@ -339,6 +340,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             submenu: [{
                 iconHTML: Constants.ZWSP,
                 label: window.siyuan.languages.spaceRepetition,
+                accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
                         openCardByData(response.data, "doc", id, name);

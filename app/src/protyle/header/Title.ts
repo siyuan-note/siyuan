@@ -353,6 +353,7 @@ export class Title {
             const riffCardMenu = [{
                 iconHTML: Constants.ZWSP,
                 label: window.siyuan.languages.spaceRepetition,
+                accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
                         openCardByData(response.data, "doc", protyle.block.rootID, this.editElement.textContent);

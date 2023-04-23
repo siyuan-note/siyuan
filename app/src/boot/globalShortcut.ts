@@ -46,7 +46,7 @@ import {Backlink} from "../layout/dock/Backlink";
 import {webFrame} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
-import {openCard} from "../card/openCard";
+import {openCard, openCardByData} from "../card/openCard";
 import {lockScreen} from "../dialog/processSystem";
 import {isWindow} from "../util/functions";
 import {reloadProtyle} from "../protyle/util/reload";
@@ -553,7 +553,7 @@ export const globalShortcut = () => {
             return;
         }
 
-        if (event.key === "ArrowUp" || event.key === "ArrowDown" ) {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
             const viewCardsDialog = window.siyuan.dialogs.find(item => {
                 if (item.element.getAttribute("data-key") === "viewCards") {
                     return true;
@@ -660,9 +660,6 @@ export const globalShortcut = () => {
         }
         if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
             newDailyNote();
-            if (document.activeElement) {
-                (document.activeElement as HTMLElement).blur();
-            }
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -1095,6 +1092,13 @@ const editKeydown = (event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
+        fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
+            openCardByData(response.data, "doc", protyle.block.rootID, protyle.title.editElement.textContent);
+        });
+        event.preventDefault();
+        return true;
+    }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         let range: Range;
         let nodeElement: false | HTMLElement;
@@ -1207,6 +1211,20 @@ const fileTreeKeydown = (event: KeyboardEvent) => {
     const notebookId = topULElement.getAttribute("data-url");
     const pathString = liElements[0].getAttribute("data-path");
     const isFile = liElements[0].getAttribute("data-type") === "navigation-file";
+
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
+        if (isFile) {
+            const id = liElements[0].getAttribute("data-node-id");
+            fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
+                openCardByData(response.data, "doc", id, getDisplayName(liElements[0].getAttribute("data-name"), false, true));
+            });
+        } else {
+            fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
+                openCardByData(response.data, "notebook", notebookId, getNotebookName(notebookId));
+            });
+        }
+    }
+
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {
         window.siyuan.menus.menu.remove();
         rename({

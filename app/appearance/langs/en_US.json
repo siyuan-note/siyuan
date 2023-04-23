@@ -1,4 +1,5 @@
 {
+  "switchDirect": "Switch comparison direction",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> only search documents",
   "onlySearchForDocTip": "After enabling, [[ or 【【 to search for block references only in doc blocks",
   "ocrResult": "OCR result text",

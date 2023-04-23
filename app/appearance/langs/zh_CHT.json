@@ -1,4 +1,5 @@
 {
+  "switchDirect": "交換對比方向",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> 僅搜索文檔",
   "onlySearchForDocTip": "啟用後使用 [[ 或 【【 搜索塊引用時將只在文檔塊中進行搜索",
   "ocrResult": "OCR 結果文本",

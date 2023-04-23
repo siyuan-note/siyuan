@@ -1,4 +1,5 @@
 {
+  "switchDirect": "Cambiar dirección de comparación",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> solo buscar documentos",
   "onlySearchForDocTip": "Después de habilitar, [[ o 【【 para buscar referencias de bloque solo en bloques de documentos",
   "ocrResult": "Texto de resultado de OCR",

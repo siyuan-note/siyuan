@@ -82,7 +82,7 @@ export class Tree {
             } else {
                 style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`;
             }
-            html += `<li class="b3-list-item" 
+            html += `<li class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}" 
 ${(item.nodeType !== "NodeDocument" && item.type === "backlink") ? 'draggable="true" ' : ""}
 ${item.id ? 'data-node-id="' + item.id + '"' : ""} 
 ${item.box ? 'data-notebook-id="' + item.box + '"' : ""} 
@@ -95,8 +95,8 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text"${titleTip}>${item.name}</span>
-    ${countHTML}
     ${this.topExtHTML || ""}
+    ${countHTML}
 </li>`;
             if (item.children && item.children.length > 0) {
                 html += this.genHTML(item.children) + "</ul>";
@@ -136,7 +136,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
                 style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`;
             }
             html += `<li ${type === "backlink" ? 'draggable="true"' : ""} 
-class="b3-list-item ${isMobile() ? "" : "b3-list-item--hide-action"}"  
+class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}"  
 data-node-id="${item.id}" 
 data-ref-text="${encodeURIComponent(item.refText)}" 
 data-def-id="${item.defID}" 

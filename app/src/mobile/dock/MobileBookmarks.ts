@@ -3,9 +3,7 @@ import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openMobileFileById} from "../editor";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {escapeHtml} from "../../util/escape";
-import {Dialog} from "../../dialog";
+import {openBookmarkMenu} from "../../menus/bookmark";
 
 export class MobileBookmarks {
     public element: HTMLElement;
@@ -34,62 +32,15 @@ export class MobileBookmarks {
                 const id = element.getAttribute("data-node-id");
                 const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
                 if (actionElement) {
-                    const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent;
-                    if (actionElement.getAttribute("data-type") === "remove") {
-                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
-                            if (id) {
-                                fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
-                                    this.update();
-                                });
-                                document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${id}"]`).forEach((item) => {
-                                    item.setAttribute("bookmark", "");
-                                    const bookmarkElement = item.querySelector(".protyle-attr--bookmark");
-                                    if (bookmarkElement) {
-                                        bookmarkElement.remove();
-                                    }
-                                });
-                            } else {
-                                fetchPost("/api/bookmark/removeBookmark", {bookmark});
-                            }
-                        });
-                    } else {
-                        const dialog = new Dialog({
-                            title: window.siyuan.languages.rename,
-                            content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block"></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                            width: "92vw",
-                        });
-                        const btnsElement = dialog.element.querySelectorAll(".b3-button");
-                        btnsElement[0].addEventListener("click", () => {
-                            dialog.destroy();
-                        });
-                        const inputElement = dialog.element.querySelector("input");
-                        dialog.bindInput(inputElement, () => {
-                            (btnsElement[1] as HTMLButtonElement).click();
-                        });
-                        inputElement.value = bookmark;
-                        inputElement.focus();
-                        inputElement.select();
-                        btnsElement[1].addEventListener("click", () => {
-                            fetchPost("/api/bookmark/renameBookmark", {
-                                oldBookmark: bookmark,
-                                newBookmark: inputElement.value
-                            }, () => {
-                                dialog.destroy();
-                            });
-                        });
-                    }
+                    openBookmarkMenu(actionElement.parentElement, event, this)
                 } else {
                     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                         openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
                     });
                 }
             },
-            blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>',
-            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action" data-type="edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>'
+            blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
+            topExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

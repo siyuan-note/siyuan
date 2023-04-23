@@ -2,14 +2,12 @@ import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
 import {getDockByType, setPanelFocus} from "../util";
-import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
-import {Dialog} from "../../dialog";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {escapeHtml} from "../../util/escape";
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {openBookmarkMenu} from "../../menus/bookmark";
 
 export class Bookmark extends Model {
     private openNodes: string[];
@@ -75,79 +73,23 @@ export class Bookmark extends Model {
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
             data: null,
-            click(element: HTMLElement) {
-                const id = element.getAttribute("data-node-id");
-                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    openFileById({
-                        id,
-                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                        zoomIn: foldResponse.data
+            click:(element: HTMLElement, event: MouseEvent)=> {
+                const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
+                if (actionElement) {
+                    openBookmarkMenu(actionElement.parentElement, event, this);
+                } else {
+                    const id = element.getAttribute("data-node-id");
+                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                        openFileById({
+                            id,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                            zoomIn: foldResponse.data
+                        });
                     });
-                });
+                }
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
-                window.siyuan.menus.menu.remove();
-                const id = element.getAttribute("data-node-id");
-                if (!id) {
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        label: window.siyuan.languages.rename,
-                        click: () => {
-                            const oldBookmark = element.querySelector(".b3-list-item__text").textContent;
-                            const dialog = new Dialog({
-                                title: window.siyuan.languages.rename,
-                                content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block"></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                                width: "520px",
-                            });
-                            const btnsElement = dialog.element.querySelectorAll(".b3-button");
-                            btnsElement[0].addEventListener("click", () => {
-                                dialog.destroy();
-                            });
-                            const inputElement = dialog.element.querySelector("input");
-                            dialog.bindInput(inputElement, () => {
-                                (btnsElement[1] as HTMLButtonElement).click();
-                            });
-                            inputElement.value = oldBookmark;
-                            inputElement.focus();
-                            inputElement.select();
-                            btnsElement[1].addEventListener("click", () => {
-                                fetchPost("/api/bookmark/renameBookmark", {
-                                    oldBookmark,
-                                    newBookmark: inputElement.value
-                                }, () => {
-                                    dialog.destroy();
-                                });
-                            });
-                        }
-                    }).element);
-                }
-                window.siyuan.menus.menu.append(new MenuItem({
-                    icon: "iconTrashcan",
-                    label: window.siyuan.languages.remove,
-                    click: () => {
-                        const bookmark = (id ? element.parentElement.previousElementSibling : element).querySelector(".b3-list-item__text").textContent;
-                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmark)}</b>?`, () => {
-                            if (id) {
-                                fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
-                                    this.update();
-                                });
-                                document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${id}"]`).forEach((item) => {
-                                    item.setAttribute("bookmark", "");
-                                    const bookmarkElement = item.querySelector(".protyle-attr--bookmark");
-                                    if (bookmarkElement) {
-                                        bookmarkElement.remove();
-                                    }
-                                });
-                            } else {
-                                fetchPost("/api/bookmark/removeBookmark", {bookmark});
-                            }
-                        });
-                    }
-                }).element);
-                window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                openBookmarkMenu(element, event, this)
             },
             ctrlClick(element: HTMLElement) {
                 openFileById({
@@ -169,7 +111,9 @@ export class Bookmark extends Model {
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
-            }
+            },
+            blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
+            topExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {

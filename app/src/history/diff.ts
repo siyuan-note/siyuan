@@ -104,7 +104,7 @@ export const showDiff = (data: { id: string, time: string }[]) => {
     }
     let left: string;
     let right: string;
-    if (data[0].time < data[1].time) {
+    if (data[0].time > data[1].time) {
         left = data[1].id;
         right = data[0].id;
     } else {

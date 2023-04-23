@@ -175,6 +175,22 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 		},
 	}
 	luteEngine := NewLute()
+	for _, removeRight := range diff.RemovesRight {
+		title, parseErr := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
+		if "" == title || nil != parseErr {
+			continue
+		}
+
+		ret.RemovesRight = append(ret.RemovesRight, &DiffFile{
+			FileID:  removeRight.ID,
+			Title:   title,
+			Updated: removeRight.Updated,
+		})
+	}
+	if 1 > len(ret.RemovesRight) {
+		ret.RemovesRight = []*DiffFile{}
+	}
+
 	for _, addLeft := range diff.AddsLeft {
 		title, parseErr := parseTitleInSnapshot(addLeft.ID, repo, luteEngine)
 		if "" == title || nil != parseErr {
@@ -221,22 +237,6 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 	if 1 > len(ret.UpdatesRight) {
 		ret.UpdatesRight = []*DiffFile{}
-	}
-
-	for _, removeRight := range diff.RemovesRight {
-		title, parseErr := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
-		if "" == title || nil != parseErr {
-			continue
-		}
-
-		ret.RemovesRight = append(ret.RemovesRight, &DiffFile{
-			FileID:  removeRight.ID,
-			Title:   title,
-			Updated: removeRight.Updated,
-		})
-	}
-	if 1 > len(ret.RemovesRight) {
-		ret.RemovesRight = []*DiffFile{}
 	}
 	return
 }

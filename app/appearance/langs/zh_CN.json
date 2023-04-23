@@ -457,6 +457,7 @@
   "moveToLeft": "向左移",
   "moveToRight": "向右移",
   "copyProtocol": "复制块超链接",
+  "copyProtocolInMd": "复制块超链接（Markdown）",
   "uploadAssets2CDN": "上传资源文件到图床",
   "uploadAssets2CDNConfirmTip": "确定将该文档内的资源文件上传到图床吗？",
   "notSupport1": "不支持跨笔记本进行拖拽",

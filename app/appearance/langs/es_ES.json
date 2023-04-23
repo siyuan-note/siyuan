@@ -457,6 +457,7 @@
   "moveToLeft": "Mover a la izquierda",
   "moveToRight": "Mover a la derecha",
   "copyProtocol": "Copiar hipervínculo de bloque",
+  "copyProtocolInMd": "Copiar hipervínculo de bloque (Markdown)",
   "uploadAssets2CDN": "Subir archivos de activos a la nube",
   "uploadAssets2CDNConfirmTip": "¿Está seguro de cargar los recursos de este documento en la nube?",
   "notSupport1": "No admite la función de arrastrar y soltar en los cuadernos",

@@ -7,8 +7,6 @@ const INITIAL_CACHED_RESOURCES = [
     "/stage/icon.png",
     "/stage/loading-pure.svg",
     "/stage/loading.svg",
-    "/stage/manifest.webmanifest",
-    "/stage/service-worker.js",
     "/stage/build/fonts/JetBrainsMono-Regular.woff",
     "/stage/protyle/js/lute/lute.min.js",
     "/stage/protyle/js/protyle-html.js"
@@ -41,19 +39,26 @@ self.addEventListener("fetch", event => {
 
     // Don't care about other-origin URLs.
     if (url.origin !== location.origin &&
-        url.origin !== "https://assets.b3logfile.com") {
+        url.origin !== "https://assets.b3logfile.com"
+    ) {
         return;
     }
 
     // Don't care about anything else than GET.
     if (event.request.method !== 'GET' ||
-        event.request.destination === "document") {
+        event.request.destination === "document"
+    ) {
         return;
     }
-    // Don't care about widget requests.
-    if (!url.pathname.startsWith("/stage/") && !url.pathname.startsWith("/appearance/") &&
-        "/favicon.ico" !== url.pathname &&
-        url.href.indexOf("https://assets.b3logfile.com/avatar/") === -1) {
+
+    // Don't care about other requests.
+    if (!url.pathname.startsWith("/stage/") &&
+        !url.pathname.startsWith("/appearance/boot/") &&
+        !url.pathname.startsWith("/appearance/emojis/") &&
+        !url.pathname.startsWith("/appearance/langs/") &&
+        !url.href.startsWith("https://assets.b3logfile.com/avatar/") &&
+        url.pathname !== "/favicon.ico"
+    ) {
         return;
     }
 

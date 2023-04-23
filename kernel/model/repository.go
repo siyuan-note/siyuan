@@ -181,14 +181,14 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			continue
 		}
 
-		ret.RemovesRight = append(ret.RemovesRight, &DiffFile{
+		ret.AddsLeft = append(ret.AddsLeft, &DiffFile{
 			FileID:  removeRight.ID,
 			Title:   title,
 			Updated: removeRight.Updated,
 		})
 	}
-	if 1 > len(ret.RemovesRight) {
-		ret.RemovesRight = []*DiffFile{}
+	if 1 > len(ret.AddsLeft) {
+		ret.AddsLeft = []*DiffFile{}
 	}
 
 	for _, addLeft := range diff.AddsLeft {
@@ -197,14 +197,14 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			continue
 		}
 
-		ret.AddsLeft = append(ret.AddsLeft, &DiffFile{
+		ret.RemovesRight = append(ret.RemovesRight, &DiffFile{
 			FileID:  addLeft.ID,
 			Title:   title,
 			Updated: addLeft.Updated,
 		})
 	}
-	if 1 > len(ret.AddsLeft) {
-		ret.AddsLeft = []*DiffFile{}
+	if 1 > len(ret.RemovesRight) {
+		ret.RemovesRight = []*DiffFile{}
 	}
 
 	for _, updateLeft := range diff.UpdatesLeft {

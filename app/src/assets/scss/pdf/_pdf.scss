@@ -93,6 +93,7 @@
 
   .textLayer,
   .pdf__resize {
+    z-index: 2; // pdf 缩放后 canvas 会出现在末尾，导致无法选中和查看标注
     mix-blend-mode: screen;
   }
 }

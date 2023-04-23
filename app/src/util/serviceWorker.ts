@@ -7,7 +7,7 @@ export const registerServiceWorker = (scriptURL: string) => {
     // REF https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
     window.navigator.serviceWorker
         .register(scriptURL, {
-            scope: "./",
+            scope: "/",
             type: "module",
         }).then(registration => {
         registration.update();

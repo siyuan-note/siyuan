@@ -437,60 +437,68 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
 };
 
 export const copySubMenu = (id: string, accelerator = true, focusElement?: Element) => {
-    return [
-        {
-            icon: "iconRef",
-            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
-            label: window.siyuan.languages.copyBlockRef,
-            click: () => {
-                fetchPost("/api/block/getRefText", {id}, (response) => {
-                    writeText(`((${id} '${response.data}'))`);
-                });
-                if (focusElement) {
-                    focusBlock(focusElement);
-                }
-            }
-        }, {
-            icon: "iconSQL",
-            label: window.siyuan.languages.copyBlockEmbed,
-            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom : undefined,
-            click: () => {
-                writeText(`{{select * from blocks where id='${id}'}}`);
-                if (focusElement) {
-                    focusBlock(focusElement);
-                }
-            }
-        }, {
-            icon: "iconSiYuan",
-            label: window.siyuan.languages.copyProtocol,
-            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocol.custom : undefined,
-            click: () => {
-                writeText(`siyuan://blocks/${id}`);
-                if (focusElement) {
-                    focusBlock(focusElement);
-                }
-            }
-        }, {
-            label: window.siyuan.languages.copyHPath,
-            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
-            click: () => {
-                fetchPost("/api/filetree/getHPathByID", {
-                    id
-                }, (response) => {
-                    writeText(response.data);
-                });
-            }
-        }, {
-            label: window.siyuan.languages.copyID,
-            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
-            click: () => {
-                writeText(id);
-                if (focusElement) {
-                    focusBlock(focusElement);
-                }
+    return [{
+        icon: "iconRef",
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
+        label: window.siyuan.languages.copyBlockRef,
+        click: () => {
+            fetchPost("/api/block/getRefText", {id}, (response) => {
+                writeText(`((${id} '${response.data}'))`);
+            });
+            if (focusElement) {
+                focusBlock(focusElement);
             }
         }
-    ];
+    }, {
+        icon: "iconSQL",
+        label: window.siyuan.languages.copyBlockEmbed,
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom : undefined,
+        click: () => {
+            writeText(`{{select * from blocks where id='${id}'}}`);
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
+        }
+    }, {
+        icon: "iconSiYuan",
+        label: window.siyuan.languages.copyProtocol,
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocol.custom : undefined,
+        click: () => {
+            writeText(`siyuan://blocks/${id}`);
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
+        }
+    }, {
+        label: window.siyuan.languages.copyProtocol,
+        click: () => {
+            fetchPost("/api/block/getRefText", {id}, (response) => {
+                writeText(`[${response.data.substring(0, Constants.SIZE_LINK_TEXT_MAX)}](siyuan://blocks/${id})`);
+            });
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
+        }
+    }, {
+        label: window.siyuan.languages.copyHPath,
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
+        click: () => {
+            fetchPost("/api/filetree/getHPathByID", {
+                id
+            }, (response) => {
+                writeText(response.data);
+            });
+        }
+    }, {
+        label: window.siyuan.languages.copyID,
+        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
+        click: () => {
+            writeText(id);
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
+        }
+    }];
 };
 
 export const exportMd = (id: string) => {

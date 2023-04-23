@@ -40,6 +40,7 @@ export abstract class Constants {
     public static readonly SIYUAN_AUTO_LAUNCH: string = "siyuan-auto-launch";
 
     // size
+    public static readonly SIZE_LINK_TEXT_MAX: number = 24;
     public static readonly SIZE_TOOLBAR_HEIGHT: number = isMobile() ? 0 : 32;
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;

@@ -762,7 +762,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             if (!anchor && linkAddress) {
                 anchor = linkAddress.replace("https://", "").replace("http://", "");
                 if (anchor.length > 24) {
-                    anchor = anchor.substring(0, 24) + "...";
+                    anchor = anchor.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
                 }
                 linkElement.innerHTML = Lute.EscapeHTMLStr(anchor);
             }

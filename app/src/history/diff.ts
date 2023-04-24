@@ -186,6 +186,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => 
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.update}</span>
+                <span class="counter${response.data.updatesLeft.length === 0 ? " fn__none" : ""}">${response.data.updatesLeft.length}</span>
             </li>
             <ul class="fn__none">${genItem(response.data.updatesLeft, response.data.updatesRight)}</ul>
         </ul>
@@ -195,6 +196,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => 
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
+                <span class="counter${response.data.addsLeft.length === 0 ? " fn__none" : ""}">${response.data.addsLeft.length}</span>
             </li>
             <ul class="fn__none">${genItem(response.data.addsLeft)}</ul>
         </ul>
@@ -204,6 +206,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => 
                     <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
                 </span>
                 <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.remove}</span>
+                <span class="counter${response.data.removesRight.length === 0 ? " fn__none" : ""}">${response.data.removesRight.length}</span>
             </li>
             <ul class="fn__none">${genItem(response.data.removesRight)}</ul>
         </ul>

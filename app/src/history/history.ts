@@ -57,6 +57,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
+        nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount||1}`;
         if (response.data.histories.length === 0) {
             element.lastElementChild.lastElementChild.previousElementSibling.classList.add("fn__none");
             element.lastElementChild.lastElementChild.classList.add("fn__none");
@@ -210,6 +211,7 @@ const renderRepo = (element: Element, currentPage: number) => {
     element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     const previousElement = element.querySelector('[data-type="previous"]');
     const nextElement = element.querySelector('[data-type="next"]');
+    const pageElement = nextElement.nextElementSibling.nextElementSibling;
     element.setAttribute("data-init", "true");
     if (selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots") {
         fetchPost(`/api/repo/${selectValue}`, {}, (response) => {
@@ -217,21 +219,25 @@ const renderRepo = (element: Element, currentPage: number) => {
         });
         previousElement.classList.add("fn__none");
         nextElement.classList.add("fn__none");
+        pageElement.classList.add("fn__none")
     } else {
         previousElement.classList.remove("fn__none");
         nextElement.classList.remove("fn__none");
+        pageElement.classList.remove("fn__none")
         element.setAttribute("data-page", currentPage.toString());
         if (currentPage > 1) {
             previousElement.removeAttribute("disabled");
         } else {
             previousElement.setAttribute("disabled", "disabled");
         }
+        nextElement.setAttribute("disabled", "disabled");
         fetchPost(`/api/repo/${selectValue}`, {page: currentPage}, (response) => {
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
             } else {
                 nextElement.setAttribute("disabled", "disabled");
             }
+            pageElement.textContent = `${currentPage}/${response.data.pageCount||1}`;
             renderRepoItem(response, element, selectValue);
         });
     }
@@ -291,6 +297,7 @@ export const openHistory = () => {
             notebookSelectHTML += ` <option value="${item.id}"${item.id === window.siyuan.storage[Constants.LOCAL_HISTORYNOTEID] ? " selected" : ""}>${escapeHtml(item.name)}</option>`;
         }
     });
+
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
     <div class="layout-tab-bar fn__flex" style="border-radius: 4px 4px 0 0">
         <div data-type="doc" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.fileHistory}</span><span class="fn__flex-1"></span></div>
@@ -304,19 +311,21 @@ export const openHistory = () => {
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
                     <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                    <span class="fn__space"></span>
+                    <span>1/1</span>
                     <div class="fn__flex-1"></div>
                     <div style="position: relative">
                         <svg class="b3-form__icon-icon ft__on-surface"><use xlink:href="#iconSearch"></use></svg>
-                        <input class="b3-text-field b3-form__icon-input">
+                        <input class="b3-text-field b3-form__icon-input fn__size96">
                     </div>
                     <span class="fn__space"></span>
-                    <select data-type="typeselect" class="b3-select" style="min-width: auto">
+                    <select data-type="typeselect" class="b3-select fn__size96">
                         <option value="0" selected>${window.siyuan.languages.docName}</option>
                         <option value="1">${window.siyuan.languages.docNameAndContent}</option>
                         <option value="2">${window.siyuan.languages.assets}</option>
                     </select>
                     <span class="fn__space"></span>
-                    <select data-type="opselect" class="b3-select" style="min-width: auto">
+                    <select data-type="opselect" class="b3-select fn__size96">
                         <option value="all" selected>${window.siyuan.languages.allOp}</option>
                         <option value="clean">clean</option>
                         <option value="update">update</option>
@@ -326,7 +335,7 @@ export const openHistory = () => {
                         <option value="replace">replace</option>
                     </select>
                     <span class="fn__space"></span>
-                    <select data-type="notebookselect" class="b3-select" style="min-width: auto">
+                    <select data-type="notebookselect" class="b3-select fn__size96">
                         ${notebookSelectHTML}
                     </select>
                     <span class="fn__space"></span>
@@ -351,8 +360,10 @@ export const openHistory = () => {
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
                     <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                    <span class="fn__space"></span>
+                    <span>1/1</span>
                     <div class="fn__flex-1"></div>
-                    <select class="b3-select" style="min-width: auto">
+                    <select class="b3-select fn__size96">
                         <option value="getRepoSnapshots">${window.siyuan.languages.localSnapshot}</option>
                         <option value="getRepoTagSnapshots">${window.siyuan.languages.localTagSnapshot}</option>
                         <option value="getCloudRepoSnapshots">${window.siyuan.languages.cloudSnapshot}</option>

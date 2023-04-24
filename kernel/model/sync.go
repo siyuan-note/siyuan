@@ -578,6 +578,9 @@ func isProviderOnline(byHand bool) (ret bool) {
 	}
 
 	if ret = util.IsOnline(checkURL, skipTlsVerify); !ret {
+		if !byHand {
+			autoSyncErrCount++
+		}
 		if 1 > autoSyncErrCount || byHand {
 			util.PushErrMsg(Conf.Language(76)+" (Provider: "+conf.ProviderToStr(Conf.Sync.Provider)+")", 5000)
 		}

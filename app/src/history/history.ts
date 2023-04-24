@@ -306,7 +306,7 @@ export const openHistory = () => {
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
-            <div style="${isMobile() ? "overflow:auto;" : ""}">
+            <div style="overflow:auto;">
                 <div class="block__icons">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
@@ -317,16 +317,16 @@ export const openHistory = () => {
                     <div class="fn__flex-1"></div>
                     <div style="position: relative">
                         <svg class="b3-form__icon-icon ft__on-surface"><use xlink:href="#iconSearch"></use></svg>
-                        <input class="b3-text-field b3-form__icon-input fn__size96">
+                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}">
                     </div>
                     <span class="fn__space"></span>
-                    <select data-type="typeselect" class="b3-select fn__size96">
+                    <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
                         <option value="0" selected>${window.siyuan.languages.docName}</option>
                         <option value="1">${window.siyuan.languages.docNameAndContent}</option>
                         <option value="2">${window.siyuan.languages.assets}</option>
                     </select>
                     <span class="fn__space"></span>
-                    <select data-type="opselect" class="b3-select fn__size96">
+                    <select data-type="opselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
                         <option value="all" selected>${window.siyuan.languages.allOp}</option>
                         <option value="clean">clean</option>
                         <option value="update">update</option>
@@ -336,7 +336,7 @@ export const openHistory = () => {
                         <option value="replace">replace</option>
                     </select>
                     <span class="fn__space"></span>
-                    <select data-type="notebookselect" class="b3-select fn__size96">
+                    <select data-type="notebookselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
                         ${notebookSelectHTML}
                     </select>
                     <span class="fn__space"></span>
@@ -356,7 +356,7 @@ export const openHistory = () => {
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
         </ul>
         <div data-type="repo" class="fn__none history__repo">
-            <div style="${isMobile() ? "overflow:auto;" : ""}">
+            <div style="overflow: auto"">
                 <div class="block__icons">
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
@@ -365,7 +365,7 @@ export const openHistory = () => {
                     <span>1/1</span>
                     <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
-                    <select class="b3-select fn__size96">
+                    <select class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
                         <option value="getRepoSnapshots">${window.siyuan.languages.localSnapshot}</option>
                         <option value="getRepoTagSnapshots">${window.siyuan.languages.localTagSnapshot}</option>
                         <option value="getCloudRepoSnapshots">${window.siyuan.languages.cloudSnapshot}</option>

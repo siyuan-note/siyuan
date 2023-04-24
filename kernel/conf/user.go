@@ -25,7 +25,6 @@ type User struct {
 	UserIntro                       string       `json:"userIntro"`
 	UserNickname                    string       `json:"userNickname"`
 	UserCreateTime                  string       `json:"userCreateTime"`
-	UserPaymentSum                  string       `json:"userPaymentSum"`
 	UserSiYuanProExpireTime         float64      `json:"userSiYuanProExpireTime"`
 	UserToken                       string       `json:"userToken"`
 	UserTokenExpireTime             string       `json:"userTokenExpireTime"`

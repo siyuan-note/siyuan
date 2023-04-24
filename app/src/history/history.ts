@@ -57,7 +57,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
-        nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount||1}`;
+        nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount || 1}`;
         if (response.data.histories.length === 0) {
             element.lastElementChild.lastElementChild.previousElementSibling.classList.add("fn__none");
             element.lastElementChild.lastElementChild.classList.add("fn__none");
@@ -155,6 +155,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     }
     /// #endif
     let repoHTML = "";
+    const isPhone = isMobile();
     response.data.snapshots.forEach((item: {
         memo: string,
         id: string,
@@ -169,27 +170,26 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     }) => {
         let statHTML = "";
         if (item.typesCount) {
-            statHTML = '<div class="b3-list-item__meta">';
+            statHTML = `<div class="b3-list-item__meta${isPhone ? " fn__none" : ""}">
+${window.siyuan.languages.fileCount} ${item.count}<span class="fn__space"></span>`;
             item.typesCount.forEach(subItem => {
                 statHTML += `${subItem.type} ${subItem.count}<span class="fn__space"></span>`;
             });
             statHTML += "</div>";
         }
-        const infoHTML = `<div>
-    ${escapeHtml(item.memo)}
-    <span class="fn__space"></span>
-    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
-</div>
-<div class="b3-list-item__meta">
-    <code class="fn__code">${item.id.substring(0, 7)}</code>
-    <span class="fn__space"></span>
+        const infoHTML = `<div${isPhone ? ' style="padding-top:8px"' : ""}>
     <span data-type="hCreated">${item.hCreated}</span>
     <span class="fn__space"></span>
     ${item.hSize}
     <span class="fn__space"></span>
-    ${window.siyuan.languages.fileCount} ${item.count}
+    ${item.systemOS}${(item.systemName && item.systemOS) ? "/" : ""}${item.systemName}
     <span class="fn__space"></span>
-    ${item.systemOS}/${item.systemName}
+    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
+</div>
+<div class="b3-list-item__meta${isPhone ? " fn__none" : ""}">
+    ${escapeHtml(item.memo)}
+    <span class="fn__space"></span>
+    <code class="fn__code">${item.id.substring(0, 7)}</code>
 </div>
 ${statHTML}`;
         /// #if MOBILE
@@ -198,6 +198,12 @@ ${statHTML}`;
     ${infoHTML}
     <div class="fn__flex" style="height: 26px" data-id="${item.id}" data-tag="${item.tag}">
         ${actionHTML}
+        <span class="b3-list-item__action" data-type="more">
+            <svg><use xlink:href="#iconMore"></use></svg>
+            <span class="fn__space"></span>
+            ${window.siyuan.languages.more}
+        </span>
+        <span class="fn__flex-1"></span>
     </div>
 </div>
 </li>`;
@@ -242,7 +248,7 @@ const renderRepo = (element: Element, currentPage: number) => {
             } else {
                 nextElement.setAttribute("disabled", "disabled");
             }
-            pageElement.textContent = `${currentPage}/${response.data.pageCount||1}`;
+            pageElement.textContent = `${currentPage}/${response.data.pageCount || 1}`;
             renderRepoItem(response, element, selectValue);
         });
     }
@@ -313,9 +319,9 @@ export const openHistory = () => {
         <div data-type="doc" class="history__repo fn__block" data-init="true">
             <div style="overflow:auto;">
                 <div class="block__icons">
-                    <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+                    <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
-                    <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                    <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span>1/1</span>
                     <span class="fn__space"></span>
@@ -331,7 +337,7 @@ export const openHistory = () => {
                         <option value="2">${window.siyuan.languages.assets}</option>
                     </select>
                     <span class="fn__space"></span>
-                    <select data-type="opselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
+                    <select data-type="opselect" class="b3-select${isMobile() ? " fn__size96" : ""}">
                         <option value="all" selected>${window.siyuan.languages.allOp}</option>
                         <option value="clean">clean</option>
                         <option value="update">update</option>
@@ -348,8 +354,8 @@ export const openHistory = () => {
                     <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildIndex}</button>
                 </div>
             </div>
-            <div class="fn__flex fn__flex-1"${isMobile() ? ' style="flex-direction: column;"' : ""}>
-                <ul style="${isMobile() ? "height: 40%" : "width:200px"};overflow: auto;padding-bottom: 8px;" class="b3-list b3-list--background">
+            <div class="fn__flex fn__flex-1 history__panel">
+                <ul class="b3-list b3-list--background" style="overflow:auto;">
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
                 <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
@@ -363,9 +369,9 @@ export const openHistory = () => {
         <div data-type="repo" class="fn__none history__repo">
             <div style="overflow: auto"">
                 <div class="block__icons">
-                    <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
+                    <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
-                    <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
+                    <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span>1/1</span>
                     <span class="fn__space"></span>
@@ -403,7 +409,7 @@ export const openHistory = () => {
     } else {
         const dialog = new Dialog({
             content: contentHTML,
-            width: "80vw",
+            width: "90vw",
             height: "80vh",
             destroyCallback() {
                 historyEditor = undefined;
@@ -477,6 +483,8 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                         item.classList.remove("fn__block");
                     }
                 });
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
@@ -500,6 +508,15 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                         });
                     }
                 });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "more") {
+                target.parentElement.parentElement.querySelectorAll(".b3-list-item__meta").forEach(item => {
+                    item.classList.toggle("fn__none");
+                })
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "toggle") {
                 const iconElement = target.firstElementChild.firstElementChild;
@@ -537,10 +554,14 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                         });
                     }
                 }
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "rmtoggle") {
                 target.nextElementSibling.classList.toggle("fn__none");
                 target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && type === "repoitem" &&
                 ["getRepoSnapshots", "getRepoTagSnapshots"].includes(repoSelectElement.value)) {
@@ -570,6 +591,8 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                     btnElement.setAttribute("disabled", "disabled");
                 }
                 btnElement.setAttribute("data-ids", JSON.stringify(idJSON));
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
                 const dataPath = target.getAttribute("data-path");
@@ -599,6 +622,8 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                     }
                 }
                 target.classList.add("b3-list-item--focus");
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "genRepo") {
                 const genRepoDialog = new Dialog({
@@ -627,6 +652,8 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                     });
                     genRepoDialog.destroy();
                 });
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
                 const tag = target.parentElement.getAttribute("data-tag");
@@ -635,18 +662,24 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                         renderRepo(repoElement, 1);
                     });
                 });
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "uploadSnapshot") {
                 fetchPost("/api/repo/uploadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
                 });
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "downloadSnapshot") {
                 fetchPost("/api/repo/downloadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
                 });
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "genTag") {
                 const genTagDialog = new Dialog({
@@ -690,14 +723,20 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                     });
                     genTagDialog.destroy();
                 });
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if ((type === "previous" || type === "next") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page"));
                 renderRepo(repoElement, type === "previous" ? currentPage - 1 : currentPage + 1);
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "rebuildIndex") {
                 fetchPost("/api/history/reindexHistory");
@@ -707,9 +746,13 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
                     closeModel();
                     historyEditor = undefined;
                 }
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "compare" && !target.getAttribute("disabled")) {
                 showDiff(JSON.parse(target.getAttribute("data-ids") || "[]"));
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             }
             target = target.parentElement;

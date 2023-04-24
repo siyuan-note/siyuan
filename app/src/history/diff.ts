@@ -115,7 +115,7 @@ export const showDiff = (data: { id: string, time: string }[]) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.compare,
         content: "",
-        width: isMobile() ? "92vw" : "80vw",
+        width: isMobile() ? "92vw" : "90vw",
         height: "80vh",
         destroyCallback() {
             leftEditor = undefined;
@@ -178,8 +178,8 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => 
     ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__flex-1"></span>
 </div>`;
-        headElement.nextElementSibling.innerHTML = `<div class="fn__flex" style="height: 100%;${isMobile() ? "flex-direction: column;" : ""}">
-    <div class="history__diff"${isMobile() ? 'style="flex:1;width:auto"' : ""}>
+        headElement.nextElementSibling.innerHTML = `<div class="fn__flex history__panel" style="height: 100%">
+    <div class="history__diff">
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">

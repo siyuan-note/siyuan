@@ -58,4 +58,18 @@
       }
     }
   }
+
+  .history {
+    &__panel {
+      flex-direction: column;
+
+      & > .b3-list,
+      & > .history__diff {
+        height: 40%;
+        overflow: auto;
+        padding-bottom: 8px;
+        width: auto;
+      }
+    }
+  }
 }

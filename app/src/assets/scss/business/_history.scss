@@ -31,4 +31,9 @@
     padding: 8px 0;
     overflow: auto;
   }
+
+  &__panel > .b3-list,
+  &__panel > .history__diff {
+    width: 200px;
+  }
 }

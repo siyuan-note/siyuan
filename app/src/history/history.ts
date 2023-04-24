@@ -307,12 +307,13 @@ export const openHistory = () => {
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
             <div style="${isMobile() ? "overflow:auto;" : ""}">
-                <div class="block__icons" style="min-width: 870px">
+                <div class="block__icons">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
                     <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span>1/1</span>
+                    <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
                     <div style="position: relative">
                         <svg class="b3-form__icon-icon ft__on-surface"><use xlink:href="#iconSearch"></use></svg>
@@ -356,12 +357,13 @@ export const openHistory = () => {
         </ul>
         <div data-type="repo" class="fn__none history__repo">
             <div style="${isMobile() ? "overflow:auto;" : ""}">
-                <div class="block__icons" style="min-width: 446px">
+                <div class="block__icons">
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <span class="fn__space"></span>
                     <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__se" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span>1/1</span>
+                    <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
                     <select class="b3-select fn__size96">
                         <option value="getRepoSnapshots">${window.siyuan.languages.localSnapshot}</option>

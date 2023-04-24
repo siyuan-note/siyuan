@@ -277,8 +277,10 @@ github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5g
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
-github.com/siyuan-note/dejavu v0.0.0-20230421144748-43d79a87c9f9 h1:vOGSTlJpei7tyVOpgwSXVChmf65NHkuL9GvMWPjfPgo=
-github.com/siyuan-note/dejavu v0.0.0-20230421144748-43d79a87c9f9/go.mod h1:R3PnH4Y9/0TollG4g0tX7jGW7lvhNIEL9hYi5zQ4+sI=
+github.com/siyuan-note/dejavu v0.0.0-20230424034810-63afce096499 h1:2cAa1Y8GG1f13cyy1g1SLWHty/EYaj02EMza2ql3FTs=
+github.com/siyuan-note/dejavu v0.0.0-20230424034810-63afce096499/go.mod h1:R3PnH4Y9/0TollG4g0tX7jGW7lvhNIEL9hYi5zQ4+sI=
+github.com/siyuan-note/dejavu v0.0.0-20230424035816-c47703a13fd4 h1:5hkMgzn1kyrBVK0BQTSh6jrCMrNDBKoJD/tR7U+4Tqc=
+github.com/siyuan-note/dejavu v0.0.0-20230424035816-c47703a13fd4/go.mod h1:R3PnH4Y9/0TollG4g0tX7jGW7lvhNIEL9hYi5zQ4+sI=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b h1:828lTUW2C0uNiolODqoACu7J8sDUzswD4Xo04mUombg=

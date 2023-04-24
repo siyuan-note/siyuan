@@ -83,6 +83,14 @@ func GetDeviceID() string {
 	return gulu.Rand.String(12)
 }
 
+func GetDeviceName() string {
+	ret, err := os.Hostname()
+	if nil != err {
+		return "unknown"
+	}
+	return ret
+}
+
 func SetNetworkProxy(proxyURL string) {
 	if err := os.Setenv("HTTPS_PROXY", proxyURL); nil != err {
 		logging.LogErrorf("set env [HTTPS_PROXY] failed: %s", err)

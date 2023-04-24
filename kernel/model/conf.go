@@ -235,8 +235,12 @@ func InitConf() {
 	if "" == Conf.System.ID {
 		Conf.System.ID = util.GetDeviceID()
 	}
+	if "" == Conf.System.Name {
+		Conf.System.Name = util.GetDeviceName()
+	}
 	if util.ContainerStd == util.Container {
 		Conf.System.ID = util.GetDeviceID()
+		Conf.System.Name = util.GetDeviceName()
 	}
 
 	Conf.System.AppDir = util.WorkingDir

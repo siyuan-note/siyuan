@@ -161,6 +161,9 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         hCreated: string,
         count: number,
         hSize: string,
+        systemID: string,
+        systemName: string,
+        systemOS: string,
         tag: string,
         typesCount: { type: string, count: number }[]
     }) => {
@@ -178,13 +181,15 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
 </div>
 <div class="b3-list-item__meta">
-    <code class="fn__code">${item.id.substring(0, 7)}</code> 
+    <code class="fn__code">${item.id.substring(0, 7)}</code>
     <span class="fn__space"></span>
     <span data-type="hCreated">${item.hCreated}</span>
     <span class="fn__space"></span>
     ${item.hSize}
     <span class="fn__space"></span>
     ${window.siyuan.languages.fileCount} ${item.count}
+    <span class="fn__space"></span>
+    ${item.systemOS}/${item.systemName}
 </div>
 ${statHTML}`;
         /// #if MOBILE

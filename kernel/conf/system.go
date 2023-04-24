@@ -22,6 +22,7 @@ import (
 
 type System struct {
 	ID               string `json:"id"`
+	Name             string `json:"name"`
 	KernelVersion    string `json:"kernelVersion"`
 	OS               string `json:"os"`
 	OSPlatform       string `json:"osPlatform"`
@@ -47,6 +48,7 @@ type System struct {
 func NewSystem() *System {
 	return &System{
 		ID:                 util.GetDeviceID(),
+		Name:               util.GetDeviceName(),
 		KernelVersion:      util.Ver,
 		NetworkProxy:       &NetworkProxy{},
 		DownloadInstallPkg: true,

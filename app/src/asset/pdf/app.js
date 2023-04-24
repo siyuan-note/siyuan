@@ -3194,6 +3194,18 @@ function webViewerKeyDown(evt) {
     return
   }
 
+  if (!evt.repeat &&  cmd !== 1 && cmd !== 2 && cmd !== 4  && cmd !== 8 &&
+      [48, 49, 50, 51, 52, 53, 54, 55].includes(evt.keyCode) &&
+      getSelection().rangeCount > 0 &&
+      !pdfInstance.appConfig.toolbar.rectAnno.classList.contains('toggled')) {
+    const range = getSelection().getRangeAt(0);
+    if (range.toString() !== "" && hasClosestByClassName(range.commonAncestorContainer, "pdfViewer")) {
+      pdfInstance.appConfig.appContainer.dispatchEvent(new CustomEvent("click", {detail: (evt.keyCode - 48).toString()}));
+      evt.preventDefault()
+      return
+    }
+  }
+
   // First, handle the key bindings that are independent whether an input
   // control is selected or not.
   if (cmd === 1 || cmd === 8 || cmd === 5 || cmd === 12) {

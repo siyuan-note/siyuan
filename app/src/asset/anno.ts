@@ -131,6 +131,25 @@ export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf
     element.addEventListener("click", (event) => {
         let processed = false;
         let target = event.target as HTMLElement;
+        if (typeof event.detail === "string") {
+            window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor = event.detail === "0" ?
+                (window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor || "var(--b3-pdf-background1)")
+                : `var(--b3-pdf-background${event.detail})`;
+            setStorageVal(Constants.LOCAL_PDFTHEME, window.siyuan.storage[Constants.LOCAL_PDFTHEME]);
+            const coords = getHightlightCoordsByRange(pdf, window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor);
+            if (coords) {
+                coords.forEach((item, index) => {
+                    const newElement = showHighlight(item, pdf);
+                    if (index === 0) {
+                        rectElement = newElement;
+                        copyAnno(`${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute("data-node-id")}`,
+                            pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""));
+                    }
+                });
+            }
+            hideToolbar(element);
+            return;
+        }
         while (target && !target.classList.contains("pdf__outer")) {
             const type = target.getAttribute("data-type");
             if (target.classList.contains("color__square")) {

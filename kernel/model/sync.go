@@ -46,7 +46,7 @@ func SyncDataDownload() {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline(true) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -82,7 +82,7 @@ func SyncDataUpload() {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !isProviderOnline(true) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -112,10 +112,10 @@ func SyncDataUpload() {
 }
 
 var (
-	syncSameCount        = 0
-	syncDownloadErrCount = 0
-	fixSyncInterval      = 5 * time.Minute
-	syncPlanTime         = time.Now().Add(fixSyncInterval)
+	syncSameCount    = 0
+	autoSyncErrCount = 0
+	fixSyncInterval  = 5 * time.Minute
+	syncPlanTime     = time.Now().Add(fixSyncInterval)
 
 	BootSyncSucc = -1 // -1：未执行，0：执行成功，1：执行失败
 	ExitSyncSucc = -1
@@ -136,7 +136,7 @@ func BootSyncData() {
 		return
 	}
 
-	if !isProviderOnline() {
+	if !isProviderOnline(false) {
 		BootSyncSucc = 1
 		util.PushErrMsg(Conf.Language(28), 7000)
 		return
@@ -182,7 +182,7 @@ func syncData(exit, byHand bool) {
 	}
 
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-	if !exit && !isProviderOnline() { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
+	if !exit && !isProviderOnline(byHand) { // 这个操作比较耗时，所以要先推送 syncing 事件后再判断网络，这样才能给用户更即时的反馈
 		util.BroadcastByType("main", "syncing", 2, Conf.Language(28), nil)
 		return
 	}
@@ -246,12 +246,12 @@ func checkSync(boot, exit, byHand bool) bool {
 
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")
-		planSyncAfter(30 * time.Second)
+		planSyncAfter(fixSyncInterval)
 		return false
 	}
 
-	if 7 < syncDownloadErrCount && !byHand {
-		logging.LogErrorf("sync download error too many times, cancel auto sync, try to sync by hand")
+	if 7 < autoSyncErrCount && !byHand {
+		logging.LogErrorf("failed to auto-sync too many times, delay auto-sync 64 minutes")
 		util.PushErrMsg(Conf.Language(125), 1000*60*60)
 		planSyncAfter(64 * time.Minute)
 		return false
@@ -561,7 +561,7 @@ func planSyncAfter(d time.Duration) {
 	syncPlanTime = time.Now().Add(d)
 }
 
-func isProviderOnline() (ret bool) {
+func isProviderOnline(byHand bool) (ret bool) {
 	checkURL := util.SiYuanSyncServer
 	skipTlsVerify := false
 	switch Conf.Sync.Provider {
@@ -578,7 +578,13 @@ func isProviderOnline() (ret bool) {
 	}
 
 	if ret = util.IsOnline(checkURL, skipTlsVerify); !ret {
-		util.PushErrMsg(Conf.Language(76) + " (Provider: " + conf.ProviderToStr(Conf.Sync.Provider) + ")", 5000)
+		if 1 > autoSyncErrCount || byHand {
+			util.PushErrMsg(Conf.Language(76)+" (Provider: "+conf.ProviderToStr(Conf.Sync.Provider)+")", 5000)
+		}
+		if !byHand {
+			planSyncAfter(fixSyncInterval)
+			autoSyncErrCount++
+		}
 	}
 	return
 }

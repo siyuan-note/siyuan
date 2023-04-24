@@ -117,12 +117,6 @@ ${window.siyuan.languages.account8}`;
     <div class="fn__flex-1 fn__hr"></div>
     <div class="ft__center">${subscriptionHTML}</div>
     <div class="fn__flex-1 fn__hr"></div>
-    <div class="fn__flex fn__block" style="line-height: 1.625">
-        <div class="fn__flex-1"></div>
-        <span class="ft__on-surface">${window.siyuan.languages.paymentSum}</span>
-        <span class="fn__space"></span>
-        <span>${window.siyuan.user.userPaymentSum} RMB</span>
-    </div>
     ${activeSubscriptionHTML}
 </div></div>`;
         }

@@ -246,7 +246,7 @@ func checkSync(boot, exit, byHand bool) bool {
 
 	if util.IsMutexLocked(&syncLock) {
 		logging.LogWarnf("sync is in progress")
-		planSyncAfter(30 * time.Second)
+		planSyncAfter(fixSyncInterval)
 		return false
 	}
 
@@ -582,7 +582,7 @@ func isProviderOnline(byHand bool) (ret bool) {
 			util.PushErrMsg(Conf.Language(76)+" (Provider: "+conf.ProviderToStr(Conf.Sync.Provider)+")", 5000)
 		}
 		if !byHand {
-			planSyncAfter(30 * time.Second)
+			planSyncAfter(fixSyncInterval)
 			autoSyncErrCount++
 		}
 	}

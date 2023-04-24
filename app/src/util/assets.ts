@@ -281,7 +281,7 @@ const updateMobileTheme = (OSTheme: string) => {
     if ((window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) ||
         (window.siyuan.config.system.container === "android" && window.JSAndroid)) {
         setTimeout(() => {
-            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background");
+            const backgroundColor = getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim();
             let mode = window.siyuan.config.appearance.mode;
             if (window.siyuan.config.appearance.modeOS) {
                 if (OSTheme === "dark") {
@@ -291,7 +291,7 @@ const updateMobileTheme = (OSTheme: string) => {
                 }
             }
             if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
-                window.webkit.messageHandlers.changeStatusBar.postMessage(backgroundColor + " " + mode);
+                window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1f22")) + " " + mode);
             } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
             }

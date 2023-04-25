@@ -17,12 +17,22 @@ import {needSubscribe} from "../util/needSubscribe";
 import {redirectToCheckAuth} from "../util/pathName";
 import {getAllModels} from "../layout/getAll";
 import {reloadProtyle} from "../protyle/util/reload";
+import {Tab} from "../layout/Tab";
 
-export const reloadSync = (data:{upsertRootIDs: string[], removeRootIDs: string[]}) => {
+
+const updateTitle = (rootID: string, tab: Tab) => {
+    fetchPost("/api/block/getDocInfo", {
+        id: rootID
+    }, (response) => {
+        tab.updateTitle(response.data.name)
+    })
+}
+export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: string[] }) => {
     const allModels = getAllModels()
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
-            reloadProtyle(item.editor.protyle)
+            reloadProtyle(item.editor.protyle);
+            updateTitle(item.editor.protyle.block.rootID, item.parent);
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);
         }
@@ -30,19 +40,25 @@ export const reloadSync = (data:{upsertRootIDs: string[], removeRootIDs: string[
     allModels.graph.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);
-        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.rootId)){
+        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.rootId)) {
             item.searchGraph(false);
+            if (item.type === "local") {
+                updateTitle(item.rootId, item.parent);
+            }
         }
     })
     allModels.outline.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);
-        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)){
+        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
             fetchPost("/api/outline/getDocOutline", {
                 id: item.blockId,
             }, response => {
                 item.update(response);
             });
+            if (item.type === "local") {
+                updateTitle(item.blockId, item.parent);
+            }
         }
     })
     allModels.backlink.forEach(item => {
@@ -50,6 +66,9 @@ export const reloadSync = (data:{upsertRootIDs: string[], removeRootIDs: string[
             item.parent.parent.removeTab(item.parent.id, false, false, false);
         } else {
             item.refresh();
+            if (item.type === "local") {
+                updateTitle(item.rootId, item.parent);
+            }
         }
     })
     allModels.files.forEach(item => {

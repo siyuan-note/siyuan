@@ -18,7 +18,7 @@ export const openBacklink = (protyle: IProtyle) => {
     const newWnd = protyle.model.parent.parent.split("lr");
     const tab = new Tab({
         icon: "iconLink",
-        title: protyle.title.editElement.textContent,
+        title: protyle.title.editElement.textContent || "Untitled",
         callback(tab: Tab) {
             tab.addModel(new Backlink({
                 type: "local",
@@ -45,7 +45,7 @@ export const openGraph = (protyle: IProtyle) => {
     const wnd = protyle.model.parent.parent.split("lr");
     const tab = new Tab({
         icon: "iconGraph",
-        title: protyle.title.editElement.textContent,
+        title: protyle.title.editElement.textContent || "Untitled",
         callback(tab: Tab) {
             tab.addModel(new Graph({
                 type: "local",
@@ -71,7 +71,7 @@ export const openOutline = (protyle: IProtyle) => {
     const newWnd = protyle.model.parent.parent.split("lr");
     const tab = new Tab({
         icon: "iconAlignCenter",
-        title: protyle.title.editElement.textContent,
+        title: protyle.title.editElement.textContent || "Untitled",
         callback(tab: Tab) {
             tab.addModel(new Outline({
                 type: "local",

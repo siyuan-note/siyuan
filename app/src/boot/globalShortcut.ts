@@ -1094,7 +1094,7 @@ const editKeydown = (event: KeyboardEvent) => {
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-            openCardByData(response.data, "doc", protyle.block.rootID, protyle.title.editElement.textContent);
+            openCardByData(response.data, "doc", protyle.block.rootID, protyle.title.editElement.textContent || "Untitled");
         });
         event.preventDefault();
         return true;

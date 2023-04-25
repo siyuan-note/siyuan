@@ -1053,7 +1053,8 @@ func bootSyncRepo() (err error) {
 
 	if 0 < len(fetchedFiles) {
 		go func() {
-			time.Sleep(7 * time.Second) // 等待一段时间后前端完成界面初始化后再同步
+			util.WaitForUILoaded() // 等待一段时间后前端完成界面初始化后再同步，因为需要推送消息
+
 			syncErr := syncRepo(false, false)
 			if nil != err {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)

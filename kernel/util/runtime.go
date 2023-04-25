@@ -40,6 +40,26 @@ import (
 
 const DatabaseVer = "20220501" // 修改表结构的话需要修改这里
 
+// IsUILoaded 是否已经加载了 UI。
+var IsUILoaded = false
+
+func WaitForUILoaded() {
+	for !IsUILoaded {
+		logging.LogInfof("waiting for UI loading...")
+		time.Sleep(time.Second)
+	}
+}
+
+func HookUILoaded() {
+	for !IsUILoaded {
+		if 0 < len(SessionsByType("main")) {
+			IsUILoaded = true
+			return
+		}
+		time.Sleep(time.Second)
+	}
+}
+
 // IsExiting 是否正在退出程序。
 var IsExiting = false
 

@@ -129,6 +129,8 @@ func Serve(fastMode bool) {
 		}
 	}()
 
+	go util.HookUILoaded()
+
 	if err = http.Serve(ln, ginServer); nil != err {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)

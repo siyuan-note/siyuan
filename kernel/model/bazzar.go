@@ -32,15 +32,15 @@ func GetPackageREADME(repoURL, repoHash string) (ret string) {
 	return
 }
 
-func BazaarPlugins() (widgets []*bazaar.Widget) {
-	widgets = bazaar.Widgets()
-	for _, widget := range widgets {
-		widget.Installed = gulu.File.IsDir(filepath.Join(util.DataDir, "widgets", widget.Name))
-		if widget.Installed {
-			if widget.Installed {
-				if widgetConf, err := widgetJSON(widget.Name); nil == err && nil != widget {
-					if widget.Version != widgetConf["version"].(string) {
-						widget.Outdated = true
+func BazaarPlugins() (plugins []*bazaar.Plugin) {
+	plugins = bazaar.Plugins()
+	for _, plugin := range plugins {
+		plugin.Installed = gulu.File.IsDir(filepath.Join(util.DataDir, "plugins", plugin.Name))
+		if plugin.Installed {
+			if plugin.Installed {
+				if pluginConf, err := bazaar.PluginJSON(plugin.Name); nil == err && nil != plugin {
+					if plugin.Version != pluginConf["version"].(string) {
+						plugin.Outdated = true
 					}
 				}
 			}
@@ -78,7 +78,7 @@ func BazaarWidgets() (widgets []*bazaar.Widget) {
 		widget.Installed = gulu.File.IsDir(filepath.Join(util.DataDir, "widgets", widget.Name))
 		if widget.Installed {
 			if widget.Installed {
-				if widgetConf, err := widgetJSON(widget.Name); nil == err && nil != widget {
+				if widgetConf, err := bazaar.WidgetJSON(widget.Name); nil == err && nil != widget {
 					if widget.Version != widgetConf["version"].(string) {
 						widget.Outdated = true
 					}
@@ -118,7 +118,7 @@ func BazaarIcons() (icons []*bazaar.Icon) {
 		for _, icon := range icons {
 			if installed == icon.Name {
 				icon.Installed = true
-				if themeConf, err := iconJSON(icon.Name); nil == err {
+				if themeConf, err := bazaar.IconJSON(icon.Name); nil == err {
 					if icon.Version != themeConf["version"].(string) {
 						icon.Outdated = true
 					}
@@ -230,7 +230,7 @@ func BazaarTemplates() (templates []*bazaar.Template) {
 	for _, template := range templates {
 		template.Installed = gulu.File.IsExist(filepath.Join(util.DataDir, "templates", template.Name))
 		if template.Installed {
-			if themeConf, err := templateJSON(template.Name); nil == err && nil != themeConf {
+			if themeConf, err := bazaar.TemplateJSON(template.Name); nil == err && nil != themeConf {
 				if template.Version != themeConf["version"].(string) {
 					template.Outdated = true
 				}

@@ -32,7 +32,11 @@ export const pdfResize = () => {
         if (!pdfDocument) {
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/8097
         const pdfViewerElement = item.element.querySelector("#viewerContainer");
+        if (pdfViewerElement.clientHeight === 0) {
+            return;
+        }
         if (pdfViewerElement) {
             // https://github.com/siyuan-note/siyuan/issues/6890
             const scrollTop = pdfViewerElement.getAttribute("data-scrolltop");

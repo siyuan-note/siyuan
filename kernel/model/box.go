@@ -478,10 +478,6 @@ func genTreeID(tree *parse.Tree) {
 	return
 }
 
-func ReloadUI() {
-	task.AppendTask(task.ReloadUI, util.ReloadUI)
-}
-
 func FullReindex() {
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)

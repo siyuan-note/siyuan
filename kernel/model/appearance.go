@@ -17,7 +17,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -142,72 +141,6 @@ func loadThemes() {
 	}
 }
 
-func iconJSON(iconName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.IconsPath, iconName, "icon.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if nil != err {
-		logging.LogErrorf("read icon.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
-		return
-	}
-	if 4 > len(ret) {
-		logging.LogWarnf("invalid icon.json [%s]", p)
-		return nil, errors.New("invalid icon.json")
-	}
-	return
-}
-
-func templateJSON(templateName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.DataDir, "templates", templateName, "template.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if nil != err {
-		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
-		return
-	}
-	if 4 > len(ret) {
-		logging.LogWarnf("invalid template.json [%s]", p)
-		return nil, errors.New("invalid template.json")
-	}
-	return
-}
-
-func widgetJSON(widgetName string) (ret map[string]interface{}, err error) {
-	p := filepath.Join(util.DataDir, "widgets", widgetName, "widget.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if nil != err {
-		logging.LogErrorf("read widget.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
-		return
-	}
-	if 4 > len(ret) {
-		logging.LogWarnf("invalid widget.json [%s]", p)
-		return nil, errors.New("invalid widget.json")
-	}
-	return
-}
-
 func loadIcons() {
 	iconDirs, err := os.ReadDir(util.IconsPath)
 	if nil != err {
@@ -222,7 +155,7 @@ func loadIcons() {
 			continue
 		}
 		name := iconDir.Name()
-		iconConf, err := iconJSON(name)
+		iconConf, err := bazaar.IconJSON(name)
 		if nil != err || nil == iconConf {
 			continue
 		}

@@ -28,7 +28,11 @@ export const reloadSync = (data:{upsertRootIDs: string[], removeRootIDs: string[
         }
     })
     allModels.graph.forEach(item => {
-        item.searchGraph(false);
+        if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
+            item.parent.parent.removeTab(item.parent.id, false, false, false);
+        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.rootId)){
+            item.searchGraph(false);
+        }
     })
     allModels.outline.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {

@@ -24,11 +24,11 @@ const updateTitle = (rootID: string, tab: Tab) => {
     fetchPost("/api/block/getDocInfo", {
         id: rootID
     }, (response) => {
-        tab.updateTitle(response.data.name)
-    })
-}
+        tab.updateTitle(response.data.name);
+    });
+};
 export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: string[] }) => {
-    const allModels = getAllModels()
+    const allModels = getAllModels();
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
             reloadProtyle(item.editor.protyle);
@@ -36,7 +36,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);
         }
-    })
+    });
     allModels.graph.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);
@@ -46,7 +46,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
                 updateTitle(item.rootId, item.parent);
             }
         }
-    })
+    });
     allModels.outline.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);
@@ -60,7 +60,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
                 updateTitle(item.blockId, item.parent);
             }
         }
-    })
+    });
     allModels.backlink.forEach(item => {
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);
@@ -70,21 +70,21 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
                 updateTitle(item.rootId, item.parent);
             }
         }
-    })
+    });
     allModels.files.forEach(item => {
         item.init(false);
-    })
+    });
     allModels.bookmark.forEach(item => {
         item.update();
-    })
+    });
     allModels.tag.forEach(item => {
         item.update();
-    })
+    });
     // NOTE asset 无法获取推送地址，先不处理
     allModels.search.forEach(item => {
         item.parent.panelElement.querySelector("#searchRefresh").dispatchEvent(new CustomEvent("input"));
-    })
-}
+    });
+};
 
 export const lockScreen = () => {
     if (window.siyuan.config.readonly) {

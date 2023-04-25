@@ -32,6 +32,46 @@ func GetPackageREADME(repoURL, repoHash string) (ret string) {
 	return
 }
 
+func BazaarPlugins() (widgets []*bazaar.Widget) {
+	widgets = bazaar.Widgets()
+	for _, widget := range widgets {
+		widget.Installed = gulu.File.IsDir(filepath.Join(util.DataDir, "widgets", widget.Name))
+		if widget.Installed {
+			if widget.Installed {
+				if widgetConf, err := widgetJSON(widget.Name); nil == err && nil != widget {
+					if widget.Version != widgetConf["version"].(string) {
+						widget.Outdated = true
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+func InstalledPlugins() (plugins []*bazaar.Plugin) {
+	plugins = bazaar.InstalledPlugins()
+	return
+}
+
+func InstallBazaarPlugin(repoURL, repoHash, pluginName string) error {
+	installPath := filepath.Join(util.DataDir, "plugins", pluginName)
+	err := bazaar.InstallPlugin(repoURL, repoHash, installPath, Conf.System.ID)
+	if nil != err {
+		return errors.New(fmt.Sprintf(Conf.Language(46), pluginName))
+	}
+	return nil
+}
+
+func UninstallBazaarPlugin(pluginName string) error {
+	installPath := filepath.Join(util.DataDir, "plugins", pluginName)
+	err := bazaar.UninstallPlugin(installPath)
+	if nil != err {
+		return errors.New(fmt.Sprintf(Conf.Language(47), err.Error()))
+	}
+	return nil
+}
+
 func BazaarWidgets() (widgets []*bazaar.Widget) {
 	widgets = bazaar.Widgets()
 	for _, widget := range widgets {

@@ -6,6 +6,9 @@ import {Outline} from "./dock/Outline";
 import {Backlink} from "./dock/Backlink";
 import {Asset} from "../asset";
 import {Search} from "../search";
+import {Files} from "./dock/Files";
+import {Bookmark} from "./dock/Bookmark";
+import {Tag} from "./dock/Tag";
 
 export const getAllModels = () => {
     const models: IModels = {
@@ -14,7 +17,11 @@ export const getAllModels = () => {
         asset: [],
         outline: [],
         backlink: [],
-        search: []
+        search: [],
+        inbox: [],
+        files: [],
+        bookmark: [],
+        tag: []
     };
     const getTabs = (layout: Layout) => {
         for (let i = 0; i < layout.children.length; i++) {
@@ -33,6 +40,12 @@ export const getAllModels = () => {
                     models.asset.push(model);
                 } else if (model instanceof Search) {
                     models.search.push(model);
+                } else if (model instanceof Files) {
+                    models.files.push(model);
+                } else if (model instanceof Bookmark) {
+                    models.bookmark.push(model);
+                } else if (model instanceof Tag) {
+                    models.tag.push(model);
                 }
             } else {
                 getTabs(item as Layout);

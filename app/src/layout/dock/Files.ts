@@ -636,7 +636,7 @@ export class Files extends Model {
         }
     }
 
-    private init(init = true) {
+    public init(init = true) {
         let html = "";
         let closeHtml = "";
         window.siyuan.notebooks.forEach((item) => {

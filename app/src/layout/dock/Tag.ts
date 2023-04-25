@@ -184,7 +184,7 @@ export class Tag extends Model {
         setPanelFocus(this.element);
     }
 
-    private update() {
+    public update() {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         if (element.classList.contains("fn__rotate")) {
             return;

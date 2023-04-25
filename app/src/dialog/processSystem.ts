@@ -15,6 +15,53 @@ import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
 import {redirectToCheckAuth} from "../util/pathName";
+import {getAllModels} from "../layout/getAll";
+import {reloadProtyle} from "../protyle/util/reload";
+
+export const reloadSync = (data:{upsertRootIDs: string[], removeRootIDs: string[]}) => {
+    const allModels = getAllModels()
+    allModels.editor.forEach(item => {
+        if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
+            reloadProtyle(item.editor.protyle)
+        } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
+            item.parent.parent.removeTab(item.parent.id, false, false, false);
+        }
+    })
+    allModels.graph.forEach(item => {
+        item.searchGraph(false);
+    })
+    allModels.outline.forEach(item => {
+        if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
+            item.parent.parent.removeTab(item.parent.id, false, false, false);
+        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)){
+            fetchPost("/api/outline/getDocOutline", {
+                id: item.blockId,
+            }, response => {
+                item.update(response);
+            });
+        }
+    })
+    allModels.backlink.forEach(item => {
+        if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
+            item.parent.parent.removeTab(item.parent.id, false, false, false);
+        } else {
+            item.refresh();
+        }
+    })
+    allModels.files.forEach(item => {
+        item.init(false);
+    })
+    allModels.bookmark.forEach(item => {
+        item.update();
+    })
+    allModels.tag.forEach(item => {
+        item.update();
+    })
+    // NOTE asset 无法获取推送地址，先不处理
+    allModels.search.forEach(item => {
+        item.parent.panelElement.querySelector("#searchRefresh").dispatchEvent(new CustomEvent("input"));
+    })
+}
 
 export const lockScreen = () => {
     if (window.siyuan.config.readonly) {

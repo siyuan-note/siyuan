@@ -13,15 +13,6 @@ import {escapeHtml} from "../util/escape";
 import {getDisplayName, movePathTo} from "../util/pathName";
 
 export const openCard = () => {
-    const exit = window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
-            item.destroy();
-            return true;
-        }
-    });
-    if (exit) {
-        return;
-    }
     fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
         openCardByData(cardsResponse.data, "all");
     });
@@ -31,6 +22,16 @@ export const openCardByData = (cardsData: {
     cards: ICard[],
     unreviewedCount: number
 }, cardType: "doc" | "notebook" | "all", id?: string, title?: string) => {
+    const exit = window.siyuan.dialogs.find(item => {
+        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
+            item.destroy();
+            return true;
+        }
+    });
+    if (exit) {
+        return;
+    }
+
     let blocks = cardsData.cards;
     let index = 0;
     const dialog = new Dialog({

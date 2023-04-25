@@ -45,7 +45,6 @@ var IsUILoaded = false
 
 func WaitForUILoaded() {
 	for !IsUILoaded {
-		logging.LogInfof("waiting for UI loading...")
 		time.Sleep(200 * time.Millisecond)
 	}
 }

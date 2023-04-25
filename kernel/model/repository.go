@@ -1245,6 +1245,13 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 	elapsed := time.Since(start)
 	go func() {
 		util.WaitForUILoaded()
+
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			// 移动端不推送差异详情
+			upsertRootIDs = []string{}
+			removeRootIDs = []string{}
+		}
+
 		util.BroadcastByType("main", "syncMergeResult", 0, "",
 			map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
 

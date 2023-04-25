@@ -182,7 +182,6 @@ func exportLog(c *gin.Context) {
 	}
 }
 
-var start = true // 是否是启动
 func getConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -200,21 +199,21 @@ func getConf(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"conf":  maskedConf,
-		"start": start,
+		"start": !util.IsUILoaded,
 	}
 
-	if start {
-		start = false
+	if !util.IsUILoaded {
+		go func() {
+			util.WaitForUILoaded()
 
-		if model.Conf.Editor.ReadOnly {
-			// 编辑器启用只读模式时启动后提示用户 https://github.com/siyuan-note/siyuan/issues/7700
-			go func() {
-				time.Sleep(time.Second * 7)
+			if model.Conf.Editor.ReadOnly {
+				// 编辑器启用只读模式时启动后提示用户 https://github.com/siyuan-note/siyuan/issues/7700
+				time.Sleep(time.Second * 3)
 				if model.Conf.Editor.ReadOnly {
 					util.PushMsg(model.Conf.Language(197), 7000)
 				}
-			}()
-		}
+			}
+		}()
 	}
 }
 

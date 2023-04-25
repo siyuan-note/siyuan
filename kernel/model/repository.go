@@ -1053,7 +1053,6 @@ func bootSyncRepo() (err error) {
 
 	if 0 < len(fetchedFiles) {
 		go func() {
-			time.Sleep(7 * time.Second) // 等待一段时间后前端完成界面初始化后再同步
 			syncErr := syncRepo(false, false)
 			if nil != err {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)
@@ -1238,33 +1237,42 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 		return
 	}
 
-	incReindex(upserts, removes)
-	if !exit {
-		ReloadUI()
+	if exit { // 退出时同步不用推送事件
+		return
 	}
 
+	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
 	elapsed := time.Since(start)
-	if !exit {
-		go func() {
-			time.Sleep(2 * time.Second)
-			util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	go func() {
+		util.WaitForUILoaded()
 
-			if 0 < len(mergeResult.Conflicts) {
-				syConflict := false
-				for _, file := range mergeResult.Conflicts {
-					if strings.HasSuffix(file.Path, ".sy") {
-						syConflict = true
-						break
-					}
-				}
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			// 移动端不推送差异详情
+			upsertRootIDs = []string{}
+			removeRootIDs = []string{}
+		}
 
-				if syConflict {
-					// 数据同步发生冲突时在界面上进行提醒 https://github.com/siyuan-note/siyuan/issues/7332
-					util.PushMsg(Conf.Language(108), 7000)
+		util.BroadcastByType("main", "syncMergeResult", 0, "",
+			map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+
+		time.Sleep(2 * time.Second)
+		util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+
+		if 0 < len(mergeResult.Conflicts) {
+			syConflict := false
+			for _, file := range mergeResult.Conflicts {
+				if strings.HasSuffix(file.Path, ".sy") {
+					syConflict = true
+					break
 				}
 			}
-		}()
-	}
+
+			if syConflict {
+				// 数据同步发生冲突时在界面上进行提醒 https://github.com/siyuan-note/siyuan/issues/7332
+				util.PushMsg(Conf.Language(108), 7000)
+			}
+		}
+	}()
 }
 
 func logSyncMergeResult(mergeResult *dejavu.MergeResult) {

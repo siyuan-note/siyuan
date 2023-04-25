@@ -89,7 +89,7 @@ export class Bookmark extends Model {
                 }
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
-                openBookmarkMenu(element, event, this)
+                openBookmarkMenu(element, event, this);
             },
             ctrlClick(element: HTMLElement) {
                 openFileById({

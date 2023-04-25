@@ -402,7 +402,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             icon: "iconSearch",
             accelerator: window.siyuan.config.keymap.general.search.custom,
             async click() {
-                const searchPath = getDisplayName(pathString, false, true)
+                const searchPath = getDisplayName(pathString, false, true);
                 /// #if MOBILE
                 const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                     notebook: notebookId,
@@ -432,7 +432,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             accelerator: window.siyuan.config.keymap.general.replace.custom,
             icon: "iconReplace",
             async click() {
-                const searchPath = getDisplayName(pathString, false, true)
+                const searchPath = getDisplayName(pathString, false, true);
                 /// #if MOBILE
                 const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                     notebook: notebookId,

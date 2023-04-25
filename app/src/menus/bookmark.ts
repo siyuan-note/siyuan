@@ -63,7 +63,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
                 confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(bookmarkText)}</b>?`, () => {
                     if (id) {
                         fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
-                            bookmarkObj.update()
+                            bookmarkObj.update();
                         });
                         document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${id}"]`).forEach((item) => {
                             item.setAttribute("bookmark", "");
@@ -81,4 +81,4 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
     }
     window.siyuan.menus.menu.element.style.zIndex = "221";  // 移动端被右侧栏遮挡
     window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
-}
+};

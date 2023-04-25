@@ -230,11 +230,11 @@ const renderRepo = (element: Element, currentPage: number) => {
         });
         previousElement.classList.add("fn__none");
         nextElement.classList.add("fn__none");
-        pageElement.classList.add("fn__none")
+        pageElement.classList.add("fn__none");
     } else {
         previousElement.classList.remove("fn__none");
         nextElement.classList.remove("fn__none");
-        pageElement.classList.remove("fn__none")
+        pageElement.classList.remove("fn__none");
         element.setAttribute("data-page", currentPage.toString());
         if (currentPage > 1) {
             previousElement.removeAttribute("disabled");
@@ -514,7 +514,7 @@ const bindEvent = (element: Element, dialog?: Dialog) => {
             } else if (type === "more") {
                 target.parentElement.parentElement.querySelectorAll(".b3-list-item__meta").forEach(item => {
                     item.classList.toggle("fn__none");
-                })
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;

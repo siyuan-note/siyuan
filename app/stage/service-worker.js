@@ -56,7 +56,7 @@ self.addEventListener("fetch", event => {
         !url.pathname.startsWith("/appearance/boot/") &&
         !url.pathname.startsWith("/appearance/emojis/") &&
         !url.pathname.startsWith("/appearance/langs/") &&
-        !url.href.startsWith("https://assets.b3logfile.com/avatar/") &&
+        !url.href.startsWith("https://assets.b3logfile.com/") &&
         url.pathname !== "/favicon.ico"
     ) {
         return;

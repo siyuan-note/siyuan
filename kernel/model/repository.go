@@ -1059,8 +1059,6 @@ func bootSyncRepo() (err error) {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)
 				return
 			}
-			syncingFiles = sync.Map{}
-			syncingStorages = false
 		}()
 	}
 	return
@@ -1231,6 +1229,9 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 	if needReloadOcrTexts {
 		LoadAssetsTexts()
 	}
+
+	syncingFiles = sync.Map{}
+	syncingStorages = false
 
 	cache.ClearDocsIAL()              // 同步后文档树文档图标没有更新 https://github.com/siyuan-note/siyuan/issues/4939
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764

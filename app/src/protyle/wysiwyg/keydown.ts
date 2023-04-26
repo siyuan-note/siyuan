@@ -577,7 +577,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
-
+        const selectText = range.toString();
         // 上下左右光标移动
         if (!event.altKey && !event.shiftKey && !isCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
             // 需使用 editabled，否则代码块会把语言字数算入
@@ -637,7 +637,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 }
-            } else if (range.toString() === "" && (event.key === "ArrowDown" || event.key === "ArrowRight") && nodeElement.isSameNode(getLastBlock(protyle.wysiwyg.element.lastElementChild)) &&
+            } else if (selectText === "" && (event.key === "ArrowDown" || event.key === "ArrowRight") && nodeElement.isSameNode(getLastBlock(protyle.wysiwyg.element.lastElementChild)) &&
                 // 表格无法右移动 https://ld246.com/article/1631434502215
                 !hasClosestByMatchTag(range.startContainer, "TD") && !hasClosestByMatchTag(range.startContainer, "TH")) {
                 // 页面按向下/右箭头丢失焦点 https://ld246.com/article/1629954026096
@@ -648,7 +648,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     event.preventDefault();
                     focusByRange(range);
                 }
-            } else if (range.toString() === "" && event.key === "ArrowLeft" && nodeElement.isSameNode(getFirstBlock(protyle.wysiwyg.element.firstElementChild))) {
+            } else if (selectText === "" && event.key === "ArrowLeft" && nodeElement.isSameNode(getFirstBlock(protyle.wysiwyg.element.firstElementChild))) {
                 // 页面向左箭头丢失焦点 https://github.com/siyuan-note/siyuan/issues/2768
                 const firstEditElement = getContenteditableElement(nodeElement);
                 if (firstEditElement && getSelectionOffset(firstEditElement, undefined, range).start === 0) {
@@ -688,7 +688,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        const selectText = range.toString();
         // 删除，不可使用 !isCtrl(event)，否则软删除回导致 https://github.com/siyuan-note/siyuan/issues/5607
         // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
         if (!event.altKey && (event.key === "Backspace" || event.key === "Delete")) {
@@ -699,8 +698,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             // https://github.com/siyuan-note/siyuan/issues/6796
-            const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
-            if (range.toString() === "" && event.key === "Backspace" &&
+            if (selectText === "" && event.key === "Backspace" &&
                 range.startOffset === range.startContainer.textContent.length &&
                 range.startContainer.textContent.endsWith("\n" + Constants.ZWSP)) {
                 range.setStart(range.startContainer, range.startOffset - 1);
@@ -709,6 +707,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 return;
             }
+            const previousSibling = hasPreviousSibling(range.startContainer) as HTMLElement;
             // https://github.com/siyuan-note/siyuan/issues/5547
             if (range.startOffset === 1 && range.startContainer.textContent === Constants.ZWSP &&
                 previousSibling && previousSibling.nodeType !== 3 &&
@@ -843,7 +842,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 软换行
-        if (matchHotKey("⇧↩", event) && range.toString() === "") {
+        if (matchHotKey("⇧↩", event) && selectText === "") {
             let startElement = range.startContainer as HTMLElement;
             const nextSibling = hasNextSibling(startElement) as Element;
             // 图片之前软换行
@@ -1443,7 +1442,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText.custom, event)) {
-            if (range.toString() === "") {
+            if (selectText === "") {
                 const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 let html = "";
                 if (selectsElement.length === 0) {

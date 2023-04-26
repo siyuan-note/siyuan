@@ -11,6 +11,7 @@ import {blockRender} from "../markdown/blockRender";
 import {hideElements} from "../ui/hideElements";
 import {hasClosestByAttribute} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true) => {
     if (!blockElement.parentElement) {
@@ -41,11 +42,17 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
-    let id = blockElement.getAttribute("data-node-id");
+    const id = blockElement.getAttribute("data-node-id");
     if (type !== "NodeCodeBlock" && (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
         // 软换行
         updateTransaction(protyle, id, blockElement.outerHTML, blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
         wbrElement.remove();
+        return;
+    }
+    if (turnIntoTaskList(protyle, type, blockElement, editElement)) {
+      return;
+    }
+    if (headingTurnIntoList(protyle, type, blockElement, editElement)) {
         return;
     }
     // table、粗体 中也会有 br，仅用于类似#a#，删除后会产生的 br
@@ -80,9 +87,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         }
     }
     let html = blockElement.outerHTML;
-    let todoOldHTML = "";
     let focusHR = false;
-    if (editElement.textContent === "---" && !blockElement.classList.contains("code-block")) {
+    if (editElement.textContent === "---" && type !== "NodeCodeBlock") {
         html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
         const nextBlockElement = getNextBlock(editElement);
         if (nextBlockElement) {
@@ -93,23 +99,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
         } else {
             html += genEmptyBlock(false, true);
-        }
-    } else if (!blockElement.classList.contains("code-block") && (["[]", "[ ]", "[x]", "[X]", "【】", "【 】", "【x】", "【X】"].includes(editElement.textContent))) {
-        const isDone = editElement.textContent.indexOf("x") > -1 || editElement.textContent.indexOf("X") > -1;
-        if (blockElement.parentElement.classList.contains("li") &&
-            blockElement.parentElement.childElementCount === 3  // https://ld246.com/article/1659315815506
-        ) {
-            // 仅有一项的列表才可转换
-            if (!blockElement.parentElement.parentElement.classList.contains("protyle-wysiwyg") && // https://ld246.com/article/1659315815506
-                blockElement.parentElement.parentElement.childElementCount === 2) {
-                html = `<div data-subtype="t" data-node-id="${blockElement.parentElement.parentElement.getAttribute("data-node-id")}" data-type="NodeList" class="list"><div data-marker="*" data-subtype="t" data-node-id="${blockElement.parentElement.getAttribute("data-node-id")}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div><div data-node-id="${id}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"><wbr></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
-                id = blockElement.parentElement.parentElement.getAttribute("data-node-id");
-                blockElement = blockElement.parentElement.parentElement;
-                todoOldHTML = blockElement.outerHTML;
-            }
-        } else {
-            html = `<div data-subtype="t" data-node-id="${id}" data-type="NodeList" class="list"><div data-marker="*" data-subtype="t" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div><div data-node-id="${Lute.NewNodeID()}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"><wbr></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
-            todoOldHTML = blockElement.outerHTML;
         }
     } else {
         if (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
@@ -137,7 +126,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             // 内容删空后使用上下键，光标无法到达 https://github.com/siyuan-note/siyuan/issues/4167 https://ld246.com/article/1636256333803
             tempElement.content.childElementCount === 1 && getContenteditableElement(tempElement.content.firstElementChild)?.innerHTML === "<wbr>"
         ) &&
-        !(tempElement.content.childElementCount === 1 && tempElement.content.firstElementChild.classList.contains("code-block") && blockElement.classList.contains("code-block"))
+        !(tempElement.content.childElementCount === 1 && tempElement.content.firstElementChild.classList.contains("code-block") && type === "NodeCodeBlock")
     ) {
         log("SpinBlockDOM", blockElement.outerHTML, "argument", protyle.options.debugger);
         log("SpinBlockDOM", html, "result", protyle.options.debugger);
@@ -216,10 +205,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         protyle.hint.render(protyle);
     }
     hideElements(["gutter"], protyle);
-    updateInput(html, protyle, id, type, todoOldHTML);
+    updateInput(html, protyle, id, type);
 };
 
-const updateInput = (html: string, protyle: IProtyle, id: string, type: string, oldHTML?: string) => {
+const updateInput = (html: string, protyle: IProtyle, id: string, type: string) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     const doOperations: IOperation[] = [];
@@ -237,7 +226,7 @@ const updateInput = (html: string, protyle: IProtyle, id: string, type: string, 
             });
             undoOperations.push({
                 id,
-                data: protyle.wysiwyg.lastHTMLs[id] || oldHTML,
+                data: protyle.wysiwyg.lastHTMLs[id],
                 action: "update"
             });
         } else {

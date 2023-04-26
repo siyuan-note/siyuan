@@ -84,7 +84,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
     const tempElement = document.createElement("template");
     // 需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
-    tempElement.innerHTML = protyle.lute.SpinBlockDOM(html);
+    tempElement.innerHTML = protyle.lute.SpinBlockDOM(html) ||
+        html;   // 空格会被 Spin 不再，需要使用原文
     const editableElement = getContenteditableElement(blockElement);
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {

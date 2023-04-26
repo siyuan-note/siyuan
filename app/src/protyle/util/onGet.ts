@@ -245,6 +245,7 @@ const setHTML = (options: {
         disabledForeverProtyle(protyle);
     } else {
         protyle.breadcrumb.element.nextElementSibling.textContent = "";
+        protyle.element.removeAttribute("disabled-forever");
         if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
             disabledProtyle(protyle);
         } else {

@@ -82,7 +82,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
     });
     // NOTE asset 无法获取推送地址，先不处理
     allModels.search.forEach(item => {
-        item.parent.panelElement.querySelector("#searchRefresh").dispatchEvent(new CustomEvent("input"));
+        item.parent.panelElement.querySelector("#searchInput").dispatchEvent(new CustomEvent("input"));
     });
 };
 

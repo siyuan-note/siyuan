@@ -244,7 +244,8 @@ const setHTML = (options: {
     if (options.isSyncing) {
         disabledForeverProtyle(protyle);
     } else {
-        if (protyle.disabled) {
+        protyle.breadcrumb.element.nextElementSibling.textContent = "";
+        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
             disabledProtyle(protyle);
         } else {
             enableProtyle(protyle);

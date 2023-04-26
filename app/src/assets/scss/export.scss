@@ -36,7 +36,7 @@ svg {
 }
 
 @media print {
-  #preview.protyle-wysiwyg {
+  .protyle-wysiwyg {
     [data-node-id] {
 
       // 尽量避免音频块内分页

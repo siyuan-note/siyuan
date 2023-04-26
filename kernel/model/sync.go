@@ -261,6 +261,9 @@ func checkSync(boot, exit, byHand bool) bool {
 
 // incReindex 增量重建索引。
 func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []string) {
+	upsertRootIDs = []string{}
+	removeRootIDs = []string{}
+
 	util.IncBootProgress(3, "Sync reindexing...")
 	msg := fmt.Sprintf(Conf.Language(35))
 	util.PushStatusBar(msg)

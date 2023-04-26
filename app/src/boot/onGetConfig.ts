@@ -159,55 +159,84 @@ export const onGetConfig = (isStart: boolean) => {
     addGA();
 };
 
-const winOnFocus = () => {
-    if (getSelection().rangeCount > 0) {
-        const range = getSelection().getRangeAt(0);
-        const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
-        if (startNode && startNode.nodeType !== 3 && (startNode.tagName === "TEXTAREA" || startNode.tagName === "INPUT")) {
-            startNode.focus();
-        } else {
-            focusByRange(getSelection().getRangeAt(0));
-        }
-    }
-    exportLayout(false);
-    window.siyuan.altIsPressed = false;
-    window.siyuan.ctrlIsPressed = false;
-    window.siyuan.shiftIsPressed = false;
-    document.body.classList.remove("body--blur");
-};
-
-const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
-    /// #if !BROWSER
-    exportLayout(false, () => {
-        if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
-            // 最小化
-            if ("windows" === window.siyuan.config.system.os) {
-                ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, {
-                    id: getCurrentWindow().id,
-                    languages: window.siyuan.languages["_trayMenu"],
-                });
-            } else {
-                if (currentWindow.isFullScreen()) {
-                    currentWindow.once("leave-full-screen", () => currentWindow.hide());
-                    currentWindow.setFullScreen(false);
-                } else {
-                    currentWindow.hide();
-                }
-            }
-        } else {
-            exitSiYuan();
-        }
-    }, false, true);
-    /// #endif
-};
-
 export const initWindow = () => {
     /// #if !BROWSER
+    const winOnFocus = () => {
+        if (getSelection().rangeCount > 0) {
+            const range = getSelection().getRangeAt(0);
+            const startNode = range.startContainer.childNodes[range.startOffset] as HTMLElement;
+            if (startNode && startNode.nodeType !== 3 && (startNode.tagName === "TEXTAREA" || startNode.tagName === "INPUT")) {
+                startNode.focus();
+            } else {
+                focusByRange(getSelection().getRangeAt(0));
+            }
+        }
+        exportLayout(false);
+        window.siyuan.altIsPressed = false;
+        window.siyuan.ctrlIsPressed = false;
+        window.siyuan.shiftIsPressed = false;
+        document.body.classList.remove("body--blur");
+    };
+
+    const winOnBlur = () => {
+        document.body.classList.add("body--blur");
+    }
+
+    const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
+        exportLayout(false, () => {
+            if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
+                // 最小化
+                if ("windows" === window.siyuan.config.system.os) {
+                    ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, {
+                        id: getCurrentWindow().id,
+                        languages: window.siyuan.languages["_trayMenu"],
+                    });
+                } else {
+                    if (currentWindow.isFullScreen()) {
+                        currentWindow.once("leave-full-screen", () => currentWindow.hide());
+                        currentWindow.setFullScreen(false);
+                    } else {
+                        currentWindow.hide();
+                    }
+                }
+            } else {
+                exitSiYuan();
+            }
+        }, false, true);
+    };
+
+    const winOnMaxRestore = () => {
+        const currentWindow = getCurrentWindow();
+        const maxBtnElement = document.getElementById("maxWindow");
+        const restoreBtnElement = document.getElementById("restoreWindow");
+        if (currentWindow.isMaximized() || currentWindow.isFullScreen()) {
+            restoreBtnElement.style.display = "flex";
+            maxBtnElement.style.display = "none";
+        } else {
+            restoreBtnElement.style.display = "none";
+            maxBtnElement.style.display = "flex";
+        }
+    };
+
+    const winOnEnterFullscreen = () => {
+        if (isWindow()) {
+            setTabPosition();
+        } else {
+            document.getElementById("toolbar").style.paddingLeft = "0";
+        }
+    }
+
+    const winOnLeaveFullscreen = () => {
+        if (isWindow()) {
+            setTabPosition();
+        } else {
+            document.getElementById("toolbar").setAttribute("style", "");
+        }
+    }
+
     const currentWindow = getCurrentWindow();
     currentWindow.on("focus", winOnFocus);
-    currentWindow.on("blur", () => {
-        document.body.classList.add("body--blur");
-    });
+    currentWindow.on("blur", winOnBlur);
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
             if (!isSYProtocol(url)) {
@@ -261,7 +290,7 @@ export const initWindow = () => {
             setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
             try {
                 if (window.siyuan.config.export.pdfFooter.trim()) {
-                    const response = await fetchSyncPost("/api/template/renderSprig", {template:window.siyuan.config.export.pdfFooter});
+                    const response = await fetchSyncPost("/api/template/renderSprig", {template: window.siyuan.config.export.pdfFooter});
                     ipcData.pdfOptions.displayHeaderFooter = true;
                     ipcData.pdfOptions.headerTemplate = "<span></span>";
                     ipcData.pdfOptions.footerTemplate = `<div style="text-align:center;width:100%;font-size:8px;line-height:12px;">
@@ -321,9 +350,21 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             window.siyuan.printWin.hide();
         });
     });
+
     window.addEventListener("beforeunload", () => {
         currentWindow.off("focus", winOnFocus);
+        currentWindow.off("blur", winOnBlur);
+        if ("darwin" === window.siyuan.config.system.os) {
+            currentWindow.off("enter-full-screen", winOnEnterFullscreen);
+            currentWindow.off("leave-full-screen", winOnLeaveFullscreen);
+        } else {
+            currentWindow.off("enter-full-screen", winOnMaxRestore);
+            currentWindow.off("leave-full-screen", winOnMaxRestore);
+            currentWindow.off("maximize", winOnMaxRestore);
+            currentWindow.off("unmaximize", winOnMaxRestore);
+        }
     }, false);
+
     if (isWindow()) {
         document.body.insertAdjacentHTML("beforeend", `<div class="toolbar__window">
 <div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.pin}" id="pinWindow">
@@ -352,26 +393,14 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             }
         });
         const toolbarElement = document.getElementById("toolbar");
-        currentWindow.on("enter-full-screen", () => {
-            if (isWindow()) {
-                setTabPosition();
-            } else {
-                toolbarElement.style.paddingLeft = "0";
-            }
-        });
-        currentWindow.on("leave-full-screen", () => {
-            if (isWindow()) {
-                setTabPosition();
-            } else {
-                toolbarElement.setAttribute("style", "");
-            }
-        });
-
+        currentWindow.on("enter-full-screen", winOnEnterFullscreen);
+        currentWindow.on("leave-full-screen", winOnLeaveFullscreen);
         if (currentWindow.isFullScreen() && !isWindow()) {
             toolbarElement.style.paddingLeft = "0";
         }
         return;
     }
+
     document.body.classList.add("body--win32");
 
     // 添加窗口控件
@@ -414,23 +443,11 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         currentWindow.maximize();
     });
 
-    const toggleMaxRestoreButtons = () => {
-        if (currentWindow.isMaximized() || currentWindow.isFullScreen()) {
-            restoreBtnElement.style.display = "flex";
-            maxBtnElement.style.display = "none";
-        } else {
-            restoreBtnElement.style.display = "none";
-            maxBtnElement.style.display = "flex";
-        }
-    };
-    toggleMaxRestoreButtons();
-    currentWindow.on("maximize", toggleMaxRestoreButtons);
-    currentWindow.on("unmaximize", toggleMaxRestoreButtons);
-    currentWindow.on("enter-full-screen", () => {
-        restoreBtnElement.style.display = "flex";
-        maxBtnElement.style.display = "none";
-    });
-    currentWindow.on("leave-full-screen", toggleMaxRestoreButtons);
+    winOnMaxRestore();
+    currentWindow.on("maximize", winOnMaxRestore);
+    currentWindow.on("unmaximize", winOnMaxRestore);
+    currentWindow.on("enter-full-screen", winOnMaxRestore);
+    currentWindow.on("leave-full-screen", winOnMaxRestore);
     const minBtnElement = document.getElementById("minWindow");
     const closeBtnElement = document.getElementById("closeWindow");
     minBtnElement.addEventListener("click", () => {

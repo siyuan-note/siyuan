@@ -1672,7 +1672,7 @@ type Sync struct {
 }
 
 func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchangeSize, hTrafficUploadSize, hTrafficDownloadSize, hTrafficAPIGet, hTrafficAPIPut string, err error) {
-	stat, err := getCloudSpaceOSS()
+	stat, err := getCloudSpace()
 	if nil != err {
 		err = errors.New(Conf.Language(30) + " " + err.Error())
 		return
@@ -1719,7 +1719,7 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchan
 	return
 }
 
-func getCloudSpaceOSS() (stat *cloud.Stat, err error) {
+func getCloudSpace() (stat *cloud.Stat, err error) {
 	repo, err := newRepository()
 	if nil != err {
 		return

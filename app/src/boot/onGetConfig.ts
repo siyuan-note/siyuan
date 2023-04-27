@@ -180,7 +180,7 @@ export const initWindow = () => {
 
     const winOnBlur = () => {
         document.body.classList.add("body--blur");
-    }
+    };
 
     const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
         exportLayout(false, () => {
@@ -224,7 +224,7 @@ export const initWindow = () => {
         } else {
             document.getElementById("toolbar").style.paddingLeft = "0";
         }
-    }
+    };
 
     const winOnLeaveFullscreen = () => {
         if (isWindow()) {
@@ -232,7 +232,7 @@ export const initWindow = () => {
         } else {
             document.getElementById("toolbar").setAttribute("style", "");
         }
-    }
+    };
 
     const currentWindow = getCurrentWindow();
     currentWindow.on("focus", winOnFocus);

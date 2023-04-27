@@ -205,10 +205,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         protyle.hint.render(protyle);
     }
     hideElements(["gutter"], protyle);
-    updateInput(html, protyle, id, type);
+    updateInput(html, protyle, id);
 };
 
-const updateInput = (html: string, protyle: IProtyle, id: string, type: string) => {
+const updateInput = (html: string, protyle: IProtyle, id: string) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     const doOperations: IOperation[] = [];

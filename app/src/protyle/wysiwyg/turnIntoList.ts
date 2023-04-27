@@ -26,15 +26,15 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 if (isDone) {
                     blockElement.parentElement.classList.add("protyle-task--done");
                 }
-                blockElement.previousElementSibling.outerHTML = `<div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>`
+                blockElement.previousElementSibling.outerHTML = `<div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>`;
                 editElement.innerHTML = editElement.innerHTML.substring(contextStartIndex);
                 updateTransaction(protyle, liElement.getAttribute("data-node-id"), liElement.outerHTML, oldHTML);
-                focusByWbr(protyle.wysiwyg.element, range)
+                focusByWbr(protyle.wysiwyg.element, range);
                 return true;
             }
             return false;
         } else {
-            const id = blockElement.getAttribute("data-node-id")
+            const id = blockElement.getAttribute("data-node-id");
             const newId = Lute.NewNodeID();
             const emptyId = Lute.NewNodeID();
             const liItemId = Lute.NewNodeID();
@@ -68,18 +68,18 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 action: "delete",
                 id: newId
             }]);
-            blockElement.outerHTML = `<div data-subtype="t" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`
-            focusByWbr(protyle.wysiwyg.element, range)
+            blockElement.outerHTML = `<div data-subtype="t" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
+            focusByWbr(protyle.wysiwyg.element, range);
             return true;
         }
     }
-    return false
-}
+    return false;
+};
 
 export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
     if (type === "NodeHeading" && ["* ", "- "].includes(editElement.innerHTML.substring(0, 2)) &&
         blockElement.parentElement.getAttribute("data-type") !== "NodeListItem") {
-        const id = blockElement.getAttribute("data-node-id")
+        const id = blockElement.getAttribute("data-node-id");
         const newId = Lute.NewNodeID();
         const emptyId = Lute.NewNodeID();
         const liItemId = Lute.NewNodeID();
@@ -113,9 +113,9 @@ export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElemen
             action: "delete",
             id: newId
         }]);
-        blockElement.outerHTML = `<div data-subtype="u" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="${editElement.innerHTML.substring(0, 1)}" data-subtype="u" data-node-id="${liItemId}" data-type="NodeListItem" class="li" updated="${liItemId.split("-")[0]}"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`
-        focusByWbr(protyle.wysiwyg.element, range)
-        return true
+        blockElement.outerHTML = `<div data-subtype="u" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="${editElement.innerHTML.substring(0, 1)}" data-subtype="u" data-node-id="${liItemId}" data-type="NodeListItem" class="li" updated="${liItemId.split("-")[0]}"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
+        focusByWbr(protyle.wysiwyg.element, range);
+        return true;
     }
-    return false
-}
+    return false;
+};

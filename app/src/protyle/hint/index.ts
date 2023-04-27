@@ -288,7 +288,10 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
             searchElement.value = oldValue;
             searchElement.select();
             searchElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                event.stopPropagation();
+                if (event.key !== "Meta" && event.key !== "Control") {
+                    // 需要冒泡以满足光标在块标位置时 ctrl 弹出悬浮层
+                    event.stopPropagation();
+                }
                 if (event.isComposing) {
                     return;
                 }
@@ -334,7 +337,13 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
             }
             response.data.blocks.forEach((item: IBlock, index: number) => {
-                const iconName = getIconByType(item.type);
+                let iconHTML;
+                if (item.type === "NodeDocument" && item.ial.icon) {
+                    iconHTML = unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic popover__block", true);
+                    iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`)
+                } else {
+                    iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
+                }
                 let attrHTML = "";
                 if (item.name) {
                     attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span>${item.name}</span></span><span class="fn__space"></span>`;
@@ -350,7 +359,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 }
                 const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
                 searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">${attrHTML}<div class="b3-list-item__first">
-    <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
+    ${iconHTML}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
 <div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div></button>`;

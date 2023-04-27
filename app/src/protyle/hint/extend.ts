@@ -18,6 +18,7 @@ import {escapeHtml} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
+import {unicode2Emoji} from "../../emoji";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -319,7 +320,13 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
             });
         }
         response.data.blocks.forEach((item: IBlock) => {
-            const iconName = getIconByType(item.type);
+            let iconHTML;
+            if (item.type === "NodeDocument" && item.ial.icon){
+                iconHTML  = unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic popover__block", true);
+                iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`)
+            } else {
+                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
+            }
             let attrHTML = "";
             if (item.name) {
                 attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span>${item.name}</span></span><span class="fn__space"></span>`;
@@ -340,7 +347,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
             dataList.push({
                 value,
                 html: `${attrHTML}<div class="b3-list-item__first">
-    <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
+    ${iconHTML}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
 <div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`,
@@ -377,7 +384,13 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     }, (response) => {
         const dataList: IHintData[] = [];
         response.data.blocks.forEach((item: IBlock) => {
-            const iconName = getIconByType(item.type);
+            let iconHTML;
+            if (item.type === "NodeDocument" && item.ial.icon){
+                iconHTML  = unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic popover__block", true);
+                iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`)
+            } else {
+                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
+            }
             let attrHTML = "";
             if (item.name) {
                 attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg>${item.name}</span><span class="fn__space"></span>`;
@@ -394,7 +407,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
             dataList.push({
                 value: `{{select * from blocks where id='${item.id}'}}`,
                 html: `${attrHTML}<div class="b3-list-item__first">
-    <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${iconName}"></use></svg>
+    ${iconHTML}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
 <div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`,

@@ -1252,7 +1252,6 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 			// 移动端不推送差异详情
 			upsertRootIDs = []string{}
-			removeRootIDs = []string{}
 		}
 
 		util.BroadcastByType("main", "syncMergeResult", 0, "",

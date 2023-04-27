@@ -49,10 +49,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         wbrElement.remove();
         return;
     }
-    if (turnIntoTaskList(protyle, type, blockElement, editElement)) {
+    if (turnIntoTaskList(protyle, type, blockElement, editElement, range)) {
       return;
     }
-    if (headingTurnIntoList(protyle, type, blockElement, editElement)) {
+    if (headingTurnIntoList(protyle, type, blockElement, editElement, range)) {
         return;
     }
     // table、粗体 中也会有 br，仅用于类似#a#，删除后会产生的 br

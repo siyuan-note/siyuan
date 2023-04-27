@@ -21,7 +21,6 @@ import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {hideElements} from "../protyle/ui/hideElements";
 
-
 const updateTitle = (rootID: string, tab: Tab) => {
     fetchPost("/api/block/getDocInfo", {
         id: rootID
@@ -37,6 +36,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
             hideElements(["dialog"]);
         } else {
             reloadProtyle(window.siyuan.mobile.popEditor.protyle);
+            window.siyuan.mobile.popEditor.protyle.breadcrumb.render(window.siyuan.mobile.popEditor.protyle, true);
         }
     }
     if (window.siyuan.mobile.editor) {
@@ -47,7 +47,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
             fetchPost("/api/block/getDocInfo", {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
-                (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.rootTitle === "Untitled" ? "" : response.data.rootTitle;
+                (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.name === "Untitled" ? "" : response.data.name;
             });
         }
     }

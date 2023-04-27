@@ -129,7 +129,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="${closeCB ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconRefresh"></use></svg>
             </span>
-            <span id="searchOpen" aria-label="${window.siyuan.languages.stickSearch}" class="${closeCB ? "" : "fn__none "}block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchOpen" aria-label="${window.siyuan.languages.openInNewTab}" class="${closeCB ? "" : "fn__none "}block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconLayoutRight"></use></svg>
             </span>
         </div>

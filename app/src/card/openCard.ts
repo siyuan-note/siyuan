@@ -11,52 +11,39 @@ import {fullscreen} from "../protyle/breadcrumb/action";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 import {getDisplayName, movePathTo} from "../util/pathName";
+import {newCardTab} from "./newCardTab";
 
-export const openCard = () => {
-    fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-        openCardByData(cardsResponse.data, "all");
-    });
-};
-
-export const openCardByData = (cardsData: {
-    cards: ICard[],
-    unreviewedCount: number
-}, cardType: "doc" | "notebook" | "all", id?: string, title?: string) => {
-    const exit = window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
-            item.destroy();
-            return true;
-        }
-    });
-    if (exit) {
-        return;
-    }
-
-    let blocks = cardsData.cards;
-    let index = 0;
-    const dialog = new Dialog({
-        content: `<div class="card__main">
+export const genCardHTML = (options: {
+    id: string,
+    cardType: TCardType,
+    blocks: ICard[],
+    isTab: boolean
+}) => {
+    return `<div class="card__main">
     <div class="card__header">
         <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>
         <span class="fn__space"></span>
-        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${blocks.length === 0 ? " fn__none" : ""}">1/${blocks.length}</span></div>
+        <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.blocks.length === 0 ? " fn__none" : ""}">1/${options.blocks.length}</span></div>
         <div class="fn__space"></div>
-        <div data-id="${id || ""}" data-cardtype="${cardType}" data-type="filter" class="block__icon block__icon--show">
+        <div data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconFilter"></use></svg>
         </div>
         <div class="fn__space"></div>
         ${isMobile() ? `<div data-type="close" class="block__icon block__icon--show">
             <svg><use xlink:href="#iconCloseRound"></use></svg>
         </div>` : `<div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
-            <svg><use xlink:href="#iconFullscreen"></use></svg>
-        </div>`}
+    <svg><use xlink:href="#iconFullscreen"></use></svg>
+</div><div class="fn__space"></div>
+<div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.openInNewTab}">
+    <svg><use xlink:href="#iconLayoutRight"></use></svg>
+</div>`}
     </div>
-    <div class="card__block fn__flex-1${blocks.length === 0 ? " fn__none" : ""}${window.siyuan.config.flashcard.mark ? " card__block--hidemark" : ""}${window.siyuan.config.flashcard.superBlock ? " card__block--hidesb" : ""}${window.siyuan.config.flashcard.list ? " card__block--hideli" : ""}" data-type="render"></div>
-    <div class="card__empty card__empty--space${blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
+    <div class="card__block fn__flex-1${options.blocks.length === 0 ? " fn__none" : ""}${window.siyuan.config.flashcard.mark ? " card__block--hidemark" : ""}${window.siyuan.config.flashcard.superBlock ? " card__block--hidesb" : ""}${window.siyuan.config.flashcard.list ? " card__block--hideli" : ""}" data-type="render"></div>
+    <div class="card__empty card__empty--space${options.blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
         <div>🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
-    <div class="fn__flex card__action${blocks.length === 0 ? " fn__none" : ""}">
+    <div class="fn__flex card__action${options.blocks.length === 0 ? " fn__none" : ""}">
         <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;min-width: 86px;display: flex">
             <svg><use xlink:href="#iconLeft"></use></svg>
             (p)
@@ -101,7 +88,33 @@ export const openCardByData = (cardsData: {
             </button>
         </div>
     </div>
-</div>`,
+</div>`;
+};
+
+export const openCard = () => {
+    fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
+        openCardByData(cardsResponse.data, "all");
+    });
+};
+
+export const openCardByData = (cardsData: {
+    cards: ICard[],
+    unreviewedCount: number
+}, cardType: TCardType, id?: string, title?: string) => {
+    const exit = window.siyuan.dialogs.find(item => {
+        if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
+            item.destroy();
+            return true;
+        }
+    });
+    if (exit) {
+        return;
+    }
+
+    let blocks = cardsData.cards;
+    let index = 0;
+    const dialog = new Dialog({
+        content: genCardHTML({id, cardType, blocks, isTab: false}),
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100vh" : "70vh",
         destroyCallback() {
@@ -194,6 +207,17 @@ export const openCardByData = (cardsData: {
             if (fullscreenElement) {
                 fullscreen(dialog.element.querySelector(".card__main"),
                     dialog.element.querySelector('[data-type="fullscreen"]'));
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
+            if (sticktabElement) {
+                newCardTab({
+                    type: filterElement.getAttribute("data-cardtype") as TCardType,
+                    id: filterElement.getAttribute("data-id"),
+                    dialog,
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 return;

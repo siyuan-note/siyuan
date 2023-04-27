@@ -30,6 +30,7 @@ type TOperation =
     | "addFlashcards"
     | "removeFlashcards"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes"
+type TCardType = "doc" | "notebook" | "all"
 declare module "blueimp-md5"
 
 interface Window {

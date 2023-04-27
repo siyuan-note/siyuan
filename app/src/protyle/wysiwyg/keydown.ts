@@ -1068,7 +1068,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (!selectText.trim()) {
                     selectAll(protyle, nodeElement, range);
                 }
-                const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML)) || "Untitled";
+                const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "")) || "Untitled";
                 fetchPost("/api/filetree/getHPathByPath", {
                     notebook: protyle.notebookId,
                     path: protyle.path,
@@ -1096,7 +1096,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     selectAll(protyle, nodeElement, range);
                 }
                 getSavePath(protyle.path, protyle.notebookId, (pathString) => {
-                    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML)) || "Untitled";
+                    const newFileName = replaceFileName(selectText.trim() ? selectText.trim() : protyle.lute.BlockDOM2Content(nodeElement.outerHTML).replace(/\n/g, "")) || "Untitled";
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: protyle.notebookId,
                         path: pathPosix().join(pathString, newFileName),

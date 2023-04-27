@@ -18,6 +18,8 @@ import {redirectToCheckAuth} from "../util/pathName";
 import {getAllModels} from "../layout/getAll";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
+import {setEmpty} from "../mobile/util/setEmpty";
+import {hideElements} from "../protyle/ui/hideElements";
 
 
 const updateTitle = (rootID: string, tab: Tab) => {
@@ -27,7 +29,30 @@ const updateTitle = (rootID: string, tab: Tab) => {
         tab.updateTitle(response.data.name);
     });
 };
+
 export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: string[] }) => {
+    /// #if MOBILE
+    if (window.siyuan.mobile.popEditor) {
+        if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
+            hideElements(["dialog"]);
+        } else {
+            reloadProtyle(window.siyuan.mobile.popEditor.protyle);
+        }
+    }
+    if (window.siyuan.mobile.editor) {
+        if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
+            setEmpty();
+        } else {
+            reloadProtyle(window.siyuan.mobile.editor.protyle);
+            fetchPost("/api/block/getDocInfo", {
+                id: window.siyuan.mobile.editor.protyle.block.rootID
+            }, (response) => {
+                (document.getElementById("toolbarName") as HTMLInputElement).value = response.data.rootTitle === "Untitled" ? "" : response.data.rootTitle;
+            });
+        }
+    }
+    window.siyuan.mobile.files.init(false);
+    /// #else
     const allModels = getAllModels();
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
@@ -84,6 +109,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
     allModels.search.forEach(item => {
         item.parent.panelElement.querySelector("#searchInput").dispatchEvent(new CustomEvent("input"));
     });
+    /// #endif
 };
 
 export const lockScreen = () => {

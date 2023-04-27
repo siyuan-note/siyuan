@@ -11,7 +11,7 @@ import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,
-    progressStatus,
+    progressStatus, reloadSync,
     setTitle,
     transactionError
 } from "../dialog/processSystem";
@@ -42,6 +42,9 @@ class App {
                 msgCallback: (data) => {
                     if (data) {
                         switch (data.cmd) {
+                            case "syncMergeResult":
+                                reloadSync(data.data);
+                                break;
                             case "progress":
                                 progressLoading(data);
                                 break;

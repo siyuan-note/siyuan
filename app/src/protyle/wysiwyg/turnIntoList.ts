@@ -64,7 +64,6 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
     return false
 }
 
-
 export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement) => {
     if (type !== "NodeHeading" && ["* ", "- "].includes(editElement.innerHTML.substring(0, 2))) {
         const id = blockElement.getAttribute("data-node-id")

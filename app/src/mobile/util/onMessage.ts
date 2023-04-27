@@ -1,5 +1,5 @@
 import {openMobileFileById} from "../editor";
-import {processSync, progressLoading, progressStatus, transactionError} from "../../dialog/processSystem";
+import {processSync, progressLoading, progressStatus, reloadSync, transactionError} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 
 const processReadonly = () => {
@@ -17,6 +17,9 @@ const processReadonly = () => {
 export const onMessage = (data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "syncMergeResult":
+                reloadSync(data.data);
+                break;
             case "readonly":
                 window.siyuan.config.editor.readOnly = data.data;
                 processReadonly();

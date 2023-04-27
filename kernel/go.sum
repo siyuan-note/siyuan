@@ -10,6 +10,8 @@ github.com/88250/gulu v1.2.3-0.20230321113152-38c4a3d73c37 h1:7ZMvlXDbH2sqaxowoA
 github.com/88250/gulu v1.2.3-0.20230321113152-38c4a3d73c37/go.mod h1:pTWnjt+6qUqNnP9xltswsJxgCBVu3C7eW09u48LWX0k=
 github.com/88250/lute v1.7.6-0.20230426013259-afae190c74ff h1:gWI6ch+YgmecbRpkLzq8mf9HiYWybEYCHcy+Szwelyg=
 github.com/88250/lute v1.7.6-0.20230426013259-afae190c74ff/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
+github.com/88250/lute v1.7.6-0.20230427065909-d447ad8fc493 h1:F6C9dVvQVwxCOAd88Ea4WchCzR6Ekr/Q4IiqLYWfDyw=
+github.com/88250/lute v1.7.6-0.20230427065909-d447ad8fc493/go.mod h1:+wUqx/1kdFDbWtxn9LYJlaCOAeol2pjSO6w+WJTVQsg=
 github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c h1:Dl/8S9iLyPMTElnWIBxmjaLiWrkI5P4a21ivwAn5pU0=
 github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=

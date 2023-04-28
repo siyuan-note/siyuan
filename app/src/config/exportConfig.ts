@@ -37,7 +37,7 @@ export const exportConfig = {
 </label>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.blockRef}
+        ${window.siyuan.languages.ref}
         <div class="b3-label__text">${window.siyuan.languages.export11}</div>
     </div>
     <span class="fn__space"></span>

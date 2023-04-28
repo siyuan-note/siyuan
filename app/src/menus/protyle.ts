@@ -820,7 +820,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     }
     if (linkAddress?.startsWith("siyuan://blocks/")) {
         window.siyuan.menus.menu.append(new MenuItem({
-            label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.blockRef}</b>`,
+            label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.ref}</b>`,
             icon: "iconRef",
             click() {
                 linkElement.setAttribute("data-subtype", "s");

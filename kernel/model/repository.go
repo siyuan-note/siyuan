@@ -831,7 +831,7 @@ var syncingFiles = sync.Map{}
 var syncingStorages = false
 
 func waitForSyncingStorages() {
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 60; i++ {
 		if syncingStorages {
 			return
 		}

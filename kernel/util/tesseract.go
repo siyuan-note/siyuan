@@ -189,6 +189,12 @@ func getTesseractVer() (ret string) {
 			cmd = exec.Command(TesseractBin, "--version")
 			gulu.CmdAttr(cmd)
 			data, err = cmd.CombinedOutput()
+			if nil != err && strings.Contains(err.Error(), "executable file not found") {
+				TesseractBin = "/opt/homebrew/bin/tesseract"
+				cmd = exec.Command(TesseractBin, "--version")
+				gulu.CmdAttr(cmd)
+				data, err = cmd.CombinedOutput()
+			}
 		}
 	}
 	if nil != err {

@@ -33,6 +33,7 @@ import {setTabPosition} from "../window/setHeader";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {getIdZoomInByPath} from "../util/pathName";
+import {openHistory} from "../history/history";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 

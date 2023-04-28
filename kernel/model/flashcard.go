@@ -17,7 +17,6 @@
 package model
 
 import (
-	"errors"
 	"math"
 	"os"
 	"path/filepath"
@@ -247,10 +246,7 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating, reviewedCardIDs 
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	deck := Decks[deckID]
 	card := deck.GetCard(cardID)
@@ -290,10 +286,7 @@ func SkipReviewFlashcard(deckID, cardID string) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	deck := Decks[deckID]
 	card := deck.GetCard(cardID)
@@ -330,10 +323,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
 	if nil != err {
@@ -384,10 +374,7 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	deck := Decks[builtinDeckID]
 	if nil == deck {
@@ -425,10 +412,7 @@ func GetDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	if "" == deckID {
 		ret, unreviewedCount = getAllDueFlashcards(reviewedCardIDs)
@@ -735,10 +719,7 @@ func RenameDeck(deckID, name string) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	deck := Decks[deckID]
 	deck.Name = name
@@ -754,10 +735,7 @@ func RemoveDeck(deckID string) (err error) {
 	deckLock.Lock()
 	defer deckLock.Unlock()
 
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	riffSavePath := getRiffDir()
 	deckPath := filepath.Join(riffSavePath, deckID+".deck")
@@ -785,10 +763,7 @@ func CreateDeck(name string) (deck *riff.Deck, err error) {
 }
 
 func createDeck(name string) (deck *riff.Deck, err error) {
-	if syncingStorages {
-		err = errors.New(Conf.Language(81))
-		return
-	}
+	waitForSyncingStorages()
 
 	deckID := ast.NewNodeID()
 	deck, err = createDeck0(name, deckID)

@@ -21,7 +21,7 @@ export const genCardHTML = (options: {
     blocks: ICard[],
     isTab: boolean
 }) => {
-    let iconsHTML:string
+    let iconsHTML:string;
     /// #if MOBILE
     iconsHTML=`<div class="toolbar toolbar--border">
     <svg class="toolbar__icon"><use xlink:href="#iconRiffCard"></use></svg>

@@ -35,7 +35,7 @@ import {getIdZoomInByPath} from "../util/pathName";
 import {openHistory} from "../history/history";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
-import {openRecentDocs} from "../business/openRecentDocs";
+import { openRecentDocs } from "../business/openRecentDocs";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -799,6 +799,8 @@ export const newCenterEmptyTab = () => {
         </div>
         <div class="b3-label__text">${window.siyuan.languages.slogan}</div>
     </div>
+    <h1>${window.siyuan.languages.noOpenFile}</h1>
+    <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div class="b3-list-item" id="editorEmptySearch">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg>
@@ -836,7 +838,7 @@ export const newCenterEmptyTab = () => {
                     if (target.id === "editorEmptySearch") {
                         openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
                         event.stopPropagation();
-                        event.preventDefault()
+                        event.preventDefault();
                         break;
                     } else if (target.id === "editorEmptyRecent") {
                         const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
@@ -850,32 +852,32 @@ export const newCenterEmptyTab = () => {
                         }
                         openRecentDocs();
                         event.stopPropagation();
-                        event.preventDefault()
+                        event.preventDefault();
                         break;
                     }else if (target.id === "editorEmptyHistory") {
                         openHistory();
                         event.stopPropagation();
-                        event.preventDefault()
+                        event.preventDefault();
                         break;
                     }else if (target.id === "editorEmptyFile") {
                         newFile(undefined, undefined, undefined, true);
                         event.stopPropagation();
-                        event.preventDefault()
+                        event.preventDefault();
                         break;
                     }else if (target.id === "editorEmptyNewNotebook") {
                         newNotebook();
                         event.stopPropagation();
-                        event.preventDefault()
+                        event.preventDefault();
                         break;
                     }else if (target.id === "editorEmptyHelp") {
-                        mountHelp()
+                        mountHelp();
                         event.stopPropagation();
-                        event.preventDefault()
+                        event.preventDefault();
                         break;
                     }
-                    target = target.parentElement
+                    target = target.parentElement;
                 }
-            })
+            });
         }
     });
 };

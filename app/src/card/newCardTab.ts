@@ -66,5 +66,5 @@ export const newCardModel = (options: {
             });
         }
     });
-    return custom
-}
+    return custom;
+};

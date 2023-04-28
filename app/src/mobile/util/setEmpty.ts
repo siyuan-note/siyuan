@@ -14,7 +14,8 @@ export const setEmpty = () => {
     if (emptyElement.innerHTML !== "") {
         return;
     }
-    emptyElement.innerHTML = `
+    emptyElement.innerHTML = `<h1 style="width: 200px">${window.siyuan.languages.noOpenFile}</h1>
+<div class="fn__hr--b"></div>
 <div id="emptySearch" class="b3-list-item">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.search}</span>
 </div>
@@ -39,17 +40,17 @@ export const setEmpty = () => {
             if (target.id === "emptySearch") {
                 popSearch();
                 event.stopPropagation();
-                event.preventDefault()
+                event.preventDefault();
                 break;
             } else if (target.id === "emptyRecent") {
                 getRecentDocs();
                 event.stopPropagation();
-                event.preventDefault()
+                event.preventDefault();
                 break;
             } else if (target.id === "emptyHistory") {
                 openHistory();
                 event.stopPropagation();
-                event.preventDefault()
+                event.preventDefault();
                 break;
             } else if (target.id === "emptyNewFile") {
                 if (window.siyuan.mobile.editor) {
@@ -63,17 +64,17 @@ export const setEmpty = () => {
                     });
                 }
                 event.stopPropagation();
-                event.preventDefault()
+                event.preventDefault();
                 break;
             } else if (target.id === "emptyNewNotebook") {
                 newNotebook();
                 event.stopPropagation();
-                event.preventDefault()
+                event.preventDefault();
                 break;
             } else if (target.id === "emptyHelp") {
                 mountHelp();
                 event.stopPropagation();
-                event.preventDefault()
+                event.preventDefault();
                 break;
             }
             target = target.parentElement;

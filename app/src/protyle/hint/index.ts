@@ -340,7 +340,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 let iconHTML;
                 if (item.type === "NodeDocument" && item.ial.icon) {
                     iconHTML = unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic popover__block", true);
-                    iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`)
+                    iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`);
                 } else {
                     iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
                 }

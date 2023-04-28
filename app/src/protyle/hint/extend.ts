@@ -36,7 +36,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["引用块", "yinyong", "yy", "block reference"],
         value: "((",
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconRef"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.ref}</span><span class="b3-list-item__meta">((</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconRef"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.blockRef}</span><span class="b3-list-item__meta">((</span></div>`,
     }, {
         filter: ["嵌入块", "qianrukuai", "qrk", "embed block"],
         value: "{{",
@@ -323,7 +323,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
             let iconHTML;
             if (item.type === "NodeDocument" && item.ial.icon){
                 iconHTML  = unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic popover__block", true);
-                iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`)
+                iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`);
             } else {
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
             }
@@ -387,7 +387,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
             let iconHTML;
             if (item.type === "NodeDocument" && item.ial.icon){
                 iconHTML  = unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic popover__block", true);
-                iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`)
+                iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`);
             } else {
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
             }

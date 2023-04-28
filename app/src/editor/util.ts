@@ -1,7 +1,7 @@
 import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
 import {Wnd} from "../layout/Wnd";
-import {getDockByType, getInstanceById, getWndByLayout, pdfIsLoading, resizeTabs, setPanelFocus} from "../layout/util";
+import {getDockByType, getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../layout/util";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
 import {getDisplayName, pathPosix} from "../util/pathName";

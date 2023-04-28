@@ -145,6 +145,7 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()
 	name = util.FilterFileName(name) + ".md"
+	name = util.TruncateLenFileName(name)
 	savePath := filepath.Join(util.DataDir, "templates", name)
 	if gulu.File.IsExist(savePath) {
 		if !overwrite {

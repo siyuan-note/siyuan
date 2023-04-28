@@ -526,7 +526,12 @@ export const exportMd = (id: string) => {
                 dialog.bindInput(inputElement, () => {
                     (btnsElement[1] as HTMLButtonElement).click();
                 });
-                inputElement.value = replaceFileName(result.data);
+                let name =  replaceFileName(result.data);
+                const maxNameLen = 32;
+                if (name.length > maxNameLen) {
+                    name = name.substring(0, maxNameLen);
+                }
+                inputElement.value = name;
                 inputElement.focus();
                 inputElement.select();
                 btnsElement[0].addEventListener("click", () => {
@@ -539,9 +544,13 @@ export const exportMd = (id: string) => {
                         inputElement.value = replaceFileName(inputElement.value);
                     }
 
+                    if (name.length > maxNameLen) {
+                        name = name.substring(0, maxNameLen);
+                    }
+
                     fetchPost("/api/template/docSaveAsTemplate", {
                         id,
-                        name: inputElement.value,
+                        name,
                         overwrite: false
                     }, response => {
                         if (response.code === 1) {
@@ -549,7 +558,7 @@ export const exportMd = (id: string) => {
                             confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
                                 fetchPost("/api/template/docSaveAsTemplate", {
                                     id,
-                                    name: inputElement.value,
+                                    name,
                                     overwrite: true
                                 }, resp => {
                                     if (resp.code === 0) {

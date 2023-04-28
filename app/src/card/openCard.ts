@@ -10,8 +10,10 @@ import {needSubscribe} from "../util/needSubscribe";
 import {fullscreen} from "../protyle/breadcrumb/action";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
-import {getDisplayName, movePathTo} from "../util/pathName";
+/// #if !MOBILE
 import {newCardTab} from "./newCardTab";
+/// #endif
+import {getDisplayName, movePathTo} from "../util/pathName";
 
 export const genCardHTML = (options: {
     id: string,
@@ -19,9 +21,22 @@ export const genCardHTML = (options: {
     blocks: ICard[],
     isTab: boolean
 }) => {
-    return `<div class="card__main">
-    <div class="block__icons">
-        ${options.isTab ? '<div class="fn__flex-1"></div>' : `<span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
+    let iconsHTML:string
+    /// #if MOBILE
+    iconsHTML=`<div class="toolbar toolbar--border">
+    <svg class="toolbar__icon"><use xlink:href="#iconRiffCard"></use></svg>
+    <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
+    <div data-type="count" class="${options.blocks.length === 0 ? "fn__none" : ""}">1/${options.blocks.length}</span></div>
+    <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
+    <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
+</div>`;
+    /// #else
+    iconsHTML=`<div class="block__icons">
+        ${options.isTab ? '<div class="fn__flex-1"></div>' : `<div class="block__icon block__icon--show">
+            <svg><use xlink:href="#iconRiffCard"></use></svg>
+        </div>
+        <span class="fn__space"></span>
+        <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
         <span class="fn__space"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.blocks.length === 0 ? " fn__none" : ""}">1/${options.blocks.length}</span></div>
         <div class="fn__space"></div>
@@ -29,15 +44,17 @@ export const genCardHTML = (options: {
             <svg><use xlink:href="#iconFilter"></use></svg>
         </div>
         <div class="fn__space"></div>
-        ${isMobile() ? `<div data-type="close" class="block__icon block__icon--show">
-            <svg><use xlink:href="#iconCloseRound"></use></svg>
-        </div>` : `<div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
-    <svg><use xlink:href="#iconFullscreen"></use></svg>
-</div><div class="fn__space${options.isTab ? " fn__none" : ""}"></div>
-<div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openInNewTab}">
-    <svg><use xlink:href="#iconLayoutRight"></use></svg>
-</div>`}
-    </div>
+        <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
+            <svg><use xlink:href="#iconFullscreen"></use></svg>
+        </div>
+        <div class="fn__space${options.isTab ? " fn__none" : ""}"></div>
+        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openInNewTab}">
+            <svg><use xlink:href="#iconLayoutRight"></use></svg>
+        </div>
+    </div>`;
+    /// #endif
+    return `<div class="card__main">
+    ${iconsHTML}
     <div class="card__block fn__flex-1${options.blocks.length === 0 ? " fn__none" : ""}${window.siyuan.config.flashcard.mark ? " card__block--hidemark" : ""}${window.siyuan.config.flashcard.superBlock ? " card__block--hidesb" : ""}${window.siyuan.config.flashcard.list ? " card__block--hideli" : ""}" data-type="render"></div>
     <div class="card__empty card__empty--space${options.blocks.length === 0 ? "" : " fn__none"}" data-type="empty">
         <div>🔮</div>
@@ -183,6 +200,7 @@ export const bindCardEvent = (options: {
                 event.preventDefault();
                 return;
             }
+            /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
                 newCardTab({
@@ -197,6 +215,7 @@ export const bindCardEvent = (options: {
                 event.preventDefault();
                 return;
             }
+            /// #endif
             const closeElement = hasClosestByAttribute(target, "data-type", "close");
             if (closeElement) {
                 if (options.dialog) {

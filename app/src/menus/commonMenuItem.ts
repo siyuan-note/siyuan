@@ -9,7 +9,7 @@ import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {saveExport} from "../protyle/export";
 import {openByMobile, writeText} from "../protyle/util/compatibility";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
@@ -19,7 +19,7 @@ import {getAllModels} from "../layout/getAll";
 import {Bookmark} from "../layout/dock/Bookmark";
 import {openAsset, openBy} from "../editor/util";
 /// #endif
-import {rename} from "../editor/rename";
+import {rename, replaceFileName} from "../editor/rename";
 import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
@@ -509,22 +509,60 @@ export const exportMd = (id: string) => {
         submenu: [{
             label: window.siyuan.languages.template,
             icon: "iconMarkdown",
-            click: () => {
-                fetchPost("/api/template/docSaveAsTemplate", {
-                    id,
-                    overwrite: false
-                }, response => {
-                    if (response.code === 1) {
-                        // 重名
-                        confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
-                            fetchPost("/api/template/docSaveAsTemplate", {
-                                id,
-                                overwrite: true
-                            });
-                        });
-                        return;
+            click: async () => {
+                const result = await fetchSyncPost("/api/block/getRefText", {id: id});
+
+                const dialog = new Dialog({
+                    title: window.siyuan.languages.fileName,
+                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                    width: isMobile() ? "92vw" : "520px",
+                });
+                const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+                const btnsElement = dialog.element.querySelectorAll(".b3-button");
+                dialog.bindInput(inputElement, () => {
+                    (btnsElement[1] as HTMLButtonElement).click();
+                });
+                inputElement.value = replaceFileName(result.data);
+                inputElement.focus();
+                inputElement.select();
+                btnsElement[0].addEventListener("click", () => {
+                    dialog.destroy();
+                });
+                btnsElement[1].addEventListener("click", () => {
+                    if (inputElement.value.trim() === "") {
+                        inputElement.value = "Untitled";
+                    } else {
+                        inputElement.value = replaceFileName(inputElement.value);
                     }
-                    showMessage(window.siyuan.languages.exportTplSucc);
+
+                    fetchPost("/api/template/docSaveAsTemplate", {
+                        id,
+                        name: inputElement.value,
+                        overwrite: false
+                    }, response => {
+                        if (response.code === 1) {
+                            // 重名
+                            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
+                                fetchPost("/api/template/docSaveAsTemplate", {
+                                    id,
+                                    name: inputElement.value,
+                                    overwrite: true
+                                }, resp => {
+                                    if (resp.code === 0) {
+                                        showMessage(window.siyuan.languages.exportTplSucc);
+                                    }
+                                });
+                            });
+                            return;
+                        }
+                        showMessage(window.siyuan.languages.exportTplSucc);
+                    });
+
+                    dialog.destroy();
                 });
             }
         }, {

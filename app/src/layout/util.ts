@@ -36,6 +36,7 @@ import {getIdZoomInByPath} from "../util/pathName";
 import {openHistory} from "../history/history";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
+import { openRecentDocs } from "../business/openRecentDocs";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -802,26 +803,82 @@ export const newCenterEmptyTab = () => {
     <h1>${window.siyuan.languages.noOpenFile}</h1>
     <div class="fn__hr"></div>
     <div class="fn__hr"></div>
-    <div class="b3-list-item" id="editorEmptySearch"><svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg><span>${window.siyuan.languages.search}</span><span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}</span></div>
-    <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="editorEmptyFile"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span>${window.siyuan.languages.newFile}</span><span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span></div>
-    <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="editorEmptyNewNotebook"><svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span>${window.siyuan.languages.newNotebook}</span></div>
-    <div class="b3-list-item" id="editorEmptyHelp"><svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span>${window.siyuan.languages.help}</span></div>
+    <div class="b3-list-item" id="editorEmptySearch">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg>
+        <span>${window.siyuan.languages.search}</span>
+        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}</span>
+    </div>
+    <div id="editorEmptyRecent" class="b3-list-item">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg>
+        <span>${window.siyuan.languages.recentDocs}</span>
+        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.recentDocs.custom)}</span>
+    </div>
+    <div id="editorEmptyHistory" class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconHistory"></use></svg>
+        <span>${window.siyuan.languages.dataHistory}</span>
+        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.dataHistory.custom)}</span>
+    </div>
+    <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="editorEmptyFile">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+        <span>${window.siyuan.languages.newFile}</span>
+        <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span>
+    </div>
+    <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="editorEmptyNewNotebook">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg>
+        <span>${window.siyuan.languages.newNotebook}</span>
+    </div>
+    <div class="b3-list-item" id="editorEmptyHelp">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg>
+        <span>${window.siyuan.languages.help}</span>
+    </div>
 </div>`,
         callback(tab: Tab) {
-            tab.panelElement.querySelector("#editorEmptyHelp").addEventListener("click", () => {
-                mountHelp();
-            });
-            tab.panelElement.querySelector("#editorEmptySearch").addEventListener("click", () => {
-                openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
-            });
-            if (!window.siyuan.config.readonly) {
-                tab.panelElement.querySelector("#editorEmptyNewNotebook").addEventListener("click", () => {
-                    newNotebook();
-                });
-                tab.panelElement.querySelector("#editorEmptyFile").addEventListener("click", () => {
-                    newFile(undefined, undefined, undefined, true);
-                });
-            }
+            tab.panelElement.addEventListener("click", (event) => {
+                let target = event.target as HTMLElement;
+                while (target && !target.isEqualNode( tab.panelElement)) {
+                    if (target.id === "editorEmptySearch") {
+                        openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
+                        event.stopPropagation();
+                        event.preventDefault()
+                        break;
+                    } else if (target.id === "editorEmptyRecent") {
+                        const openRecentDocsDialog = window.siyuan.dialogs.find(item => {
+                            if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.recentDocs.custom) {
+                                return true;
+                            }
+                        });
+                        if (openRecentDocsDialog) {
+                            hideElements(["dialog"]);
+                            return;
+                        }
+                        openRecentDocs();
+                        event.stopPropagation();
+                        event.preventDefault()
+                        break;
+                    }else if (target.id === "editorEmptyHistory") {
+                        openHistory();
+                        event.stopPropagation();
+                        event.preventDefault()
+                        break;
+                    }else if (target.id === "editorEmptyFile") {
+                        newFile(undefined, undefined, undefined, true);
+                        event.stopPropagation();
+                        event.preventDefault()
+                        break;
+                    }else if (target.id === "editorEmptyNewNotebook") {
+                        newNotebook();
+                        event.stopPropagation();
+                        event.preventDefault()
+                        break;
+                    }else if (target.id === "editorEmptyHelp") {
+                        mountHelp()
+                        event.stopPropagation();
+                        event.preventDefault()
+                        break;
+                    }
+                    target = target.parentElement
+                }
+            })
         }
     });
 };

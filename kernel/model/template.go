@@ -132,21 +132,21 @@ func SearchTemplate(keyword string) (ret []*Block) {
 	return
 }
 
-func DocSaveAsTemplate(id string, overwrite bool) (code int, err error) {
-	tree, err := loadTreeByBlockID(id)
-	if nil != err {
+func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
 		return
 	}
 
+	tree := prepareExportTree(bt)
 	addBlockIALNodes(tree, true)
 
 	luteEngine := NewLute()
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()
-	title := tree.Root.IALAttr("title")
-	title = util.FilterFileName(title)
-	title += ".md"
-	savePath := filepath.Join(util.DataDir, "templates", title)
+	name = util.FilterFileName(name) + ".md"
+	name = util.TruncateLenFileName(name)
+	savePath := filepath.Join(util.DataDir, "templates", name)
 	if gulu.File.IsExist(savePath) {
 		if !overwrite {
 			code = 1

@@ -8,7 +8,7 @@
 		"title": "请从这里开始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20230415112508"
+		"updated": "20230428162620"
 	},
 	"Children": [
 		{
@@ -83,7 +83,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20210528115012-vst5lwt",
-				"updated": "20210528115049"
+				"updated": "20210528115021"
 			},
 			"Children": [
 				{
@@ -98,7 +98,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20210528115021-oj6gzg7",
-						"style": "width: 70%; flex: 0 0 auto;",
+						"style": "width: 50%; flex: 0 0 auto;",
 						"updated": "20210502233951"
 					},
 					"Children": [
@@ -182,7 +182,15 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "在编辑器中输入 "
+													"Data": "在"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "编辑器"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "中输入 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -191,7 +199,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 触发功能菜单"
+													"Data": "​ 触发功能菜单"
 												}
 											]
 										}
@@ -392,7 +400,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20210528115259-ifi35e9",
-				"updated": "20221114173007"
+				"updated": "20210601234211"
 			},
 			"Children": [
 				{
@@ -407,7 +415,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20210528115306-kftajae",
-						"style": "width: 70%; flex: 0 0 auto;",
+						"style": "width: 50%; flex: 0 0 auto;",
 						"updated": "20210601234211"
 					},
 					"Children": [
@@ -626,8 +634,40 @@
 			"ID": "20221114172820-dvkx6pq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20221114172820-dvkx6pq"
-			}
+				"id": "20221114172820-dvkx6pq",
+				"updated": "20230428155245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你感到官方用户指南过于硬核，请尝试从"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230428153709-hioyy5l",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "社区资源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "开始。"
+				}
+			]
+		},
+		{
+			"ID": "20230428155440-s8hzxrz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230428155440-s8hzxrz",
+				"updated": "20230428162620"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我们希望在接下来的时间里，思源能够成为你生活和学习的效率工具，帮助你实现更多的目标和计划🙏"
+				}
+			]
 		}
 	]
 }

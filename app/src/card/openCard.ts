@@ -11,7 +11,7 @@ import {fullscreen} from "../protyle/breadcrumb/action";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 /// #if !MOBILE
-import {newCardTab} from "./newCardTab";
+import {openFile} from "../editor/util";
 /// #endif
 import {getDisplayName, movePathTo} from "../util/pathName";
 
@@ -203,10 +203,13 @@ export const bindCardEvent = (options: {
             /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
-                newCardTab({
-                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                    id: filterElement.getAttribute("data-id"),
-                    title: options.title
+                openFile({
+                    position: "right",
+                    customData:{
+                        cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                        id: filterElement.getAttribute("data-id"),
+                        title: options.title
+                    }
                 });
                 if (options.dialog) {
                     options.dialog.destroy();

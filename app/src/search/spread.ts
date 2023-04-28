@@ -75,8 +75,8 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         content: "",
         width: "80vw",
         height: "90vh",
-        destroyCallback: () => {
-            if (range) {
+        destroyCallback(options: IObject) {
+            if (range && !options) {
                 focusByRange(range);
             }
             if (edit) {
@@ -98,7 +98,7 @@ export const openSearch = async (hotkey: string, key?: string, notebookId?: stri
         types: Object.assign({}, localData.types),
         page: key ? 1 : localData.page
     }, dialog.element.querySelector(".b3-dialog__container").lastElementChild, () => {
-        dialog.destroy();
+        dialog.destroy({focus: "false"});
     });
     // 搜索面板层级需高于 201（.protyle-hint） 且小于205（.block__popover）
     dialog.element.firstElementChild.setAttribute("style", "z-index:202"); // https://github.com/siyuan-note/siyuan/issues/3515

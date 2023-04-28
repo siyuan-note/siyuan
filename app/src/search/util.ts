@@ -1,12 +1,8 @@
 import {getAllModels} from "../layout/getAll";
-import {getInstanceById, getWndByLayout, resizeTabs, setPanelFocus} from "../layout/util";
-import {Tab} from "../layout/Tab";
-import {Search} from "./index";
-import {Wnd} from "../layout/Wnd";
 import {Constants} from "../constants";
 import {escapeAttr, escapeGreat, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
-import {openFileById} from "../editor/util";
+import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
@@ -36,48 +32,31 @@ const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
 
 export const openGlobalSearch = (text: string, replace: boolean) => {
     text = text.trim();
-    let wnd: Wnd;
-    const searchModel = getAllModels().search.find((item, index) => {
-        if (index === 0) {
-            wnd = item.parent.parent;
-        }
-        wnd.switchTab(item.parent.headElement);
+    const searchModel = getAllModels().search.find((item) => {
+        item.parent.parent.switchTab(item.parent.headElement);
         item.updateSearch(text, replace);
         return true;
     });
     if (searchModel) {
         return;
     }
-    if (!wnd) {
-        wnd = getWndByLayout(window.siyuan.layout.centerLayout);
-    }
-    const tab = new Tab({
-        icon: "iconSearch",
-        title: window.siyuan.languages.search,
-        callback(tab) {
-            const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-            const asset = new Search({
-                tab,
-                config: {
-                    k: text,
-                    r: "",
-                    hasReplace: false,
-                    method: localData.method,
-                    hPath: "",
-                    idPath: [],
-                    group: localData.group,
-                    sort: localData.sort,
-                    types: Object.assign({}, localData.types),
-                    removed: localData.removed,
-                    page: 1
-                }
-            });
-            tab.addModel(asset);
-            resizeTabs();
-        }
+    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+    openFile({
+        searchData: {
+            k: text,
+            r: "",
+            hasReplace: false,
+            method: localData.method,
+            hPath: "",
+            idPath: [],
+            group: localData.group,
+            sort: localData.sort,
+            types: Object.assign({}, localData.types),
+            removed: localData.removed,
+            page: 1
+        },
+        position: "right"
     });
-    wnd.split("lr").addTab(tab);
-    setPanelFocus(tab.panelElement);
 };
 
 // closeCB 不存在为页签搜索
@@ -428,29 +407,9 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchOpen") {
-                let wnd: Wnd;
-                const element = document.querySelector(".layout__wnd--active");
-                if (element) {
-                    wnd = getInstanceById(element.getAttribute("data-id")) as Wnd;
-                }
-                if (!wnd) {
-                    wnd = getWndByLayout(window.siyuan.layout.centerLayout);
-                }
-                const tab = new Tab({
-                    icon: "iconSearch",
-                    title: window.siyuan.languages.search,
-                    callback(tab) {
-                        config.k = searchInputElement.value;
-                        config.r = replaceInputElement.value;
-                        const asset = new Search({
-                            tab,
-                            config
-                        });
-                        tab.addModel(asset);
-                        resizeTabs();
-                    }
-                });
-                wnd.split("lr").addTab(tab);
+                config.k = searchInputElement.value;
+                config.r = replaceInputElement.value;
+                openFile({searchData: config, position: "right"});
                 if (closeCB) {
                     closeCB();
                 }

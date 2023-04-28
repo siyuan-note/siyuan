@@ -1,7 +1,7 @@
 import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
 import {Wnd} from "../layout/Wnd";
-import {getDockByType, getInstanceById, getWndByLayout, pdfIsLoading} from "../layout/util";
+import {getDockByType, getInstanceById, getWndByLayout, pdfIsLoading, resizeTabs, setPanelFocus} from "../layout/util";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
 import {getDisplayName, pathPosix} from "../util/pathName";
@@ -24,8 +24,10 @@ import {setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
-import {getSearch} from "../util/functions";
+import {getSearch, objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
+import {newCardModel} from "../card/newCardTab";
+import {Search} from "../search";
 
 export const openFileById = async (options: {
     id: string,
@@ -74,7 +76,7 @@ export const openAsset = (assetPath: string, page: number | string, position?: s
     });
 };
 
-const openFile = (options: IOpenFileOptions) => {
+export const openFile = (options: IOpenFileOptions) => {
     const allModels = getAllModels();
     // 文档已打开
     if (options.assetPath) {
@@ -92,6 +94,32 @@ const openFile = (options: IOpenFileOptions) => {
             if (options.afterOpen) {
                 options.afterOpen();
             }
+            return;
+        }
+    } else if (options.customData) {
+        const custom = allModels.custom.find((item) => {
+            if (objEquals(item.data, options.customData)) {
+                if (!pdfIsLoading(item.parent.parent.element)) {
+                    item.parent.parent.switchTab(item.parent.headElement);
+                    item.parent.parent.showHeading();
+                }
+                return true;
+            }
+        });
+        if (custom) {
+            return;
+        }
+    } else if (options.searchData) {
+        const search = allModels.search.find((item) => {
+            if (objEquals(item.config, options.searchData)) {
+                if (!pdfIsLoading(item.parent.parent.element)) {
+                    item.parent.parent.switchTab(item.parent.headElement);
+                    item.parent.parent.showHeading();
+                }
+                return true;
+            }
+        });
+        if (search) {
             return;
         }
     } else if (!options.position) {
@@ -347,15 +375,39 @@ const newTab = (options: IOpenFileOptions) => {
                 icon,
                 title: getDisplayName(options.assetPath),
                 callback(tab) {
-                    const asset = new Asset({
+                    tab.addModel(new Asset({
                         tab,
                         path: options.assetPath,
                         page: options.page,
-                    });
-                    tab.addModel(asset);
+                    }));
+                    setPanelFocus(tab.panelElement.parentElement.parentElement);
                 }
             });
         }
+    } else if (options.customData) {
+        tab = new Tab({
+            icon: "iconRiffCard",
+            title: window.siyuan.languages.spaceRepetition,
+            callback(tab) {
+                tab.addModel(newCardModel({
+                    tab,
+                    data: options.customData
+                }));
+                setPanelFocus(tab.panelElement.parentElement.parentElement);
+            }
+        });
+    } else if (options.searchData) {
+        tab = new Tab({
+            icon: "iconSearch",
+            title: window.siyuan.languages.search,
+            callback(tab) {
+                tab.addModel(new Search({
+                    tab,
+                    config: options.searchData
+                }));
+                setPanelFocus(tab.panelElement.parentElement.parentElement);
+            }
+        });
     } else {
         tab = new Tab({
             title: getDisplayName(options.fileName, true, true),

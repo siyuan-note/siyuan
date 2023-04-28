@@ -2,7 +2,7 @@ import {genUUID} from "../util/genID";
 import {isMobile} from "../util/functions";
 
 export class Dialog {
-    private destroyCallback: () => void;
+    private destroyCallback: (options?:IObject) => void;
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
@@ -13,7 +13,7 @@ export class Dialog {
         content: string,
         width?: string
         height?: string,
-        destroyCallback?: () => void
+        destroyCallback?: (options?:IObject) => void
         disableClose?: boolean
         disableAnimation?: boolean
     }) {
@@ -59,12 +59,12 @@ export class Dialog {
         window.siyuan.menus.menu.remove();
     }
 
-    public destroy() {
+    public destroy(options?:IObject) {
         this.element.remove();
         // https://github.com/siyuan-note/siyuan/issues/6783
         window.siyuan.menus.menu.remove();
         if (this.destroyCallback) {
-            this.destroyCallback();
+            this.destroyCallback(options);
         }
         window.siyuan.dialogs.find((item, index) => {
             if (item.id === this.id) {

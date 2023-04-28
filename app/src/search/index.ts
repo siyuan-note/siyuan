@@ -2,6 +2,7 @@ import {Model} from "../layout/Model";
 import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
 import {genSearch} from "./util";
+import {setPanelFocus} from "../layout/util";
 
 export class Search extends Model {
     private element: HTMLElement;
@@ -15,6 +16,9 @@ export class Search extends Model {
         this.element = options.tab.panelElement as HTMLElement;
         this.config = options.config;
         this.edit = genSearch(this.config, this.element);
+        this.element.addEventListener("click", () => {
+            setPanelFocus(this.element.parentElement.parentElement);
+        });
     }
 
     public updateSearch(text: string, replace: boolean) {

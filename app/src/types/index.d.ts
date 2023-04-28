@@ -280,6 +280,8 @@ declare interface IDockTab {
 }
 
 declare interface IOpenFileOptions {
+    searchData?: ISearchOption, // 搜索必填
+    customData?: any, // card 必填
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填
     rootIcon?: string, // 文档图标

@@ -33,6 +33,8 @@ import {setTabPosition} from "../window/setHeader";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {getIdZoomInByPath} from "../util/pathName";
+import {Custom} from "./dock/Custom";
+import {newCardModel} from "../card/newCardTab";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -334,6 +336,11 @@ export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isS
             tab: (layout as Tab),
             config: json.config
         }));
+    } else if (json.instance === "Custom") {
+        (layout as Tab).addModel(newCardModel({
+            tab: (layout as Tab),
+            data: json.data
+        }));
     }
     if (json.children) {
         if (Array.isArray(json.children)) {
@@ -462,6 +469,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
     } else if (layout instanceof Search) {
         json.instance = "Search";
         json.config = layout.config;
+    } else if (layout instanceof Custom) {
+        json.instance = "Custom";
+        json.data = layout.data;
     }
 
     if (layout instanceof Layout || layout instanceof Wnd) {
@@ -548,8 +558,10 @@ export const resizeTabs = () => {
             });
         });
         models.custom.forEach(item => {
-            item.resize();
-        })
+            if (item.resize) {
+                item.resize();
+            }
+        });
         pdfResize();
         hideAllElements(["gutter"]);
     }, 200);
@@ -605,6 +617,11 @@ export const copyTab = (tab: Tab) => {
                 model = new Search({
                     tab: newTab,
                     config: tab.model.config
+                });
+            } else if (tab.model instanceof Custom) {
+                model = newCardModel({
+                    tab,
+                    data: tab.model.data
                 });
             } else if (!tab.model && tab.headElement) {
                 const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");

@@ -648,7 +648,9 @@ export class Wnd {
             }
         }
         if (model instanceof Custom) {
-            model.destroy();
+            if (model.destroy) {
+                model.destroy();
+            }
         }
         model.send("closews", {});
     }

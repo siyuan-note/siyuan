@@ -20,8 +20,8 @@ export const genCardHTML = (options: {
     isTab: boolean
 }) => {
     return `<div class="card__main">
-    <div class="card__header">
-        <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>
+    <div class="block__icons">
+        ${options.isTab ? '<div class="fn__flex-1"></div>' : `<span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
         <span class="fn__space"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.blocks.length === 0 ? " fn__none" : ""}">1/${options.blocks.length}</span></div>
         <div class="fn__space"></div>
@@ -97,7 +97,7 @@ export const bindCardEvent = (options: {
     blocks: ICard[],
     cardType: TCardType,
     id?: string,
-    dialog: Dialog,
+    dialog?: Dialog,
 }) => {
     let index = 0;
     const editor = new Protyle(options.element.querySelector("[data-type='render']") as HTMLElement, {
@@ -188,16 +188,20 @@ export const bindCardEvent = (options: {
                 newCardTab({
                     cardType: filterElement.getAttribute("data-cardtype") as TCardType,
                     id: filterElement.getAttribute("data-id"),
-                    dialog: options.dialog,
                     title: options.title
                 });
+                if (options.dialog) {
+                    options.dialog.destroy();
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
             const closeElement = hasClosestByAttribute(target, "data-type", "close");
             if (closeElement) {
-                options.dialog.destroy();
+                if (options.dialog) {
+                    options.dialog.destroy();
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 return;

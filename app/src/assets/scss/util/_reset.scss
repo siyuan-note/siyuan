@@ -58,13 +58,6 @@ body {
       padding: 0 0 0 5px;
     }
 
-    .card__main.fullscreen > .card__header {
-      padding: 2px 108px 2px 12px;
-      & > .fn__flex-1 {
-        -webkit-app-region: drag;
-      }
-    }
-
     .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {

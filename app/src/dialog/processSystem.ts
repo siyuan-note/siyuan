@@ -109,6 +109,11 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
     allModels.search.forEach(item => {
         item.parent.panelElement.querySelector("#searchInput").dispatchEvent(new CustomEvent("input"));
     });
+    allModels.custom.forEach(item => {
+        if (item.update) {
+            item.update();
+        }
+    });
     /// #endif
 };
 

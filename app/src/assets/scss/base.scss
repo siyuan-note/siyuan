@@ -93,12 +93,14 @@ html {
   border-radius: 0;
 
   & > .protyle-breadcrumb,
-  & > .block__icons { // 关系图
+  & > .block__icons { // 关系图、card
     padding-left: var(--b3-toolbar-left-mac);
     height: 32px;
+    min-height: 32px;
   }
 
-  .protyle-breadcrumb > .protyle-breadcrumb__space {
+  .protyle-breadcrumb > .protyle-breadcrumb__space,
+  & > .block__icons > .fn__flex-1{
     -webkit-app-region: drag;
     min-width: 32px;
 

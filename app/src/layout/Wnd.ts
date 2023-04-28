@@ -33,6 +33,7 @@ import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
+import {Custom} from "./dock/Custom";
 
 export class Wnd {
     public id: string;
@@ -645,6 +646,9 @@ export class Wnd {
             if (model.pdfObject && model.pdfObject.pdfLoadingTask) {
                 model.pdfObject.pdfLoadingTask.destroy();
             }
+        }
+        if (model instanceof Custom) {
+            model.destroy();
         }
         model.send("closews", {});
     }

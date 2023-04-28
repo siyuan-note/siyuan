@@ -25,6 +25,7 @@ import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {getSearch} from "../util/functions";
+import {resize} from "../protyle/util/resize";
 
 export const openFileById = async (options: {
     id: string,
@@ -390,7 +391,7 @@ export const updatePanelByEditor = (protyle?: IProtyle, focus = true, pushBackSt
             return;
         }
         title = protyle.title.editElement.textContent;
-        setPadding(protyle);
+        resize(protyle);
         if (focus) {
             if (protyle.toolbar.range) {
                 focusByRange(protyle.toolbar.range);

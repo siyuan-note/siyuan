@@ -26,6 +26,7 @@ import {disabledProtyle, enableProtyle, onGet} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
+import {resize} from "./util/resize";
 
 export class Protyle {
 
@@ -270,5 +271,9 @@ export class Protyle {
     /** 销毁编辑器 */
     public destroy() {
         destroy(this.protyle);
+    }
+
+    public resize() {
+        resize(this.protyle);
     }
 }

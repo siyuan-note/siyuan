@@ -532,34 +532,9 @@ export const resizeTabs = () => {
     resizeTimeout = window.setTimeout(() => {
         const models = getAllModels();
         models.editor.forEach((item) => {
-            if (item.editor && item.editor.protyle && item.element.parentElement) {
-                hideElements(["gutter"], item.editor.protyle);
-                setPadding(item.editor.protyle);
-                if (typeof echarts !== "undefined") {
-                    item.editor.protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
-                        const chartInstance = echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"));
-                        if (chartInstance) {
-                            chartInstance.resize();
-                        }
-                    });
-                }
-                // 保持光标位置不变 https://ld246.com/article/1673704873983/comment/1673765814595#comments
-                if (!item.element.classList.contains("fn__none") && item.editor.protyle.toolbar.range) {
-                    let rangeRect = item.editor.protyle.toolbar.range.getBoundingClientRect();
-                    if (rangeRect.height === 0) {
-                        const blockElement = hasClosestBlock(item.editor.protyle.toolbar.range.startContainer);
-                        if (blockElement) {
-                            rangeRect = blockElement.getBoundingClientRect();
-                        }
-                    }
-                    if (rangeRect.height === 0) {
-                        return;
-                    }
-                    const protyleRect = item.editor.protyle.element.getBoundingClientRect();
-                    if (protyleRect.top + 30 > rangeRect.top || protyleRect.bottom < rangeRect.bottom) {
-                        item.editor.protyle.toolbar.range.startContainer.parentElement.scrollIntoView(protyleRect.top > rangeRect.top);
-                    }
-                }
+            if (item.editor && item.editor.protyle &&
+                item.element.parentElement && !item.element.classList.contains("fn__none")) {
+                item.editor.resize();
             }
         });
         // https://github.com/siyuan-note/siyuan/issues/6250
@@ -572,6 +547,9 @@ export const resizeTabs = () => {
                 hideElements(["gutter"], editorItem.protyle);
             });
         });
+        models.custom.forEach(item => {
+            item.resize();
+        })
         pdfResize();
         hideAllElements(["gutter"]);
     }, 200);

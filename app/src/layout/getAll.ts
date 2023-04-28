@@ -9,6 +9,7 @@ import {Search} from "../search";
 import {Files} from "./dock/Files";
 import {Bookmark} from "./dock/Bookmark";
 import {Tag} from "./dock/Tag";
+import {Custom} from "./dock/Custom";
 
 export const getAllModels = () => {
     const models: IModels = {
@@ -21,7 +22,8 @@ export const getAllModels = () => {
         inbox: [],
         files: [],
         bookmark: [],
-        tag: []
+        tag: [],
+        custom: [],
     };
     const getTabs = (layout: Layout) => {
         for (let i = 0; i < layout.children.length; i++) {
@@ -46,6 +48,8 @@ export const getAllModels = () => {
                     models.bookmark.push(model);
                 } else if (model instanceof Tag) {
                     models.tag.push(model);
+                } else if (model instanceof Custom) {
+                    models.custom.push(model);
                 }
             } else {
                 getTabs(item as Layout);

@@ -658,6 +658,7 @@ declare interface IModels {
     tag: import("../layout/dock/Tag").Tag[]
     asset: import("../asset").Asset[]
     search: import("../search").Search[]
+    custom: import("../layout/dock/Custom").Custom[]
 }
 
 declare interface IMenu {

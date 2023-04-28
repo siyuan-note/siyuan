@@ -381,7 +381,8 @@ html {
 
 .switch-doc {
   max-height: 70vh;
-  width: 520px;
+  max-width: 768px;
+  min-width: 426px;
 
   .b3-list:last-child {
     border-left: 1px solid var(--b3-theme-surface-lighter);

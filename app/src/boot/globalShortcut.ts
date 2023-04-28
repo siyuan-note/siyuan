@@ -477,7 +477,7 @@ export const globalShortcut = () => {
             }
             let dockHtml = "";
             if (!isTabWindow) {
-                dockHtml = `<ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px);overflow: auto">
+                dockHtml = `<ul class="b3-list b3-list--background" style="max-height: calc(70vh - 35px);overflow: auto;width: 200px;">
 <li data-type="riffCard" data-index="0" class="b3-list-item${!tabHtml ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>

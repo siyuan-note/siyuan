@@ -62,6 +62,10 @@ export const openFileById = async (options: {
 };
 
 export const openAsset = (assetPath: string, page: number | string, position?: string) => {
+    const suffix = pathPosix().extname(assetPath.split("?page")[0]);
+    if (!Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
+        return;
+    }
     openFile({
         assetPath,
         page,

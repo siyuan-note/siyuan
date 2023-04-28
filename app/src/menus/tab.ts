@@ -40,10 +40,10 @@ const closeMenu = (tab: Tab) => {
     if (allTabs.length > 1) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.closeOthers,
-            click: async () => {
+            click() {
                 for (let index = 0; index < allTabs.length; index++) {
                     if (allTabs[index].id !== tab.id && !allTabs[index].headElement.classList.contains("item--pin")) {
-                        await allTabs[index].parent.removeTab(allTabs[index].id, true);
+                        allTabs[index].parent.removeTab(allTabs[index].id, true, true, false);
                     }
                 }
                 if (!tab.headElement.parentElement.querySelector(".item--focus")) {

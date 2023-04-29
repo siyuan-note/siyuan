@@ -13,7 +13,6 @@ export class Model {
     /// #else
     // @ts-ignore
     public parent: any;
-
     /// #endif
 
     constructor(options: {

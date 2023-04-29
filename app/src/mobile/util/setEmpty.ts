@@ -14,8 +14,7 @@ export const setEmpty = () => {
     if (emptyElement.innerHTML !== "") {
         return;
     }
-    emptyElement.innerHTML = `<h1 style="width: 200px">${window.siyuan.languages.noOpenFile}</h1>
-<div class="fn__hr--b"></div>
+    emptyElement.innerHTML = `
 <div id="emptySearch" class="b3-list-item">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.search}</span>
 </div>

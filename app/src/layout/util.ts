@@ -35,7 +35,7 @@ import {getIdZoomInByPath} from "../util/pathName";
 import {openHistory} from "../history/history";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
-import { openRecentDocs } from "../business/openRecentDocs";
+import {openRecentDocs} from "../business/openRecentDocs";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -799,8 +799,6 @@ export const newCenterEmptyTab = () => {
         </div>
         <div class="b3-label__text">${window.siyuan.languages.slogan}</div>
     </div>
-    <h1>${window.siyuan.languages.noOpenFile}</h1>
-    <div class="fn__hr"></div>
     <div class="fn__hr"></div>
     <div class="b3-list-item" id="editorEmptySearch">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg>

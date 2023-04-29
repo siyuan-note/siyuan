@@ -183,6 +183,7 @@ const renderKeyboardToolbar = () => {
         if (getSelection().rangeCount === 0 ||
             window.siyuan.config.editor.readOnly ||
             window.siyuan.config.readonly ||
+            window.screen.height - window.innerHeight < 160 ||  // reloadSync 会导致 selectionchange，从而导致键盘没有弹起的情况下出现工具栏
             !document.activeElement || (
                 document.activeElement &&
                 document.activeElement.tagName !== "INPUT" &&

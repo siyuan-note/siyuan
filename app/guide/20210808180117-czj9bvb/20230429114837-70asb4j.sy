@@ -1,0 +1,1005 @@
+{
+	"ID": "20230429114837-70asb4j",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f5c2",
+		"id": "20230429114837-70asb4j",
+		"title": "术语表",
+		"updated": "20230429120400"
+	},
+	"Children": [
+		{
+			"ID": "20230429114837-3y8u0uj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429114837-3y8u0uj",
+				"updated": "20230429090147"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-d5s8qi7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-d5s8qi7",
+				"updated": "20230429090932"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "思源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "中，涉及到了一些相对复杂的术语，这些术语可能会让人感到困惑。在本章节中，我们会逐一对这些术语进行解释，希望能够帮助你更好地理解和使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "思源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-z07wqvi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-z07wqvi",
+				"updated": "20230429102742"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "请"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，以下内容在涉及到具体功能时主要以桌面端为主进行介绍。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-ua8g2lw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429114837-ua8g2lw",
+				"updated": "20230428204250"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑器"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-hxy4fie",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-hxy4fie",
+				"updated": "20230429091240"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "面包屑"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-npgtpv4",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20230429114837-npgtpv4",
+				"updated": "20230429092525"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20230429114837-g45yk2o",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20230429114837-g45yk2o",
+						"updated": "20230429092525"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "通常情况下，面包屑是应用程序导航中的一种辅助元素，通常位于顶部或页面顶部下方的水平序列中。它显示了用户当前所在位置的路径，在用户导航过程中提供了便利的记忆和方向感。面包屑可以让用户更容易地浏览网站结构、快速返回到前一个页面或更高级别的页面，并减少无效点击和迷路的可能性。它可以作为用户体验设计的一部分，提高应用的可用性和易用性。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-snq8ez2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-snq8ez2",
+				"updated": "20230429120400"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，面包屑指的是编辑器顶部由右箭头相连的块路径，用于在块结构中导航。其中每一层都由块标开头，鼠标悬浮可以打开预览浮窗。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-2z8tol5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-2z8tol5",
+				"updated": "20230429091244"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "锚文本",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-x8yli02",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20230429114837-x8yli02",
+				"updated": "20230429092502"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20230429114837-rygun1z",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20230429114837-rygun1z",
+						"updated": "20230429092502"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "通常情况下，锚文本是指在超链接中被点击的文本部分，它通常是蓝色的。锚文本可以与超链接的 URL 地址相连接，当用户点击锚文本时，就会自动跳转到相应的网页或文件。锚文本可以是任何文字或短语，但通常应与所链接的内容相关联，一般是目标跳转内容的标题。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-oovriku",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-oovriku",
+				"updated": "20230429092328"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，我们将通常意义上的锚文本从超链接元素扩展到了块引用、PDF 标注引用元素上。特殊地，对于块引用元素锚文本还分为静态锚文本和动态锚文本，具体细节请参考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220623194755-30vtsr7",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "引用内容块锚文本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "章节。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-q6cq7i0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-q6cq7i0",
+				"updated": "20230429092949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑器模式"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-sl7fhz3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230429114837-sl7fhz3",
+				"updated": "20230429093026"
+			},
+			"Children": [
+				{
+					"ID": "20230429114837-47i9nme",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230429114837-47i9nme",
+						"updated": "20230429093026"
+					},
+					"Children": [
+						{
+							"ID": "20230429114837-kytzptc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230429114837-kytzptc",
+								"updated": "20230429093608"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "所见即所得：常规情况下的编辑器界面"
+								}
+							]
+						},
+						{
+							"ID": "20230429114837-99w6aiu",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230429114837-99w6aiu"
+							},
+							"Children": [
+								{
+									"ID": "20230429114837-b2h5mcd",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230429114837-b2h5mcd"
+									},
+									"Children": [
+										{
+											"ID": "20230429114837-h6cj9dt",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230429114837-h6cj9dt",
+												"updated": "20230429093421"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "可编辑：支持修改内容"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230429114837-gru4sga",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230429114837-gru4sga"
+									},
+									"Children": [
+										{
+											"ID": "20230429114837-epcys13",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230429114837-epcys13",
+												"updated": "20230429093433"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "仅只读：仅支持查看内容，不支持修改"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230429114837-vyapjdy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230429114837-vyapjdy"
+					},
+					"Children": [
+						{
+							"ID": "20230429114837-tyf0kib",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230429114837-tyf0kib",
+								"updated": "20230429093334"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "导出预览：转换为标准 Markdown 后进行预览"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-h68659d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-h68659d",
+				"updated": "20230429094041"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所见即所得和导出预览模式切换位于编辑器右上角 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⋮"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 菜单中；所见即所得编辑和只读模式切换位于顶栏右上角。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-a0mufyr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429114837-a0mufyr",
+				"updated": "20230428204306"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "数据仓库",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-btaob5b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-btaob5b",
+				"updated": "20230428204157"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "密钥"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-zf8859i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-zf8859i",
+				"updated": "20230429095144"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "密钥用于加密数据快照，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220722001555-3wcanjb",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "有三种生成方式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。建议普通用户使用密码短语生成，相同的密码短语可在其他设备上生成相同的密钥，以方便初始化数据同步。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-j480an3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-j480an3",
+				"updated": "20230428204114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地快照"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-zvtgut0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-zvtgut0",
+				"updated": "20230429095234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存在本地设备上的数据快照。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-01j30mi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-01j30mi",
+				"updated": "20230428204116"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地标记的快照"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-baczgue",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-baczgue",
+				"updated": "20230429100720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地快照中手动打过标记的快照。打标记的目的是为了方便查找，一个有意义的标记名称可以在回滚快照时起到足够的提示作用。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-ndhh31x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-ndhh31x",
+				"updated": "20230428204119"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "云端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "快照"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-xpxr9x2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-xpxr9x2",
+				"updated": "20230429095321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存在云端存储上的数据快照。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-e2w74sf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-e2w74sf",
+				"updated": "20230428204122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "云端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "标记的快照"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-n3kucvo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-n3kucvo",
+				"updated": "20230429095359"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地标记的快照上传到云端后的数据快照。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-j6668qw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429114837-j6668qw",
+				"updated": "20230428210748"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "界面"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-u3wlhsg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-u3wlhsg",
+				"updated": "20230429102207"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "停靠栏"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-x691uxl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-x691uxl",
+				"updated": "20230429102308"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主界面左侧、右侧和下侧的边栏，用于存放面板入口按钮。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-krbd42o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-krbd42o",
+				"updated": "20230429102142"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "面板"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-5m6ncf0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-5m6ncf0",
+				"updated": "20230429102409"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "面板指的是从停靠栏上打开的功能区域，比如文档树、大纲和反链等。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-yenli3h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-yenli3h",
+				"updated": "20230428210709"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-57v9r45",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-57v9r45",
+				"updated": "20230429101019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签类似浏览器上的标签页，不同类型的页签包含了不同的功能。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-lw88lkt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429114837-lw88lkt",
+				"updated": "20230428210713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑器页签"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-x97fosc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-x97fosc",
+				"updated": "20230429101122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用于加载文档编辑器。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-pelzbsa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429114837-pelzbsa",
+				"updated": "20230428210715"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF 页签"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-8uhilc2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-8uhilc2",
+				"updated": "20230429101129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用于加载 PDF。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-k6nnan8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429114837-k6nnan8",
+				"updated": "20230428210717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "搜索页签"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-6sa64xq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-6sa64xq",
+				"updated": "20230429101504"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将搜索界面在页签中打开，直接这样用户就可以同时使用其他页签，不会被搜索窗口遮挡其他工作。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-ut5gv8h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429114837-ut5gv8h",
+				"updated": "20230429101406"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "间隔重复页签"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-phug5j8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-phug5j8",
+				"updated": "20230429101534"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将间隔重复界面在页签中打开。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-1fw1u07",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-1fw1u07",
+				"updated": "20230428210813"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "窗口"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-efwc1si",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-efwc1si",
+				"updated": "20230429101913"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签可以转换为独立于主界面的窗口，窗口可以拖到主界面之外，避免主界面中过于拥挤。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-idbctyn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-idbctyn",
+				"updated": "20230429101947"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过钉住窗口还可以实现该窗口位于所有应用程序之上，以便用户更好的利用有限的屏幕空间。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-gs71q41",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-gs71q41",
+				"updated": "20230428210814"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "布局"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-wu8pscc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-wu8pscc",
+				"updated": "20230429102809"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "当前主界面的停靠栏、页签和面板的状态组成了布局，布局可以在左上角工作空间菜单中进行保存和切换。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-7grcqq5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-7grcqq5",
+				"updated": "20230429105016"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "块标"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-m8punok",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-m8punok",
+				"updated": "20230429112706"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "出现在块前面的图标，面板中出现的块标在大部分情况下都支持通过鼠标悬浮打开预览浮窗，比如大纲面板、反链面板中的块标。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-ohe6zol",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-ohe6zol",
+				"updated": "20230429113218"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "块标除了悬浮预览，还支持 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Click"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 在页签中打开，这在反链面板等需要跳转上下文的场景中尤其有用。"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-ecvrylp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429114837-ecvrylp",
+				"updated": "20230428204437"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "其他",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-ki1rovi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429114837-ki1rovi",
+				"updated": "20230428204126"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "伺服"
+				}
+			]
+		},
+		{
+			"ID": "20230429114837-uavwo4u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429114837-uavwo4u",
+				"updated": "20230429103400"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过思源内核提供的服务能力以便"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201004184819-nj8ibyg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "在浏览器上使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

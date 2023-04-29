@@ -1,0 +1,945 @@
+{
+	"ID": "20230429115711-ejbts4s",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f5c2",
+		"id": "20230429115711-ejbts4s",
+		"title": "Glossary",
+		"updated": "20230429120517"
+	},
+	"Children": [
+		{
+			"ID": "20230429115740-9l80any",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429115740-9l80any",
+				"updated": "20230429115740"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-yhr68al",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115740-yhr68al",
+				"updated": "20230429120220"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, some relatively complicated terminology is involved, which can be confusing. In this chapter, we will explain these terms one by one, hoping to help you better understand and use SiYuan."
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-1d51yn2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115740-1d51yn2",
+				"updated": "20230429120317"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, when it comes to specific functions, the following content is mainly introduced on the desktop."
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-s72e6yy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429115740-s72e6yy",
+				"updated": "20230429115745"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editor"
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-jegf4ou",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115740-jegf4ou",
+				"updated": "20230429115801"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Breadcrumb"
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-fnmy34z",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20230429115740-fnmy34z",
+				"updated": "20230429115740"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20230429115740-21j01p3",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20230429115740-21j01p3",
+						"updated": "20230429115740"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Typically, a breadcrumb is an auxiliary element in application navigation, usually in a horizontal sequence at the top or below the top of the page. It shows the path of the user's current location, providing a convenient memory and sense of direction during the user's navigation. Breadcrumbs make it easier for users to navigate the site structure, quickly return to a previous page or a higher-level page, and reduce the chance of invalid clicks and getting lost. It can be used as part of user experience design to improve the usability and ease of use of the application."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-u7ka7oi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115740-u7ka7oi",
+				"updated": "20230429120405"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, breadcrumbs refer to the block paths connected by right arrows at the top of the editor, which are used to navigate in the block structure. Each layer starts with a block icon, and the preview floating window can be opened by hovering the mouse."
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-nprcl4k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115740-nprcl4k",
+				"updated": "20230429115757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Anchor text"
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-ewj59ik",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20230429115740-ewj59ik",
+				"updated": "20230429115740"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20230429115740-id1s5ff",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20230429115740-id1s5ff",
+						"updated": "20230429115740"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Typically, anchor text refers to the portion of text that is clicked on within a hyperlink, and it is usually blue. The anchor text can be connected with the URL address of the hyperlink. When the user clicks the anchor text, it will automatically jump to the corresponding webpage or file. Anchor text can be any word or phrase, but it should usually be associated with the content being linked, usually the title of the target jump content."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230429115740-5mp1ell",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115740-5mp1ell",
+				"updated": "20230429120228"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, we have extended anchor text in the usual sense from hyperlink elements to block quotes and PDF annotation reference elements. In particular, the anchor text of the block quote element is divided into static anchor text and dynamic anchor text. For details, please refer to the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220623201008-is3nn7u",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Reference Content Block Anchor Text"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " section."
+				}
+			]
+		},
+		{
+			"ID": "20230429115912-b97gvan",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115912-b97gvan",
+				"updated": "20230429115912"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editor Mode"
+				}
+			]
+		},
+		{
+			"ID": "20230429115912-x1a373p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230429115912-x1a373p",
+				"updated": "20230429115912"
+			},
+			"Children": [
+				{
+					"ID": "20230429115912-8o8vxx5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230429115912-8o8vxx5",
+						"updated": "20230429115912"
+					},
+					"Children": [
+						{
+							"ID": "20230429115912-91dt06z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230429115912-91dt06z",
+								"updated": "20230429115912"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "What you see is what you get: the editor interface under normal circumstances"
+								}
+							]
+						},
+						{
+							"ID": "20230429115912-qa1d2gj",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230429115912-qa1d2gj",
+								"updated": "20230429115912"
+							},
+							"Children": [
+								{
+									"ID": "20230429115912-wls4t5m",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230429115912-wls4t5m",
+										"updated": "20230429115912"
+									},
+									"Children": [
+										{
+											"ID": "20230429115912-wsv8fch",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230429115912-wsv8fch",
+												"updated": "20230429115912"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Editable: support modifying content"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230429115912-3ge90ax",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230429115912-3ge90ax",
+										"updated": "20230429115912"
+									},
+									"Children": [
+										{
+											"ID": "20230429115912-ilnm57r",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230429115912-ilnm57r",
+												"updated": "20230429115912"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Only read-only: only supports viewing content, does not support modification"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230429115912-evfoi3b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230429115912-evfoi3b",
+						"updated": "20230429115912"
+					},
+					"Children": [
+						{
+							"ID": "20230429115912-rr9nv27",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230429115912-rr9nv27",
+								"updated": "20230429115912"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Export preview: preview after conversion to standard Markdown"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230429115912-zd5p7jl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115912-zd5p7jl",
+				"updated": "20230429120505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WYSIWYG and export preview mode switches are located in the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⋮"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ menu in the upper right corner of the editor; WYSIWYG editing and read-only mode switches are located in the upper right corner of the top bar."
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-coz742f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429115927-coz742f",
+				"updated": "20230429115933"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data repository"
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-bjmnazr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115927-bjmnazr",
+				"updated": "20230429115945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Key"
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-qaqpi8z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115927-qaqpi8z",
+				"updated": "20230429120019"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The key is used to encrypt data snapshots, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220722002536-oh6do47",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "there are three ways to generate"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". It is recommended that ordinary users use passphrase generation. The same passphrase can generate the same key on other devices to facilitate initial data synchronization."
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-rkshv1l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115927-rkshv1l",
+				"updated": "20230429120027"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-s5dasq2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115927-s5dasq2",
+				"updated": "20230429115927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data snapshots saved locally on the device."
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-vgz5oj0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115927-vgz5oj0",
+				"updated": "20230429120030"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Locally tagged snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-lhfhnvb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115927-lhfhnvb",
+				"updated": "20230429115927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manually tagged snapshots in local snapshots. The purpose of tagging is to facilitate searching, and a meaningful tag name can serve as a sufficient reminder when rolling back a snapshot."
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-4vr87gi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115927-4vr87gi",
+				"updated": "20230429115927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cloud snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-bb5x5s1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115927-bb5x5s1",
+				"updated": "20230429115927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data snapshots saved on cloud storage."
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-3oc93qe",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429115927-3oc93qe",
+				"updated": "20230429120032"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cloud tagged snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20230429115927-2wm6pxd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429115927-2wm6pxd",
+				"updated": "20230429115927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The data snapshot after the locally tagged snapshot is uploaded to the cloud."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-5xk88t9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429120050-5xk88t9",
+				"updated": "20230429120054"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Interface"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-scwpy3r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429120050-scwpy3r",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Dock"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-le0yzzw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-le0yzzw",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The sidebars on the left, right and bottom of the main interface are used to store the panel entry buttons."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-09mig9d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429120050-09mig9d",
+				"updated": "20230429120115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Panel"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-c9xun18",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-c9xun18",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Panels refer to functional areas opened from the dock, such as the document tree, outline, and backlinks."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-3mfr5fb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429120050-3mfr5fb",
+				"updated": "20230429120110"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tab"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-r9j15xs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-r9j15xs",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tabs are similar to tabs on a browser, and different types of tabs have different functions."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-r51s7t7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429120050-r51s7t7",
+				"updated": "20230429120125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editor tab"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-mpeypp0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-mpeypp0",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to load the docs editor."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-5ehc5zq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429120050-5ehc5zq",
+				"updated": "20230429120123"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF tab"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-gvsgq2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-gvsgq2n",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to load PDFs."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-x2yrwdq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429120050-x2yrwdq",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Search tab"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-v2u9dy4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-v2u9dy4",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the search interface in a tab, so that users can use other tabs at the same time without being blocked by the search window for other work."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-vzjnkvv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20230429120050-vzjnkvv",
+				"updated": "20230429120130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Spaced Repeatition tab"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-9az1982",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-9az1982",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the spaced repetition interface in a tab."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-mgddw1u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429120050-mgddw1u",
+				"updated": "20230429120134"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Window"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-klzguje",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-klzguje",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tabs can be converted into windows independent of the main interface, and windows can be dragged outside the main interface to avoid overcrowding in the main interface."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-zo5u4jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-zo5u4jx",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "By pinning the window, the window can also be placed on top of all applications so that the user can make better use of the limited screen space."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-36xz5r4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429120050-36xz5r4",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Layout"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-vx2ae03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-vx2ae03",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The status of the dock bar, tabs, and panels of the current main interface constitutes the layout, and the layout can be saved and switched in the workspace menu in the upper left corner."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-i338ss7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429120050-i338ss7",
+				"updated": "20230429120139"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Block icon"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-9yrwodu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-9yrwodu",
+				"updated": "20230429120050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Icons appearing in front of blocks, and block labels appearing in the panel support opening the floating preview window by hovering the mouse in most cases, such as the block labels in the outline panel and anti-link panel."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-7kwyta0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-7kwyta0",
+				"updated": "20230429120517"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to the floating preview, the block label also supports "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Click"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ to open in the tab, which is especially useful in scenarios such as anti-link panels that require context jumping."
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-b0r6bh0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230429120050-b0r6bh0",
+				"updated": "20230429120142"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Other"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-s4dqqa7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230429120050-s4dqqa7",
+				"updated": "20230429120146"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Serving"
+				}
+			]
+		},
+		{
+			"ID": "20230429120050-xn4ri9u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230429120050-xn4ri9u",
+				"updated": "20230429120213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Through the service capabilities provided by the SiYuan kernel "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201004194026-s8h2cog",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Use on browser"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

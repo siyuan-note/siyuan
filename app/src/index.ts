@@ -192,3 +192,9 @@ window.openFileByURL = (openURL) => {
     }
     return false;
 };
+
+/// #if BROWSER
+window.showKeyboardToolbar = () => {
+    // 防止 Pad 端报错
+};
+/// #endif

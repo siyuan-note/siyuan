@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230415112115"
+		"updated": "20230429085324"
 	},
 	"Children": [
 		{
@@ -263,7 +263,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115356-i1v42hf",
-				"updated": "20230103223819"
+				"updated": "20230429085324"
 			},
 			"Children": [
 				{
@@ -391,7 +391,7 @@
 					},
 					"Properties": {
 						"id": "20221202215226-ibnf53j",
-						"updated": "20230103223819"
+						"updated": "20230429085324"
 					},
 					"Children": [
 						{
@@ -399,7 +399,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202215226-n689p7u",
-								"updated": "20230103223819"
+								"updated": "20230429085324"
 							},
 							"Children": [
 								{
@@ -413,7 +413,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用於保存命名查詢和"
+									"Data": "​​ 用於保存查詢條件、佈局和"
 								},
 								{
 									"Type": "NodeTextMark",

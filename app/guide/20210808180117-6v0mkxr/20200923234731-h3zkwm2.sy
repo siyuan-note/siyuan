@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230415112018"
+		"updated": "20230429085233"
 	},
 	"Children": [
 		{
@@ -268,7 +268,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428222603-moih9fe",
-				"updated": "20230103223700"
+				"updated": "20230429085233"
 			},
 			"Children": [
 				{
@@ -398,7 +398,7 @@
 					},
 					"Properties": {
 						"id": "20221202214811-2s26txl",
-						"updated": "20230103223700"
+						"updated": "20230429085233"
 					},
 					"Children": [
 						{
@@ -406,7 +406,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202214811-p1eevpi",
-								"updated": "20230103223700"
+								"updated": "20230429085233"
 							},
 							"Children": [
 								{
@@ -420,7 +420,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is used to save named criteria and "
+									"Data": "​ is used to save query conditions, layouts and "
 								},
 								{
 									"Type": "NodeTextMark",

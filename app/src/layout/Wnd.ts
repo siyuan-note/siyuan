@@ -100,7 +100,7 @@ export class Wnd {
                     newFile(undefined, undefined, undefined, true);
                     break;
                 } else if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "more") {
-                    this.renderTabList(event);
+                    this.renderTabList(target);
                     break;
                 } else if (target.tagName === "LI" && target.getAttribute("data-id") && !pdfIsLoading(this.element)) {
                     this.switchTab(target, true);
@@ -555,7 +555,12 @@ export class Wnd {
         /// #endif
     }
 
-    private renderTabList(event: MouseEvent) {
+    private renderTabList(target: HTMLElement) {
+        if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+            window.siyuan.menus.menu.element.getAttribute("data-name") === "tabList") {
+            window.siyuan.menus.menu.remove();
+            return;
+        }
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.classList.add("b3-menu--list");
         Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
@@ -567,8 +572,8 @@ export class Wnd {
                 iconHTML: iconElement ? `<span class="b3-menu__icon">${iconElement.innerHTML}</span>` : "",
                 icon: graphicElement ? graphicElement.firstElementChild.getAttribute("xlink:href").substring(1) : "",
                 bind: (element) => {
-                    element.addEventListener("click", (event) => {
-                        if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {
+                    element.addEventListener("click", (itemEvent) => {
+                        if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
                             this.removeTab(item.getAttribute("data-id"));
                             if (element.previousElementSibling || element.nextElementSibling) {
                                 element.remove();
@@ -580,18 +585,19 @@ export class Wnd {
                             this.showHeading();
                             window.siyuan.menus.menu.remove();
                         }
-                        event.preventDefault();
-                        event.stopPropagation();
+                        itemEvent.preventDefault();
+                        itemEvent.stopPropagation();
                     });
                 },
                 current: item.classList.contains("item--focus")
             }).element);
         });
+        window.siyuan.menus.menu.element.setAttribute("data-name", "tabList");
+        const rect  = target.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
-            x: event.clientX,
-            y: event.clientY,
-            w: 16
-        });
+            x: rect.left + rect.width,
+            y: rect.top + rect.height,
+        }, true);
     }
 
     private removeOverCounter(oldFocusIndex?: number) {

@@ -42,7 +42,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.7.3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/sashabaranov/go-gpt3 v1.4.0
+	github.com/sashabaranov/go-openai v1.9.0
 	github.com/shirou/gopsutil/v3 v3.23.2
 	github.com/siyuan-note/dejavu v0.0.0-20230425070132-9eeaf90cb5ba
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75

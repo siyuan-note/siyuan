@@ -35,6 +35,8 @@
   "apiTimeoutTip": "發起請求的超時時間，單位：秒",
   "apiProxy": "網絡代理",
   "apiProxyTip": "發起請求的網絡代理，如 <code class='fn__code'>socks://127.0.0.1:1080</code>",
+  "apiModel": "模型",
+  "apiModelTip": "請求 API 時傳入的 <code class='fn__code'>model</code> 參數，用於控制生成的文本風格",
   "apiMaxTokens": "最大 Token 數",
   "apiMaxTokensTip": "請求 API 時傳入的 <code class='fn__code'>max_tokens</code> 參數，用於控制生成的文本長度",
   "apiBaseURL": "API 基礎地址",

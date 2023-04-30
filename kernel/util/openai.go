@@ -18,30 +18,31 @@ package util
 
 import (
 	"context"
-	gogpt "github.com/sashabaranov/go-gpt3"
-	"github.com/siyuan-note/logging"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/logging"
 )
 
-func ChatGPT(msg string, contextMsgs []string, c *gogpt.Client, maxTokens, timeout int) (ret string, stop bool, err error) {
-	var reqMsgs []gogpt.ChatCompletionMessage
+func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, maxTokens, timeout int) (ret string, stop bool, err error) {
+	var reqMsgs []openai.ChatCompletionMessage
 
 	for _, ctxMsg := range contextMsgs {
-		reqMsgs = append(reqMsgs, gogpt.ChatCompletionMessage{
+		reqMsgs = append(reqMsgs, openai.ChatCompletionMessage{
 			Role:    "user",
 			Content: ctxMsg,
 		})
 	}
-	reqMsgs = append(reqMsgs, gogpt.ChatCompletionMessage{
+	reqMsgs = append(reqMsgs, openai.ChatCompletionMessage{
 		Role:    "user",
 		Content: msg,
 	})
 
-	req := gogpt.ChatCompletionRequest{
-		Model:     gogpt.GPT3Dot5Turbo,
+	req := openai.ChatCompletionRequest{
+		Model:     model,
 		MaxTokens: maxTokens,
 		Messages:  reqMsgs,
 	}
@@ -74,8 +75,8 @@ func ChatGPT(msg string, contextMsgs []string, c *gogpt.Client, maxTokens, timeo
 	return
 }
 
-func NewOpenAIClient(apiKey, apiProxy, apiBaseURL string) *gogpt.Client {
-	config := gogpt.DefaultConfig(apiKey)
+func NewOpenAIClient(apiKey, apiProxy, apiBaseURL string) *openai.Client {
+	config := openai.DefaultConfig(apiKey)
 	if "" != apiProxy {
 		proxyUrl, err := url.Parse(apiProxy)
 		if nil != err {
@@ -86,5 +87,5 @@ func NewOpenAIClient(apiKey, apiProxy, apiBaseURL string) *gogpt.Client {
 	}
 
 	config.BaseURL = apiBaseURL
-	return gogpt.NewClientWithConfig(config)
+	return openai.NewClientWithConfig(config)
 }

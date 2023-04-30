@@ -35,6 +35,8 @@
   "apiTimeoutTip": "The timeout period for initiating a request, unit: second",
   "apiProxy": "Network Proxy",
   "apiProxyTip": "The network proxy that initiates the request, such as <code class='fn__code'>socks://127.0.0.1:1080</code>",
+  "apiModel": "Model",
+  "apiModelTip": "The <code class='fn__code'>model</code> parameter passed in when requesting the API is used to control the style of the generated text",
   "apiMaxTokens": "Maximum number of Tokens",
   "apiMaxTokensTip": "The <code class='fn__code'>max_tokens</code> parameter passed in when requesting the API is used to control the length of the generated text",
   "apiBaseURL": "API Base URL",

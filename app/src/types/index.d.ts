@@ -424,6 +424,7 @@ declare interface IConfig {
         openAI: {
             apiBaseURL: string
             apiKey: string
+            apiModel: string
             apiMaxTokens: number
             apiProxy: string
             apiTimeout: number

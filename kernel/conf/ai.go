@@ -29,6 +29,7 @@ type OpenAI struct {
 	APIKey       string `json:"apiKey"`
 	APITimeout   int    `json:"apiTimeout"`
 	APIProxy     string `json:"apiProxy"`
+	APIModel     string `json:"apiModel"`
 	APIMaxTokens int    `json:"apiMaxTokens"`
 	APIBaseURL   string `json:"apiBaseURL"`
 }

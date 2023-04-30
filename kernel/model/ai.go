@@ -22,7 +22,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	gogpt "github.com/sashabaranov/go-gpt3"
+	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -154,11 +154,11 @@ type GPT interface {
 }
 
 type OpenAIGPT struct {
-	c *gogpt.Client
+	c *openai.Client
 }
 
 func (gpt *OpenAIGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
-	return util.ChatGPT(msg, contextMsgs, gpt.c, Conf.AI.OpenAI.APIMaxTokens, Conf.AI.OpenAI.APITimeout)
+	return util.ChatGPT(msg, contextMsgs, gpt.c, Conf.AI.OpenAI.APIModel, Conf.AI.OpenAI.APIMaxTokens, Conf.AI.OpenAI.APITimeout)
 }
 
 type CloudGPT struct {

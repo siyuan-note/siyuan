@@ -1078,6 +1078,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: protyle.notebookId,
                         path: pathPosix().join(response.data, newFileName),
+                        parentID: protyle.block.rootID,
                         markdown: ""
                     }, response => {
                         insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);
@@ -1102,6 +1103,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     fetchPost("/api/filetree/createDocWithMd", {
                         notebook: protyle.notebookId,
                         path: pathPosix().join(pathString, newFileName),
+                        parentID: protyle.block.rootID,
                         markdown: ""
                     }, response => {
                         insertHTML(`<span data-type="block-ref" data-id="${response.data}" data-subtype="d">${escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen))}</span>`, protyle);

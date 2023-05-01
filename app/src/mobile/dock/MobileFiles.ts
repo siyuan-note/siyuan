@@ -29,6 +29,9 @@ export class MobileFiles extends Model {
                         case "moveDoc":
                             this.onMove(data.data);
                             break;
+                        case "reloadFiletree":
+                            this.init(false);
+                            break;
                         case "mount":
                             this.onMount(data);
                             break;

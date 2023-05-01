@@ -35,7 +35,9 @@ export class Files extends Model {
                             this.onMove(data);
                             break;
                         case "reloadFiletree":
-                            this.init(false);
+                            setNoteBook(() => {
+                                this.init(false);
+                            });
                             break;
                         case "mount":
                             this.onMount(data);

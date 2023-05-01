@@ -1094,7 +1094,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!selectText.trim() && (nodeElement.querySelector("tr") || nodeElement.querySelector("span"))) {
                 // 没选中时，都是纯文本就创建子文档 https://ld246.com/article/1663073488381/comment/1664804353295#comments
             } else {
-                if (!selectText.trim()) {
+                if (!selectText.trim() && getContenteditableElement(nodeElement).textContent) {
                     selectAll(protyle, nodeElement, range);
                 }
                 getSavePath(protyle.path, protyle.notebookId, (pathString) => {

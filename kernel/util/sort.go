@@ -69,4 +69,6 @@ const (
 	SortModeSubDocCountASC         // 13：子文档数升序
 	SortModeSubDocCountDESC        // 14：子文档数降序
 	SortModeFileTree               // 15：使用文档树排序规则
+
+	SortModeUnassigned      = 256  // 256：未指定排序规则，按照笔记本优先于文档树获取排序规则
 )

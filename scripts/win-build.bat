@@ -24,7 +24,7 @@ goversioninfo -platform-specific=true -icon=resource/icon.ico -manifest=resource
 
 set GOOS=windows
 set GOARCH=amd64
-@REM you can use `go mod tidy` to update kernel dependency bofore build
+@REM you can use `go mod tidy` to update kernel dependency before build
 go build --tags fts5 -v -o "../app/kernel/SiYuan-Kernel.exe" -ldflags "-s -w -H=windowsgui" .
 
 cd ..

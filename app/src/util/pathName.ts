@@ -454,7 +454,6 @@ const getLeaf = (liElement: HTMLElement, flashcard:boolean) => {
     fetchPost("/api/filetree/listDocsByPath", {
         notebook: notebookId,
         path: liElement.getAttribute("data-path"),
-        sort: window.siyuan.config.fileTree.sort,
         flashcard,
     }, response => {
         if (response.data.path === "/" && response.data.files.length === 0) {

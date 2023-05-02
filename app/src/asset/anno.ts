@@ -320,11 +320,14 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         if (item.tagName === "BR" && item.previousElementSibling && item.nextElementSibling) {
             const previousText = item.previousElementSibling.textContent;
             const nextText = item.nextElementSibling.textContent;
-            if (previousText.endsWith("-") && /^[A-Za-z]$/.test(previousText.substring(previousText.length - 2, previousText.length - 1)) &&
+            if (/^[A-Za-z]$/.test(previousText.substring(previousText.length - 2, previousText.length - 1)) &&
                 /^[A-Za-z]$/.test(nextText.substring(0, 1))) {
-                item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1);
-            } else {
-                item.insertAdjacentText("afterend", " ");
+                if (previousText.endsWith("-")) {
+                    item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1);
+                } else {
+                    // 中文情况不能添加 https://github.com/siyuan-note/siyuan/issues/8152
+                    item.insertAdjacentText("afterend", " ");
+                }
             }
         }
     });

@@ -35,6 +35,8 @@
   "apiTimeoutTip": "Le délai d'attente pour lancer une requête, unité : seconde",
   "apiProxy": "Proxy Web",
   "apiProxyTip": "Le proxy réseau qui lance la requête, tel que <code class='fn__code'>socks://127.0.0.1:1080</code>",
+  "apiModel": "Modelo",
+  "apiModelTip": "El parámetro <code class='fn__code'>model</code> pasado al solicitar la API se usa para controlar el estilo del texto generado",
   "apiMaxTokens": "Nombre maximum de jetons",
   "apiMaxTokensTip": "Le paramètre <code class='fn__code'>max_tokens</code> transmis lors de la demande de l'API est utilisé pour contrôler la longueur du texte généré",
   "apiBaseURL": "URL de base de l'API",

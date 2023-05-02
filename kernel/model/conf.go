@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"github.com/sashabaranov/go-openai"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -337,14 +338,18 @@ func InitConf() {
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
 	}
+	if "" == Conf.AI.OpenAI.APIModel {
+		Conf.AI.OpenAI.APIModel = openai.GPT4
+	}
 
 	if "" != Conf.AI.OpenAI.APIKey {
 		logging.LogInfof("OpenAI API enabled\n"+
 			"    baseURL=%s\n"+
 			"    timeout=%ds\n"+
 			"    proxy=%s\n"+
+			"    model=%s\n"+
 			"    maxTokens=%d",
-			Conf.AI.OpenAI.APIBaseURL, Conf.AI.OpenAI.APITimeout, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIMaxTokens)
+			Conf.AI.OpenAI.APIBaseURL, Conf.AI.OpenAI.APITimeout, Conf.AI.OpenAI.APIProxy, Conf.AI.OpenAI.APIModel, Conf.AI.OpenAI.APIMaxTokens)
 	}
 
 	Conf.ReadOnly = util.ReadOnly

@@ -474,6 +474,7 @@ ${unicode2Emoji(emoji.unicode, true)}</button>`;
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: protyle.notebookId,
                     path: pathPosix().join(pathString, realFileName),
+                    parentID: protyle.block.rootID,
                     markdown: ""
                 }, response => {
                     protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {

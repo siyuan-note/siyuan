@@ -428,13 +428,6 @@
   @extend .fn__ellipsis;
 }
 
-// iPhone 右上角属性中对不齐
-.protyle-wysiwyg--attr .protyle-attr > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
-  max-width: 26vw;
-  white-space: nowrap;
-  display: block;
-}
-
 .protyle {
   &-util {
     .color__square {
@@ -445,6 +438,18 @@
 
   &-font {
     font-size: 14px;
+  }
+
+  // iPhone 右上角属性中对不齐
+  &-wysiwyg--attr .protyle-attr > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
+    max-width: 26vw;
+    white-space: nowrap;
+    display: block;
+  }
+
+  // 移动端键盘弹起和点击加号需保持滚动高度一致
+  &-background__img img {
+    height: 200px;
   }
 }
 

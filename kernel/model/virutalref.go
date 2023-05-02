@@ -232,6 +232,14 @@ func getVirtualRefKeywords(docName string) (ret []string) {
 
 func prepareMarkKeywords(keywords []string) (ret []string) {
 	ret = gulu.Str.RemoveDuplicatedElem(keywords)
+	var tmp []string
+	for _, k := range ret {
+		if "" != k {
+			tmp = append(tmp, k)
+		}
+	}
+	ret = tmp
+
 	sort.SliceStable(ret, func(i, j int) bool {
 		return len(ret[i]) > len(ret[j])
 	})

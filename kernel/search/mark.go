@@ -88,6 +88,10 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 	}
 	re := ic + "("
 	for i, k := range keywords {
+		if "" == k {
+			continue
+		}
+
 		wordBoundary := false
 		if splitWords {
 			wordBoundary = lex.IsASCIILetterNums(gulu.Str.ToBytes(k)) // Improve virtual reference split words https://github.com/siyuan-note/siyuan/issues/7833

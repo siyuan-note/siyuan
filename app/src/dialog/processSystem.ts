@@ -14,7 +14,7 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
-import {redirectToCheckAuth} from "../util/pathName";
+import {redirectToCheckAuth, setNoteBook} from "../util/pathName";
 import {getAllModels} from "../layout/getAll";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
@@ -51,7 +51,9 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
             });
         }
     }
-    window.siyuan.mobile.files.init(false);
+    setNoteBook(() => {
+        window.siyuan.mobile.files.init(false);
+    });
     /// #else
     const allModels = getAllModels();
     allModels.editor.forEach(item => {
@@ -97,7 +99,9 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
         }
     });
     allModels.files.forEach(item => {
-        item.init(false);
+        setNoteBook(() => {
+            item.init(false);
+        });
     });
     allModels.bookmark.forEach(item => {
         item.update();

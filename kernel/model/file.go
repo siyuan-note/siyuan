@@ -244,8 +244,12 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 	}
 
 	boxConf := box.GetConf()
-	if util.SortModeFileTree != boxConf.SortMode {
-		sortMode = boxConf.SortMode
+
+	if util.SortModeUnassigned == sortMode {
+		sortMode = Conf.FileTree.Sort
+		if util.SortModeFileTree != boxConf.SortMode {
+			sortMode = boxConf.SortMode
+		}
 	}
 
 	var files []*FileInfo

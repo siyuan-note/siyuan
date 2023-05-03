@@ -453,6 +453,17 @@
   }
 }
 
+html[lang="en_US"] .protyle-wysiwyg [spellcheck]:empty:before {
+  content: "Enter text";
+  color: var(--b3-theme-on-surface-light);
+}
+
+html[lang="zh__CN"] .protyle-wysiwyg [spellcheck]:empty:before {
+  content: "键入文字";
+  color: var(--b3-theme-on-surface-light);
+}
+
+
 @media (max-width: 620px) {
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;

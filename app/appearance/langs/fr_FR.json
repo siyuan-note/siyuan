@@ -473,7 +473,7 @@
   "customSort": "Tri personnalisé",
   "collapse": "Collapse",
   "blockEmbed": "incorporer le bloc",
-  "gutterTip": "Faites glisser pour déplacer la position<br>Cliquez pour ouvrir le Menu<br>⌘Click Accès<br>⌥Click Élargir/Collapse<br>⇧Click Modifier les attribut",
+  "gutterTip": "Cliquez pour ouvrir le menu<br>⌘Cliquez pour entrer<br>⌥Cliquez pour plier/agrandir<br>⇧Cliquez pour mettre à jour l'attribut<br>Faites glisser pour déplacer<br>⌃Faites glisser pour dupliquer<br>⌥ Faites glisser vers ref<br> ⇧Faites glisser pour incorporer<br>",
   "gutterTip2": "Cliquez pour ouvrir le menu<br>⇧Click Modifier les attribut",
   "linkDistance": "Distance du lien",
   "collideStrength": "Force de collision",

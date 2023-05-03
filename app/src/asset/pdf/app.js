@@ -901,7 +901,8 @@ class PDFViewerApplication {
     };
 
     if (typeof PDFJSDev === "undefined" || !PDFJSDev.test("PRODUCTION")) {
-      params.docBaseUrl ||= document.URL.split("#")[0];
+      // NOTE https://github.com/siyuan-note/siyuan/issues/8103
+      // params.docBaseUrl ||= document.URL.split("#")[0];
     } else if (PDFJSDev.test("MOZCENTRAL || CHROME")) {
       params.docBaseUrl ||= this.baseUrl;
     }

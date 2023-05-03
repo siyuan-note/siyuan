@@ -199,7 +199,7 @@ export abstract class Constants {
             insert: {
                 font: {default: "⌥⌘X", custom: "⌥⌘X"},
                 lastUsed: {default: "⌥X", custom: "⌥X"},
-                blockRef: {default: "⌥[", custom: "⌥["},
+                ref: {default: "⌥[", custom: "⌥["},
                 kbd: {default: "⌘'", custom: "⌘'"},
                 sup: {default: "⌘H", custom: "⌘H"},
                 sub: {default: "⌘J", custom: "⌘J"},

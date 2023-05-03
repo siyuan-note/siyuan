@@ -32,7 +32,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div class="keyboard__slash-block">
     ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
-    ${getSlashItem("((", "iconRef", window.siyuan.languages.blockRef, "true")}
+    ${getSlashItem("((", "iconRef", window.siyuan.languages.ref, "true")}
 </div>
 <div class="keyboard__slash-block">
     ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}

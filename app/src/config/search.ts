@@ -39,7 +39,7 @@ export const initConfigSearch = (element: HTMLElement) => {
 
         // 导出
         getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export11",
-            "export13", "export14", "export15", "export19", "export20", "blockRef", "blockEmbed"]),
+            "export13", "export14", "export15", "export19", "export20", "ref", "blockEmbed"]),
 
         // 外观
         getLang(["language", "language1", "appearance", "appearance1", "appearance2",

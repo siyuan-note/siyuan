@@ -44,7 +44,7 @@ export class Gutter {
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
-        this.element.setAttribute("aria-label", window.siyuan.languages.gutterTip.replace("⌘Click", updateHotkeyTip("⌘Click")).replace("⌥Click", updateHotkeyTip("⌥Click")).replace("⇧Click", updateHotkeyTip("⇧Click")));
+        this.element.setAttribute("aria-label", window.siyuan.languages.gutterTip.replace(/⌘/g, updateHotkeyTip("⌘")).replace(/⌥/g, updateHotkeyTip("⌥")).replace(/⇧/g, updateHotkeyTip("⇧")).replace(/⌃/g, updateHotkeyTip("⌃")));
         this.element.setAttribute("data-type", "a");
         this.element.setAttribute("data-position", "right");
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {

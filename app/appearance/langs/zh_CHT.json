@@ -473,7 +473,7 @@
   "customSort": "自訂排序",
   "collapse": "摺疊",
   "blockEmbed": "嵌入塊",
-  "gutterTip": "拖拽 移動位置<br>點擊 打開菜單<br>⌘Click 進入<br>⌥Click 摺疊/展開<br>⇧Click 修改屬性",
+  "gutterTip": "點擊 打開菜單<br>⌘Click 進入<br>⌥Click 折疊/展開<br>⇧Click 修改屬性<br>拖拽 移動位置<br>⌃拖拽 重複<br>⌥拖拽 生成塊引用<br>⇧拖拽 生成嵌入塊<br>",
   "gutterTip2": "點擊 打開功能表<br>⇧Click 修改屬性",
   "linkDistance": "連結距離",
   "collideStrength": "斥力強度",

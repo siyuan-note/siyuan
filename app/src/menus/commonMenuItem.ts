@@ -473,7 +473,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyProtocolInMd,
         click: () => {
             fetchPost("/api/block/getRefText", {id}, (response) => {
-                writeText(`[${response.data.substring(0, Constants.SIZE_LINK_TEXT_MAX)}](siyuan://blocks/${id})`);
+                writeText(`[${response.data}](siyuan://blocks/${id})`);
             });
             if (focusElement) {
                 focusBlock(focusElement);

@@ -1,4 +1,8 @@
 {
+  "attrBookmarkTip": "將該塊和一個書籤進行關聯，以便後續通過書籤面板查看",
+  "attrNameTip": "為該塊設置命名，主要用於引用和搜索，一個塊只能擁有一個唯一的命名",
+  "attrAliasTip": "為該塊設置別名，一個塊可以通過英文逗號分隔設置多個別名",
+  "attrMemoTip": "為該塊設置備註，僅支持純文本",
   "switchDirect": "交換對比方向",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> 僅搜索文檔",
   "onlySearchForDocTip": "啟用後使用 [[ 或 【【 搜索塊引用時將只在文檔塊中進行搜索",

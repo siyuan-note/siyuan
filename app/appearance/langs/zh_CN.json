@@ -1,4 +1,8 @@
 {
+  "attrBookmarkTip": "将该块和一个书签进行关联，以便后续通过书签面板查看",
+  "attrNameTip": "为该块设置命名，主要用于引用和搜索，一个块只能拥有一个唯一的命名",
+  "attrAliasTip": "为该块设置别名，一个块可以通过英文逗号分隔设置多个别名",
+  "attrMemoTip": "为该块设置备注，仅支持纯文本",
   "switchDirect": "交换对比方向",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> 仅搜索文档",
   "onlySearchForDocTip": "启用后使用 [[ 或 【【 搜索块引用时将只在文档块中进行搜索",

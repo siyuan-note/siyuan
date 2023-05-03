@@ -1,4 +1,8 @@
 {
+  "attrBookmarkTip": "Asociar este bloque con un marcador para verlo posteriormente a través del panel de marcadores",
+  "attrNameTip": "Establezca un nombre para este bloque, principalmente para referencia y búsqueda, un bloque solo puede tener un nombre único",
+  "attrAliasTip": "Establecer alias para este bloque, un bloque puede establecer múltiples alias separados por comas",
+  "attrMemoTip": "Establece una nota para este bloque, solo se admite texto sin formato",
   "switchDirect": "Cambiar dirección de comparación",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> solo buscar documentos",
   "onlySearchForDocTip": "Después de habilitar, [[ o 【【 para buscar referencias de bloque solo en bloques de documentos",

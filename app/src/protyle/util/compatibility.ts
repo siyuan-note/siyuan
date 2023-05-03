@@ -101,6 +101,7 @@ export const updateHotkeyTip = (hotkey: string) => {
 
     const KEY_MAP = new Map(Object.entries({
         "⌘": "Ctrl",
+        "⌃": "Ctrl",
         "⇧": "Shift",
         "⌥": "Alt",
         "⇥": "Tab",

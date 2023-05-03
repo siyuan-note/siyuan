@@ -192,22 +192,22 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
             <span data-action="bookmark" class="block__icon block__icon--show"><svg><use xlink:href="#iconDown"></use></svg></span>
         </div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" data-name="bookmark">
+        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrBookmarkTip}" data-name="bookmark">
     </label>
     <label class="b3-label b3-label--noborder">
         ${window.siyuan.languages.name}
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" data-name="name">
+        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrNameTip}" data-name="name">
     </label>
     <label class="b3-label b3-label--noborder">
         ${window.siyuan.languages.alias}
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" data-name="alias">
+        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrAliasTip}" data-name="alias">
     </label>
     <label class="b3-label b3-label--noborder">
         ${window.siyuan.languages.memo}
         <div class="fn__hr"></div>
-        <textarea class="b3-text-field fn__block" rows="2" data-name="memo">${attrs.memo || ""}</textarea>
+        <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrMemoTip}" rows="2" data-name="memo">${attrs.memo || ""}</textarea>
     </label>
     ${notifyHTML}
     ${customHTML}

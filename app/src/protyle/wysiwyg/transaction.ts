@@ -128,7 +128,8 @@ const promiseTransaction = () => {
                 // 折叠标题后未触发动态加载 https://github.com/siyuan-note/siyuan/issues/4168
                 if (protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
                     !protyle.scroll.element.classList.contains("fn__none") &&
-                    protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2) {
+                    protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2    // https://github.com/siyuan-note/siyuan/issues/7785
+                ) {
                     fetchPost("/api/filetree/getDoc", {
                         id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                         mode: 2,

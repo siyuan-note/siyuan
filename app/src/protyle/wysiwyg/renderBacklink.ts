@@ -31,7 +31,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: {
 export const foldPassiveType = (expand: boolean, element: HTMLElement | DocumentFragment) => {
     if (element.firstElementChild.classList.contains("li")) {
         if (expand) {
-            element.querySelectorAll(".li .li .li").forEach(item => {
+            element.querySelectorAll(".li .li").forEach(item => {
                 if (item.childElementCount > 3) {
                     item.setAttribute("fold", "1");
                 }

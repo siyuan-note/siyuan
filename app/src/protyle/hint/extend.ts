@@ -36,7 +36,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["引用块", "yinyong", "yy", "block reference"],
         value: "((",
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconRef"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.blockRef}</span><span class="b3-list-item__meta">((</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconRef"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.ref}</span><span class="b3-list-item__meta">((</span></div>`,
     }, {
         filter: ["嵌入块", "qianrukuai", "qrk", "embed block"],
         value: "{{",

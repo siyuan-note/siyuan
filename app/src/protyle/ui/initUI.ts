@@ -73,10 +73,16 @@ export const initUI = (protyle: IProtyle) => {
 };
 
 export const addLoading = (protyle: IProtyle) => {
-    protyle.element.insertAdjacentHTML("beforeend", '<div style="background-color: var(--b3-theme-background)" class="fn__loading wysiwygLoading"><img width="48px" src="/stage/loading-pure.svg"></div>');
+    protyle.element.removeAttribute("data-loading");
+    setTimeout(() => {
+        if (protyle.element.getAttribute("data-loading") !== "finished") {
+            protyle.element.insertAdjacentHTML("beforeend", '<div style="background-color: var(--b3-theme-background)" class="fn__loading wysiwygLoading"><img width="48px" src="/stage/loading-pure.svg"></div>');
+        }
+    }, Constants.TIMEOUT_BLOCKLOAD);
 };
 
 export const removeLoading = (protyle: IProtyle) => {
+    protyle.element.setAttribute("data-loading", "finished");
     const loadingElement = protyle.element.querySelector(".wysiwygLoading");
     if (loadingElement) {
         loadingElement.remove();

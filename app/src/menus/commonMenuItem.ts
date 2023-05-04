@@ -9,7 +9,7 @@ import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {saveExport} from "../protyle/export";
 import {openByMobile, writeText} from "../protyle/util/compatibility";
-import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {fetchPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
@@ -19,7 +19,7 @@ import {getAllModels} from "../layout/getAll";
 import {Bookmark} from "../layout/dock/Bookmark";
 import {openAsset, openBy} from "../editor/util";
 /// #endif
-import {rename, replaceFileName} from "../editor/rename";
+import {rename} from "../editor/rename";
 import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
@@ -192,22 +192,22 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
             <span data-action="bookmark" class="block__icon block__icon--show"><svg><use xlink:href="#iconDown"></use></svg></span>
         </div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrBookmarkTip}" data-name="bookmark">
+        <input class="b3-text-field fn__block" data-name="bookmark">
     </label>
     <label class="b3-label b3-label--noborder">
         ${window.siyuan.languages.name}
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrNameTip}" data-name="name">
+        <input class="b3-text-field fn__block" data-name="name">
     </label>
     <label class="b3-label b3-label--noborder">
         ${window.siyuan.languages.alias}
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrAliasTip}" data-name="alias">
+        <input class="b3-text-field fn__block" data-name="alias">
     </label>
     <label class="b3-label b3-label--noborder">
         ${window.siyuan.languages.memo}
         <div class="fn__hr"></div>
-        <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.attrMemoTip}" rows="2" data-name="memo">${attrs.memo || ""}</textarea>
+        <textarea class="b3-text-field fn__block" rows="2" data-name="memo">${attrs.memo || ""}</textarea>
     </label>
     ${notifyHTML}
     ${customHTML}
@@ -473,7 +473,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyProtocolInMd,
         click: () => {
             fetchPost("/api/block/getRefText", {id}, (response) => {
-                writeText(`[${response.data}](siyuan://blocks/${id})`);
+                writeText(`[${response.data.substring(0, Constants.SIZE_LINK_TEXT_MAX)}](siyuan://blocks/${id})`);
             });
             if (focusElement) {
                 focusBlock(focusElement);
@@ -509,69 +509,22 @@ export const exportMd = (id: string) => {
         submenu: [{
             label: window.siyuan.languages.template,
             icon: "iconMarkdown",
-            click: async () => {
-                const result = await fetchSyncPost("/api/block/getRefText", {id: id});
-
-                const dialog = new Dialog({
-                    title: window.siyuan.languages.fileName,
-                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                    width: isMobile() ? "92vw" : "520px",
-                });
-                const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-                const btnsElement = dialog.element.querySelectorAll(".b3-button");
-                dialog.bindInput(inputElement, () => {
-                    (btnsElement[1] as HTMLButtonElement).click();
-                });
-                let name =  replaceFileName(result.data);
-                const maxNameLen = 32;
-                if (name.length > maxNameLen) {
-                    name = name.substring(0, maxNameLen);
-                }
-                inputElement.value = name;
-                inputElement.focus();
-                inputElement.select();
-                btnsElement[0].addEventListener("click", () => {
-                    dialog.destroy();
-                });
-                btnsElement[1].addEventListener("click", () => {
-                    if (inputElement.value.trim() === "") {
-                        inputElement.value = "Untitled";
-                    } else {
-                        inputElement.value = replaceFileName(inputElement.value);
-                    }
-
-                    if (name.length > maxNameLen) {
-                        name = name.substring(0, maxNameLen);
-                    }
-
-                    fetchPost("/api/template/docSaveAsTemplate", {
-                        id,
-                        name,
-                        overwrite: false
-                    }, response => {
-                        if (response.code === 1) {
-                            // 重名
-                            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
-                                fetchPost("/api/template/docSaveAsTemplate", {
-                                    id,
-                                    name,
-                                    overwrite: true
-                                }, resp => {
-                                    if (resp.code === 0) {
-                                        showMessage(window.siyuan.languages.exportTplSucc);
-                                    }
-                                });
+            click: () => {
+                fetchPost("/api/template/docSaveAsTemplate", {
+                    id,
+                    overwrite: false
+                }, response => {
+                    if (response.code === 1) {
+                        // 重名
+                        confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
+                            fetchPost("/api/template/docSaveAsTemplate", {
+                                id,
+                                overwrite: true
                             });
-                            return;
-                        }
-                        showMessage(window.siyuan.languages.exportTplSucc);
-                    });
-
-                    dialog.destroy();
+                        });
+                        return;
+                    }
+                    showMessage(window.siyuan.languages.exportTplSucc);
                 });
             }
         }, {

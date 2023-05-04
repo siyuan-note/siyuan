@@ -38,10 +38,18 @@ import (
 	"golang.org/x/text/transform"
 )
 
+type Funding struct {
+	OpenCollective string   `json:"openCollective"`
+	Patreon        string   `json:"patreon"`
+	GitHub         string   `json:"github"`
+	Custom         []string `json:"custom"`
+}
+
 type Package struct {
-	Author  string `json:"author"`
-	URL     string `json:"url"`
-	Version string `json:"version"`
+	Author  string   `json:"author"`
+	URL     string   `json:"url"`
+	Version string   `json:"version"`
+	Funding *Funding `json:"funding"`
 
 	Name            string `json:"name"`
 	RepoURL         string `json:"repoURL"`

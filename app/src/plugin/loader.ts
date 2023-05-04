@@ -17,7 +17,7 @@ const runCode = (code: string, sourceURL: string) => {
 }
 
 export const loadPlugins = (app: App) => {
-    fetchPost("/api/plugin/loadPlugins", {}, response => {
+    fetchPost("/api/petal/loadPetals", {}, response => {
         let css = "";
         response.data.forEach((item: { id: string, name: string, jsCode: string, cssCode: string, lang: IObject }) => {
             const moduleObj = {}

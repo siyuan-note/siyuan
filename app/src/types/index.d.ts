@@ -701,4 +701,5 @@ declare interface IBazaarItem {
     hInstallSize: string
     hInstallDate: string
     hUpdated: string
+    fundingUrl: IObject
 }

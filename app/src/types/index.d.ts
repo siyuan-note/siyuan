@@ -29,7 +29,7 @@ type TOperation =
     | "removeAttrViewBlock"
     | "addFlashcards"
     | "removeFlashcards"
-type TBazaarType = "templates" | "icons" | "widgets" | "themes"
+type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 declare module "blueimp-md5"
 

@@ -624,7 +624,7 @@ func searchBySQL(stmt string, beforeLen, page int) (ret []*Block, matchedBlockCo
 		stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
 	}
 	stmt = removeLimitClause(stmt)
-	result, _ := sql.Query(stmt)
+	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(ret) {
 		return
 	}
@@ -745,7 +745,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter string) 
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
-	result, _ := sql.Query(stmt)
+	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return
 	}
@@ -785,7 +785,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (matchedBlockCount, matchedRootCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if ast.IsNodeIDPattern(query) {
-		ret, _ := sql.Query("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
+		ret, _ := sql.QueryNoLimit("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
 		if 1 > len(ret) {
 			return
 		}
@@ -802,7 +802,7 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
-	result, _ := sql.Query(stmt)
+	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return
 	}

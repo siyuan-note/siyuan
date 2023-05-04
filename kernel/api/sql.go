@@ -21,6 +21,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -35,7 +36,7 @@ func SQL(c *gin.Context) {
 	}
 
 	stmt := arg["stmt"].(string)
-	result, err := sql.Query(stmt)
+	result, err := sql.Query(stmt, model.Conf.Search.Limit)
 	if nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()

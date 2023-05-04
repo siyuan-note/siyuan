@@ -29,8 +29,11 @@ import {getLocalStorage} from "./protyle/util/compatibility";
 import {updateEditModeElement} from "./layout/topBar";
 import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
+import {loadPlugins} from "./plugin/loader";
 
-class App {
+export class App {
+    public plugins: import("./plugin").Plugin[] = [];
+
     constructor() {
         /// #if BROWSER
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
@@ -139,6 +142,7 @@ class App {
                 }
             }),
         };
+
         fetchPost("/api/system/getConf", {}, response => {
             window.siyuan.config = response.data.conf;
             // 历史数据兼容，202306后可删除
@@ -164,6 +168,7 @@ class App {
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
                         onGetConfig(response.data.start);
+                        loadPlugins(siyuanApp);
                         account.onSetaccount();
                         resizeDrag();
                         setTitle(window.siyuan.languages.siyuanNote);
@@ -178,7 +183,7 @@ class App {
     }
 }
 
-new App();
+const siyuanApp = new App();
 
 window.openFileByURL = (openURL) => {
     if (openURL && isSYProtocol(openURL)) {

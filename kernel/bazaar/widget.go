@@ -33,26 +33,25 @@ import (
 )
 
 type Widget struct {
-	Package
+	*Package
 }
 
 func Widgets() (widgets []*Widget) {
 	widgets = []*Widget{}
 
-	pkgIndex, err := getPkgIndex("widgets")
+	stageIndex, err := getStageIndex("widgets")
 	if nil != err {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
 
-	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
 		defer waitGroup.Done()
 
-		repo := arg.(map[string]interface{})
-		repoURL := repo["url"].(string)
+		repo := arg.(*StageRepo)
+		repoURL := repo.URL
 
 		widget := &Widget{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
@@ -73,13 +72,13 @@ func Widgets() (widgets []*Widget) {
 		widget.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
 		widget.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
 		widget.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		widget.Funding = parseFunding(repo["package"].(map[string]interface{}))
+		widget.Funding = repo.Package.Funding
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
 		widget.PreferredDesc = getPreferredDesc(widget.Description)
-		widget.Updated = repo["updated"].(string)
-		widget.Stars = int(repo["stars"].(float64))
-		widget.OpenIssues = int(repo["openIssues"].(float64))
-		widget.Size = int64(repo["size"].(float64))
+		widget.Updated = repo.Updated
+		widget.Stars = repo.Stars
+		widget.OpenIssues = repo.OpenIssues
+		widget.Size = repo.Size
 		widget.HSize = humanize.Bytes(uint64(widget.Size))
 		widget.HUpdated = formatUpdated(widget.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
@@ -90,7 +89,7 @@ func Widgets() (widgets []*Widget) {
 		widgets = append(widgets, widget)
 		lock.Unlock()
 	})
-	for _, repo := range repos {
+	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
 		p.Invoke(repo)
 	}
@@ -123,25 +122,18 @@ func InstalledWidgets() (ret []*Widget) {
 		}
 		dirName := widgetDir.Name()
 
-		widgetConf, parseErr := WidgetJSON(dirName)
-		if nil != parseErr || nil == widgetConf {
+		widget, parseErr := WidgetJSON(dirName)
+		if nil != parseErr || nil == widget {
 			continue
 		}
 
 		installPath := filepath.Join(util.DataDir, "widgets", dirName)
 
-		widget := &Widget{}
 		widget.Installed = true
-		widget.Name = widgetConf["name"].(string)
-		widget.Author = widgetConf["author"].(string)
-		widget.URL = widgetConf["url"].(string)
-		widget.URL = strings.TrimSuffix(widget.URL, "/")
-		widget.Version = widgetConf["version"].(string)
 		widget.RepoURL = widget.URL
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
 		widget.IconURL = "/widgets/" + dirName + "/icon.png"
-		widget.Funding = parseFunding(widgetConf)
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
 		widget.PreferredDesc = getPreferredDesc(widget.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))

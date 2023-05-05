@@ -33,7 +33,7 @@ import (
 )
 
 type Theme struct {
-	Package
+	*Package
 
 	Modes []string `json:"modes"`
 }
@@ -41,19 +41,18 @@ type Theme struct {
 func Themes() (ret []*Theme) {
 	ret = []*Theme{}
 
-	pkgIndex, err := getPkgIndex("themes")
+	stageIndex, err := getStageIndex("themes")
 	if nil != err {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
-	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
 		defer waitGroup.Done()
 
-		repo := arg.(map[string]interface{})
-		repoURL := repo["url"].(string)
+		repo := arg.(*StageRepo)
+		repoURL := repo.URL
 
 		theme := &Theme{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/theme.json"
@@ -74,13 +73,13 @@ func Themes() (ret []*Theme) {
 		theme.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
 		theme.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
 		theme.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		theme.Funding = parseFunding(repo["package"].(map[string]interface{}))
+		theme.Funding = repo.Package.Funding
 		theme.PreferredFunding = getPreferredFunding(theme.Funding)
 		theme.PreferredDesc = getPreferredDesc(theme.Description)
-		theme.Updated = repo["updated"].(string)
-		theme.Stars = int(repo["stars"].(float64))
-		theme.OpenIssues = int(repo["openIssues"].(float64))
-		theme.Size = int64(repo["size"].(float64))
+		theme.Updated = repo.Updated
+		theme.Stars = repo.Stars
+		theme.OpenIssues = repo.OpenIssues
+		theme.Size = repo.Size
 		theme.HSize = humanize.Bytes(uint64(theme.Size))
 		theme.HUpdated = formatUpdated(theme.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
@@ -91,7 +90,7 @@ func Themes() (ret []*Theme) {
 		ret = append(ret, theme)
 		lock.Unlock()
 	})
-	for _, repo := range repos {
+	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
 		p.Invoke(repo)
 	}
@@ -126,28 +125,18 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 
-		themeConf, parseErr := ThemeJSON(dirName)
-		if nil != parseErr || nil == themeConf {
+		theme, parseErr := ThemeJSON(dirName)
+		if nil != parseErr || nil == theme {
 			continue
 		}
 
 		installPath := filepath.Join(util.ThemesPath, dirName)
 
-		theme := &Theme{}
 		theme.Installed = true
-		theme.Name = themeConf["name"].(string)
-		theme.Author = themeConf["author"].(string)
-		theme.URL = themeConf["url"].(string)
-		theme.URL = strings.TrimSuffix(theme.URL, "/")
-		theme.Version = themeConf["version"].(string)
-		for _, mode := range themeConf["modes"].([]interface{}) {
-			theme.Modes = append(theme.Modes, mode.(string))
-		}
 		theme.RepoURL = theme.URL
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
 		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
 		theme.IconURL = "/appearance/themes/" + dirName + "/icon.png"
-		theme.Funding = parseFunding(themeConf)
 		theme.PreferredFunding = getPreferredFunding(theme.Funding)
 		theme.PreferredDesc = getPreferredDesc(theme.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))

@@ -116,7 +116,7 @@ func loadThemes() {
 			continue
 		}
 
-		modes := themeConf["modes"].([]interface{})
+		modes := themeConf.Modes
 		for _, mode := range modes {
 			if "dark" == mode {
 				Conf.Appearance.DarkThemes = append(Conf.Appearance.DarkThemes, name)
@@ -127,12 +127,12 @@ func loadThemes() {
 
 		if 0 == Conf.Appearance.Mode {
 			if Conf.Appearance.ThemeLight == name {
-				Conf.Appearance.ThemeVer = themeConf["version"].(string)
+				Conf.Appearance.ThemeVer = themeConf.Version
 				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, name, "theme.js"))
 			}
 		} else {
 			if Conf.Appearance.ThemeDark == name {
-				Conf.Appearance.ThemeVer = themeConf["version"].(string)
+				Conf.Appearance.ThemeVer = themeConf.Version
 				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, name, "theme.js"))
 			}
 		}
@@ -161,7 +161,7 @@ func loadIcons() {
 		}
 		Conf.Appearance.Icons = append(Conf.Appearance.Icons, name)
 		if Conf.Appearance.Icon == name {
-			Conf.Appearance.IconVer = iconConf["version"].(string)
+			Conf.Appearance.IconVer = iconConf.Version
 		}
 	}
 }

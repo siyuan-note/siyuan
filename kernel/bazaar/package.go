@@ -93,24 +93,28 @@ type Package struct {
 	Downloads    int    `json:"downloads"`
 }
 
-func parseFunding(pkg map[string]interface{}) (ret *Funding) {
-	if nil == pkg["funding"] {
-		return
-	}
+type StagePackage struct {
+	Author      string       `json:"author"`
+	URL         string       `json:"url"`
+	Version     string       `json:"version"`
+	Description *Description `json:"description"`
+	Readme      *Readme      `json:"readme"`
+	I18N        []string     `json:"i18n"`
+	Funding     *Funding     `json:"funding"`
+}
 
-	ret = &Funding{}
-	funding := pkg["funding"].(map[string]interface{})
-	ret.OpenCollective = funding["openCollective"].(string)
-	ret.Patreon = funding["patreon"].(string)
-	ret.GitHub = funding["github"].(string)
+type StageRepo struct {
+	URL        string `json:"url"`
+	Updated    string `json:"updated"`
+	Stars      int    `json:"stars"`
+	OpenIssues int    `json:"openIssues"`
+	Size       int64  `json:"size"`
 
-	customURLs := funding["custom"].([]interface{})
-	var custom []string
-	for _, customURL := range customURLs {
-		custom = append(custom, customURL.(string))
-	}
-	ret.Custom = custom
-	return
+	Package *StagePackage `json:"package"`
+}
+
+type StageIndex struct {
+	Repos []*StageRepo `json:"repos"`
 }
 
 func getPreferredDesc(desc *Description) string {
@@ -156,7 +160,7 @@ func getPreferredFunding(funding *Funding) string {
 	return ""
 }
 
-func PluginJSON(pluginDirName string) (ret map[string]interface{}, err error) {
+func PluginJSON(pluginDirName string) (ret *Plugin, err error) {
 	p := filepath.Join(util.DataDir, "plugins", pluginDirName, "plugin.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
@@ -171,14 +175,12 @@ func PluginJSON(pluginDirName string) (ret map[string]interface{}, err error) {
 		logging.LogErrorf("parse plugin.json [%s] failed: %s", p, err)
 		return
 	}
-	if 4 > len(ret) {
-		logging.LogWarnf("invalid plugin.json [%s]", p)
-		return nil, errors.New("invalid plugin.json")
-	}
+
+	ret.URL = strings.TrimSuffix(ret.URL, "/")
 	return
 }
 
-func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
+func WidgetJSON(widgetDirName string) (ret *Widget, err error) {
 	p := filepath.Join(util.DataDir, "widgets", widgetDirName, "widget.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
@@ -193,14 +195,12 @@ func WidgetJSON(widgetDirName string) (ret map[string]interface{}, err error) {
 		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
 		return
 	}
-	if 4 > len(ret) {
-		logging.LogWarnf("invalid widget.json [%s]", p)
-		return nil, errors.New("invalid widget.json")
-	}
+
+	ret.URL = strings.TrimSuffix(ret.URL, "/")
 	return
 }
 
-func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
+func IconJSON(iconDirName string) (ret *Icon, err error) {
 	p := filepath.Join(util.IconsPath, iconDirName, "icon.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
@@ -215,14 +215,12 @@ func IconJSON(iconDirName string) (ret map[string]interface{}, err error) {
 		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
 		return
 	}
-	if 4 > len(ret) {
-		logging.LogWarnf("invalid icon.json [%s]", p)
-		return nil, errors.New("invalid icon.json")
-	}
+
+	ret.URL = strings.TrimSuffix(ret.URL, "/")
 	return
 }
 
-func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error) {
+func TemplateJSON(templateDirName string) (ret *Template, err error) {
 	p := filepath.Join(util.DataDir, "templates", templateDirName, "template.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
@@ -237,14 +235,12 @@ func TemplateJSON(templateDirName string) (ret map[string]interface{}, err error
 		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
 		return
 	}
-	if 4 > len(ret) {
-		logging.LogWarnf("invalid template.json [%s]", p)
-		return nil, errors.New("invalid template.json")
-	}
+
+	ret.URL = strings.TrimSuffix(ret.URL, "/")
 	return
 }
 
-func ThemeJSON(themeDirName string) (ret map[string]interface{}, err error) {
+func ThemeJSON(themeDirName string) (ret *Theme, err error) {
 	p := filepath.Join(util.ThemesPath, themeDirName, "theme.json")
 	if !gulu.File.IsExist(p) {
 		err = os.ErrNotExist
@@ -255,28 +251,41 @@ func ThemeJSON(themeDirName string) (ret map[string]interface{}, err error) {
 		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
 		return
 	}
+
+	ret = &Theme{}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
 		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
 		return
 	}
-	if 5 > len(ret) {
-		logging.LogWarnf("invalid theme.json [%s]", p)
-		return nil, errors.New("invalid theme.json")
-	}
+
+	ret.URL = strings.TrimSuffix(ret.URL, "/")
 	return
 }
 
-func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
-	ret, err = util.GetRhyResult(false)
+var cachedStageIndex *StageIndex
+var stageIndexCacheTime int64
+var stageIndexLock = sync.Mutex{}
+
+func getStageIndex(pkgType string) (ret *StageIndex, err error) {
+	rhyRet, err := util.GetRhyResult(false)
 	if nil != err {
 		return
 	}
 
-	bazaarHash := ret["bazaar"].(string)
-	ret = map[string]interface{}{}
+	stageIndexLock.Lock()
+	defer stageIndexLock.Unlock()
+
+	now := time.Now().Unix()
+	if 3600 >= now-stageIndexCacheTime {
+		ret = cachedStageIndex
+		return
+	}
+
+	bazaarHash := rhyRet["bazaar"].(string)
+	cachedStageIndex = &StageIndex{}
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
-	resp, reqErr := request.SetSuccessResult(&ret).Get(u)
+	resp, reqErr := request.SetSuccessResult(cachedStageIndex).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
 		return
@@ -285,6 +294,9 @@ func getPkgIndex(pkgType string) (ret map[string]interface{}, err error) {
 		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
 		return
 	}
+
+	stageIndexCacheTime = now
+	ret = cachedStageIndex
 	return
 }
 
@@ -390,6 +402,7 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 
 func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
+
 	data, err := downloadPackage(repoURLHash+"/README.md", false, systemID)
 	if nil != err {
 		ret = "Load bazaar package's README.md failed: " + err.Error()

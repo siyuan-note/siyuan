@@ -33,28 +33,27 @@ import (
 )
 
 type Plugin struct {
-	Package
+	*Package
 }
 
 func Plugins() (plugins []*Plugin) {
 	plugins = []*Plugin{}
 
-	pkgIndex, err := getPkgIndex("plugins")
+	stageIndex, err := getStageIndex("plugins")
 	if nil != err {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
 
-	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
 		defer waitGroup.Done()
 
-		repo := arg.(map[string]interface{})
-		repoURL := repo["url"].(string)
+		repo := arg.(*StageRepo)
+		repoURL := repo.URL
 
-		plugin := &Plugin{Package{Funding: &Funding{}, Description: &Description{}}}
+		plugin := &Plugin{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/plugin.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(plugin).Get(innerU)
 		if nil != innerErr {
@@ -73,13 +72,13 @@ func Plugins() (plugins []*Plugin) {
 		plugin.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
 		plugin.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
 		plugin.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		plugin.Funding = parseFunding(repo["package"].(map[string]interface{}))
+		plugin.Funding = repo.Package.Funding
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
-		plugin.Updated = repo["updated"].(string)
-		plugin.Stars = int(repo["stars"].(float64))
-		plugin.OpenIssues = int(repo["openIssues"].(float64))
-		plugin.Size = int64(repo["size"].(float64))
+		plugin.Updated = repo.Updated
+		plugin.Stars = repo.Stars
+		plugin.OpenIssues = repo.OpenIssues
+		plugin.Size = repo.Size
 		plugin.HSize = humanize.Bytes(uint64(plugin.Size))
 		plugin.HUpdated = formatUpdated(plugin.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
@@ -90,7 +89,7 @@ func Plugins() (plugins []*Plugin) {
 		plugins = append(plugins, plugin)
 		lock.Unlock()
 	})
-	for _, repo := range repos {
+	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
 		p.Invoke(repo)
 	}
@@ -123,25 +122,18 @@ func InstalledPlugins() (ret []*Plugin) {
 		}
 		dirName := pluginDir.Name()
 
-		pluginConf, parseErr := PluginJSON(dirName)
-		if nil != parseErr || nil == pluginConf {
+		plugin, parseErr := PluginJSON(dirName)
+		if nil != parseErr || nil == plugin {
 			continue
 		}
 
 		installPath := filepath.Join(util.DataDir, "plugins", dirName)
 
-		plugin := &Plugin{}
 		plugin.Installed = true
-		plugin.Name = pluginConf["name"].(string)
-		plugin.Author = pluginConf["author"].(string)
-		plugin.URL = pluginConf["url"].(string)
-		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
-		plugin.Version = pluginConf["version"].(string)
 		plugin.RepoURL = plugin.URL
 		plugin.PreviewURL = "/plugins/" + dirName + "/preview.png"
 		plugin.PreviewURLThumb = "/plugins/" + dirName + "/preview.png"
 		plugin.IconURL = "/plugins/" + dirName + "/icon.png"
-		plugin.Funding = parseFunding(pluginConf)
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))

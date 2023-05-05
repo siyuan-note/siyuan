@@ -34,25 +34,24 @@ import (
 )
 
 type Template struct {
-	Package
+	*Package
 }
 
 func Templates() (templates []*Template) {
 	templates = []*Template{}
 
-	pkgIndex, err := getPkgIndex("templates")
+	stageIndex, err := getStageIndex("templates")
 	if nil != err {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
-	repos := pkgIndex["repos"].([]interface{})
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {
 		defer waitGroup.Done()
 
-		repo := arg.(map[string]interface{})
-		repoURL := repo["url"].(string)
+		repo := arg.(*StageRepo)
+		repoURL := repo.URL
 
 		template := &Template{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
@@ -73,13 +72,13 @@ func Templates() (templates []*Template) {
 		template.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
 		template.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
 		template.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		template.Funding = parseFunding(repo["package"].(map[string]interface{}))
+		template.Funding = repo.Package.Funding
 		template.PreferredFunding = getPreferredFunding(template.Funding)
 		template.PreferredDesc = getPreferredDesc(template.Description)
-		template.Updated = repo["updated"].(string)
-		template.Stars = int(repo["stars"].(float64))
-		template.OpenIssues = int(repo["openIssues"].(float64))
-		template.Size = int64(repo["size"].(float64))
+		template.Updated = repo.Updated
+		template.Stars = repo.Stars
+		template.OpenIssues = repo.OpenIssues
+		template.Size = repo.Size
 		template.HSize = humanize.Bytes(uint64(template.Size))
 		template.HUpdated = formatUpdated(template.Updated)
 		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
@@ -90,7 +89,7 @@ func Templates() (templates []*Template) {
 		templates = append(templates, template)
 		lock.Unlock()
 	})
-	for _, repo := range repos {
+	for _, repo := range stageIndex.Repos {
 		waitGroup.Add(1)
 		p.Invoke(repo)
 	}
@@ -125,25 +124,18 @@ func InstalledTemplates() (ret []*Template) {
 		}
 		dirName := templateDir.Name()
 
-		templateConf, parseErr := TemplateJSON(dirName)
-		if nil != parseErr || nil == templateConf {
+		template, parseErr := TemplateJSON(dirName)
+		if nil != parseErr || nil == template {
 			continue
 		}
 
 		installPath := filepath.Join(util.DataDir, "templates", dirName)
 
-		template := &Template{}
 		template.Installed = true
-		template.Name = templateConf["name"].(string)
-		template.Author = templateConf["author"].(string)
-		template.URL = templateConf["url"].(string)
-		template.URL = strings.TrimSuffix(template.URL, "/")
-		template.Version = templateConf["version"].(string)
 		template.RepoURL = template.URL
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
 		template.IconURL = "/templates/" + dirName + "/icon.png"
-		template.Funding = parseFunding(templateConf)
 		template.PreferredFunding = getPreferredFunding(template.Funding)
 		template.PreferredDesc = getPreferredDesc(template.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))

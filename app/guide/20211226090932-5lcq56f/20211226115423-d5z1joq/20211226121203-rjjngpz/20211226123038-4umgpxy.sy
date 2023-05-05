@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230414203110"
+		"updated": "20230505084013"
 	},
 	"Children": [
 		{
@@ -239,6 +239,29 @@
 				{
 					"Type": "NodeKramdownSpanIAL",
 					"Data": "{: parent-style=\"display: block;\"}"
+				}
+			]
+		},
+		{
+			"ID": "20230505083958-jgvk215",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230505083958-jgvk215",
+				"updated": "20230505084013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：插入圖片不會進行壓縮處理，所有圖片和文件都以原始數據進行保存。"
 				}
 			]
 		},

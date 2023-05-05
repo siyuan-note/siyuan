@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20230414203014"
+		"updated": "20230505083923"
 	},
 	"Children": [
 		{
@@ -199,7 +199,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210512171633-u3iy2xx",
-				"updated": "20230414202246"
+				"updated": "20230505083901"
 			},
 			"Children": [
 				{
@@ -245,10 +245,29 @@
 				{
 					"Type": "NodeKramdownSpanIAL",
 					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
+				}
+			]
+		},
+		{
+			"ID": "20230505083902-s5e711d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230505083902-s5e711d",
+				"updated": "20230505083923"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "\n"
+					"Data": "​：插入图片不会进行压缩处理，所有图片和文件都以原始数据进行保存。"
 				}
 			]
 		},

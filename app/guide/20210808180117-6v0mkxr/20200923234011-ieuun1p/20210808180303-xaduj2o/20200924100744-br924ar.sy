@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230414203046"
+		"updated": "20230505084035"
 	},
 	"Children": [
 		{
@@ -245,10 +245,29 @@
 				{
 					"Type": "NodeKramdownSpanIAL",
 					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
+				}
+			]
+		},
+		{
+			"ID": "20230505084028-ztfxqzm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230505084028-ztfxqzm",
+				"updated": "20230505084035"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "\n"
+					"Data": "​: Inserting pictures will not be compressed, and all pictures and files will be saved as original data.\n"
 				}
 			]
 		},

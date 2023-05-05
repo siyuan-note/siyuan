@@ -172,7 +172,13 @@ export const bazaar = {
             repoHash: item.repoHash,
             downloaded: false,
         };
-        const fundingKey = item.fundingUrl ? Object.keys(item.fundingUrl)[0] : "";
+        let fundingUrl = "";
+        if (item.fundingUrl) {
+            fundingUrl = item.fundingUrl.openCollective || item.fundingUrl.patreon || item.fundingUrl.github
+            if (!fundingUrl && item.fundingUrl.custom && item.fundingUrl.custom.length > 0) {
+                fundingUrl = item.fundingUrl.custom[0];
+            }
+        }
         return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
     <div class="b3-card__info fn__flex">
@@ -184,7 +190,7 @@ export const bazaar = {
         <span class="fn__flex-center">${item.downloads}</span>
     </div>
     <div class="b3-card__actions">
-        ${fundingKey ? `<a target="_blank" href="${item.fundingUrl[fundingKey]}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${fundingKey}"><svg><use xlink:href="#iconHeart"></use></svg></a>` : ""}
+        ${fundingUrl ? `<a target="_blank" href="${fundingUrl}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${fundingUrl}"><svg><use xlink:href="#iconHeart"></use></svg></a>` : ""}
         <div class="fn__flex-1"></div>
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>

@@ -56,15 +56,28 @@ func SetPetalEnabled(name string, enabled bool) {
 	}
 
 	plugins := bazaar.InstalledPlugins()
-	for _, plugin := range plugins {
-		id := hash(plugin.URL)
-		petal := getPetalByID(id, petals)
-		if nil == petal {
-			continue
+	var plugin *bazaar.Plugin
+	for _, p := range plugins {
+		if p.Name == name {
+			plugin = p
+			break
 		}
+	}
+	if nil == plugin {
+		logging.LogErrorf("plugin [%s] not found", name)
+		return
+	}
 
+	petal := getPetalByID(hash(plugin.Name), petals)
+	if nil == petal {
+		petal = &Petal{
+			ID:      hash(plugin.Name),
+			Name:    plugin.Name,
+			Enabled: enabled,
+		}
+		petals = append(petals, petal)
+	} else {
 		petal.Enabled = enabled
-		break
 	}
 
 	if data, err = gulu.JSON.MarshalIndentJSON(petals, "", "\t"); nil != err {
@@ -113,7 +126,7 @@ func LoadPetals() (ret []*Petal) {
 
 	plugins := bazaar.InstalledPlugins()
 	for _, plugin := range plugins {
-		id := hash(plugin.URL)
+		id := hash(plugin.Name)
 		petal := getPetalByID(id, ret)
 		if nil == petal {
 			continue

@@ -1,4 +1,5 @@
 {
+  "plugin": "Complemento",
   "attrBookmarkTip": "Asociar este bloque con un marcador para verlo posteriormente a través del panel de marcadores",
   "attrNameTip": "Establezca un nombre para este bloque, principalmente para referencia y búsqueda, un bloque solo puede tener un nombre único",
   "attrAliasTip": "Establecer alias para este bloque, un bloque puede establecer múltiples alias separados por comas",

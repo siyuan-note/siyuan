@@ -1,4 +1,5 @@
 {
+  "plugin": "Plugin",
   "attrBookmarkTip": "Associate this block with a bookmark for subsequent viewing through the bookmark panel",
   "attrNameTip": "Set a name for this block, mainly for reference and search, a block can only have one unique name",
   "attrAliasTip": "Set aliases for this block, a block can set multiple aliases separated by commas",

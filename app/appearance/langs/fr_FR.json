@@ -1,4 +1,5 @@
 {
+  "plugin": "Plugin",
   "attrBookmarkTip": "Associez ce bloc à un signet pour un affichage ultérieur via le panneau des signets",
   "attrNameTip": "Définissez un nom pour ce bloc, principalement pour la référence et la recherche, un bloc ne peut avoir qu'un seul nom unique",
   "attrAliasTip": "Définissez des alias pour ce bloc, un bloc peut définir plusieurs alias séparés par des virgules",

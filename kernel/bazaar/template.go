@@ -72,6 +72,7 @@ func Templates() (templates []*Template) {
 		template.RepoHash = repoURLHash[1]
 		template.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
 		template.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
+		template.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
 		template.Updated = repo["updated"].(string)
 		template.Stars = int(repo["stars"].(float64))
 		template.OpenIssues = int(repo["openIssues"].(float64))
@@ -138,6 +139,7 @@ func InstalledTemplates() (ret []*Template) {
 		template.RepoURL = template.URL
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
+		template.IconURL = "/templates/" + dirName + "/icon.png"
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

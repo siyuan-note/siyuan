@@ -56,6 +56,7 @@ type Package struct {
 	RepoHash        string `json:"repoHash"`
 	PreviewURL      string `json:"previewURL"`
 	PreviewURLThumb string `json:"previewURLThumb"`
+	IconURL         string `json:"iconURL"`
 
 	README string `json:"readme"`
 

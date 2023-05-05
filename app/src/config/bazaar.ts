@@ -175,7 +175,7 @@ export const bazaar = {
         };
         return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card b3-card--wrap${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img">
-        <img src="${item.iconURL}" onerror="this.src='/stage/images/icon.png'"/>
+        <img src="${item.iconURL}" onerror="this.src='${item.previewURLThumb}'"/>
     </div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
@@ -237,7 +237,7 @@ export const bazaar = {
                     downloaded: true
                 };
                 html += `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${item.current ? " b3-card--current" : ""}">
-    <div class="b3-card__img"><img src="${item.iconURL}" onerror="this.src='/stage/images/icon.png'"/></div>
+    <div class="b3-card__img"><img src="${item.iconURL}" onerror="this.src='${item.previewURLThumb}'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
             ${item.name}

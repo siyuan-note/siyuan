@@ -75,6 +75,7 @@ func Widgets() (widgets []*Widget) {
 		widget.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
 		widget.Funding = parseFunding(repo["package"].(map[string]interface{}))
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
+		widget.PreferredDesc = getPreferredDesc(widget.Description)
 		widget.Updated = repo["updated"].(string)
 		widget.Stars = int(repo["stars"].(float64))
 		widget.OpenIssues = int(repo["openIssues"].(float64))
@@ -142,6 +143,7 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.IconURL = "/widgets/" + dirName + "/icon.png"
 		widget.Funding = parseFunding(widgetConf)
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
+		widget.PreferredDesc = getPreferredDesc(widget.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

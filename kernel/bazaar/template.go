@@ -75,6 +75,7 @@ func Templates() (templates []*Template) {
 		template.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
 		template.Funding = parseFunding(repo["package"].(map[string]interface{}))
 		template.PreferredFunding = getPreferredFunding(template.Funding)
+		template.PreferredDesc = getPreferredDesc(template.Description)
 		template.Updated = repo["updated"].(string)
 		template.Stars = int(repo["stars"].(float64))
 		template.OpenIssues = int(repo["openIssues"].(float64))
@@ -144,6 +145,7 @@ func InstalledTemplates() (ret []*Template) {
 		template.IconURL = "/templates/" + dirName + "/icon.png"
 		template.Funding = parseFunding(templateConf)
 		template.PreferredFunding = getPreferredFunding(template.Funding)
+		template.PreferredDesc = getPreferredDesc(template.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

@@ -75,6 +75,7 @@ func Plugins() (plugins []*Plugin) {
 		plugin.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
 		plugin.Funding = parseFunding(repo["package"].(map[string]interface{}))
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
+		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
 		plugin.Updated = repo["updated"].(string)
 		plugin.Stars = int(repo["stars"].(float64))
 		plugin.OpenIssues = int(repo["openIssues"].(float64))
@@ -142,6 +143,7 @@ func InstalledPlugins() (ret []*Plugin) {
 		plugin.IconURL = "/plugins/" + dirName + "/icon.png"
 		plugin.Funding = parseFunding(pluginConf)
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
+		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

@@ -64,6 +64,7 @@ type Package struct {
 	Description *Description `json:"description"`
 	Readme      *Readme      `json:"readme"`
 	Funding     *Funding     `json:"funding"`
+	I18N        []string     `json:"i18n"`
 
 	PreferredFunding string `json:"preferredFunding"`
 	PreferredDesc    string `json:"preferredDesc"`
@@ -110,6 +111,29 @@ func parseFunding(pkg map[string]interface{}) (ret *Funding) {
 	}
 	ret.Custom = custom
 	return
+}
+
+func getPreferredDesc(desc *Description) string {
+	if nil == desc {
+		return ""
+	}
+
+	ret := desc.Default
+	switch util.Lang {
+	case "zh_CN":
+		if "" != desc.ZhCN {
+			ret = desc.ZhCN
+		}
+	case "en_US":
+		if "" != desc.EnUS {
+			ret = desc.EnUS
+		}
+	default:
+		if "" != desc.EnUS {
+			ret = desc.EnUS
+		}
+	}
+	return ret
 }
 
 func getPreferredFunding(funding *Funding) string {

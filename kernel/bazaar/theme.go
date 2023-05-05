@@ -76,6 +76,7 @@ func Themes() (ret []*Theme) {
 		theme.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
 		theme.Funding = parseFunding(repo["package"].(map[string]interface{}))
 		theme.PreferredFunding = getPreferredFunding(theme.Funding)
+		theme.PreferredDesc = getPreferredDesc(theme.Description)
 		theme.Updated = repo["updated"].(string)
 		theme.Stars = int(repo["stars"].(float64))
 		theme.OpenIssues = int(repo["openIssues"].(float64))
@@ -148,6 +149,7 @@ func InstalledThemes() (ret []*Theme) {
 		theme.IconURL = "/appearance/themes/" + dirName + "/icon.png"
 		theme.Funding = parseFunding(themeConf)
 		theme.PreferredFunding = getPreferredFunding(theme.Funding)
+		theme.PreferredDesc = getPreferredDesc(theme.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

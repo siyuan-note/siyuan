@@ -13,21 +13,34 @@ const getObject = (key: string) => {
 };
 
 const runCode = (code: string, sourceURL: string) => {
-    return window.eval("(function anonymous(require, module){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
+    return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
 };
 
 export const loadPlugins = (app: App) => {
     fetchPost("/api/petal/loadPetals", {}, response => {
         let css = "";
-        response.data.forEach((item: { id: string, name: string, jsCode: string, cssCode: string, lang: IObject }) => {
-            const moduleObj = {};
-            const execResult = runCode(item.jsCode, "plugin:" + encodeURIComponent(item.id));
-            execResult(getObject, moduleObj);
-            // @ts-ignore
-            const plugin: Plugin = new moduleObj.exports.default({app, id: item.id, lang: item.lang});
+        response.data.forEach((item: { id: string, name: string, js: string, css: string, i18n: IObject }) => {
+            const exportsObj: { [key: string]: any } = {};
+            const moduleObj = {exports: exportsObj};
+            try {
+                runCode(item.js, "plugin:" + encodeURIComponent(item.id))(getObject, moduleObj, exportsObj);
+            } catch (e) {
+                console.error(`eval plugin ${item.name} error:`, e);
+                return;
+            }
+            const pluginClass = (moduleObj.exports || exportsObj).default || moduleObj.exports
+            if (typeof pluginClass !== "function") {
+                console.error(`plugin ${item.name} has no export`);
+                return;
+            }
+            if (!(pluginClass.prototype instanceof Plugin)) {
+                console.error(`plugin ${item.name} does not extends Plugin`);
+                return;
+            }
+            const plugin = new pluginClass({app, id: item.id, i18n: item.i18n});
             app.plugins.push(plugin);
             plugin.onload();
-            css += item.cssCode + "\n";
+            css += item.css || "" + "\n";
         });
         const styleElement = document.createElement("style");
         styleElement.textContent = css;

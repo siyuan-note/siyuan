@@ -30,6 +30,7 @@ const updateTitle = (rootID: string, tab: Tab) => {
 };
 
 export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: string[] }) => {
+    hideMessage();
     /// #if MOBILE
     if (window.siyuan.mobile.popEditor) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {

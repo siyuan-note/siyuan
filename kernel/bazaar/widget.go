@@ -138,6 +138,7 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
 		widget.IconURL = "/widgets/" + dirName + "/icon.png"
+		widget.Funding = parseFunding(widgetConf)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

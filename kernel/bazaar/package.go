@@ -262,7 +262,7 @@ func ThemeJSON(themeDirName string) (ret *Theme, err error) {
 	return
 }
 
-var cachedStageIndex map[string]*StageIndex
+var cachedStageIndex = map[string]*StageIndex{}
 var stageIndexCacheTime int64
 var stageIndexLock = sync.Mutex{}
 
@@ -276,7 +276,7 @@ func getStageIndex(pkgType string) (ret *StageIndex, err error) {
 	defer stageIndexLock.Unlock()
 
 	now := time.Now().Unix()
-	if 3600 >= now-stageIndexCacheTime {
+	if 3600 >= now-stageIndexCacheTime && nil != cachedStageIndex[pkgType] {
 		ret = cachedStageIndex[pkgType]
 		return
 	}

@@ -415,6 +415,8 @@ export const bazaar = {
                             url = "/api/bazaar/installBazaarIcon";
                         } else if (bazaarType === "widgets") {
                             url = "/api/bazaar/installBazaarWidget";
+                        } else if (bazaarType === "plugins") {
+                            url = "/api/bazaar/installBazaarPlugin";
                         }
                         fetchPost(url, {
                             repoURL: dataObj.repoURL,
@@ -445,6 +447,8 @@ export const bazaar = {
                                 url = "/api/bazaar/installBazaarIcon";
                             } else if (bazaarType === "widgets") {
                                 url = "/api/bazaar/installBazaarWidget";
+                            } else if (bazaarType === "plugins") {
+                                url = "/api/bazaar/installBazaarPlugin";
                             }
                             if (!target.classList.contains("b3-button")) {
                                 target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
@@ -487,6 +491,8 @@ export const bazaar = {
                         url = "/api/bazaar/uninstallBazaarIcon";
                     } else if (bazaarType === "widgets") {
                         url = "/api/bazaar/uninstallBazaarWidget";
+                    } else if (bazaarType === "plugins") {
+                        url = "/api/bazaar/uninstallBazaarPlugin";
                     }
 
                     const packageName = dataObj.name;

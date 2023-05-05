@@ -75,6 +75,16 @@ type Package struct {
 	Downloads    int    `json:"downloads"`
 }
 
+func parseFunding(conf map[string]interface{}) (ret *Funding) {
+	ret = &Funding{}
+	funding := conf["funding"].(map[string]interface{})
+	ret.OpenCollective = funding["openCollective"].(string)
+	ret.Patreon = funding["patreon"].(string)
+	ret.GitHub = funding["github"].(string)
+	ret.Custom = funding["custom"].([]string)
+	return
+}
+
 func PluginJSON(pluginDirName string) (ret map[string]interface{}, err error) {
 	p := filepath.Join(util.DataDir, "plugins", pluginDirName, "plugin.json")
 	if !gulu.File.IsExist(p) {

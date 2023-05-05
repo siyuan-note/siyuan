@@ -133,6 +133,7 @@ func InstalledIcons() (ret []*Icon) {
 		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"
 		icon.PreviewURLThumb = "/appearance/icons/" + dirName + "/preview.png"
 		icon.IconURL = "/appearance/icons/" + dirName + "/icon.png"
+		icon.Funding = parseFunding(iconConf)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

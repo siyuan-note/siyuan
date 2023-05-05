@@ -138,6 +138,7 @@ func InstalledPlugins() (ret []*Plugin) {
 		plugin.PreviewURL = "/plugins/" + dirName + "/preview.png"
 		plugin.PreviewURLThumb = "/plugins/" + dirName + "/preview.png"
 		plugin.IconURL = "/plugins/" + dirName + "/icon.png"
+		plugin.Funding = parseFunding(pluginConf)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

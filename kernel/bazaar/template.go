@@ -140,6 +140,7 @@ func InstalledTemplates() (ret []*Template) {
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
 		template.IconURL = "/templates/" + dirName + "/icon.png"
+		template.Funding = parseFunding(templateConf)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

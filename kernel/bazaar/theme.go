@@ -144,6 +144,7 @@ func InstalledThemes() (ret []*Theme) {
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
 		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
 		theme.IconURL = "/appearance/themes/" + dirName + "/icon.png"
+		theme.Funding = parseFunding(themeConf)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

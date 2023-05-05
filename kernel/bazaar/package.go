@@ -285,7 +285,7 @@ func getStageIndex(pkgType string) (ret *StageIndex, err error) {
 	ret = &StageIndex{}
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
-	resp, reqErr := request.SetSuccessResult(cachedStageIndex).Get(u)
+	resp, reqErr := request.SetSuccessResult(ret).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
 		return

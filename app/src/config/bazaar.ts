@@ -376,6 +376,7 @@ export const bazaar = {
             fetchPost("/api/bazaar/getBazaarPackageREAME", {
                 repoURL: data.repoURL,
                 repoHash: data.repoHash,
+                packageType: bazaarType
             }, response => {
                 const mdElement = readmeElement.querySelector(".item__readme");
                 mdElement.innerHTML = response.data.html;

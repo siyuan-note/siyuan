@@ -36,8 +36,9 @@ func getBazaarPackageREAME(c *gin.Context) {
 
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
+	packageType := arg["packageType"].(string)
 	ret.Data = map[string]interface{}{
-		"html": model.GetPackageREADME(repoURL, repoHash),
+		"html": model.GetPackageREADME(repoURL, repoHash, packageType),
 	}
 }
 

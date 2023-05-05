@@ -117,6 +117,29 @@ type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
 }
 
+func getPreferredReadme(readme *Readme) string {
+	if nil == readme {
+		return "README.md"
+	}
+
+	ret := readme.Default
+	switch util.Lang {
+	case "zh_CN":
+		if "" != readme.ZhCN {
+			ret = readme.ZhCN
+		}
+	case "en_US":
+		if "" != readme.EnUS {
+			ret = readme.EnUS
+		}
+	default:
+		if "" != readme.EnUS {
+			ret = readme.EnUS
+		}
+	}
+	return ret
+}
+
 func getPreferredDesc(desc *Description) string {
 	if nil == desc {
 		return ""
@@ -400,10 +423,28 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 	return false
 }
 
-func GetPackageREADME(repoURL, repoHash string, systemID string) (ret string) {
+func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 
-	data, err := downloadPackage(repoURLHash+"/README.md", false, systemID)
+	stageIndex := cachedStageIndex[packageType]
+	if nil == stageIndex {
+		return
+	}
+
+	var repo *StageRepo
+	for _, r := range stageIndex.Repos {
+		if r.URL == repoURLHash {
+			repo = r
+			break
+		}
+	}
+	if nil == repo {
+		return
+	}
+
+	readme := getPreferredReadme(repo.Package.Readme)
+
+	data, err := downloadPackage(repoURLHash+"/"+readme, false, "")
 	if nil != err {
 		ret = "Load bazaar package's README.md failed: " + err.Error()
 		return
@@ -472,7 +513,7 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 }
 
 func incPackageDownloads(repoURLHash, systemID string) {
-	if strings.Contains(repoURLHash, ".md") {
+	if strings.Contains(repoURLHash, ".md") || "" == systemID {
 		return
 	}
 

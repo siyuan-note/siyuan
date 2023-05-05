@@ -27,8 +27,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 )
 
-func GetPackageREADME(repoURL, repoHash string) (ret string) {
-	ret = bazaar.GetPackageREADME(repoURL, repoHash, Conf.System.ID)
+func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
+	ret = bazaar.GetPackageREADME(repoURL, repoHash, packageType)
 	return
 }
 

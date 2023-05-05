@@ -68,7 +68,7 @@ func SetPetalEnabled(name string, enabled bool) {
 		return
 	}
 
-	petal := getPetalByID(hash(plugin.Name), petals)
+	petal := getPetalByName(plugin.Name, petals)
 	if nil == petal {
 		petal = &Petal{
 			ID:      hash(plugin.Name),
@@ -90,7 +90,7 @@ func SetPetalEnabled(name string, enabled bool) {
 	}
 }
 
-func LoadPetals() (ret []*Petal) {
+func getPetals() (ret []*Petal) {
 	ret = []*Petal{}
 
 	petalDir := filepath.Join(util.DataDir, "storage", "petal")
@@ -123,11 +123,15 @@ func LoadPetals() (ret []*Petal) {
 		logging.LogErrorf("unmarshal petals failed: %s", err)
 		return
 	}
+	return
+}
+
+func LoadPetals() (ret []*Petal) {
+	ret = getPetals()
 
 	plugins := bazaar.InstalledPlugins()
 	for _, plugin := range plugins {
-		id := hash(plugin.Name)
-		petal := getPetalByID(id, ret)
+		petal := getPetalByName(plugin.Name, ret)
 		if nil == petal {
 			continue
 		}
@@ -168,9 +172,9 @@ func LoadPetals() (ret []*Petal) {
 	return
 }
 
-func getPetalByID(id string, petals []*Petal) (ret *Petal) {
+func getPetalByName(name string, petals []*Petal) (ret *Petal) {
 	for _, p := range petals {
-		if id == p.ID {
+		if name == p.Name {
 			ret = p
 			break
 		}

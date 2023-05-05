@@ -34,6 +34,7 @@ import (
 
 type Plugin struct {
 	*Package
+	Enabled bool `json:"enabled"`
 }
 
 func Plugins() (plugins []*Plugin) {

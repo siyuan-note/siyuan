@@ -51,6 +51,15 @@ func BazaarPlugins() (plugins []*bazaar.Plugin) {
 
 func InstalledPlugins() (plugins []*bazaar.Plugin) {
 	plugins = bazaar.InstalledPlugins()
+
+	petals := getPetals()
+	for _, plugin := range plugins {
+		petal := getPetalByName(plugin.Name, petals)
+		if nil != petal {
+			plugin.Enabled = petal.Enabled
+			break
+		}
+	}
 	return
 }
 

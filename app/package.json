@@ -61,7 +61,6 @@
     "file-loader": "^6.2.0",
     "html-loader": "^2.1.2",
     "html-webpack-plugin": "^5.5.0",
-    "iconv-lite": "^0.6.3",
     "ifdef-loader": "^2.3.2",
     "mini-css-extract-plugin": "2.3.0",
     "path-browserify": "^1.0.1",

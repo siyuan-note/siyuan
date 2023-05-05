@@ -456,7 +456,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                     protyle.title.element.setAttribute("custom-riff-decks", data.new["custom-riff-decks"]);
                     setTimeout(() => {
                         protyle.title.element.style.animation = "";
-                    }, 450)
+                    }, 450);
                 } else {
                     protyle.title.element.removeAttribute("custom-riff-decks");
                 }
@@ -492,7 +492,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                     item.style.animation = "addCard 450ms linear";
                     setTimeout(() => {
                         item.style.animation = "";
-                    }, 450)
+                    }, 450);
                 }
             });
             const refElement = item.lastElementChild.querySelector(".protyle-attr--refcount");

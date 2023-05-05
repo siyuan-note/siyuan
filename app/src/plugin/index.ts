@@ -4,11 +4,11 @@ export class Plugin {
 
     }
 
-    getData  () {
+    public getData  () {
 
     }
 
     public onload() {
-        console.log("Hello, world!")
+        console.log("Hello, world!");
     }
 }

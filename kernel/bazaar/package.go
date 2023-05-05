@@ -113,6 +113,10 @@ func parseFunding(pkg map[string]interface{}) (ret *Funding) {
 }
 
 func getPreferredFunding(funding *Funding) string {
+	if nil == funding {
+		return ""
+	}
+
 	if "" != funding.OpenCollective {
 		return funding.OpenCollective
 	}

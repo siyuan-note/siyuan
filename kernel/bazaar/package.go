@@ -431,9 +431,10 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 		return
 	}
 
+	fullRepoURLHash := "https://github.com/" + repoURLHash
 	var repo *StageRepo
 	for _, r := range stageIndex.Repos {
-		if r.URL == repoURLHash {
+		if r.URL == fullRepoURLHash {
 			repo = r
 			break
 		}

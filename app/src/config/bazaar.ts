@@ -16,7 +16,7 @@ export const bazaar = {
     element: undefined as Element,
     genHTML() {
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
-        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 72}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
+        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 80}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
         return `<div class="fn__flex-column" style="height: 100%">
 <div class="layout-tab-bar fn__flex">
     <div data-type="downloaded" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.downloaded}</span><span class="fn__flex-1"></span></div>
@@ -172,7 +172,7 @@ export const bazaar = {
             repoHash: item.repoHash,
             downloaded: false,
         };
-        const fundingKey = Object.keys(item.fundingUrl)[0];
+        const fundingKey = item.fundingUrl ? Object.keys(item.fundingUrl)[0] : "";
         return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
     <div class="b3-card__info fn__flex">
@@ -582,7 +582,7 @@ export const bazaar = {
                                 } else if (type === "plugin") {
                                     fetchPost("/api/bazaar/getBazaarPlugin", {}, response => {
                                         bazaar._onBazaar(response, "plugins", false);
-                                        bazaar._data.themes = response.data.packages;
+                                        bazaar._data.plugins = response.data.packages;
                                     });
                                 }
                                 item.setAttribute("data-init", "true");
@@ -671,6 +671,8 @@ export const bazaar = {
             id = "#configBazaarIcon";
         } else if (bazaarType === "widgets") {
             id = "#configBazaarWidget";
+        } else if (bazaarType === "plugins") {
+            id = "#configBazaarPlugin";
         }
         const element = bazaar.element.querySelector(id);
         if (response.code === 1) {

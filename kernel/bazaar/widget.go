@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -98,7 +99,13 @@ func Widgets() (widgets []*Widget) {
 
 func InstalledWidgets() (ret []*Widget) {
 	ret = []*Widget{}
-	widgetDirs, err := os.ReadDir(filepath.Join(util.DataDir, "widgets"))
+
+	widgetsPath := filepath.Join(util.DataDir, "widgets")
+	if !gulu.File.IsDir(widgetsPath) {
+		return
+	}
+
+	widgetDirs, err := os.ReadDir(widgetsPath)
 	if nil != err {
 		logging.LogWarnf("read widgets folder failed: %s", err)
 		return

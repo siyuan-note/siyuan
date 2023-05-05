@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -99,6 +100,11 @@ func Themes() (ret []*Theme) {
 
 func InstalledThemes() (ret []*Theme) {
 	ret = []*Theme{}
+
+	if !gulu.File.IsDir(util.ThemesPath) {
+		return
+	}
+
 	themeDirs, err := os.ReadDir(util.ThemesPath)
 	if nil != err {
 		logging.LogWarnf("read appearance themes folder failed: %s", err)

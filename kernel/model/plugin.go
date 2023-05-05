@@ -19,6 +19,7 @@ package model
 import (
 	"crypto/sha1"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/88250/gulu"
@@ -41,6 +42,11 @@ type Petal struct {
 
 func LoadPetals() (ret []*Petal) {
 	petalDir := filepath.Join(util.DataDir, "storage", "petal")
+	if err := os.MkdirAll(petalDir, 0755); nil != err {
+		logging.LogErrorf("create petal dir [%s] failed: %s", petalDir, err)
+		return
+	}
+
 	confPath := filepath.Join(petalDir, "petals.json")
 
 	ret = []*Petal{}

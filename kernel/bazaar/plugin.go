@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -98,7 +99,13 @@ func Plugins() (plugins []*Plugin) {
 
 func InstalledPlugins() (ret []*Plugin) {
 	ret = []*Plugin{}
-	pluginDirs, err := os.ReadDir(filepath.Join(util.DataDir, "plugins"))
+
+	pluginsPath := filepath.Join(util.DataDir, "plugins")
+	if !gulu.File.IsDir(pluginsPath) {
+		return
+	}
+
+	pluginDirs, err := os.ReadDir(pluginsPath)
 	if nil != err {
 		logging.LogWarnf("read plugins folder failed: %s", err)
 		return

@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -100,7 +101,13 @@ func Templates() (templates []*Template) {
 
 func InstalledTemplates() (ret []*Template) {
 	ret = []*Template{}
-	templateDirs, err := os.ReadDir(filepath.Join(util.DataDir, "templates"))
+
+	templatesPath := filepath.Join(util.DataDir, "templates")
+	if !gulu.File.IsDir(templatesPath) {
+		return
+	}
+
+	templateDirs, err := os.ReadDir(templatesPath)
 	if nil != err {
 		logging.LogWarnf("read templates folder failed: %s", err)
 		return

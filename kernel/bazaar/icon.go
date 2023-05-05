@@ -71,6 +71,8 @@ func Icons() (icons []*Icon) {
 		icon.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
 		icon.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
 		icon.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
+		icon.Funding = parseFunding(repo["package"].(map[string]interface{}))
+		icon.PreferredFunding = getPreferredFunding(icon.Funding)
 		icon.Updated = repo["updated"].(string)
 		icon.Stars = int(repo["stars"].(float64))
 		icon.OpenIssues = int(repo["openIssues"].(float64))
@@ -134,6 +136,7 @@ func InstalledIcons() (ret []*Icon) {
 		icon.PreviewURLThumb = "/appearance/icons/" + dirName + "/preview.png"
 		icon.IconURL = "/appearance/icons/" + dirName + "/icon.png"
 		icon.Funding = parseFunding(iconConf)
+		icon.PreferredFunding = getPreferredFunding(icon.Funding)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

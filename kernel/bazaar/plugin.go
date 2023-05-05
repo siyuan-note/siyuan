@@ -54,7 +54,7 @@ func Plugins() (plugins []*Plugin) {
 		repo := arg.(map[string]interface{})
 		repoURL := repo["url"].(string)
 
-		plugin := &Plugin{}
+		plugin := &Plugin{Package{Funding: &Funding{}, Description: &Description{}}}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/plugin.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(plugin).Get(innerU)
 		if nil != innerErr {
@@ -73,6 +73,8 @@ func Plugins() (plugins []*Plugin) {
 		plugin.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
 		plugin.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
 		plugin.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
+		plugin.Funding = parseFunding(repo["package"].(map[string]interface{}))
+		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		plugin.Updated = repo["updated"].(string)
 		plugin.Stars = int(repo["stars"].(float64))
 		plugin.OpenIssues = int(repo["openIssues"].(float64))
@@ -139,6 +141,7 @@ func InstalledPlugins() (ret []*Plugin) {
 		plugin.PreviewURLThumb = "/plugins/" + dirName + "/preview.png"
 		plugin.IconURL = "/plugins/" + dirName + "/icon.png"
 		plugin.Funding = parseFunding(pluginConf)
+		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
 		if nil != statErr {
 			logging.LogWarnf("stat install theme README.md failed: %s", statErr)

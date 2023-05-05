@@ -38,6 +38,18 @@ import (
 	"golang.org/x/text/transform"
 )
 
+type Description struct {
+	Default string `json:"default"`
+	ZhCN    string `json:"zh_CN"`
+	EnUS    string `json:"en_US"`
+}
+
+type Readme struct {
+	Default string `json:"default"`
+	ZhCN    string `json:"zh_CN"`
+	EnUS    string `json:"en_US"`
+}
+
 type Funding struct {
 	OpenCollective string   `json:"openCollective"`
 	Patreon        string   `json:"patreon"`
@@ -46,10 +58,15 @@ type Funding struct {
 }
 
 type Package struct {
-	Author  string   `json:"author"`
-	URL     string   `json:"url"`
-	Version string   `json:"version"`
-	Funding *Funding `json:"funding"`
+	Author      string       `json:"author"`
+	URL         string       `json:"url"`
+	Version     string       `json:"version"`
+	Description *Description `json:"description"`
+	Readme      *Readme      `json:"readme"`
+	Funding     *Funding     `json:"funding"`
+
+	PreferredFunding string `json:"preferredFunding"`
+	PreferredDesc    string `json:"preferredDesc"`
 
 	Name            string `json:"name"`
 	RepoURL         string `json:"repoURL"`
@@ -75,14 +92,40 @@ type Package struct {
 	Downloads    int    `json:"downloads"`
 }
 
-func parseFunding(conf map[string]interface{}) (ret *Funding) {
+func parseFunding(pkg map[string]interface{}) (ret *Funding) {
+	if nil == pkg["funding"] {
+		return
+	}
+
 	ret = &Funding{}
-	funding := conf["funding"].(map[string]interface{})
+	funding := pkg["funding"].(map[string]interface{})
 	ret.OpenCollective = funding["openCollective"].(string)
 	ret.Patreon = funding["patreon"].(string)
 	ret.GitHub = funding["github"].(string)
-	ret.Custom = funding["custom"].([]string)
+
+	customURLs := funding["custom"].([]interface{})
+	var custom []string
+	for _, customURL := range customURLs {
+		custom = append(custom, customURL.(string))
+	}
+	ret.Custom = custom
 	return
+}
+
+func getPreferredFunding(funding *Funding) string {
+	if "" != funding.OpenCollective {
+		return funding.OpenCollective
+	}
+	if "" != funding.Patreon {
+		return funding.Patreon
+	}
+	if "" != funding.GitHub {
+		return funding.GitHub
+	}
+	if 0 < len(funding.Custom) {
+		return funding.Custom[0]
+	}
+	return ""
 }
 
 func PluginJSON(pluginDirName string) (ret map[string]interface{}, err error) {

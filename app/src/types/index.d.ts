@@ -680,6 +680,9 @@ declare interface IMenu {
 }
 
 declare interface IBazaarItem {
+    enabled: boolean
+    preferredDesc: string
+    iconURL: string
     readme: string
     stars: string
     author: string
@@ -701,5 +704,5 @@ declare interface IBazaarItem {
     hInstallSize: string
     hInstallDate: string
     hUpdated: string
-    fundingUrl: IObject
+    preferredFunding: string
 }

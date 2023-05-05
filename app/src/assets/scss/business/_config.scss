@@ -205,6 +205,7 @@
     padding: 16px;
     box-sizing: border-box;
     opacity: 0;
+    z-index: 1;
 
     &--show {
       opacity: 1;

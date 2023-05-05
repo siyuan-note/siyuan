@@ -1,15 +1,14 @@
 .b3-card {
   box-shadow: var(--b3-point-shadow);
   background-color: var(--b3-theme-surface);
-  width: calc(25% - 18px);
-  min-width: 200px;
   border-radius: 4px;
-  margin: 8px;
+  margin: 16px;
   overflow: hidden;
   position: relative;
   transition: var(--b3-transition);
   cursor: pointer;
   border: 1px solid var(--b3-theme-surface-lighter);
+  display: flex;
 
   &:hover {
     background-color: var(--b3-theme-surface-lighter);
@@ -29,8 +28,8 @@
   }
 
   &__img {
-    height: 116px;
-    width: 100%;
+    width: 96px;
+    height: 96px;
     display: flex;
     justify-content: center;
     align-items: center;

@@ -11,6 +11,7 @@ import * as path from "path";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 export const bazaar = {
     element: undefined as Element,
@@ -172,15 +173,8 @@ export const bazaar = {
             repoHash: item.repoHash,
             downloaded: false,
         };
-        let fundingUrl = "";
-        if (item.fundingUrl) {
-            fundingUrl = item.fundingUrl.openCollective || item.fundingUrl.patreon || item.fundingUrl.github
-            if (!fundingUrl && item.fundingUrl.custom && item.fundingUrl.custom.length > 0) {
-                fundingUrl = item.fundingUrl.custom[0];
-            }
-        }
         return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
-    <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
+    <div class="b3-card__img"><img src="${item.iconURL}" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="b3-card__info fn__flex">
         <span class="fn__flex-center fn__ellipsis">${item.name}</span>
         <span class="fn__space"></span>
@@ -190,7 +184,7 @@ export const bazaar = {
         <span class="fn__flex-center">${item.downloads}</span>
     </div>
     <div class="b3-card__actions">
-        ${fundingUrl ? `<a target="_blank" href="${fundingUrl}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${fundingUrl}"><svg><use xlink:href="#iconHeart"></use></svg></a>` : ""}
+        ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${item.preferredFunding}"><svg><use xlink:href="#iconHeart"></use></svg></a>` : ""}
         <div class="fn__flex-1"></div>
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
@@ -234,32 +228,40 @@ export const bazaar = {
                     downloaded: true
                 };
                 html += `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${item.current ? " b3-card--current" : ""}">
-    <div class="b3-card__img"><img src="${item.previewURLThumb}"/></div>
-    <div class="b3-card__info">
-        ${item.name}
-    </div>
-    <div class="b3-card__actions">
-        <div class="fn__flex-1"></div>
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
-            <svg><use xlink:href="#iconTrashcan"></use></svg>
-        </span>
-        <span class="fn__space${isBrowser() ? " fn__none" : ""}"></span>
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
-            <svg><use xlink:href="#iconFolder"></use></svg>
-        </span>
-        <span class="fn__space${!item.current && showSwitch ? "" : " fn__none"}"></span>
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${!item.current && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
-            <svg><use xlink:href="#iconSelect"></use></svg>
-        </span>
-        <span class="fn__space${item.outdated ? "" : " fn__none"}"></span>
-        <span data-type="install-t" aria-label="${window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
-            <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
-        </span>
+    <div class="b3-card__img"><img src="${item.iconURL}" onerror="this.src='/stage/images/icon.png'"/></div>
+    <div class="fn__flex-1 fn__flex-column">
+        <div class="b3-card__info fn__flex-1">
+            ${item.name}
+            <div class="fn__hr"></div>
+            <div class="ft__smaller ft__on-surface">${item.preferredDesc || ""}</div>
+        </div>
+        <div class="b3-card__actions">
+            ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${item.preferredFunding}"><svg><use xlink:href="#iconHeart"></use></svg></a>` : ""}
+            <div class="fn__flex-1"></div>
+            <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
+                <svg><use xlink:href="#iconTrashcan"></use></svg>
+            </span>
+            <span class="fn__space${isBrowser() ? " fn__none" : ""}"></span>
+            <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+                <svg><use xlink:href="#iconFolder"></use></svg>
+            </span>
+            <span class="fn__space${!item.current && showSwitch ? "" : " fn__none"}"></span>
+            <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${!item.current && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
+                <svg><use xlink:href="#iconSelect"></use></svg>
+            </span>
+            <span class="fn__space${item.outdated ? "" : " fn__none"}"></span>
+            <span data-type="install-t" aria-label="${window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
+                <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
+            </span>
+            <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
+            <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
+            <input class="b3-switch fn__flex-center${bazaarType === "plugins" ? "" : " fn__none"}" ${item.enabled ? "checked" : ""} data-type="plugin-enable" type="checkbox">
+        </div>
     </div>
 </div>`;
             });
             bazaar._data.downloaded = response.data.packages;
-            bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = html ? `<div class="b3-cards">${html}</div>` : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = html ? html : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
     },
     _data: {
@@ -556,6 +558,19 @@ export const bazaar = {
                         });
                     }
                     event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "plugin-enable") {
+                    const itemElement = hasClosestByClassName(target, "b3-card")
+                    if (itemElement) {
+                        const dataObj = JSON.parse(itemElement.getAttribute("data-obj"));
+                        fetchPost("/api/petal/setPetalEnabled", {
+                            packageName: dataObj.name,
+                            enabled: (target as HTMLInputElement).checked
+                        }, () => {
+                            exportLayout(true);
+                        });
+                    }
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("b3-card")) {

@@ -40,7 +40,46 @@ type Petal struct {
 	I18n map[string]interface{} `json:"i18n"` // i18n text
 }
 
+func SetPetalEnabled(name string, enabled bool) {
+	petals := []*Petal{}
+	petalDir := filepath.Join(util.DataDir, "storage", "petal")
+	confPath := filepath.Join(petalDir, "petals.json")
+	data, err := filelock.ReadFile(confPath)
+	if nil != err {
+		logging.LogErrorf("read petal file [%s] failed: %s", confPath, err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &petals); nil != err {
+		logging.LogErrorf("unmarshal petals failed: %s", err)
+		return
+	}
+
+	plugins := bazaar.InstalledPlugins()
+	for _, plugin := range plugins {
+		id := hash(plugin.URL)
+		petal := getPetalByID(id, petals)
+		if nil == petal {
+			continue
+		}
+
+		petal.Enabled = enabled
+		break
+	}
+
+	if data, err = gulu.JSON.MarshalIndentJSON(petals, "", "\t"); nil != err {
+		logging.LogErrorf("marshal petals failed: %s", err)
+		return
+	}
+	if err = filelock.WriteFile(confPath, data); nil != err {
+		logging.LogErrorf("write petals [%s] failed: %s", confPath, err)
+		return
+	}
+}
+
 func LoadPetals() (ret []*Petal) {
+	ret = []*Petal{}
+
 	petalDir := filepath.Join(util.DataDir, "storage", "petal")
 	if err := os.MkdirAll(petalDir, 0755); nil != err {
 		logging.LogErrorf("create petal dir [%s] failed: %s", petalDir, err)
@@ -48,8 +87,6 @@ func LoadPetals() (ret []*Petal) {
 	}
 
 	confPath := filepath.Join(petalDir, "petals.json")
-
-	ret = []*Petal{}
 	if !gulu.File.IsExist(confPath) {
 		data, err := gulu.JSON.MarshalIndentJSON(ret, "", "\t")
 		if nil != err {

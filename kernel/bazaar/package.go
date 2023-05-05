@@ -262,7 +262,7 @@ func ThemeJSON(themeDirName string) (ret *Theme, err error) {
 	return
 }
 
-var cachedStageIndex *StageIndex
+var cachedStageIndex map[string]*StageIndex
 var stageIndexCacheTime int64
 var stageIndexLock = sync.Mutex{}
 
@@ -277,12 +277,12 @@ func getStageIndex(pkgType string) (ret *StageIndex, err error) {
 
 	now := time.Now().Unix()
 	if 3600 >= now-stageIndexCacheTime {
-		ret = cachedStageIndex
+		ret = cachedStageIndex[pkgType]
 		return
 	}
 
 	bazaarHash := rhyRet["bazaar"].(string)
-	cachedStageIndex = &StageIndex{}
+	ret = &StageIndex{}
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
 	resp, reqErr := request.SetSuccessResult(cachedStageIndex).Get(u)
@@ -296,7 +296,7 @@ func getStageIndex(pkgType string) (ret *StageIndex, err error) {
 	}
 
 	stageIndexCacheTime = now
-	ret = cachedStageIndex
+	cachedStageIndex[pkgType] = ret
 	return
 }
 

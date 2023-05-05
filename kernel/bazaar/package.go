@@ -391,34 +391,34 @@ func incPackageDownloads(repoURLHash, systemID string) {
 }
 
 func installPackage(data []byte, installPath string) (err error) {
-	dir := filepath.Join(util.TempDir, "bazaar", "package")
-	if err = os.MkdirAll(dir, 0755); nil != err {
+	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
+	if err = os.MkdirAll(tmpPackage, 0755); nil != err {
 		return
 	}
 	name := gulu.Rand.String(7)
-	tmp := filepath.Join(dir, name+".zip")
+	tmp := filepath.Join(tmpPackage, name+".zip")
 	if err = os.WriteFile(tmp, data, 0644); nil != err {
 		return
 	}
 
-	unzipPath := filepath.Join(dir, name)
+	unzipPath := filepath.Join(tmpPackage, name)
 	if err = gulu.Zip.Unzip(tmp, unzipPath); nil != err {
 		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
 		err = errors.New("write file failed")
 		return
 	}
 
+	dirName := filepath.Base(installPath)
 	dirs, err := os.ReadDir(unzipPath)
 	if nil != err {
 		return
 	}
-	for _, d := range dirs {
-		if d.IsDir() && strings.Contains(d.Name(), "-") {
-			dir = d.Name()
-			break
-		}
+
+	srcPath := unzipPath
+	if 1 == len(dirs) && dirs[0].IsDir() && strings.HasPrefix(dirs[0].Name(), dirName+"-") {
+		srcPath = filepath.Join(unzipPath, dirs[0].Name())
 	}
-	srcPath := filepath.Join(unzipPath, dir)
+
 	if err = filelock.Copy(srcPath, installPath); nil != err {
 		return
 	}

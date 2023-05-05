@@ -141,7 +141,7 @@
   "backmentionExpand": "Backmention default expand",
   "backmentionExpandTip": "If configured as <code class='fn__code'>0</code>, it will not be expanded",
   "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "After enabling, usage will be counted through <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> so that developers can improve the product user experience",
+  "googleAnalyticsTip": "After enabling, it will use <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> to count the opening status of the application and will not collect users data and operations",
   "floatWindowMode": "Hover to display a floating window",
   "floatWindowModeTip": "After enabling, a floating window will appear when the mouse hovers over the block reference, breadcrumb block icon, etc. After disabling, you need to hold down the <code class='fn__code'>${hotkey}</code> key to appear the floating window",
   "codeSnippet": "Code Snippet",

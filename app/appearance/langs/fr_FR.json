@@ -141,7 +141,7 @@
   "backmentionExpand": "Développer la mention par défaut",
   "backmentionExpandTip": "Si configuré comme <code class='fn__code'>0</code>, il ne sera pas développé",
   "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "Après l'activation, l'utilisation sera comptabilisée via <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> afin que les développeurs puissent améliorer l'expérience utilisateur du produit.",
+  "googleAnalyticsTip": "Après l'activation, il utilisera <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> pour compter le statut d'ouverture du l'application et ne collectera pas les Données et Opérations des utilisateurs",
   "floatWindowMode": "Survolez pour afficher une fenêtre flottante",
   "floatWindowModeTip": "Après l'activation, une fenêtre flottante apparaît lorsque la souris survole la référence du bloc, l'icône du fil d'Ariane, etc. Après la désactivation, vous devez maintenir enfoncée la touche <code class='fn__code'>${hotkey}</code> pour apparaît la fenêtre flottante",
   "codeSnippet": "Extrait de code",

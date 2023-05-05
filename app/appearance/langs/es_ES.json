@@ -141,7 +141,7 @@
   "backmentionExpand": "Expansión predeterminada de la mención",
   "backmentionExpandTip": "Si se configura como <code class='fn__code'>0</code>, no se expandirá",
   "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "Después de habilitar, el uso se contará a través de <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> para que los desarrolladores puedan mejorar la experiencia del usuario del producto.",
+  "googleAnalyticsTip": "Después de habilitarlo, usará <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> para contar el estado de apertura del aplicación y no recopilará datos y operaciones de los usuarios",
   "floatWindowMode": "Pase el cursor para mostrar una ventana flotante",
   "floatWindowModeTip": "Después de habilitar, aparecerá una ventana flotante cuando el mouse se desplace sobre la referencia del bloque, el ícono del bloque de navegación, etc. Después de deshabilitar, debe mantener presionada la tecla <code class='fn__code'>${hotkey}</code> para aparece la ventana flotante",
   "codeSnippet": "Fragmento de código",

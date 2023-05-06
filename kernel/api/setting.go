@@ -171,6 +171,10 @@ func setEditor(c *gin.Context) {
 		editor.KaTexMacros = "{}"
 	}
 
+	if "" == editor.PicgoServePath {
+		editor.PicgoServePath = "http://127.0.0.1:36677"
+	}
+
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
 	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
 	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude

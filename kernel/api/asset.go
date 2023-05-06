@@ -270,8 +270,13 @@ func insertLocalAssets(c *gin.Context) {
 	if nil != isUploadArg {
 		isUpload = isUploadArg.(bool)
 	}
+	isUsePicgo := false
+	isUsePicgoArg := arg["isUsePicgo"]
+	if  nil != isUsePicgoArg {
+		isUsePicgo = isUsePicgoArg.(bool)
+	}
 	id := arg["id"].(string)
-	succMap, err := model.InsertLocalAssets(id, assetPaths, isUpload)
+	succMap, err := model.InsertLocalAssets(id, assetPaths, isUpload, isUsePicgo)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

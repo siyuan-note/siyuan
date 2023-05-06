@@ -138,6 +138,29 @@ export const editor = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="virtualBlockRef" type="checkbox"${window.siyuan.config.editor.virtualBlockRef ? " checked" : ""}/>
 </label>
+<details style="outline: auto">     
+<summary>  ${window.siyuan.languages.configPicgo}</summary>
+<label class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.picgo}
+        <div class="b3-label__text">${window.siyuan.languages.picgoTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <select id="picgoMode" class="b3-select fn__flex-center fn__size200">
+        <option value="0" ${window.siyuan.config.editor.picgoMode === 0 ? "selected" : ""}>${window.siyuan.languages.picgoMode0}</option>
+        <option value="1" ${window.siyuan.config.editor.picgoMode === 1 ? "selected" : ""}>${window.siyuan.languages.picgoMode1}</option>
+        <option value="2" ${window.siyuan.config.editor.picgoMode === 2 ? "selected" : ""}>${window.siyuan.languages.picgoMode2}</option>
+    </select>
+</label>
+<label class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.picgoServePath}
+        <div class="b3-label__text">${window.siyuan.languages.picgoServePathTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="picgoServePath" value="${window.siyuan.config.editor.picgoServePath}" />
+</label>
+</details>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.md9}
@@ -306,7 +329,9 @@ export const editor = {
                 generateHistoryInterval: parseInt((editor.element.querySelector("#generateHistoryInterval") as HTMLInputElement).value),
                 historyRetentionDays: parseInt((editor.element.querySelector("#historyRetentionDays") as HTMLInputElement).value),
                 fontFamily: fontFamilyElement.value,
-                emoji: window.siyuan.config.editor.emoji
+                emoji: window.siyuan.config.editor.emoji,
+                picgoServePath: (editor.element.querySelector("#picgoServePath") as HTMLInputElement).value,
+                picgoMode: parseInt((editor.element.querySelector("#picgoMode") as HTMLSelectElement).value),
             }, response => {
                 editor.onSetEditor(response.data);
             });

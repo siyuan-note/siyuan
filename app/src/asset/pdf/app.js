@@ -3185,6 +3185,16 @@ function webViewerKeyDown(evt) {
     (evt.shiftKey ? 4 : 0) |
     (evt.metaKey ? 8 : 0);
 
+  if (cmd === 0 && [38, 40].includes(evt.keyCode)) {
+    // NOTE https://github.com/siyuan-note/siyuan/issues/8164
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+    setTimeout(() => {
+      pdfViewer.focus();
+    })
+    return;
+  }
 
   // NOTE
   if (!evt.repeat && (cmd === 8 || cmd === 1 || cmd === 2) && evt.keyCode === 68 &&  // D

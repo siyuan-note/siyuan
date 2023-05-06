@@ -73,19 +73,23 @@ func SetPetalEnabled(name string, enabled bool) {
 }
 
 func LoadPetals() (ret []*Petal) {
-	ret = getPetals()
-
-	plugins := bazaar.InstalledPlugins()
-	for _, plugin := range plugins {
-		petal := getPetalByName(plugin.Name, ret)
-		if nil == petal {
+	ret = []*Petal{}
+	petals := getPetals()
+	for _, petal := range petals {
+		if !petal.Enabled {
 			continue
 		}
 
-		pluginDir := filepath.Join(util.DataDir, "plugins", plugin.Name)
-		data, err := filelock.ReadFile(filepath.Join(pluginDir, "index.js"))
+		pluginDir := filepath.Join(util.DataDir, "plugins", petal.Name)
+		jsPath := filepath.Join(pluginDir, "index.js")
+		if !gulu.File.IsExist(jsPath) {
+			logging.LogErrorf("plugin [%s] js not found", petal.Name)
+			continue
+		}
+
+		data, err := filelock.ReadFile(jsPath)
 		if nil != err {
-			logging.LogErrorf("read plugin [%s] js failed: %s", plugin.Name, err)
+			logging.LogErrorf("read plugin [%s] js failed: %s", petal.Name, err)
 			continue
 		}
 		petal.JS = string(data)
@@ -94,7 +98,7 @@ func LoadPetals() (ret []*Petal) {
 		if gulu.File.IsExist(cssPath) {
 			data, err := filelock.ReadFile(cssPath)
 			if nil != err {
-				logging.LogErrorf("read plugin [%s] css failed: %s", plugin.Name, err)
+				logging.LogErrorf("read plugin [%s] css failed: %s", petal.Name, err)
 			} else {
 				petal.CSS = string(data)
 			}
@@ -104,11 +108,11 @@ func LoadPetals() (ret []*Petal) {
 		if gulu.File.IsExist(i18nPath) {
 			data, err := filelock.ReadFile(i18nPath)
 			if nil != err {
-				logging.LogErrorf("read plugin [%s] i18n failed: %s", plugin.Name, err)
+				logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
 			} else {
 				petal.I18n = map[string]interface{}{}
 				if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); nil != err {
-					logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", plugin.Name, err)
+					logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
 				}
 			}
 		}

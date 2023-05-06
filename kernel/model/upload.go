@@ -313,7 +313,7 @@ func uploadWithPicgo(filepath string) (ret string, err error) {
 	var sendErr error
 	// default url: http://127.0.0.1:36677/upload
 	var apiURL string
-	picgoServePath := Conf.Editor.PicgoServePath
+	picgoServePath := strings.TrimSpace(Conf.Editor.PicgoServePath)
 	logging.LogInfof("picgoServePath:[%s]", picgoServePath)
 	apiURL = strings.TrimSuffix(picgoServePath, "/") + "/upload"
 	logging.LogInfof("picgoApiURL:[%s]", apiURL)

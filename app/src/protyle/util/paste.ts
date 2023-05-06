@@ -256,11 +256,23 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else if (textPlain.trim() !== "" && files && files.length === 0) {
             if (range.toString() !== "") {
                 if (isDynamicRef(textPlain)) {
-                    textPlain = textPlain.replace(/'.*'\)\)$/, ` "${Lute.EscapeHTMLStr(range.toString())}"))`);
+                    protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                        type: "id",
+                        color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${Lute.EscapeHTMLStr(range.toString())}`
+                    });
+                    return;
                 } else if (isFileAnnotation(textPlain)) {
-                    textPlain = textPlain.replace(/".+">>$/, `"${Lute.EscapeHTMLStr(range.toString())}">>`);
+                    protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {
+                        type: "file-annotation-ref",
+                        color: textPlain.substring(2).replace(/ ".+">>$/, "") + Constants.ZWSP + Lute.EscapeHTMLStr(range.toString())
+                    });
+                    return;
                 } else if (protyle.lute.IsValidLinkDest(textPlain)) {
-                    textPlain = `[${range.toString()}](${textPlain})`;
+                    protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                        type: "a",
+                        color: textPlain + Constants.ZWSP + Lute.EscapeHTMLStr(range.toString())
+                    });
+                    return;
                 }
             }
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);

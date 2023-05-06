@@ -23,7 +23,7 @@ export const loadPlugins = (app: App) => {
             const exportsObj: { [key: string]: any } = {};
             const moduleObj = {exports: exportsObj};
             try {
-                runCode(item.js, "plugin:" + encodeURIComponent(item.id))(getObject, moduleObj, exportsObj);
+                runCode(item.js, "plugin:" + encodeURIComponent(item.name))(getObject, moduleObj, exportsObj);
             } catch (e) {
                 console.error(`eval plugin ${item.name} error:`, e);
                 return;

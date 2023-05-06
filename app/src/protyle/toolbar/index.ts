@@ -497,18 +497,26 @@ export class Toolbar {
                                     return true;
                                 }
                             });
-                        } else if (type === "block-ref" && types.includes("a")) {
-                            // 虚拟引用和链接不能同时存在
+                        } else if (type === "block-ref" && (types.includes("a") || types.includes("file-annotation-ref"))) {
+                            // 虚拟引用和链接/标注不能同时存在
                             types.find((item, index) => {
-                                if (item === "a") {
+                                if (item === "a"||item === "file-annotation-ref") {
                                     types.splice(index, 1);
                                     return true;
                                 }
                             });
-                        } else if (type === "a" && types.includes("block-ref")) {
-                            // 链接和引用不能同时存在
+                        } else if (type === "a" && (types.includes("block-ref")|| types.includes("file-annotation-ref"))) {
+                            // 链接和引用/标注不能同时存在
                             types.find((item, index) => {
-                                if (item === "block-ref") {
+                                if (item === "block-ref"||item === "file-annotation-ref") {
+                                    types.splice(index, 1);
+                                    return true;
+                                }
+                            });
+                        } else if (type === "file-annotation-ref" && (types.includes("block-ref")|| types.includes("a"))) {
+                            // 引用和链接/标注不能同时存在
+                            types.find((item, index) => {
+                                if (item === "block-ref"||item === "a") {
                                     types.splice(index, 1);
                                     return true;
                                 }

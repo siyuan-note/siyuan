@@ -181,6 +181,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
         // 标签等元素中包含 ZWSP，需移除后拼接 https://github.com/siyuan-note/siyuan/issues/6466
         textElement.setAttribute("data-id", blockRefData.splice(0, 1)[0]);
         textElement.setAttribute("data-subtype", blockRefData.splice(0, 1)[0]);
+        textElement.removeAttribute("data-href");
         textElement.innerText = blockRefData.join("");
     };
     const setLink = (textOption: string) => {
@@ -188,6 +189,15 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
         textElement.setAttribute("data-href", options[0]);
         textElement.removeAttribute("data-subtype");
         textElement.removeAttribute("data-id");
+        if (options[1]) {
+            textElement.textContent = options[1];
+        }
+    };
+    const setFileAnnotation = (textOption: string) => {
+        const options = textOption.split(Constants.ZWSP);
+        textElement.setAttribute("data-id", options[0]);
+        textElement.removeAttribute("data-href");
+        textElement.removeAttribute("data-subtype");
         if (options[1]) {
             textElement.textContent = options[1];
         }
@@ -224,6 +234,9 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 break;
             case "a":
                 setLink(textOption.color);
+                break;
+            case "file-annotation-ref":
+                setFileAnnotation(textOption.color);
                 break;
             case "inline-memo":
                 textElement.removeAttribute("contenteditable");

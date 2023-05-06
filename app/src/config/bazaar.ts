@@ -22,10 +22,10 @@ export const bazaar = {
 <div class="layout-tab-bar fn__flex">
     <div data-type="downloaded" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.downloaded}</span><span class="fn__flex-1"></span></div>
     <div data-type="theme" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.theme}</span><span class="fn__flex-1"></span></div>
-    <div data-type="template" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.template}</span><span class="fn__flex-1"></span></div>
-    <div data-type="plugin" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.plugin}</span><span class="fn__flex-1"></span></div>
     <div data-type="icon" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.icon}</span><span class="fn__flex-1"></span></div>
+    <div data-type="template" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.template}</span><span class="fn__flex-1"></span></div>
     <div data-type="widget" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.widget}</span><span class="fn__flex-1"></span></div>
+    <div data-type="plugin" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.plugin}</span><span class="fn__flex-1"></span></div>
 </div>
 <div class="fn__flex-1">
     <div class="bazaarPanel" data-type="downloaded" data-init="true">
@@ -35,13 +35,13 @@ export const bazaar = {
             <div class="fn__space"></div>
             <button data-type="myTheme" class="b3-button">${window.siyuan.languages.theme}</button>
             <div class="fn__space"></div>
-            <button data-type="myTemplate" class="b3-button b3-button--outline">${window.siyuan.languages.template}</button>
-            <div class="fn__space"></div>
-            <button data-type="myPlugin" class="b3-button b3-button--outline">${window.siyuan.languages.plugin}</button>
-            <div class="fn__space"></div>
             <button data-type="myIcon" class="b3-button b3-button--outline">${window.siyuan.languages.icon}</button>
             <div class="fn__space"></div>
+            <button data-type="myTemplate" class="b3-button b3-button--outline">${window.siyuan.languages.template}</button>
+            <div class="fn__space"></div>
             <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
+            <div class="fn__space"></div>
+            <button data-type="myPlugin" class="b3-button b3-button--outline">${window.siyuan.languages.plugin}</button>
         </div>
         <div id="configBazaarDownloaded">
             ${loadingHTML}

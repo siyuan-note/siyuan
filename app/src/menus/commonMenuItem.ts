@@ -310,7 +310,7 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                 name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value;
             }
             if (item.value.trim()) {
-                if (!/^[0-9a-zA-Z\-]*$/.test(name.replace("custom-", "")) || name === "custom-") {
+                if (!/^custom-[_.\-0-9a-zA-Z]+$/.test(name)) {
                     errorTip += name.replace("custom-", "") + ", ";
                     return;
                 }
@@ -381,7 +381,7 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                     name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value;
                 }
                 if (item.value.trim()) {
-                    if (!/^[0-9a-zA-Z\-]*$/.test(name.replace("custom-", "")) || name === "custom-") {
+                    if (!/^custom-[_.\-0-9a-zA-Z]+$/.test(name)) {
                         errorTip += name.replace("custom-", "") + ", ";
                         return;
                     }

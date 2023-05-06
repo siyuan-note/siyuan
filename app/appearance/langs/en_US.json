@@ -423,7 +423,7 @@
   "addAttr": "Add",
   "addTag": "Add Tag",
   "width": "Width",
-  "attrName": "Key",
+  "attrName": "Attribute name",
   "attr": "Attribute",
   "updatePath": "Change dir",
   "default": "Default",

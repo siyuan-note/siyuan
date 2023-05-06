@@ -423,7 +423,7 @@
   "addAttr": "Añadir",
   "addTag": "Añadir etiqueta",
   "width": "Ancho",
-  "attrName": "Clave",
+  "attrName": "Nombre del atributo",
   "attr": "Atributo",
   "updatePath": "Cambiar directorio",
   "default": "Por defecto",

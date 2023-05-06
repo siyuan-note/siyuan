@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
@@ -41,19 +42,7 @@ type Petal struct {
 }
 
 func SetPetalEnabled(name string, enabled bool) {
-	petals := []*Petal{}
-	petalDir := filepath.Join(util.DataDir, "storage", "petal")
-	confPath := filepath.Join(petalDir, "petals.json")
-	data, err := filelock.ReadFile(confPath)
-	if nil != err {
-		logging.LogErrorf("read petal file [%s] failed: %s", confPath, err)
-		return
-	}
-
-	if err = gulu.JSON.UnmarshalJSON(data, &petals); nil != err {
-		logging.LogErrorf("unmarshal petals failed: %s", err)
-		return
-	}
+	petals := getPetals()
 
 	plugins := bazaar.InstalledPlugins()
 	var plugin *bazaar.Plugin
@@ -80,50 +69,7 @@ func SetPetalEnabled(name string, enabled bool) {
 		petal.Enabled = enabled
 	}
 
-	if data, err = gulu.JSON.MarshalIndentJSON(petals, "", "\t"); nil != err {
-		logging.LogErrorf("marshal petals failed: %s", err)
-		return
-	}
-	if err = filelock.WriteFile(confPath, data); nil != err {
-		logging.LogErrorf("write petals [%s] failed: %s", confPath, err)
-		return
-	}
-}
-
-func getPetals() (ret []*Petal) {
-	ret = []*Petal{}
-
-	petalDir := filepath.Join(util.DataDir, "storage", "petal")
-	if err := os.MkdirAll(petalDir, 0755); nil != err {
-		logging.LogErrorf("create petal dir [%s] failed: %s", petalDir, err)
-		return
-	}
-
-	confPath := filepath.Join(petalDir, "petals.json")
-	if !gulu.File.IsExist(confPath) {
-		data, err := gulu.JSON.MarshalIndentJSON(ret, "", "\t")
-		if nil != err {
-			logging.LogErrorf("marshal petals failed: %s", err)
-			return
-		}
-		if err = filelock.WriteFile(confPath, data); nil != err {
-			logging.LogErrorf("write petals [%s] failed: %s", confPath, err)
-			return
-		}
-		return
-	}
-
-	data, err := filelock.ReadFile(confPath)
-	if nil != err {
-		logging.LogErrorf("read petal file [%s] failed: %s", confPath, err)
-		return
-	}
-
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("unmarshal petals failed: %s", err)
-		return
-	}
-	return
+	savePetals(petals)
 }
 
 func LoadPetals() (ret []*Petal) {
@@ -168,6 +114,63 @@ func LoadPetals() (ret []*Petal) {
 		}
 
 		ret = append(ret, petal)
+	}
+	return
+}
+
+var petalsStoreLock = sync.Mutex{}
+
+func savePetals(petals []*Petal) {
+	petalsStoreLock.Lock()
+	defer petalsStoreLock.Unlock()
+
+	petalDir := filepath.Join(util.DataDir, "storage", "petal")
+	confPath := filepath.Join(petalDir, "petals.json")
+	data, err := gulu.JSON.MarshalIndentJSON(petals, "", "\t")
+	if nil != err {
+		logging.LogErrorf("marshal petals failed: %s", err)
+		return
+	}
+	if err = filelock.WriteFile(confPath, data); nil != err {
+		logging.LogErrorf("write petals [%s] failed: %s", confPath, err)
+		return
+	}
+}
+
+func getPetals() (ret []*Petal) {
+	petalsStoreLock.Lock()
+	defer petalsStoreLock.Unlock()
+
+	ret = []*Petal{}
+	petalDir := filepath.Join(util.DataDir, "storage", "petal")
+	if err := os.MkdirAll(petalDir, 0755); nil != err {
+		logging.LogErrorf("create petal dir [%s] failed: %s", petalDir, err)
+		return
+	}
+
+	confPath := filepath.Join(petalDir, "petals.json")
+	if !gulu.File.IsExist(confPath) {
+		data, err := gulu.JSON.MarshalIndentJSON(ret, "", "\t")
+		if nil != err {
+			logging.LogErrorf("marshal petals failed: %s", err)
+			return
+		}
+		if err = filelock.WriteFile(confPath, data); nil != err {
+			logging.LogErrorf("write petals [%s] failed: %s", confPath, err)
+			return
+		}
+		return
+	}
+
+	data, err := filelock.ReadFile(confPath)
+	if nil != err {
+		logging.LogErrorf("read petal file [%s] failed: %s", confPath, err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("unmarshal petals failed: %s", err)
+		return
 	}
 	return
 }

@@ -729,6 +729,10 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 				return ast.WalkContinue
 			}
 
+			if !strings.Contains(n.TextMarkFileAnnotationRefID, "/") {
+				return ast.WalkSkipChildren
+			}
+
 			dest := n.TextMarkFileAnnotationRefID[:strings.LastIndexByte(n.TextMarkFileAnnotationRefID, '/')]
 			dest = strings.TrimSpace(dest)
 			ret = append(ret, dest)

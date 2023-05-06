@@ -18,6 +18,10 @@ package model
 
 import (
 	"errors"
+	"fmt"
+	"github.com/imroc/req/v3"
+	"github.com/siyuan-note/httpclient"
+	"golang.org/x/exp/slices"
 	"io"
 	"os"
 	"path"
@@ -34,9 +38,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap map[string]interface{}, err error) {
-	succMap = map[string]interface{}{}
+var (
+	imageTypes = []string{".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif",
+		".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg"}
+)
 
+type PicgoApiResult struct {
+	Success bool     `json:"success"` // return code
+	Result  []string `json:"result"`  // message
+}
+
+func InsertLocalAssets(id string, assetPaths []string, isUpload bool, isUsePicgo bool) (succMap map[string]interface{}, err error) {
+	succMap = map[string]interface{}{}
+	picgoMode := Conf.Editor.PicgoMode
+	enablePicgo := picgoMode == 1 || (picgoMode == 2 && isUsePicgo)
+	if enablePicgo {
+		logging.LogInfof("picgo enable")
+	} else {
+		logging.LogInfof("picgo disable")
+	}
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		err = errors.New(Conf.Language(71))
@@ -90,7 +110,15 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 			ext := path.Ext(fName)
 			fName = fName[0 : len(fName)-len(ext)]
 			fName = fName + "-" + ast.NewNodeID() + ext
-			writePath := filepath.Join(assetsDirPath, fName)
+			var writePath string
+			isPic := slices.Contains(imageTypes, ext)
+			enablePicgo2 := enablePicgo && isPic
+			if enablePicgo2 {
+				tmpFName := "asset_tmp2_file_" + fName
+				writePath = filepath.Join(util.TempDir, tmpFName)
+			} else {
+				writePath = filepath.Join(assetsDirPath, fName)
+			}
 			if _, err = f.Seek(0, io.SeekStart); nil != err {
 				f.Close()
 				return
@@ -100,7 +128,23 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 				return
 			}
 			f.Close()
-			succMap[baseName] = "assets/" + fName
+			// upload with picgo
+			if enablePicgo2 {
+				logging.LogInfof("upload with picgo...")
+				fileUrl, uploadErr := uploadWithPicgo(writePath)
+				if nil != uploadErr {
+					err = uploadErr
+					break
+				}
+				logging.LogInfof("picgo upload success:", fileUrl)
+				succMap[baseName] = fileUrl
+				// remove local tmp file
+				if err = filelock.Remove(writePath); nil != err {
+					logging.LogErrorf("remove file [%s] failed: %s", writePath, err)
+				}
+			} else {
+				succMap[baseName] = "assets/" + fName
+			}
 		}
 	}
 	IncSync()
@@ -117,6 +161,17 @@ func Upload(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+	var isUsePicgo string
+	if nil != form.Value["isUsePicgo"] {
+		isUsePicgo = form.Value["isUsePicgo"][0]
+	}
+	picgoMode := Conf.Editor.PicgoMode
+	enablePicgo := picgoMode == 1 || (picgoMode == 2 && isUsePicgo == "true")
+	if enablePicgo {
+		logging.LogInfof("picgo enable")
+	} else {
+		logging.LogInfof("picgo disable")
 	}
 	assetsDirPath := filepath.Join(util.DataDir, "assets")
 	if nil != form.Value["id"] {
@@ -153,6 +208,8 @@ func Upload(c *gin.Context) {
 		ext := filepath.Ext(fName)
 		fName = strings.TrimSuffix(fName, ext)
 		ext = strings.ToLower(ext)
+		tmpid := ast.NewNodeID()
+		tmpFName := "asset_tmp1_file_" + fName + "-" + tmpid + ext
 		fName += ext
 		baseName := fName
 		f, openErr := file.Open()
@@ -175,7 +232,14 @@ func Upload(c *gin.Context) {
 			succMap[baseName] = existAsset.Path
 		} else {
 			fName = util.AssetName(fName)
-			writePath := filepath.Join(assetsDirPath, fName)
+			var writePath string
+			isPic := slices.Contains(imageTypes, ext)
+			enablePicgo2 := enablePicgo && isPic
+			if enablePicgo2 {
+				writePath = filepath.Join(util.TempDir, tmpFName)
+			} else {
+				writePath = filepath.Join(assetsDirPath, fName)
+			}
 			if _, err = f.Seek(0, io.SeekStart); nil != err {
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
@@ -189,7 +253,24 @@ func Upload(c *gin.Context) {
 				break
 			}
 			f.Close()
-			succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+			// upload with picgo
+			if enablePicgo2 {
+				logging.LogInfof("upload with picgo...")
+				fileUrl, uploadErr := uploadWithPicgo(writePath)
+				if nil != uploadErr {
+					errFiles = append(errFiles, fName)
+					ret.Msg = uploadErr.Error()
+					break
+				}
+				logging.LogInfof("picgo upload success:", fileUrl)
+				succMap[baseName] = fileUrl
+				// remove local tmp file
+				if err = filelock.Remove(writePath); nil != err {
+					logging.LogErrorf("remove file [%s] failed: %s", writePath, err)
+				}
+			} else {
+				succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+			}
 		}
 	}
 
@@ -210,4 +291,52 @@ func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 		}
 	}
 	return
+}
+
+// upload picture with picgo
+// see 高级技巧 | PicGo
+// https://picgo.github.io/PicGo-Doc/zh/guide/advance.html#picgo-server%E7%9A%84%E4%BD%BF%E7%94%A8
+func uploadWithPicgo(filepath string) (ret string, err error) {
+	ret = ""
+	apiBody := make(map[string][]string)
+	apiBody["list"] = append(apiBody["list"], filepath)
+
+	result := &PicgoApiResult{
+		Success: false,
+		Result:  []string{},
+	}
+	request := httpclient.NewCloudRequest30s()
+	request = request.
+		SetSuccessResult(result).
+		SetBody(apiBody)
+	var resp *req.Response
+	var sendErr error
+	// default url: http://127.0.0.1:36677/upload
+	var apiURL string
+	picgoServePath := Conf.Editor.PicgoServePath
+	logging.LogInfof("picgoServePath:[%s]", picgoServePath)
+	apiURL = strings.TrimSuffix(picgoServePath, "/") + "/upload"
+	logging.LogInfof("picgoApiURL:[%s]", apiURL)
+
+	resp, sendErr = request.Post(apiURL)
+	if nil != sendErr {
+		msg := fmt.Sprintf("PicgoUploadError::Post send failed: [%s]", sendErr.Error())
+		logging.LogErrorf(msg)
+		return "", errors.New(msg)
+	}
+	if 200 != resp.StatusCode {
+		msg := fmt.Sprintf("PicgoUploadError::StatusCode failed [sc=%d]", resp.StatusCode)
+		logging.LogErrorf(msg)
+		return "", errors.New(msg)
+	}
+	logging.LogInfof("pigco api result:[%s]", result)
+	if result.Success {
+		if len(result.Result) > 0 {
+			ret = result.Result[0]
+			return ret, nil
+		} else {
+			return "", errors.New("PicgoUploadFailed::success but no result")
+		}
+	}
+	return "", errors.New("PicgoUploadFailed::none")
 }

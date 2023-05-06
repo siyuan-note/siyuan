@@ -46,6 +46,8 @@ type Editor struct {
 	OnlySearchForDoc                bool     `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
 	BacklinkExpandCount             int      `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int      `json:"backmentionExpandCount"`          // 反链提及默认展开数量
+	PicgoServePath               	string   `json:"picgoServePath"`                  // picgo 伺服地址
+	PicgoMode               	    int      `json:"picgoMode"`                       // picgo模式
 }
 
 func NewEditor() *Editor {
@@ -74,5 +76,7 @@ func NewEditor() *Editor {
 		RTL:                             false,
 		BacklinkExpandCount:             8,
 		BackmentionExpandCount:          8,
+		PicgoServePath:                  "http://127.0.0.1:36677",
+		PicgoMode:                       0,
 	}
 }

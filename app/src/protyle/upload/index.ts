@@ -8,6 +8,7 @@ import {pathPosix} from "../../util/pathName";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {hasClosestBlock} from "../util/hasClosest";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {ipcRenderer} from "electron";
 
 export class Upload {
     public element: HTMLElement;
@@ -139,10 +140,27 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
 
 export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: boolean) => {
     const msgId = showMessage(window.siyuan.languages.uploading, 0);
+    let isUsePicgo= false
+    let needConfirm = window.siyuan.config.editor.picgoMode == 2
+    if (needConfirm) {
+        let hasImage = Array.from(files).some((item)=>{
+            const type = pathPosix().extname(item.trim()).toLowerCase();
+            if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
+                return true
+            }
+        })
+        if (hasImage) {
+            let isConfirm = ipcRenderer.sendSync("sync-confrim-dialog",`${window.siyuan.languages.usePicgoConfirm}`);
+            if (isConfirm) {
+                isUsePicgo = true;
+            }
+        }
+    }
     fetchPost("/api/asset/insertLocalAssets", {
         assetPaths: files,
         isUpload,
-        id: protyle.block.rootID
+        id: protyle.block.rootID,
+        isUsePicgo
     }, (response) => {
         hideMessage(msgId);
         genUploadedLabel(JSON.stringify(response), protyle);
@@ -210,8 +228,23 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         formData.append(key, extraData[key]);
     }
 
+    let hasImage= false
     for (let i = 0, iMax = validateResult.files.length; i < iMax; i++) {
         formData.append(protyle.options.upload.fieldName, validateResult.files[i]);
+        let file = validateResult.files[i];
+        const type = pathPosix().extname(file.name).toLowerCase();
+        if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
+            hasImage = true
+        }
+    }
+    let needConfirm = window.siyuan.config.editor.picgoMode == 2
+    if (needConfirm && hasImage) {
+        let isUsePicgo= "false";
+        let isConfirm = ipcRenderer.sendSync("sync-confrim-dialog",`${window.siyuan.languages.usePicgoConfirm}`);
+        if (isConfirm) {
+            isUsePicgo = "true"
+        }
+        formData.append("isUsePicgo",isUsePicgo);
     }
     formData.append("id", protyle.block.rootID);
     const xhr = new XMLHttpRequest();

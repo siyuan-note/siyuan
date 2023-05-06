@@ -359,6 +359,8 @@ declare interface IEditor {
     backmentionExpandCount: number;
 
     emoji: string[];
+    picgoMode:number;
+    picgoServePath:string;
 }
 
 declare interface IWebSocketData {

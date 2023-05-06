@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const {
-    app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray,
+    app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray, dialog
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -330,6 +330,24 @@ const boot = () => {
         }
     });
 
+    function syncConfirmDialog(message,windows) {
+        let opts={
+            type: 'none',
+            buttons: ['Yes','No'],
+            detail: " ",
+            message: message,
+            title:"SiYuan",
+            icon:path.join(appDir, "stage", "icon.png"),
+        }
+        const buttonIdx = dialog.showMessageBoxSync(windows,opts );
+        return buttonIdx == 0;
+    }
+
+    ipcMain.on('sync-confrim-dialog', (event, arg) => {
+        let senderWindow = BrowserWindow.fromWebContents(event.sender);
+        let ret = syncConfirmDialog(arg,senderWindow);
+        event.returnValue = ret
+    })
     // 加载主界面
     currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
 

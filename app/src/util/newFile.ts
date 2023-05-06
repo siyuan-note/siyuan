@@ -83,6 +83,8 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
                 }, response => {
                     /// #if !MOBILE
                     openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                    /// #else
+                    openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     /// #endif
                 });
             } else {
@@ -97,6 +99,8 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
                     }, response => {
                         /// #if !MOBILE
                         openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                        /// #else
+                        openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                         /// #endif
                     });
                 });
@@ -121,6 +125,8 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
             }, () => {
                 /// #if !MOBILE
                 openFileById({id, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                /// #else
+                openMobileFileById(id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                 /// #endif
             });
         }
@@ -165,11 +171,11 @@ export const newFileByName = (value: string) => {
             markdown: ""
         }, response => {
             hideElements(["dialog"]);
-            if (isMobile()) {
-                openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
-            } else {
-                openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
-            }
+            /// #if MOBILE
+            openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+            /// #else
+            openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+            /// #endif
         });
     });
 };

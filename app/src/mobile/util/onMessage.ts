@@ -33,7 +33,6 @@ export const onMessage = (data: IWebSocketData) => {
                     document.getElementById("toolbarSync").classList.add("fn__none");
                 }
                 break;
-            case "create":
             case "createdailynote":
                 openMobileFileById(data.data.id);
                 break;

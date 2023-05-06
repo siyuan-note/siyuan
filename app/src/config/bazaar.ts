@@ -304,6 +304,8 @@ export const bazaar = {
             navTitle = window.siyuan.languages.widget;
         } else if (bazaarType === "templates") {
             navTitle = window.siyuan.languages.template;
+        } else if (bazaarType === "plugins") {
+            navTitle = window.siyuan.languages.plugin;
         }
         const dataObj1 = {
             bazaarType,
@@ -390,7 +392,7 @@ export const bazaar = {
         bazaar.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             const dataElement = hasClosestByAttribute(target, "data-obj", null);
-            let dataObj:IObject;
+            let dataObj: IObject;
             if (dataElement) {
                 dataObj = JSON.parse(dataElement.getAttribute("data-obj"));
             }
@@ -525,6 +527,10 @@ export const bazaar = {
                         }, response => {
                             this._genMyHTML(bazaarType);
                             bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
+                            // TODO destroy plugin
+                            if (bazaarType === "plugins") {
+                                exportLayout(true);
+                            }
                         });
                     }
                     event.preventDefault();
@@ -577,6 +583,7 @@ export const bazaar = {
                             packageName: dataObj.name,
                             enabled: (target as HTMLInputElement).checked
                         }, () => {
+                            // TODO destroy plugin
                             exportLayout(true);
                         });
                     }

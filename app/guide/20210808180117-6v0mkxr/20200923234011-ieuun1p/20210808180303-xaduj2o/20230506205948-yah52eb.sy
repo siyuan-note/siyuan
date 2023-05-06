@@ -1,0 +1,156 @@
+{
+	"ID": "20230506205948-yah52eb",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230506205948-yah52eb",
+		"title": "Plugins",
+		"updated": "20230506211146"
+	},
+	"Children": [
+		{
+			"ID": "20230506210937-ubi5da4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210937-ubi5da4",
+				"updated": "20230506210937"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-bt48731",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210937-bt48731",
+				"updated": "20230506211000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plugins are mainly used to expand the overall functions of SiYuan. Compared with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210824202056-udkf7wg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Widgets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", the plugin can exist without the document, which is more flexible and powerful."
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-yel1yei",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210937-yel1yei",
+				"updated": "20230506210937"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-v1ki1ir",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210937-v1ki1ir",
+				"updated": "20230506211116"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The plugin is installed through the plugin marketplace. After installation, the plugin will be placed in the folder "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/plugins/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. You can enable or disable plugins in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Marketplace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Downloaded"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Plugin"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-jxzxwz7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210937-jxzxwz7",
+				"updated": "20230506211146"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Push on plugin marketplace"
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-i9vqw4g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210937-i9vqw4g",
+				"updated": "20230506210937"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+					"TextMarkTextContent": "Community Bazaar README"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

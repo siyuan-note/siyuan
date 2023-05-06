@@ -80,12 +80,13 @@ func UninstallBazaarPlugin(pluginName string) error {
 	}
 
 	petals := getPetals()
+	var tmp []*Petal
 	for i, petal := range petals {
-		if petal.Name == pluginName {
-			petals = append(petals[:i], petals[i+1:]...)
-			break
+		if petal.Name != pluginName {
+			tmp = append(tmp, petals[i])
 		}
 	}
+	petals = tmp
 	savePetals(petals)
 	return nil
 }

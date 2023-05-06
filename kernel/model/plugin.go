@@ -104,15 +104,47 @@ func LoadPetals() (ret []*Petal) {
 			}
 		}
 
-		i18nPath := filepath.Join(pluginDir, "i18n", Conf.Lang)
-		if gulu.File.IsExist(i18nPath) {
-			data, err := filelock.ReadFile(i18nPath)
+		i18nDir := filepath.Join(pluginDir, "i18n")
+		if gulu.File.IsDir(i18nDir) {
+			langJSONs, err := os.ReadDir(i18nDir)
 			if nil != err {
 				logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
 			} else {
-				petal.I18n = map[string]interface{}{}
-				if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); nil != err {
-					logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
+				preferredLang := Conf.Lang + ".json"
+				foundPreferredLang := false
+				foundEnUS := false
+				foundZhCN := false
+				for _, langJSON := range langJSONs {
+					if langJSON.Name() == preferredLang {
+						foundPreferredLang = true
+						break
+					}
+					if langJSON.Name() == "en_US.json" {
+						foundEnUS = true
+					}
+					if langJSON.Name() == "zh_CN.json" {
+						foundZhCN = true
+					}
+				}
+
+				if !foundPreferredLang {
+					if foundEnUS {
+						preferredLang = "en_US.json"
+					} else if foundZhCN {
+						preferredLang = "zh_CN.json"
+					} else {
+						preferredLang = langJSONs[0].Name()
+					}
+				}
+
+				data, err := filelock.ReadFile(filepath.Join(i18nDir, preferredLang))
+				if nil != err {
+					logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
+				} else {
+					petal.I18n = map[string]interface{}{}
+					if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); nil != err {
+						logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
+					}
 				}
 			}
 		}

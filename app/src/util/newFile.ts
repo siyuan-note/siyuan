@@ -11,7 +11,6 @@ import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
 import {Constants} from "../constants";
 import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
-import {isMobile} from "./functions";
 import {openMobileFileById} from "../mobile/editor";
 
 export const getNewFilePath = (useSavePath: boolean) => {

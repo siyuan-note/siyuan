@@ -28,7 +28,7 @@ export const loadPlugins = (app: App) => {
                 console.error(`eval plugin ${item.name} error:`, e);
                 return;
             }
-            const pluginClass = (moduleObj.exports || exportsObj).default || moduleObj.exports
+            const pluginClass = (moduleObj.exports || exportsObj).default || moduleObj.exports;
             if (typeof pluginClass !== "function") {
                 console.error(`plugin ${item.name} has no export`);
                 return;

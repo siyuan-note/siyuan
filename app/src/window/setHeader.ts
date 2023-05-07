@@ -58,21 +58,21 @@ export const setTabPosition = () => {
 
 export const setModelsHash = () => {
     if (!isWindow()) {
-        return
+        return;
     }
-    let hash = ""
+    let hash = "";
     getAllTabs().forEach(tab => {
         if (!tab.model) {
             const initTab = tab.headElement.getAttribute("data-initdata");
             if (initTab) {
                 const initTabData = JSON.parse(initTab);
-                hash += initTabData.rootId + Constants.ZWSP
+                hash += initTabData.rootId + Constants.ZWSP;
             }
         } else if (tab.model instanceof Editor) {
-            hash += tab.model.editor.protyle.block.rootID + Constants.ZWSP
+            hash += tab.model.editor.protyle.block.rootID + Constants.ZWSP;
         } else if (tab.model instanceof Asset) {
-            hash += tab.model.path + Constants.ZWSP
+            hash += tab.model.path + Constants.ZWSP;
         }
-    })
-    window.location.hash = hash
-}
+    });
+    window.location.hash = hash;
+};

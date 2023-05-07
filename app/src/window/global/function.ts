@@ -25,13 +25,13 @@ export const switchTabById = (id: string) => {
         } else if (tab.model instanceof Editor) {
             if (tab.model.editor.protyle.block.rootID === id) {
                 tab.parent.switchTab(tab.headElement);
-                return true
+                return true;
             }
         } else if (tab.model instanceof Asset) {
             if (tab.model.path === id) {
                 tab.parent.switchTab(tab.headElement);
-                return true
+                return true;
             }
         }
     });
-}
+};

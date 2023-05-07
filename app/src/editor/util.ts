@@ -24,7 +24,7 @@ import {setTitle} from "../dialog/processSystem";
 import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
-import {getSearch, objEquals} from "../util/functions";
+import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 import {newCardModel} from "../card/newCardTab";
 import {Search} from "../search";
@@ -160,16 +160,16 @@ export const openFile = (options: IOpenFileOptions) => {
 
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
-    const currentWindowId = getCurrentWindow().id
+    const currentWindowId = getCurrentWindow().id;
     const hasMatch = BrowserWindow.getAllWindows().find(item => {
         if (item.id === currentWindowId) {
             return;
         }
         const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split(Constants.ZWSP);
         if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
-            let execJS = `window.newWindow.switchTabById("${options.rootID || options.assetPath}");`
+            let execJS = `window.newWindow.switchTabById("${options.rootID || options.assetPath}");`;
             if (options.assetPath) {
-                execJS += `window.newWindow.positionPDF("${options.assetPath}", ${typeof options.page === "number" ? options.page : `"${options.page}"`})`
+                execJS += `window.newWindow.positionPDF("${options.assetPath}", ${typeof options.page === "number" ? options.page : `"${options.page}"`})`;
             }
             item.focus();
             item.webContents.executeJavaScript(execJS);
@@ -178,7 +178,7 @@ export const openFile = (options: IOpenFileOptions) => {
             }
             return true;
         }
-    })
+    });
     if (hasMatch) {
         return;
     }

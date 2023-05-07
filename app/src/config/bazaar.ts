@@ -192,7 +192,7 @@ export const bazaar = {
                 ${item.downloads}
             </span>
             <span class="fn__space"></span>
-            ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${item.preferredFunding}"><svg><use xlink:href="#iconHeart"></use></svg></a><span class="fn__space"></span>` : ""}
+            ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${window.siyuan.languages.sponsor} ${item.preferredFunding}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a><span class="fn__space"></span>` : ""}
             <div class="fn__flex-1"></div>
             <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
                 <svg><use xlink:href="#iconTrashcan"></use></svg>
@@ -245,7 +245,7 @@ export const bazaar = {
             <div class="ft__smaller ft__on-surface">${item.preferredDesc || ""}</div>
         </div>
         <div class="b3-card__actions">
-            ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${item.preferredFunding}"><svg><use xlink:href="#iconHeart"></use></svg></a>` : ""}
+            ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${window.siyuan.languages.sponsor} ${item.preferredFunding}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>` : ""}
             <div class="fn__flex-1"></div>
             <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
                 <svg><use xlink:href="#iconTrashcan"></use></svg>
@@ -324,7 +324,16 @@ export const bazaar = {
     <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.name}</a>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
-    <div style="line-height: 20px;"><span class="ft__smaller">Made with ❤️ by</span><br><a href="${urls.join("/")}" target="_blank" title="Creator">${data.author}</a></div>
+    <div class="block__icons">
+        <span class="fn__flex-1"></span>
+        ${data.preferredFunding ?
+            `<a target="_blank" href="${data.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${window.siyuan.languages.sponsor} ${data.preferredFunding}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>` : 
+            `<span class="b3-tooltips b3-tooltips__ne block__icon block__icon--show ft__primary" aria-label="${window.siyuan.languages.author}"><svg><use xlink:href="#iconAccount"></use></svg></span>`
+        }
+        <span class="fn__space"></span>
+        <a href="${urls.join("/")}" target="_blank" title="Creator">${data.author}</a>
+        <span class="fn__flex-1"></span>
+    </div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${data.version}</div>
@@ -398,7 +407,9 @@ export const bazaar = {
             }
             while (target && !target.isEqualNode(bazaar.element)) {
                 const type = target.getAttribute("data-type");
-                if (type === "open" && dataObj) {
+                if (target.tagName === "A") {
+                    break;
+                } else if (type === "open" && dataObj) {
                     /// #if !BROWSER
                     const dirName = dataObj.bazaarType;
                     if (dirName === "icons" || dirName === "themes") {

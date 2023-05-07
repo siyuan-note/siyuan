@@ -31,6 +31,8 @@ type TOperation =
     | "removeFlashcards"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
+type TEventBus = "ws-main"
+
 declare module "blueimp-md5"
 
 interface Window {

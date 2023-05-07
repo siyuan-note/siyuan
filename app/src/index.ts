@@ -54,6 +54,9 @@ export class App {
                 id: genUUID(),
                 type: "main",
                 msgCallback: (data) => {
+                    this.plugins.forEach((plugin) => {
+                        plugin.eventBus.emit("ws-main", data);
+                    });
                     if (data) {
                         switch (data.cmd) {
                             case "syncMergeResult":
@@ -167,8 +170,8 @@ export class App {
                     bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        onGetConfig(response.data.start);
                         loadPlugins(siyuanApp);
+                        onGetConfig(response.data.start);
                         account.onSetaccount();
                         resizeDrag();
                         setTitle(window.siyuan.languages.siyuanNote);

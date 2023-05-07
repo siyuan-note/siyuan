@@ -1,12 +1,11 @@
 import {fetchPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
+import {API} from "./API";
 
 const getObject = (key: string) => {
     const api = {
-        siyuan: {
-            Plugin: Plugin
-        }
+        siyuan: API
     };
     // @ts-ignore
     return api[key];
@@ -37,7 +36,12 @@ export const loadPlugins = (app: App) => {
                 console.error(`plugin ${item.name} does not extends Plugin`);
                 return;
             }
-            const plugin = new pluginClass({app, id: item.id, i18n: item.i18n});
+            const plugin = new pluginClass({
+                app,
+                name: item.name,
+                id: item.id,
+                i18n: item.i18n
+            });
             app.plugins.push(plugin);
             plugin.onload();
             css += item.css || "" + "\n";

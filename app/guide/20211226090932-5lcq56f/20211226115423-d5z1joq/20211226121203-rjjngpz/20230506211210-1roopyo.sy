@@ -1,0 +1,129 @@
+{
+	"ID": "20230506211210-1roopyo",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230506211210-1roopyo",
+		"title": "插件",
+		"updated": "20230506211739"
+	},
+	"Children": [
+		{
+			"ID": "20230506211224-qhnwy60",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506211224-qhnwy60",
+				"updated": "20230506211224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230506211224-e8zojdm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506211224-e8zojdm",
+				"updated": "20230506211739"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插件主要用於擴展思源整體功能。相較於"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226123101-qjw03ab",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "小工具"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "而言，插件可以脫離於文檔而存在，更為靈活和強大。"
+				}
+			]
+		},
+		{
+			"ID": "20230506211224-q293o5x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506211224-q293o5x",
+				"updated": "20230506211224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230506211224-uqq704u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506211224-uqq704u",
+				"updated": "20230506211224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插件通過插件集市安裝，安裝後插件將被放置到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/plugins/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 文件夾下，你可以在 \u003ckbd\u003e插件集市\u003c/kbd\u003e - \u003ckbd\u003e已下載\u003c/kbd\u003e - \u003ckbd\u003e插件\u003c/kbd\u003e 中啟用或禁用插件。"
+				}
+			]
+		},
+		{
+			"ID": "20230506211224-p7vkirt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506211224-p7vkirt",
+				"updated": "20230506211224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架插件集市"
+				}
+			]
+		},
+		{
+			"ID": "20230506211224-n2giwy1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506211224-n2giwy1",
+				"updated": "20230506211224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請參考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+					"TextMarkTextContent": "社區集市 README"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

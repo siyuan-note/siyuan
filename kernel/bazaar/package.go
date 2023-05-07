@@ -169,13 +169,13 @@ func getPreferredFunding(funding *Funding) string {
 	}
 
 	if "" != funding.OpenCollective {
-		return funding.OpenCollective
+		return "https://opencollective.com/" + funding.OpenCollective
 	}
 	if "" != funding.Patreon {
-		return funding.Patreon
+		return "https://www.patreon.com/" + funding.Patreon
 	}
 	if "" != funding.GitHub {
-		return funding.GitHub
+		return "https://github.com/sponsors/" + funding.GitHub
 	}
 	if 0 < len(funding.Custom) {
 		return funding.Custom[0]

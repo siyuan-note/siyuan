@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210824202056-udkf7wg",
 		"title": "Widgets",
-		"updated": "20230418085917"
+		"updated": "20230506210716"
 	},
 	"Children": [
 		{
@@ -66,12 +66,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210824202107-cmsetzk",
-				"updated": "20230418085759"
+				"updated": "20230506210716"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The widgets are installed through the widget marketplace. After installation, the widgets will be placed in the workspace/widgets folder. In the editor, use the slash menu to trigger the call search. After selecting the widget you need, the widget will be inserted into the document in the form of a widget block."
+					"Data": "The widgets are installed through the widget marketplace. After installation, the widgets will be placed in the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/widgets/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ folder. In the editor, use the slash menu to trigger the call search. After selecting the widget you need, the widget will be inserted into the document in the form of a widget block."
 				}
 			]
 		},

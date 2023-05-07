@@ -38,6 +38,12 @@ import (
 	"golang.org/x/text/transform"
 )
 
+type DisplayName struct {
+	Default string `json:"default"`
+	ZhCN    string `json:"zh_CN"`
+	EnUS    string `json:"en_US"`
+}
+
 type Description struct {
 	Default string `json:"default"`
 	ZhCN    string `json:"zh_CN"`
@@ -61,6 +67,7 @@ type Package struct {
 	Author      string       `json:"author"`
 	URL         string       `json:"url"`
 	Version     string       `json:"version"`
+	DisplayName *DisplayName `json:"displayName"`
 	Description *Description `json:"description"`
 	Readme      *Readme      `json:"readme"`
 	Funding     *Funding     `json:"funding"`

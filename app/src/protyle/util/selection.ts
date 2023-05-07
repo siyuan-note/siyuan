@@ -125,6 +125,17 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     countBlockWord(ids, protyle.block.rootID);
 };
 
+// https://github.com/siyuan-note/siyuan/issues/8196
+export const getRangeByPoint = (x: number, y: number) => {
+    const range = document.caretRangeFromPoint(x, y);
+    const imgElement = hasClosestByAttribute(range.startContainer, "data-type", "img")
+    if (imgElement) {
+        range.setStart(imgElement.nextSibling, 0);
+        range.collapse();
+    }
+    return range;
+}
+
 export const getEditorRange = (element: Element) => {
     let range: Range;
     if (getSelection().rangeCount > 0) {

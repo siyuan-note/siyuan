@@ -74,6 +74,7 @@ type Package struct {
 	I18N        []string     `json:"i18n"`
 
 	PreferredFunding string `json:"preferredFunding"`
+	PreferredName    string `json:"preferredName"`
 	PreferredDesc    string `json:"preferredDesc"`
 
 	Name            string `json:"name"`
@@ -142,6 +143,29 @@ func getPreferredReadme(readme *Readme) string {
 	default:
 		if "" != readme.EnUS {
 			ret = readme.EnUS
+		}
+	}
+	return ret
+}
+
+func getPreferredName(pkg *Package) string {
+	if nil == pkg.DisplayName {
+		return pkg.Name
+	}
+
+	ret := pkg.DisplayName.Default
+	switch util.Lang {
+	case "zh_CN":
+		if "" != pkg.DisplayName.ZhCN {
+			ret = pkg.DisplayName.ZhCN
+		}
+	case "en_US":
+		if "" != pkg.DisplayName.EnUS {
+			ret = pkg.DisplayName.EnUS
+		}
+	default:
+		if "" != pkg.DisplayName.EnUS {
+			ret = pkg.DisplayName.EnUS
 		}
 	}
 	return ret

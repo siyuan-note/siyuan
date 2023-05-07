@@ -98,7 +98,7 @@ func SearchTemplate(keyword string) (ret []*Block) {
 					return nil
 				}
 
-				if !strings.HasSuffix(name, ".md") || "readme.md" == name || !strings.Contains(name, k) {
+				if !strings.HasSuffix(name, ".md") || strings.HasPrefix(name, "readme") || !strings.Contains(name, k) {
 					return nil
 				}
 

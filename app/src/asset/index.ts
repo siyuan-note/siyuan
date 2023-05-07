@@ -3,6 +3,7 @@ import {Tab} from "../layout/Tab";
 import {Constants} from "../constants";
 import {setPanelFocus} from "../layout/util";
 /// #if !MOBILE
+import {setModelsHash} from "../window/setHeader";
 // @ts-ignore
 import {webViewerLoad} from "./pdf/viewer";
 // @ts-ignore
@@ -497,6 +498,7 @@ export class Asset extends Model {
                         this.element, this.pdfPage, this.pdfId);
                     this.element.setAttribute("data-loading", "true");
                 }
+                setModelsHash();
             }, Constants.TIMEOUT_BLOCKLOAD);
             /// #endif
         }

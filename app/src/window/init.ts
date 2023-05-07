@@ -36,7 +36,6 @@ export const init = () => {
             }]
         });
         window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
-
     });
     initStatus(true);
     initWindow();

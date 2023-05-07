@@ -14,7 +14,7 @@ import {focusBlock, focusByRange} from "../protyle/util/selection";
 import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER
 import {shell} from "electron";
-import {BrowserWindow} from "@electron/remote";
+import {BrowserWindow, getCurrentWindow} from "@electron/remote";
 /// #endif
 import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
@@ -158,31 +158,31 @@ export const openFile = (options: IOpenFileOptions) => {
         }
     }
 
-    let hasOpen = false;
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
-    BrowserWindow.getAllWindows().find((item) => {
-        const json = getSearch("json", new URL(item.webContents.getURL()).search);
-        if (json) {
-            const jsonObj = JSON.parse(json);
-            if ((jsonObj.children.rootId && jsonObj.children.rootId === options.rootID) ||
-                (jsonObj.children.path && jsonObj.children.path === options.assetPath)) {
-                item.focus();
-                if (options.assetPath) {
-                    item.webContents.executeJavaScript(`window.newWindow.positionPDF("${options.assetPath}", ${typeof options.page === "number" ? options.page : `"${options.page}"`})`);
-                }
-                hasOpen = true;
-                return true;
+    const currentWindowId = getCurrentWindow().id
+    const hasMatch = BrowserWindow.getAllWindows().find(item => {
+        if (item.id === currentWindowId) {
+            return;
+        }
+        const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split(Constants.ZWSP);
+        if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
+            let execJS = `window.newWindow.switchTabById("${options.rootID || options.assetPath}");`
+            if (options.assetPath) {
+                execJS += `window.newWindow.positionPDF("${options.assetPath}", ${typeof options.page === "number" ? options.page : `"${options.page}"`})`
             }
+            item.focus();
+            item.webContents.executeJavaScript(execJS);
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
+            return true;
         }
-    });
-    /// #endif
-    if (hasOpen) {
-        if (options.afterOpen) {
-            options.afterOpen();
-        }
+    })
+    if (hasMatch) {
         return;
     }
+    /// #endif
 
     let wnd: Wnd = undefined;
     // 获取光标所在 tab

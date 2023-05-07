@@ -64,12 +64,12 @@ export const getAllModels = () => {
 };
 
 export const getAllTabs = () => {
-    const models: Tab[] = [];
+    const tabs: Tab[] = [];
     const getTabs = (layout: Layout) => {
         for (let i = 0; i < layout.children.length; i++) {
             const item = layout.children[i];
             if (item instanceof Tab) {
-                models.push(item);
+                tabs.push(item);
             } else {
                 getTabs(item as Layout);
             }
@@ -79,7 +79,7 @@ export const getAllTabs = () => {
     if (window.siyuan.layout.centerLayout) {
         getTabs(window.siyuan.layout.centerLayout);
     }
-    return models;
+    return tabs;
 };
 
 export const getAllDocks = () => {

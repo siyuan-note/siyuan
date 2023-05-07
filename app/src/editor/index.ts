@@ -4,6 +4,9 @@ import {Model} from "../layout/Model";
 import {disabledProtyle} from "../protyle/util/onGet";
 import {setPadding} from "../protyle/ui/initUI";
 import {getAllModels} from "../layout/getAll";
+/// #if !BROWSER
+import {setModelsHash} from "../window/setHeader";
+/// #endif
 import {countBlockWord} from "../layout/status";
 
 export class Editor extends Model {
@@ -62,6 +65,9 @@ export class Editor extends Model {
                     });
                 }
                 countBlockWord([], editor.protyle.block.rootID);
+                /// #if !BROWSER
+                setModelsHash();
+                /// #endif
             },
         });
         // 需在 after 回调之前，否则不会聚焦 https://github.com/siyuan-note/siyuan/issues/5303

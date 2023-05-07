@@ -2467,20 +2467,7 @@ function webViewerResize() {
 }
 
 function webViewerHashchange(evt) {
-  const hash = evt.hash;
-  if (!hash) {
-    return;
-  }
   // NOTE
-  const pdfInstance = getPdfInstance(evt.source)
-  if (!pdfInstance) {
-    return
-  }
-  if (!pdfInstance.isInitialViewSet) {
-    pdfInstance.initialBookmark = hash;
-  } else if (!pdfInstance.pdfHistory?.popStateInProgress) {
-    pdfInstance.pdfLinkService.setHash(hash);
-  }
 }
 
 if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {

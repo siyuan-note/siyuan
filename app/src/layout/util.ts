@@ -237,7 +237,7 @@ const JSONToDock = (json: any) => {
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom});
 };
 
-export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isStart = false) => {
+export const JSONToCenter = (json: ILayoutJSON, layout?: Layout | Wnd | Tab | Model, isStart = false) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
         if (!layout) {
@@ -309,7 +309,7 @@ export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isS
             tab: (layout as Tab),
             blockId: json.blockId,
             rootId: json.rootId,
-            type: json.type,
+            type: json.type as "pin" | "local",
         }));
     } else if (json.instance === "Bookmark") {
         (layout as Tab).addModel(new Bookmark((layout as Tab)));
@@ -322,13 +322,13 @@ export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isS
             tab: (layout as Tab),
             blockId: json.blockId,
             rootId: json.rootId,
-            type: json.type
+            type: json.type as "pin" | "local" | "global",
         }));
     } else if (json.instance === "Outline") {
         (layout as Tab).addModel(new Outline({
             tab: (layout as Tab),
             blockId: json.blockId,
-            type: json.type
+            type: json.type as "pin" | "local",
         }));
     } else if (json.instance === "Tag") {
         (layout as Tab).addModel(new Tag((layout as Tab)));
@@ -347,7 +347,7 @@ export const JSONToCenter = (json: any, layout?: Layout | Wnd | Tab | Model, isS
         if (Array.isArray(json.children)) {
             json.children.forEach((item: any, index: number) => {
                 JSONToCenter(item, layout ? child : window.siyuan.layout.layout, isStart);
-                if (item.instance === "Tab" && index === json.children.length - 1) {
+                if (item.instance === "Tab" && index === (json.children as ILayoutJSON[]).length - 1) {
                     const activeTabElement = (child as Wnd).headersElement.querySelector('[data-init-active="true"]') as HTMLElement;
                     if (activeTabElement) {
                         if (window.siyuan.config.fileTree.closeTabsOnStart && isStart &&
@@ -832,7 +832,7 @@ export const newCenterEmptyTab = () => {
         callback(tab: Tab) {
             tab.panelElement.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
-                while (target && !target.isEqualNode( tab.panelElement)) {
+                while (target && !target.isEqualNode(tab.panelElement)) {
                     if (target.id === "editorEmptySearch") {
                         openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
                         event.stopPropagation();
@@ -852,22 +852,22 @@ export const newCenterEmptyTab = () => {
                         event.stopPropagation();
                         event.preventDefault();
                         break;
-                    }else if (target.id === "editorEmptyHistory") {
+                    } else if (target.id === "editorEmptyHistory") {
                         openHistory();
                         event.stopPropagation();
                         event.preventDefault();
                         break;
-                    }else if (target.id === "editorEmptyFile") {
+                    } else if (target.id === "editorEmptyFile") {
                         newFile(undefined, undefined, undefined, true);
                         event.stopPropagation();
                         event.preventDefault();
                         break;
-                    }else if (target.id === "editorEmptyNewNotebook") {
+                    } else if (target.id === "editorEmptyNewNotebook") {
                         newNotebook();
                         event.stopPropagation();
                         event.preventDefault();
                         break;
-                    }else if (target.id === "editorEmptyHelp") {
+                    } else if (target.id === "editorEmptyHelp") {
                         mountHelp();
                         event.stopPropagation();
                         event.preventDefault();

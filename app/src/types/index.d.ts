@@ -50,6 +50,7 @@ interface Window {
 
     newWindow: {
         positionPDF(pathStr: string, page: string | number): void
+        switchTabById(id: string): void
     }
 
     Protyle: import("../protyle/method").default
@@ -269,6 +270,29 @@ interface IOperation {
 
 interface IObject {
     [key: string]: string;
+}
+
+declare interface ILayoutJSON extends ILayoutOptions {
+    instance?: string,
+    width?: string,
+    height?: string,
+    title?: string,
+    lang?: string
+    docIcon?: string
+    page?: string
+    path?: string
+    blockId?: string
+    icon?: string
+    rootId?: string
+    active?: boolean
+    pin?: boolean
+    data?: {
+        cardType: TCardType,
+        id: string,
+        title?: string
+    }
+    config?: ISearchOption
+    children?: ILayoutJSON[] | ILayoutJSON
 }
 
 declare interface IDockTab {

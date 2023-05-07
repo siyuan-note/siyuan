@@ -2,6 +2,10 @@ import {isWindow} from "../util/functions";
 import {Wnd} from "../layout/Wnd";
 import {getCurrentWindow} from "@electron/remote";
 import {Layout} from "../layout";
+import {getAllTabs} from "../layout/getAll";
+import {Editor} from "../editor";
+import {Asset} from "../asset";
+import {Constants} from "../constants";
 
 const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
     for (let i = 0; i < layout.children.length; i++) {
@@ -50,3 +54,25 @@ export const setTabPosition = () => {
         }
     });
 };
+
+
+export const setModelsHash = () => {
+    if (!isWindow()) {
+        return
+    }
+    let hash = ""
+    getAllTabs().forEach(tab => {
+        if (!tab.model) {
+            const initTab = tab.headElement.getAttribute("data-initdata");
+            if (initTab) {
+                const initTabData = JSON.parse(initTab);
+                hash += initTabData.rootId + Constants.ZWSP
+            }
+        } else if (tab.model instanceof Editor) {
+            hash += tab.model.editor.protyle.block.rootID + Constants.ZWSP
+        } else if (tab.model instanceof Asset) {
+            hash += tab.model.path + Constants.ZWSP
+        }
+    })
+    window.location.hash = hash
+}

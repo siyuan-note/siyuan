@@ -17,7 +17,7 @@ import {Constants} from "../constants";
 /// #if !BROWSER
 import {webFrame, ipcRenderer} from "electron";
 import {getCurrentWindow} from "@electron/remote";
-import {setTabPosition} from "../window/setHeader";
+import {setModelsHash, setTabPosition} from "../window/setHeader";
 /// #endif
 import {Search} from "../search";
 import {showMessage} from "../dialog/message";
@@ -228,6 +228,7 @@ export class Wnd {
                     ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data: tabData.id});
                     it.querySelector("li[data-clone='true']").remove();
                     wnd.switchTab(oldTab.headElement);
+                    getCurrentWindow().focus();
                 }
             }
             /// #endif
@@ -334,6 +335,7 @@ export class Wnd {
                 JSONToCenter(tabData, this);
                 oldTab = this.children[this.children.length - 1];
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data: tabData.id});
+                getCurrentWindow().focus();
             }
             /// #endif
             if (!oldTab) {
@@ -552,6 +554,7 @@ export class Wnd {
         }
         /// #if !BROWSER
         setTabPosition();
+        setModelsHash();
         /// #endif
     }
 
@@ -689,9 +692,6 @@ export class Wnd {
                             }
                         });
                     }
-                    /// #if !BROWSER
-                    setTabPosition();
-                    /// #endif
                     return;
                 }
                 if (item.headElement) {
@@ -746,6 +746,7 @@ export class Wnd {
         /// #if !BROWSER
         webFrame.clearCache();
         getCurrentWindow().webContents.session.clearCache();
+        setTabPosition();
         /// #endif
     };
 

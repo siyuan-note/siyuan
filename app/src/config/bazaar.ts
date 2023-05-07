@@ -179,7 +179,7 @@ export const bazaar = {
     </div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
-            ${item.name}
+            ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
             <div class="fn__hr"></div>
             <div class="ft__smaller ft__on-surface">
                 ${item.preferredDesc || ""}
@@ -240,7 +240,7 @@ export const bazaar = {
     <div class="b3-card__img"><img src="${item.iconURL}" onerror="this.src='${item.previewURLThumb}'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
-            ${item.name}
+            ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
             <div class="fn__hr"></div>
             <div class="ft__smaller ft__on-surface">${item.preferredDesc || ""}</div>
         </div>

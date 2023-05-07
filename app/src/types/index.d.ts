@@ -707,6 +707,7 @@ declare interface IMenu {
 
 declare interface IBazaarItem {
     enabled: boolean
+    preferredName: string
     preferredDesc: string
     iconURL: string
     readme: string

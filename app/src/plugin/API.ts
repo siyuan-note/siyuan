@@ -4,23 +4,24 @@ import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {MenuItem} from "../menus/Menu";
 import {Menu as SiyuanMenu} from "../menus/Menu";
+import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 
 export class Menu {
     private menu: SiyuanMenu;
-    private isOpen: boolean
+    private isOpen: boolean;
 
     constructor(id?: string, closeCB?: () => void) {
         this.menu = window.siyuan.menus.menu;
         this.isOpen = false;
         if (id) {
-            const dataName = this.menu.element.getAttribute('data-name');
+            const dataName = this.menu.element.getAttribute("data-name");
             if (dataName && dataName === id) {
-                this.isOpen = true
+                this.isOpen = true;
             }
         }
         this.menu.remove();
         if (!this.isOpen) {
-            this.menu.element.setAttribute('data-name', id);
+            this.menu.element.setAttribute("data-name", id);
             this.menu.removeCB = closeCB;
         }
     }
@@ -42,7 +43,7 @@ export class Menu {
         if (this.isOpen) {
             return;
         }
-        this.addItem({type: 'separator'});
+        this.addItem({type: "separator"});
     }
 
     open(options: { x: number, y: number, h?: number, w?: number, isLeft: false }) {
@@ -65,9 +66,12 @@ export class Menu {
 }
 
 export const API = {
-    Plugin: Plugin,
     confirm: confirmDialog,
     showMessage,
+    fetchPost,
+    fetchSyncPost,
+    fetchGet,
+    Plugin: Plugin,
     Dialog,
     Menu,
 };

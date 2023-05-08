@@ -40,8 +40,8 @@ export const initRightMenu = () => {
         <svg class="b3-menu__icon"><use xlink:href="#iconSparkles"></use></svg><span class="b3-menu__label">AI</span>
     </div>`;
     const isHuawei = () => {
-        return 0 < window.siyuan.config.system.osPlatform.toLowerCase().indexOf("huawei")
-    }
+        return 0 < window.siyuan.config.system.osPlatform.toLowerCase().indexOf("huawei");
+    };
     if (isHuawei()) {
         // Access to the OpenAI API is no longer supported on Huawei devices https://github.com/siyuan-note/siyuan/issues/8192
         aiHTML = "";

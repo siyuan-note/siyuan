@@ -396,12 +396,12 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 }
 
 func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDs []string) {
-	tree, err := loadTreeByBlockID(rootID)
-	if nil != err {
+	root := treenode.GetBlockTree(rootID)
+	if nil == root {
 		return
 	}
 
-	bts := treenode.GetBlockTreesByPathPrefix(strings.TrimSuffix(tree.Path, ".sy"))
+	bts := treenode.GetBlockTreesByPathPrefix(strings.TrimSuffix(root.Path, ".sy"))
 	for _, bt := range bts {
 		treeBlockIDs = append(treeBlockIDs, bt.ID)
 	}

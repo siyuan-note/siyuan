@@ -259,13 +259,16 @@ func putFile(c *gin.Context) {
 	}
 
 	modTimeStr := c.PostForm("modTime")
-	modTimeInt, err := strconv.ParseInt(modTimeStr, 10, 64)
-	if nil != err {
-		logging.LogErrorf("parse mod time [%s] failed: %s", modTimeStr, err)
-		c.Status(500)
-		return
+	modTime := time.Now()
+	if "" != modTimeStr {
+		modTimeInt, parseErr := strconv.ParseInt(modTimeStr, 10, 64)
+		if nil != parseErr {
+			logging.LogErrorf("parse mod time [%s] failed: %s", modTimeStr, parseErr)
+			c.Status(500)
+			return
+		}
+		modTime = millisecond2Time(modTimeInt)
 	}
-	modTime := millisecond2Time(modTimeInt)
 	if err = os.Chtimes(filePath, modTime, modTime); nil != err {
 		logging.LogErrorf("change time failed: %s", err)
 		ret.Code = -1

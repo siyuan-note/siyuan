@@ -11,45 +11,6 @@
 	},
 	"Children": [
 		{
-			"ID": "20221031001313-rk7sd0e",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20221031001313-rk7sd0e",
-				"updated": "20221031001313"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "听说思源笔记会通过用户电脑挖矿？"
-				}
-			]
-		},
-		{
-			"ID": "20221031001314-v5a3pa8",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20221031001314-v5a3pa8",
-				"updated": "20221107103705"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "以前不会、现在不会，将来也不会。详情请看"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://www.zhihu.com/question/434530733/answer/2644563326",
-					"TextMarkTextContent": "如何评价思源笔记? - 知乎"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
-				}
-			]
-		},
-		{
 			"ID": "20220617160928-fw4ixa3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

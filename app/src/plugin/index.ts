@@ -24,6 +24,7 @@ export class Plugin {
         const iconElement = document.createElement("div");
         iconElement.className = "toolbar__item b3-tooltips b3-tooltips__sw";
         iconElement.setAttribute("aria-label", options.title);
+        iconElement.setAttribute("data-menu", "true");
         iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
         iconElement.addEventListener("click", options.callback);
         document.querySelector("#" + (options.position === "right" ? "barSearch" : "drag")).before(iconElement);

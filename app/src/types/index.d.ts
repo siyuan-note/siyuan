@@ -388,12 +388,12 @@ declare interface IEditor {
 }
 
 declare interface IWebSocketData {
-    cmd: string
+    cmd?: string
     callback?: string
-    data: any
+    data?: any
     msg: string
     code: number
-    sid: string
+    sid?: string
 }
 
 declare interface IAppearance {

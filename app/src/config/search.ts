@@ -1,6 +1,7 @@
 import {Constants} from "../constants";
 import {genItemPanel} from "./index";
 import {keymap} from "./keymap";
+import {App} from "../index";
 
 const getLang = (keys: string[]) => {
     const langArray: string[] = [];
@@ -10,7 +11,7 @@ const getLang = (keys: string[]) => {
     return langArray;
 };
 
-export const initConfigSearch = (element: HTMLElement) => {
+export const initConfigSearch = (element: HTMLElement, app: App) => {
     const configIndex = [
         // 编辑器
         getLang(["config", "fullWidth",
@@ -115,7 +116,7 @@ export const initConfigSearch = (element: HTMLElement) => {
                 // 右侧面板过滤
                 const panelElement = element.querySelector(`.config__tab-container[data-name="${type}"]`);
                 if (panelElement.innerHTML === "") {
-                    genItemPanel(type, panelElement);
+                    genItemPanel(type, panelElement, app);
                 }
                 if (type === "keymap") {
                     const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;

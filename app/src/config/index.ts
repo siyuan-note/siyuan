@@ -13,8 +13,9 @@ import {query} from "./query";
 import {Dialog} from "../dialog";
 import {ai} from "./ai";
 import {flashcard} from "./flashcard";
+import {App} from "../index";
 
-export const genItemPanel = (type: string, containerElement:Element) => {
+export const genItemPanel = (type: string, containerElement:Element, app: App) => {
     switch (type) {
         case "filetree":
             containerElement.innerHTML = fileTree.genHTML();
@@ -54,7 +55,7 @@ export const genItemPanel = (type: string, containerElement:Element) => {
         case "bazaar":
             bazaar.element = containerElement;
             containerElement.innerHTML = bazaar.genHTML();
-            bazaar.bindEvent();
+            bazaar.bindEvent(app);
             break;
         case "account":
             containerElement.innerHTML = account.genHTML();
@@ -81,7 +82,7 @@ export const genItemPanel = (type: string, containerElement:Element) => {
     }
 };
 
-export const openSetting = () => {
+export const openSetting = (app:App) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector(".config__tab-container")) {
             item.destroy();
@@ -126,7 +127,7 @@ export const openSetting = () => {
         width: "90vw",
     });
 
-    initConfigSearch(dialog.element);
+    initConfigSearch(dialog.element, app);
     (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1280px";
     dialog.element.querySelectorAll(".b3-tab-bar .b3-list-item").forEach(item => {
         item.addEventListener("click", () => {
@@ -139,7 +140,7 @@ export const openSetting = () => {
             item.classList.add("b3-list-item--focus");
             containerElement.classList.remove("fn__none");
             if (containerElement.innerHTML === "" || type === "repos" || type === "bazaar") {
-                genItemPanel(type, containerElement);
+                genItemPanel(type, containerElement, app);
             }
         });
     });

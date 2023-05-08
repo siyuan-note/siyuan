@@ -1,18 +1,24 @@
 import {App} from "../index";
 import {EventBus} from "./EventBus";
+import {fetchPost} from "../util/fetch";
 
 export class Plugin {
     public i18n: IObject;
     public eventBus: EventBus;
+    public data: any = {};
+    public name: string;
 
     constructor(options: {
         app: App,
-        id: string,
         name: string,
         i18n: IObject
     }) {
         this.i18n = options.i18n;
+        this.name = options.name;
         this.eventBus = new EventBus(options.name);
+    }
+
+    public onload() {
     }
 
     public addTopBar(options: {
@@ -31,7 +37,36 @@ export class Plugin {
         return iconElement;
     }
 
-    public onload() {
-        console.log("Hello, world!");
+    public openSetting() {
+    }
+
+    public loadData(storageName: string) {
+        if (typeof this.data[storageName] === "undefined") {
+            this.data[storageName] = "";
+        }
+        return new Promise((resolve) => {
+            fetchPost("/api/file/getFile", {path: `/data/storage/petal/${this.name}/${storageName}`}, (response) => {
+                if (response.code === 404) {
+                    this.data[storageName] = "";
+                } else {
+                    this.data[storageName] = response;
+                }
+                resolve(this.data[storageName]);
+            });
+        });
+    }
+
+    public saveData(storageName: string, data: any) {
+        return new Promise((resolve) => {
+            const pathString = `/data/storage/petal/${this.name}/${storageName}`;
+            const file = new File([new Blob([data])], pathString.split('/').pop());
+            const formData = new FormData();
+            formData.append('path', pathString);
+            formData.append('file', file);
+            formData.append('isDir', "false");
+            fetchPost("/api/file/putFile", formData, (response) => {
+                resolve(response);
+            });
+        });
     }
 }

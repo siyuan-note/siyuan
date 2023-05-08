@@ -9,10 +9,11 @@ import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
 import {initWindow} from "../boot/onGetConfig";
+import {App} from "../index";
 
-export const init = () => {
+export const init = (app:App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
-    globalShortcut();
+    globalShortcut(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
 

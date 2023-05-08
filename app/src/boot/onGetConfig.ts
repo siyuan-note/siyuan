@@ -26,6 +26,7 @@ import {initBar} from "../layout/topBar";
 import {setProxy} from "../config/util/setProxy";
 import {openChangelog} from "./openChangelog";
 import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
+import {App} from "../index";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -84,7 +85,7 @@ const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edito
     return match;
 };
 
-export const onGetConfig = (isStart: boolean) => {
+export const onGetConfig = (isStart: boolean, app:App) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
     const matchKeymap3 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.insert, "editor", "insert");
@@ -130,7 +131,7 @@ export const onGetConfig = (isStart: boolean) => {
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
         window.siyuan.config.uiLayout = Constants.SIYUAN_EMPTY_LAYOUT;
     }
-    globalShortcut();
+    globalShortcut(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
@@ -140,7 +141,7 @@ export const onGetConfig = (isStart: boolean) => {
             resetLayout();
         }
     });
-    initBar();
+    initBar(app);
     setProxy();
     initStatus();
     initWindow();

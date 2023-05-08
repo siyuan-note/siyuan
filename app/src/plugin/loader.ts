@@ -18,7 +18,7 @@ const runCode = (code: string, sourceURL: string) => {
 export const loadPlugins = (app: App) => {
     fetchPost("/api/petal/loadPetals", {}, response => {
         let css = "";
-        response.data.forEach((item: { id: string, name: string, js: string, css: string, i18n: IObject }) => {
+        response.data.forEach((item: { name: string, js: string, css: string, i18n: IObject }) => {
             const exportsObj: { [key: string]: any } = {};
             const moduleObj = {exports: exportsObj};
             try {
@@ -39,7 +39,6 @@ export const loadPlugins = (app: App) => {
             const plugin = new pluginClass({
                 app,
                 name: item.name,
-                id: item.id,
                 i18n: item.i18n
             });
             app.plugins.push(plugin);

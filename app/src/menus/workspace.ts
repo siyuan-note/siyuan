@@ -22,6 +22,7 @@ import {viewCards} from "../card/viewCards";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {App} from "../index";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -34,7 +35,7 @@ const togglePinDock = (dock: Dock, icon: string) => {
     };
 };
 
-export const workspaceMenu = (rect: DOMRect) => {
+export const workspaceMenu = (app:App, rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === "barWorkspace") {
         window.siyuan.menus.menu.remove();
@@ -49,7 +50,7 @@ export const workspaceMenu = (rect: DOMRect) => {
                 icon: "iconSettings",
                 accelerator: window.siyuan.config.keymap.general.config.custom,
                 click: () => {
-                    openSetting();
+                    openSetting(app);
                 }
             }).element);
         }

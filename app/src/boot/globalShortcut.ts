@@ -53,6 +53,7 @@ import {reloadProtyle} from "../protyle/util/reload";
 import {fullscreen} from "../protyle/breadcrumb/action";
 import {setPadding} from "../protyle/ui/initUI";
 import {openRecentDocs} from "../business/openRecentDocs";
+import {App} from "../index";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -95,7 +96,7 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
     }
 };
 
-export const globalShortcut = () => {
+export const globalShortcut = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
         if (window.siyuan.layout.leftDock) {
             window.siyuan.layout.leftDock.hideDock();
@@ -630,7 +631,7 @@ export const globalShortcut = () => {
             return;
         }
         if (!isTabWindow && !window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.config.custom, event)) {
-            openSetting();
+            openSetting(app);
             event.preventDefault();
             return;
         }

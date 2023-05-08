@@ -28,8 +28,23 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
         init.headers = headers;
     }
     fetch(url, init).then((response) => {
-        return response.json();
+        if (response.status === 404) {
+            cb({
+                data: null,
+                msg: response.statusText,
+                code: response.status,
+            });
+        } else {
+            if (response.headers.get("content-type").indexOf("application/json") > -1) {
+                return response.json();
+            } else {
+                return response.text();
+            }
+        }
     }).then((response: IWebSocketData) => {
+        if (!response) {
+            return;
+        }
         if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {
             if (response.data.reqId && window.siyuan.reqIds[url] && window.siyuan.reqIds[url] > response.data.reqId) {
                 return;

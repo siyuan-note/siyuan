@@ -135,7 +135,7 @@ class App {
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
                         loadPlugins(siyuanApp);
-                        init();
+                        init(siyuanApp);
                         setTitle(window.siyuan.languages.siyuanNote);
                         initMessage();
                     });

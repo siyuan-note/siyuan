@@ -3,7 +3,7 @@ import {shell} from "electron";
 /// #endif
 import {getDockByType} from "../layout/util";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {getSearch, isMobile} from "../util/functions";
+import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -310,8 +310,8 @@ export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark")
                 name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value;
             }
             if (item.value.trim()) {
-                if (!/^custom-[_.\-0-9a-zA-Z]+$/.test(name)) {
-                    errorTip += name.replace("custom-", "") + ", ";
+                if (!isValidAttrName(name)) {
+                    errorTip += name.replace(/^custom-/, "") + ", ";
                     return;
                 }
                 attrsResult[name] = item.value;
@@ -381,8 +381,8 @@ export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "b
                     name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value;
                 }
                 if (item.value.trim()) {
-                    if (!/^custom-[_.\-0-9a-zA-Z]+$/.test(name)) {
-                        errorTip += name.replace("custom-", "") + ", ";
+                    if (!isValidAttrName(name)) {
+                        errorTip += name.replace(/^custom-/, "") + ", ";
                         return;
                     }
                     if (removeAttrs.includes(name)) {

@@ -42,6 +42,10 @@ export const isFileAnnotation = (text: string) => {
     return /^<<assets\/.+\/\d{14}-\w{7} ".+">>$/.test(text);
 };
 
+export const isValidAttrName = (name: string) => {
+    return /^[_a-zA-Z][_.\-0-9a-zA-Z]*$/.test(name);
+};
+
 // REF https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval
 export const looseJsonParse = (text: string) => {
     return Function(`"use strict";return (${text})`)();

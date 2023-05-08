@@ -53,11 +53,11 @@ export class Menu {
         this.menu.popup(options, options.isLeft);
     }
 
-    fullscreen(position: { x: number; y: number }) {
+    fullscreen(position: "bottom" | "all" = "all") {
         if (this.isOpen) {
             return;
         }
-        this.menu.popup({x: position.x, y: position.y});
+        this.menu.fullscreen(position);
     }
 
     close() {

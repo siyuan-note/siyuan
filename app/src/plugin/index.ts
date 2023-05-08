@@ -18,7 +18,7 @@ export class Plugin {
     public addTopBar(options: {
         icon: string,
         title: string,
-        position: "right",
+        position?: "right",
         callback: (evt: MouseEvent) => void
     }) {
         const iconElement = document.createElement("div");

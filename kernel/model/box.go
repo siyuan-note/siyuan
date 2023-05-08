@@ -55,6 +55,7 @@ type Box struct {
 
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`
+	FlashcardCount    int `json:"flashcardCount"`
 
 	historyGenerated int64 // 最近一次历史生成时间
 }

@@ -45,17 +45,18 @@ func GetFlashcardNotebooks() (ret []*Box) {
 
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
-		newFlashcardCount, dueFlashcardCount, containFlashcard := countBoxFlashcard(box.ID)
-		if containFlashcard {
+		newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID)
+		if 0 < flashcardCount {
 			box.NewFlashcardCount = newFlashcardCount
 			box.DueFlashcardCount = dueFlashcardCount
+			box.FlashcardCount = flashcardCount
 			ret = append(ret, box)
 		}
 	}
 	return
 }
 
-func countTreeFlashcard(rootID string) (newFlashcardCount, dueFlashcardCount int, containFlashcard bool) {
+func countTreeFlashcard(rootID string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
 	deck := Decks[builtinDeckID]
 	if nil == deck {
 		return
@@ -63,14 +64,12 @@ func countTreeFlashcard(rootID string) (newFlashcardCount, dueFlashcardCount int
 
 	deckBlockIDs := deck.GetBlockIDs()
 	blockIDs := getTreeSubTreeChildBlocks(rootID)
-	containFlashcard = false
 	for _, blockID := range deckBlockIDs {
 		if gulu.Str.Contains(blockID, blockIDs) {
-			containFlashcard = true
-			break
+			flashcardCount++
 		}
 	}
-	if !containFlashcard {
+	if 1 > flashcardCount {
 		return
 	}
 
@@ -81,7 +80,7 @@ func countTreeFlashcard(rootID string) (newFlashcardCount, dueFlashcardCount int
 	return
 }
 
-func countBoxFlashcard(boxID string) (newFlashcardCount, dueFlashcardCount int, containFlashcard bool) {
+func countBoxFlashcard(boxID string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
 	deck := Decks[builtinDeckID]
 	if nil == deck {
 		return
@@ -93,7 +92,6 @@ func countBoxFlashcard(boxID string) (newFlashcardCount, dueFlashcardCount int, 
 		return
 	}
 
-	containFlashcard = false
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -104,12 +102,10 @@ func countBoxFlashcard(boxID string) (newFlashcardCount, dueFlashcardCount int, 
 		}
 
 		rootID := strings.TrimSuffix(entry.Name(), ".sy")
-		treeNewFlashcardCount, treeDueFlashcardCount, treeContainFlashcard := countTreeFlashcard(rootID)
-		if treeContainFlashcard {
-			containFlashcard = true
-			newFlashcardCount += treeNewFlashcardCount
-			dueFlashcardCount += treeDueFlashcardCount
-		}
+		treeNewFlashcardCount, treeDueFlashcardCount, treeFlashcardCount := countTreeFlashcard(rootID)
+		flashcardCount += treeFlashcardCount
+		newFlashcardCount += treeNewFlashcardCount
+		dueFlashcardCount += treeDueFlashcardCount
 	}
 	return
 }

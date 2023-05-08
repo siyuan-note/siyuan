@@ -54,6 +54,9 @@ devDependencies:
   html-webpack-plugin:
     specifier: ^5.5.0
     version: 5.5.0(webpack@5.73.0)
+  iconv-lite:
+    specifier: ^0.6.3
+    version: 0.6.3
   ifdef-loader:
     specifier: ^2.3.2
     version: 2.3.2

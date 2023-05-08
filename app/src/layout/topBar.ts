@@ -9,7 +9,6 @@ import {MenuItem} from "../menus/Menu";
 import {setMode} from "../util/assets";
 import {openSetting} from "../config";
 import {openSearch} from "../search/spread";
-import {App} from "../index";
 
 export const updateEditModeElement = () => {
     const target = document.querySelector("#barReadonly");
@@ -24,7 +23,7 @@ export const updateEditModeElement = () => {
     }
 };
 
-export const initBar = (app: App) => {
+export const initBar = () => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `
 <div id="barWorkspace" class="toolbar__item">

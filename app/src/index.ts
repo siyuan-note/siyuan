@@ -171,7 +171,7 @@ export class App {
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
                         loadPlugins(siyuanApp);
-                        onGetConfig(response.data.start, siyuanApp);
+                        onGetConfig(response.data.start);
                         account.onSetaccount();
                         resizeDrag();
                         setTitle(window.siyuan.languages.siyuanNote);

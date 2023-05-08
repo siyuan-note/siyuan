@@ -17,8 +17,6 @@
 package model
 
 import (
-	"crypto/sha1"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -32,7 +30,6 @@ import (
 
 // Petal represents a plugin's management status.
 type Petal struct {
-	ID      string `json:"id"`      // Plugin ID
 	Name    string `json:"name"`    // Plugin name
 	Enabled bool   `json:"enabled"` // Whether enabled
 
@@ -60,7 +57,6 @@ func SetPetalEnabled(name string, enabled bool) {
 	petal := getPetalByName(plugin.Name, petals)
 	if nil == petal {
 		petal = &Petal{
-			ID:      hash(plugin.Name),
 			Name:    plugin.Name,
 			Enabled: enabled,
 		}
@@ -219,8 +215,4 @@ func getPetalByName(name string, petals []*Petal) (ret *Petal) {
 		}
 	}
 	return
-}
-
-func hash(str string) string {
-	return fmt.Sprintf("%x", sha1.Sum([]byte(str)))
 }

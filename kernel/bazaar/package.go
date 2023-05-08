@@ -576,14 +576,13 @@ func installPackage(data []byte, installPath string) (err error) {
 		return
 	}
 
-	dirName := filepath.Base(installPath)
 	dirs, err := os.ReadDir(unzipPath)
 	if nil != err {
 		return
 	}
 
 	srcPath := unzipPath
-	if 1 == len(dirs) && dirs[0].IsDir() && strings.HasPrefix(dirs[0].Name(), dirName+"-") {
+	if 1 == len(dirs) && dirs[0].IsDir() {
 		srcPath = filepath.Join(unzipPath, dirs[0].Name())
 	}
 

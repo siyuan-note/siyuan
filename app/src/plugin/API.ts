@@ -7,5 +7,5 @@ export const API = {
     Plugin: Plugin,
     confirm: confirmDialog,
     showMessage,
-    Dialog
+    Dialog,
 };

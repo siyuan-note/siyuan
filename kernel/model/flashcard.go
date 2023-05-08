@@ -42,34 +42,58 @@ func GetFlashcardNotebooks() (ret []*Box) {
 	if nil == deck {
 		return
 	}
-	deckBlockIDs := deck.GetBlockIDs()
 
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
-		if isBoxContainFlashcard(box.ID, deckBlockIDs) {
+		newFlashcardCount, dueFlashcardCount, containFlashcard := countBoxFlashcard(box.ID)
+		if containFlashcard {
+			box.NewFlashcardCount = newFlashcardCount
+			box.DueFlashcardCount = dueFlashcardCount
 			ret = append(ret, box)
 		}
 	}
 	return
 }
 
-func isTreeContainFlashcard(rootID string, deckBlockIDs []string) (ret bool) {
+func countTreeFlashcard(rootID string) (newFlashcardCount, dueFlashcardCount int, containFlashcard bool) {
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+
+	deckBlockIDs := deck.GetBlockIDs()
 	blockIDs := getTreeSubTreeChildBlocks(rootID)
+	containFlashcard = false
 	for _, blockID := range deckBlockIDs {
 		if gulu.Str.Contains(blockID, blockIDs) {
-			return true
+			containFlashcard = true
+			break
 		}
 	}
+	if !containFlashcard {
+		return
+	}
+
+	newFlashCards := deck.GetNewCardsByBlockIDs(blockIDs)
+	newFlashcardCount = len(newFlashCards)
+	newDueFlashcards := deck.GetDueCardsByBlockIDs(blockIDs)
+	dueFlashcardCount = len(newDueFlashcards)
 	return
 }
 
-func isBoxContainFlashcard(boxID string, deckBlockIDs []string) (ret bool) {
+func countBoxFlashcard(boxID string) (newFlashcardCount, dueFlashcardCount int, containFlashcard bool) {
+	deck := Decks[builtinDeckID]
+	if nil == deck {
+		return
+	}
+
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
 	if nil != err {
 		logging.LogErrorf("read dir failed: %s", err)
 		return
 	}
 
+	containFlashcard = false
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -80,8 +104,11 @@ func isBoxContainFlashcard(boxID string, deckBlockIDs []string) (ret bool) {
 		}
 
 		rootID := strings.TrimSuffix(entry.Name(), ".sy")
-		if isTreeContainFlashcard(rootID, deckBlockIDs) {
-			return true
+		treeNewFlashcardCount, treeDueFlashcardCount, treeContainFlashcard := countTreeFlashcard(rootID)
+		if treeContainFlashcard {
+			containFlashcard = true
+			newFlashcardCount += treeNewFlashcardCount
+			dueFlashcardCount += treeDueFlashcardCount
 		}
 	}
 	return

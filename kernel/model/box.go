@@ -53,6 +53,9 @@ type Box struct {
 	SortMode int    `json:"sortMode"`
 	Closed   bool   `json:"closed"`
 
+	NewFlashcardCount int `json:"newFlashcardCount"`
+	DueFlashcardCount int `json:"dueFlashcardCount"`
+
 	historyGenerated int64 // 最近一次历史生成时间
 }
 

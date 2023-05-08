@@ -38,7 +38,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/user_agent v0.6.0
 	github.com/olahol/melody v1.1.3
-	github.com/open-spaced-repetition/go-fsrs v0.1.0
+	github.com/open-spaced-repetition/go-fsrs v0.1.1
 	github.com/panjf2000/ants/v2 v2.7.3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
@@ -50,7 +50,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20230501032014-b981a05568ef
 	github.com/siyuan-note/httpclient v0.0.0-20230501032226-9e9018416f53
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
-	github.com/siyuan-note/riff v0.0.0-20230224144841-cfbe0748ddb7
+	github.com/siyuan-note/riff v0.0.0-20230508133423-21cd63a7ef20
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.0.0-20230203202212-3282f94193f2
 	github.com/vmihailenco/msgpack/v5 v5.3.5
@@ -131,7 +131,7 @@ require (
 	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/tools v0.8.0 // indirect
 	google.golang.org/protobuf v1.29.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

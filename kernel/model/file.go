@@ -48,23 +48,25 @@ import (
 )
 
 type File struct {
-	Path         string `json:"path"`
-	Name         string `json:"name"` // 标题，即 ial["title"]
-	Icon         string `json:"icon"`
-	Name1        string `json:"name1"` // 命名，即 ial["name"]
-	Alias        string `json:"alias"`
-	Memo         string `json:"memo"`
-	Bookmark     string `json:"bookmark"`
-	ID           string `json:"id"`
-	Count        int    `json:"count"`
-	Size         uint64 `json:"size"`
-	HSize        string `json:"hSize"`
-	Mtime        int64  `json:"mtime"`
-	CTime        int64  `json:"ctime"`
-	HMtime       string `json:"hMtime"`
-	HCtime       string `json:"hCtime"`
-	Sort         int    `json:"sort"`
-	SubFileCount int    `json:"subFileCount"`
+	Path              string `json:"path"`
+	Name              string `json:"name"` // 标题，即 ial["title"]
+	Icon              string `json:"icon"`
+	Name1             string `json:"name1"` // 命名，即 ial["name"]
+	Alias             string `json:"alias"`
+	Memo              string `json:"memo"`
+	Bookmark          string `json:"bookmark"`
+	ID                string `json:"id"`
+	Count             int    `json:"count"`
+	Size              uint64 `json:"size"`
+	HSize             string `json:"hSize"`
+	Mtime             int64  `json:"mtime"`
+	CTime             int64  `json:"ctime"`
+	HMtime            string `json:"hMtime"`
+	HCtime            string `json:"hCtime"`
+	Sort              int    `json:"sort"`
+	SubFileCount      int    `json:"subFileCount"`
+	NewFlashcardCount int    `json:"newFlashcardCount"`
+	DueFlashcardCount int    `json:"dueFlashcardCount"`
 }
 
 func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret *File) {
@@ -144,13 +146,11 @@ func (box *Box) moveCorruptedData(filePath string) {
 func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]string) {
 	ret = []map[string]string{}
 
-	var deckBlockIDs []string
 	if flashcard {
 		deck := Decks[builtinDeckID]
 		if nil == deck {
 			return
 		}
-		deckBlockIDs = deck.GetBlockIDs()
 	}
 
 	openedBoxes := Conf.GetOpenedBoxes()
@@ -164,8 +164,9 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		for _, box := range boxes {
 			if strings.Contains(box.Name, keyword) {
 				if flashcard {
-					if isBoxContainFlashcard(box.ID, deckBlockIDs) {
-						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+					newFlashcardCount, dueFlashcardCount, containFlashcard := countBoxFlashcard(box.ID)
+					if containFlashcard {
+						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount)})
 					}
 				} else {
 					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
@@ -184,8 +185,9 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 	} else {
 		for _, box := range boxes {
 			if flashcard {
-				if isBoxContainFlashcard(box.ID, deckBlockIDs) {
-					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+				newFlashcardCount, dueFlashcardCount, containFlashcard := countBoxFlashcard(box.ID)
+				if containFlashcard {
+					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount)})
 				}
 			} else {
 				ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
@@ -200,8 +202,9 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		}
 		hPath := b.Name + rootBlock.HPath
 		if flashcard {
-			if isTreeContainFlashcard(rootBlock.ID, deckBlockIDs) {
-				ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon})
+			newFlashcardCount, dueFlashcardCount, containFlashcard := countTreeFlashcard(rootBlock.ID)
+			if containFlashcard {
+				ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount)})
 			}
 		} else {
 			ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon})
@@ -229,13 +232,11 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 
 	ret = []*File{}
 
-	var deckBlockIDs []string
 	if flashcard {
 		deck := Decks[builtinDeckID]
 		if nil == deck {
 			return
 		}
-		deckBlockIDs = deck.GetBlockIDs()
 	}
 
 	box := Conf.Box(boxID)
@@ -290,7 +291,10 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 
 				if flashcard {
 					rootID := strings.TrimSuffix(filepath.Base(parentDocPath), ".sy")
-					if isTreeContainFlashcard(rootID, deckBlockIDs) {
+					newFlashcardCount, dueFlashcardCount, containFlashcard := countTreeFlashcard(rootID)
+					if containFlashcard {
+						doc.NewFlashcardCount = newFlashcardCount
+						doc.DueFlashcardCount = dueFlashcardCount
 						docs = append(docs, doc)
 					}
 				} else {
@@ -310,7 +314,10 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 
 			if flashcard {
 				rootID := strings.TrimSuffix(filepath.Base(file.path), ".sy")
-				if isTreeContainFlashcard(rootID, deckBlockIDs) {
+				newFlashcardCount, dueFlashcardCount, containFlashcard := countTreeFlashcard(rootID)
+				if containFlashcard {
+					doc.NewFlashcardCount = newFlashcardCount
+					doc.DueFlashcardCount = dueFlashcardCount
 					docs = append(docs, doc)
 				}
 			} else {

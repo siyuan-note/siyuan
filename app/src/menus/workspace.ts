@@ -271,7 +271,7 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.feedback,
-            icon: "iconHeart",
+            icon: "iconFeedback",
             click: () => {
                 if ("zh_CN" === window.siyuan.config.lang) {
                     window.open("https://ld246.com/article/1649901726096");

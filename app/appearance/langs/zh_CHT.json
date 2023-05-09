@@ -1,4 +1,7 @@
 {
+  "flashcardNewCard": "新卡",
+  "flashcardReviewCard": "複習卡",
+  "flashcardCard": "所有",
   "plugin": "插件",
   "attrBookmarkTip": "將該塊和一個書籤進行關聯，以便後續通過書籤面板查看",
   "attrNameTip": "為該塊設置命名，主要用於引用和搜索，一個塊只能擁有一個唯一的命名",

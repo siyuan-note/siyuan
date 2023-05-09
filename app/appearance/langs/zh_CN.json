@@ -1,4 +1,7 @@
 {
+  "flashcardNewCard": "新卡",
+  "flashcardReviewCard": "复习卡",
+  "flashcardCard": "所有",
   "plugin": "插件",
   "attrBookmarkTip": "将该块和一个书签进行关联，以便后续通过书签面板查看",
   "attrNameTip": "为该块设置命名，主要用于引用和搜索，一个块只能拥有一个唯一的命名",

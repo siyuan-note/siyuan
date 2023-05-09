@@ -59,8 +59,8 @@ func GetFlashcardNotebooks() (ret []*Box) {
 
 func countTreeFlashcard(rootID string, deck *riff.Deck, deckBlockIDs []string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
 	blockIDs := getTreeSubTreeChildBlocks(rootID)
-	for _, blockID := range deckBlockIDs {
-		if gulu.Str.Contains(blockID, blockIDs) {
+	for _, deckBlockID := range deckBlockIDs {
+		if gulu.Str.Contains(deckBlockID, blockIDs) {
 			flashcardCount++
 		}
 	}
@@ -77,8 +77,8 @@ func countTreeFlashcard(rootID string, deck *riff.Deck, deckBlockIDs []string) (
 
 func countBoxFlashcard(boxID string, deck *riff.Deck, deckBlockIDs []string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
 	blockIDs := getBoxBlocks(boxID)
-	for _, blockID := range deckBlockIDs {
-		if gulu.Str.Contains(blockID, blockIDs) {
+	for _, deckBlockID := range deckBlockIDs {
+		if gulu.Str.Contains(deckBlockID, blockIDs) {
 			flashcardCount++
 		}
 	}

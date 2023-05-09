@@ -637,14 +637,14 @@ export const copyTab = (app: App, tab: Tab) => {
                 const custom = tab.model as Custom;
                 if (custom.type === "siyuan-card") {
                     model = newCardModel({
-                        tab,
+                        tab: newTab,
                         data: custom.data
                     });
                 } else {
                     app.plugins.find(item => {
                         if (item.models[custom.type]) {
                             model = item.models[custom.type]({
-                                tab,
+                                tab: newTab,
                                 data: custom.data
                             });
                             return true;

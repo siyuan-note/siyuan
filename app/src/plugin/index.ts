@@ -74,6 +74,9 @@ export class Plugin {
 
     public saveData(storageName: string, data: any) {
         return new Promise((resolve) => {
+            if (!this.data) {
+                this.data = {};
+            }
             const pathString = `/data/storage/petal/${this.name}/${storageName}`;
             const file = new File([new Blob([data])], pathString.split("/").pop());
             const formData = new FormData();

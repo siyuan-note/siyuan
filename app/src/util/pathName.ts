@@ -225,7 +225,8 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             }) => {
                 let countHTML = "";
                 if (flashcard) {
-                    countHTML = `<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
+                    countHTML = `<span class="fn__flex-1"></span>
+<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
 <span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewCard}">${item.dueFlashcardCount}</span>
 <span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
@@ -449,6 +450,9 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 } else {
                     currentItemElements[0].classList.remove("b3-list-item--focus");
                     target.classList.add("b3-list-item--focus");
+                }
+                if (target.getAttribute("data-path") === "/") {
+                    getLeaf(target, flashcard);
                 }
                 event.preventDefault();
                 event.stopPropagation();

@@ -255,6 +255,21 @@ func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 	}
 }
 
+func GetBlockTreesByBoxID(boxID string) (ret []*BlockTree) {
+	blockTrees.Range(func(key, value interface{}) bool {
+		slice := value.(*btSlice)
+		slice.m.Lock()
+		for _, b := range slice.data {
+			if b.BoxID == boxID {
+				ret = append(ret, b)
+			}
+		}
+		slice.m.Unlock()
+		return true
+	})
+	return
+}
+
 func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)

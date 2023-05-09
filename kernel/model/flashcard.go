@@ -76,27 +76,20 @@ func countTreeFlashcard(rootID string, deck *riff.Deck, deckBlockIDs []string) (
 }
 
 func countBoxFlashcard(boxID string, deck *riff.Deck, deckBlockIDs []string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
-	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
-	if nil != err {
-		logging.LogErrorf("read dir failed: %s", err)
+	blockIDs := getBoxBlocks(boxID)
+	for _, blockID := range deckBlockIDs {
+		if gulu.Str.Contains(blockID, blockIDs) {
+			flashcardCount++
+		}
+	}
+	if 1 > flashcardCount {
 		return
 	}
 
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-
-		if !strings.HasSuffix(entry.Name(), ".sy") {
-			continue
-		}
-
-		rootID := strings.TrimSuffix(entry.Name(), ".sy")
-		treeNewFlashcardCount, treeDueFlashcardCount, treeFlashcardCount := countTreeFlashcard(rootID, deck, deckBlockIDs)
-		flashcardCount += treeFlashcardCount
-		newFlashcardCount += treeNewFlashcardCount
-		dueFlashcardCount += treeDueFlashcardCount
-	}
+	newFlashCards := deck.GetNewCardsByBlockIDs(blockIDs)
+	newFlashcardCount = len(newFlashCards)
+	newDueFlashcards := deck.GetDueCardsByBlockIDs(blockIDs)
+	dueFlashcardCount = len(newDueFlashcards)
 	return
 }
 
@@ -417,6 +410,14 @@ func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDs []string) {
 	bts := treenode.GetBlockTreesByPathPrefix(strings.TrimSuffix(root.Path, ".sy"))
 	for _, bt := range bts {
 		treeBlockIDs = append(treeBlockIDs, bt.ID)
+	}
+	return
+}
+
+func getBoxBlocks(boxID string) (blockIDs []string) {
+	bts := treenode.GetBlockTreesByBoxID(boxID)
+	for _, bt := range bts {
+		blockIDs = append(blockIDs, bt.ID)
 	}
 	return
 }

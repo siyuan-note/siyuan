@@ -150,12 +150,14 @@ func InstalledThemes() (ret []*Theme) {
 		installSize, _ := util.SizeOfDirectory(installPath)
 		theme.InstallSize = installSize
 		theme.HInstallSize = humanize.Bytes(uint64(installSize))
-		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
+		readmeFilename := getPreferredReadme(theme.Readme)
+		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {
-			logging.LogWarnf("read install theme README.md failed: %s", readErr)
+			logging.LogWarnf("read installed README.md failed: %s", readErr)
 			continue
 		}
-		theme.README, _ = renderREADME(theme.URL, readme)
+
+		theme.PreferredReadme, _ = renderREADME(theme.URL, readme)
 		theme.Outdated = isOutdatedTheme(theme, bazaarThemes)
 		ret = append(ret, theme)
 	}

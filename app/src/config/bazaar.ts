@@ -397,7 +397,7 @@ export const bazaar = {
 </div>`;
         if (dataObj.downloaded) {
             const mdElement = readmeElement.querySelector(".item__readme");
-            mdElement.innerHTML = data.readme;
+            mdElement.innerHTML = data.preferredReadme;
             highlightRender(mdElement);
         } else {
             fetchPost("/api/bazaar/getBazaarPackageREAME", {

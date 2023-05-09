@@ -20,6 +20,7 @@ export class Plugin {
     }
 
     public onload() {
+        // 加载
     }
 
     public addTopBar(options: {
@@ -49,11 +50,12 @@ export class Plugin {
     }
 
     public openSetting() {
+        // 打开设置
     }
 
     public loadData(storageName: string) {
         if (!this.data) {
-            this.data = {}
+            this.data = {};
         }
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
@@ -73,11 +75,11 @@ export class Plugin {
     public saveData(storageName: string, data: any) {
         return new Promise((resolve) => {
             const pathString = `/data/storage/petal/${this.name}/${storageName}`;
-            const file = new File([new Blob([data])], pathString.split('/').pop());
+            const file = new File([new Blob([data])], pathString.split("/").pop());
             const formData = new FormData();
-            formData.append('path', pathString);
-            formData.append('file', file);
-            formData.append('isDir', "false");
+            formData.append("path", pathString);
+            formData.append("file", file);
+            formData.append("isDir", "false");
             fetchPost("/api/file/putFile", formData, (response) => {
                 this.data[storageName] = data;
                 resolve(response);

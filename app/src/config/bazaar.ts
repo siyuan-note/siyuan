@@ -246,7 +246,7 @@ export const bazaar = {
                             hasSetting = item.__proto__.hasOwnProperty("openSetting");
                             return true;
                         }
-                    })
+                    });
                 }
                 html += `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${item.iconURL}" onerror="this.src='${item.previewURLThumb}'"/></div>
@@ -606,10 +606,10 @@ export const bazaar = {
                 } else if (type === "setting") {
                     app.plugins.find((item: Plugin) => {
                         if (item.name === dataObj.name) {
-                            item.openSetting()
-                            return true
+                            item.openSetting();
+                            return true;
                         }
-                    })
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

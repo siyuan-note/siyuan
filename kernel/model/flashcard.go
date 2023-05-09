@@ -402,6 +402,7 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 }
 
 func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDsMap map[string]bool, treeBlockIDs []string) {
+	treeBlockIDsMap = map[string]bool{}
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
 		return

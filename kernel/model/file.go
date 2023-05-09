@@ -242,7 +242,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 	var deck *riff.Deck
 	var deckBlockIDs []string
 	if flashcard {
-		deck := Decks[builtinDeckID]
+		deck = Decks[builtinDeckID]
 		if nil == deck {
 			return
 		}

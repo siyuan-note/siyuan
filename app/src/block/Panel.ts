@@ -295,6 +295,8 @@ export class BlockPanel {
         });
         if (this.editors.length > 0) {
             this.editors.forEach(item => {
+                // https://github.com/siyuan-note/siyuan/issues/8199
+                hideElements(["util"], item.protyle);
                 item.destroy();
             });
             this.editors = [];

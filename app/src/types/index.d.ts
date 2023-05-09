@@ -183,6 +183,9 @@ interface INotebook {
     closed: boolean
     icon: string
     sort: number
+    dueFlashcardCount?: string;
+    newFlashcardCount?: string;
+    flashcardCount?: string;
     sortMode: number
 }
 

@@ -6,7 +6,7 @@ import {isMobile, isWindow} from "../util/functions";
 export class Plugin {
     public i18n: IObject;
     public eventBus: EventBus;
-    public data: any = {};
+    public data: any;
     public name: string;
 
     constructor(options: {
@@ -52,6 +52,9 @@ export class Plugin {
     }
 
     public loadData(storageName: string) {
+        if (!this.data) {
+            this.data = {}
+        }
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
@@ -76,6 +79,7 @@ export class Plugin {
             formData.append('file', file);
             formData.append('isDir', "false");
             fetchPost("/api/file/putFile", formData, (response) => {
+                this.data[storageName] = data;
                 resolve(response);
             });
         });

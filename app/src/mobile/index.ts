@@ -72,11 +72,11 @@ class App {
                     initAssets();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        loadPlugins(siyuanApp);
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             initFramework();
                             initRightMenu();
+                            loadPlugins(siyuanApp);
                             openChangelog();
                         });
                     });

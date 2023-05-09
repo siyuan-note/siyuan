@@ -5,6 +5,7 @@ import {Dialog} from "../dialog";
 import {MenuItem} from "../menus/Menu";
 import {Menu as SiyuanMenu} from "../menus/Menu";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
+import {isMobile} from "../util/functions";
 
 export class Menu {
     private menu: SiyuanMenu;
@@ -58,6 +59,7 @@ export class Menu {
             return;
         }
         this.menu.fullscreen(position);
+        this.menu.element.style.zIndex = "310";
     }
 
     close() {
@@ -74,4 +76,5 @@ export const API = {
     Plugin: Plugin,
     Dialog,
     Menu,
+    isMobile
 };

@@ -362,6 +362,11 @@ html {
   font-size: 12px;
   user-select: none;
   height: 22px;
+
+  &--right {
+    width: 32px;
+    text-align: right;
+  }
 }
 
 .reveal {

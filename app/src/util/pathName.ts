@@ -147,8 +147,8 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-text-field fn__block b3-form__icon-input" value="" placeholder="${window.siyuan.languages.search}">
     </div>
-    <ul id="foldList" class="fn__none b3-list b3-list--background" style="height: 50vh;overflow: auto;position: relative"></ul>
-    <div id="foldTree" style="height: 50vh;overflow: auto;position: relative"></div>
+    <ul id="foldList" class="fn__none b3-list b3-list--background${isMobile() ? " b3-list--mobile" : ""}" style="height: 50vh;overflow: auto;position: relative"></ul>
+    <div id="foldTree" class="${isMobile() ? "b3-list--mobile" : ""}" style="height: 50vh;overflow: auto;position: relative"></div>
     <div class="fn__hr"></div>
 </div>
 <div class="b3-dialog__action">
@@ -177,9 +177,9 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             if (!item.closed) {
                 let countHTML = "";
                 if (flashcard) {
-                    countHTML = `<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
-<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewCard}">${item.dueFlashcardCount}</span>
-<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
+                    countHTML = `<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
+<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewCard}">${item.dueFlashcardCount}</span>
+<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
                 html += `<ul class="b3-list b3-list--background">
 <li class="b3-list-item${html === "" ? " b3-list-item--focus" : ""}" data-path="/" data-box="${item.id}">
@@ -226,9 +226,9 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 let countHTML = "";
                 if (flashcard) {
                     countHTML = `<span class="fn__flex-1"></span>
-<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
-<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewCard}">${item.dueFlashcardCount}</span>
-<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
+<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
+<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewCard}">${item.dueFlashcardCount}</span>
+<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
                 fileHTML += `<li style="padding: 4px" class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
     ${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic", true)}
@@ -493,9 +493,9 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         response.data.files.forEach((item: IFile) => {
             let countHTML = "";
             if (flashcard) {
-                countHTML = `<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
-<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewCard}">${item.dueFlashcardCount}</span>
-<span class="counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
+                countHTML = `<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
+<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewCard}">${item.dueFlashcardCount}</span>
+<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
             } else if (item.count && item.count > 0) {
                 countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
             }

@@ -147,12 +147,14 @@ func InstalledWidgets() (ret []*Widget) {
 		installSize, _ := util.SizeOfDirectory(installPath)
 		widget.InstallSize = installSize
 		widget.HInstallSize = humanize.Bytes(uint64(installSize))
-		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
+		readmeFilename := getPreferredReadme(widget.Readme)
+		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {
-			logging.LogWarnf("read install widget README.md failed: %s", readErr)
+			logging.LogWarnf("read installed README.md failed: %s", readErr)
 			continue
 		}
-		widget.README, _ = renderREADME(widget.URL, readme)
+
+		widget.PreferredReadme, _ = renderREADME(widget.URL, readme)
 		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
 		ret = append(ret, widget)
 	}

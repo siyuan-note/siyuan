@@ -149,12 +149,14 @@ func InstalledTemplates() (ret []*Template) {
 		installSize, _ := util.SizeOfDirectory(installPath)
 		template.InstallSize = installSize
 		template.HInstallSize = humanize.Bytes(uint64(installSize))
-		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
+		readmeFilename := getPreferredReadme(template.Readme)
+		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {
-			logging.LogWarnf("read install template README.md failed: %s", readErr)
+			logging.LogWarnf("read installed README.md failed: %s", readErr)
 			continue
 		}
-		template.README, _ = renderREADME(template.URL, readme)
+
+		template.PreferredReadme, _ = renderREADME(template.URL, readme)
 		template.Outdated = isOutdatedTemplate(template, bazaarTemplates)
 		ret = append(ret, template)
 	}

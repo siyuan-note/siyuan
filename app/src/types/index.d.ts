@@ -712,8 +712,8 @@ declare interface IBazaarItem {
     enabled: boolean
     preferredName: string
     preferredDesc: string
+    preferredReadme: string
     iconURL: string
-    readme: string
     stars: string
     author: string
     updated: string

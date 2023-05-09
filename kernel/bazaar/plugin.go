@@ -148,12 +148,14 @@ func InstalledPlugins() (ret []*Plugin) {
 		installSize, _ := util.SizeOfDirectory(installPath)
 		plugin.InstallSize = installSize
 		plugin.HInstallSize = humanize.Bytes(uint64(installSize))
-		readme, readErr := os.ReadFile(filepath.Join(installPath, "README.md"))
+		readmeFilename := getPreferredReadme(plugin.Readme)
+		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 		if nil != readErr {
-			logging.LogWarnf("read install plugin README.md failed: %s", readErr)
+			logging.LogWarnf("read installed README.md failed: %s", readErr)
 			continue
 		}
-		plugin.README, _ = renderREADME(plugin.URL, readme)
+
+		plugin.PreferredReadme, _ = renderREADME(plugin.URL, readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
 		ret = append(ret, plugin)
 	}

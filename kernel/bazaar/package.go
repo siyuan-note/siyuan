@@ -76,6 +76,7 @@ type Package struct {
 	PreferredFunding string `json:"preferredFunding"`
 	PreferredName    string `json:"preferredName"`
 	PreferredDesc    string `json:"preferredDesc"`
+	PreferredReadme  string `json:"preferredReadme"`
 
 	Name            string `json:"name"`
 	RepoURL         string `json:"repoURL"`
@@ -83,8 +84,6 @@ type Package struct {
 	PreviewURL      string `json:"previewURL"`
 	PreviewURLThumb string `json:"previewURLThumb"`
 	IconURL         string `json:"iconURL"`
-
-	README string `json:"readme"`
 
 	Installed    bool   `json:"installed"`
 	Outdated     bool   `json:"outdated"`

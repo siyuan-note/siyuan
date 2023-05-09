@@ -43,9 +43,10 @@ func GetFlashcardNotebooks() (ret []*Box) {
 		return
 	}
 
+	deckBlockIDs := deck.GetBlockIDs()
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
-		newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID)
+		newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 		if 0 < flashcardCount {
 			box.NewFlashcardCount = newFlashcardCount
 			box.DueFlashcardCount = dueFlashcardCount
@@ -56,13 +57,7 @@ func GetFlashcardNotebooks() (ret []*Box) {
 	return
 }
 
-func countTreeFlashcard(rootID string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
-	deck := Decks[builtinDeckID]
-	if nil == deck {
-		return
-	}
-
-	deckBlockIDs := deck.GetBlockIDs()
+func countTreeFlashcard(rootID string, deck *riff.Deck, deckBlockIDs []string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
 	blockIDs := getTreeSubTreeChildBlocks(rootID)
 	for _, blockID := range deckBlockIDs {
 		if gulu.Str.Contains(blockID, blockIDs) {
@@ -80,12 +75,7 @@ func countTreeFlashcard(rootID string) (newFlashcardCount, dueFlashcardCount, fl
 	return
 }
 
-func countBoxFlashcard(boxID string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
-	deck := Decks[builtinDeckID]
-	if nil == deck {
-		return
-	}
-
+func countBoxFlashcard(boxID string, deck *riff.Deck, deckBlockIDs []string) (newFlashcardCount, dueFlashcardCount, flashcardCount int) {
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
 	if nil != err {
 		logging.LogErrorf("read dir failed: %s", err)
@@ -102,7 +92,7 @@ func countBoxFlashcard(boxID string) (newFlashcardCount, dueFlashcardCount, flas
 		}
 
 		rootID := strings.TrimSuffix(entry.Name(), ".sy")
-		treeNewFlashcardCount, treeDueFlashcardCount, treeFlashcardCount := countTreeFlashcard(rootID)
+		treeNewFlashcardCount, treeDueFlashcardCount, treeFlashcardCount := countTreeFlashcard(rootID, deck, deckBlockIDs)
 		flashcardCount += treeFlashcardCount
 		newFlashcardCount += treeNewFlashcardCount
 		dueFlashcardCount += treeDueFlashcardCount

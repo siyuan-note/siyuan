@@ -38,6 +38,7 @@ import (
 	"github.com/facette/natsort"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -148,11 +149,15 @@ func (box *Box) moveCorruptedData(filePath string) {
 func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]string) {
 	ret = []map[string]string{}
 
+	var deck *riff.Deck
+	var deckBlockIDs []string
 	if flashcard {
 		deck := Decks[builtinDeckID]
 		if nil == deck {
 			return
 		}
+
+		deckBlockIDs = deck.GetBlockIDs()
 	}
 
 	openedBoxes := Conf.GetOpenedBoxes()
@@ -166,7 +171,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		for _, box := range boxes {
 			if strings.Contains(box.Name, keyword) {
 				if flashcard {
-					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID)
+					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
 						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
 					}
@@ -187,7 +192,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 	} else {
 		for _, box := range boxes {
 			if flashcard {
-				newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID)
+				newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 				if 0 < flashcardCount {
 					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
 				}
@@ -204,7 +209,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		}
 		hPath := b.Name + rootBlock.HPath
 		if flashcard {
-			newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootBlock.ID)
+			newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootBlock.ID, deck, deckBlockIDs)
 			if 0 < flashcardCount {
 				ret = append(ret, map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
 			}
@@ -234,11 +239,15 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 
 	ret = []*File{}
 
+	var deck *riff.Deck
+	var deckBlockIDs []string
 	if flashcard {
 		deck := Decks[builtinDeckID]
 		if nil == deck {
 			return
 		}
+
+		deckBlockIDs = deck.GetBlockIDs()
 	}
 
 	box := Conf.Box(boxID)
@@ -293,7 +302,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 
 				if flashcard {
 					rootID := strings.TrimSuffix(filepath.Base(parentDocPath), ".sy")
-					newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootID)
+					newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
 						doc.NewFlashcardCount = newFlashcardCount
 						doc.DueFlashcardCount = dueFlashcardCount
@@ -317,7 +326,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 
 			if flashcard {
 				rootID := strings.TrimSuffix(filepath.Base(file.path), ".sy")
-				newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootID)
+				newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootID, deck, deckBlockIDs)
 				if 0 < flashcardCount {
 					doc.NewFlashcardCount = newFlashcardCount
 					doc.DueFlashcardCount = dueFlashcardCount

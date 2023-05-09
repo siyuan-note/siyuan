@@ -152,7 +152,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 	var deck *riff.Deck
 	var deckBlockIDs []string
 	if flashcard {
-		deck := Decks[builtinDeckID]
+		deck = Decks[builtinDeckID]
 		if nil == deck {
 			return
 		}

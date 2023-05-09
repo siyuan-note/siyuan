@@ -8,12 +8,13 @@ import {initTabMenu} from "./tab";
 /// #endif
 import {Menu} from "./Menu";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {App} from "../index";
 
 
 export class Menus {
     public menu: Menu;
 
-    constructor() {
+    constructor(app: App) {
         this.menu = new Menu();
         /// #if !MOBILE
         window.addEventListener("contextmenu", (event) => {
@@ -23,7 +24,7 @@ export class Menus {
                 const dataType = target.getAttribute("data-type");
                 if (dataType === "tab-header") {
                     this.unselect();
-                    initTabMenu((getInstanceById(target.getAttribute("data-id")) as Tab)).popup({
+                    initTabMenu(app, (getInstanceById(target.getAttribute("data-id")) as Tab)).popup({
                         x: event.clientX,
                         y: event.clientY
                     });

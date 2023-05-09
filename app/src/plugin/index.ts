@@ -2,12 +2,15 @@ import {App} from "../index";
 import {EventBus} from "./EventBus";
 import {fetchPost} from "../util/fetch";
 import {isMobile, isWindow} from "../util/functions";
+import {Custom} from "../layout/dock/Custom";
+import {Tab} from "../layout/Tab";
 
 export class Plugin {
     public i18n: IObject;
     public eventBus: EventBus;
     public data: any;
     public name: string;
+    public models: { [key: string]: (options: { tab: Tab, data: any }) => Custom } = {};
 
     constructor(options: {
         app: App,
@@ -88,5 +91,25 @@ export class Plugin {
                 resolve(response);
             });
         });
+    }
+
+    public createTab(options: {
+        type: string,
+        destroy?: () => void,
+        resize?: () => void,
+        update?: () => void,
+        init: () => void
+    }) {
+        const type2 = this.name + options.type;
+        this.models[type2] = (arg: { data: any, tab: Tab }) => new Custom({
+            tab: arg.tab,
+            type: type2,
+            data: arg.data,
+            init: options.init,
+            destroy: options.destroy,
+            resize: options.resize,
+            update: options.update,
+        });
+        return this.models[type2];
     }
 }

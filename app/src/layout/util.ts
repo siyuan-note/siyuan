@@ -36,6 +36,7 @@ import {openHistory} from "../history/history";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {openRecentDocs} from "../business/openRecentDocs";
+import {App} from "../index";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -237,7 +238,7 @@ const JSONToDock = (json: any) => {
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom});
 };
 
-export const JSONToCenter = (json: ILayoutJSON, layout?: Layout | Wnd | Tab | Model, isStart = false) => {
+export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd | Tab | Model, isStart = false) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
         if (!layout) {
@@ -258,7 +259,7 @@ export const JSONToCenter = (json: ILayoutJSON, layout?: Layout | Wnd | Tab | Mo
             (layout as Layout).addLayout(child);
         }
     } else if (json.instance === "Wnd") {
-        child = new Wnd(json.resize, (layout as Layout).type);
+        child = new Wnd(app, json.resize, (layout as Layout).type);
         (layout as Layout).addWnd(child);
         if (json.width) {
             child.element.classList.remove("fn__flex-1");
@@ -338,15 +339,27 @@ export const JSONToCenter = (json: ILayoutJSON, layout?: Layout | Wnd | Tab | Mo
             config: json.config
         }));
     } else if (json.instance === "Custom") {
-        (layout as Tab).addModel(newCardModel({
-            tab: (layout as Tab),
-            data: json.data
-        }));
+        if (json.customModelType === "siyuan-card") {
+            (layout as Tab).addModel(newCardModel({
+                tab: (layout as Tab),
+                data: json.customModelData
+            }));
+        } else {
+            app.plugins.find(item => {
+                if (item.models[json.customModelType]) {
+                    (layout as Tab).addModel(item.models[json.customModelType]({
+                        tab: (layout as Tab),
+                        data: json.customModelData
+                    }));
+                    return true;
+                }
+            });
+        }
     }
     if (json.children) {
         if (Array.isArray(json.children)) {
             json.children.forEach((item: any, index: number) => {
-                JSONToCenter(item, layout ? child : window.siyuan.layout.layout, isStart);
+                JSONToCenter(app, item, layout ? child : window.siyuan.layout.layout, isStart);
                 if (item.instance === "Tab" && index === (json.children as ILayoutJSON[]).length - 1) {
                     const activeTabElement = (child as Wnd).headersElement.querySelector('[data-init-active="true"]') as HTMLElement;
                     if (activeTabElement) {
@@ -361,13 +374,13 @@ export const JSONToCenter = (json: ILayoutJSON, layout?: Layout | Wnd | Tab | Mo
                 }
             });
         } else {
-            JSONToCenter(json.children, child, isStart);
+            JSONToCenter(app, json.children, child, isStart);
         }
     }
 };
 
-export const JSONToLayout = (isStart: boolean) => {
-    JSONToCenter(window.siyuan.config.uiLayout.layout, undefined, isStart);
+export const JSONToLayout = (app: App, isStart: boolean) => {
+    JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined, isStart);
     JSONToDock(window.siyuan.config.uiLayout);
     // 启动时不打开页签，需要移除没有钉住的页签
     if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
@@ -472,7 +485,8 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.config = layout.config;
     } else if (layout instanceof Custom) {
         json.instance = "Custom";
-        json.data = layout.data;
+        json.customModelType = layout.type;
+        json.customModelData = layout.data;
     }
 
     if (layout instanceof Layout || layout instanceof Wnd) {
@@ -568,7 +582,7 @@ export const resizeTabs = () => {
     }, 200);
 };
 
-export const copyTab = (tab: Tab) => {
+export const copyTab = (app: App, tab: Tab) => {
     return new Tab({
         icon: tab.icon,
         docIcon: tab.docIcon,
@@ -620,10 +634,23 @@ export const copyTab = (tab: Tab) => {
                     config: tab.model.config
                 });
             } else if (tab.model instanceof Custom) {
-                model = newCardModel({
-                    tab,
-                    data: tab.model.data
-                });
+                const custom = tab.model as Custom;
+                if (custom.type === "siyuan-card") {
+                    model = newCardModel({
+                        tab,
+                        data: custom.data
+                    });
+                } else {
+                    app.plugins.find(item => {
+                        if (item.models[custom.type]) {
+                            model = item.models[custom.type]({
+                                tab,
+                                data: custom.data
+                            });
+                            return true;
+                        }
+                    });
+                }
             } else if (!tab.model && tab.headElement) {
                 const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
                 model = new Editor({

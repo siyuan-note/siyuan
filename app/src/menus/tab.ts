@@ -6,6 +6,7 @@ import {copyTab, resizeTabs} from "../layout/util";
 import {openNewWindow} from "../window/openNewWindow";
 /// #endif
 import {copySubMenu} from "./commonMenuItem";
+import {App} from "../index";
 
 const closeMenu = (tab: Tab) => {
     const allTabs: Tab[] = [];
@@ -115,12 +116,12 @@ const closeMenu = (tab: Tab) => {
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
 };
 
-const splitSubMenu = (tab: Tab) => {
+const splitSubMenu = (app: App, tab: Tab) => {
     const subMenus: IMenu[] = [{
         icon: "iconSplitLR",
         label: window.siyuan.languages.splitLR,
         click: () => {
-            tab.parent.split("lr").addTab(copyTab(tab));
+            tab.parent.split("lr").addTab(copyTab(app, tab));
         }
     }];
     if (tab.parent.children.length > 1) {
@@ -140,7 +141,7 @@ const splitSubMenu = (tab: Tab) => {
         icon: "iconSplitTB",
         label: window.siyuan.languages.splitTB,
         click: () => {
-            tab.parent.split("tb").addTab(copyTab(tab));
+            tab.parent.split("tb").addTab(copyTab(app, tab));
         }
     });
 
@@ -160,12 +161,12 @@ const splitSubMenu = (tab: Tab) => {
     return subMenus;
 };
 
-export const initTabMenu = (tab: Tab) => {
+export const initTabMenu = (app: App, tab: Tab) => {
     window.siyuan.menus.menu.remove();
     closeMenu(tab);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.split,
-        submenu: splitSubMenu(tab)
+        submenu: splitSubMenu(app, tab)
     }).element);
     const model = tab.model;
     let rootId: string;

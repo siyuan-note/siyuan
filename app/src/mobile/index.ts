@@ -64,7 +64,7 @@ class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;
-                    window.siyuan.menus = new Menus();
+                    window.siyuan.menus = new Menus(siyuanApp);
                     document.title = window.siyuan.languages.siyuanNote;
                     bootSync();
                     loadAssets(confResponse.data.conf.appearance);

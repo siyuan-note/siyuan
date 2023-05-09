@@ -12,6 +12,7 @@ import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 /// #if !MOBILE
 import {openFile} from "../editor/util";
+import {newCardModel} from "./newCardTab";
 /// #endif
 import {getDisplayName, movePathTo} from "../util/pathName";
 
@@ -21,9 +22,9 @@ export const genCardHTML = (options: {
     blocks: ICard[],
     isTab: boolean
 }) => {
-    let iconsHTML:string;
+    let iconsHTML: string;
     /// #if MOBILE
-    iconsHTML=`<div class="toolbar toolbar--border">
+    iconsHTML = `<div class="toolbar toolbar--border">
     <svg class="toolbar__icon"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
     <div data-type="count" class="${options.blocks.length === 0 ? "fn__none" : ""}">1/${options.blocks.length}</span></div>
@@ -31,7 +32,7 @@ export const genCardHTML = (options: {
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
     /// #else
-    iconsHTML=`<div class="block__icons">
+    iconsHTML = `<div class="block__icons">
         ${options.isTab ? '<div class="fn__flex-1"></div>' : `<div class="block__icon block__icon--show">
             <svg><use xlink:href="#iconRiffCard"></use></svg>
         </div>
@@ -205,11 +206,16 @@ export const bindCardEvent = (options: {
             if (sticktabElement) {
                 openFile({
                     position: "right",
-                    customData:{
-                        cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                        id: filterElement.getAttribute("data-id"),
-                        title: options.title
-                    }
+                    custom: {
+                        icon: "iconRiffCard",
+                        title: window.siyuan.languages.spaceRepetition,
+                        data: {
+                            cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                            id: filterElement.getAttribute("data-id"),
+                            title: options.title
+                        },
+                        fn: newCardModel
+                    },
                 });
                 if (options.dialog) {
                     options.dialog.destroy();

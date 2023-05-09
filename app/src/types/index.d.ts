@@ -291,11 +291,8 @@ declare interface ILayoutJSON extends ILayoutOptions {
     rootId?: string
     active?: boolean
     pin?: boolean
-    data?: {
-        cardType: TCardType,
-        id: string,
-        title?: string
-    }
+    customModelData?: any
+    customModelType?: string
     config?: ISearchOption
     children?: ILayoutJSON[] | ILayoutJSON
 }
@@ -310,7 +307,13 @@ declare interface IDockTab {
 
 declare interface IOpenFileOptions {
     searchData?: ISearchOption, // 搜索必填
-    customData?: any, // card 必填
+    // card 和自定义页签 必填
+    custom?: {
+        title: string,
+        icon: string,
+        data?: any
+        fn?: (options: { tab: import("../layout/Tab").Tab, data: any }) => import("../layout/Model").Model,
+    }
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填
     rootIcon?: string, // 文档图标

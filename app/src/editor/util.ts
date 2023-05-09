@@ -26,7 +26,6 @@ import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
-import {newCardModel} from "../card/newCardTab";
 import {Search} from "../search";
 
 export const openFileById = async (options: {
@@ -96,9 +95,9 @@ export const openFile = (options: IOpenFileOptions) => {
             }
             return;
         }
-    } else if (options.customData) {
+    } else if (options.custom) {
         const custom = allModels.custom.find((item) => {
-            if (objEquals(item.data, options.customData)) {
+            if (objEquals(item.data, options.custom.data)) {
                 if (!pdfIsLoading(item.parent.parent.element)) {
                     item.parent.parent.switchTab(item.parent.headElement);
                     item.parent.parent.showHeading();
@@ -384,14 +383,14 @@ const newTab = (options: IOpenFileOptions) => {
                 }
             });
         }
-    } else if (options.customData) {
+    } else if (options.custom) {
         tab = new Tab({
-            icon: "iconRiffCard",
-            title: window.siyuan.languages.spaceRepetition,
+            icon: options.custom.icon,
+            title: options.custom.title,
             callback(tab) {
-                tab.addModel(newCardModel({
+                tab.addModel(options.custom.fn({
                     tab,
-                    data: options.customData
+                    data: options.custom.data
                 }));
                 setPanelFocus(tab.panelElement.parentElement.parentElement);
             }

@@ -6,6 +6,8 @@ import {MenuItem} from "../menus/Menu";
 import {Menu as SiyuanMenu} from "../menus/Menu";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
+import {Custom} from "../layout/dock/Custom";
+import {openFile} from "../editor/util";
 
 export class Menu {
     private menu: SiyuanMenu;
@@ -73,8 +75,9 @@ export const API = {
     fetchPost,
     fetchSyncPost,
     fetchGet,
-    Plugin: Plugin,
+    isMobile,
+    openTab: openFile,
+    Plugin,
     Dialog,
     Menu,
-    isMobile
 };

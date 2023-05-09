@@ -34,8 +34,10 @@ import {isWindow} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
+import {App} from "../index";
 
 export class Wnd {
+    private app: App;
     public id: string;
     public parent?: Layout;
     public element: HTMLElement;
@@ -43,8 +45,9 @@ export class Wnd {
     public children: Tab[] = [];
     public resize?: TDirection;
 
-    constructor(resize?: TDirection, parentType?: TLayout) {
+    constructor(app: App, resize?: TDirection, parentType?: TLayout) {
         this.id = genUUID();
+        this.app = app;
         this.resize = resize;
         this.element = document.createElement("div");
         this.element.classList.add("fn__flex-1", "fn__flex");
@@ -223,7 +226,7 @@ export class Wnd {
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
                 if (wnd instanceof Wnd) {
-                    JSONToCenter(tabData, wnd);
+                    JSONToCenter(app, tabData, wnd);
                     oldTab = wnd.children[wnd.children.length - 1];
                     ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data: tabData.id});
                     it.querySelector("li[data-clone='true']").remove();
@@ -332,7 +335,7 @@ export class Wnd {
             let oldTab = getInstanceById(tabData.id) as Tab;
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
-                JSONToCenter(tabData, this);
+                JSONToCenter(app, tabData, this);
                 oldTab = this.children[this.children.length - 1];
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data: tabData.id});
                 getCurrentWindow().focus();
@@ -596,7 +599,7 @@ export class Wnd {
             }).element);
         });
         window.siyuan.menus.menu.element.setAttribute("data-name", "tabList");
-        const rect  = target.getBoundingClientRect();
+        const rect = target.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
             x: rect.left + rect.width,
             y: rect.top + rect.height,
@@ -738,7 +741,7 @@ export class Wnd {
                     return;
                 }
                 /// #endif
-                const wnd = new Wnd();
+                const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab());
             }
@@ -844,7 +847,7 @@ export class Wnd {
             // 场景：没有打开的文档，点击标签面板打开
             return this;
         }
-        const wnd = new Wnd(direction);
+        const wnd = new Wnd(this.app, direction);
         if (direction === this.parent.direction) {
             this.parent.addWnd(wnd, this.id);
         } else if (this.parent.children.length === 1) {

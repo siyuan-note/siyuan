@@ -333,13 +333,17 @@ export const bazaar = {
         };
         readmeElement.innerHTML = ` <div class="item__side" data-obj='${JSON.stringify(dataObj1)}'>
     <div class="fn__flex">
-        <button class="b3-button b3-button--outline" data-type="goBack" title="Go back"><svg><use xlink:href="#iconLeft"></use></svg></button>
-        <div class="item__nav">${navTitle}</div>
+        <div class="fn__space"></div>
+        <div class="fn__space"></div>
+        <div class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="goBack" aria-label="${window.siyuan.languages.back}">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+            <span class="fn__space"></span>
+            ${navTitle}
+        </div>
     </div>
     <div class="fn__flex-1"></div>
+    <img class="item__img" src="${data.iconURL}" onerror="this.src='${data.previewURLThumb}'">
     <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.name}</a>
-    <div class="fn__hr--b"></div>
-    <div class="fn__hr--b"></div>
     <div class="block__icons">
         <span class="fn__flex-1"></span>
         ${data.preferredFunding ?
@@ -357,8 +361,8 @@ export const bazaar = {
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${dataObj.downloaded ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${dataObj.downloaded ? data.hInstallDate : data.hUpdated}</div>
     <div class="fn__hr"></div>
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${dataObj.downloaded ? window.siyuan.languages.installSize : window.siyuan.languages.pkgSize}<br>${dataObj.downloaded ? data.hInstallSize : data.hSize}</div>
-    <div class="fn__hr--b"></div>
-    <div class="fn__hr--b"></div>
+    <div class="fn__hr--b${(data.installed || dataObj.downloaded) ? " fn__none" : ""}"></div>
+    <div class="fn__hr--b${(data.installed || dataObj.downloaded) ? " fn__none" : ""}"></div>
     <div${(data.installed || dataObj.downloaded) ? ' class="fn__none"' : ""}>
         <button class="b3-button" style="width: 168px"  data-type="install">${window.siyuan.languages.download}</button>
     </div>
@@ -387,11 +391,14 @@ export const bazaar = {
         <span class="fn__space"></span>
         ${data.downloads}
     </div>
+    <div class="fn__hr--b"></div>
+    <div class="fn__hr--b"></div>
     <div class="fn__flex-1"></div>
 </div>
 <div class="item__main">
     <div class="item__preview" style="background-image: url(${data.previewURL})"></div>
-    <div class="item__readme b3-typography b3-typography--default" style="position:relative;">
+    <div class="b3-typography${data.preferredDesc?"":" fn__none"}">${data.preferredDesc || ""}</div>
+    <div class="item__readme b3-typography b3-typography--default"">
         <img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">
     </div>
 </div>`;

@@ -30,7 +30,7 @@
 
         &__graphic {
           margin-right: 0;
-          padding:0 10px 0 5px;
+          padding: 0 10px 0 5px;
           height: 16px;
           width: 16px;
         }
@@ -202,7 +202,7 @@
     height: 100%;
     background-color: var(--b3-theme-background);
     display: flex;
-    padding: 16px;
+    padding: 16px 16px 16px 0;
     box-sizing: border-box;
     opacity: 0;
     z-index: 1;
@@ -219,6 +219,12 @@
         display: flex;
         flex-direction: column;
         height: 100%;
+        overflow: auto;
+      }
+
+      &__readme {
+        margin-top: 32px;
+        position: relative;
       }
 
       &__main {
@@ -233,12 +239,12 @@
         color: var(--b3-theme-on-background);
       }
 
-      &__nav {
-        text-align: center;
-        flex: 1;
-        line-height: 26px;
-        font-size: 16px;
-        color: var(--b3-theme-on-surface);
+      &__img {
+        height: 96px;
+        width: 96px;
+        margin: 32px auto 32px;
+        border-radius: 4px;
+        flex-shrink: 0;
       }
 
       &__preview {
@@ -248,7 +254,7 @@
         background-repeat: no-repeat;
         background-size: cover;
         border-radius: 4px;
-        margin-bottom: 16px;
+        margin-bottom: 32px;
         cursor: pointer;
         left: 0;
         top: 0;

@@ -46,6 +46,8 @@ type Search struct {
 	Memo  bool `json:"memo"`
 	IAL   bool `json:"ial"`
 
+	IndexAssetPath bool `json:"indexAssetPath"`
+
 	BacklinkMentionName          bool `json:"backlinkMentionName"`
 	BacklinkMentionAlias         bool `json:"backlinkMentionAlias"`
 	BacklinkMentionAnchor        bool `json:"backlinkMentionAnchor"`

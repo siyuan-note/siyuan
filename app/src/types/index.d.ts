@@ -551,6 +551,7 @@ declare interface IConfig {
         name: boolean
         alias: boolean
         memo: boolean
+        indexAssetPath: boolean
         ial: boolean
         limit: number
         caseSensitive: boolean

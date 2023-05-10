@@ -527,41 +527,49 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-                if (!list.keys || list.keys.length === 0) {
-                    return;
-                }
-                let html = "";
-                list.keys.forEach((s: string) => {
-                    if (s !== searchInputElement.value) {
-                        html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
+                if (historyElement.classList.contains("fn__none")) {
+                    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+                    if (!list.keys || list.keys.length === 0) {
+                        return;
                     }
-                });
-                if (html === "") {
-                    return;
+                    let html = "";
+                    list.keys.forEach((s: string) => {
+                        if (s !== searchInputElement.value) {
+                            html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
+                        }
+                    });
+                    if (html === "") {
+                        return;
+                    }
+                    historyElement.classList.remove("fn__none");
+                    historyElement.innerHTML = html;
+                } else {
+                    historyElement.classList.add("fn__none");
                 }
-                historyElement.classList.remove("fn__none");
-                historyElement.innerHTML = html;
                 replaceHistoryElement.classList.add("fn__none");
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-                if (!list.replaceKeys || list.replaceKeys.length === 0) {
-                    return;
-                }
-                let html = "";
-                list.replaceKeys.forEach((s: string) => {
-                    if (s !== replaceInputElement.value) {
-                        html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
+                if (replaceHistoryElement.classList.contains("fn__none")) {
+                    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+                    if (!list.replaceKeys || list.replaceKeys.length === 0) {
+                        return;
                     }
-                });
-                if (html === "") {
-                    return;
+                    let html = "";
+                    list.replaceKeys.forEach((s: string) => {
+                        if (s !== replaceInputElement.value) {
+                            html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
+                        }
+                    });
+                    if (html === "") {
+                        return;
+                    }
+                    replaceHistoryElement.classList.remove("fn__none");
+                    replaceHistoryElement.innerHTML = html;
+                } else {
+                    replaceHistoryElement.classList.add("fn__none");
                 }
-                replaceHistoryElement.classList.remove("fn__none");
-                replaceHistoryElement.innerHTML = html;
                 historyElement.classList.add("fn__none");
                 event.stopPropagation();
                 event.preventDefault();

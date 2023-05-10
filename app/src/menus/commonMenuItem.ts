@@ -656,6 +656,17 @@ export const exportMd = (id: string) => {
                             openByMobile(response.data.zip);
                         });
                     }
+                },{
+                    label: "Textile",
+                    click: () => {
+                        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                        fetchPost("/api/export/exportTextile", {
+                            id,
+                        }, response => {
+                            hideMessage(msgId);
+                            openByMobile(response.data.zip);
+                        });
+                    }
                 },
                 ]
             }

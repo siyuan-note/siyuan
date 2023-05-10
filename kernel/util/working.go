@@ -17,14 +17,12 @@
 package util
 
 import (
-	"bytes"
 	"errors"
 	"flag"
 	"fmt"
 	"math/rand"
 	"mime"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -173,7 +171,6 @@ var (
 	DBPath         string        // SQLite 数据库文件路径
 	HistoryDBPath  string        // SQLite 历史数据库文件路径
 	BlockTreePath  string        // 区块树文件路径
-	PandocBinPath  string        // Pandoc 可执行文件路径
 	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
 	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
 	IconsPath      string        // 配置目录下的外观目录下的 icons/ 路径
@@ -388,79 +385,6 @@ func initMime() {
 
 	// 文档数据文件
 	mime.AddExtensionType(".sy", "application/json")
-}
-
-func initPandoc() {
-	if ContainerStd != Container {
-		return
-	}
-
-	pandocDir := filepath.Join(TempDir, "pandoc")
-	if gulu.OS.IsWindows() {
-		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc.exe")
-	} else if gulu.OS.IsDarwin() || gulu.OS.IsLinux() {
-		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc")
-	}
-	pandocVer := getPandocVer(PandocBinPath)
-	if "" != pandocVer {
-		logging.LogInfof("built-in pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
-		return
-	}
-
-	pandocZip := filepath.Join(WorkingDir, "pandoc.zip")
-	if "dev" == Mode || !gulu.File.IsExist(pandocZip) {
-		if gulu.OS.IsWindows() {
-			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-windows-amd64.zip")
-		} else if gulu.OS.IsDarwin() {
-			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-darwin-amd64.zip")
-		} else if gulu.OS.IsLinux() {
-			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-amd64.zip")
-		}
-	}
-	if err := gulu.Zip.Unzip(pandocZip, pandocDir); nil != err {
-		logging.LogErrorf("unzip pandoc failed: %s", err)
-		return
-	}
-
-	if gulu.OS.IsDarwin() || gulu.OS.IsLinux() {
-		exec.Command("chmod", "+x", PandocBinPath).CombinedOutput()
-	}
-	pandocVer = getPandocVer(PandocBinPath)
-	logging.LogInfof("initialized built-in pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
-}
-
-func getPandocVer(binPath string) (ret string) {
-	if "" == binPath {
-		return
-	}
-
-	cmd := exec.Command(binPath, "--version")
-	gulu.CmdAttr(cmd)
-	data, err := cmd.CombinedOutput()
-	if nil == err && strings.HasPrefix(string(data), "pandoc") {
-		parts := bytes.Split(data, []byte("\n"))
-		if 0 < len(parts) {
-			ret = strings.TrimPrefix(string(parts[0]), "pandoc")
-			ret = strings.ReplaceAll(ret, ".exe", "")
-			ret = strings.TrimSpace(ret)
-		}
-		return
-	}
-	return
-}
-
-func IsValidPandocBin(binPath string) bool {
-	if "" == binPath {
-		return false
-	}
-
-	cmd := exec.Command(binPath, "--version")
-	gulu.CmdAttr(cmd)
-	data, err := cmd.CombinedOutput()
-	if nil == err && strings.HasPrefix(string(data), "pandoc") {
-		return true
-	}
-	return false
 }
 
 func GetDataAssetsAbsPath() (ret string) {

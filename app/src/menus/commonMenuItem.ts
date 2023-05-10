@@ -635,12 +635,40 @@ export const exportMd = (id: string) => {
                 icon: "iconMore",
                 type: "submenu",
                 submenu: [{
-                    label: "Word .docx",
-                    icon: "iconExact",
+                    label: "reStructuredText",
                     click: () => {
-                        saveExport({type: "word", id});
+                        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                        fetchPost("/api/export/exportReStructuredText", {
+                            id,
+                        }, response => {
+                            hideMessage(msgId);
+                            openByMobile(response.data.zip);
+                        });
                     }
-                }]
+                }, {
+                    label: "AsciiDoc",
+                    click: () => {
+                        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                        fetchPost("/api/export/exportAsciiDoc", {
+                            id,
+                        }, response => {
+                            hideMessage(msgId);
+                            openByMobile(response.data.zip);
+                        });
+                    }
+                },{
+                    label: "Textile",
+                    click: () => {
+                        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                        fetchPost("/api/export/exportTextile", {
+                            id,
+                        }, response => {
+                            hideMessage(msgId);
+                            openByMobile(response.data.zip);
+                        });
+                    }
+                },
+                ]
             }
             /// #endif
         ]

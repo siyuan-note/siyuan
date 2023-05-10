@@ -984,7 +984,7 @@ func ExportStdMarkdown(id string) string {
 		Conf.Export.AddTitle)
 }
 
-func ExportMarkdown(id string) (name, zipPath string) {
+func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 	block := treenode.GetBlockTree(id)
 	if nil == block {
 		logging.LogErrorf("not found block [%s]", id)
@@ -1002,7 +1002,8 @@ func ExportMarkdown(id string) (name, zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportMarkdownZip(boxID, baseFolderName, docPaths)
+
+	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "gfm+footnotes", pandocTo, ext)
 	name = strings.TrimSuffix(filepath.Base(block.Path), ".sy")
 	return
 }
@@ -1030,114 +1031,7 @@ func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportMarkdownZip(boxID, baseFolderName, docPaths)
-	return
-}
-
-func exportMarkdownZip(boxID, baseFolderName string, docPaths []string) (zipPath string) {
-	dir, name := path.Split(baseFolderName)
-	name = util.FilterFileName(name)
-	if strings.HasSuffix(name, "..") {
-		// 文档标题以 `..` 结尾时无法导出 Markdown https://github.com/siyuan-note/siyuan/issues/4698
-		// 似乎是 os.MkdirAll 的 bug，以 .. 结尾的路径无法创建，所以这里加上 _ 结尾
-		name += "_"
-	}
-	baseFolderName = path.Join(dir, name)
-	box := Conf.Box(boxID)
-
-	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName)
-	if err := os.MkdirAll(exportFolder, 0755); nil != err {
-		logging.LogErrorf("create export temp folder failed: %s", err)
-		return
-	}
-
-	luteEngine := util.NewLute()
-	for _, p := range docPaths {
-		docIAL := box.docIAL(p)
-		if nil == docIAL {
-			continue
-		}
-
-		id := docIAL["id"]
-		hPath, md := exportMarkdownContent(id)
-		dir, name = path.Split(hPath)
-		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590
-		name = util.FilterFileName(name)
-		hPath = path.Join(dir, name)
-		p = hPath + ".md"
-		writePath := filepath.Join(exportFolder, p)
-		if gulu.File.IsExist(writePath) {
-			// 重名文档加 ID
-			p = hPath + "-" + id + ".md"
-			writePath = filepath.Join(exportFolder, p)
-		}
-		writeFolder := filepath.Dir(writePath)
-		if err := os.MkdirAll(writeFolder, 0755); nil != err {
-			logging.LogErrorf("create export temp folder [%s] failed: %s", writeFolder, err)
-			continue
-		}
-		if err := gulu.File.WriteFileSafer(writePath, gulu.Str.ToBytes(md), 0644); nil != err {
-			logging.LogErrorf("write export markdown file [%s] failed: %s", writePath, err)
-			continue
-		}
-
-		// 解析导出后的标准 Markdown，汇总 assets
-		tree := parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
-		var assets []string
-		assets = append(assets, assetsLinkDestsInTree(tree)...)
-		for _, asset := range assets {
-			asset = string(html.DecodeDestination([]byte(asset)))
-			if strings.Contains(asset, "?") {
-				asset = asset[:strings.LastIndex(asset, "?")]
-			}
-
-			srcPath, err := GetAssetAbsPath(asset)
-			if nil != err {
-				logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
-				continue
-			}
-
-			destPath := filepath.Join(writeFolder, asset)
-			err = filelock.Copy(srcPath, destPath)
-			if nil != err {
-				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
-				continue
-			}
-		}
-	}
-
-	zipPath = exportFolder + ".zip"
-	zip, err := gulu.Zip.Create(zipPath)
-	if nil != err {
-		logging.LogErrorf("create export markdown zip [%s] failed: %s", exportFolder, err)
-		return ""
-	}
-
-	// 导出 Markdown zip 包内不带文件夹 https://github.com/siyuan-note/siyuan/issues/6869
-	entries, err := os.ReadDir(exportFolder)
-	if nil != err {
-		logging.LogErrorf("read export markdown folder [%s] failed: %s", exportFolder, err)
-		return ""
-	}
-	for _, entry := range entries {
-		entryPath := filepath.Join(exportFolder, entry.Name())
-		if gulu.File.IsDir(entryPath) {
-			err = zip.AddDirectory(entry.Name(), entryPath)
-		} else {
-			err = zip.AddEntry(entry.Name(), entryPath)
-		}
-		if nil != err {
-			logging.LogErrorf("add entry [%s] to zip failed: %s", entry.Name(), err)
-			return ""
-		}
-	}
-
-	if err = zip.Close(); nil != err {
-		logging.LogErrorf("close export markdown zip failed: %s", err)
-	}
-
-	os.RemoveAll(exportFolder)
-	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "", "md", ".md")
 	return
 }
 
@@ -1391,17 +1285,17 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	zipPath = exportFolder + ".sy.zip"
 	zip, err := gulu.Zip.Create(zipPath)
 	if nil != err {
-		logging.LogErrorf("create export markdown zip [%s] failed: %s", exportFolder, err)
+		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}
 
 	if err = zip.AddDirectory(baseFolderName, exportFolder); nil != err {
-		logging.LogErrorf("create export markdown zip [%s] failed: %s", exportFolder, err)
+		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}
 
 	if err = zip.Close(); nil != err {
-		logging.LogErrorf("close export markdown zip failed: %s", err)
+		logging.LogErrorf("close export .sy.zip failed: %s", err)
 	}
 
 	os.RemoveAll(exportFolder)
@@ -2088,4 +1982,120 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 	n.InsertBefore(fileAnnotationRefLink)
 	return ast.WalkSkipChildren
+}
+
+func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
+	pandocFrom, pandocTo, ext string) (zipPath string) {
+	dir, name := path.Split(baseFolderName)
+	name = util.FilterFileName(name)
+	if strings.HasSuffix(name, "..") {
+		// 文档标题以 `..` 结尾时无法导出 Markdown https://github.com/siyuan-note/siyuan/issues/4698
+		// 似乎是 os.MkdirAll 的 bug，以 .. 结尾的路径无法创建，所以这里加上 _ 结尾
+		name += "_"
+	}
+	baseFolderName = path.Join(dir, name)
+	box := Conf.Box(boxID)
+
+	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
+	if err := os.MkdirAll(exportFolder, 0755); nil != err {
+		logging.LogErrorf("create export temp folder failed: %s", err)
+		return
+	}
+
+	luteEngine := util.NewLute()
+	for _, p := range docPaths {
+		docIAL := box.docIAL(p)
+		if nil == docIAL {
+			continue
+		}
+
+		id := docIAL["id"]
+		hPath, md := exportMarkdownContent(id)
+		dir, name = path.Split(hPath)
+		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590
+		name = util.FilterFileName(name)
+		hPath = path.Join(dir, name)
+		p = hPath + ext
+		writePath := filepath.Join(exportFolder, p)
+		if gulu.File.IsExist(writePath) {
+			// 重名文档加 ID
+			p = hPath + "-" + id + ext
+			writePath = filepath.Join(exportFolder, p)
+		}
+		writeFolder := filepath.Dir(writePath)
+		if err := os.MkdirAll(writeFolder, 0755); nil != err {
+			logging.LogErrorf("create export temp folder [%s] failed: %s", writeFolder, err)
+			continue
+		}
+
+		// 调用 Pandoc 进行格式转换
+		output, err := util.Pandoc(pandocFrom, pandocTo, md)
+		if nil != err {
+			logging.LogErrorf("pandoc failed: %s", err)
+			continue
+		}
+
+		if err := gulu.File.WriteFileSafer(writePath, gulu.Str.ToBytes(output), 0644); nil != err {
+			logging.LogErrorf("write export markdown file [%s] failed: %s", writePath, err)
+			continue
+		}
+
+		// 解析导出后的标准 Markdown，汇总 assets
+		tree := parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
+		var assets []string
+		assets = append(assets, assetsLinkDestsInTree(tree)...)
+		for _, asset := range assets {
+			asset = string(html.DecodeDestination([]byte(asset)))
+			if strings.Contains(asset, "?") {
+				asset = asset[:strings.LastIndex(asset, "?")]
+			}
+
+			srcPath, err := GetAssetAbsPath(asset)
+			if nil != err {
+				logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
+				continue
+			}
+
+			destPath := filepath.Join(writeFolder, asset)
+			err = filelock.Copy(srcPath, destPath)
+			if nil != err {
+				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
+				continue
+			}
+		}
+	}
+
+	zipPath = exportFolder + ".zip"
+	zip, err := gulu.Zip.Create(zipPath)
+	if nil != err {
+		logging.LogErrorf("create export markdown zip [%s] failed: %s", exportFolder, err)
+		return ""
+	}
+
+	// 导出 Markdown zip 包内不带文件夹 https://github.com/siyuan-note/siyuan/issues/6869
+	entries, err := os.ReadDir(exportFolder)
+	if nil != err {
+		logging.LogErrorf("read export markdown folder [%s] failed: %s", exportFolder, err)
+		return ""
+	}
+	for _, entry := range entries {
+		entryPath := filepath.Join(exportFolder, entry.Name())
+		if gulu.File.IsDir(entryPath) {
+			err = zip.AddDirectory(entry.Name(), entryPath)
+		} else {
+			err = zip.AddEntry(entry.Name(), entryPath)
+		}
+		if nil != err {
+			logging.LogErrorf("add entry [%s] to zip failed: %s", entry.Name(), err)
+			return ""
+		}
+	}
+
+	if err = zip.Close(); nil != err {
+		logging.LogErrorf("close export markdown zip failed: %s", err)
+	}
+
+	os.RemoveAll(exportFolder)
+	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	return
 }

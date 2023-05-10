@@ -28,16 +28,18 @@ export class MobileBookmarks {
         this.tree = new Tree({
             element: this.element.querySelector(".bookmarkList") as HTMLElement,
             data: null,
-            click: (element: HTMLElement, event: MouseEvent) => {
+            click: (element: HTMLElement, event?: MouseEvent) => {
                 const id = element.getAttribute("data-node-id");
-                const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
-                if (actionElement) {
-                    openBookmarkMenu(actionElement.parentElement, event, this);
-                } else {
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                        openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
-                    });
+                if (event) {
+                    const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
+                    if (actionElement) {
+                        openBookmarkMenu(actionElement.parentElement, event, this);
+                        return;
+                    }
                 }
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                });
             },
             blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
             topExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'

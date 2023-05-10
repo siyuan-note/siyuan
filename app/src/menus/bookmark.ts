@@ -9,6 +9,11 @@ import {isMobile} from "../util/functions";
 import {MobileBookmarks} from "../mobile/dock/MobileBookmarks";
 
 export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookmarkObj: Bookmark | MobileBookmarks) => {
+    if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+        window.siyuan.menus.menu.element.getAttribute("data-name") === "bookmarkMenu") {
+        window.siyuan.menus.menu.remove();
+        return;
+    }
     window.siyuan.menus.menu.remove();
     const id = element.getAttribute("data-node-id");
     if (!id && !window.siyuan.config.readonly) {
@@ -79,6 +84,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
             }
         }).element);
     }
+    window.siyuan.menus.menu.element.setAttribute("data-name", "bookmarkMenu");
     window.siyuan.menus.menu.element.style.zIndex = "221";  // 移动端被右侧栏遮挡
-    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+    window.siyuan.menus.menu.popup({x: event.clientX - 11, y: event.clientY + 11, h: 22});
 };

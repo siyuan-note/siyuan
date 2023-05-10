@@ -73,12 +73,16 @@ export class Bookmark extends Model {
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
             data: null,
-            click:(element: HTMLElement, event: MouseEvent)=> {
-                const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
-                if (actionElement) {
-                    openBookmarkMenu(actionElement.parentElement, event, this);
-                } else {
-                    const id = element.getAttribute("data-node-id");
+            click: (element: HTMLElement, event?: MouseEvent) => {
+                if (event) {
+                    const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
+                    if (actionElement) {
+                        openBookmarkMenu(actionElement.parentElement, event, this);
+                        return;
+                    }
+                }
+                const id = element.getAttribute("data-node-id");
+                if (id) {
                     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                         openFileById({
                             id,

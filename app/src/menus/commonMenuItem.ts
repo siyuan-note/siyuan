@@ -526,7 +526,7 @@ export const exportMd = (id: string) => {
                 dialog.bindInput(inputElement, () => {
                     (btnsElement[1] as HTMLButtonElement).click();
                 });
-                let name =  replaceFileName(result.data);
+                let name = replaceFileName(result.data);
                 const maxNameLen = 32;
                 if (name.length > maxNameLen) {
                     name = name.substring(0, maxNameLen);
@@ -630,6 +630,17 @@ export const exportMd = (id: string) => {
                 click: () => {
                     saveExport({type: "word", id});
                 }
+            }, {
+                label: window.siyuan.languages.more,
+                icon: "iconMore",
+                type: "submenu",
+                submenu: [{
+                    label: "Word .docx",
+                    icon: "iconExact",
+                    click: () => {
+                        saveExport({type: "word", id});
+                    }
+                }]
             }
             /// #endif
         ]

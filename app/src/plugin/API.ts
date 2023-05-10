@@ -74,7 +74,7 @@ let openTab;
 /// #if MOBILE
 openTab = () => {
     // TODO: Mobile
-}
+};
 /// #else
 openTab = openFile;
 /// #endif

@@ -406,7 +406,7 @@ export const globalShortcut = (app: App) => {
                 }
             });
             if (!cardElement) {
-                cardElement = document.querySelector(`.layout__wnd--active div[data-key="${window.siyuan.config.keymap.general.riffCard.custom}"]:not(.fn__none)`)
+                cardElement = document.querySelector(`.layout__wnd--active div[data-key="${window.siyuan.config.keymap.general.riffCard.custom}"]:not(.fn__none)`);
             }
             if (cardElement) {
                 event.preventDefault();

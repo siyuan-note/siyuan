@@ -34,37 +34,32 @@
   }
 
   &__img {
-    width: 100px;
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin: 16px 0 16px 16px;
 
     img {
-      height: 100%;
+      height: 54px;
       object-fit: cover;
+      border-radius: 4px;
+      width: 54px;
     }
   }
 
   &__info {
-    padding: 8px 16px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding: 16px 16px 4px;
+  }
 
-    a {
-      color: var(--b3-theme-on-background);
-
-      &:hover {
-        color: var(--b3-theme-on-surface);
-      }
-    }
+  &__desc {
+    color: var(--b3-theme-on-surface);
+    font-size: 12px;
+    margin-top: 4px;
+    height: 36px;
+    @include text-clamp(2);
   }
 
   &__actions {
-    padding: 0 16px 8px 16px;
+    padding: 0 16px 14px 16px;
     display: flex;
-    height: 36px;
     box-sizing: border-box;
+    font-size: 12px;
   }
 }

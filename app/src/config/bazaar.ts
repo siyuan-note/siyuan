@@ -183,8 +183,7 @@ export const bazaar = {
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
             ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
-            <div class="fn__hr"></div>
-            <div class="ft__smaller ft__on-surface fn__ellipsis">
+            <div class="b3-card__desc">
                 ${item.preferredDesc || ""}
             </div>
         </div>
@@ -254,8 +253,7 @@ export const bazaar = {
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
             ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
-            <div class="fn__hr"></div>
-            <div class="ft__smaller ft__on-surface fn__ellipsis">${item.preferredDesc || ""}</div>
+            <div class="b3-card__desc">${item.preferredDesc || ""}</div>
         </div>
         <div class="b3-card__actions">
             ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" data-type="a" class="block__icon block__icon--show" aria-label="${window.siyuan.languages.sponsor} ${item.preferredFunding}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>` : ""}
@@ -780,14 +778,14 @@ export const bazaar = {
         } else if (localSort[bazaarType.replace("s", "")] === "2") { // 下载次数降序
             html = "";
             Array.from(element.querySelectorAll(".b3-card")).sort((a, b) => {
-                return parseInt(b.querySelector(".b3-card__info").lastElementChild.textContent) < parseInt(a.querySelector(".b3-card__info").lastElementChild.textContent) ? -1 : 1;
+                return JSON.parse(b.getAttribute("data-obj")).downloads < JSON.parse(a.getAttribute("data-obj")).downloads ? -1 : 1;
             }).forEach((item) => {
                 html += item.outerHTML;
             });
         } else if (localSort[bazaarType.replace("s", "")] === "3") { // 下载次数升序
             html = "";
             Array.from(element.querySelectorAll(".b3-card")).sort((a, b) => {
-                return parseInt(b.querySelector(".b3-card__info").lastElementChild.textContent) < parseInt(a.querySelector(".b3-card__info").lastElementChild.textContent) ? 1 : -1;
+                return JSON.parse(b.getAttribute("data-obj")).downloads < JSON.parse(a.getAttribute("data-obj")).downloads ? 1 : -1;
             }).forEach((item) => {
                 html += item.outerHTML;
             });

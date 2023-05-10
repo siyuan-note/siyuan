@@ -126,7 +126,7 @@ const promiseTransaction = () => {
                     return;
                 }
                 // 折叠标题后未触发动态加载 https://github.com/siyuan-note/siyuan/issues/4168
-                if (protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
+                if (protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
                     !protyle.scroll.element.classList.contains("fn__none") &&
                     protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2    // https://github.com/siyuan-note/siyuan/issues/7785
                 ) {

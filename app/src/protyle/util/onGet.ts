@@ -40,9 +40,9 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
 
     if (data.data.eof) {
         if (action.includes(Constants.CB_GET_BEFORE)) {
-            protyle.wysiwyg.element.firstElementChild.setAttribute("data-eof", "true");
+            protyle.wysiwyg.element.firstElementChild.setAttribute("data-eof", "1");
         } else {
-            protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "true");
+            protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "2");
         }
         if (data.data.mode !== 4) {
             return;
@@ -274,7 +274,7 @@ const setHTML = (options: {
     }
     // 屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
     if (!protyle.scroll.element.classList.contains("fn__none") &&
-        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true" &&
+        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
         protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
         !options.action.includes(Constants.CB_GET_FOCUSFIRST) && // 防止 eof 为true https://github.com/siyuan-note/siyuan/issues/5291
         protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {

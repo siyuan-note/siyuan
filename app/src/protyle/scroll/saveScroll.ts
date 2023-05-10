@@ -100,6 +100,8 @@ export const restoreScroll = (protyle: IProtyle, scrollAttr: IScrollAttr) => {
                 pushBack(protyle, range || undefined);
                 /// #endif
             }
+            // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
+            protyle.scroll.updateIndex(protyle, scrollAttr.startId);
         });
     } else if (scrollAttr.scrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;

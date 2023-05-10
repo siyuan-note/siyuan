@@ -1297,7 +1297,7 @@ export class WYSIWYG {
             if (!preventGetTopHTML &&
                 event.deltaY < 0 && !protyle.scroll.element.classList.contains("fn__none") &&
                 protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight &&
-                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "true") {
+                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1") {
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
                     mode: 1,

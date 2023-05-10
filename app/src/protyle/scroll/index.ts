@@ -74,6 +74,17 @@ export class Scroll {
         });
     }
 
+    public updateIndex(protyle: IProtyle, id: string) {
+        fetchPost("/api/block/getBlockIndex", {id}, (response) => {
+            if (!response.data) {
+                return;
+            }
+            const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;
+            inputElement.value = response.data;
+            protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
+        });
+    }
+
     public update(protyle: IProtyle) {
         if (typeof protyle.block.blockCount === "number") {
             this.inputElement.setAttribute("max", protyle.block.blockCount.toString());

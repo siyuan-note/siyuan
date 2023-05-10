@@ -211,7 +211,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
 
 export const goHome = (protyle: IProtyle) => {
     if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
-        protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "true" ||
+        protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
         protyle.options.backlinkData) {
         focusBlock(protyle.wysiwyg.element.firstElementChild);
         protyle.contentElement.scrollTop = 0;
@@ -229,7 +229,7 @@ export const goHome = (protyle: IProtyle) => {
 
 export const goEnd = (protyle: IProtyle) => {
     if (!protyle.scroll.element.classList.contains("fn__none") &&
-        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "true") {
+        protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.block.rootID,
             mode: 4,

@@ -18,11 +18,12 @@ package util
 
 import (
 	"bytes"
-	"github.com/88250/gulu"
-	"github.com/siyuan-note/logging"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 )
 
 func Pandoc(from, to, content string) (ret string, err error) {

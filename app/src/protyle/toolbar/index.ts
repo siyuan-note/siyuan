@@ -988,7 +988,7 @@ export class Toolbar {
             }
             setTimeout(() => {
                 addScript("stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
-                    window.html2canvas(renderElement).then((canvas) => {
+                    window.html2canvas(renderElement, {useCORS: true}).then((canvas) => {
                         canvas.toBlob((blob: Blob) => {
                             const formData = new FormData();
                             formData.append("file", blob);
@@ -1000,7 +1000,7 @@ export class Toolbar {
                         });
                     });
                 });
-            }, Constants.TIMEOUT_TRANSITION);
+            }, Constants.TIMEOUT_LOAD);
         };
         headerElement.addEventListener("mousedown", (event: MouseEvent) => {
             if (hasClosestByClassName(event.target as HTMLElement, "block__icon")) {

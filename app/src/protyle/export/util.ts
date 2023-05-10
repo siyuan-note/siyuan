@@ -69,7 +69,7 @@ export const exportImage = (id: string) => {
                     });
                 });
             });
-        }, Constants.TIMEOUT_TRANSITION);
+        }, Constants.TIMEOUT_LOAD);
     });
     const previewElement = exportDialog.element.querySelector("#preview") as HTMLElement;
     const foldElement = (exportDialog.element.querySelector("#keepFold") as HTMLInputElement);

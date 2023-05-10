@@ -1054,7 +1054,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 loadingElement.classList.add("fn__none");
             });
         }
-    }, Constants.TIMEOUT_SEARCH);
+    }, Constants.TIMEOUT_INPUT);
     return inputTimeout;
 };
 

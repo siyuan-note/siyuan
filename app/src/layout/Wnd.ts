@@ -484,10 +484,22 @@ export class Wnd {
             }
             // focusin 触发前，layout__wnd--active 和 tab 已设置，需在调用里面更新
             if (update) {
-                updatePanelByEditor(currentTab.model.editor.protyle, true, pushBack);
+                updatePanelByEditor({
+                    protyle: currentTab.model.editor.protyle,
+                    focus: true,
+                    pushBackStack: pushBack,
+                    reload: false,
+                    resize: true,
+                });
             }
         } else {
-            updatePanelByEditor(undefined, false);
+            updatePanelByEditor({
+                protyle: undefined,
+                focus: false,
+                pushBackStack: false,
+                reload: false,
+                resize: true,
+            });
         }
     }
 
@@ -685,12 +697,24 @@ export class Wnd {
                     // 关闭分屏页签后光标消失
                     const editors = getAllModels().editor;
                     if (editors.length === 0) {
-                        updatePanelByEditor();
+                        updatePanelByEditor({
+                            protyle: undefined,
+                            focus: true,
+                            pushBackStack: false,
+                            reload: false,
+                            resize: true,
+                        });
                     } else {
                         editors.forEach(item => {
                             if (!item.element.classList.contains("fn__none")) {
                                 setPanelFocus(item.parent.parent.headersElement.parentElement.parentElement);
-                                updatePanelByEditor(item.editor.protyle, true, true);
+                                updatePanelByEditor({
+                                    protyle: item.editor.protyle,
+                                    focus: true,
+                                    pushBackStack: true,
+                                    reload: false,
+                                    resize: true,
+                                });
                                 return;
                             }
                         });
@@ -719,7 +743,7 @@ export class Wnd {
                         item.headElement.setAttribute("style", "max-width: 0px;");
                         setTimeout(() => {
                             item.headElement.remove();
-                        }, Constants.TIMEOUT_TRANSITION);
+                        }, 200);
                     } else {
                         item.headElement.remove();
                     }

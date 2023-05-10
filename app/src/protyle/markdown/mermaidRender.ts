@@ -73,7 +73,7 @@ const initMermaid = (mermaidElements: Element[]) => {
         renderElement.textContent = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         setTimeout(() => {
             mermaid.init(undefined, renderElement);
-        }, Constants.TIMEOUT_BLOCKLOAD * index);
+        }, Constants.TIMEOUT_LOAD * index);
         item.setAttribute("data-render", "true");
         renderElement.setAttribute("contenteditable", "false");
         if (!item.textContent.endsWith(Constants.ZWSP)) {

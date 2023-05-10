@@ -242,7 +242,7 @@ const updateSearchResult = (config: ISearchOption, element: Element) => {
                 }
             });
         }
-    }, Constants.TIMEOUT_SEARCH);
+    }, Constants.TIMEOUT_INPUT);
 };
 
 const initSearchEvent = (element: Element, config: ISearchOption) => {

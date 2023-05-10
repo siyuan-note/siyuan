@@ -51,7 +51,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
         setTimeout(() => {
             scrollCenter(protyle, blockElement, false, "smooth");
-        }, Constants.TIMEOUT_BLOCKLOAD);
+        }, Constants.TIMEOUT_LOAD);
         return;
     }
 

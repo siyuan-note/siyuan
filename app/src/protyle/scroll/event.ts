@@ -55,7 +55,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                     inputElement.value = response.data;
                     protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
                 });
-            }, Constants.TIMEOUT_BLOCKLOAD);
+            }, Constants.TIMEOUT_LOAD);
         }
         if (protyle.wysiwyg.element.getAttribute("data-top") || protyle.block.showAll ||
             (protyle.scroll && protyle.scroll.element.classList.contains("fn__none")) || !protyle.scroll ||

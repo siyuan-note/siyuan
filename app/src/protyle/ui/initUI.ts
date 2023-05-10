@@ -78,7 +78,7 @@ export const addLoading = (protyle: IProtyle) => {
         if (protyle.element.getAttribute("data-loading") !== "finished") {
             protyle.element.insertAdjacentHTML("beforeend", '<div style="background-color: var(--b3-theme-background)" class="fn__loading wysiwygLoading"><img width="48px" src="/stage/loading-pure.svg"></div>');
         }
-    }, Constants.TIMEOUT_BLOCKLOAD);
+    }, Constants.TIMEOUT_LOAD);
 };
 
 export const removeLoading = (protyle: IProtyle) => {

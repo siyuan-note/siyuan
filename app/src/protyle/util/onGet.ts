@@ -220,7 +220,7 @@ const setHTML = (options: {
             // 减少抖动 https://ld246.com/article/1654263598088
             setTimeout(() => {
                 focusElement.scrollIntoView();
-            }, Constants.TIMEOUT_BLOCKLOAD);
+            }, Constants.TIMEOUT_LOAD);
         } else {
             focusBlock(protyle.wysiwyg.element.firstElementChild);
             /// #if !MOBILE

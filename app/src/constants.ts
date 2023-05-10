@@ -85,10 +85,9 @@ export abstract class Constants {
 
     // timeout
     public static readonly TIMEOUT_DBLCLICK = 190;
-    public static readonly TIMEOUT_SEARCH = 300;
     public static readonly TIMEOUT_INPUT = 256;
-    public static readonly TIMEOUT_BLOCKLOAD = 300;
-    public static readonly TIMEOUT_TRANSITION = 150;
+    public static readonly TIMEOUT_LOAD = 300;
+    public static readonly TIMEOUT_TRANSITION = 300;
 
     // id
     public static readonly HELP_PATH = {

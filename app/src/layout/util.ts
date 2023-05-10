@@ -400,7 +400,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
                 action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                 zoomIn: idZoomIn.isZoomIn
             });
-        }, Constants.TIMEOUT_BLOCKLOAD);
+        }, Constants.TIMEOUT_LOAD);
     }
 };
 

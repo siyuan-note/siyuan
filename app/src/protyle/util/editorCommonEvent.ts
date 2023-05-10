@@ -855,13 +855,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 onGet(getResponse, protyle);
                 /// #if !MOBILE
                 // 文档标题互转后，需更新大纲
-                updatePanelByEditor(protyle, false, false, true);
+                updatePanelByEditor({
+                    protyle,
+                    focus: false,
+                    pushBackStack: false,
+                    reload: true,
+                    resize: false,
+                });
                 /// #endif
                 // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
                 setTimeout(() => {
                     protyle.contentElement.scrollTop = scrollTop;
                     protyle.scroll.lastScrollTop = scrollTop - 1;
-                }, Constants.TIMEOUT_BLOCKLOAD);
+                }, Constants.TIMEOUT_LOAD);
             });
             targetElement.classList.remove("dragover__bottom", "dragover__top");
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {

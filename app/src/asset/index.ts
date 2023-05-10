@@ -503,7 +503,7 @@ export class Asset extends Model {
                 /// #if !BROWSER
                 setModelsHash();
                 /// #endif
-            }, Constants.TIMEOUT_BLOCKLOAD);
+            }, Constants.TIMEOUT_LOAD);
             /// #endif
         }
     }

@@ -116,7 +116,13 @@ export class Protyle {
                                 /// #if !MOBILE
                                 if (data.cmd === "heading2doc") {
                                     // 文档标题互转后，需更新大纲
-                                    updatePanelByEditor(this.protyle, false, false, true);
+                                    updatePanelByEditor({
+                                        protyle: this.protyle,
+                                        focus: false,
+                                        pushBackStack: false,
+                                        reload: true,
+                                        resize: false
+                                    });
                                 }
                                 /// #endif
                             }
@@ -200,7 +206,13 @@ export class Protyle {
                     if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS)) {
                         setPanelFocus(this.protyle.model.element.parentElement.parentElement);
                     }
-                    updatePanelByEditor(this.protyle, false);
+                    updatePanelByEditor({
+                        protyle: this.protyle,
+                        focus: false,
+                        pushBackStack: false,
+                        reload: false,
+                        resize: false
+                    });
                     /// #endif
                 }
 
@@ -217,7 +229,13 @@ export class Protyle {
                             return;
                         }
                         setPanelFocus(this.protyle.model.element.parentElement.parentElement);
-                        updatePanelByEditor(this.protyle, false);
+                        updatePanelByEditor({
+                            protyle: this.protyle,
+                            focus: false,
+                            pushBackStack: false,
+                            reload: false,
+                            resize: false,
+                        });
                     } else {
                         // 悬浮层应移除其余面板高亮，否则按键会被面板监听到
                         document.querySelectorAll(".layout__tab--active").forEach(item => {

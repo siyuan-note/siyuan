@@ -102,7 +102,7 @@ export class Tab {
                         (event.clientX < 0 || event.clientY < 0 || event.clientX > window.innerWidth || event.clientY > window.innerHeight)) {
                         openNewWindow(this);
                     }
-                }, Constants.TIMEOUT_BLOCKLOAD); // 等待主进程发送关闭消息
+                }, Constants.TIMEOUT_LOAD); // 等待主进程发送关闭消息
                 /// #endif
                 window.siyuan.dragElement = undefined;
                 if (event.dataTransfer.dropEffect === "none") {

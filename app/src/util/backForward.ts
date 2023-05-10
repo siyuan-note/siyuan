@@ -151,7 +151,7 @@ const focusStack = async (stack: IBackStack) => {
             setTimeout(() => {
                 // 图片、视频等加载完成后再定位
                 scrollCenter(stack.protyle, blockElement, true);
-            }, Constants.TIMEOUT_BLOCKLOAD);
+            }, Constants.TIMEOUT_LOAD);
         });
         return true;
     }

@@ -50,20 +50,20 @@ export const bazaar = {
         </div>
     </div>
     <div data-type="theme" class="bazaarPanel fn__none">
-        <div class="fn__hr"></div>
-        <div class="fn__flex fn__flex-wrap">
+        <div class="fn__hr--b"></div>
+        <div class="fn__flex">
             <div class="fn__space"></div>
             <div class="fn__space"></div>
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
-            <select class="b3-select fn__size200">
+            <select class="b3-select">
                 <option ${localSort.theme === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
                 <option ${localSort.theme === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
                 <option ${localSort.theme === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
                 <option ${localSort.theme === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__flex-1"></div>
-            <select id="bazaarSelect" class="b3-select fn__size200">
+            <select id="bazaarSelect" class="b3-select">
                 <option selected value="2">${window.siyuan.languages.all}</option>
                 <option value="0">${window.siyuan.languages.themeLight}</option>
                 <option value="1">${window.siyuan.languages.themeDark}</option>
@@ -76,13 +76,13 @@ export const bazaar = {
         </div>
     </div>
     <div class="fn__none bazaarPanel" data-type="template">
-        <div class="fn__hr"></div>
+        <div class="fn__hr--b"></div>
         <div class="fn__flex">
             <div class="fn__space"></div>
             <div class="fn__space"></div>
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
-            <select class="b3-select fn__size200">
+            <select class="b3-select">
                 <option ${localSort.template === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
                 <option ${localSort.template === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
                 <option ${localSort.template === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
@@ -94,13 +94,13 @@ export const bazaar = {
         </div>
     </div>
     <div class="fn__none bazaarPanel" data-type="plugin">
-        <div class="fn__hr"></div>
+        <div class="fn__hr--b"></div>
         <div class="fn__flex">
             <div class="fn__space"></div>
             <div class="fn__space"></div>
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
-            <select class="b3-select fn__size200">
+            <select class="b3-select">
                 <option ${localSort.template === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
                 <option ${localSort.template === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
                 <option ${localSort.template === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
@@ -112,13 +112,13 @@ export const bazaar = {
         </div>
     </div>
     <div class="fn__none bazaarPanel" data-type="icon">
-        <div class="fn__hr"></div>
+        <div class="fn__hr--b"></div>
         <div class="fn__flex">
             <div class="fn__space"></div>
             <div class="fn__space"></div>
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
-            <select class="b3-select fn__size200">
+            <select class="b3-select">
                 <option ${localSort.icon === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
                 <option ${localSort.icon === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
                 <option ${localSort.icon === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
@@ -130,13 +130,13 @@ export const bazaar = {
         </div>
     </div>
     <div class="fn__none bazaarPanel" data-type="widget">
-        <div class="fn__hr"></div>
+        <div class="fn__hr--b"></div>
         <div class="fn__flex">
             <div class="fn__space"></div>
             <div class="fn__space"></div>
             <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconSort"></use></svg>
             <div class="fn__space"></div>
-            <select class="b3-select fn__size200">
+            <select class="b3-select">
                 <option ${localSort.widget === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
                 <option ${localSort.widget === "1" ? "selected" : ""} value="1">${window.siyuan.languages.sortByUpdateTimeAsc}</option>
                 <option ${localSort.widget === "2" ? "selected" : ""} value="2">${window.siyuan.languages.sortByDownloadsDesc}</option>
@@ -173,6 +173,7 @@ export const bazaar = {
             name: item.name,
             repoURL: item.repoURL,
             repoHash: item.repoHash,
+            downloads: item.downloads,
             downloaded: false,
         };
         return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card b3-card--wrap${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
@@ -183,7 +184,7 @@ export const bazaar = {
         <div class="b3-card__info fn__flex-1">
             ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
             <div class="fn__hr"></div>
-            <div class="ft__smaller ft__on-surface">
+            <div class="ft__smaller ft__on-surface fn__ellipsis">
                 ${item.preferredDesc || ""}
             </div>
         </div>
@@ -254,7 +255,7 @@ export const bazaar = {
         <div class="b3-card__info fn__flex-1">
             ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
             <div class="fn__hr"></div>
-            <div class="ft__smaller ft__on-surface">${item.preferredDesc || ""}</div>
+            <div class="ft__smaller ft__on-surface fn__ellipsis">${item.preferredDesc || ""}</div>
         </div>
         <div class="b3-card__actions">
             ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" class="b3-tooltips b3-tooltips__ne block__icon block__icon--show" aria-label="${window.siyuan.languages.sponsor} ${item.preferredFunding}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>` : ""}
@@ -725,13 +726,13 @@ export const bazaar = {
                         });
                     } else if (selectElement.value === "2") { // 下载次数降序
                         Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
-                            return parseInt(b.querySelector(".b3-card__info").lastElementChild.textContent) < parseInt(a.querySelector(".b3-card__info").lastElementChild.textContent) ? -1 : 1;
+                            return JSON.parse(b.getAttribute("data-obj")).downloads < JSON.parse(a.getAttribute("data-obj")).downloads ? -1 : 1;
                         }).forEach((item) => {
                             html += item.outerHTML;
                         });
                     } else if (selectElement.value === "3") { // 下载次数升序
                         Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
-                            return parseInt(b.querySelector(".b3-card__info").lastElementChild.textContent) < parseInt(a.querySelector(".b3-card__info").lastElementChild.textContent) ? 1 : -1;
+                            return JSON.parse(b.getAttribute("data-obj")).downloads < JSON.parse(a.getAttribute("data-obj")).downloads ? 1 : -1;
                         }).forEach((item) => {
                             html += item.outerHTML;
                         });

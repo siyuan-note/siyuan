@@ -249,6 +249,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/export/exportAsciiDoc", model.CheckAuth, exportAsciiDoc)
 	ginServer.Handle("POST", "/api/export/exportTextile", model.CheckAuth, exportTextile)
 	ginServer.Handle("POST", "/api/export/exportOPML", model.CheckAuth, exportOPML)
+	ginServer.Handle("POST", "/api/export/exportOrgMode", model.CheckAuth, exportOrgMode)
 
 	ginServer.Handle("POST", "/api/import/importStdMd", model.CheckAuth, model.CheckReadonly, importStdMd)
 	ginServer.Handle("POST", "/api/import/importData", model.CheckAuth, model.CheckReadonly, importData)

@@ -8,6 +8,7 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {blockRender} from "../markdown/blockRender";
 import {disabledForeverProtyle, disabledProtyle, enableProtyle} from "../util/onGet";
+import {showMessage} from "../../dialog/message";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
@@ -102,6 +103,10 @@ export const restoreScroll = (protyle: IProtyle, scrollAttr: IScrollAttr) => {
             }
             // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
             protyle.scroll.updateIndex(protyle, scrollAttr.startId);
+            // https://github.com/siyuan-note/siyuan/issues/8224
+            if (protyle.wysiwyg.element.clientHeight - parseInt(protyle.wysiwyg.element.style.paddingBottom) < protyle.contentElement.clientHeight) {
+                showMessage(window.siyuan.languages.scrollGetMore);
+            }
         });
     } else if (scrollAttr.scrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;

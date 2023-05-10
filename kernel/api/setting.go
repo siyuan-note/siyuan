@@ -310,6 +310,8 @@ func setSearch(c *gin.Context) {
 	}
 
 	oldCaseSensitive := model.Conf.Search.CaseSensitive
+	oldIndexAssetPath := model.Conf.Search.IndexAssetPath
+
 	oldVirtualRefName := model.Conf.Search.VirtualRefName
 	oldVirtualRefAlias := model.Conf.Search.VirtualRefAlias
 	oldVirtualRefAnchor := model.Conf.Search.VirtualRefAnchor
@@ -317,8 +319,11 @@ func setSearch(c *gin.Context) {
 
 	model.Conf.Search = s
 	model.Conf.Save()
+
 	sql.SetCaseSensitive(s.CaseSensitive)
-	if s.CaseSensitive != oldCaseSensitive {
+	sql.SetIndexAssetPath(s.IndexAssetPath)
+
+	if needFullReindex := s.CaseSensitive != oldCaseSensitive || s.IndexAssetPath != oldIndexAssetPath; needFullReindex {
 		model.FullReindex()
 	}
 

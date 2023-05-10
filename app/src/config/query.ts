@@ -4,7 +4,7 @@ export const query = {
     element: undefined as Element,
     genHTML: () => {
         return `<div class="b3-label">
- ${window.siyuan.languages.searchType}
+ ${window.siyuan.languages.searchBlockType}
     <div class="fn__flex config-query">
         <label class="fn__flex">
             <svg class="svg"><use xlink:href="#iconMath"></use></svg>
@@ -117,7 +117,7 @@ export const query = {
     </div>
 </div>
 <div class="b3-label">
- ${window.siyuan.languages.searchAttr}
+ ${window.siyuan.languages.searchBlockAttr}
     <div class="config-query">
         <label class="fn__flex">
             <svg class="svg"><use xlink:href="#iconN"></use></svg>
@@ -228,6 +228,18 @@ export const query = {
         </label>
     </div>
 </div>
+<div class="b3-label">
+ ${window.siyuan.languages.searchIndex}
+    <div class="config-query">
+        <label class="fn__flex">
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.indexAssetPath}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" id="indexAssetPath" type="checkbox"${window.siyuan.config.search.indexAssetPath ? " checked" : ""}/>
+        </label>
+    </div>
+</div>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.searchLimit}
@@ -266,6 +278,7 @@ export const query = {
                     alias: (query.element.querySelector("#alias") as HTMLInputElement).checked,
                     memo: (query.element.querySelector("#memo") as HTMLInputElement).checked,
                     ial: (query.element.querySelector("#ial") as HTMLInputElement).checked,
+                    indexAssetPath: (query.element.querySelector("#indexAssetPath") as HTMLInputElement).checked,
                     limit: parseInt((query.element.querySelector("#limit") as HTMLInputElement).value),
                     caseSensitive: (query.element.querySelector("#caseSensitive") as HTMLInputElement).checked,
                     backlinkMentionName: (query.element.querySelector("#backlinkMentionName") as HTMLInputElement).checked,

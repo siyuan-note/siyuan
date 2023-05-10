@@ -267,7 +267,10 @@ func initDBConnection() {
 	db.SetConnMaxLifetime(365 * 24 * time.Hour)
 }
 
-var caseSensitive bool
+var (
+	caseSensitive  bool
+	indexAssetPath bool
+)
 
 func SetCaseSensitive(b bool) {
 	caseSensitive = b
@@ -276,6 +279,10 @@ func SetCaseSensitive(b bool) {
 	} else {
 		db.Exec("PRAGMA case_sensitive_like = OFF;")
 	}
+}
+
+func SetIndexAssetPath(b bool) {
+	indexAssetPath = b
 }
 
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
@@ -701,9 +708,9 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else if n.IsContainerBlock() {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
-		content = treenode.NodeStaticContent(n, nil, true)
+		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
 		fc := treenode.FirstLeafBlock(n)
-		fcontent = treenode.NodeStaticContent(fc, nil, false)
+		fcontent = treenode.NodeStaticContent(fc, nil, false, false)
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {
@@ -712,7 +719,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		length = utf8.RuneCountInString(fcontent)
 	} else {
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
-		content = treenode.NodeStaticContent(n, nil, true)
+		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {

@@ -132,7 +132,7 @@ func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
 	return markdown
 }
 
-func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL bool) string {
+func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath bool) string {
 	if nil == node {
 		return ""
 	}
@@ -185,8 +185,7 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 				buf.WriteByte(' ')
 			}
 			if nil != linkDest {
-				if !bytes.HasPrefix(linkDest.Tokens, []byte("assets/")) {
-					// Assets hyperlinks are no longer included in the search index https://github.com/siyuan-note/siyuan/issues/8076
+				if !bytes.HasPrefix(linkDest.Tokens, []byte("assets/")) || includeAssetPath {
 					buf.Write(linkDest.Tokens)
 					buf.WriteByte(' ')
 				}
@@ -232,8 +231,7 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 					buf.WriteString(" " + n.TextMarkATitle)
 				}
 
-				if !strings.HasPrefix(n.TextMarkAHref, "assets/") {
-					// Assets hyperlinks are no longer included in the search index https://github.com/siyuan-note/siyuan/issues/8076
+				if !strings.HasPrefix(n.TextMarkAHref, "assets/") || includeAssetPath {
 					buf.WriteString(" " + n.TextMarkAHref)
 				}
 			}

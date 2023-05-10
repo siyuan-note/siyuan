@@ -37,23 +37,24 @@
     margin: 16px 0 16px 16px;
 
     img {
-      height: 54px;
+      height: 74px;
       object-fit: cover;
       border-radius: 4px;
-      width: 54px;
+      width: 74px;
     }
   }
 
   &__info {
     padding: 16px 16px 4px;
+    line-height: 18px;
   }
 
   &__desc {
     color: var(--b3-theme-on-surface);
     font-size: 12px;
     margin-top: 4px;
-    height: 36px;
-    @include text-clamp(2);
+    max-height: 54px;
+    @include text-clamp(3);
   }
 
   &__actions {
@@ -61,5 +62,6 @@
     display: flex;
     box-sizing: border-box;
     font-size: 12px;
+    line-height: 14px;
   }
 }

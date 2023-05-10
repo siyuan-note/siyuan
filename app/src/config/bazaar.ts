@@ -14,6 +14,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Plugin} from "../plugin";
 import {App} from "../index";
+import {escapeAttr} from "../util/escape";
 
 export const bazaar = {
     element: undefined as Element,
@@ -183,7 +184,7 @@ export const bazaar = {
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
             ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
-            <div class="b3-card__desc">
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">
                 ${item.preferredDesc || ""}
             </div>
         </div>
@@ -253,7 +254,7 @@ export const bazaar = {
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
             ${item.preferredName} <span class="ft__on-surface ft__smaller">${item.name}</span>
-            <div class="b3-card__desc">${item.preferredDesc || ""}</div>
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
         </div>
         <div class="b3-card__actions">
             ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" data-type="a" class="block__icon block__icon--show" aria-label="${window.siyuan.languages.sponsor} ${item.preferredFunding}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>` : ""}

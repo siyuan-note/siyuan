@@ -2,7 +2,9 @@ import {App} from "../index";
 import {EventBus} from "./EventBus";
 import {fetchPost} from "../util/fetch";
 import {isMobile, isWindow} from "../util/functions";
+/// #if !MOBILE
 import {Custom} from "../layout/dock/Custom";
+/// #endif
 import {Tab} from "../layout/Tab";
 
 export class Plugin {
@@ -10,7 +12,11 @@ export class Plugin {
     public eventBus: EventBus;
     public data: any;
     public name: string;
-    public models: { [key: string]: (options: { tab: Tab, data: any }) => Custom } = {};
+    public models: {
+        /// #if !MOBILE
+        [key: string]: (options: { tab: Tab, data: any }) => Custom
+        /// #endif
+    } = {};
 
     constructor(options: {
         app: App,
@@ -100,6 +106,7 @@ export class Plugin {
         update?: () => void,
         init: () => void
     }) {
+        /// #if !MOBILE
         const type2 = this.name + options.type;
         this.models[type2] = (arg: { data: any, tab: Tab }) => new Custom({
             tab: arg.tab,
@@ -111,5 +118,6 @@ export class Plugin {
             update: options.update,
         });
         return this.models[type2];
+        /// #endif
     }
 }

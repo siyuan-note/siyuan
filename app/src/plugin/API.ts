@@ -6,8 +6,9 @@ import {MenuItem} from "../menus/Menu";
 import {Menu as SiyuanMenu} from "../menus/Menu";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
-import {Custom} from "../layout/dock/Custom";
+/// #if !MOBILE
 import {openFile} from "../editor/util";
+/// #endif
 
 export class Menu {
     private menu: SiyuanMenu;
@@ -69,6 +70,15 @@ export class Menu {
     }
 }
 
+let openTab;
+/// #if MOBILE
+openTab = () => {
+    // TODO: Mobile
+}
+/// #else
+openTab = openFile;
+/// #endif
+
 export const API = {
     confirm: confirmDialog,
     showMessage,
@@ -76,7 +86,7 @@ export const API = {
     fetchSyncPost,
     fetchGet,
     isMobile,
-    openTab: openFile,
+    openTab,
     Plugin,
     Dialog,
     Menu,

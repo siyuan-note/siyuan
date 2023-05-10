@@ -39,7 +39,7 @@ interface Window {
     dataLayer: any[]
     siyuan: ISiyuan
     webkit: any
-    html2canvas: (element: Element) => Promise<any>;
+    html2canvas: (element: Element, opitons: {useCORS: boolean}) => Promise<any>;
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void

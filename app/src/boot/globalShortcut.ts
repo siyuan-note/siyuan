@@ -398,14 +398,19 @@ export const globalShortcut = (app: App) => {
         if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey &&
             !["INPUT", "TEXTAREA"].includes(target.tagName) &&
             ["0", "1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p"].includes(event.key.toLowerCase())) {
-            const openCardDialog = window.siyuan.dialogs.find(item => {
+            let cardElement: Element;
+            window.siyuan.dialogs.find(item => {
                 if (item.element.getAttribute("data-key") === window.siyuan.config.keymap.general.riffCard.custom) {
+                    cardElement = item.element;
                     return true;
                 }
             });
-            if (openCardDialog) {
+            if (!cardElement) {
+                cardElement = document.querySelector(`.layout__wnd--active div[data-key="${window.siyuan.config.keymap.general.riffCard.custom}"]:not(.fn__none)`)
+            }
+            if (cardElement) {
                 event.preventDefault();
-                openCardDialog.element.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
+                cardElement.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
                 return;
             }
         }

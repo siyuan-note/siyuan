@@ -453,12 +453,12 @@
   }
 }
 
-html .protyle-wysiwyg [spellcheck]:empty:before {
+html .protyle-wysiwyg [spellcheck][contenteditable="true"]:empty:before {
   content: "Enter text";
   color: var(--b3-theme-on-surface-light);
 }
 
-html[lang="zh_CN"] .protyle-wysiwyg [spellcheck]:empty:before {
+html[lang="zh_CN"] .protyle-wysiwyg [spellcheck][contenteditable="true"]:empty:before {
   content: "键入文字";
   color: var(--b3-theme-on-surface-light);
 }

@@ -1997,6 +1997,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 	box := Conf.Box(boxID)
 
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
+	os.RemoveAll(exportFolder)
 	if err := os.MkdirAll(exportFolder, 0755); nil != err {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
@@ -2029,15 +2030,17 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 		}
 
 		// 调用 Pandoc 进行格式转换
-		output, err := util.Pandoc(pandocFrom, pandocTo, md)
+		output, err := util.Pandoc(pandocFrom, pandocTo, writePath, md)
 		if nil != err {
 			logging.LogErrorf("pandoc failed: %s", err)
 			continue
 		}
 
-		if err := gulu.File.WriteFileSafer(writePath, gulu.Str.ToBytes(output), 0644); nil != err {
-			logging.LogErrorf("write export markdown file [%s] failed: %s", writePath, err)
-			continue
+		if "odt" != pandocTo && "epub" != pandocTo && "rtf" != pandocTo {
+			if err := gulu.File.WriteFileSafer(writePath, gulu.Str.ToBytes(output), 0644); nil != err {
+				logging.LogErrorf("write export markdown file [%s] failed: %s", writePath, err)
+				continue
+			}
 		}
 
 		// 解析导出后的标准 Markdown，汇总 assets

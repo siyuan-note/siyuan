@@ -46,16 +46,21 @@ const focusStack = (backStack: IBackStack) => {
         });
     }
 
-    if (backStack.isZoom) {
-        fetchPost("/api/block/checkBlockExist", {id: backStack.id}, existResponse => {
-            if (existResponse.data) {
-                zoomOut(protyle, backStack.id, undefined, false, () => {
-                    protyle.contentElement.scrollTop = backStack.scrollTop;
-                });
-            }
-        });
+    if (backStack.zoomId) {
+        if (backStack.zoomId !== protyle.block.id) {
+            fetchPost("/api/block/checkBlockExist", {id: backStack.id}, existResponse => {
+                if (existResponse.data) {
+                    zoomOut(protyle, backStack.id, undefined, false, () => {
+                        protyle.contentElement.scrollTop = backStack.scrollTop;
+                    });
+                }
+            });
+        } else {
+            protyle.contentElement.scrollTop = backStack.scrollTop;
+        }
         return;
     }
+
     fetchPost("/api/filetree/getDoc", {
         id: backStack.id,
         startID: startEndId[0],
@@ -95,7 +100,7 @@ export const pushBack = () => {
         endId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") + Constants.ZWSP + protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
         scrollTop: protyle.contentElement.scrollTop,
         callback: protyle.block.action,
-        isZoom: protyle.block.showAll
+        zoomId: protyle.block.showAll ? protyle.block.id : undefined
     });
 };
 
@@ -164,7 +169,7 @@ export const goBack = () => {
             endId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") + Constants.ZWSP + protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
             scrollTop: protyle.contentElement.scrollTop,
             callback: protyle.block.action,
-            isZoom: protyle.block.showAll
+            zoomId: protyle.block.showAll ? protyle.block.id : undefined
         });
     }
     const item = window.siyuan.backStack.pop();

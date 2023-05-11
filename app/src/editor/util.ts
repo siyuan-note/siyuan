@@ -338,7 +338,11 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             highlightById(editor.editor.protyle, options.id, true);
         } else if (options.action.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
-                focusBlock(nodeElement);
+                const newRange = focusBlock(nodeElement);
+                if (newRange) {
+                    // 需要更新 range，否则文档大纲点击导致切换页签时因为 resize 中 `保持光标位置不变` 会导致光标跳动
+                    editor.editor.protyle.toolbar.range = newRange
+                }
                 scrollCenter(editor.editor.protyle, nodeElement, true);
             } else if (editor.editor.protyle.block.rootID === options.id) {
                 // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
@@ -455,7 +459,7 @@ export const updatePanelByEditor = (options: {
         if (options.resize) {
             resize(options.protyle);
         }
-        if (focus) {
+        if (options.focus) {
             if (options.protyle.toolbar.range) {
                 focusByRange(options.protyle.toolbar.range);
                 countSelectWord(options.protyle.toolbar.range, options.protyle.block.rootID);

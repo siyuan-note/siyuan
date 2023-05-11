@@ -162,7 +162,7 @@ interface IBackStack {
     callback?: string[],
     position?: { start: number, end: number }
     protyle?: IProtyle,
-    isZoom?: boolean
+    zoomId?: string
 }
 
 interface IEmoji {

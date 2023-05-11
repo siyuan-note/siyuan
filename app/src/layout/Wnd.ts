@@ -409,6 +409,10 @@ export class Wnd {
 
     public switchTab(target: HTMLElement, pushBack = false, update = true) {
         setPanelFocus(this.headersElement.parentElement.parentElement);
+        // https://github.com/siyuan-note/siyuan/issues/8233
+        if (target.classList.contains("item--focus")) {
+            return;
+        }
         let currentTab: Tab;
         this.children.forEach((item) => {
             if (target === item.headElement) {

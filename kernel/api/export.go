@@ -31,6 +31,23 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func exportODT(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	name, zipPath := model.ExportPandocConvertZip(id, "odt", ".odt")
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"zip":  zipPath,
+	}
+}
+
 func exportMediaWiki(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

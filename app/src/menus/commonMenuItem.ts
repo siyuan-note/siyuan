@@ -700,6 +700,17 @@ export const exportMd = (id: string) => {
                             openByMobile(response.data.zip);
                         });
                     }
+                }, {
+                    label: "ODT",
+                    click: () => {
+                        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                        fetchPost("/api/export/exportODT", {
+                            id,
+                        }, response => {
+                            hideMessage(msgId);
+                            openByMobile(response.data.zip);
+                        });
+                    }
                 },
                 ]
             }

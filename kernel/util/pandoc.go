@@ -26,7 +26,7 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-func Pandoc(from, to, content string) (ret string, err error) {
+func Pandoc(from, to, o, content string) (ret string, err error) {
 	if "" == from || "" == to || "md" == to {
 		ret = content
 		return
@@ -35,6 +35,10 @@ func Pandoc(from, to, content string) (ret string, err error) {
 	args := []string{
 		"--from", from,
 		"--to", to,
+	}
+
+	if "" != o {
+		args = append(args, "-o", o)
 	}
 
 	pandoc := exec.Command(PandocBinPath, args...)

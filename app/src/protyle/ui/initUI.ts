@@ -4,6 +4,9 @@ import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {isMac} from "../util/compatibility";
+import {setInlineStyle} from "../../util/assets";
+import {fetchPost} from "../../util/fetch";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -70,6 +73,33 @@ export const initUI = (protyle: IProtyle) => {
             embedBlockElement.firstElementChild.classList.toggle("protyle-icons--show");
         }
     });
+    let wheelTimeout: number
+    const isMacOS = isMac()
+    protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {
+        if ((isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.deltaY < 0) {
+            if (window.siyuan.config.editor.fontSize < 72) {
+                window.siyuan.config.editor.fontSize++;
+            } else {
+                return;
+            }
+        } else if (event.deltaY > 0) {
+            if (window.siyuan.config.editor.fontSize > 9) {
+                window.siyuan.config.editor.fontSize--
+            } else {
+                return;
+            }
+        }
+        setInlineStyle();
+        clearTimeout(wheelTimeout);
+        wheelTimeout = window.setTimeout(() => {
+            fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+        }, Constants.TIMEOUT_LOAD);
+    }, {passive: false});
 };
 
 export const addLoading = (protyle: IProtyle) => {

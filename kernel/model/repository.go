@@ -567,7 +567,9 @@ func checkoutRepo(id string) {
 		return
 	}
 
-	FullReindex()
+	task.AppendTask(task.DatabaseIndexFull, fullReindex)
+	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
+	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
 
 	if syncEnabled {
 		func() {

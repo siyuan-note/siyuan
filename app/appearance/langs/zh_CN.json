@@ -536,7 +536,7 @@
   "memo": "备注",
   "name": "命名",
   "fold": "折叠/展开",
-  "zoom": "缩放和位置",
+  "zoom": "缩放",
   "invalid": "无效",
   "conflict": "冲突",
   "checkToggle": "任务列表勾选切换",

@@ -536,7 +536,7 @@
   "memo": "Memo",
   "name": "Name",
   "fold": "Fold/Expand",
-  "zoom": "Zoom and Position",
+  "zoom": "Zoom",
   "invalid": "Invalid",
   "conflict": "Conflict",
   "checkToggle": "Check the task list to switch",

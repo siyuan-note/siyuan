@@ -1,4 +1,4 @@
-import {isCtrl, isMac, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {isCtrl, isMac, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {openSearch} from "../search/spread";
 import {
@@ -43,7 +43,7 @@ import {editor} from "../config/editor";
 import {hintMoveBlock} from "../protyle/hint/extend";
 import {Backlink} from "../layout/dock/Backlink";
 /// #if !BROWSER
-import {webFrame} from "electron";
+import {setZoom} from "../layout/topBar";
 /// #endif
 import {openHistory} from "../history/history";
 import {openCard, openCardByData} from "../card/openCard";
@@ -575,39 +575,17 @@ export const globalShortcut = (app: App) => {
 
         /// #if !BROWSER
         if (matchHotKey("⌘=", event) && !hasClosestByClassName(target, "pdf__outer")) {
-            Constants.SIZE_ZOOM.find((item, index) => {
-                if (item === window.siyuan.storage[Constants.LOCAL_ZOOM]) {
-                    window.siyuan.storage[Constants.LOCAL_ZOOM] = Constants.SIZE_ZOOM[index + 1] || 3;
-                    webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
-                    if (!isTabWindow) {
-                        setStorageVal(Constants.LOCAL_ZOOM, window.siyuan.storage[Constants.LOCAL_ZOOM]);
-                    }
-                    return true;
-                }
-            });
+            setZoom("zoomIn")
             event.preventDefault();
             return;
         }
         if (matchHotKey("⌘0", event)) {
-            webFrame.setZoomFactor(1);
-            window.siyuan.storage[Constants.LOCAL_ZOOM] = 1;
-            if (!isTabWindow) {
-                setStorageVal(Constants.LOCAL_ZOOM, 1);
-            }
+            setZoom("restore")
             event.preventDefault();
             return;
         }
         if (matchHotKey("⌘-", event) && !hasClosestByClassName(target, "pdf__outer")) {
-            Constants.SIZE_ZOOM.find((item, index) => {
-                if (item === window.siyuan.storage[Constants.LOCAL_ZOOM]) {
-                    window.siyuan.storage[Constants.LOCAL_ZOOM] = Constants.SIZE_ZOOM[index - 1] || 0.25;
-                    webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
-                    if (!isTabWindow) {
-                        setStorageVal(Constants.LOCAL_ZOOM, window.siyuan.storage[Constants.LOCAL_ZOOM]);
-                    }
-                    return true;
-                }
-            });
+            setZoom("zoomOut")
             event.preventDefault();
             return;
         }

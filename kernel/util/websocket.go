@@ -121,15 +121,11 @@ func ClosePushChan(id string) {
 }
 
 func ReloadUIResetScroll() {
-	evt := NewCmdResult("reloadui", 0, PushModeBroadcast)
-	evt.Data = map[string]interface{}{"resetScroll": true}
-	PushEvent(evt)
+	BroadcastByType("main", "reloadui", 0, "", map[string]interface{}{"resetScroll": true})
 }
 
 func ReloadUI() {
-	evt := NewCmdResult("reloadui", 0, PushModeBroadcast)
-	evt.Data = map[string]interface{}{"dropCurrentLayout": false}
-	PushEvent(evt)
+	BroadcastByType("main", "reloadui", 0, "", nil)
 }
 
 func PushTxErr(msg string, code int, data interface{}) {

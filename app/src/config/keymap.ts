@@ -196,7 +196,11 @@ export const keymap = {
     },
     bindEvent() {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
-            exportLayout(true);
+            exportLayout({
+                reload: true,
+                onlyData: false,
+                errorExit: false,
+            });
         });
         const searchElement = keymap.element.querySelector("#keymapInput") as HTMLInputElement;
         const searchKeymapElement = keymap.element.querySelector("#searchByKey") as HTMLInputElement;

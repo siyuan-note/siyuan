@@ -245,9 +245,12 @@ export const transactionError = () => {
         /// #if MOBILE
         exitSiYuan();
         /// #else
-        exportLayout(false, () => {
-            exitSiYuan();
-        }, false, true);
+        exportLayout({
+            reload: false,
+            onlyData: false,
+            errorExit: true,
+            cb: exitSiYuan
+        });
         /// #endif
     });
     btnsElement[1].addEventListener("click", () => {

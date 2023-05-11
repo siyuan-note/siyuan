@@ -172,7 +172,11 @@ export const initWindow = () => {
                 focusByRange(getSelection().getRangeAt(0));
             }
         }
-        exportLayout(false);
+        exportLayout({
+            reload: false,
+            onlyData: false,
+            errorExit: false
+        });
         window.siyuan.altIsPressed = false;
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
@@ -184,26 +188,31 @@ export const initWindow = () => {
     };
 
     const winOnClose = (currentWindow: Electron.BrowserWindow, close = false) => {
-        exportLayout(false, () => {
-            if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
-                // 最小化
-                if ("windows" === window.siyuan.config.system.os) {
-                    ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, {
-                        id: getCurrentWindow().id,
-                        languages: window.siyuan.languages["_trayMenu"],
-                    });
-                } else {
-                    if (currentWindow.isFullScreen()) {
-                        currentWindow.once("leave-full-screen", () => currentWindow.hide());
-                        currentWindow.setFullScreen(false);
+        exportLayout({
+            reload: false,
+            cb() {
+                if (window.siyuan.config.appearance.closeButtonBehavior === 1 && !close) {
+                    // 最小化
+                    if ("windows" === window.siyuan.config.system.os) {
+                        ipcRenderer.send(Constants.SIYUAN_CONFIG_TRAY, {
+                            id: getCurrentWindow().id,
+                            languages: window.siyuan.languages["_trayMenu"],
+                        });
                     } else {
-                        currentWindow.hide();
+                        if (currentWindow.isFullScreen()) {
+                            currentWindow.once("leave-full-screen", () => currentWindow.hide());
+                            currentWindow.setFullScreen(false);
+                        } else {
+                            currentWindow.hide();
+                        }
                     }
+                } else {
+                    exitSiYuan();
                 }
-            } else {
-                exitSiYuan();
-            }
-        }, false, true);
+            },
+            onlyData: false,
+            errorExit: true
+        });
     };
 
     const winOnMaxRestore = () => {
@@ -469,10 +478,18 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         document.querySelector(".toolbar").classList.add("toolbar--browser");
     }
     window.addEventListener("beforeunload", () => {
-        exportLayout(false);
+        exportLayout({
+            reload: false,
+            onlyData: false,
+            errorExit: false
+        });
     }, false);
     window.addEventListener("pagehide", () => {
-        exportLayout(false);
+        exportLayout({
+            reload: false,
+            onlyData: false,
+            errorExit: false
+        });
     }, false);
     /// #endif
 };

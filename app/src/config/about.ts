@@ -323,23 +323,33 @@ export const about = {
         const networkServeElement = about.element.querySelector("#networkServe") as HTMLInputElement;
         networkServeElement.addEventListener("change", () => {
             fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
-                exportLayout(false, () => {
-                    exitSiYuan();
-                }, false, true);
+                exportLayout({
+                    reload: false,
+                    onlyData: false,
+                    errorExit: true,
+                    cb: exitSiYuan
+                });
             });
         });
         const googleAnalyticsElement = about.element.querySelector("#googleAnalytics") as HTMLInputElement;
         googleAnalyticsElement.addEventListener("change", () => {
             fetchPost("/api/system/setGoogleAnalytics", {googleAnalytics: googleAnalyticsElement.checked}, () => {
-                exportLayout(true);
+                exportLayout({
+                    reload: true,
+                    onlyData: false,
+                    errorExit: false,
+                });
             });
         });
         const uploadErrLogElement = about.element.querySelector("#uploadErrLog") as HTMLInputElement;
         uploadErrLogElement.addEventListener("change", () => {
             fetchPost("/api/system/setUploadErrLog", {uploadErrLog: uploadErrLogElement.checked}, () => {
-                exportLayout(false, () => {
-                    exitSiYuan();
-                }, false, true);
+                exportLayout({
+                    reload: false,
+                    onlyData: false,
+                    errorExit: true,
+                    cb: exitSiYuan
+                });
             });
         });
         const downloadInstallPkgElement = about.element.querySelector("#downloadInstallPkg") as HTMLInputElement;

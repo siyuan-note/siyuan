@@ -482,7 +482,11 @@ export const bazaar = {
                             mode: dataObj.themeMode === "dark" ? 1 : 0,
                         }, response => {
                             if (window.siyuan.config.appearance.themeJS && bazaarType === "themes") {
-                                exportLayout(true);
+                                exportLayout({
+                                    reload: true,
+                                    onlyData: false,
+                                    errorExit: false,
+                                });
                                 return;
                             }
                             bazaar._genMyHTML(bazaarType, app);
@@ -525,7 +529,11 @@ export const bazaar = {
                                     (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === dataObj.name)
                                 )) {
                                     if (window.siyuan.config.appearance.themeJS) {
-                                        exportLayout(true);
+                                        exportLayout({
+                                            reload: true,
+                                            onlyData: false,
+                                            errorExit: false,
+                                        });
                                     } else {
                                         const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
                                         linkElement.href = linkElement.href + "1";
@@ -563,7 +571,11 @@ export const bazaar = {
                             bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                             // TODO destroy plugin
                             if (bazaarType === "plugins") {
-                                exportLayout(true);
+                                exportLayout({
+                                    reload: true,
+                                    onlyData: false,
+                                    errorExit: false,
+                                });
                             }
                         });
                     }
@@ -596,7 +608,11 @@ export const bazaar = {
                                     (mode === 1 && window.siyuan.config.appearance.themeDark !== packageName) ||
                                     (mode === 0 && window.siyuan.config.appearance.themeLight !== packageName)) &&
                                 window.siyuan.config.appearance.themeJS) {
-                                exportLayout(true);
+                                exportLayout({
+                                    reload: true,
+                                    onlyData: false,
+                                    errorExit: false,
+                                });
                             } else {
                                 this._genMyHTML("themes", app);
                                 fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
@@ -628,7 +644,11 @@ export const bazaar = {
                             enabled: (target as HTMLInputElement).checked
                         }, () => {
                             // TODO destroy plugin
-                            exportLayout(true);
+                            exportLayout({
+                                reload: true,
+                                onlyData: false,
+                                errorExit: false,
+                            });
                         });
                     }
                     event.stopPropagation();

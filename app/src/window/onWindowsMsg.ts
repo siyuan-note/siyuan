@@ -15,11 +15,16 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
             closeTab(ipcData);
             break;
         case "lockscreen":
-            exportLayout(false, () => {
-                fetchPost("/api/system/logoutAuth", {}, () => {
-                    redirectToCheckAuth();
-                });
-            }, false, false);
+            exportLayout({
+                reload: false,
+                onlyData: false,
+                errorExit: false,
+                cb() {
+                    fetchPost("/api/system/logoutAuth", {}, () => {
+                        redirectToCheckAuth();
+                    });
+                }
+            });
             break;
     }
 };

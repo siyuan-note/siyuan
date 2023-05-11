@@ -187,20 +187,26 @@ export const resetLayout = () => {
     });
 };
 
-export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false, errorExit = false) => {
+export const exportLayout = (options: {
+    reload: boolean,
+    cb?: () => void,
+    onlyData: boolean,
+    errorExit: boolean,
+    dropEditScroll?: boolean
+}) => {
     if (isWindow()) {
         const layoutJSON: any = {
             layout: {},
         };
-        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
-        if (onlyData) {
+        layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, !!options.dropEditScroll);
+        if (options.onlyData) {
             return layoutJSON;
         }
         sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
-        if (reload) {
+        if (options.reload) {
             window.location.reload();
-        } else if (cb) {
-            cb();
+        } else if (options.cb) {
+            options.cb();
         }
         return;
     }
@@ -215,18 +221,18 @@ export const exportLayout = (reload: boolean, cb?: () => void, onlyData = false,
         left: dockToJSON(window.siyuan.layout.leftDock),
         right: dockToJSON(window.siyuan.layout.rightDock),
     };
-    layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
-    if (onlyData) {
+    layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout, !!options.dropEditScroll);
+    if (options.onlyData) {
         return layoutJSON;
     }
     fetchPost("/api/system/setUILayout", {
         layout: layoutJSON,
-        errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
+        errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
     }, () => {
-        if (reload) {
+        if (options.reload) {
             window.location.reload();
-        } else if (cb) {
-            cb();
+        } else if (options.cb) {
+            options.cb();
         }
     });
 };
@@ -404,7 +410,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     }
 };
 
-export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
+export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, dropEditScroll = false) => {
     if (layout instanceof Layout) {
         json.direction = layout.direction;
         if (layout.parent) {
@@ -453,7 +459,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : "";
         json.instance = "Editor";
-        json.scrollAttr = saveScroll(layout.editor.protyle, true);
+        if (!dropEditScroll) {
+            json.scrollAttr = saveScroll(layout.editor.protyle, true);
+        }
     } else if (layout instanceof Asset) {
         json.path = layout.path;
         if (layout.pdfObject) {
@@ -517,13 +525,13 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any) => {
             layout.children.forEach((item: Layout | Wnd | Tab) => {
                 const itemJSON = {};
                 json.children.push(itemJSON);
-                layoutToJSON(item, itemJSON);
+                layoutToJSON(item, itemJSON, dropEditScroll);
             });
         }
     } else if (layout instanceof Tab) {
         if (layout.model) {
             json.children = {};
-            layoutToJSON(layout.model, json.children);
+            layoutToJSON(layout.model, json.children, dropEditScroll);
         } else if (layout.headElement) {
             // 当前页签没有激活时编辑器没有初始化
             json.children = JSON.parse(layout.headElement.getAttribute("data-initdata") || "{}");

@@ -575,17 +575,17 @@ export const globalShortcut = (app: App) => {
 
         /// #if !BROWSER
         if (matchHotKey("⌘=", event) && !hasClosestByClassName(target, "pdf__outer")) {
-            setZoom("zoomIn")
+            setZoom("zoomIn");
             event.preventDefault();
             return;
         }
         if (matchHotKey("⌘0", event)) {
-            setZoom("restore")
+            setZoom("restore");
             event.preventDefault();
             return;
         }
         if (matchHotKey("⌘-", event) && !hasClosestByClassName(target, "pdf__outer")) {
-            setZoom("zoomOut")
+            setZoom("zoomOut");
             event.preventDefault();
             return;
         }

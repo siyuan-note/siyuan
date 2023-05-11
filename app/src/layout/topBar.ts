@@ -144,7 +144,7 @@ export const initBar = (app: App) => {
                     icon: "iconZoomIn",
                     accelerator: "⌘=",
                     click: () => {
-                        setZoom("zoomIn")
+                        setZoom("zoomIn");
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -152,14 +152,14 @@ export const initBar = (app: App) => {
                     accelerator: "⌘-",
                     icon: "iconZoomOut",
                     click: () => {
-                        setZoom("zoomOut")
+                        setZoom("zoomOut");
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.reset,
                     accelerator: "⌘0",
                     click: () => {
-                        setZoom("restore")
+                        setZoom("restore");
                     }
                 }).element);
                 const rect = target.getBoundingClientRect();
@@ -202,11 +202,11 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
         barZoomElement.classList.add("fn__none");
     } else {
         if (zoom > 1) {
-            barZoomElement.querySelector("use").setAttribute("xlink:href", "#iconZoomIn")
+            barZoomElement.querySelector("use").setAttribute("xlink:href", "#iconZoomIn");
         } else {
-            barZoomElement.querySelector("use").setAttribute("xlink:href", "#iconZoomOut")
+            barZoomElement.querySelector("use").setAttribute("xlink:href", "#iconZoomOut");
         }
         barZoomElement.classList.remove("fn__none");
     }
     /// #endif
-}
+};

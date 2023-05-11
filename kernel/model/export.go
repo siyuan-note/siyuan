@@ -1997,6 +1997,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 	box := Conf.Box(boxID)
 
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
+	os.RemoveAll(exportFolder)
 	if err := os.MkdirAll(exportFolder, 0755); nil != err {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return

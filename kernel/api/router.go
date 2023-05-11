@@ -252,6 +252,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/export/exportOrgMode", model.CheckAuth, exportOrgMode)
 	ginServer.Handle("POST", "/api/export/exportMediaWiki", model.CheckAuth, exportMediaWiki)
 	ginServer.Handle("POST", "/api/export/exportODT", model.CheckAuth, exportODT)
+	ginServer.Handle("POST", "/api/export/exportRTF", model.CheckAuth, exportRTF)
 
 	ginServer.Handle("POST", "/api/import/importStdMd", model.CheckAuth, model.CheckReadonly, importStdMd)
 	ginServer.Handle("POST", "/api/import/importData", model.CheckAuth, model.CheckReadonly, importData)

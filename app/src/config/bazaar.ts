@@ -333,8 +333,6 @@ export const bazaar = {
         };
         readmeElement.innerHTML = ` <div class="item__side" data-obj='${JSON.stringify(dataObj1)}'>
     <div class="fn__flex">
-        <div class="fn__space"></div>
-        <div class="fn__space"></div>
         <div class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="goBack" aria-label="${window.siyuan.languages.back}">
             <svg><use xlink:href="#iconLeft"></use></svg>
             <span class="fn__space"></span>
@@ -397,7 +395,13 @@ export const bazaar = {
 </div>
 <div class="item__main">
     <div class="item__preview" style="background-image: url(${data.previewURL})"></div>
-    <div class="b3-typography${data.preferredDesc?"":" fn__none"}">${data.preferredDesc || ""}</div>
+    <div class="b3-typography${data.preferredDesc?"":" fn__none"}">
+        <div data-type="NodeBlockquote" class="bq" data-node-id>
+            <div data-type="NodeParagraph" class="p" data-node-id>
+                ${data.preferredDesc || ""}
+            </div>
+         </div>
+    </div>
     <div class="item__readme b3-typography b3-typography--default"">
         <img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 48px;box-sizing: border-box;" src="/stage/loading-pure.svg">
     </div>

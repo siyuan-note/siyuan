@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230429085233"
+		"updated": "20230512170538"
 	},
 	"Children": [
 		{
@@ -268,7 +268,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428222603-moih9fe",
-				"updated": "20230429085233"
+				"updated": "20230512170538"
 			},
 			"Children": [
 				{
@@ -302,7 +302,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is used to save all inserted "
+									"Data": "​​ is used to save all inserted "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -346,7 +346,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is used to save emoji images"
+									"Data": "​​ is used to save emoji images"
 								}
 							]
 						}
@@ -383,7 +383,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is used to save code snippets"
+									"Data": "​​ is used to save code snippets"
 								}
 							]
 						}
@@ -420,7 +420,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is used to save query conditions, layouts and "
+									"Data": "​​ is used to save query conditions, layouts and "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -468,7 +468,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is used to save "
+									"Data": "​​ is used to save "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -512,7 +512,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is used to save "
+									"Data": "​​ is used to save "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -520,6 +520,50 @@
 									"TextMarkBlockRefID": "20210824202056-udkf7wg",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "widgets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230512170526-zvfzhdo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230512170526-zvfzhdo",
+						"updated": "20230512170538"
+					},
+					"Children": [
+						{
+							"ID": "20230512170526-3ivxdkg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230512170526-3ivxdkg",
+								"updated": "20230512170538"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "plugins"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230506205948-yah52eb",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "plugins"
 								}
 							]
 						}
@@ -555,7 +599,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ in the notebook folder are used to save the document data, and the data format is JSON"
+									"Data": "​​​ in the notebook folder are used to save the document data, and the data format is JSON"
 								}
 							]
 						}

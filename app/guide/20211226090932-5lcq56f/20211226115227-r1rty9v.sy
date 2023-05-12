@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230429085324"
+		"updated": "20230512170521"
 	},
 	"Children": [
 		{
@@ -263,7 +263,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115356-i1v42hf",
-				"updated": "20230429085324"
+				"updated": "20230512170521"
 			},
 			"Children": [
 				{
@@ -297,7 +297,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 用於保存所有插入的"
+									"Data": "​​​ 用於保存所有插入的"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -340,7 +340,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用於保存自定義圖標表情圖片"
+									"Data": "​​ 用於保存自定義圖標表情圖片"
 								}
 							]
 						}
@@ -376,7 +376,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用於保存代碼片段"
+									"Data": "​​ 用於保存代碼片段"
 								}
 							]
 						}
@@ -413,7 +413,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 用於保存查詢條件、佈局和"
+									"Data": "​​​ 用於保存查詢條件、佈局和"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -461,7 +461,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 用於保存"
+									"Data": "​​​ 用於保存"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -505,7 +505,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 用於保存"
+									"Data": "​​​ 用於保存"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -513,6 +513,50 @@
 									"TextMarkBlockRefID": "20211226123101-qjw03ab",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "小工具"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230512170447-3eatvgq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230512170447-3eatvgq",
+						"updated": "20230512170521"
+					},
+					"Children": [
+						{
+							"ID": "20230512170447-iqoofli",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230512170447-iqoofli",
+								"updated": "20230512170521"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "plugins"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230506211210-1roopyo",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "插件"
 								}
 							]
 						}
@@ -549,7 +593,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 後綴的文件用於保存文檔資料，資料格式為 JSON"
+									"Data": "​​​ 後綴的文件用於保存文檔資料，資料格式為 JSON"
 								}
 							]
 						}

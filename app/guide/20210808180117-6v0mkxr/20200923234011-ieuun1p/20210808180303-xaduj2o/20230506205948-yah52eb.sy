@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230506205948-yah52eb",
 		"title": "Plugins",
-		"updated": "20230506211146"
+		"updated": "20230512195433"
 	},
 	"Children": [
 		{
@@ -28,23 +28,37 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210937-bt48731",
-				"updated": "20230506211000"
+				"updated": "20230512195419"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Plugins are mainly used to expand the overall functions of SiYuan. Compared with "
+					"Data": "Plugins are mainly used to expand the overall functions of SiYuan."
+				}
+			]
+		},
+		{
+			"ID": "20230512195420-9550ilh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512195420-9550ilh",
+				"updated": "20230512195433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Compared with "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20210824202056-udkf7wg",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "Widgets"
+					"TextMarkTextContent": "widgets"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", the plugin can exist without the document, which is more flexible and powerful."
+					"Data": ", the plugin is mainly for program function extension, not for content block extension."
 				}
 			]
 		},

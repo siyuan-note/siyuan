@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230506210010-houyyvy",
 		"title": "插件",
-		"updated": "20230506211757"
+		"updated": "20230512171323"
 	},
 	"Children": [
 		{
@@ -33,7 +33,29 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "插件主要用于扩展思源整体功能。相较于"
+					"Data": "插件主要用于扩展"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "思源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "整体功能。"
+				}
+			]
+		},
+		{
+			"ID": "20230512170814-itmsfoy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512170814-itmsfoy",
+				"updated": "20230512171323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "相较于"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -44,7 +66,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "而言，插件可以脱离于文档而存在，更为灵活和强大。"
+					"Data": "而言，插件主要面向程序功能扩展，不面向内容块扩展。"
 				}
 			]
 		},

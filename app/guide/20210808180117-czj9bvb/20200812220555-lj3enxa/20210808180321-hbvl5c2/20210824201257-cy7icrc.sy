@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210824201257-cy7icrc",
 		"title": "挂件",
-		"updated": "20230506210708"
+		"updated": "20230512194517"
 	},
 	"Children": [
 		{
@@ -28,7 +28,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210824201352-z3731rx",
-				"updated": "20210824201939"
+				"updated": "20230512170805"
 			},
 			"Children": [
 				{
@@ -42,7 +42,32 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 进行渲染展现。"
+					"Data": "​ 进行渲染展现。"
+				}
+			]
+		},
+		{
+			"ID": "20230512170809-69w37zm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512170809-69w37zm",
+				"updated": "20230512194517"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "相较于"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230506210010-houyyvy",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "插件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "而言，挂件是一种内容块，遵循块的索引和渲染规则，挂件主要面向内容块扩展，不面向程序功能扩展。"
 				}
 			]
 		},

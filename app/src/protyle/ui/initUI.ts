@@ -73,8 +73,8 @@ export const initUI = (protyle: IProtyle) => {
             embedBlockElement.firstElementChild.classList.toggle("protyle-icons--show");
         }
     });
-    let wheelTimeout: number
-    const isMacOS = isMac()
+    let wheelTimeout: number;
+    const isMacOS = isMac();
     protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {
         if ((isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
             return;
@@ -89,7 +89,7 @@ export const initUI = (protyle: IProtyle) => {
             }
         } else if (event.deltaY > 0) {
             if (window.siyuan.config.editor.fontSize > 9) {
-                window.siyuan.config.editor.fontSize--
+                window.siyuan.config.editor.fontSize--;
             } else {
                 return;
             }

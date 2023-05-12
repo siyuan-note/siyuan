@@ -159,7 +159,7 @@ export class Plugin {
                     destroy: options.destroy,
                     resize: options.resize,
                     update: options.update,
-                })
+                });
                 customObj.element.addEventListener("click", (event: MouseEvent) => {
                     setPanelFocus(customObj.element);
                     if (hasClosestByAttribute(event.target as HTMLElement, "data-type", "min")) {
@@ -167,7 +167,7 @@ export class Plugin {
                     }
                 });
                 customObj.element.classList.add("sy__" + type2);
-                return customObj
+                return customObj;
             }
         };
         return this.docks[type2];

@@ -240,28 +240,28 @@ export const exportLayout = (options: {
 };
 
 const pushPluginDock = (app: App, dockItem: IDockTab[], position: TPluginDockPosition) => {
-    const needPushData: { [key: string]: IPluginDockTab } = {}
+    const needPushData: { [key: string]: IPluginDockTab } = {};
     app.plugins.forEach((pluginItem) => {
         let isExist = false;
         dockItem.forEach(existSubItem => {
             if (Object.keys(pluginItem.docks).includes(existSubItem.type)) {
                 isExist = true;
             }
-        })
+        });
         if (!isExist) {
             Object.keys(pluginItem.docks).forEach(pluginDockKey => {
                 if (pluginItem.docks[pluginDockKey].config.position === position) {
                     needPushData[pluginDockKey] = pluginItem.docks[pluginDockKey].config;
                 }
-            })
+            });
         }
-    })
+    });
     dockItem.forEach(existSubItem => {
         if (existSubItem.hotkeyLangId) {
-            existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId]
-            existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom
+            existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
+            existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom;
         }
-    })
+    });
     Object.keys(needPushData).forEach(key => {
         const item = needPushData[key];
         dockItem.push({
@@ -272,8 +272,8 @@ const pushPluginDock = (app: App, dockItem: IDockTab[], position: TPluginDockPos
             hotkey: item.hotkey || "",
             title: item.title,
         });
-    })
-}
+    });
+};
 
 const JSONToDock = (json: any, app: App) => {
     json.left.data.forEach((existItem: IDockTab[], index: number) => {

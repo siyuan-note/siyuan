@@ -259,6 +259,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/import/importData", model.CheckAuth, model.CheckReadonly, importData)
 	ginServer.Handle("POST", "/api/import/importSY", model.CheckAuth, model.CheckReadonly, importSY)
 
+	ginServer.Handle("POST", "/api/convert/pandoc", model.CheckAuth, model.CheckReadonly, pandoc)
+
 	ginServer.Handle("POST", "/api/template/render", model.CheckAuth, renderTemplate)
 	ginServer.Handle("POST", "/api/template/docSaveAsTemplate", model.CheckAuth, model.CheckReadonly, docSaveAsTemplate)
 	ginServer.Handle("POST", "/api/template/renderSprig", model.CheckAuth, model.CheckReadonly, renderSprig)

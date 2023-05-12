@@ -44,6 +44,8 @@
     * [List files](#List-files)
 * [Export](#Export)
     * [Export Markdown](#Export-Markdown)
+* [Conversion](#Conversion)
+    * [Pandoc](#Pandoc)
 * [Notification](#Notification)
     * [Push message](#Push-message)
     * [Push error message](#Push-error-message)
@@ -710,9 +712,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-  * `id`: Block ID to move
-  * `previousID`: The ID of the previous block, used to anchor the insertion position
-  * `parentID`: The ID of the parent block, used to anchor the insertion position, `previousID` and `parentID` cannot be empty at the same time, if they exist at the same time, `previousID` will be used first
+    * `id`: Block ID to move
+    * `previousID`: The ID of the previous block, used to anchor the insertion position
+    * `parentID`: The ID of the parent block, used to anchor the insertion position, `previousID` and `parentID` cannot
+      be empty at the same time, if they exist at the same time, `previousID` will be used first
 * Return value
 
   ```json
@@ -1013,6 +1016,41 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
     * `hPath`: human-readable path
     * `content`: Markdown content
+
+## Conversion
+
+### Pandoc
+
+* `/api/convert/pandoc`
+* Working directory
+    * Executing the pandoc command will set the working directory to `workspace/temp/convert/pandoc/`
+    * API [`Put file`](#put-file) can be used to write the file to be converted to this directory first
+    * Then call the API for conversion, and the converted file will also be written to this directory
+    * Finally, call the API [`Get file`](#get-file) to get the converted file
+        * Or call the API [Create a document with Markdown](#Create-a-document-with-Markdown)
+        * Or call the internal API `importStdMd` to import the converted folder directly
+* Parameters
+
+  ```json
+  {
+    "args": [
+      "--to", "markdown_strict-raw_html",
+      "foo.epub",
+      "-o", "foo.md"
+   ]
+  }
+  ```
+
+    * `args`: Pandoc command line parameters
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
 
 ## Notification
 

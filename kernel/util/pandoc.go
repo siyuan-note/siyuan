@@ -18,6 +18,8 @@ package util
 
 import (
 	"bytes"
+	"errors"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -25,6 +27,27 @@ import (
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/logging"
 )
+
+func ConvertPandoc(args ...string) (err error) {
+	if "" == PandocBinPath || ContainerStd != Container {
+		return errors.New("not found executable pandoc")
+	}
+
+	pandoc := exec.Command(PandocBinPath, args...)
+	gulu.CmdAttr(pandoc)
+	dir := filepath.Join(WorkspaceDir, "temp", "convert", "pandoc")
+	if err = os.MkdirAll(dir, 0755); nil != err {
+		logging.LogErrorf("mkdir [%s] failed: [%s]", dir, err)
+		return
+	}
+	pandoc.Dir = dir
+	output, err := pandoc.CombinedOutput()
+	if nil != err {
+		logging.LogErrorf("pandoc convert output [%s]", string(output))
+		return
+	}
+	return
+}
 
 func Pandoc(from, to, o, content string) (ret string, err error) {
 	if "" == from || "" == to || "md" == to {

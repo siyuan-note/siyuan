@@ -9,6 +9,7 @@ import {isMobile} from "../util/functions";
 /// #if !MOBILE
 import {openFile} from "../editor/util";
 /// #endif
+import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export class Menu {
     private menu: SiyuanMenu;
@@ -82,6 +83,7 @@ openTab = openFile;
 export const API = {
     confirm: confirmDialog,
     showMessage,
+    adaptHotkey: updateHotkeyTip,
     fetchPost,
     fetchSyncPost,
     fetchGet,

@@ -33,8 +33,8 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
             getAllDocks().forEach((item, index) => {
                 dockHtml += `<li data-type="${item.type}" data-index="${index + 1}" class="b3-list-item">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
-    <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
-    <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
+    <span class="b3-list-item__text">${item.title}</span>
+    <span class="b3-list-item__meta">${updateHotkeyTip(item.hotkey || "")}</span>
 </li>`;
             });
             dockHtml = dockHtml + "</ul>";

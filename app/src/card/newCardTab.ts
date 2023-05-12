@@ -3,6 +3,7 @@ import {Custom} from "../layout/dock/Custom";
 import {bindCardEvent, genCardHTML} from "./openCard";
 import {fetchPost} from "../util/fetch";
 import {Protyle} from "../protyle";
+import {setPanelFocus} from "../layout/util";
 
 export const newCardModel = (options: {
     tab: Tab,
@@ -13,7 +14,7 @@ export const newCardModel = (options: {
     }
 }) => {
     let editor: Protyle;
-    const custom = new Custom({
+    const customObj = new Custom({
         type: "siyuan-card",
         tab: options.tab,
         data: options.data,
@@ -66,5 +67,8 @@ export const newCardModel = (options: {
             });
         }
     });
-    return custom;
+    customObj.element.addEventListener("click", () => {
+        setPanelFocus(customObj.element.parentElement.parentElement);
+    });
+    return customObj;
 };

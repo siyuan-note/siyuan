@@ -163,9 +163,6 @@ export class Inbox extends Model {
             }
         });
         this.update();
-        /// #if !MOBILE
-        setPanelFocus(this.element);
-        /// #endif
     }
 
     private back() {

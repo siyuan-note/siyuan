@@ -6,6 +6,8 @@ import {isMobile, isWindow} from "../util/functions";
 import {Custom} from "../layout/dock/Custom";
 /// #endif
 import {Tab} from "../layout/Tab";
+import {getDockByType, setPanelFocus} from "../layout/util";
+import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 
 export class Plugin {
     public i18n: IObject;
@@ -15,6 +17,14 @@ export class Plugin {
     public models: {
         /// #if !MOBILE
         [key: string]: (options: { tab: Tab, data: any }) => Custom
+        /// #endif
+    } = {};
+    public docks: {
+        /// #if !MOBILE
+        [key: string]: {
+            config: IPluginDockTab,
+            model: (options: { tab: Tab }) => Custom
+        }
         /// #endif
     } = {};
 
@@ -99,7 +109,7 @@ export class Plugin {
         });
     }
 
-    public createTab(options: {
+    public addTab(options: {
         type: string,
         destroy?: () => void,
         resize?: () => void,
@@ -108,16 +118,59 @@ export class Plugin {
     }) {
         /// #if !MOBILE
         const type2 = this.name + options.type;
-        this.models[type2] = (arg: { data: any, tab: Tab }) => new Custom({
-            tab: arg.tab,
-            type: type2,
-            data: arg.data,
-            init: options.init,
-            destroy: options.destroy,
-            resize: options.resize,
-            update: options.update,
-        });
+        this.models[type2] = (arg: { data: any, tab: Tab }) => {
+            const customObj = new Custom({
+                tab: arg.tab,
+                type: type2,
+                data: arg.data,
+                init: options.init,
+                destroy: options.destroy,
+                resize: options.resize,
+                update: options.update,
+            });
+            customObj.element.addEventListener("click", () => {
+                setPanelFocus(customObj.element.parentElement.parentElement);
+            });
+            return customObj;
+        };
         return this.models[type2];
+        /// #endif
+    }
+
+    public addDock(options: {
+        config: IPluginDockTab,
+        data: any,
+        type: string,
+        destroy?: () => void,
+        resize?: () => void,
+        update?: () => void,
+        init: () => void
+    }) {
+        /// #if !MOBILE
+        const type2 = this.name + options.type;
+        this.docks[type2] = {
+            config: options.config,
+            model: (arg: { tab: Tab }) => {
+                const customObj = new Custom({
+                    tab: arg.tab,
+                    type: type2,
+                    data: options.data,
+                    init: options.init,
+                    destroy: options.destroy,
+                    resize: options.resize,
+                    update: options.update,
+                })
+                customObj.element.addEventListener("click", (event: MouseEvent) => {
+                    setPanelFocus(customObj.element);
+                    if (hasClosestByAttribute(event.target as HTMLElement, "data-type", "min")) {
+                        getDockByType(type2).toggleModel(type2);
+                    }
+                });
+                customObj.element.classList.add("sy__" + type2);
+                return customObj
+            }
+        };
+        return this.docks[type2];
         /// #endif
     }
 }

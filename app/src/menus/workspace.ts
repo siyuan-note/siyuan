@@ -58,8 +58,8 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
         getAllDocks().forEach(item => {
             dockMenu.push({
                 icon: item.icon,
-                accelerator: window.siyuan.config.keymap.general[item.hotkeyLangId].custom,
-                label: window.siyuan.languages[item.hotkeyLangId],
+                accelerator: item.hotkey,
+                label: item.title,
                 click() {
                     getDockByType(item.type).toggleModel(item.type);
                 }

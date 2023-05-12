@@ -181,7 +181,6 @@ export class Tag extends Model {
             }
         });
         this.update();
-        setPanelFocus(this.element);
     }
 
     public update() {

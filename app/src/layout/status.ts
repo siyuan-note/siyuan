@@ -126,7 +126,7 @@ export const initStatus = (isWindow = false) => {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-menu__item")) {
-                const type = target.getAttribute("data-type") as TDockType;
+                const type = target.getAttribute("data-type");
                 getDockByType(type).toggleModel(type);
                 if (type === "file" && getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);

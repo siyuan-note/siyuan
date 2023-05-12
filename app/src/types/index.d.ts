@@ -2,16 +2,7 @@ type TLayout = "normal" | "bottom" | "left" | "right" | "center"
 type TSearchFilter = "mathBlock" | "table" | "blockquote" | "superBlock" | "paragraph" | "document" | "heading"
     | "list" | "listItem" | "codeBlock" | "htmlBlock"
 type TDirection = "lr" | "tb"
-type TDockType =
-    "file"
-    | "outline"
-    | "bookmark"
-    | "tag"
-    | "graph"
-    | "globalGraph"
-    | "backlink"
-    | "backlinkOld"
-    | "inbox"
+type TPluginDockPosition = "LeftTop" | "LeftBottom" | "RightTop" | "RightBottom" | "BottomLeft" | "BottomRight"
 type TDockPosition = "Left" | "Right" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
 type TEditorMode = "preview" | "wysiwyg"
@@ -39,7 +30,7 @@ interface Window {
     dataLayer: any[]
     siyuan: ISiyuan
     webkit: any
-    html2canvas: (element: Element, opitons: {useCORS: boolean}) => Promise<any>;
+    html2canvas: (element: Element, opitons: { useCORS: boolean }) => Promise<any>;
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
@@ -298,11 +289,21 @@ declare interface ILayoutJSON extends ILayoutOptions {
 }
 
 declare interface IDockTab {
-    type: TDockType;
+    type: string;
     size: { width: number, height: number }
     show: boolean
     icon: string
-    hotkeyLangId: string
+    title: string
+    hotkey?: string
+    hotkeyLangId?: string   // 常量中无法存变量
+}
+
+declare interface IPluginDockTab {
+    position: TPluginDockPosition,
+    size: { width: number, height: number },
+    icon: string,
+    hotkey?: string,
+    title: string,
 }
 
 declare interface IOpenFileOptions {

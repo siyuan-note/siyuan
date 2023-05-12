@@ -15,16 +15,26 @@ import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
 import {resetFloatDockSize} from "./util";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {App} from "../../index";
+import {Plugin} from "../../plugin";
 
 export class Dock {
     public element: HTMLElement;
     public layout: Layout;
     private position: TDockPosition;
+    private app: App;
     public resizeElement: HTMLElement;
     public pin = true;
     public data: { [key: string]: Model | boolean };
 
-    constructor(options: { data: { pin: boolean, data: IDockTab[][] }, position: TDockPosition }) {
+    constructor(options: {
+        app: App,
+        data: {
+            pin: boolean,
+            data: IDockTab[][]
+        },
+        position: TDockPosition
+    }) {
         switch (options.position) {
             case "Left":
                 this.layout = window.siyuan.layout.layout.children[0].children[0] as Layout;
@@ -45,6 +55,7 @@ export class Dock {
                 this.layout.element.insertAdjacentHTML("beforeend", "<div class=\"layout__dockresize\"></div>");
                 break;
         }
+        this.app = options.app;
         this.element = document.getElementById("dock" + options.position);
         const dockClass = options.position === "Bottom" ? ' class="fn__flex"' : "";
         this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1"></div><div${dockClass}></div>`;
@@ -77,13 +88,13 @@ export class Dock {
             this.resizeElement.classList.add("fn__none");
         } else {
             activeElements.forEach(item => {
-                this.toggleModel(item.getAttribute("data-type") as TDockType, true);
+                this.toggleModel(item.getAttribute("data-type"), true);
             });
         }
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                const type = target.getAttribute("data-type") as TDockType;
+                const type = target.getAttribute("data-type");
                 if (type) {
                     this.toggleModel(type, false, true);
                     event.preventDefault();
@@ -256,7 +267,7 @@ export class Dock {
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
     }
 
-    public toggleModel(type: TDockType, show = false, close = false) {
+    public toggleModel(type: string, show = false, close = false) {
         if (!type) {
             return;
         }
@@ -389,10 +400,27 @@ export class Dock {
                             }
                         });
                         break;
+                    default:
+                        tab = new Tab({
+                            callback: (tab: Tab) => {
+                                let customModel;
+                                this.app.plugins.find((item: Plugin) => {
+                                    if (item.docks[type]) {
+                                        customModel = item.docks[type].model({tab});
+                                        return true;
+                                    }
+                                });
+                                if (customModel) {
+                                    tab.addModel(customModel);
+                                }
+                            }
+                        });
+                        break;
                 }
                 wnd.addTab(tab);
                 target.setAttribute("data-id", tab.id);
                 this.data[type] = tab.model;
+                setPanelFocus(tab.panelElement);
             } else {
                 // tab 切换
                 Array.from(wnd.element.querySelector(".layout-tab-container").children).forEach(item => {
@@ -482,7 +510,7 @@ export class Dock {
     public add(index: number, sourceElement: Element) {
         sourceElement.setAttribute("data-height", "");
         sourceElement.setAttribute("data-width", "");
-        const type = sourceElement.getAttribute("data-type") as TDockType;
+        const type = sourceElement.getAttribute("data-type");
         const sourceDock = getDockByType(type);
         if (sourceDock.element.querySelectorAll(".dock__item").length === 2) {
             sourceDock.element.classList.add("fn__none");
@@ -569,7 +597,7 @@ export class Dock {
     private genButton(data: IDockTab[], index: number) {
         let html = "";
         data.forEach(item => {
-            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkeylangid="${item.hotkeyLangId}" class="dock__item${item.show ? " dock__item--active" : ""} b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${window.siyuan.languages[item.hotkeyLangId] + " " + updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}${window.siyuan.languages.dockTip}">
+            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeyLangId="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}">
     <svg><use xlink:href="#${item.icon}"></use></svg>
 </span>`;
             this.data[item.type] = true;

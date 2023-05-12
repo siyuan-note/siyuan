@@ -1,9 +1,8 @@
 import {Tab} from "../Tab";
-import {setPanelFocus} from "../util";
 import {Model} from "../Model";
 
 export class Custom extends Model {
-    private element: Element;
+    public element: Element;
     public data: any;
     public type: string;
     public init: () => void;
@@ -27,9 +26,6 @@ export class Custom extends Model {
         }
         this.element = options.tab.panelElement;
         this.data = options.data;
-        this.element.addEventListener("click", () => {
-            setPanelFocus(this.element.parentElement.parentElement);
-        });
         this.init = options.init;
         this.destroy = options.destroy;
         this.resize = options.resize;

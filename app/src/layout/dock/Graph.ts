@@ -354,9 +354,6 @@ export class Graph extends Model {
             });
         });
         this.searchGraph(options.type !== "global");
-        if (this.type !== "local") {
-            setPanelFocus(this.element);
-        }
     }
 
     private reset(conf: IGraphCommon & ({ dailyNote: boolean } | { minRefs: number, dailyNote: boolean })) {

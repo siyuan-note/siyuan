@@ -169,10 +169,6 @@ export class Outline extends Model {
         }, response => {
             this.update(response);
         });
-
-        if (this.type === "pin") {
-            setPanelFocus(options.tab.panelElement);
-        }
     }
 
     public updateDocTitle(ial?: IObject) {

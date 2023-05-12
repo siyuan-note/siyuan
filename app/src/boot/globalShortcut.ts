@@ -76,7 +76,7 @@ const switchDialogEvent = (event: MouseEvent, switchDialog: Dialog) => {
                 if (currentType === "riffCard") {
                     openCard();
                 } else {
-                    getDockByType(currentType as TDockType).toggleModel(currentType as TDockType, true);
+                    getDockByType(currentType).toggleModel(currentType, true);
                 }
             } else {
                 const currentId = target.getAttribute("data-id");
@@ -369,7 +369,7 @@ export const globalShortcut = (app: App) => {
                     if (currentType === "riffCard") {
                         openCard();
                     } else {
-                        getDockByType(currentType as TDockType).toggleModel(currentType as TDockType, true);
+                        getDockByType(currentType).toggleModel(currentType, true);
                     }
                     if (document.activeElement) {
                         (document.activeElement as HTMLElement).blur();
@@ -492,8 +492,8 @@ export const globalShortcut = (app: App) => {
                 getAllDocks().forEach((item, index) => {
                     dockHtml += `<li data-type="${item.type}" data-index="${index + 1}" class="b3-list-item">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
-    <span class="b3-list-item__text">${window.siyuan.languages[item.hotkeyLangId]}</span>
-    <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general[item.hotkeyLangId].custom)}</span>
+    <span class="b3-list-item__text">${item.title}</span>
+    <span class="b3-list-item__meta">${updateHotkeyTip(item.hotkey || "")}</span>
 </li>`;
                 });
                 dockHtml = dockHtml + "</ul>";
@@ -623,7 +623,7 @@ export const globalShortcut = (app: App) => {
             return;
         }
         const matchDock = getAllDocks().find(item => {
-            if (matchHotKey(window.siyuan.config.keymap.general[item.hotkeyLangId].custom, event)) {
+            if (matchHotKey(item.hotkey, event)) {
                 getDockByType(item.type).toggleModel(item.type);
                 if (document.activeElement) {
                     (document.activeElement as HTMLElement).blur();
@@ -751,15 +751,15 @@ export const globalShortcut = (app: App) => {
             event.preventDefault();
             let activeTabElement = document.querySelector(".layout__tab--active");
             if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
-                let type: TDockType;
+                let type = "";
                 Array.from(activeTabElement.classList).find(item => {
                     if (item.startsWith("sy__")) {
-                        type = item.replace("sy__", "") as TDockType;
+                        type = item.replace("sy__", "");
                         return true;
                     }
                 });
                 if (type) {
-                    getDockByType(type).toggleModel(type, false, true);
+                    getDockByType(type)?.toggleModel(type, false, true);
                 }
                 return;
             }
@@ -932,7 +932,7 @@ const dialogArrow = (element: HTMLElement, event: KeyboardEvent) => {
                 if (currentType === "riffCard") {
                     openCard();
                 } else {
-                    getDockByType(currentType as TDockType).toggleModel(currentType as TDockType, true);
+                    getDockByType(currentType).toggleModel(currentType, true);
                 }
             } else {
                 openFileById({

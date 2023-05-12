@@ -146,7 +146,6 @@ export class Bookmark extends Model {
         });
 
         this.update();
-        setPanelFocus(this.element);
     }
 
     public update() {

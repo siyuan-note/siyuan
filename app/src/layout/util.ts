@@ -55,9 +55,9 @@ export const setPanelFocus = (element: Element) => {
         element.classList.add("layout__wnd--active");
     } else {
         element.classList.add("layout__tab--active");
-        ["file", "inbox", "backlink", "tag", "bookmark", "graph", "globalGraph", "outline"].find(item => {
-            if (element.classList.contains("sy__" + item)) {
-                document.querySelector(`.dock__item[data-type="${item}"]`).classList.add("dock__item--activefocus");
+        Array.from(element.classList).find(item => {
+            if (item.startsWith("sy__")) {
+                document.querySelector(`.dock__item[data-type="${item.substring(4)}"]`).classList.add("dock__item--activefocus");
                 return true;
             }
         });
@@ -71,7 +71,7 @@ export const setPanelFocus = (element: Element) => {
     }
 };
 
-export const getDockByType = (type: TDockType) => {
+export const getDockByType = (type: string) => {
     if (!window.siyuan.layout.leftDock) {
         return undefined;
     }
@@ -154,14 +154,16 @@ const dockToJSON = (dock: Dock) => {
         const data: IDockTab[] = [];
         dock.element.querySelectorAll(`span[data-index="${index}"]`).forEach(item => {
             data.push({
-                type: item.getAttribute("data-type") as TDockType,
+                type: item.getAttribute("data-type"),
                 size: {
                     height: parseInt(item.getAttribute("data-height")),
                     width: parseInt(item.getAttribute("data-width")),
                 },
+                title: item.getAttribute("data-title"),
                 show: item.classList.contains("dock__item--active"),
                 icon: item.querySelector("use").getAttribute("xlink:href").substring(1),
-                hotkeyLangId: item.getAttribute("data-hotkeylangid")
+                hotkey: item.getAttribute("data-hotkey") || "",
+                hotkeyLangId: item.getAttribute("data-hotkeyLangId") || ""
             });
         });
         return data;
@@ -237,11 +239,56 @@ export const exportLayout = (options: {
     });
 };
 
-const JSONToDock = (json: any) => {
+const pushPluginDock = (app: App, dockItem: IDockTab[], position: TPluginDockPosition) => {
+    const needPushData: { [key: string]: IPluginDockTab } = {}
+    app.plugins.forEach((pluginItem) => {
+        let isExist = false;
+        dockItem.forEach(existSubItem => {
+            if (Object.keys(pluginItem.docks).includes(existSubItem.type)) {
+                isExist = true;
+            }
+        })
+        if (!isExist) {
+            Object.keys(pluginItem.docks).forEach(pluginDockKey => {
+                if (pluginItem.docks[pluginDockKey].config.position === position) {
+                    needPushData[pluginDockKey] = pluginItem.docks[pluginDockKey].config;
+                }
+            })
+        }
+    })
+    dockItem.forEach(existSubItem => {
+        if (existSubItem.hotkeyLangId) {
+            existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId]
+            existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom
+        }
+    })
+    Object.keys(needPushData).forEach(key => {
+        const item = needPushData[key];
+        dockItem.push({
+            type: key,
+            size: item.size,
+            show: false,
+            icon: item.icon,
+            hotkey: item.hotkey || "",
+            title: item.title,
+        });
+    })
+}
+
+const JSONToDock = (json: any, app: App) => {
+    json.left.data.forEach((existItem: IDockTab[], index: number) => {
+        pushPluginDock(app, existItem, index === 0 ? "LeftTop" : "LeftBottom");
+    });
+    json.right.data.forEach((existItem: IDockTab[], index: number) => {
+        pushPluginDock(app, existItem, index === 0 ? "RightTop" : "RightBottom");
+    });
+    json.bottom.data.forEach((existItem: IDockTab[], index: number) => {
+        pushPluginDock(app, existItem, index === 0 ? "BottomLeft" : "BottomRight");
+    });
     window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[0].children[1] as Layout;
-    window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left});
-    window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right});
-    window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom});
+    window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left, app});
+    window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right, app});
+    window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom, app});
 };
 
 export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd | Tab | Model, isStart = false) => {
@@ -387,7 +434,7 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
 
 export const JSONToLayout = (app: App, isStart: boolean) => {
     JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined, isStart);
-    JSONToDock(window.siyuan.config.uiLayout);
+    JSONToDock(window.siyuan.config.uiLayout, app);
     // 启动时不打开页签，需要移除没有钉住的页签
     if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
         getAllTabs().forEach(item => {

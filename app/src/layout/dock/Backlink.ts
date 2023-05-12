@@ -325,10 +325,6 @@ export class Backlink extends Model {
         });
 
         this.searchBacklinks(true);
-
-        if (this.type === "pin") {
-            setPanelFocus(this.element);
-        }
     }
 
     private setFocus() {

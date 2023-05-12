@@ -602,7 +602,6 @@ export class Files extends Model {
             newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
         });
         this.init();
-        setPanelFocus(this.element.parentElement);
         if (window.siyuan.config.openHelp) {
             // 需等待链接建立，不能放在 ongetconfig 中
             mountHelp();

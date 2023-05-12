@@ -19,6 +19,8 @@ package conf
 import (
 	"os"
 	"strconv"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 type AI struct {
@@ -37,6 +39,7 @@ type OpenAI struct {
 func NewAI() *AI {
 	openAI := &OpenAI{
 		APITimeout: 30,
+		APIModel:   openai.GPT3Dot5Turbo,
 		APIBaseURL: "https://api.openai.com/v1",
 	}
 

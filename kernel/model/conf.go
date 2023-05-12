@@ -339,7 +339,7 @@ func InitConf() {
 		Conf.AI = conf.NewAI()
 	}
 	if "" == Conf.AI.OpenAI.APIModel {
-		Conf.AI.OpenAI.APIModel = openai.GPT4
+		Conf.AI.OpenAI.APIModel = openai.GPT3Dot5Turbo
 	}
 
 	if "" != Conf.AI.OpenAI.APIKey {

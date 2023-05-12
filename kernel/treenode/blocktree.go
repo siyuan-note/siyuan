@@ -234,7 +234,7 @@ func RemoveBlockTreesByPathPrefix(pathPrefix string) {
 		slice.m.Lock()
 		for _, b := range slice.data {
 			if strings.HasPrefix(b.Path, pathPrefix) {
-				ids = append(ids, b.RootID)
+				ids = append(ids, b.ID)
 			}
 		}
 		slice.m.Unlock()
@@ -276,7 +276,7 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 		slice.m.Lock()
 		for _, b := range slice.data {
 			if b.BoxID == boxID {
-				ids = append(ids, b.RootID)
+				ids = append(ids, b.ID)
 			}
 		}
 		slice.m.Unlock()

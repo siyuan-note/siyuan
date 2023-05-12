@@ -631,6 +631,7 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 	ret.Path = bt.Path
 	ret.HPath = bt.HPath
 	ret.Box = bt.BoxID
+	ret.ID = bt.RootID
 	return
 }
 

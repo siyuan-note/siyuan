@@ -175,6 +175,9 @@ func InitConf() {
 		Conf.FileTree.MaxOpenTabCount = 32
 	}
 	Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
+	if "../" == Conf.FileTree.DocCreateSavePath {
+		Conf.FileTree.DocCreateSavePath = "../Untitled"
+	}
 	for strings.HasSuffix(Conf.FileTree.DocCreateSavePath, "/") {
 		Conf.FileTree.DocCreateSavePath = strings.TrimSuffix(Conf.FileTree.DocCreateSavePath, "/")
 		Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
@@ -339,7 +342,7 @@ func InitConf() {
 		Conf.AI = conf.NewAI()
 	}
 	if "" == Conf.AI.OpenAI.APIModel {
-		Conf.AI.OpenAI.APIModel = openai.GPT4
+		Conf.AI.OpenAI.APIModel = openai.GPT3Dot5Turbo
 	}
 
 	if "" != Conf.AI.OpenAI.APIKey {

@@ -265,6 +265,9 @@ func setFiletree(c *gin.Context) {
 	}
 
 	fileTree.DocCreateSavePath = strings.TrimSpace(fileTree.DocCreateSavePath)
+	if "../" == fileTree.DocCreateSavePath {
+		fileTree.DocCreateSavePath = "../Untitled"
+	}
 	for strings.HasSuffix(fileTree.DocCreateSavePath, "/") {
 		fileTree.DocCreateSavePath = strings.TrimSuffix(fileTree.DocCreateSavePath, "/")
 		fileTree.DocCreateSavePath = strings.TrimSpace(fileTree.DocCreateSavePath)

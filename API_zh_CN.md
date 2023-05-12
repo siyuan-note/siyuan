@@ -44,6 +44,8 @@
     * [列出文件](#列出文件)
 * [导出](#导出)
     * [导出 Markdown 文本](#导出-markdown-文本)
+* [转换](#转换)
+    * [Pandoc](#Pandoc)
 * [通知](#通知)
     * [推送消息](#推送消息)
     * [推送报错消息](#推送报错消息)
@@ -1007,6 +1009,41 @@
 
     * `hPath`：人类可读的路径
     * `content`：Markdown 内容
+
+## 转换
+
+### Pandoc
+
+* `/api/convert/pandoc`
+* 工作目录
+    * 执行调用 pandoc 命令时工作目录会被设置在 `工作空间/temp/convert/pandoc/` 下
+    * 可先通过 API [`写入文件`](#写入文件) 将待转换文件写入该目录
+    * 然后再调用该 API 进行转换，转换后的文件也会被写入该目录
+    * 最后调用 API [`获取文件`](#获取文件) 获取转换后的文件内容
+        * 或者调用 API [`通过 Markdown 创建文档`](#通过-markdown-创建文档)
+        * 或者调用内部 API `importStdMd` 将转换后的文件夹直接导入
+* 参数
+
+  ```json
+  {
+    "args": [
+      "--to", "markdown_strict-raw_html",
+      "foo.epub",
+      "-o", "foo.md"
+   ]
+  }
+  ```
+
+    * `args`：Pandoc 命令行参数
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
 
 ## 通知
 

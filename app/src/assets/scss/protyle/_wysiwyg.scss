@@ -53,9 +53,7 @@
       &:before {
         content: "";
         position: absolute;
-        height: calc(100% - 35px);
         border-left: 0.5px solid var(--b3-theme-background-light);
-        top: 35px;
         left: 17px;
       }
 

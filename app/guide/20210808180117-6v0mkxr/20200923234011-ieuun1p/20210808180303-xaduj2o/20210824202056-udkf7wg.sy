@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210824202056-udkf7wg",
 		"title": "Widgets",
-		"updated": "20230506210716"
+		"updated": "20230512195357"
 	},
 	"Children": [
 		{
@@ -33,7 +33,15 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The widget is a static webpage served by SiYuan Kernel. It accesses data through API and renders it through "
+					"Data": "The widget is a static webpage served by "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Kernel. It accesses data through API and renders it through "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -42,7 +50,32 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20230512195321-tin4qpv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512195321-tin4qpv",
+				"updated": "20230512195357"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Compared with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230506205948-yah52eb",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "plugins"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", a widget is a kind of content block, which follows the indexing and rendering rules of the block. The widget is mainly oriented to content block extension, not to program function extension."
 				}
 			]
 		},

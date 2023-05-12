@@ -1495,11 +1495,6 @@ export class Toolbar {
         });
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
-        /// #if !MOBILE
-        const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-        (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
-        /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
         fetchPost("/api/search/searchTemplate", {
@@ -1522,6 +1517,11 @@ export class Toolbar {
                 html = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             }
             this.subElement.querySelector(".b3-list--background").innerHTML = html;
+            /// #if !MOBILE
+            const rangePosition = getSelectionPosition(nodeElement, range);
+            setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+            (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
+            /// #endif
         });
     }
 
@@ -1573,10 +1573,6 @@ export class Toolbar {
         });
         this.subElement.classList.remove("fn__none");
         this.subElementCloseCB = undefined;
-        /// #if !MOBILE
-        const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-        /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
         fetchPost("/api/search/searchWidget", {
@@ -1587,6 +1583,10 @@ export class Toolbar {
                 html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.content}</div>`;
             });
             this.subElement.querySelector(".b3-list--background").innerHTML = html;
+            /// #if !MOBILE
+            const rangePosition = getSelectionPosition(nodeElement, range);
+            setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+            /// #endif
         });
     }
 

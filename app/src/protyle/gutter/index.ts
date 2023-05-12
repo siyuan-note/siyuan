@@ -37,6 +37,7 @@ import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
+import {hideTooltip} from "../../dialog/tooltip";
 
 export class Gutter {
     public element: HTMLElement;
@@ -52,6 +53,7 @@ export class Gutter {
         this.element.setAttribute("data-type", "a");
         this.element.setAttribute("data-position", "right");
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
+            hideTooltip();
             let selectIds: string[] = [event.target.getAttribute("data-node-id")];
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {

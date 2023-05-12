@@ -175,6 +175,9 @@ func InitConf() {
 		Conf.FileTree.MaxOpenTabCount = 32
 	}
 	Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
+	if "../" == Conf.FileTree.DocCreateSavePath {
+		Conf.FileTree.DocCreateSavePath = "../Untitled"
+	}
 	for strings.HasSuffix(Conf.FileTree.DocCreateSavePath, "/") {
 		Conf.FileTree.DocCreateSavePath = strings.TrimSuffix(Conf.FileTree.DocCreateSavePath, "/")
 		Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)

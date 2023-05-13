@@ -1,8 +1,6 @@
 import {setTitle} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
-import {genEmptyElement} from "../../block/util";
-import {transaction} from "../wysiwyg/transaction";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
 import {highlightRender} from "../markdown/highlightRender";
@@ -11,16 +9,15 @@ import {highlightById} from "../../util/highlightById";
 /// #if !MOBILE
 import {pushBack} from "../../util/backForward";
 /// #endif
-import {focusBlock} from "./selection";
+import {focusBlock, focusByOffset} from "./selection";
 import {hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
-import {restoreScroll} from "../scroll/saveScroll";
 import {removeLoading} from "../ui/initUI";
 import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
 
-export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: IScrollAttr, renderTitle = false) => {
+export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: IScrollAttr) => {
     protyle.wysiwyg.element.removeAttribute("data-top");
     if (data.code === 1) {
         // 其他报错
@@ -38,7 +35,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     protyle.notebookId = data.data.box;
     protyle.path = data.data.path;
 
-    if (data.data.eof) {
+    if (data.data.eof && !scrollAttr) {
         if (action.includes(Constants.CB_GET_BEFORE)) {
             protyle.wysiwyg.element.firstElementChild.setAttribute("data-eof", "1");
         } else {
@@ -49,18 +46,6 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
         }
     }
     hideElements(["gutter"], protyle);
-    let html = data.data.content;
-    if (html === "" && !action) {
-        const element = genEmptyElement(false, false);
-        html = element.outerHTML;
-        transaction(protyle, [{
-            action: "insert",
-            id: element.getAttribute("data-node-id"),
-            data: html,
-            parentID: data.data.parentID
-        }]);
-    }
-
     protyle.block.parentID = data.data.parentID;
     protyle.block.parent2ID = data.data.parent2ID;
     protyle.block.rootID = data.data.rootID;
@@ -79,10 +64,10 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     // 防止动态加载加载过多的内容
     if (action.includes(Constants.CB_GET_APPEND) || action.includes(Constants.CB_GET_BEFORE) || action.includes(Constants.CB_GET_HTML)) {
         setHTML({
-            content: html,
+            content: data.data.content,
             expand: data.data.isBacklinkExpand,
             action,
-            unScroll: false,
+            scrollAttr,
             isSyncing: data.data.isSyncing,
         }, protyle);
         removeLoading(protyle);
@@ -94,34 +79,20 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     }, (response) => {
         if (protyle.options.render.title) {
             // 页签没有打开
-            protyle.title.render(protyle, response, renderTitle);
+            protyle.title.render(protyle, response);
         } else if (protyle.options.render.background) {
             protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
         }
 
-        let scrollObj = scrollAttr;
-        if (!scrollObj) {
-            if (action.includes(Constants.CB_GET_SCROLL) && response.data.ial.scroll) {
-                try {
-                    scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
-                } catch (e) {
-                    scrollObj = undefined;
-                }
-            }
-        }
-
         setHTML({
-            content: html,
+            content: data.data.content,
             expand: data.data.isBacklinkExpand,
             action,
-            unScroll: (scrollObj && scrollObj.focusId) ? true : false,
+            scrollAttr,
             isSyncing: data.data.isSyncing,
         }, protyle);
         setTitle(response.data.ial.title);
-        if (scrollObj && protyle.options.mode !== "preview") {
-            restoreScroll(protyle, scrollObj);
-        }
         removeLoading(protyle);
     });
 };
@@ -131,7 +102,7 @@ const setHTML = (options: {
     action?: string[],
     isSyncing: boolean,
     expand: boolean,
-    unScroll?: boolean
+    scrollAttr?: IScrollAttr
 }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none")) {
         return;
@@ -189,7 +160,31 @@ const setHTML = (options: {
     if (protyle.options.render.scroll) {
         protyle.scroll.update(protyle);
     }
-    if (options.action.includes(Constants.CB_GET_HL) && !options.unScroll) {
+    if (options.scrollAttr) {
+        protyle.contentElement.scrollTop = options.scrollAttr.scrollTop;
+        if (options.action.includes(Constants.CB_GET_HL)) {
+            highlightById(protyle, options.scrollAttr.focusId, true);
+        } else if (options.action.includes(Constants.CB_GET_FOCUS)) {
+            if (options.scrollAttr.focusId) {
+                const range = focusByOffset(protyle.wysiwyg.element.querySelector(`[data-node-id="${options.scrollAttr.focusId}"]`), options.scrollAttr.focusStart, options.scrollAttr.focusEnd);
+                /// #if !MOBILE
+                if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
+                    pushBack(protyle, range || undefined);
+                }
+                /// #endif
+            } else {
+                focusElement(protyle, options);
+            }
+        }
+        if (!protyle.scroll.element.classList.contains("fn__none")) {
+            // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
+            protyle.scroll.updateIndex(protyle, options.scrollAttr.startId);
+            // https://github.com/siyuan-note/siyuan/issues/8224
+            if (protyle.wysiwyg.element.clientHeight - parseInt(protyle.wysiwyg.element.style.paddingBottom) < protyle.contentElement.clientHeight) {
+                showMessage(window.siyuan.languages.scrollGetMore);
+            }
+        }
+    } else if (options.action.includes(Constants.CB_GET_HL)) {
         preventScroll(protyle); // 搜索页签滚动会导致再次请求
         const hlElement = highlightById(protyle, protyle.block.id, true);
         /// #if !MOBILE
@@ -197,39 +192,9 @@ const setHTML = (options: {
             pushBack(protyle, undefined, hlElement);
         }
         /// #endif
-    } else if (options.action.includes(Constants.CB_GET_FOCUS) && !options.unScroll) {
-        let focusElement: Element;
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${protyle.block.id}"]`)).find((item: HTMLElement) => {
-            if (!hasClosestByAttribute(item, "data-type", "block-render", true)) {
-                focusElement = item;
-                return true;
-            }
-        });
-        if (protyle.block.mode === 4) {
-            preventScroll(protyle);
-            focusElement = protyle.wysiwyg.element.lastElementChild;
-        }
-        if (focusElement && !protyle.wysiwyg.element.firstElementChild.isSameNode(focusElement)) {
-            focusBlock(focusElement);
-            /// #if !MOBILE
-            if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
-                pushBack(protyle, undefined, focusElement);
-            }
-            /// #endif
-            focusElement.scrollIntoView();
-            // 减少抖动 https://ld246.com/article/1654263598088
-            setTimeout(() => {
-                focusElement.scrollIntoView();
-            }, Constants.TIMEOUT_LOAD);
-        } else {
-            focusBlock(protyle.wysiwyg.element.firstElementChild);
-            /// #if !MOBILE
-            if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
-                pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
-            }
-            /// #endif
-        }
-    } else if (options.action.includes(Constants.CB_GET_FOCUSFIRST) && !options.unScroll) {
+    } else if (options.action.includes(Constants.CB_GET_FOCUS)) {
+        focusElement(protyle, options);
+    } else if (options.action.includes(Constants.CB_GET_FOCUSFIRST)) {
         // settimeout 时间需短一点，否则定位后快速滚动无效
         const headerHeight = protyle.wysiwyg.element.offsetTop - 16;
         preventScroll(protyle, headerHeight, 256);
@@ -355,3 +320,44 @@ export const enableProtyle = (protyle: IProtyle) => {
         }
     });
 };
+
+
+const focusElement = (protyle: IProtyle, options: {
+    content: string,
+    action?: string[],
+    isSyncing: boolean,
+    expand: boolean,
+    scrollAttr?: IScrollAttr
+}) => {
+    let focusElement: Element;
+    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${protyle.block.id}"]`)).find((item: HTMLElement) => {
+        if (!hasClosestByAttribute(item, "data-type", "block-render", true)) {
+            focusElement = item;
+            return true;
+        }
+    });
+    if (protyle.block.mode === 4) {
+        preventScroll(protyle);
+        focusElement = protyle.wysiwyg.element.lastElementChild;
+    }
+    if (focusElement && !protyle.wysiwyg.element.firstElementChild.isSameNode(focusElement)) {
+        focusBlock(focusElement);
+        /// #if !MOBILE
+        if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
+            pushBack(protyle, undefined, focusElement);
+        }
+        /// #endif
+        focusElement.scrollIntoView();
+        // 减少抖动 https://ld246.com/article/1654263598088
+        setTimeout(() => {
+            focusElement.scrollIntoView();
+        }, Constants.TIMEOUT_LOAD);
+    } else {
+        focusBlock(protyle.wysiwyg.element.firstElementChild);
+        /// #if !MOBILE
+        if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
+            pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
+        }
+        /// #endif
+    }
+}

@@ -245,23 +245,11 @@ export class Breadcrumb {
                             id: protyle.block.rootID
                         }, () => {
                             /// #if MOBILE
-                            fetchPost("/api/filetree/getDoc", {
-                                id: protyle.block.id,
-                                mode: 0,
-                                size: window.siyuan.config.editor.dynamicLoadBlocks,
-                            }, getResponse => {
-                                onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
-                            });
+                            reloadProtyle(protyle);
                             /// #else
                             getAllModels().editor.forEach(item => {
                                 if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                    fetchPost("/api/filetree/getDoc", {
-                                        id: item.editor.protyle.block.rootID,
-                                        mode: 0,
-                                        size: window.siyuan.config.editor.dynamicLoadBlocks,
-                                    }, getResponse => {
-                                        onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
-                                    });
+                                    reloadProtyle(item.editor.protyle);
                                 }
                             });
                             /// #endif

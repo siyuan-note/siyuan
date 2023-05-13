@@ -192,68 +192,122 @@ export class Protyle {
                 removeLoading(this.protyle);
                 return;
             }
-            fetchPost("/api/filetree/getDoc", {
-                id: options.blockId,
-                k: options.key || "",
-                isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
-                // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
-                mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
-                size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-            }, getResponse => {
-                onGet(getResponse, this.protyle, mergedOptions.action, options.scrollAttr);
-                if (this.protyle.model) {
-                    /// #if !MOBILE
-                    if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS)) {
-                        setPanelFocus(this.protyle.model.element.parentElement.parentElement);
-                    }
-                    updatePanelByEditor({
-                        protyle: this.protyle,
-                        focus: false,
-                        pushBackStack: false,
-                        reload: false,
-                        resize: false
+            if (options.scrollAttr ||
+                (mergedOptions.action.includes(Constants.CB_GET_SCROLL) && this.protyle.options.mode !== "preview")) {
+                if (!options.scrollAttr) {
+                    fetchPost("/api/block/getDocInfo", {
+                        id: options.blockId
+                    }, (response) => {
+                        if (response.data.ial.scroll) {
+                            let scrollObj;
+                            try {
+                                scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
+                            } catch (e) {
+                                scrollObj = undefined;
+                            }
+                            if (scrollObj) {
+                                this.getDocByScrollData(scrollObj, mergedOptions);
+                            } else {
+                                this.getDoc(mergedOptions);
+                            }
+                        }
                     });
-                    /// #endif
+                } else {
+                    this.getDocByScrollData(options.scrollAttr, mergedOptions);
                 }
-
-                // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
-                // 只能用 focusin，否则点击表格无法执行
-                this.protyle.wysiwyg.element.addEventListener("focusin", () => {
-                    /// #if !MOBILE
-                    if (this.protyle && this.protyle.model) {
-                        let needUpdate = true;
-                        if (this.protyle.model.element.parentElement.parentElement.classList.contains("layout__wnd--active") && this.protyle.model.headElement.classList.contains("item--focus")) {
-                            needUpdate = false;
-                        }
-                        if (!needUpdate) {
-                            return;
-                        }
-                        setPanelFocus(this.protyle.model.element.parentElement.parentElement);
-                        updatePanelByEditor({
-                            protyle: this.protyle,
-                            focus: false,
-                            pushBackStack: false,
-                            reload: false,
-                            resize: false,
-                        });
-                    } else {
-                        // 悬浮层应移除其余面板高亮，否则按键会被面板监听到
-                        document.querySelectorAll(".layout__tab--active").forEach(item => {
-                            item.classList.remove("layout__tab--active");
-                        });
-                        document.querySelectorAll(".layout__wnd--active").forEach(item => {
-                            item.classList.remove("layout__wnd--active");
-                        });
-                    }
-                    /// #endif
-                });
-                // 需等渲染完后再回调，用于定位搜索字段 https://github.com/siyuan-note/siyuan/issues/3171
-                if (mergedOptions.after) {
-                    mergedOptions.after(this);
-                }
-            });
+            } else {
+                this.getDoc(mergedOptions);
+            }
         }
         this.protyle.contentElement.classList.add("protyle-content--transition");
+    }
+
+    private getDoc(mergedOptions: IOptions) {
+        fetchPost("/api/filetree/getDoc", {
+            id: mergedOptions.blockId,
+            k: mergedOptions.key || "",
+            isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
+            // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
+            mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
+            size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
+        }, getResponse => {
+            onGet(getResponse, this.protyle, mergedOptions.action);
+            this.afterOnGet(mergedOptions);
+        });
+    }
+
+    private getDocByScrollData(scrollAttr: IScrollAttr, mergedOptions: IOptions) {
+        if (scrollAttr.zoomInId) {
+            fetchPost("/api/filetree/getDoc", {
+                id: scrollAttr.zoomInId,
+                size: Constants.SIZE_GET_MAX,
+            }, response => {
+                onGet(response, this.protyle, mergedOptions.action, scrollAttr);
+                this.afterOnGet(mergedOptions);
+            })
+            return;
+        }
+        fetchPost("/api/filetree/getDoc", {
+            id: scrollAttr.startId,
+            startID: scrollAttr.startId,
+            endID: scrollAttr.endId,
+        }, response => {
+            onGet(response, this.protyle, mergedOptions.action, scrollAttr);
+            this.afterOnGet(mergedOptions);
+        });
+    }
+
+    private afterOnGet(mergedOptions: IOptions) {
+        if (this.protyle.model) {
+            /// #if !MOBILE
+            if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS)) {
+                setPanelFocus(this.protyle.model.element.parentElement.parentElement);
+            }
+            updatePanelByEditor({
+                protyle: this.protyle,
+                focus: false,
+                pushBackStack: false,
+                reload: false,
+                resize: false
+            });
+            /// #endif
+        }
+
+        // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
+        // 只能用 focusin，否则点击表格无法执行
+        this.protyle.wysiwyg.element.addEventListener("focusin", () => {
+            /// #if !MOBILE
+            if (this.protyle && this.protyle.model) {
+                let needUpdate = true;
+                if (this.protyle.model.element.parentElement.parentElement.classList.contains("layout__wnd--active") && this.protyle.model.headElement.classList.contains("item--focus")) {
+                    needUpdate = false;
+                }
+                if (!needUpdate) {
+                    return;
+                }
+                setPanelFocus(this.protyle.model.element.parentElement.parentElement);
+                updatePanelByEditor({
+                    protyle: this.protyle,
+                    focus: false,
+                    pushBackStack: false,
+                    reload: false,
+                    resize: false,
+                });
+            } else {
+                // 悬浮层应移除其余面板高亮，否则按键会被面板监听到
+                document.querySelectorAll(".layout__tab--active").forEach(item => {
+                    item.classList.remove("layout__tab--active");
+                });
+                document.querySelectorAll(".layout__wnd--active").forEach(item => {
+                    item.classList.remove("layout__wnd--active");
+                });
+            }
+            /// #endif
+        });
+        // 需等渲染完后再回调，用于定位搜索字段 https://github.com/siyuan-note/siyuan/issues/3171
+        if (mergedOptions.after) {
+            mergedOptions.after(this);
+        }
     }
 
     private init() {

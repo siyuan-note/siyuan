@@ -415,8 +415,8 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         }
     }
 
-    public render(protyle: IProtyle, response: IWebSocketData, refresh = false) {
-        if (this.editElement.getAttribute("data-render") === "true" && !refresh) {
+    public render(protyle: IProtyle, response: IWebSocketData) {
+        if (this.editElement.getAttribute("data-render") === "true") {
             return false;
         }
         this.element.setAttribute("data-node-id", protyle.block.rootID);

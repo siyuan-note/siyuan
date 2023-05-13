@@ -4,10 +4,9 @@ import {getAllModels} from "../../layout/getAll";
 import {addLoading, setPadding} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
-import {onGet} from "../util/onGet";
-import {saveScroll} from "../scroll/saveScroll";
 import {hideAllElements, hideElements} from "../ui/hideElements";
 import {hasClosestByClassName} from "../util/hasClosest";
+import {reloadProtyle} from "../util/reload";
 
 export const netImg2LocalAssets = (protyle: IProtyle) => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
@@ -19,23 +18,11 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
         id: protyle.block.rootID
     }, () => {
         /// #if MOBILE
-        fetchPost("/api/filetree/getDoc", {
-            id: protyle.block.id,
-            mode: 0,
-            size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
-            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
-        });
+        reloadProtyle(protyle);
         /// #else
         getAllModels().editor.forEach(item => {
             if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                fetchPost("/api/filetree/getDoc", {
-                    id: item.editor.protyle.block.rootID,
-                    mode: 0,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS], saveScroll(protyle, true));
-                });
+                reloadProtyle(item.editor.protyle)
             }
         });
         /// #endif

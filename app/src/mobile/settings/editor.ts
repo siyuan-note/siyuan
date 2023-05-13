@@ -4,12 +4,6 @@ import {reloadProtyle} from "../../protyle/util/reload";
 import {setInlineStyle} from "../../util/assets";
 import {confirmDialog} from "../../dialog/confirmDialog";
 
-const reloadEditor = (data: IEditor) => {
-    window.siyuan.config.editor = data;
-    reloadProtyle(window.siyuan.mobile.editor.protyle);
-    setInlineStyle();
-};
-
 const setEditor = (modelMainElement: Element) => {
     let dynamicLoadBlocks = parseInt((modelMainElement.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value);
     if (48 > dynamicLoadBlocks) {
@@ -45,7 +39,9 @@ const setEditor = (modelMainElement: Element) => {
     window.siyuan.config.editor.generateHistoryInterval = parseInt((modelMainElement.querySelector("#generateHistoryInterval") as HTMLInputElement).value);
     window.siyuan.config.editor.historyRetentionDays = parseInt((modelMainElement.querySelector("#historyRetentionDays") as HTMLInputElement).value);
     fetchPost("/api/setting/setEditor", window.siyuan.config.editor, response => {
-        reloadEditor(response.data);
+        window.siyuan.config.editor = response.data;
+        reloadProtyle(window.siyuan.mobile.editor.protyle);
+        setInlineStyle();
     });
 };
 

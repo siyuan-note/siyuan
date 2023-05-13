@@ -28,8 +28,7 @@
     margin: 0 16px 16px 0;
   }
 
-  &--current .b3-card__info,
-  &--current .b3-card__actions {
+  &--current {
     background-color: var(--b3-theme-primary-lightest)
   }
 

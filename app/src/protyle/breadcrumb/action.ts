@@ -18,11 +18,11 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
         id: protyle.block.rootID
     }, () => {
         /// #if MOBILE
-        reloadProtyle(protyle);
+        reloadProtyle(protyle, false);
         /// #else
         getAllModels().editor.forEach(item => {
             if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                reloadProtyle(item.editor.protyle)
+                reloadProtyle(item.editor.protyle, item.editor.protyle.element.isSameNode(protyle.element));
             }
         });
         /// #endif

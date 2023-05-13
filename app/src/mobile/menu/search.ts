@@ -59,7 +59,7 @@ const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
         if (ids.length > 1) {
             return;
         }
-        reloadProtyle(window.siyuan.mobile.editor.protyle);
+        reloadProtyle(window.siyuan.mobile.editor.protyle, false);
 
         if (currentLiElement.nextElementSibling) {
             currentLiElement.nextElementSibling.classList.add("b3-list-item--focus");

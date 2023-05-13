@@ -647,7 +647,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         return;
     }
     if (operation.action === "append") {
-        reloadProtyle(protyle);
+        reloadProtyle(protyle, false);
     }
 };
 

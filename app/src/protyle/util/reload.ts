@@ -1,12 +1,11 @@
 import {addLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
-import {Constants} from "../../constants";
-import {onGet} from "./onGet";
-import {saveScroll} from "../scroll/saveScroll";
+import {getDocByScroll, saveScroll} from "../scroll/saveScroll";
 import {renderBacklink} from "../wysiwyg/renderBacklink";
 import {hasClosestByClassName} from "./hasClosest";
+import {preventScroll} from "../scroll/preventScroll";
 
-export const reloadProtyle = (protyle: IProtyle) => {
+export const reloadProtyle = (protyle: IProtyle, focus: boolean) => {
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         protyle.wysiwyg.element.classList.add("protyle-wysiwyg--attr");
     } else {
@@ -38,12 +37,11 @@ export const reloadProtyle = (protyle: IProtyle) => {
             });
         }
     } else {
-        fetchPost("/api/filetree/getDoc", {
-            id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
-            mode: 0,
-            size: protyle.block.showAll ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
-            onGet(getResponse, protyle, protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS], saveScroll(protyle, true), true);
+        preventScroll(protyle);
+        getDocByScroll({
+            protyle,
+            focus,
+            scrollAttr: saveScroll(protyle, true)
         });
     }
 };

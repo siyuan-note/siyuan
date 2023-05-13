@@ -40,7 +40,7 @@ const setEditor = (modelMainElement: Element) => {
     window.siyuan.config.editor.historyRetentionDays = parseInt((modelMainElement.querySelector("#historyRetentionDays") as HTMLInputElement).value);
     fetchPost("/api/setting/setEditor", window.siyuan.config.editor, response => {
         window.siyuan.config.editor = response.data;
-        reloadProtyle(window.siyuan.mobile.editor.protyle);
+        reloadProtyle(window.siyuan.mobile.editor.protyle, false);
         setInlineStyle();
     });
 };

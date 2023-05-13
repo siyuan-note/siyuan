@@ -245,11 +245,11 @@ export class Breadcrumb {
                             id: protyle.block.rootID
                         }, () => {
                             /// #if MOBILE
-                            reloadProtyle(protyle);
+                            reloadProtyle(protyle, false);
                             /// #else
                             getAllModels().editor.forEach(item => {
                                 if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                    reloadProtyle(item.editor.protyle);
+                                    reloadProtyle(item.editor.protyle, item.editor.protyle.element.isSameNode(protyle.element));
                                 }
                             });
                             /// #endif
@@ -304,7 +304,7 @@ export class Breadcrumb {
                 accelerator: window.siyuan.config.keymap.editor.general.refresh.custom,
                 label: window.siyuan.languages.refresh,
                 click: () => {
-                    reloadProtyle(protyle);
+                    reloadProtyle(protyle, !isMobile());
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

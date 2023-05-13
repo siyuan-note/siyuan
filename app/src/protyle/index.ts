@@ -27,6 +27,7 @@ import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {resize} from "./util/resize";
+import {getDocByScroll} from "./scroll/saveScroll";
 
 export class Protyle {
 
@@ -111,7 +112,7 @@ export class Protyle {
                                         onGet(getResponse, this.protyle);
                                     });
                                 } else {
-                                    reloadProtyle(this.protyle);
+                                    reloadProtyle(this.protyle, false);
                                 }
                                 /// #if !MOBILE
                                 if (data.cmd === "heading2doc") {
@@ -206,14 +207,28 @@ export class Protyle {
                                 scrollObj = undefined;
                             }
                             if (scrollObj) {
-                                this.getDocByScrollData(scrollObj, mergedOptions);
+                                getDocByScroll({
+                                    protyle: this.protyle,
+                                    scrollAttr: scrollObj,
+                                    mergedOptions,
+                                    cb: () => {
+                                        this.afterOnGet(mergedOptions);
+                                    }
+                                });
                             } else {
                                 this.getDoc(mergedOptions);
                             }
                         }
                     });
                 } else {
-                    this.getDocByScrollData(options.scrollAttr, mergedOptions);
+                    getDocByScroll({
+                        protyle: this.protyle,
+                        scrollAttr: options.scrollAttr,
+                        mergedOptions,
+                        cb: () => {
+                            this.afterOnGet(mergedOptions);
+                        }
+                    });
                 }
             } else {
                 this.getDoc(mergedOptions);
@@ -232,27 +247,6 @@ export class Protyle {
             size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, this.protyle, mergedOptions.action);
-            this.afterOnGet(mergedOptions);
-        });
-    }
-
-    private getDocByScrollData(scrollAttr: IScrollAttr, mergedOptions: IOptions) {
-        if (scrollAttr.zoomInId) {
-            fetchPost("/api/filetree/getDoc", {
-                id: scrollAttr.zoomInId,
-                size: Constants.SIZE_GET_MAX,
-            }, response => {
-                onGet(response, this.protyle, mergedOptions.action, scrollAttr);
-                this.afterOnGet(mergedOptions);
-            })
-            return;
-        }
-        fetchPost("/api/filetree/getDoc", {
-            id: scrollAttr.startId,
-            startID: scrollAttr.startId,
-            endID: scrollAttr.endId,
-        }, response => {
-            onGet(response, this.protyle, mergedOptions.action, scrollAttr);
             this.afterOnGet(mergedOptions);
         });
     }

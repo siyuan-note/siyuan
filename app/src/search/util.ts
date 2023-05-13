@@ -961,7 +961,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         }
         getAllModels().editor.forEach(item => {
             if (rootIds[0] === item.editor.protyle.block.rootID) {
-                reloadProtyle(item.editor.protyle);
+                reloadProtyle(item.editor.protyle, false);
             }
         });
         if (currentList.nextElementSibling) {

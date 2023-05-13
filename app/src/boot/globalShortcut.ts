@@ -1044,7 +1044,7 @@ const editKeydown = (event: KeyboardEvent) => {
         return false;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
-        reloadProtyle(protyle);
+        reloadProtyle(protyle, true);
         event.preventDefault();
         return true;
     }

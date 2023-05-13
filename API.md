@@ -29,6 +29,7 @@
     * [Delete a block](#Delete-a-block)
     * [Move a block](#Move-a-block)
     * [Get a block kramdown](#Get-a-block-kramdown)
+    * [Get child blocks](#get-child-blocks)
 * [Attributes](#Attributes)
     * [Set block attributes](#Set-block-attributes)
     * [Get block attributes](#Get-block-attributes)
@@ -769,6 +770,44 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
+### Get child blocks
+
+* `/api/block/getChildBlocks`
+* Parameters
+
+  ```json
+  {
+    "id": "20230506212712-vt9ajwj"
+  }
+  ```
+
+  * `id`: Parent block ID
+  * The blocks below a heading are also counted as child blocks
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "id": "20230512083858-mjdwkbn",
+        "type": "h",
+        "subType": "h1"
+      },
+      {
+        "id": "20230513213727-thswvfd",
+        "type": "s"
+      },
+      {
+        "id": "20230513213633-9lsj4ew",
+        "type": "l",
+        "subType": "u"
+      }
+    ]
+  }
+  ```
+
 ## Attributes
 
 ### Set block attributes
@@ -880,7 +919,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-### 渲染 Sprig
+### Render Sprig
 
 * `/api/template/renderSprig`
 * Parameters

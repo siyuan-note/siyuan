@@ -445,6 +445,58 @@ func GetBlockKramdown(id string) (ret string) {
 	return
 }
 
+type ChildBlock struct {
+	ID      string `json:"id"`
+	Type    string `json:"type"`
+	SubType string `json:"subType,omitempty"`
+}
+
+func GetChildBlocks(id string) (ret []*ChildBlock) {
+	ret = []*ChildBlock{}
+	if "" == id {
+		return
+	}
+
+	tree, err := loadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	if ast.NodeHeading == node.Type {
+		children := treenode.HeadingChildren(node)
+		for _, c := range children {
+			ret = append(ret, &ChildBlock{
+				ID:      c.ID,
+				Type:    treenode.TypeAbbr(c.Type.String()),
+				SubType: treenode.SubTypeAbbr(c),
+			})
+		}
+		return
+	}
+
+	if !node.IsContainerBlock() {
+		return
+	}
+
+	for c := node.FirstChild; nil != c; c = c.Next {
+		if !c.IsBlock() {
+			continue
+		}
+
+		ret = append(ret, &ChildBlock{
+			ID:      c.ID,
+			Type:    treenode.TypeAbbr(c.Type.String()),
+			SubType: treenode.SubTypeAbbr(c),
+		})
+	}
+	return
+}
+
 func GetBlock(id string, tree *parse.Tree) (ret *Block, err error) {
 	ret, err = getBlock(id, tree)
 	return

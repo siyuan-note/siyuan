@@ -57,7 +57,6 @@ func InstalledPlugins() (plugins []*bazaar.Plugin) {
 		petal := getPetalByName(plugin.Name, petals)
 		if nil != petal {
 			plugin.Enabled = petal.Enabled
-			break
 		}
 	}
 	return

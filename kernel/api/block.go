@@ -481,3 +481,20 @@ func getBlockKramdown(c *gin.Context) {
 		"kramdown": kramdown,
 	}
 }
+
+func getChildBlocks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	ret.Data = model.GetChildBlocks(id)
+}

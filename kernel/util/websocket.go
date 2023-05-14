@@ -214,6 +214,14 @@ func PushClearProgress() {
 	BroadcastByType("main", "cprogress", 0, "", nil)
 }
 
+func PushProtyleReload(rootID string) {
+	BroadcastByType("protyle", "reload", 0, "", rootID)
+}
+
+func PushProtyleLoading(rootID, msg string) {
+	BroadcastByType("protyle", "addLoadding", 0, msg, rootID)
+}
+
 func PushDownloadProgress(id string, percent float32) {
 	evt := NewCmdResult("downloadProgress", 0, PushModeBroadcast)
 	evt.Data = map[string]interface{}{

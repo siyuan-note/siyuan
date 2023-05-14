@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {Hint} from "./hint";
 import {setLute} from "./markdown/setLute";
 import {Preview} from "./preview";
-import {initUI, removeLoading, setPadding} from "./ui/initUI";
+import {addLoading, initUI, removeLoading, setPadding} from "./ui/initUI";
 import {Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";
@@ -89,6 +89,16 @@ export class Protyle {
                 type: "protyle",
                 msgCallback: (data) => {
                     switch (data.cmd) {
+                        case "reload":
+                            if (data.data === this.protyle.block.rootID) {
+                                reloadProtyle(this.protyle, false);
+                            }
+                            break;
+                        case "addLoadding":
+                            if (data.data === this.protyle.block.rootID) {
+                                addLoading(this.protyle);
+                            }
+                            break;
                         case "transactions":
                             data.data[0].doOperations.forEach((item: IOperation) => {
                                 onTransaction(this.protyle, item, false);

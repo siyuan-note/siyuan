@@ -311,11 +311,7 @@ export const bazaar = {
         urls.pop();
         let navTitle = window.siyuan.languages.icon;
         if (bazaarType === "themes") {
-            if (data.modes.includes("dark")) {
-                navTitle = window.siyuan.languages.themeDark + " " + window.siyuan.languages.theme;
-            } else {
-                navTitle = window.siyuan.languages.themeLight + " " + window.siyuan.languages.theme;
-            }
+            navTitle = window.siyuan.languages.theme;
         } else if (bazaarType === "widgets") {
             navTitle = window.siyuan.languages.widget;
         } else if (bazaarType === "templates") {
@@ -395,7 +391,7 @@ export const bazaar = {
 </div>
 <div class="item__main">
     <div class="item__preview" style="background-image: url(${data.previewURL})"></div>
-    <div class="b3-typography${data.preferredDesc?"":" fn__none"}">
+    <div class="b3-typography${data.preferredDesc ? "" : " fn__none"}">
         <div data-type="NodeBlockquote" class="bq" data-node-id>
             <div data-type="NodeParagraph" class="p" data-node-id>
                 ${data.preferredDesc || ""}

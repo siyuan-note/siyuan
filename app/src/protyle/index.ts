@@ -94,7 +94,7 @@ export class Protyle {
                                 reloadProtyle(this.protyle, false);
                             }
                             break;
-                        case "addLoadding":
+                        case "addLoading":
                             if (data.data === this.protyle.block.rootID) {
                                 addLoading(this.protyle, data.msg);
                             }

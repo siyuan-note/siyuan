@@ -219,7 +219,7 @@ func PushProtyleReload(rootID string) {
 }
 
 func PushProtyleLoading(rootID, msg string) {
-	BroadcastByType("protyle", "addLoadding", 0, msg, rootID)
+	BroadcastByType("protyle", "addLoading", 0, msg, rootID)
 }
 
 func PushDownloadProgress(id string, percent float32) {

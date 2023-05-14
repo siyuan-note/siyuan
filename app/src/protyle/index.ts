@@ -199,25 +199,25 @@ export class Protyle {
                     fetchPost("/api/block/getDocInfo", {
                         id: options.blockId
                     }, (response) => {
+                        let scrollObj;
                         if (response.data.ial.scroll) {
-                            let scrollObj;
                             try {
                                 scrollObj = JSON.parse(response.data.ial.scroll.replace(/&quot;/g, '"'));
                             } catch (e) {
                                 scrollObj = undefined;
                             }
-                            if (scrollObj) {
-                                getDocByScroll({
-                                    protyle: this.protyle,
-                                    scrollAttr: scrollObj,
-                                    mergedOptions,
-                                    cb: () => {
-                                        this.afterOnGet(mergedOptions);
-                                    }
-                                });
-                            } else {
-                                this.getDoc(mergedOptions);
-                            }
+                        }
+                        if (scrollObj) {
+                            getDocByScroll({
+                                protyle: this.protyle,
+                                scrollAttr: scrollObj,
+                                mergedOptions,
+                                cb: () => {
+                                    this.afterOnGet(mergedOptions);
+                                }
+                            });
+                        } else {
+                            this.getDoc(mergedOptions);
                         }
                     });
                 } else {

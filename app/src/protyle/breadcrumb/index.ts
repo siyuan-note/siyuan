@@ -243,16 +243,6 @@ export class Breadcrumb {
                         hideElements(["toolbar"], protyle);
                         fetchPost("/api/format/autoSpace", {
                             id: protyle.block.rootID
-                        }, () => {
-                            /// #if MOBILE
-                            reloadProtyle(protyle, false);
-                            /// #else
-                            getAllModels().editor.forEach(item => {
-                                if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                    reloadProtyle(item.editor.protyle, item.editor.protyle.element.isSameNode(protyle.element));
-                                }
-                            });
-                            /// #endif
                         });
                     }
                 }).element);

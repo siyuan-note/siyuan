@@ -96,7 +96,7 @@ export class Protyle {
                             break;
                         case "addLoadding":
                             if (data.data === this.protyle.block.rootID) {
-                                addLoading(this.protyle);
+                                addLoading(this.protyle, data.msg);
                             }
                             break;
                         case "transactions":

@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230512170439"
+		"updated": "20230406111909"
 	},
 	"Children": [
 		{
@@ -2141,7 +2141,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230406111846-ph7umq6",
-				"updated": "20230406111934"
+				"updated": "20230406111909"
 			},
 			"Children": [
 				{
@@ -2169,36 +2169,6 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com/sponsor",
 									"TextMarkTextContent": "靠爱发电 - 链滴"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230406111847-hszqryy",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230406111847-hszqryy",
-						"updated": "20230406111934"
-					},
-					"Children": [
-						{
-							"ID": "20230406111847-qe9lvb0",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230406111847-qe9lvb0",
-								"updated": "20230406111934"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://opencollective.com/b3log",
-									"TextMarkTextContent": "B3log - Open Collective"
 								}
 							]
 						}

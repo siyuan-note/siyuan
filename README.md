@@ -265,10 +265,6 @@ All local features are free, even for commercial use.
 
 [Cloud Service](https://b3log.org/siyuan/pricing.html) requires an annual subscription. At present, only users in mainland China are supported to subscribe, and users outside of mainland China are not allowed to subscribe.
 
-If you don't need a subscription but would like to support development, you are welcome to make a donation:
-
-* [B3log - Open Collective](https://opencollective.com/b3log)
-
 ## 🙏 Acknowledgement
 
 ### Contributors

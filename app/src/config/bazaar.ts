@@ -564,19 +564,21 @@ export const bazaar = {
                         window.siyuan.config.appearance.icon === packageName) {
                         showMessage(window.siyuan.languages.uninstallTip);
                     } else {
-                        fetchPost(url, {
-                            packageName
-                        }, response => {
-                            this._genMyHTML(bazaarType, app);
-                            bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
-                            // TODO destroy plugin
-                            if (bazaarType === "plugins") {
-                                exportLayout({
-                                    reload: true,
-                                    onlyData: false,
-                                    errorExit: false,
-                                });
-                            }
+                        confirmDialog(window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
+                            fetchPost(url, {
+                                packageName
+                            }, response => {
+                                this._genMyHTML(bazaarType, app);
+                                bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
+                                if (bazaarType === "plugins") {
+                                    // TODO destroy plugin
+                                    exportLayout({
+                                        reload: true,
+                                        onlyData: false,
+                                        errorExit: false,
+                                    });
+                                }
+                            });
                         });
                     }
                     event.preventDefault();

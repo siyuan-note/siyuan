@@ -1,4 +1,5 @@
 {
+  "confirmUninstall": "Are you sure you want to uninstall ${name}?",
   "scrollGetMore": "Don't panic... scroll up and down to load more",
   "flashcardNewCard": "New",
   "flashcardReviewCard": "Review",

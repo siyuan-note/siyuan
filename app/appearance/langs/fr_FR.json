@@ -1,4 +1,5 @@
 {
+  "confirmUninstall": "Êtes-vous sûr de vouloir désinstaller ${name} ?",
   "scrollGetMore": "Ne paniquez pas... faites défiler de haut en bas pour en charger plus",
   "flashcardNewCard": "Nouvelle carte",
   "flashcardReviewCard": "Revoir la carte",

@@ -2063,61 +2063,6 @@
 			]
 		},
 		{
-			"ID": "20230406112010-97r5e5d",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20230406112010-97r5e5d",
-				"updated": "20230406112010"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If you don't need a subscription but would like to support development, you are welcome to make a donation:"
-				}
-			]
-		},
-		{
-			"ID": "20230406112010-my4qnoy",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20230406112010-my4qnoy",
-				"updated": "20230406112010"
-			},
-			"Children": [
-				{
-					"ID": "20230406112010-cmr795u",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230406112010-cmr795u",
-						"updated": "20230406112010"
-					},
-					"Children": [
-						{
-							"ID": "20230406112010-j8z0apy",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230406112010-j8z0apy",
-								"updated": "20230406112010"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://opencollective.com/b3log",
-									"TextMarkTextContent": "B3log - Open Collective"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
 			"ID": "20230415111951-vt4y4gg",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

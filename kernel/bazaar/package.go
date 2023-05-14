@@ -497,7 +497,7 @@ func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)
-	linkBase := repoURL + "/blob/main/"
+	linkBase := "https://cdn.jsdelivr.net/gh/" + strings.TrimPrefix(repoURL, "https://github.com/")
 	luteEngine.SetLinkBase(linkBase)
 	ret = luteEngine.Md2HTML(string(mdData))
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(ret))

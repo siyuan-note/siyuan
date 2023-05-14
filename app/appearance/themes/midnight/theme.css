@@ -101,6 +101,7 @@
     /* 阴影 */
     --b3-point-shadow: 0 3px 6px #010409;
     --b3-dialog-shadow: 0 8px 24px #010409;
+    --b3-button-shadow: 0px 5px 5px -3px rgb(0 0 0 / 0.2), 0px 8px 10px 1px rgb(0 0 0 / 0.14), 0px 3px 14px 2px rgb(0 0 0 / 0.12);
 
     /* 图表颜色 */
     --b3-graph-p-point: #076f7e;

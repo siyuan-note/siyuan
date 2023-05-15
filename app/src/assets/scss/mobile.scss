@@ -249,6 +249,16 @@
   z-index: 220;
   transform: translateX(100vw);
   top: 0;
+
+  // for plugin
+  .b3-menu__item > svg:not(.b3-menu__icon) {
+    height: 17px;
+    width: 17px;
+    margin: 0 16px 0 8px;
+    border-radius: 4px;
+    align-self: center;
+    color: var(--b3-theme-on-surface);
+  }
 }
 
 .keyboard {

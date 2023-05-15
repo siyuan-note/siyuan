@@ -19,6 +19,7 @@ package util
 import (
 	"bytes"
 	"io"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -40,6 +41,10 @@ func IsEmptyDir(p string) bool {
 		return false
 	}
 	return 1 > len(files)
+}
+
+func IsDirOrSymlink(dir fs.DirEntry) bool {
+	return dir.IsDir() || dir.Type() == fs.ModeSymlink
 }
 
 func RemoveID(name string) string {

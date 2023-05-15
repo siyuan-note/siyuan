@@ -118,7 +118,7 @@ func InstalledWidgets() (ret []*Widget) {
 	bazaarWidgets := Widgets()
 
 	for _, widgetDir := range widgetDirs {
-		if !widgetDir.IsDir() {
+		if !util.IsDirOrSymlink(widgetDir) {
 			continue
 		}
 		dirName := widgetDir.Name()

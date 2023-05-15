@@ -89,7 +89,7 @@ func unloadThemes() {
 	}
 
 	for _, themeDir := range themeDirs {
-		if !themeDir.IsDir() {
+		if !util.IsDirOrSymlink(themeDir) {
 			continue
 		}
 		unwatchTheme(filepath.Join(util.ThemesPath, themeDir.Name()))
@@ -107,7 +107,7 @@ func loadThemes() {
 	Conf.Appearance.DarkThemes = nil
 	Conf.Appearance.LightThemes = nil
 	for _, themeDir := range themeDirs {
-		if !themeDir.IsDir() {
+		if !util.IsDirOrSymlink(themeDir) {
 			continue
 		}
 		name := themeDir.Name()
@@ -151,7 +151,7 @@ func loadIcons() {
 
 	Conf.Appearance.Icons = nil
 	for _, iconDir := range iconDirs {
-		if !iconDir.IsDir() {
+		if !util.IsDirOrSymlink(iconDir) {
 			continue
 		}
 		name := iconDir.Name()

@@ -110,7 +110,7 @@ func InstalledIcons() (ret []*Icon) {
 	bazaarIcons := Icons()
 
 	for _, iconDir := range iconDirs {
-		if !iconDir.IsDir() {
+		if !util.IsDirOrSymlink(iconDir) {
 			continue
 		}
 		dirName := iconDir.Name()

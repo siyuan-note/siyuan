@@ -119,7 +119,7 @@ func InstalledPlugins() (ret []*Plugin) {
 	bazaarPlugins := Plugins()
 
 	for _, pluginDir := range pluginDirs {
-		if !pluginDir.IsDir() {
+		if !util.IsDirOrSymlink(pluginDir) {
 			continue
 		}
 		dirName := pluginDir.Name()

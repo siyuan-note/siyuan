@@ -120,7 +120,7 @@ func InstalledTemplates() (ret []*Template) {
 	bazaarTemplates := Templates()
 
 	for _, templateDir := range templateDirs {
-		if !templateDir.IsDir() {
+		if !util.IsDirOrSymlink(templateDir) {
 			continue
 		}
 		dirName := templateDir.Name()

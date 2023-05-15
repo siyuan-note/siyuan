@@ -118,7 +118,7 @@ func InstalledThemes() (ret []*Theme) {
 	bazaarThemes := Themes()
 
 	for _, themeDir := range themeDirs {
-		if !themeDir.IsDir() {
+		if !util.IsDirOrSymlink(themeDir) {
 			continue
 		}
 		dirName := themeDir.Name()

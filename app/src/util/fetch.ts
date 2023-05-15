@@ -29,11 +29,11 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
     }
     fetch(url, init).then((response) => {
         if (response.status === 404) {
-            cb({
+            return {
                 data: null,
                 msg: response.statusText,
                 code: response.status,
-            });
+            };
         } else {
             if (response.headers.get("content-type").indexOf("application/json") > -1) {
                 return response.json();
@@ -46,6 +46,9 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
             if (cb) {
                 cb(response);
             }
+            return;
+        }
+        if (typeof response.msg === "undefined") {
             return;
         }
         if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {

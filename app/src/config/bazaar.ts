@@ -15,6 +15,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasC
 import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";
+import {uninstall} from "../plugin/uninstall";
 
 export const bazaar = {
     element: undefined as Element,
@@ -571,12 +572,7 @@ export const bazaar = {
                                 this._genMyHTML(bazaarType, app);
                                 bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
                                 if (bazaarType === "plugins") {
-                                    // TODO destroy plugin
-                                    exportLayout({
-                                        reload: true,
-                                        onlyData: false,
-                                        errorExit: false,
-                                    });
+                                    uninstall(app, packageName);
                                 }
                             });
                         });
@@ -641,16 +637,20 @@ export const bazaar = {
                 } else if (type === "plugin-enable") {
                     const itemElement = hasClosestByClassName(target, "b3-card");
                     if (itemElement) {
+                        const enabled = (target as HTMLInputElement).checked
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: dataObj.name,
-                            enabled: (target as HTMLInputElement).checked
+                            enabled,
                         }, () => {
-                            // TODO destroy plugin
-                            exportLayout({
-                                reload: true,
-                                onlyData: false,
-                                errorExit: false,
-                            });
+                            if (enabled) {
+                                exportLayout({
+                                    reload: true,
+                                    onlyData: false,
+                                    errorExit: false,
+                                });
+                            } else {
+                                uninstall(app, dataObj.name);
+                            }
                         });
                     }
                     event.stopPropagation();

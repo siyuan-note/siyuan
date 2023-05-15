@@ -17,6 +17,7 @@ import {resetFloatDockSize} from "./util";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {App} from "../../index";
 import {Plugin} from "../../plugin";
+import {Custom} from "./Custom";
 
 export class Dock {
     public element: HTMLElement;
@@ -267,7 +268,7 @@ export class Dock {
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
     }
 
-    public toggleModel(type: string, show = false, close = false) {
+    public toggleModel(type: string, show = false, close = false, hide = false) {
         if (!type) {
             return;
         }
@@ -277,7 +278,7 @@ export class Dock {
         }
         const index = parseInt(target.getAttribute("data-index"));
         const wnd = this.layout.children[index] as Wnd;
-        if (target.classList.contains("dock__item--active")) {
+        if (target.classList.contains("dock__item--active") || hide) {
             if (!close) {
                 let needFocus = false;
                 Array.from(wnd.element.querySelector(".layout-tab-container").children).find(item => {
@@ -542,6 +543,14 @@ export class Dock {
         if (hasActive) {
             this.toggleModel(type, true);
         }
+    }
+
+    public remove(key: string) {
+        this.toggleModel(key, false, true, true);
+        this.element.querySelector(`[data-type="${key}"]`).remove();
+        const custom = this.data[key] as Custom;
+        custom.parent.parent.removeTab(custom.parent.id);
+        delete this.data[key];
     }
 
     private getClassDirect(index: number) {

@@ -13,13 +13,14 @@ import {scrollCenter} from "./highlightById";
 import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
+import {getAllModels} from "../layout/getAll";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
 
 const focusStack = async (stack: IBackStack) => {
     hideElements(["gutter", "toolbar", "hint", "util", "dialog"], stack.protyle);
-    let blockElement: Element;
+    let blockElement: HTMLElement;
     if (!document.contains(stack.protyle.element)) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.protyle.block.rootID});
         if (!response.data) {
@@ -91,7 +92,7 @@ const focusStack = async (stack: IBackStack) => {
             if (info.data.rootID === stack.id) {
                 focusByOffset(protyle.title.editElement, stack.position.start, stack.position.end);
             } else {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
                     if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
                         blockElement = item;
                         return true;
@@ -116,7 +117,7 @@ const focusStack = async (stack: IBackStack) => {
         focusByOffset(stack.protyle.title.editElement, stack.position.start, stack.position.end);
         return true;
     }
-    Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
+    Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
         if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
             blockElement = item;
             return true;
@@ -127,17 +128,16 @@ const focusStack = async (stack: IBackStack) => {
             // 切换 tab
             stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);
         }
-        if (stack.zoomId && stack.zoomId !== stack.protyle.block.id) {
-            zoomOut(stack.protyle, stack.zoomId, undefined, false, () => {
-                focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-                scrollCenter(stack.protyle, blockElement, true);
-            });
-            return true;
-        }
         focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
         scrollCenter(stack.protyle, blockElement, true);
+        getAllModels().outline.forEach(item => {
+            if (item.blockId === stack.protyle.block.rootID) {
+                item.setCurrent(blockElement);
+            }
+        });
         return true;
     }
+    // 缩放
     if (stack.protyle.element.parentElement) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.id});
         if (!response.data) {
@@ -147,22 +147,23 @@ const focusStack = async (stack: IBackStack) => {
             }
             return false;
         }
-        fetchPost("/api/filetree/getDoc", {
-            id: stack.zoomId ? stack.zoomId : stack.id,
-            mode: stack.zoomId ? 0 : 3,
-            size: stack.zoomId ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
-            onGet(getResponse, stack.protyle, stack.zoomId ? [Constants.CB_GET_HTML, Constants.CB_GET_ALL] : [Constants.CB_GET_HTML]);
-            Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find(item => {
+        zoomOut(stack.protyle, stack.zoomId || stack.protyle.block.rootID, undefined, false, () => {
+            Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
                 if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
                     blockElement = item;
                     return true;
                 }
             });
+            if (!blockElement) {
+                return;
+            }
+            getAllModels().outline.forEach(item => {
+                if (item.blockId === stack.protyle.block.rootID) {
+                    item.setCurrent(blockElement);
+                }
+            });
             focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-            setTimeout(() => {
-                scrollCenter(stack.protyle, blockElement);
-            }, Constants.TIMEOUT_INPUT);
+            scrollCenter(stack.protyle, blockElement, true);
         });
         return true;
     }

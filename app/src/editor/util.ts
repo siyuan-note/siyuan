@@ -506,7 +506,7 @@ export const isCurrentEditor = (blockId: string) => {
     return true;
 };
 
-const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
+export const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
     models.outline.find(item => {
         if (reload || (item.type === "pin" && (!protyle || item.blockId !== protyle.block?.rootID))) {
             let blockId = "";

@@ -16,7 +16,6 @@ import {getEditorRange} from "../util/selection";
 import {setPadding} from "../ui/initUI";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {getAllModels} from "../../layout/getAll";
 /// #endif
 /// #if !BROWSER
 import {getCurrentWindow, systemPreferences} from "@electron/remote";

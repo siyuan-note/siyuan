@@ -218,6 +218,9 @@ export class Outline extends Model {
     }
 
     public setCurrent(nodeElement: HTMLElement) {
+        if (!nodeElement) {
+            return;
+        }
         if (nodeElement.getAttribute("data-type") === "NodeHeading") {
             this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {

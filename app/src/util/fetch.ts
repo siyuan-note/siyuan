@@ -42,7 +42,10 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
             }
         }
     }).then((response: IWebSocketData) => {
-        if (!response) {
+        if (typeof response === "string") {
+            if (cb) {
+                cb(response);
+            }
             return;
         }
         if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {

@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/html"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
@@ -495,7 +496,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 }
 
 func formatRepoErrorMsg(err error) string {
-	msg := err.Error()
+	msg := html.EscapeString(err.Error())
 	if errors.Is(err, cloud.ErrCloudAuthFailed) {
 		msg = Conf.Language(31)
 	} else if errors.Is(err, cloud.ErrCloudObjectNotFound) {

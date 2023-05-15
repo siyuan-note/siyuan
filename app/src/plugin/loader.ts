@@ -42,7 +42,11 @@ export const loadPlugins = (app: App) => {
                 i18n: item.i18n
             });
             app.plugins.push(plugin);
-            plugin.onload();
+            try {
+                plugin.onload();
+            } catch (e) {
+                console.error(`plugin ${item.name} load error:`, e);
+            }
             css += item.css || "" + "\n";
         });
         const styleElement = document.createElement("style");

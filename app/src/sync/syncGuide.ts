@@ -5,7 +5,9 @@ import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
 import {processSync} from "../dialog/processSystem";
+/// #if !MOBILE
 import {openSetting} from "../config";
+/// #endif
 import {App} from "../index";
 
 export const addCloudName = (cloudPanelElement: Element) => {
@@ -144,25 +146,25 @@ export const syncGuide = (app?: App) => {
     if (window.siyuan.config.readonly) {
         return;
     }
-    if (isMobile()) {
-        if (0 === window.siyuan.config.sync.provider && needSubscribe()) {
-            return;
-        }
-    } else {
-        if (document.querySelector("#barSync")?.classList.contains("toolbar__item--active")) {
-            return;
-        }
-        if (0 === window.siyuan.config.sync.provider && needSubscribe("") && app) {
-            const dialogSetting = openSetting(app);
-            if (window.siyuan.user) {
-                dialogSetting.element.querySelector('.b3-tab-bar [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
-            } else {
-                dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
-                dialogSetting.element.querySelector('.config__tab-container[data-name="account"]').setAttribute("data-action", "go-repos");
-            }
-            return;
-        }
+    /// #if MOBILE
+    if (0 === window.siyuan.config.sync.provider && needSubscribe()) {
+        return;
     }
+    /// #else
+    if (document.querySelector("#barSync")?.classList.contains("toolbar__item--active")) {
+        return;
+    }
+    if (0 === window.siyuan.config.sync.provider && needSubscribe("") && app) {
+        const dialogSetting = openSetting(app);
+        if (window.siyuan.user) {
+            dialogSetting.element.querySelector('.b3-tab-bar [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
+        } else {
+            dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
+            dialogSetting.element.querySelector('.config__tab-container[data-name="account"]').setAttribute("data-action", "go-repos");
+        }
+        return;
+    }
+    /// #endif
     if (!window.siyuan.config.repo.key) {
         setKey();
         return;

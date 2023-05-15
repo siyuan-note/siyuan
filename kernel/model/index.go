@@ -28,6 +28,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
@@ -76,7 +77,7 @@ func index(boxID string) {
 	var treeCount int
 	var treeSize int64
 	i := 0
-	util.PushStatusBar(fmt.Sprintf("["+box.Name+"] "+Conf.Language(64), len(files)))
+	util.PushStatusBar(fmt.Sprintf("["+html.EscapeString(box.Name)+"] "+Conf.Language(64), len(files)))
 
 	poolSize := runtime.NumCPU()
 	if 4 < poolSize {

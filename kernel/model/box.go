@@ -31,6 +31,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/facette/natsort"
@@ -403,7 +404,7 @@ func (box *Box) moveTrees0(files []*FileInfo) {
 
 		treenode.SetBlockTreePath(subTree)
 		sql.RenameSubTreeQueue(subTree)
-		msg := fmt.Sprintf(Conf.Language(107), subTree.HPath)
+		msg := fmt.Sprintf(Conf.Language(107), html.EscapeString(subTree.HPath))
 		util.PushStatusBar(msg)
 	}
 }

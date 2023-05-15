@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/html"
 	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/logging"
 )
@@ -123,7 +124,7 @@ func Tesseract(imgAbsPath string) string {
 	ret := string(output)
 	ret = gulu.Str.RemoveInvisible(ret)
 	ret = RemoveRedundantSpace(ret)
-	msg := fmt.Sprintf("OCR [%s] [%s]", info.Name(), ret)
+	msg := fmt.Sprintf("OCR [%s] [%s]", html.EscapeString(info.Name()), html.EscapeString(ret))
 	PushStatusBar(msg)
 	return ret
 }

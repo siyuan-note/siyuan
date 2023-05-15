@@ -43,8 +43,21 @@ func IsEmptyDir(p string) bool {
 	return 1 > len(files)
 }
 
-func IsDirOrSymlink(dir fs.DirEntry) bool {
+func IsDirRegularOrSymlink(dir fs.DirEntry) bool {
 	return dir.IsDir() || dir.Type() == fs.ModeSymlink
+}
+
+func IsPathRegularDirOrSymlinkDir(path string) bool {
+	fio, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	if nil != err {
+		return false
+	}
+
+	return fio.IsDir()
 }
 
 func RemoveID(name string) string {

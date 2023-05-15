@@ -4,8 +4,9 @@ import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
-import {account} from "../config/account";
 import {processSync} from "../dialog/processSystem";
+import {openSetting} from "../config";
+import {App} from "../index";
 
 export const addCloudName = (cloudPanelElement: Element) => {
     const dialog = new Dialog({
@@ -82,7 +83,15 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
     fetchPost("/api/sync/listCloudSyncDir", {}, (response) => {
         let syncListHTML = `<div class="fn__hr"></div><ul><li style="padding: 0 16px" class="b3-list--empty">${window.siyuan.languages.emptyCloudSyncList}</li></ul>`;
         if (response.code === 1) {
-            syncListHTML = `<div class="fn__hr"></div><ul><li style="padding: 0 16px" class="b3-list--empty ft__error">${response.msg}</li></ul>`;
+            syncListHTML = `<div class="fn__hr"></div>
+<ul>
+    <li class="b3-list--empty ft__error">
+        ${response.msg}
+    </li>
+    <li class="b3-list--empty">
+        ${window.siyuan.languages.cloudConfigTip}
+    </li>
+</ul>`;
         } else if (response.code !== 1) {
             syncListHTML = '<div class="fn__hr"></div><ul class="b3-list b3-list--background fn__flex-1" style="overflow: auto;">';
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
@@ -131,25 +140,28 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
     });
 };
 
-export const syncGuide = (element?: Element) => {
+export const syncGuide = (app?: App) => {
     if (window.siyuan.config.readonly) {
-        return;
-    }
-    if (element && element.classList.contains("toolbar__item--active")) {
         return;
     }
     if (isMobile()) {
         if (0 === window.siyuan.config.sync.provider && needSubscribe()) {
             return;
         }
-    } else if (0 === window.siyuan.config.sync.provider && needSubscribe("")) {
-        const dialog = new Dialog({
-            title: window.siyuan.languages.account,
-            content: `<div class="account" style="background-color: var(--b3-theme-background)">${account.genHTML()}</div>`,
-            width: "80vw",
-        });
-        account.bindEvent(dialog.element.querySelector(".account"));
-        return;
+    } else {
+        if (document.querySelector("#barSync")?.classList.contains("toolbar__item--active")) {
+            return;
+        }
+        if (0 === window.siyuan.config.sync.provider && needSubscribe("") && app) {
+            const dialogSetting = openSetting(app);
+            if (window.siyuan.user) {
+                dialogSetting.element.querySelector('.b3-tab-bar [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
+            } else {
+                dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
+                dialogSetting.element.querySelector('.config__tab-container[data-name="account"]').setAttribute("data-action", "go-repos");
+            }
+            return;
+        }
     }
     if (!window.siyuan.config.repo.key) {
         setKey();

@@ -18,8 +18,9 @@ import {MobileTags} from "../dock/MobileTags";
 import {activeBlur, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardToolbar";
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
+import {App} from "../../index";
 
-export const initFramework = () => {
+export const initFramework = (app: App) => {
     setInlineStyle();
     renderSnippet();
     initKeyboardToolbar();
@@ -122,7 +123,7 @@ export const initFramework = () => {
         fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
     });
     document.getElementById("toolbarSync").addEventListener(getEventName(), () => {
-        syncGuide();
+        syncGuide(app);
     });
     if (navigator.userAgent.indexOf("iPhone") > -1 && !window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly) {
         // 不知道为什么 iPhone 中如果是编辑状态，点击文档后无法点击标题

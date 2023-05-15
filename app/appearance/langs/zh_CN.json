@@ -1,4 +1,5 @@
 {
+  "cloudConfigTip": "请在 [设置 - 云端] 中进行配置",
   "confirmUninstall": "确定卸载 ${name} ？",
   "scrollGetMore": "不要惊慌...上下滚动即可加载更多内容",
   "flashcardNewCard": "新卡",

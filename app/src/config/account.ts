@@ -362,22 +362,16 @@ ${window.siyuan.languages.account9}
     _afterLogin(userResponse: IWebSocketData, element: Element) {
         window.siyuan.user = userResponse.data;
         processSync();
-        if (element.classList.contains("account") && !needSubscribe("")) {
-            const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
-            if (dialogElement) {
-                window.siyuan.dialogs.find((item) => {
-                    if (item.element.isSameNode(dialogElement)) {
-                        item.destroy();
-                        return true;
-                    }
-                });
-                syncGuide();
-                return;
-            }
-        }
         element.innerHTML = account.genHTML();
         account.bindEvent(element);
         account.onSetaccount();
+        if (element.getAttribute("data-action") === "go-repos") {
+            const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
+            if (dialogElement) {
+                dialogElement.querySelector('.b3-tab-bar [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
+                element.removeAttribute("data-action");
+            }
+        }
     },
     onSetaccount() {
         if (repos.element) {

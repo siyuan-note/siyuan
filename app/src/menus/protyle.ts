@@ -493,7 +493,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
         }
         /// #if !MOBILE
         if (protyle.model) {
-            const allModels = getAllModels()
+            const allModels = getAllModels();
             allModels.outline.forEach(item => {
                 if (item.blockId === protyle.block.rootID) {
                     item.setCurrent(protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId || id}"]`));

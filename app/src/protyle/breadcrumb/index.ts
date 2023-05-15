@@ -21,7 +21,6 @@ import {openFileById} from "../../editor/util";
 import {getCurrentWindow, systemPreferences} from "@electron/remote";
 /// #endif
 import {onGet} from "../util/onGet";
-import {saveScroll} from "../scroll/saveScroll";
 import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";

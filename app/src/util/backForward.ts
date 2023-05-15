@@ -2,13 +2,12 @@ import {hasClosestBlock, hasClosestByAttribute} from "../protyle/util/hasClosest
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
 import {hideElements} from "../protyle/ui/hideElements";
-import {fetchPost, fetchSyncPost} from "./fetch";
+import {fetchSyncPost} from "./fetch";
 import {Constants} from "../constants";
 import {Wnd} from "../layout/Wnd";
 import {getInstanceById, getWndByLayout} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {Editor} from "../editor";
-import {onGet} from "../protyle/util/onGet";
 import {scrollCenter} from "./highlightById";
 import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";

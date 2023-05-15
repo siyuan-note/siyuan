@@ -360,4 +360,4 @@ const focusElement = (protyle: IProtyle, options: {
         }
         /// #endif
     }
-}
+};

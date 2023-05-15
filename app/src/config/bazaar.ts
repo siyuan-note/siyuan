@@ -637,7 +637,7 @@ export const bazaar = {
                 } else if (type === "plugin-enable") {
                     const itemElement = hasClosestByClassName(target, "b3-card");
                     if (itemElement) {
-                        const enabled = (target as HTMLInputElement).checked
+                        const enabled = (target as HTMLInputElement).checked;
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: dataObj.name,
                             enabled,

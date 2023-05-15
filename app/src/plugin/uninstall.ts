@@ -7,27 +7,27 @@ export const uninstall = (app: App, name: string) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
             // rm tab
-            const modelsKeys = Object.keys(plugin.models)
+            const modelsKeys = Object.keys(plugin.models);
             getAllModels().custom.forEach(custom => {
                 if (modelsKeys.includes(custom.type)) {
-                    custom.parent.parent.removeTab(custom.parent.id)
+                    custom.parent.parent.removeTab(custom.parent.id);
                 }
-            })
+            });
             // rm topbar
             plugin.topBarIcons.forEach(item => {
                 item.remove();
-            })
+            });
             // rm dock
-            const docksKeys = Object.keys(plugin.docks)
+            const docksKeys = Object.keys(plugin.docks);
             docksKeys.forEach(key => {
                 if (Object.keys(window.siyuan.layout.leftDock.data).includes(key)) {
-                    window.siyuan.layout.leftDock.remove(key)
+                    window.siyuan.layout.leftDock.remove(key);
                 } else if (Object.keys(window.siyuan.layout.rightDock.data).includes(key)) {
-                    window.siyuan.layout.rightDock.remove(key)
+                    window.siyuan.layout.rightDock.remove(key);
                 } else if (Object.keys(window.siyuan.layout.bottomDock.data).includes(key)) {
-                    window.siyuan.layout.bottomDock.remove(key)
+                    window.siyuan.layout.bottomDock.remove(key);
                 }
-            })
+            });
             exportLayout({
                 reload: false,
                 onlyData: false,
@@ -39,10 +39,10 @@ export const uninstall = (app: App, name: string) => {
                     item.remove();
                     return true;
                 }
-            })
+            });
             // rm plugin
-            app.plugins.splice(index, 1)
-            return true
+            app.plugins.splice(index, 1);
+            return true;
         }
-    })
-}
+    });
+};

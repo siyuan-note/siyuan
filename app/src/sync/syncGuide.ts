@@ -306,7 +306,7 @@ export const setKey = (isSync:boolean, cb?:() => void) => {
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();
     });
-    const genBtnElement = dialog.element.querySelector("#initKeyByPW")
+    const genBtnElement = dialog.element.querySelector("#initKeyByPW");
     dialog.element.querySelector(".b3-switch").addEventListener("change", function () {
         if (this.checked) {
             genBtnElement.removeAttribute("disabled");
@@ -331,7 +331,7 @@ export const setKey = (isSync:boolean, cb?:() => void) => {
             fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value}, (response) => {
                 window.siyuan.config.repo.key = response.data.key;
                 if (cb) {
-                    cb()
+                    cb();
                 }
                 if (isSync) {
                     setSync(response.data.key, dialog);

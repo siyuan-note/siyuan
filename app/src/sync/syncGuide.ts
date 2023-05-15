@@ -166,7 +166,7 @@ export const syncGuide = (app?: App) => {
     }
     /// #endif
     if (!window.siyuan.config.repo.key) {
-        setKey();
+        setKey(true);
         return;
     }
     if (!window.siyuan.config.sync.enabled) {
@@ -276,39 +276,68 @@ const setSync = (key?: string, dialog?: Dialog) => {
     }
 };
 
-const setKey = () => {
+export const setKey = (isSync:boolean, cb?:() => void) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
     <img style="width: 260px" src="/stage/images/sync-guide.svg"/>
     <div class="fn__hr--b"></div>
     <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide2}</div>
-     <div class="fn__hr--b"></div>
+    <div class="fn__hr--b"></div>
     <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.passphrase}">
     <div class="fn__hr"></div>
-    <button class="b3-button fn__block" id="initKeyByPW">
-        <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}
-    </button>
+    <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.duplicate} ${window.siyuan.languages.passphrase}">
 </div>
 <div class="b3-dialog__action">
+    <label>
+        <input type="checkbox" class="b3-switch fn__flex-center">
+        <span class="fn__space"></span>
+        ${window.siyuan.languages.confirmPassword}
+    </label>
+    <span class="fn__flex-1"></span>
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--text" id="initKeyByPW" disabled>
+        ${window.siyuan.languages.confirm}
+    </button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();
     });
-    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-    dialog.element.querySelector("#initKeyByPW").addEventListener("click", () => {
-        if (!inputElement.value) {
+    const genBtnElement = dialog.element.querySelector("#initKeyByPW")
+    dialog.element.querySelector(".b3-switch").addEventListener("change", function () {
+        if (this.checked) {
+            genBtnElement.removeAttribute("disabled");
+        } else {
+            genBtnElement.setAttribute("disabled", "disabled");
+        }
+    });
+    const inputElements = dialog.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
+    genBtnElement.addEventListener("click", () => {
+        if (!inputElements[0].value || !inputElements[1].value) {
             showMessage(window.siyuan.languages._kernel[142]);
             return;
         }
+        if (inputElements[0].value !== inputElements[1].value) {
+            showMessage(window.siyuan.languages.passwordNoMatch);
+            return;
+        }
         confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
-            fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
-                setSync(response.data.key, dialog);
+            if (!isSync) {
+                dialog.destroy();
+            }
+            fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value}, (response) => {
+                window.siyuan.config.repo.key = response.data.key;
+                if (cb) {
+                    cb()
+                }
+                if (isSync) {
+                    setSync(response.data.key, dialog);
+                }
             });
         });
     });
-    inputElement.focus();
+    inputElements[0].focus();
 };

@@ -1,4 +1,6 @@
 {
+  "confirmPassword": "Confirmer que le mot de passe a été mémorisé",
+  "passwordNoMatch": "La saisie du mot de passe ne correspond pas deux fois",
   "cloudConfigTip": "Veuillez configurer dans [Paramètres - Cloud]",
   "confirmUninstall": "Êtes-vous sûr de vouloir désinstaller ${name} ?",
   "scrollGetMore": "Ne paniquez pas... faites défiler de haut en bas pour en charger plus",

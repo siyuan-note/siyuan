@@ -83,7 +83,7 @@ export const about = {
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.dataRepoKey}
         <div class="b3-label__text">${window.siyuan.languages.dataRepoKeyTip1}</div>
-        <div class="b3-label__text ft__error">${window.siyuan.languages.dataRepoKeyTip2}</div>
+        <div class="b3-label__text"><span class="ft__error">${window.siyuan.languages.dataRepoKeyTip2}</span></div>
     </div>
     <div class="fn__space"></div>
     <div class="fn__size200 config__item-line fn__flex-center${window.siyuan.config.repo.key ? " fn__none" : ""}">

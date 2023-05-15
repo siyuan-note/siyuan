@@ -109,6 +109,18 @@ export class Plugin {
         });
     }
 
+    public removeData(storageName: string) {
+        return new Promise((resolve) => {
+            if (!this.data) {
+                this.data = {};
+            }
+            fetchPost("/api/file/removeFile", {path: `/data/storage/petal/${this.name}/${storageName}`}, (response) => {
+                delete this.data[storageName];
+                resolve(response);
+            });
+        });
+    }
+
     public addTab(options: {
         type: string,
         destroy?: () => void,

@@ -1,6 +1,6 @@
 {
-  "confirmPassword": "確認已經牢記密碼",
-  "passwordNoMatch": "密碼兩次輸入不一致",
+  "confirmPassword": "我已經牢記密碼了",
+  "passwordNoMatch": "兩次輸入的密碼不一致",
   "cloudConfigTip": "請在 [設置 - 雲端] 中進行配置",
   "confirmUninstall": "確定卸載 ${name} ？",
   "scrollGetMore": "不要驚慌...上下滾動即可加載更多內容",

@@ -1,5 +1,5 @@
 {
-  "confirmPassword": "Confirmer que le mot de passe a été mémorisé",
+  "confirmPassword": "J'ai déjà retenu le mot de passe",
   "passwordNoMatch": "Les mots de passe saisis deux fois ne correspondent pas",
   "cloudConfigTip": "Veuillez configurer dans [Paramètres - Cloud]",
   "confirmUninstall": "Êtes-vous sûr de vouloir désinstaller ${name} ?",

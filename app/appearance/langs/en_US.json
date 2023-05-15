@@ -1,5 +1,5 @@
 {
-  "confirmPassword": "Confirm that the password has been remembered",
+  "confirmPassword": "I have already remembered the password",
   "passwordNoMatch": "The passwords entered twice do not match",
   "cloudConfigTip": "Please configure in [Settings - Cloud]",
   "confirmUninstall": "Are you sure you want to uninstall ${name}?",

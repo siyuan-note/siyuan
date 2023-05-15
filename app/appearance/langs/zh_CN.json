@@ -1,5 +1,5 @@
 {
-  "confirmPassword": "确认已经牢记密码",
+  "confirmPassword": "我已经牢记密码了",
   "passwordNoMatch": "两次输入的密码不一致",
   "cloudConfigTip": "请在 [设置 - 云端] 中进行配置",
   "confirmUninstall": "确定卸载 ${name} ？",

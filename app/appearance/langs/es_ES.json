@@ -1,5 +1,5 @@
 {
-  "confirmPassword": "Confirme que la contraseña ha sido recordada",
+  "confirmPassword": "Ya he recordado la contraseña",
   "passwordNoMatch": "Las contraseñas ingresadas dos veces no coinciden",
   "cloudConfigTip": "Configure en [Configuración - Nube]",
   "confirmUninstall": "¿Está seguro de que desea desinstalar ${name}?",

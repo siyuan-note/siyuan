@@ -1136,7 +1136,7 @@
     "197": "Actualmente, el editor se encuentra en modo de solo lectura. Si necesita editar contenido, cambie al modo de edición",
     "198": "Este no es un archivo data.zip válido. Si el archivo se exportó de [Árbol de documentos], importalo de [Árbol de documentos]",
     "199": "Este no es un archivo .sy.zip válido. Si el archivo se exportó desde [Configuración], impórtelo desde [Configuración]",
-    "200": "El tiempo de respuesta de la búsqueda global es lento. Se recomienda ajustar [Configuración - Búsqueda - Número de resultados de búsqueda mostrados] a 64 o un valor menor. Para obtener más sugerencias, consulte el capítulo de optimización del rendimiento de la guía del usuario",
+    "200": "El tiempo de respuesta de b\u00fasqueda global es lento, se recomienda agregar filtros de tipo o palabras clave para reducir el alcance de b\u00fasqueda",
     "201": "Error al purgar el repositorio de datos: %s",
     "202": "Limpiando repositorio de datos...",
     "203": "El repositorio de datos se purgó, [%d] instantáneas y [%d] objetos de datos se eliminaron y se liberó un total de [%s] espacio en disco"

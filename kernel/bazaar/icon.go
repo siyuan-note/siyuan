@@ -101,6 +101,11 @@ func Icons() (icons []*Icon) {
 
 func InstalledIcons() (ret []*Icon) {
 	ret = []*Icon{}
+
+	if !util.IsPathRegularDirOrSymlinkDir(util.IconsPath) {
+		return
+	}
+
 	iconDirs, err := os.ReadDir(util.IconsPath)
 	if nil != err {
 		logging.LogWarnf("read icons folder failed: %s", err)
@@ -110,7 +115,7 @@ func InstalledIcons() (ret []*Icon) {
 	bazaarIcons := Icons()
 
 	for _, iconDir := range iconDirs {
-		if !iconDir.IsDir() {
+		if !util.IsDirRegularOrSymlink(iconDir) {
 			continue
 		}
 		dirName := iconDir.Name()

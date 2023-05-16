@@ -24,7 +24,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -105,7 +104,7 @@ func Themes() (ret []*Theme) {
 func InstalledThemes() (ret []*Theme) {
 	ret = []*Theme{}
 
-	if !gulu.File.IsDir(util.ThemesPath) {
+	if !util.IsPathRegularDirOrSymlinkDir(util.ThemesPath) {
 		return
 	}
 
@@ -118,7 +117,7 @@ func InstalledThemes() (ret []*Theme) {
 	bazaarThemes := Themes()
 
 	for _, themeDir := range themeDirs {
-		if !themeDir.IsDir() {
+		if !util.IsDirRegularOrSymlink(themeDir) {
 			continue
 		}
 		dirName := themeDir.Name()

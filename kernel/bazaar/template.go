@@ -25,7 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -107,7 +106,7 @@ func InstalledTemplates() (ret []*Template) {
 	ret = []*Template{}
 
 	templatesPath := filepath.Join(util.DataDir, "templates")
-	if !gulu.File.IsDir(templatesPath) {
+	if !util.IsPathRegularDirOrSymlinkDir(templatesPath) {
 		return
 	}
 
@@ -120,7 +119,7 @@ func InstalledTemplates() (ret []*Template) {
 	bazaarTemplates := Templates()
 
 	for _, templateDir := range templateDirs {
-		if !templateDir.IsDir() {
+		if !util.IsDirRegularOrSymlink(templateDir) {
 			continue
 		}
 		dirName := templateDir.Name()

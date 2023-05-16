@@ -24,7 +24,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/88250/gulu"
 	"github.com/dustin/go-humanize"
 	ants "github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/httpclient"
@@ -106,7 +105,7 @@ func InstalledPlugins() (ret []*Plugin) {
 	ret = []*Plugin{}
 
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
-	if !gulu.File.IsDir(pluginsPath) {
+	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
 		return
 	}
 
@@ -119,7 +118,7 @@ func InstalledPlugins() (ret []*Plugin) {
 	bazaarPlugins := Plugins()
 
 	for _, pluginDir := range pluginDirs {
-		if !pluginDir.IsDir() {
+		if !util.IsDirRegularOrSymlink(pluginDir) {
 			continue
 		}
 		dirName := pluginDir.Name()

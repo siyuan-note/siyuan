@@ -11,7 +11,7 @@ import * as path from "path";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {setStorageVal} from "../protyle/util/compatibility";
-import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";

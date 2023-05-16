@@ -61,7 +61,7 @@ const loadPluginJS = (app: App, item: IPluginData) => {
         console.error(`plugin ${item.name} load error:`, e);
     }
     return plugin;
-}
+};
 
 export const loadPlugin = (app: App, item: IPluginData) => {
     const plugin = loadPluginJS(app, item);
@@ -75,7 +75,7 @@ export const loadPlugin = (app: App, item: IPluginData) => {
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
-            }], dock.config.position === "LeftBottom" ? 1 : 0, true)
+            }], dock.config.position === "LeftBottom" ? 1 : 0, true);
         } else if (dock.config.position.startsWith("Bottom")) {
             window.siyuan.layout.bottomDock.genButton([{
                 type: key,
@@ -84,7 +84,7 @@ export const loadPlugin = (app: App, item: IPluginData) => {
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
-            }], dock.config.position === "BottomRight" ? 1 : 0, true)
+            }], dock.config.position === "BottomRight" ? 1 : 0, true);
         } else if (dock.config.position.startsWith("Right")) {
             window.siyuan.layout.rightDock.genButton([{
                 type: key,
@@ -93,7 +93,7 @@ export const loadPlugin = (app: App, item: IPluginData) => {
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
-            }], dock.config.position === "RightBottom" ? 1 : 0, true)
+            }], dock.config.position === "RightBottom" ? 1 : 0, true);
         }
     });
     const styleElement = document.createElement("style");

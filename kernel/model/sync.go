@@ -139,7 +139,7 @@ func BootSyncData() {
 
 	if !isProviderOnline(false) {
 		BootSyncSucc = 1
-		util.PushErrMsg(Conf.Language(28), 7000)
+		util.PushErrMsg(Conf.Language(76), 7000)
 		return
 	}
 

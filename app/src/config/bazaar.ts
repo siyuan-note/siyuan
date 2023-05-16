@@ -16,6 +16,7 @@ import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
+import {loadPlugin} from "../plugin/loader";
 
 export const bazaar = {
     element: undefined as Element,
@@ -635,19 +636,16 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "plugin-enable") {
-                    const itemElement = hasClosestByClassName(target, "b3-card");
-                    if (itemElement) {
+                    if (!target.getAttribute("disabled")) {
+                        target.setAttribute("disabled", "disabled");
                         const enabled = (target as HTMLInputElement).checked;
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: dataObj.name,
                             enabled,
-                        }, () => {
+                        }, (response) => {
+                            target.removeAttribute("disabled");
                             if (enabled) {
-                                exportLayout({
-                                    reload: true,
-                                    onlyData: false,
-                                    errorExit: false,
-                                });
+                                loadPlugin(app, response.data);
                             } else {
                                 uninstall(app, dataObj.name);
                             }

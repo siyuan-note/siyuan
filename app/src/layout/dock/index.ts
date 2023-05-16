@@ -549,7 +549,9 @@ export class Dock {
         this.toggleModel(key, false, true, true);
         this.element.querySelector(`[data-type="${key}"]`).remove();
         const custom = this.data[key] as Custom;
-        custom.parent.parent.removeTab(custom.parent.id);
+        if (custom.parent) {
+            custom.parent.parent.removeTab(custom.parent.id);
+        }
         delete this.data[key];
     }
 
@@ -603,7 +605,7 @@ export class Dock {
         return max;
     }
 
-    private genButton(data: IDockTab[], index: number) {
+    public genButton(data: IDockTab[], index: number, append = false) {
         let html = "";
         data.forEach(item => {
             html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeyLangId="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}">
@@ -612,11 +614,19 @@ export class Dock {
             this.data[item.type] = true;
         });
         if (index === 0) {
-            this.element.firstElementChild.innerHTML = `${html}<span class="dock__item dock__item--pin b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
+            if (append) {
+                this.element.firstElementChild.lastElementChild.insertAdjacentHTML("beforebegin", html);
+            } else {
+                this.element.firstElementChild.innerHTML = `${html}<span class="dock__item dock__item--pin b3-tooltips b3-tooltips__${this.getClassDirect(index)}" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
     <svg><use xlink:href="#iconPin"></use></svg>
 </span>`;
+            }
         } else {
-            this.element.lastElementChild.innerHTML = html;
+            if (append) {
+                this.element.lastElementChild.insertAdjacentHTML("beforeend", html);
+            } else {
+                this.element.lastElementChild.innerHTML = html;
+            }
         }
     }
 }

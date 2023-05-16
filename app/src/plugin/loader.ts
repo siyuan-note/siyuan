@@ -1,8 +1,10 @@
 import {fetchPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
-import {API} from "./API";
+/// #if !MOBILE
 import {exportLayout} from "../layout/util";
+/// #endif
+import {API} from "./API";
 
 const getObject = (key: string) => {
     const api = {
@@ -97,9 +99,11 @@ export const loadPlugin = (app: App, item: IPluginData) => {
     const styleElement = document.createElement("style");
     styleElement.textContent = item.css;
     document.head.append(styleElement);
+    /// #if !MOBILE
     exportLayout({
         reload: false,
         onlyData: false,
         errorExit: false
     });
+    /// #endif
 };

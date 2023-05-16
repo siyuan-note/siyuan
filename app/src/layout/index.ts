@@ -3,7 +3,7 @@ import {genUUID} from "../util/genID";
 import {addResize, resizeTabs} from "./util";
 /// #if MOBILE
 // 检测移动端是否引入了桌面端的代码
-alert("Need remove unused code");
+debugger;
 /// #endif
 
 export class Layout {

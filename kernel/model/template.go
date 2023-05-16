@@ -70,6 +70,10 @@ func SearchTemplate(keyword string) (ret []*Block) {
 	ret = []*Block{}
 
 	templates := filepath.Join(util.DataDir, "templates")
+	if !util.IsPathRegularDirOrSymlinkDir(templates) {
+		return
+	}
+
 	groups, err := os.ReadDir(templates)
 	if nil != err {
 		logging.LogErrorf("read templates failed: %s", err)

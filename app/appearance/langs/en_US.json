@@ -1136,7 +1136,7 @@
     "197": "Currently the editor is in read-only mode. If you need to edit content, please switch to edit mode",
     "198": "This is not a valid Data archive. If the archive was exported from [Doc tree], please import it from [Doc tree]",
     "199": "This is not a valid .sy.zip archive. If the archive was exported from [Settings], please import it from [Settings]",
-    "200": "The response time of the global search is slow. It is recommended to adjust [Settings - Search - Number of search results displayed] to 64 or a smaller value. For more suggestions, please refer to the performance optimization chapter of the user guide",
+    "200": "Global search response time is slow, it is recommended to add type filtering or keywords to narrow the search scope",
     "201": "Failed to purge data repo: %s",
     "202": "Cleaning data repo...",
     "203": "The data repo is purged, [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released"

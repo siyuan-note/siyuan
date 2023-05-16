@@ -1136,7 +1136,7 @@
     "197": "Actuellement, l'éditeur est en mode lecture seule. Si vous devez modifier le contenu, veuillez passer en mode édition",
     "198": "Ceci n'est pas une archive data.zip valide. Si l'archive a été exportée depuis [Doc tree], veuillez l'importer depuis [Doc tree]",
     "199": "Ceci n'est pas une archive .sy.zip valide. Si l'archive a été exportée depuis [Paramètres], veuillez l'importer depuis [Paramètres]",
-    "200": "Le temps de réponse de la recherche globale est lent. Il est recommandé d'ajuster [Paramètres - Recherche - Nombre de résultats de recherche affichés] à 64 ou à une valeur inférieure. Pour plus de suggestions, veuillez vous référer au chapitre sur l'optimisation des performances de la notice",
+    "200": "Le temps de réponse de la recherche globale est lent, il est recommandé d'ajouter un filtrage de type ou des mots-clés pour restreindre la portée de la recherche",
     "201": "Échec de la purge du référentiel de données : %s",
     "202": "Nettoyage du référentiel de données...",
     "203": "Le référentiel de données est purgé, [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré"

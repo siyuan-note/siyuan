@@ -12,7 +12,7 @@ import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 export class Plugin {
     public i18n: IObject;
     public eventBus: EventBus;
-    public data: any;
+    public data: any = {};
     public name: string;
     public topBarIcons: Element[] = [];
     public models: {
@@ -75,17 +75,12 @@ export class Plugin {
     }
 
     public loadData(storageName: string) {
-        if (!this.data) {
-            this.data = {};
-        }
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
         return new Promise((resolve) => {
             fetchPost("/api/file/getFile", {path: `/data/storage/petal/${this.name}/${storageName}`}, (response) => {
-                if (response.code === 404) {
-                    this.data[storageName] = "";
-                } else {
+                if (response.code !== 404) {
                     this.data[storageName] = response;
                 }
                 resolve(this.data[storageName]);
@@ -95,11 +90,15 @@ export class Plugin {
 
     public saveData(storageName: string, data: any) {
         return new Promise((resolve) => {
-            if (!this.data) {
-                this.data = {};
-            }
             const pathString = `/data/storage/petal/${this.name}/${storageName}`;
-            const file = new File([new Blob([data])], pathString.split("/").pop());
+            let file: File;
+            if (typeof data === "object") {
+                file = new File([new Blob([JSON.stringify(data)], {
+                    type: "application/json"
+                })], pathString.split("/").pop());
+            } else {
+                file = new File([new Blob([data])], pathString.split("/").pop());
+            }
             const formData = new FormData();
             formData.append("path", pathString);
             formData.append("file", file);

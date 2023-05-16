@@ -279,7 +279,6 @@
 如果你没有订阅需求但又想支持开发，欢迎进行捐赠：
 
 * [靠爱发电 - 链滴](https://ld246.com/sponsor)
-* [B3log - Open Collective](https://opencollective.com/b3log)
 
 ## 🙏 鸣谢
 

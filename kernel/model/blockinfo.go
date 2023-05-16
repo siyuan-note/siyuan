@@ -56,6 +56,31 @@ func GetDocInfo(rootID string) (ret *BlockInfo) {
 	title := tree.Root.IALAttr("title")
 	ret = &BlockInfo{ID: rootID, Name: title}
 	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
+	scrollData := ret.IAL["scroll"]
+	if 0 < len(scrollData) {
+		scroll := map[string]interface{}{}
+		if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
+			logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)
+			delete(ret.IAL, "scroll")
+		} else {
+			if zoomInId := scroll["zoomInId"]; nil != zoomInId {
+				if nil == treenode.GetBlockTree(zoomInId.(string)) {
+					delete(ret.IAL, "scroll")
+				}
+			} else {
+				if startId := scroll["startId"]; nil != startId {
+					if nil == treenode.GetBlockTree(startId.(string)) {
+						delete(ret.IAL, "scroll")
+					}
+				}
+				if endId := scroll["endId"]; nil != endId {
+					if nil == treenode.GetBlockTree(endId.(string)) {
+						delete(ret.IAL, "scroll")
+					}
+				}
+			}
+		}
+	}
 	ret.RefIDs, _ = sql.QueryRefIDsByDefID(rootID, false)
 	ret.RefCount = len(ret.RefIDs)
 

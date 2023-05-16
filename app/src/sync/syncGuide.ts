@@ -4,8 +4,11 @@ import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
-import {account} from "../config/account";
 import {processSync} from "../dialog/processSystem";
+/// #if !MOBILE
+import {openSetting} from "../config";
+/// #endif
+import {App} from "../index";
 
 export const addCloudName = (cloudPanelElement: Element) => {
     const dialog = new Dialog({
@@ -82,7 +85,15 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
     fetchPost("/api/sync/listCloudSyncDir", {}, (response) => {
         let syncListHTML = `<div class="fn__hr"></div><ul><li style="padding: 0 16px" class="b3-list--empty">${window.siyuan.languages.emptyCloudSyncList}</li></ul>`;
         if (response.code === 1) {
-            syncListHTML = `<div class="fn__hr"></div><ul><li style="padding: 0 16px" class="b3-list--empty ft__error">${response.msg}</li></ul>`;
+            syncListHTML = `<div class="fn__hr"></div>
+<ul>
+    <li class="b3-list--empty ft__error">
+        ${response.msg}
+    </li>
+    <li class="b3-list--empty">
+        ${window.siyuan.languages.cloudConfigTip}
+    </li>
+</ul>`;
         } else if (response.code !== 1) {
             syncListHTML = '<div class="fn__hr"></div><ul class="b3-list b3-list--background fn__flex-1" style="overflow: auto;">';
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
@@ -131,28 +142,31 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
     });
 };
 
-export const syncGuide = (element?: Element) => {
+export const syncGuide = (app?: App) => {
     if (window.siyuan.config.readonly) {
         return;
     }
-    if (element && element.classList.contains("toolbar__item--active")) {
+    /// #if MOBILE
+    if (0 === window.siyuan.config.sync.provider && needSubscribe()) {
         return;
     }
-    if (isMobile()) {
-        if (0 === window.siyuan.config.sync.provider && needSubscribe()) {
-            return;
+    /// #else
+    if (document.querySelector("#barSync")?.classList.contains("toolbar__item--active")) {
+        return;
+    }
+    if (0 === window.siyuan.config.sync.provider && needSubscribe("") && app) {
+        const dialogSetting = openSetting(app);
+        if (window.siyuan.user) {
+            dialogSetting.element.querySelector('.b3-tab-bar [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
+        } else {
+            dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
+            dialogSetting.element.querySelector('.config__tab-container[data-name="account"]').setAttribute("data-action", "go-repos");
         }
-    } else if (0 === window.siyuan.config.sync.provider && needSubscribe("")) {
-        const dialog = new Dialog({
-            title: window.siyuan.languages.account,
-            content: `<div class="account" style="background-color: var(--b3-theme-background)">${account.genHTML()}</div>`,
-            width: "80vw",
-        });
-        account.bindEvent(dialog.element.querySelector(".account"));
         return;
     }
+    /// #endif
     if (!window.siyuan.config.repo.key) {
-        setKey();
+        setKey(true);
         return;
     }
     if (!window.siyuan.config.sync.enabled) {
@@ -262,39 +276,68 @@ const setSync = (key?: string, dialog?: Dialog) => {
     }
 };
 
-const setKey = () => {
+export const setKey = (isSync:boolean, cb?:() => void) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
     <img style="width: 260px" src="/stage/images/sync-guide.svg"/>
     <div class="fn__hr--b"></div>
     <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide2}</div>
-     <div class="fn__hr--b"></div>
+    <div class="fn__hr--b"></div>
     <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.passphrase}">
     <div class="fn__hr"></div>
-    <button class="b3-button fn__block" id="initKeyByPW">
-        <svg><use xlink:href="#iconHand"></use></svg>${window.siyuan.languages.genKeyByPW}
-    </button>
+    <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.duplicate} ${window.siyuan.languages.passphrase}">
 </div>
 <div class="b3-dialog__action">
+    <label>
+        <input type="checkbox" class="b3-switch fn__flex-center">
+        <span class="fn__space"></span>
+        ${window.siyuan.languages.confirmPassword}
+    </label>
+    <span class="fn__flex-1"></span>
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+    <span class="fn__space"></span>
+    <button class="b3-button b3-button--text" id="initKeyByPW" disabled>
+        ${window.siyuan.languages.confirm}
+    </button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => {
         dialog.destroy();
     });
-    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-    dialog.element.querySelector("#initKeyByPW").addEventListener("click", () => {
-        if (!inputElement.value) {
+    const genBtnElement = dialog.element.querySelector("#initKeyByPW");
+    dialog.element.querySelector(".b3-switch").addEventListener("change", function () {
+        if (this.checked) {
+            genBtnElement.removeAttribute("disabled");
+        } else {
+            genBtnElement.setAttribute("disabled", "disabled");
+        }
+    });
+    const inputElements = dialog.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
+    genBtnElement.addEventListener("click", () => {
+        if (!inputElements[0].value || !inputElements[1].value) {
             showMessage(window.siyuan.languages._kernel[142]);
             return;
         }
+        if (inputElements[0].value !== inputElements[1].value) {
+            showMessage(window.siyuan.languages.passwordNoMatch);
+            return;
+        }
         confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
-            fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
-                setSync(response.data.key, dialog);
+            if (!isSync) {
+                dialog.destroy();
+            }
+            fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElements[0].value}, (response) => {
+                window.siyuan.config.repo.key = response.data.key;
+                if (cb) {
+                    cb();
+                }
+                if (isSync) {
+                    setSync(response.data.key, dialog);
+                }
             });
         });
     });
-    inputElement.focus();
+    inputElements[0].focus();
 };

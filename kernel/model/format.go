@@ -35,8 +35,8 @@ func AutoSpace(rootID string) (err error) {
 		return
 	}
 
-	util.PushEndlessProgress(Conf.Language(116))
-	defer util.ClearPushProgress(100)
+	util.PushProtyleLoading(rootID, Conf.Language(116))
+	defer util.PushProtyleReload(rootID)
 
 	WaitForWritingFiles()
 

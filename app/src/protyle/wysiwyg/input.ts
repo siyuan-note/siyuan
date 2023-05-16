@@ -50,7 +50,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         return;
     }
     if (turnIntoTaskList(protyle, type, blockElement, editElement, range)) {
-      return;
+        return;
     }
     if (headingTurnIntoList(protyle, type, blockElement, editElement, range)) {
         return;
@@ -101,8 +101,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             html += genEmptyBlock(false, true);
         }
     } else {
-        if (trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
-            trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
+        if (type !== "NodeCodeBlock" && (
+            trimStartText.startsWith("```") || trimStartText.startsWith("~~~") || trimStartText.startsWith("···") ||
+            trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1
+        )) {
             if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
                 // ```test` 不处理，正常渲染为段落块
             } else {

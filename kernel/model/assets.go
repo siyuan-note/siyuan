@@ -33,6 +33,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
@@ -354,7 +355,7 @@ func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
 			continue
 		}
 
-		msg := fmt.Sprintf(Conf.Language(27), absAsset)
+		msg := fmt.Sprintf(Conf.Language(27), html.EscapeString(absAsset))
 		util.PushStatusBar(msg)
 		util.PushUpdateMsg(msgId, msg, 3000)
 

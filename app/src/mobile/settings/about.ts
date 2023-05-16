@@ -8,6 +8,7 @@ import {openByMobile, writeText} from "../../protyle/util/compatibility";
 import {exitSiYuan, processSync} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {openModel} from "../menu/model";
+import {setKey} from "../../sync/syncGuide";
 
 export const initAbout = () => {
     if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
@@ -195,39 +196,9 @@ export const initAbout = () => {
                         event.stopPropagation();
                         break;
                     } else if (target.id === "initKeyByPW") {
-                        const initDialog = new Dialog({
-                            title: "🔑 " + window.siyuan.languages.genKeyByPW,
-                            content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.password}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                            width: "92vw",
-                        });
-                        const inputElement = initDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-                        inputElement.focus();
-                        const btnsElement = initDialog.element.querySelectorAll(".b3-button");
-                        initDialog.bindInput(inputElement, () => {
-                            (btnsElement[1] as HTMLButtonElement).click();
-                        });
-                        btnsElement[0].addEventListener("click", () => {
-                            initDialog.destroy();
-                        });
-                        btnsElement[1].addEventListener("click", () => {
-                            if (!inputElement.value) {
-                                showMessage(window.siyuan.languages._kernel[142]);
-                                return;
-                            }
-                            confirmDialog("🔑 " + window.siyuan.languages.genKeyByPW, window.siyuan.languages.initRepoKeyTip, () => {
-                                initDialog.destroy();
-                                fetchPost("/api/repo/initRepoKeyFromPassphrase", {pass: inputElement.value}, (response) => {
-                                    window.siyuan.config.repo.key = response.data.key;
-                                    importKeyElement.parentElement.classList.add("fn__none");
-                                    importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
-                                });
-                            });
+                        setKey(false, () => {
+                            importKeyElement.parentElement.classList.add("fn__none");
+                            importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
                         });
                         event.preventDefault();
                         event.stopPropagation();

@@ -74,7 +74,7 @@ class App {
                         window.siyuan.user = userResponse.data;
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                            initFramework();
+                            initFramework(siyuanApp);
                             initRightMenu();
                             loadPlugins(siyuanApp);
                             openChangelog();

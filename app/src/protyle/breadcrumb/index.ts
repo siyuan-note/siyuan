@@ -16,13 +16,11 @@ import {getEditorRange} from "../util/selection";
 import {setPadding} from "../ui/initUI";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {getAllModels} from "../../layout/getAll";
 /// #endif
 /// #if !BROWSER
 import {getCurrentWindow, systemPreferences} from "@electron/remote";
 /// #endif
 import {onGet} from "../util/onGet";
-import {saveScroll} from "../scroll/saveScroll";
 import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
@@ -243,16 +241,6 @@ export class Breadcrumb {
                         hideElements(["toolbar"], protyle);
                         fetchPost("/api/format/autoSpace", {
                             id: protyle.block.rootID
-                        }, () => {
-                            /// #if MOBILE
-                            reloadProtyle(protyle, false);
-                            /// #else
-                            getAllModels().editor.forEach(item => {
-                                if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                                    reloadProtyle(item.editor.protyle, item.editor.protyle.element.isSameNode(protyle.element));
-                                }
-                            });
-                            /// #endif
                         });
                     }
                 }).element);

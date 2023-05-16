@@ -43,7 +43,9 @@ export const openNewWindowById = (id: string) => {
         };
         if (response.data.rootID === id) {
             fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
-                json.children.scrollAttr = JSON.parse(attrResponse.data.scroll || "{}");
+                if (attrResponse.data.scroll) {
+                    json.children.scrollAttr = JSON.parse(attrResponse.data.scroll);
+                }
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
                     id: getCurrentWindow().id,

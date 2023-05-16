@@ -15,6 +15,8 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasC
 import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";
+import {uninstall} from "../plugin/uninstall";
+import {loadPlugin} from "../plugin/loader";
 
 export const bazaar = {
     element: undefined as Element,
@@ -311,11 +313,7 @@ export const bazaar = {
         urls.pop();
         let navTitle = window.siyuan.languages.icon;
         if (bazaarType === "themes") {
-            if (data.modes.includes("dark")) {
-                navTitle = window.siyuan.languages.themeDark + " " + window.siyuan.languages.theme;
-            } else {
-                navTitle = window.siyuan.languages.themeLight + " " + window.siyuan.languages.theme;
-            }
+            navTitle = window.siyuan.languages.theme;
         } else if (bazaarType === "widgets") {
             navTitle = window.siyuan.languages.widget;
         } else if (bazaarType === "templates") {
@@ -395,7 +393,7 @@ export const bazaar = {
 </div>
 <div class="item__main">
     <div class="item__preview" style="background-image: url(${data.previewURL})"></div>
-    <div class="b3-typography${data.preferredDesc?"":" fn__none"}">
+    <div class="b3-typography${data.preferredDesc ? "" : " fn__none"}">
         <div data-type="NodeBlockquote" class="bq" data-node-id>
             <div data-type="NodeParagraph" class="p" data-node-id>
                 ${data.preferredDesc || ""}
@@ -568,19 +566,16 @@ export const bazaar = {
                         window.siyuan.config.appearance.icon === packageName) {
                         showMessage(window.siyuan.languages.uninstallTip);
                     } else {
-                        fetchPost(url, {
-                            packageName
-                        }, response => {
-                            this._genMyHTML(bazaarType, app);
-                            bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
-                            // TODO destroy plugin
-                            if (bazaarType === "plugins") {
-                                exportLayout({
-                                    reload: true,
-                                    onlyData: false,
-                                    errorExit: false,
-                                });
-                            }
+                        confirmDialog(window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
+                            fetchPost(url, {
+                                packageName
+                            }, response => {
+                                this._genMyHTML(bazaarType, app);
+                                bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
+                                if (bazaarType === "plugins") {
+                                    uninstall(app, packageName);
+                                }
+                            });
                         });
                     }
                     event.preventDefault();
@@ -641,18 +636,19 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "plugin-enable") {
-                    const itemElement = hasClosestByClassName(target, "b3-card");
-                    if (itemElement) {
+                    if (!target.getAttribute("disabled")) {
+                        target.setAttribute("disabled", "disabled");
+                        const enabled = (target as HTMLInputElement).checked;
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: dataObj.name,
-                            enabled: (target as HTMLInputElement).checked
-                        }, () => {
-                            // TODO destroy plugin
-                            exportLayout({
-                                reload: true,
-                                onlyData: false,
-                                errorExit: false,
-                            });
+                            enabled,
+                        }, (response) => {
+                            target.removeAttribute("disabled");
+                            if (enabled) {
+                                loadPlugin(app, response.data);
+                            } else {
+                                uninstall(app, dataObj.name);
+                            }
                         });
                     }
                     event.stopPropagation();

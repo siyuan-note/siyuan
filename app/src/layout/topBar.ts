@@ -73,7 +73,7 @@ export const initBar = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSync") {
-                syncGuide(target);
+                syncGuide(app);
                 event.stopPropagation();
                 break;
             } else if (target.id === "barWorkspace") {

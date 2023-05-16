@@ -298,6 +298,13 @@ declare interface IDockTab {
     hotkeyLangId?: string   // 常量中无法存变量
 }
 
+declare interface IPluginData {
+    name: string,
+    js: string,
+    css: string,
+    i18n: IObject
+}
+
 declare interface IPluginDockTab {
     position: TPluginDockPosition,
     size: { width: number, height: number },

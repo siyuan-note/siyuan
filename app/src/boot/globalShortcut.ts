@@ -593,7 +593,7 @@ export const globalShortcut = (app: App) => {
 
         if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
             event.preventDefault();
-            syncGuide(document.querySelector("#barSync"));
+            syncGuide(app);
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.editMode.custom, event)) {

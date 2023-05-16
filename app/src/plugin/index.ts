@@ -14,6 +14,7 @@ export class Plugin {
     public eventBus: EventBus;
     public data: any;
     public name: string;
+    public topBarIcons: Element[] = [];
     public models: {
         /// #if !MOBILE
         [key: string]: (options: { tab: Tab, data: any }) => Custom
@@ -65,6 +66,7 @@ export class Plugin {
             iconElement.addEventListener("click", options.callback);
             document.querySelector("#" + (options.position === "right" ? "barSearch" : "drag")).before(iconElement);
         }
+        this.topBarIcons.push(iconElement);
         return iconElement;
     }
 
@@ -104,6 +106,18 @@ export class Plugin {
             formData.append("isDir", "false");
             fetchPost("/api/file/putFile", formData, (response) => {
                 this.data[storageName] = data;
+                resolve(response);
+            });
+        });
+    }
+
+    public removeData(storageName: string) {
+        return new Promise((resolve) => {
+            if (!this.data) {
+                this.data = {};
+            }
+            fetchPost("/api/file/removeFile", {path: `/data/storage/petal/${this.name}/${storageName}`}, (response) => {
+                delete this.data[storageName];
                 resolve(response);
             });
         });

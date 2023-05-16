@@ -113,7 +113,8 @@
   line-height: 20px;
 
   &__text {
-    color: var(--b3-theme-on-surface) !important;
+    // import 的话会导致设置关于中 ft__error 无效
+    color: var(--b3-theme-on-surface);
     font-size: 14px !important;
     margin-top: 4px;
     overflow: hidden !important;

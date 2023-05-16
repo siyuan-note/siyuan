@@ -57,7 +57,19 @@ func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
 	}
 
 	for i := 0; i < 3; i++ {
-		_, err := c.R().Get(checkURL)
+		resp, err := c.R().Get(checkURL)
+		if resp.GetHeader("Location") != "" {
+			return true
+		}
+
+		switch err.(type) {
+		case *url.Error:
+			if err.(*url.Error).URL != checkURL {
+				// DNS 重定向
+				return true
+			}
+		}
+
 		ret = nil == err
 		if ret {
 			break

@@ -44,5 +44,5 @@ func setPetalEnabled(c *gin.Context) {
 
 	packageName := arg["packageName"].(string)
 	enabled := arg["enabled"].(bool)
-	model.SetPetalEnabled(packageName, enabled)
+	ret.Data = model.SetPetalEnabled(packageName, enabled)
 }

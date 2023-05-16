@@ -102,21 +102,23 @@ export const initUI = (protyle: IProtyle) => {
     }, {passive: false});
 };
 
-export const addLoading = (protyle: IProtyle) => {
+export const addLoading = (protyle: IProtyle, msg?: string) => {
     protyle.element.removeAttribute("data-loading");
     setTimeout(() => {
         if (protyle.element.getAttribute("data-loading") !== "finished") {
-            protyle.element.insertAdjacentHTML("beforeend", '<div style="background-color: var(--b3-theme-background)" class="fn__loading wysiwygLoading"><img width="48px" src="/stage/loading-pure.svg"></div>');
+            protyle.element.insertAdjacentHTML("beforeend", `<div style="background-color: var(--b3-theme-background);flex-direction: column;" class="fn__loading wysiwygLoading">
+    <img width="48px" src="/stage/loading-pure.svg">
+    <div style="color: var(--b3-theme-on-surface);margin-top: 8px;">${msg || ""}</div>
+</div>`);
         }
     }, Constants.TIMEOUT_LOAD);
 };
 
 export const removeLoading = (protyle: IProtyle) => {
     protyle.element.setAttribute("data-loading", "finished");
-    const loadingElement = protyle.element.querySelector(".wysiwygLoading");
-    if (loadingElement) {
-        loadingElement.remove();
-    }
+    protyle.element.querySelectorAll(".wysiwygLoading").forEach(item => {
+        item.remove();
+    });
 };
 
 export const setPadding = (protyle: IProtyle) => {

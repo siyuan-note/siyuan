@@ -1,5 +1,5 @@
 import {hasClosestBlock} from "../util/hasClosest";
-import {focusByOffset, getSelectionOffset} from "../util/selection";
+import {getSelectionOffset} from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
@@ -50,12 +50,12 @@ export const getDocByScroll = (options: {
     cb?: () => void
     focus?: boolean
 }) => {
-    let actions: string[] = []
+    let actions: string[] = [];
     if (options.mergedOptions) {
-        actions = options.mergedOptions.action
+        actions = options.mergedOptions.action;
     } else {
         if (options.focus) {
-            actions = [Constants.CB_GET_UNUNDO, Constants.CB_GET_FOCUS]
+            actions = [Constants.CB_GET_UNUNDO, Constants.CB_GET_FOCUS];
         } else {
             actions = [Constants.CB_GET_UNUNDO];
         }
@@ -70,7 +70,7 @@ export const getDocByScroll = (options: {
         }, response => {
             onGet(response, options.protyle, actions, options.scrollAttr);
             if (options.cb) {
-                options.cb()
+                options.cb();
             }
         });
     }
@@ -81,7 +81,7 @@ export const getDocByScroll = (options: {
     }, response => {
         onGet(response, options.protyle, actions, options.scrollAttr);
         if (options.cb) {
-            options.cb()
+            options.cb();
         }
     });
 };

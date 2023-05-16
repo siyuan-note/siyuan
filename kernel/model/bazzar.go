@@ -249,7 +249,7 @@ func UninstallBazaarTheme(themeName string) error {
 func BazaarTemplates() (templates []*bazaar.Template) {
 	templates = bazaar.Templates()
 	for _, template := range templates {
-		template.Installed = gulu.File.IsExist(filepath.Join(util.DataDir, "templates", template.Name))
+		template.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "templates", template.Name))
 		if template.Installed {
 			if themeConf, err := bazaar.TemplateJSON(template.Name); nil == err && nil != themeConf {
 				if template.Version != themeConf.Version {

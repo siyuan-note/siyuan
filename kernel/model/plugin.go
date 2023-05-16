@@ -38,7 +38,7 @@ type Petal struct {
 	I18n map[string]interface{} `json:"i18n"` // i18n text
 }
 
-func SetPetalEnabled(name string, enabled bool) {
+func SetPetalEnabled(name string, enabled bool) (ret *Petal) {
 	petals := getPetals()
 
 	plugins := bazaar.InstalledPlugins()
@@ -54,18 +54,21 @@ func SetPetalEnabled(name string, enabled bool) {
 		return
 	}
 
-	petal := getPetalByName(plugin.Name, petals)
-	if nil == petal {
-		petal = &Petal{
+	ret = getPetalByName(plugin.Name, petals)
+	if nil == ret {
+		ret = &Petal{
 			Name:    plugin.Name,
 			Enabled: enabled,
 		}
-		petals = append(petals, petal)
+		petals = append(petals, ret)
 	} else {
-		petal.Enabled = enabled
+		ret.Enabled = enabled
 	}
 
 	savePetals(petals)
+
+	loadCode(ret)
+	return
 }
 
 func LoadPetals() (ret []*Petal) {
@@ -76,78 +79,81 @@ func LoadPetals() (ret []*Petal) {
 			continue
 		}
 
-		pluginDir := filepath.Join(util.DataDir, "plugins", petal.Name)
-		jsPath := filepath.Join(pluginDir, "index.js")
-		if !gulu.File.IsExist(jsPath) {
-			logging.LogErrorf("plugin [%s] js not found", petal.Name)
-			continue
-		}
-
-		data, err := filelock.ReadFile(jsPath)
-		if nil != err {
-			logging.LogErrorf("read plugin [%s] js failed: %s", petal.Name, err)
-			continue
-		}
-		petal.JS = string(data)
-
-		cssPath := filepath.Join(pluginDir, "index.css")
-		if gulu.File.IsExist(cssPath) {
-			data, err := filelock.ReadFile(cssPath)
-			if nil != err {
-				logging.LogErrorf("read plugin [%s] css failed: %s", petal.Name, err)
-			} else {
-				petal.CSS = string(data)
-			}
-		}
-
-		i18nDir := filepath.Join(pluginDir, "i18n")
-		if gulu.File.IsDir(i18nDir) {
-			langJSONs, err := os.ReadDir(i18nDir)
-			if nil != err {
-				logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
-			} else {
-				preferredLang := Conf.Lang + ".json"
-				foundPreferredLang := false
-				foundEnUS := false
-				foundZhCN := false
-				for _, langJSON := range langJSONs {
-					if langJSON.Name() == preferredLang {
-						foundPreferredLang = true
-						break
-					}
-					if langJSON.Name() == "en_US.json" {
-						foundEnUS = true
-					}
-					if langJSON.Name() == "zh_CN.json" {
-						foundZhCN = true
-					}
-				}
-
-				if !foundPreferredLang {
-					if foundEnUS {
-						preferredLang = "en_US.json"
-					} else if foundZhCN {
-						preferredLang = "zh_CN.json"
-					} else {
-						preferredLang = langJSONs[0].Name()
-					}
-				}
-
-				data, err := filelock.ReadFile(filepath.Join(i18nDir, preferredLang))
-				if nil != err {
-					logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
-				} else {
-					petal.I18n = map[string]interface{}{}
-					if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); nil != err {
-						logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
-					}
-				}
-			}
-		}
-
+		loadCode(petal)
 		ret = append(ret, petal)
 	}
 	return
+}
+
+func loadCode(petal *Petal) {
+	pluginDir := filepath.Join(util.DataDir, "plugins", petal.Name)
+	jsPath := filepath.Join(pluginDir, "index.js")
+	if !gulu.File.IsExist(jsPath) {
+		logging.LogErrorf("plugin [%s] js not found", petal.Name)
+		return
+	}
+
+	data, err := filelock.ReadFile(jsPath)
+	if nil != err {
+		logging.LogErrorf("read plugin [%s] js failed: %s", petal.Name, err)
+		return
+	}
+	petal.JS = string(data)
+
+	cssPath := filepath.Join(pluginDir, "index.css")
+	if gulu.File.IsExist(cssPath) {
+		data, err = filelock.ReadFile(cssPath)
+		if nil != err {
+			logging.LogErrorf("read plugin [%s] css failed: %s", petal.Name, err)
+		} else {
+			petal.CSS = string(data)
+		}
+	}
+
+	i18nDir := filepath.Join(pluginDir, "i18n")
+	if gulu.File.IsDir(i18nDir) {
+		langJSONs, readErr := os.ReadDir(i18nDir)
+		if nil != readErr {
+			logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, readErr)
+		} else {
+			preferredLang := Conf.Lang + ".json"
+			foundPreferredLang := false
+			foundEnUS := false
+			foundZhCN := false
+			for _, langJSON := range langJSONs {
+				if langJSON.Name() == preferredLang {
+					foundPreferredLang = true
+					break
+				}
+				if langJSON.Name() == "en_US.json" {
+					foundEnUS = true
+				}
+				if langJSON.Name() == "zh_CN.json" {
+					foundZhCN = true
+				}
+			}
+
+			if !foundPreferredLang {
+				if foundEnUS {
+					preferredLang = "en_US.json"
+				} else if foundZhCN {
+					preferredLang = "zh_CN.json"
+				} else {
+					preferredLang = langJSONs[0].Name()
+				}
+			}
+
+			data, err = filelock.ReadFile(filepath.Join(i18nDir, preferredLang))
+			if nil != err {
+				logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
+			} else {
+				petal.I18n = map[string]interface{}{}
+				if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); nil != err {
+					logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
+				}
+			}
+		}
+	}
 }
 
 var petalsStoreLock = sync.Mutex{}

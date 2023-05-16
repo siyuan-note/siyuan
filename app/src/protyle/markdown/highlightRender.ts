@@ -73,8 +73,9 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                     block.style.setProperty("white-space", "pre-wrap");
                     block.style.setProperty("word-break", "break-all");
                 } else {
-                    block.style.setProperty("white-space", "pre",);
-                    block.style.setProperty("word-break", "initial",);
+                    // https://ld246.com/article/1684031600711 该属性会导致有 tab 后光标跳至末尾，目前无解
+                    block.style.setProperty("white-space", "pre");
+                    block.style.setProperty("word-break", "initial");
                 }
                 if (ligatures === "true" || (ligatures !== "false" && window.siyuan.config.editor.codeLigatures)) {
                     block.style.fontVariantLigatures = "normal";

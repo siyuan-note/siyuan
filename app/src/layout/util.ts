@@ -461,7 +461,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         }
         app.plugins.forEach(item => {
             item.onLayoutReady();
-        })
+        });
     }, Constants.TIMEOUT_LOAD);
 };
 

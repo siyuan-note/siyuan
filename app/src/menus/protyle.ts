@@ -455,7 +455,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
     }
     /// #if !MOBILE
     if (protyle.breadcrumb) {
-        protyle.breadcrumb.toggleExit(id === protyle.block.rootID)
+        protyle.breadcrumb.toggleExit(id === protyle.block.rootID);
     }
     /// #endif
     fetchPost("/api/filetree/getDoc", {

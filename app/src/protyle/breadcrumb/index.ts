@@ -153,7 +153,7 @@ export class Breadcrumb {
         if (cursorNodeElement) {
             id = cursorNodeElement.getAttribute("data-node-id");
         }
-        fetchPost("/api/block/getTreeStat", {id: id || protyle.block.id}, (response) => {
+        fetchPost("/api/block/getTreeStat", {id: id || (protyle.block.showAll ? protyle.block.id : protyle.block.rootID)}, (response) => {
             window.siyuan.menus.menu.remove();
             if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                 let uploadHTML = "";
@@ -337,7 +337,7 @@ export class Breadcrumb {
                 type: "submenu",
                 submenu: editSubmenu
             }).element);
-            window.siyuan.menus.menu.append(exportMd(protyle.block.id));
+            window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 iconHTML: Constants.ZWSP,

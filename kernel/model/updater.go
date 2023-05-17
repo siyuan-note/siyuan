@@ -45,9 +45,6 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	} else if gulu.OS.IsDarwin() {
 		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("open", newVerInstallPkgPath)
-	} else if gulu.OS.IsLinux() {
-		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
-		cmd = exec.Command("sh", "-c", newVerInstallPkgPath)
 	}
 	gulu.CmdAttr(cmd)
 	cmdErr := cmd.Start()
@@ -133,8 +130,6 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 		} else {
 			suffix = "mac.dmg"
 		}
-	} else if gulu.OS.IsLinux() {
-		suffix = "linux.AppImage"
 	}
 	pkg := "siyuan-" + ver + "-" + suffix
 
@@ -287,7 +282,7 @@ func isVersionUpToDate(releaseVer string) bool {
 }
 
 func skipNewVerInstallPkg() bool {
-	if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() && !gulu.OS.IsLinux() {
+	if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() {
 		return true
 	}
 	if util.ISMicrosoftStore || util.ContainerStd != util.Container {

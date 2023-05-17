@@ -75,7 +75,7 @@ export const getDocByScroll = (options: {
         return;
     }
     fetchPost("/api/filetree/getDoc", {
-        id: options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
+        id: options.scrollAttr.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
         startID: options.scrollAttr.startId,
         endID: options.scrollAttr.endId,
     }, response => {

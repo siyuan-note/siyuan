@@ -1645,7 +1645,7 @@ export class WYSIWYG {
             if (aElement && !event.altKey) {
                 event.stopPropagation();
                 event.preventDefault();
-                const linkAddress = aElement.getAttribute("data-href");
+                const linkAddress = Lute.UnEscapeHTMLStr(aElement.getAttribute("data-href"));
                 /// #if MOBILE
                 openByMobile(linkAddress);
                 /// #else

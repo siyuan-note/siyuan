@@ -37,7 +37,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 
 	k := strings.ToLower(keyword)
 	for _, entry := range entries {
-		if !entry.IsDir() {
+		if !util.IsDirRegularOrSymlink(entry) {
 			continue
 		}
 

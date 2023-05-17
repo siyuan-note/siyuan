@@ -6,6 +6,8 @@ import {exportLayout} from "../layout/util";
 export const uninstall = (app: App, name: string) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
+            // rm command
+            plugin.onunload();
             // rm tab
             const modelsKeys = Object.keys(plugin.models);
             getAllModels().custom.forEach(custom => {
@@ -28,11 +30,6 @@ export const uninstall = (app: App, name: string) => {
                     window.siyuan.layout.bottomDock.remove(key);
                 }
             });
-            exportLayout({
-                reload: false,
-                onlyData: false,
-                errorExit: false
-            });
             // rm listen
             Array.from(document.childNodes).find(item => {
                 if (item.nodeType === 8 && item.textContent === name) {
@@ -42,6 +39,11 @@ export const uninstall = (app: App, name: string) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
+            exportLayout({
+                reload: false,
+                onlyData: false,
+                errorExit: false
+            });
             return true;
         }
     });

@@ -43,6 +43,10 @@ export class Plugin {
         // 加载
     }
 
+    public onunload() {
+        // 禁用/卸载
+    }
+
     public addTopBar(options: {
         icon: string,
         title: string,

@@ -50,9 +50,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     }
     /// #endif
     if (localFiles.length === 0) {
-        // https://github.com/siyuan-note/siyuan/issues/8010
+        // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
         navigator.clipboard.readText().then(textPlain => {
-            insertHTML(protyle.lute.BlockDOM2Content(protyle.lute.Md2BlockDOM(textPlain)), protyle);
+            insertHTML(protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain)), protyle);
         });
     }
 };

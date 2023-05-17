@@ -147,6 +147,8 @@ declare class Lute {
 
     public BlockDOM2Content(text: string): string;
 
+    public BlockDOM2EscapeMarkerContent(text: string): string;
+
     public SetTextMark(enable: boolean): void;
 
     public SetHeadingID(enable: boolean): void;

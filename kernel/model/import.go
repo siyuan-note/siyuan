@@ -55,7 +55,6 @@ import (
 func HTML2Markdown(htmlStr string) (markdown string, err error) {
 	assetDirPath := filepath.Join(util.DataDir, "assets")
 	luteEngine := util.NewLute()
-	luteEngine.SetProtyleWYSIWYG(false)
 	tree := luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeLinkDest != n.Type {

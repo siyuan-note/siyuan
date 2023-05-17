@@ -122,7 +122,10 @@ const focusStack = async (stack: IBackStack) => {
             return true;
         }
     });
-    if (blockElement) {
+    if (blockElement &&
+        // 即使块存在，折叠的情况需要也需要 zoomOut，否则折叠块内的光标无法定位
+        (!stack.zoomId || (stack.zoomId && stack.zoomId === stack.protyle.block.id))
+    ) {
         if (blockElement.getBoundingClientRect().height === 0) {
             // 切换 tab
             stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);

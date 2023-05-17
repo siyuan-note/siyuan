@@ -903,14 +903,7 @@ const getArticle = (options: {
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
             }
-            const exitFocusElement = options.edit.protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
-            if (!foldResponse.data) {
-                exitFocusElement.classList.add("fn__none");
-                exitFocusElement.nextElementSibling.classList.add("fn__none");
-            } else {
-                exitFocusElement.classList.remove("fn__none");
-                exitFocusElement.nextElementSibling.classList.remove("fn__none");
-            }
+            options.edit.protyle.breadcrumb.toggleExit(!foldResponse.data);
         });
     });
 };

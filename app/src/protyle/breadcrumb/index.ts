@@ -82,9 +82,7 @@ export class Breadcrumb {
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
                             onGet(getResponse, protyle, [Constants.CB_GET_HL]);
-                            const exitFocusElement = this.element.parentElement.querySelector('[data-type="exit-focus"]');
-                            exitFocusElement.classList.add("fn__none");
-                            exitFocusElement.nextElementSibling.classList.add("fn__none");
+                            this.toggleExit(true);
                         });
                         target.classList.add("block__icon--active");
                     }
@@ -145,6 +143,17 @@ export class Breadcrumb {
             uploadFiles(protyle, [file]);
         });
         this.mediaRecorder.startRecordingNewWavFile();
+    }
+
+    public toggleExit(hide: boolean) {
+        const exitFocusElement = this.element.parentElement.querySelector('[data-type="exit-focus"]');
+        if (hide) {
+            exitFocusElement.classList.add("fn__none");
+            exitFocusElement.nextElementSibling.classList.add("fn__none");
+        } else {
+            exitFocusElement.classList.remove("fn__none");
+            exitFocusElement.nextElementSibling.classList.remove("fn__none");
+        }
     }
 
     public showMenu(protyle: IProtyle, position: { x: number, y: number }) {

@@ -455,14 +455,7 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
     }
     /// #if !MOBILE
     if (protyle.breadcrumb) {
-        const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
-        if (id === protyle.block.rootID) {
-            exitFocusElement.classList.add("fn__none");
-            exitFocusElement.nextElementSibling.classList.add("fn__none");
-        } else {
-            exitFocusElement.classList.remove("fn__none");
-            exitFocusElement.nextElementSibling.classList.remove("fn__none");
-        }
+        protyle.breadcrumb.toggleExit(id === protyle.block.rootID)
     }
     /// #endif
     fetchPost("/api/filetree/getDoc", {

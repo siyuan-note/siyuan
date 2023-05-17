@@ -58,6 +58,7 @@ func Pandoc(from, to, o, content string) (ret string, err error) {
 	args := []string{
 		"--from", from,
 		"--to", to,
+		"--resource-path", filepath.Dir(o),
 		"-s",
 	}
 

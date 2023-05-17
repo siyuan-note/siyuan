@@ -1032,7 +1032,7 @@ func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "", "md", ".md")
+	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "", "", ".md")
 	return
 }
 
@@ -2030,20 +2030,6 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 			continue
 		}
 
-		// 调用 Pandoc 进行格式转换
-		output, err := util.Pandoc(pandocFrom, pandocTo, writePath, md)
-		if nil != err {
-			logging.LogErrorf("pandoc failed: %s", err)
-			continue
-		}
-
-		if "odt" != pandocTo && "epub" != pandocTo && "rtf" != pandocTo {
-			if err := gulu.File.WriteFileSafer(writePath, gulu.Str.ToBytes(output), 0644); nil != err {
-				logging.LogErrorf("write export markdown file [%s] failed: %s", writePath, err)
-				continue
-			}
-		}
-
 		// 解析导出后的标准 Markdown，汇总 assets
 		tree := parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
 		var assets []string
@@ -2064,6 +2050,20 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 			err = filelock.Copy(srcPath, destPath)
 			if nil != err {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
+				continue
+			}
+		}
+
+		// 调用 Pandoc 进行格式转换
+		output, err := util.Pandoc(pandocFrom, pandocTo, writePath, md)
+		if nil != err {
+			logging.LogErrorf("pandoc failed: %s", err)
+			continue
+		}
+
+		if "odt" != pandocTo && "epub" != pandocTo && "rtf" != pandocTo {
+			if err := gulu.File.WriteFileSafer(writePath, gulu.Str.ToBytes(output), 0644); nil != err {
+				logging.LogErrorf("write export markdown file [%s] failed: %s", writePath, err)
 				continue
 			}
 		}

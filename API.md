@@ -502,13 +502,20 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   {
     "dataType": "markdown",
     "data": "foo**bar**{: style=\"color: var(--b3-font-color8);\"}baz",
-    "previousID": "20211229114650-vrek5x6"
+    "nextID": "",
+    "previousID": "20211229114650-vrek5x6",
+    "parentID": ""
   }
   ```
 
     * `dataType`: The data type to be inserted, the value can be `markdown` or `dom`
     * `data`: Data to be inserted
+    * `nextID`: The ID of the next block, used to anchor the insertion position
     * `previousID`: The ID of the previous block, used to anchor the insertion position
+    * `parentID`: The ID of the parent block, used to anchor the insertion position
+
+  `nextID`, `previousID`, and `parentID` must have at least one value, using
+  priority: `nextID` > `previousID` > `parentID`
 * Return value
 
   ```json
@@ -781,8 +788,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-  * `id`: Parent block ID
-  * The blocks below a heading are also counted as child blocks
+    * `id`: Parent block ID
+    * The blocks below a heading are also counted as child blocks
 * Return value
 
   ```json

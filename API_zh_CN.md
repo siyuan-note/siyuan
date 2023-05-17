@@ -496,13 +496,19 @@
   {
     "dataType": "markdown",
     "data": "foo**bar**{: style=\"color: var(--b3-font-color8);\"}baz",
-    "previousID": "20211229114650-vrek5x6"
+    "nextID": "",
+    "previousID": "20211229114650-vrek5x6",
+    "parentID": ""
   }
   ```
 
     * `dataType`：待插入数据类型，值可选择 `markdown` 或者 `dom`
     * `data`：待插入的数据
+    * `nextID`：后一个块的 ID，用于锚定插入位置
     * `previousID`：前一个块的 ID，用于锚定插入位置
+    * `parentID`：父块 ID，用于锚定插入位置
+
+  `nextID`、`previousID`、`parentID` 三个参数必须至少存在一个有值，优先级为 `nextID` > `previousID` > `parentID`
 * 返回值
 
   ```json
@@ -774,8 +780,8 @@
   }
   ```
 
-  * `id`：父块 ID
-  * 标题下方块也算作子块
+    * `id`：父块 ID
+    * 标题下方块也算作子块
 * 返回值
 
   ```json

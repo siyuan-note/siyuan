@@ -736,7 +736,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         label: `<div class="fn__hr--small"></div><textarea rows="1" style="width: ${isMobile() ? "200" : "360"}px" class="b3-text-field" placeholder="${window.siyuan.languages.link}"></textarea><div class="fn__hr--small"></div>`,
         bind(element) {
             const inputElement = element.querySelector("textarea");
-            inputElement.value = linkAddress || "";
+            inputElement.value = Lute.UnEscapeHTMLStr(linkAddress) || "";
             inputElement.addEventListener("keydown", (event) => {
                 if ((event.key === "Enter" || event.key === "Escape") && !event.isComposing) {
                     event.preventDefault();
@@ -884,7 +884,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         } else {
             linkElement.removeAttribute("data-title");
         }
-        linkElement.setAttribute("data-href", textElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
+        linkElement.setAttribute("data-href", Lute.EscapeHTMLStr(textElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
         if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
             removeLink(linkElement, protyle.toolbar.range);
         } else {

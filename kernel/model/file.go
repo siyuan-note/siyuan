@@ -655,8 +655,8 @@ func GetDoc(startID, endID, id string, index int, keyword string, mode int, size
 		// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
 		nodes, isBacklinkExpand = getBacklinkRenderNodes(node)
 	} else {
-		// 如果同时存在 startID 和 endID，则只加载 startID 和 endID 之间的块 [startID, endID]
-		if "" != startID && "" != endID {
+		// 如果同时存在 startID 和 endID，并且是动态加载的情况，则只加载 startID 和 endID 之间的块 [startID, endID]
+		if "" != startID && "" != endID && scroll {
 			nodes, eof = loadNodesByStartEnd(tree, startID, endID)
 			if 1 > len(nodes) {
 				// 按 mode 加载兜底

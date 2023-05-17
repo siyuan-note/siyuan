@@ -351,6 +351,10 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             (layout as Tab).headElement.classList.add("item--unupdate");
         }
+        if (json.scrollAttr) {
+            // 历史数据兼容
+            json.scrollAttr.rootId = json.rootId;
+        }
         (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     } else if (json.instance === "Asset") {
         (layout as Tab).addModel(new Asset({
@@ -647,7 +651,7 @@ export const copyTab = (app: App, tab: Tab) => {
             if (tab.model instanceof Editor) {
                 model = new Editor({
                     tab: newTab,
-                    blockId: tab.model.editor.protyle.block.rootID,
+                    blockId: tab.model.editor.protyle.block.id,
                     scrollAttr: saveScroll(tab.model.editor.protyle, true)
                 });
             } else if (tab.model instanceof Asset) {
@@ -708,9 +712,12 @@ export const copyTab = (app: App, tab: Tab) => {
                 }
             } else if (!tab.model && tab.headElement) {
                 const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
+                if (initData.scrollAttr) {
+                    initData.scrollAttr.rootId = initData.rootId;
+                }
                 model = new Editor({
                     tab: newTab,
-                    blockId: initData.rootId || initData.blockId,
+                    blockId: initData.blockId,
                     mode: initData.mode,
                     action: typeof initData.action === "string" ? [initData.action] : initData.action,
                     scrollAttr: initData.scrollAttr,

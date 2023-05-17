@@ -55,7 +55,7 @@ export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] 
     protyle.block.scroll = data.data.scroll;
     protyle.block.action = action;
     if (!action.includes(Constants.CB_GET_UNCHANGEID)) {
-        protyle.block.id = data.data.id;
+        protyle.block.id = data.data.id;    // 非缩放情况时不一定是 rootID（搜索打开页签）；缩放时必为缩放 id，否则需查看代码
         protyle.scroll.lastScrollTop = 0;
         protyle.contentElement.scrollTop = 0;
         protyle.wysiwyg.element.setAttribute("data-doc-type", data.data.type);
@@ -173,7 +173,7 @@ const setHTML = (options: {
                 }
                 /// #endif
             } else {
-                focusElement(protyle, options);
+                focusElementById(protyle, options.action);
             }
         }
         if (!protyle.scroll.element.classList.contains("fn__none")) {
@@ -193,7 +193,7 @@ const setHTML = (options: {
         }
         /// #endif
     } else if (options.action.includes(Constants.CB_GET_FOCUS)) {
-        focusElement(protyle, options);
+        focusElementById(protyle, options.action);
     } else if (options.action.includes(Constants.CB_GET_FOCUSFIRST)) {
         // settimeout 时间需短一点，否则定位后快速滚动无效
         const headerHeight = protyle.wysiwyg.element.offsetTop - 16;
@@ -322,13 +322,7 @@ export const enableProtyle = (protyle: IProtyle) => {
 };
 
 
-const focusElement = (protyle: IProtyle, options: {
-    content: string,
-    action?: string[],
-    isSyncing: boolean,
-    expand: boolean,
-    scrollAttr?: IScrollAttr
-}) => {
+const focusElementById = (protyle: IProtyle, action: string[]) => {
     let focusElement: Element;
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${protyle.block.id}"]`)).find((item: HTMLElement) => {
         if (!hasClosestByAttribute(item, "data-type", "block-render", true)) {
@@ -343,7 +337,7 @@ const focusElement = (protyle: IProtyle, options: {
     if (focusElement && !protyle.wysiwyg.element.firstElementChild.isSameNode(focusElement)) {
         focusBlock(focusElement);
         /// #if !MOBILE
-        if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
+        if (!action.includes(Constants.CB_GET_UNUNDO)) {
             pushBack(protyle, undefined, focusElement);
         }
         /// #endif
@@ -355,7 +349,7 @@ const focusElement = (protyle: IProtyle, options: {
     } else {
         focusBlock(protyle.wysiwyg.element.firstElementChild);
         /// #if !MOBILE
-        if (!options.action.includes(Constants.CB_GET_UNUNDO)) {
+        if (!action.includes(Constants.CB_GET_UNUNDO)) {
             pushBack(protyle, undefined, protyle.wysiwyg.element.firstElementChild);
         }
         /// #endif

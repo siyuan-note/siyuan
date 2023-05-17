@@ -242,6 +242,7 @@ interface ISiyuan {
 }
 
 interface IScrollAttr {
+    rootId: string,
     startId: string,
     endId: string
     scrollTop: number,
@@ -269,6 +270,7 @@ interface IObject {
 }
 
 declare interface ILayoutJSON extends ILayoutOptions {
+    scrollAttr?: IScrollAttr,
     instance?: string,
     width?: string,
     height?: string,

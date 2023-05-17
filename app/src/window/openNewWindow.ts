@@ -45,6 +45,8 @@ export const openNewWindowById = (id: string) => {
             fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
                 if (attrResponse.data.scroll) {
                     json.children.scrollAttr = JSON.parse(attrResponse.data.scroll);
+                    // 历史数据兼容
+                    json.children.scrollAttr.rootId = response.data.rootID;
                 }
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
@@ -56,12 +58,7 @@ export const openNewWindowById = (id: string) => {
         } else {
             json.children.action = Constants.CB_GET_ALL;
             json.children.scrollAttr = {
-                startId: id,
-                endId: id,
-                scrollTop: 0,
-                focusId: id,
-                focusStart: 0,
-                focusEnd: 0
+                zoomInId: id,
             };
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {

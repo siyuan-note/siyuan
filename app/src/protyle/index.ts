@@ -218,6 +218,7 @@ export class Protyle {
                             }
                         }
                         if (scrollObj) {
+                            scrollObj.rootId = response.data.rootID;
                             getDocByScroll({
                                 protyle: this.protyle,
                                 scrollAttr: scrollObj,

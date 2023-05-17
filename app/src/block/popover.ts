@@ -39,7 +39,7 @@ export const initBlockPopover = () => {
         } else if (!aElement) {
             hideTooltip();
         }
-        if (window.siyuan.config.editor.floatWindowMode === 1) {
+        if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {
             clearTimeout(timeoutHide);
             timeoutHide = window.setTimeout(() => {
                 hidePopover(event);
@@ -51,6 +51,9 @@ export const initBlockPopover = () => {
             if (window.siyuan.ctrlIsPressed) {
                 clearTimeout(timeoutHide);
                 showPopover();
+            } else if (window.siyuan.shiftIsPressed) {
+                clearTimeout(timeoutHide);
+                showPopover(true);
             }
             return;
         }
@@ -65,7 +68,7 @@ export const initBlockPopover = () => {
                 clearTimeout(timeout);
             }
         }, 200);
-        timeout = window.setTimeout(async () => {
+        timeout = window.setTimeout(() => {
             if (!getTarget(event, aElement)) {
                 return;
             }
@@ -159,7 +162,7 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
         aElement.getAttribute("prevent-popover") !== "true") {
         popoverTargetElement = aElement;
     }
-    if (!popoverTargetElement || window.siyuan.altIsPressed || window.siyuan.shiftIsPressed ||
+    if (!popoverTargetElement || window.siyuan.altIsPressed ||
         (window.siyuan.config.editor.floatWindowMode === 0 && window.siyuan.ctrlIsPressed) ||
         (popoverTargetElement && popoverTargetElement.getAttribute("prevent-popover") === "true")) {
         return false;
@@ -174,7 +177,7 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
     return true;
 };
 
-export const showPopover = async () => {
+export const showPopover = async (showRef = false) => {
     if (!popoverTargetElement) {
         return;
     }
@@ -183,12 +186,18 @@ export const showPopover = async () => {
     const dataId = popoverTargetElement.getAttribute("data-id");
     if (dataId) {
         // backlink/util/hint/正文标题 上的弹层
-        if (dataId.startsWith("[")) {
-            ids = JSON.parse(dataId);
+        if (showRef) {
+            const postResponse = await fetchSyncPost("/api/block/getRefIDs", {id: dataId});
+            ids = postResponse.data.refIDs;
+            defIds = postResponse.data.defIDs;
         } else {
-            ids = [dataId];
+            if (dataId.startsWith("[")) {
+                ids = JSON.parse(dataId);
+            } else {
+                ids = [dataId];
+            }
+            defIds = JSON.parse(popoverTargetElement.getAttribute("data-defids") || "[]");
         }
-        defIds = JSON.parse(popoverTargetElement.getAttribute("data-defids") || "[]");
     } else if (popoverTargetElement.getAttribute("data-type")?.indexOf("virtual-block-ref") > -1) {
         const nodeElement = hasClosestBlock(popoverTargetElement);
         if (nodeElement) {
@@ -237,5 +246,5 @@ export const showPopover = async () => {
             defIds,
         }));
     }
-    popoverTargetElement = undefined;
+    // 不能清除，否则ctrl 后 shift 就 无效 popoverTargetElement = undefined;
 };

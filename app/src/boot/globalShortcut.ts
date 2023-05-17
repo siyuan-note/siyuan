@@ -435,6 +435,9 @@ export const globalShortcut = (app: App) => {
         if (!event.altKey && event.shiftKey && !isCtrl(event)) {
             if (event.key === "Shift") {
                 window.siyuan.shiftIsPressed = true;
+                if (!event.repeat) {
+                    showPopover(true);
+                }
             } else {
                 window.siyuan.shiftIsPressed = false;
             }

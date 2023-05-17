@@ -243,12 +243,15 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 		sortData, sortErr = gulu.JSON.MarshalJSON(fullSortIDs)
 		if nil != sortErr {
-			logging.LogErrorf("marshal temp full sort conf failed: %s", sortErr)
+			logging.LogErrorf("marshal box full sort conf failed: %s", sortErr)
 		} else {
-			sortErr = filelock.WriteFile(sortPath, sortData)
+			sortErr = filelock.WriteFile(boxSortPath, sortData)
 			if nil != sortErr {
-				logging.LogErrorf("write temp full sort conf failed: %s", sortErr)
+				logging.LogErrorf("write box full sort conf failed: %s", sortErr)
 			}
+		}
+		if removeErr := os.RemoveAll(sortPath); nil != removeErr {
+			logging.LogErrorf("remove temp sort conf failed: %s", removeErr)
 		}
 	}
 

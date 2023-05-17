@@ -449,16 +449,20 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     }
     const idZoomIn = getIdZoomInByPath();
 
-    // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟
-    if (idZoomIn.id) {
-        setTimeout(() => {
+
+    setTimeout(() => {
+        // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟
+        if (idZoomIn.id) {
             openFileById({
                 id: idZoomIn.id,
                 action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                 zoomIn: idZoomIn.isZoomIn
             });
-        }, Constants.TIMEOUT_LOAD);
-    }
+        }
+        app.plugins.forEach(item => {
+            item.onLayoutReady();
+        })
+    }, Constants.TIMEOUT_LOAD);
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, dropEditScroll = false) => {

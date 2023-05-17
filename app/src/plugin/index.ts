@@ -47,6 +47,10 @@ export class Plugin {
         // 禁用/卸载
     }
 
+    public onLayoutReady() {
+        // 布局加载完成
+    }
+
     public addTopBar(options: {
         icon: string,
         title: string,

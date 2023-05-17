@@ -951,7 +951,7 @@
     "12": "Échec de la requête asset [%s]",
     "13": "Impossible de créer un fichier commençant par .",
     "14": "L'exportation a échoué : %s",
-    "15": "Bloc de contenu avec l'identifiant [%s] introuvable, veuillez réessayer plus tard",
+    "15": "Bloc de contenu avec l'identifiant [%s] introuvable",
     "16": "Veuillez entrer le nom du fichier",
     "17": "La synchronisation initiale a échoué au démarrage. Un écrasement imprévisible des données peut se produire si vous continuez à fonctionner. Veuillez d'abord effectuer une synchronisation.",
     "18": "Échec de la récupération du compte utilisateur communautaire",

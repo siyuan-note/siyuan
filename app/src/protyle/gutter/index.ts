@@ -708,6 +708,12 @@ export class Gutter {
                 }
             }).element);
         }
+        this.app?.plugins?.forEach((plugin) => {
+            plugin.eventBus.emit("click-blockicon", {
+                menu: window.siyuan.menus.menu,
+                blockElements: selectsElement,
+            });
+        });
         return window.siyuan.menus.menu;
     }
 
@@ -1501,8 +1507,11 @@ export class Gutter {
             type: "readonly",
             label: `${updateHTML}${window.siyuan.languages.createdAt} ${dayjs(id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`,
         }).element);
-        this.app.plugins.forEach((plugin) => {
-            plugin.eventBus.emit("click-blockicon", [nodeElement]);
+        this.app?.plugins?.forEach((plugin) => {
+            plugin.eventBus.emit("click-blockicon", {
+                menu: window.siyuan.menus.menu,
+                blockElements: [nodeElement]
+            });
         });
         return window.siyuan.menus.menu;
     }

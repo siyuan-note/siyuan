@@ -82,6 +82,16 @@ export class Menu {
         }
     }
 
+    public addSeparator() {
+        this.addItem({type: "separator"});
+    }
+
+    public addItem(option: IMenu) {
+        const menuItem = new MenuItem(option);
+        this.append(menuItem.element);
+        return menuItem.element;
+    }
+
     public remove() {
         if (window.siyuan.menus.menu.removeCB) {
             window.siyuan.menus.menu.removeCB();
@@ -170,7 +180,7 @@ export class MenuItem {
             });
         }
         let html = `<span class="b3-menu__label">${options.label}</span>`;
-        if (options.iconHTML) {
+        if (typeof options.iconHTML === "string") {
             html = options.iconHTML + html;
         } else {
             html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;

@@ -39,16 +39,14 @@ export class Menu {
         if (this.isOpen) {
             return;
         }
-        const menuItem = new MenuItem(option);
-        this.menu.append(menuItem.element);
-        return menuItem.element;
+        return this.menu.addItem(option);
     }
 
     addSeparator() {
         if (this.isOpen) {
             return;
         }
-        this.addItem({type: "separator"});
+        this.menu.addSeparator();
     }
 
     open(options: { x: number, y: number, h?: number, w?: number, isLeft: false }) {

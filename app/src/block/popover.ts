@@ -3,9 +3,10 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
 import {getIdFromSYProtocol} from "../util/pathName";
+import {App} from "../index";
 
 let popoverTargetElement: HTMLElement;
-export const initBlockPopover = () => {
+export const initBlockPopover = (app: App) => {
     let timeout: number;
     let timeoutHide: number;
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
@@ -50,10 +51,10 @@ export const initBlockPopover = () => {
             }
             if (window.siyuan.ctrlIsPressed) {
                 clearTimeout(timeoutHide);
-                showPopover();
+                showPopover(app);
             } else if (window.siyuan.shiftIsPressed) {
                 clearTimeout(timeoutHide);
-                showPopover(true);
+                showPopover(app, true);
             }
             return;
         }
@@ -73,7 +74,7 @@ export const initBlockPopover = () => {
                 return;
             }
             clearTimeout(timeoutHide);
-            showPopover();
+            showPopover(app);
         }, 620);
     });
 };
@@ -177,7 +178,7 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
     return true;
 };
 
-export const showPopover = async (showRef = false) => {
+export const showPopover = async (app: App, showRef = false) => {
     if (!popoverTargetElement) {
         return;
     }
@@ -241,6 +242,7 @@ export const showPopover = async (showRef = false) => {
         popoverTargetElement.parentElement.style.opacity !== "0.1" // 反向面板图标拖拽时不应该弹层
     ) {
         window.siyuan.blockPanels.push(new BlockPanel({
+            app,
             targetElement: popoverTargetElement,
             nodeIds: ids,
             defIds,

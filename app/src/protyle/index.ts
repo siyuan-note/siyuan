@@ -28,17 +28,20 @@ import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {resize} from "./util/resize";
 import {getDocByScroll} from "./scroll/saveScroll";
+import {App} from "../index";
 
 export class Protyle {
 
     public readonly version: string;
     public protyle: IProtyle;
+    private app: App;
 
     /**
      * @param id 要挂载 Protyle 的元素或者元素 ID。
      * @param options Protyle 参数
      */
-    constructor(id: HTMLElement, options?: IOptions) {
+    constructor(app: App, id: HTMLElement, options?: IOptions) {
+        this.app = app;
         this.version = Constants.SIYUAN_VERSION;
         const getOptions = new Options(options);
         const mergedOptions = getOptions.merge();
@@ -53,17 +56,17 @@ export class Protyle {
             block: {},
         };
 
-        this.protyle.hint = new Hint(this.protyle);
+        this.protyle.hint = new Hint(app, this.protyle);
         if (mergedOptions.render.breadcrumb) {
-            this.protyle.breadcrumb = new Breadcrumb(this.protyle);
+            this.protyle.breadcrumb = new Breadcrumb(app, this.protyle);
         }
         /// #if !MOBILE
         if (mergedOptions.render.title) {
-            this.protyle.title = new Title(this.protyle);
+            this.protyle.title = new Title(app, this.protyle);
         }
         /// #endif
         if (mergedOptions.render.background) {
-            this.protyle.background = new Background(this.protyle);
+            this.protyle.background = new Background(app, this.protyle);
         }
 
         this.protyle.element.innerHTML = "";
@@ -72,11 +75,11 @@ export class Protyle {
             this.protyle.element.appendChild(this.protyle.breadcrumb.element.parentElement);
         }
         this.protyle.undo = new Undo();
-        this.protyle.wysiwyg = new WYSIWYG(this.protyle);
-        this.protyle.toolbar = new Toolbar(this.protyle);
+        this.protyle.wysiwyg = new WYSIWYG(app, this.protyle);
+        this.protyle.toolbar = new Toolbar(app, this.protyle);
         this.protyle.scroll = new Scroll(this.protyle); // 不能使用 render.scroll 来判读是否初始化，除非重构后面用到的相关变量
         if (this.protyle.options.render.gutter) {
-            this.protyle.gutter = new Gutter(this.protyle);
+            this.protyle.gutter = new Gutter(app, this.protyle);
         }
         if (mergedOptions.upload.url || mergedOptions.upload.handler) {
             this.protyle.upload = new Upload();
@@ -85,6 +88,7 @@ export class Protyle {
         this.init();
         if (!mergedOptions.action.includes(Constants.CB_GET_HISTORY)) {
             this.protyle.ws = new Model({
+                app,
                 id: this.protyle.id,
                 type: "protyle",
                 msgCallback: (data) => {
@@ -170,7 +174,7 @@ export class Protyle {
                         case "unmount":
                             if (this.protyle.notebookId === data.data.box) {
                                 /// #if MOBILE
-                                setEmpty();
+                                setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
                                     this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
@@ -181,7 +185,7 @@ export class Protyle {
                         case "removeDoc":
                             if (data.data.ids.includes(this.protyle.block.rootID)) {
                                 /// #if MOBILE
-                                setEmpty();
+                                setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
                                     this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false, false);
@@ -325,7 +329,7 @@ export class Protyle {
             sanitize: this.protyle.options.preview.markdown.sanitize,
         });
 
-        this.protyle.preview = new Preview(this.protyle);
+        this.protyle.preview = new Preview(this.app, this.protyle);
 
         initUI(this.protyle);
     }

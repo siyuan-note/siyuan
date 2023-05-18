@@ -38,7 +38,7 @@ export class Menus {
                     }
                     this.unselect();
                     // navigation 根上：新建文档/文件夹/取消挂在/打开文件位置
-                    initNavigationMenu(target).popup({x: event.clientX, y: event.clientY});
+                    initNavigationMenu(app, target).popup({x: event.clientX, y: event.clientY});
                     event.stopPropagation();
                     break;
                 }
@@ -46,7 +46,7 @@ export class Menus {
                 if (dataType === "navigation-file") {
                     this.unselect();
                     // navigation 文件上：删除/重命名/打开文件位置/导出
-                    initFileMenu(this.getDir(target), target.getAttribute("data-path"), target).popup({
+                    initFileMenu(app, this.getDir(target), target.getAttribute("data-path"), target).popup({
                         x: event.clientX,
                         y: event.clientY
                     });

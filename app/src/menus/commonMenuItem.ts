@@ -24,6 +24,7 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import * as dayjs from "dayjs";
 import {Constants} from "../constants";
 import {exportImage} from "../protyle/export/util";
+import {App} from "../index";
 
 const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) => {
     inputElement.addEventListener("keydown", (event) => {
@@ -741,7 +742,7 @@ export const exportMd = (id: string) => {
     }).element;
 };
 
-export const openMenu = (src: string, onlyMenu: boolean, showAccelerator: boolean) => {
+export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerator: boolean) => {
     const submenu = [];
     if (isLocalPath(src)) {
         if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(src)) &&
@@ -753,7 +754,7 @@ export const openMenu = (src: string, onlyMenu: boolean, showAccelerator: boolea
                 label: window.siyuan.languages.insertRight,
                 accelerator: showAccelerator ? "Click" : "",
                 click() {
-                    openAsset(src.trim(), parseInt(getSearch("page", src)), "right");
+                    openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
                 }
             });
             /// #endif

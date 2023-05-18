@@ -4,8 +4,10 @@ import {bindCardEvent, genCardHTML} from "./openCard";
 import {fetchPost} from "../util/fetch";
 import {Protyle} from "../protyle";
 import {setPanelFocus} from "../layout/util";
+import {App} from "../index";
 
 export const newCardModel = (options: {
+    app: App,
     tab: Tab,
     data: {
         cardType: TCardType,
@@ -15,6 +17,7 @@ export const newCardModel = (options: {
 }) => {
     let editor: Protyle;
     const customObj = new Custom({
+        app: options.app,
         type: "siyuan-card",
         tab: options.tab,
         data: options.data,
@@ -33,6 +36,7 @@ export const newCardModel = (options: {
                 });
 
                 editor = bindCardEvent({
+                    app: options.app,
                     element: this.element,
                     id: this.data.id,
                     title: this.data.title,

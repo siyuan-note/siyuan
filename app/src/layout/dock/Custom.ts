@@ -1,5 +1,6 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
+import {App} from "../../index";
 
 export class Custom extends Model {
     public element: Element;
@@ -11,6 +12,7 @@ export class Custom extends Model {
     public update: () => void;
 
     constructor(options: {
+        app: App,
         type: string,
         tab: Tab,
         data: any,
@@ -19,7 +21,7 @@ export class Custom extends Model {
         update?: () => void,
         init: () => void
     }) {
-        super({id: options.tab.id});
+        super({app: options.app, id: options.tab.id});
         this.type = options.type;
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             options.tab.headElement.classList.add("item--unupdate");

@@ -4,8 +4,9 @@ import {getOpenNotebookCount} from "../../util/pathName";
 import {popSearch} from "../menu/search";
 import {getRecentDocs} from "../menu/getRecentDocs";
 import {openHistory} from "../../history/history";
+import {App} from "../../index";
 
-export const setEmpty = () => {
+export const setEmpty = (app: App) => {
     document.getElementById("toolbarName").classList.add("fn__hidden");
     document.getElementById("toolbarEdit").classList.add("fn__hidden");
     document.getElementById("editor").classList.add("fn__none");
@@ -37,27 +38,27 @@ export const setEmpty = () => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(emptyElement)) {
             if (target.id === "emptySearch") {
-                popSearch();
+                popSearch(app);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "emptyRecent") {
-                getRecentDocs();
+                getRecentDocs(app);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "emptyHistory") {
-                openHistory();
+                openHistory(app);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "emptyNewFile") {
                 if (window.siyuan.mobile.editor) {
-                    newFile(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path, undefined, true);
+                    newFile(app, window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path, undefined, true);
                 } else {
                     window.siyuan.notebooks.find(item => {
                         if (!item.closed) {
-                            newFile(item.id, "/", undefined, true);
+                            newFile(app, item.id, "/", undefined, true);
                             return true;
                         }
                     });

@@ -13,6 +13,7 @@ import {webViewerPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {App} from "../index";
 
 export class Asset extends Model {
     public path: string;
@@ -21,8 +22,8 @@ export class Asset extends Model {
     private pdfPage: number;
     public pdfObject: any;
 
-    constructor(options: { tab: Tab, path: string, page?: number | string }) {
-        super({id: options.tab.id});
+    constructor(options: { app: App, tab: Tab, path: string, page?: number | string }) {
+        super({app: options.app, id: options.tab.id});
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             options.tab.headElement.classList.add("item--unupdate");
         }

@@ -11,6 +11,7 @@ import {openNewWindowById} from "../window/openNewWindow";
 import {disabledProtyle} from "../protyle/util/onGet";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
+import {App} from "../index";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -19,11 +20,13 @@ export class BlockPanel {
     public defIds: string[] = [];
     public id: string;
     private stmt: string;
+    private app: App;
     public editors: Protyle[] = [];
     public esc: () => void;
 
     // stmt 非空且 id 为空为查询嵌入
     constructor(options: {
+        app: App,
         targetElement: HTMLElement,
         nodeIds?: string[],
         defIds?: string[],
@@ -36,6 +39,7 @@ export class BlockPanel {
         this.nodeIds = options.nodeIds;
         this.defIds = options.defIds || [];
         this.esc = options.esc;
+        this.app = options.app;
 
         this.element = document.createElement("div");
         this.element.classList.add("block__popover", "block__popover--move", "block__popover--top");
@@ -259,7 +263,7 @@ export class BlockPanel {
                 this.targetElement.classList.contains("counter")) {
                 action.push(Constants.CB_GET_BACKLINK);
             }
-            const editor = new Protyle(editorElement, {
+            const editor = new Protyle(this.app, editorElement, {
                 blockId: this.nodeIds[index],
                 defId: this.defIds[index] || this.defIds[0] || "",
                 action,

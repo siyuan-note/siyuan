@@ -144,7 +144,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initBar(app);
     setProxy();
     initStatus();
-    initWindow();
+    initWindow(app);
     appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
     renderSnippet();
@@ -160,7 +160,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     addGA();
 };
 
-export const initWindow = () => {
+export const initWindow = (app: App) => {
     /// #if !BROWSER
     const winOnFocus = () => {
         if (getSelection().rangeCount > 0) {
@@ -256,6 +256,7 @@ export const initWindow = () => {
             fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                 if (existResponse.data) {
                     openFileById({
+                        app,
                         id,
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                         zoomIn: getSearch("focus", url) === "1"

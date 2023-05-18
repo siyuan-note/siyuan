@@ -9,14 +9,16 @@ import {MenuItem} from "../../menus/Menu";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
 import {renameTag} from "../../util/noRelyPCFunction";
+import {App} from "../../index";
 
 export class Tag extends Model {
     private openNodes: string[];
     public tree: Tree;
     private element: Element;
 
-    constructor(tab: Tab) {
+    constructor(app: App, tab: Tab) {
         super({
+            app,
             id: tab.id,
             msgCallback(data) {
                 if (data) {
@@ -78,7 +80,7 @@ export class Tag extends Model {
             element: this.element.lastElementChild as HTMLElement,
             data: null,
             click(element: HTMLElement) {
-                openGlobalSearch(`#${element.getAttribute("data-label")}#`, !window.siyuan.ctrlIsPressed);
+                openGlobalSearch(app, `#${element.getAttribute("data-label")}#`, !window.siyuan.ctrlIsPressed);
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
                 const labelName = element.getAttribute("data-label");

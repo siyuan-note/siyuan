@@ -15,6 +15,7 @@ import {openModel} from "./model";
 import {initAbout} from "../settings/about";
 import {getRecentDocs} from "./getRecentDocs";
 import {initEditor} from "../settings/editor";
+import {App} from "../../index";
 
 export const popMenu = () => {
     activeBlur();
@@ -22,7 +23,7 @@ export const popMenu = () => {
     document.getElementById("menu").style.transform = "translateX(0px)";
 };
 
-export const initRightMenu = () => {
+export const initRightMenu = (app: App) => {
     const menuElement = document.getElementById("menu");
     let accountHTML = "";
     if (window.siyuan.user && !window.siyuan.config.readonly) {
@@ -118,12 +119,12 @@ export const initRightMenu = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuSearch") {
-                popSearch();
+                popSearch(app);
                 event.preventDefault();
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuRecent") {
-                getRecentDocs();
+                getRecentDocs(app);
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -164,7 +165,7 @@ export const initRightMenu = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuCard") {
-                openCard();
+                openCard(app);
                 closePanel();
                 event.preventDefault();
                 event.stopPropagation();
@@ -204,7 +205,7 @@ export const initRightMenu = () => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuHistory") {
-                openHistory();
+                openHistory(app);
                 event.preventDefault();
                 event.stopPropagation();
                 break;

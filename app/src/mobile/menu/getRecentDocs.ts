@@ -5,8 +5,9 @@ import {escapeHtml} from "../../util/escape";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openModel} from "./model";
 import {openMobileFileById} from "../editor";
+import {App} from "../../index";
 
-export const getRecentDocs = () => {
+export const getRecentDocs = (app: App) => {
     fetchPost("/api/storage/getRecentDocs", {}, (response) => {
         let html = "";
         response.data.forEach((item: any, index: number) => {
@@ -23,7 +24,7 @@ ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__
                 element.firstElementChild.addEventListener("click", (event) => {
                     const liElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
                     if (liElement) {
-                        openMobileFileById(liElement.dataset.nodeId, [Constants.CB_GET_SCROLL]);
+                        openMobileFileById(app, liElement.dataset.nodeId, [Constants.CB_GET_SCROLL]);
                     }
                 });
             }

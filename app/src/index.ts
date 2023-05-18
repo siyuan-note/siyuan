@@ -51,6 +51,7 @@ export class App {
             ctrlIsPressed: false,
             altIsPressed: false,
             ws: new Model({
+                app: this,
                 id: genUUID(),
                 type: "main",
                 msgCallback: (data) => {
@@ -60,7 +61,7 @@ export class App {
                     if (data) {
                         switch (data.cmd) {
                             case "syncMergeResult":
-                                reloadSync(data.data);
+                                reloadSync(this, data.data);
                                 break;
                             case "readonly":
                                 window.siyuan.config.editor.readOnly = data.data;
@@ -135,10 +136,10 @@ export class App {
                                 }
                                 break;
                             case "createdailynote":
-                                openFileById({id: data.data.id, action: [Constants.CB_GET_FOCUS]});
+                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
                             case "openFileById":
-                                openFileById({id: data.data.id, action: [Constants.CB_GET_FOCUS]});
+                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
                         }
                     }
@@ -166,12 +167,12 @@ export class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;
-                    window.siyuan.menus = new Menus(siyuanApp);
+                    window.siyuan.menus = new Menus(this);
                     bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        loadPlugins(siyuanApp);
-                        onGetConfig(response.data.start, siyuanApp);
+                        loadPlugins(this);
+                        onGetConfig(response.data.start, this);
                         account.onSetaccount();
                         resizeDrag();
                         setTitle(window.siyuan.languages.siyuanNote);
@@ -181,7 +182,7 @@ export class App {
             });
         });
         setNoteBook();
-        initBlockPopover();
+        initBlockPopover(this);
         promiseTransactions();
     }
 }
@@ -192,6 +193,7 @@ window.openFileByURL = (openURL) => {
     if (openURL && isSYProtocol(openURL)) {
         const isZoomIn = getSearch("focus", openURL) === "1";
         openFileById({
+            app: siyuanApp,
             id: getIdFromSYProtocol(openURL),
             action: isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
             zoomIn: isZoomIn

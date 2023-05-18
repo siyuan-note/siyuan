@@ -242,13 +242,13 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
                     label: window.siyuan.languages.spaceRepetition,
                     accelerator: window.siyuan.config.keymap.general.riffCard.custom,
                     click: () => {
-                        openCard();
+                        openCard(app);
                     }
                 }, {
                     iconHTML: Constants.ZWSP,
                     label: window.siyuan.languages.mgmt,
                     click: () => {
-                        viewCards("", window.siyuan.languages.all, "");
+                        viewCards(app, "", window.siyuan.languages.all, "");
                     }
                 }],
             }).element);
@@ -265,7 +265,7 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
                 icon: "iconHistory",
                 accelerator: window.siyuan.config.keymap.general.dataHistory.custom,
                 click: () => {
-                    openHistory();
+                    openHistory(app);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

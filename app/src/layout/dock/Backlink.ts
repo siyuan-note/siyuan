@@ -8,6 +8,7 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Protyle} from "../../protyle";
 import {MenuItem} from "../../menus/Menu";
+import {App} from "../../index";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -32,12 +33,14 @@ export class Backlink extends Model {
     } = {};
 
     constructor(options: {
+        app: App,
         tab: Tab,
         blockId: string,
         rootId?: string,
         type: "pin" | "local"
     }) {
         super({
+            app: options.app,
             id: options.tab.id,
             callback() {
                 if (this.type === "local") {
@@ -156,6 +159,7 @@ export class Backlink extends Model {
             },
             ctrlClick: (element) => {
                 openFileById({
+                    app: options.app,
                     id: element.getAttribute("data-node-id"),
                     action: [Constants.CB_GET_CONTEXT]
                 });
@@ -163,6 +167,7 @@ export class Backlink extends Model {
             },
             altClick(element) {
                 openFileById({
+                    app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "right",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
@@ -171,6 +176,7 @@ export class Backlink extends Model {
             },
             shiftClick(element) {
                 openFileById({
+                    app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
@@ -193,6 +199,7 @@ export class Backlink extends Model {
             },
             ctrlClick(element) {
                 openFileById({
+                    app: options.app,
                     id: element.getAttribute("data-node-id"),
                     action: [Constants.CB_GET_CONTEXT]
                 });
@@ -200,6 +207,7 @@ export class Backlink extends Model {
             },
             altClick(element) {
                 openFileById({
+                    app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "right",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
@@ -208,6 +216,7 @@ export class Backlink extends Model {
             },
             shiftClick(element) {
                 openFileById({
+                    app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
@@ -431,7 +440,7 @@ export class Backlink extends Model {
                 editorElement.setAttribute("data-defid", this.blockId);
                 editorElement.setAttribute("data-ismention", isMention ? "true" : "false");
                 liElement.after(editorElement);
-                const editor = new Protyle(editorElement, {
+                const editor = new Protyle(this.app, editorElement, {
                     blockId: docId,
                     backlinkData: isMention ? response.data.backmentions : response.data.backlinks,
                     render: {

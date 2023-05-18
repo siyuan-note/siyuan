@@ -15,6 +15,7 @@ import {openFile} from "../editor/util";
 import {newCardModel} from "./newCardTab";
 /// #endif
 import {getDisplayName, movePathTo} from "../util/pathName";
+import {App} from "../index";
 
 export const genCardHTML = (options: {
     id: string,
@@ -110,6 +111,7 @@ export const genCardHTML = (options: {
 };
 
 export const bindCardEvent = (options: {
+    app: App,
     element: Element,
     title?: string,
     blocks: ICard[],
@@ -118,7 +120,7 @@ export const bindCardEvent = (options: {
     dialog?: Dialog,
 }) => {
     let index = 0;
-    const editor = new Protyle(options.element.querySelector("[data-type='render']") as HTMLElement, {
+    const editor = new Protyle(options.app, options.element.querySelector("[data-type='render']") as HTMLElement, {
         blockId: "",
         action: [Constants.CB_GET_ALL],
         render: {
@@ -205,6 +207,7 @@ export const bindCardEvent = (options: {
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
                 openFile({
+                    app: options.app,
                     position: "right",
                     custom: {
                         icon: "iconRiffCard",
@@ -399,13 +402,13 @@ export const bindCardEvent = (options: {
     return editor;
 };
 
-export const openCard = () => {
+export const openCard = (app: App) => {
     fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-        openCardByData(cardsResponse.data, "all");
+        openCardByData(app, cardsResponse.data, "all");
     });
 };
 
-export const openCardByData = (cardsData: {
+export const openCardByData = (app: App, cardsData: {
     cards: ICard[],
     unreviewedCount: number
 }, cardType: TCardType, id?: string, title?: string) => {
@@ -435,6 +438,7 @@ export const openCardByData = (cardsData: {
     (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
     (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
     const editor = bindCardEvent({
+        app,
         element: dialog.element,
         blocks: cardsData.cards,
         title,

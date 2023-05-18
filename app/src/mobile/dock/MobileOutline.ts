@@ -3,13 +3,14 @@ import {fetchPost} from "../../util/fetch";
 import {openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
 import {getEventName} from "../../protyle/util/compatibility";
+import {App} from "../../index";
 
 export class MobileOutline {
     private tree: Tree;
     private openNodes: { [key: string]: string[] } = {};
     private element: Element;
 
-    constructor() {
+    constructor(app: App) {
         this.element = document.querySelector('#sidebar [data-type="sidebar-outline"]');
         this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
@@ -28,7 +29,7 @@ export class MobileOutline {
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                    openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
                 });
             }
         });

@@ -4,8 +4,9 @@ import {openAttr, openFileAttr} from "../../menus/commonMenuItem";
 import {openGlobalSearch} from "../../search/util";
 /// #endif
 import {isMobile} from "../../util/functions";
+import {App} from "../../index";
 
-export const commonClick = (event: MouseEvent & {
+export const commonClick = (app: App, event: MouseEvent & {
     target: HTMLElement
 }, protyle: IProtyle, data?:IObject) => {
     const isM = isMobile();
@@ -13,7 +14,7 @@ export const commonClick = (event: MouseEvent & {
     if (attrBookmarkElement) {
         if (!isM && (event.ctrlKey || event.metaKey)) {
             /// #if !MOBILE
-            openGlobalSearch(attrBookmarkElement.textContent.trim(), true);
+            openGlobalSearch(app, attrBookmarkElement.textContent.trim(), true);
             /// #endif
         } else {
             if (data) {
@@ -30,7 +31,7 @@ export const commonClick = (event: MouseEvent & {
     if (attrNameElement) {
         if (!isM && (event.ctrlKey || event.metaKey)) {
             /// #if !MOBILE
-            openGlobalSearch(attrNameElement.textContent.trim(), true);
+            openGlobalSearch(app, attrNameElement.textContent.trim(), true);
             /// #endif
         } else {
             if (data ) {
@@ -47,7 +48,7 @@ export const commonClick = (event: MouseEvent & {
     if (attrAliasElement) {
         if (!isM && (event.ctrlKey || event.metaKey)) {
             /// #if !MOBILE
-            openGlobalSearch(attrAliasElement.textContent.trim(), true);
+            openGlobalSearch(app, attrAliasElement.textContent.trim(), true);
             /// #endif
         } else {
             if (data) {
@@ -64,7 +65,7 @@ export const commonClick = (event: MouseEvent & {
     if (attrMemoElement) {
         if (!isM && (event.ctrlKey || event.metaKey)) {
             /// #if !MOBILE
-            openGlobalSearch(attrMemoElement.getAttribute("aria-label").trim(), true);
+            openGlobalSearch(app, attrMemoElement.getAttribute("aria-label").trim(), true);
             /// #endif
         } else {
             if (data) {

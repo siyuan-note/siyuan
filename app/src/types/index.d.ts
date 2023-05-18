@@ -22,7 +22,7 @@ type TOperation =
     | "removeFlashcards"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
-type TEventBus = "ws-main"
+type TEventBus = "ws-main" | "click-blockicon"
 
 declare module "blueimp-md5"
 
@@ -316,6 +316,7 @@ declare interface IPluginDockTab {
 }
 
 declare interface IOpenFileOptions {
+    app: import("../index").App,
     searchData?: ISearchOption, // 搜索必填
     // card 和自定义页签 必填
     custom?: {

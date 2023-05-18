@@ -4,13 +4,14 @@ import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {openMobileFileById} from "../editor";
 import {openBookmarkMenu} from "../../menus/bookmark";
+import {App} from "../../index";
 
 export class MobileBookmarks {
     public element: HTMLElement;
     private tree: Tree;
     private openNodes: string[];
 
-    constructor() {
+    constructor(app: App) {
         this.element = document.querySelector('#sidebar [data-type="sidebar-bookmark"]');
         this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
@@ -38,7 +39,7 @@ export class MobileBookmarks {
                     }
                 }
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                    openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
                 });
             },
             blockExtHTML: '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',

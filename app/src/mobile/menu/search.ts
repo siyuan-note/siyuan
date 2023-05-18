@@ -14,6 +14,7 @@ import {newFileByName} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {activeBlur, hideKeyboardToolbar} from "../util/keyboardToolbar";
+import {App} from "../../index";
 
 const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -245,7 +246,7 @@ const updateSearchResult = (config: ISearchOption, element: Element) => {
     }, Constants.TIMEOUT_INPUT);
 };
 
-const initSearchEvent = (element: Element, config: ISearchOption) => {
+const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
     const searchInputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     searchInputElement.value = config.k || "";
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
@@ -494,14 +495,14 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
                 break;
             } else if (target.classList.contains("b3-list-item")) {
                 if (target.getAttribute("data-type") === "search-new") {
-                    newFileByName(searchInputElement.value);
+                    newFileByName(app, searchInputElement.value);
                 } else if (target.getAttribute("data-type") === "search-item") {
                     const id = target.getAttribute("data-node-id");
                     if (window.siyuan.mobile.editor.protyle) {
                         preventScroll(window.siyuan.mobile.editor.protyle);
                     }
                     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                        openMobileFileById(id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                        openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     });
                     closePanel();
                 } else if (target.querySelector(".b3-list-item__toggle")) {
@@ -517,7 +518,7 @@ const initSearchEvent = (element: Element, config: ISearchOption) => {
     }, false);
 };
 
-export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHDATA] as ISearchOption) => {
+export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOCAL_SEARCHDATA] as ISearchOption) => {
     activeBlur();
     hideKeyboardToolbar();
     let includeChild = true;
@@ -575,7 +576,7 @@ export const popSearch = (config = window.siyuan.storage[Constants.LOCAL_SEARCHD
      <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         bindEvent(element) {
-            initSearchEvent(element.firstElementChild, config);
+            initSearchEvent(app, element.firstElementChild, config);
             updateSearchResult(config, element);
         }
     });

@@ -10,6 +10,7 @@ import {MenuItem} from "../../menus/Menu";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {replaceFileName} from "../../editor/rename";
 import {getDisplayName, movePathTo, pathPosix} from "../../util/pathName";
+import {App} from "../../index";
 
 export class Inbox extends Model {
     private element: Element;
@@ -18,8 +19,8 @@ export class Inbox extends Model {
     private pageCount = 1;
     private data: { [key: string]: IInbox } = {};
 
-    constructor(tab: Tab | Element) {
-        super({id: tab.id});
+    constructor(app: App, tab: Tab | Element) {
+        super({app, id: tab.id});
         if (tab instanceof Element) {
             this.element = tab;
         } else {

@@ -20,6 +20,7 @@ import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {hideElements} from "../protyle/ui/hideElements";
+import {App} from "../index";
 
 const updateTitle = (rootID: string, tab: Tab) => {
     fetchPost("/api/block/getDocInfo", {
@@ -29,7 +30,7 @@ const updateTitle = (rootID: string, tab: Tab) => {
     });
 };
 
-export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: string[] }) => {
+export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRootIDs: string[] }) => {
     hideMessage();
     /// #if MOBILE
     if (window.siyuan.mobile.popEditor) {
@@ -42,7 +43,7 @@ export const reloadSync = (data: { upsertRootIDs: string[], removeRootIDs: strin
     }
     if (window.siyuan.mobile.editor) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
-            setEmpty();
+            setEmpty(app);
         } else {
             reloadProtyle(window.siyuan.mobile.editor.protyle, false);
             fetchPost("/api/block/getDocInfo", {

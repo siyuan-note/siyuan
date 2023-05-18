@@ -8,6 +8,7 @@ import {getAllModels} from "../layout/getAll";
 import {setModelsHash} from "../window/setHeader";
 /// #endif
 import {countBlockWord} from "../layout/status";
+import {App} from "../index";
 
 export class Editor extends Model {
     public element: HTMLElement;
@@ -15,6 +16,7 @@ export class Editor extends Model {
     public headElement: HTMLElement;
 
     constructor(options: {
+        app: App,
         tab: Tab,
         blockId: string,
         mode?: TEditorMode,
@@ -22,6 +24,7 @@ export class Editor extends Model {
         scrollAttr?: IScrollAttr
     }) {
         super({
+            app: options.app,
             id: options.tab.id,
         });
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
@@ -38,7 +41,7 @@ export class Editor extends Model {
         mode?: TEditorMode,
         scrollAttr?: IScrollAttr
     }) {
-        this.editor = new Protyle(this.element, {
+        this.editor = new Protyle(this.app, this.element, {
             action: options.action || [],
             blockId: options.blockId,
             mode: options.mode,

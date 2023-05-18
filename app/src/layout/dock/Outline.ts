@@ -12,6 +12,7 @@ import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {onGet} from "../../protyle/util/onGet";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
+import {App} from "../../index";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -22,11 +23,13 @@ export class Outline extends Model {
     private openNodes: { [key: string]: string[] } = {};
 
     constructor(options: {
+        app: App,
         tab: Tab,
         blockId: string,
         type: "pin" | "local"
     }) {
         super({
+            app: options.app,
             id: options.tab.id,
             callback() {
                 if (this.type === "local") {
@@ -101,6 +104,7 @@ export class Outline extends Model {
                 const id = element.getAttribute("data-node-id");
                 fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
                     openFileById({
+                        app: options.app,
                         id,
                         action: attrResponse.data["heading-fold"] === "1" ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                     });

@@ -17,6 +17,7 @@ import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu} from "./menu";
+import {App} from "../index";
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
@@ -30,7 +31,7 @@ const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
 };
 
-export const openGlobalSearch = (text: string, replace: boolean) => {
+export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
     text = text.trim();
     const searchModel = getAllModels().search.find((item) => {
         item.parent.parent.switchTab(item.parent.headElement);
@@ -42,6 +43,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
     }
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
     openFile({
+        app,
         searchData: {
             k: text,
             r: "",
@@ -60,7 +62,7 @@ export const openGlobalSearch = (text: string, replace: boolean) => {
 };
 
 // closeCB 不存在为页签搜索
-export const genSearch = (config: ISearchOption, element: Element, closeCB?: () => void) => {
+export const genSearch = (app: App, config: ISearchOption, element: Element, closeCB?: () => void) => {
     let methodText = window.siyuan.languages.keyword;
     if (config.method === 1) {
         methodText = window.siyuan.languages.querySyntax;
@@ -181,7 +183,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
     const historyElement = element.querySelector("#searchHistoryList");
 
     const lineHeight = 30;
-    const edit = new Protyle(element.querySelector("#searchPreview") as HTMLElement, {
+    const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
         blockId: "",
         render: {
             gutter: true,
@@ -409,7 +411,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             } else if (target.id === "searchOpen") {
                 config.k = searchInputElement.value;
                 config.r = replaceInputElement.value;
-                openFile({searchData: config, position: "right"});
+                openFile({app, searchData: config, position: "right"});
                 if (closeCB) {
                     closeCB();
                 }
@@ -599,7 +601,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
                 } else if (type === "search-new") {
-                    newFileByName(searchInputElement.value);
+                    newFileByName(app, searchInputElement.value);
                 } else if (type === "search-item") {
                     if (event.detail === 1) {
                         clickTimeout = window.setTimeout(() => {
@@ -607,6 +609,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                                 const id = target.getAttribute("data-node-id");
                                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                                     openFileById({
+                                        app,
                                         id,
                                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                                         zoomIn: foldResponse.data,
@@ -639,6 +642,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
                         const id = target.getAttribute("data-node-id");
                         fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                             openFileById({
+                                app,
                                 id,
                                 action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                                 zoomIn: foldResponse.data
@@ -685,7 +689,7 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
             return;
         }
         if (searchInputElement.value && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
-            newFileByName(searchInputElement.value);
+            newFileByName(app, searchInputElement.value);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -693,11 +697,12 @@ export const genSearch = (config: ISearchOption, element: Element, closeCB?: () 
         const focusIsNew = currentList.getAttribute("data-type") === "search-new";
         if (event.key === "Enter") {
             if (focusIsNew) {
-                newFileByName(searchInputElement.value);
+                newFileByName(app, searchInputElement.value);
             } else {
                 const id = currentList.getAttribute("data-node-id");
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
+                        app,
                         id,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                         zoomIn: foldResponse.data

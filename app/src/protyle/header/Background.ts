@@ -13,6 +13,7 @@ import {popSearch} from "../../mobile/menu/search";
 import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
 import {Constants} from "../../constants";
+import {App} from "../../index";
 
 export class Background {
     public element: HTMLElement;
@@ -22,7 +23,7 @@ export class Background {
     private tagsElement: HTMLElement;
     private transparentData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
-    constructor(protyle: IProtyle) {
+    constructor(app: App, protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.className = "protyle-background";
         this.element.innerHTML = `<div class="protyle-background__img">
@@ -331,10 +332,10 @@ export class Background {
                     break;
                 } else if (type === "open-search") {
                     /// #if !MOBILE
-                    openGlobalSearch(`#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
+                    openGlobalSearch(app, `#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
                     /// #else
                     const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-                    popSearch({
+                    popSearch(app, {
                         removed: searchOption.removed,
                         sort: searchOption.sort,
                         group: searchOption.group,

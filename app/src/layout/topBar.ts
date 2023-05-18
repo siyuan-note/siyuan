@@ -65,11 +65,11 @@ export const initBar = (app: App) => {
         let target = event.target as HTMLElement;
         while (!target.classList.contains("toolbar")) {
             if (target.id === "barBack") {
-                goBack();
+                goBack(app);
                 event.stopPropagation();
                 break;
             } else if (target.id === "barForward") {
-                goForward();
+                goForward(app);
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSync") {
@@ -128,7 +128,10 @@ export const initBar = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "barSearch") {
-                openSearch(window.siyuan.config.keymap.general.globalSearch.custom);
+                openSearch({
+                    app,
+                    hotkey: window.siyuan.config.keymap.general.globalSearch.custom
+                });
                 event.stopPropagation();
                 break;
             } else if (target.id === "barZoom") {

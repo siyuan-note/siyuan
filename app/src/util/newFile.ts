@@ -12,6 +12,7 @@ import {Constants} from "../constants";
 import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
+import {App} from "../index";
 
 export const getNewFilePath = (useSavePath: boolean) => {
     let notebookId = "";
@@ -62,7 +63,7 @@ export const getNewFilePath = (useSavePath: boolean) => {
     return {notebookId, currentPath};
 };
 
-export const newFile = (notebookId?: string, currentPath?: string, paths?: string[], useSavePath = false) => {
+export const newFile = (app: App, notebookId?: string, currentPath?: string, paths?: string[], useSavePath = false) => {
     if (getOpenNotebookCount() === 0) {
         showMessage(window.siyuan.languages.newFileTip);
         return;
@@ -81,9 +82,9 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
                     markdown: ""
                 }, response => {
                     /// #if !MOBILE
-                    openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                    openFileById({app, id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
                     /// #else
-                    openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                    openMobileFileById(app, response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                     /// #endif
                 });
             } else {
@@ -97,9 +98,9 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
                         markdown: ""
                     }, response => {
                         /// #if !MOBILE
-                        openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                        openFileById({app, id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
                         /// #else
-                        openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                        openMobileFileById(app, response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                         /// #endif
                     });
                 });
@@ -123,9 +124,9 @@ export const newFile = (notebookId?: string, currentPath?: string, paths?: strin
                 sorts: paths
             }, () => {
                 /// #if !MOBILE
-                openFileById({id, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+                openFileById({app, id, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
                 /// #else
-                openMobileFileById(id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                openMobileFileById(app, id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
                 /// #endif
             });
         }
@@ -158,7 +159,7 @@ export const getSavePath = (pathString: string, notebookId: string, cb: (p: stri
     });
 };
 
-export const newFileByName = (value: string) => {
+export const newFileByName = (app: App, value: string) => {
     const newData = getNewFilePath(true);
     fetchPost("/api/filetree/getHPathByPath", {
         notebook: newData.notebookId,
@@ -171,9 +172,9 @@ export const newFileByName = (value: string) => {
         }, response => {
             hideElements(["dialog"]);
             /// #if MOBILE
-            openMobileFileById(response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+            openMobileFileById(app, response.data, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
             /// #else
-            openFileById({id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
+            openFileById({app, id: response.data, action: [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]});
             /// #endif
         });
     });

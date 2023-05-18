@@ -7,13 +7,14 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {escapeHtml} from "../../util/escape";
 import {popSearch} from "../menu/search";
 import {Constants} from "../../constants";
+import {App} from "../../index";
 
 export class MobileTags {
     public element: HTMLElement;
     private tree: Tree;
     private openNodes: string[];
 
-    constructor() {
+    constructor(app: App) {
         this.element = document.querySelector('#sidebar [data-type="sidebar-tag"]');
         this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
@@ -67,7 +68,7 @@ export class MobileTags {
                     }
                 } else {
                     const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-                    popSearch({
+                    popSearch(app, {
                         removed: searchOption.removed,
                         sort: searchOption.sort,
                         group: searchOption.group,

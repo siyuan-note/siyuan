@@ -13,11 +13,12 @@ import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {getAllModels} from "../layout/getAll";
+import {App} from "../index";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
 
-const focusStack = async (stack: IBackStack) => {
+const focusStack = async (app: App, stack: IBackStack) => {
     hideElements(["gutter", "toolbar", "hint", "util", "dialog"], stack.protyle);
     let blockElement: HTMLElement;
     if (!document.contains(stack.protyle.element)) {
@@ -52,6 +53,7 @@ const focusStack = async (stack: IBackStack) => {
                     scrollAttr.focusStart = stack.position.start;
                     scrollAttr.focusEnd = stack.position.end;
                     const editor = new Editor({
+                        app: app,
                         tab,
                         scrollAttr,
                         blockId: stack.zoomId || stack.protyle.block.rootID,
@@ -172,10 +174,10 @@ const focusStack = async (stack: IBackStack) => {
     }
 };
 
-export const goBack = async () => {
+export const goBack = async (app: App) => {
     if (window.siyuan.backStack.length === 0) {
         if (forwardStack.length > 0) {
-            await focusStack(forwardStack[forwardStack.length - 1]);
+            await focusStack(app, forwardStack[forwardStack.length - 1]);
         }
         return;
     }
@@ -187,7 +189,7 @@ export const goBack = async () => {
     }
     let stack = window.siyuan.backStack.pop();
     while (stack) {
-        const isFocus = await focusStack(stack);
+        const isFocus = await focusStack(app, stack);
         if (isFocus) {
             forwardStack.push(stack);
             break;
@@ -201,10 +203,10 @@ export const goBack = async () => {
     }
 };
 
-export const goForward = async () => {
+export const goForward = async (app: App) => {
     if (forwardStack.length === 0) {
         if (window.siyuan.backStack.length > 0) {
-            await focusStack(window.siyuan.backStack[window.siyuan.backStack.length - 1]);
+            await focusStack(app, window.siyuan.backStack[window.siyuan.backStack.length - 1]);
         }
         return;
     }
@@ -215,7 +217,7 @@ export const goForward = async () => {
 
     let stack = forwardStack.pop();
     while (stack) {
-        const isFocus = await focusStack(stack);
+        const isFocus = await focusStack(app, stack);
         if (isFocus) {
             window.siyuan.backStack.push(stack);
             break;

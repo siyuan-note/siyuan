@@ -328,29 +328,30 @@ export class Dock {
                 switch (type) {
                     case "file":
                         tab = new Tab({
-                            callback(tab: Tab) {
-                                tab.addModel(new Files({tab}));
+                            callback: (tab: Tab) => {
+                                tab.addModel(new Files({tab, app: this.app}));
                             }
                         });
                         break;
                     case "bookmark":
                         tab = new Tab({
-                            callback(tab: Tab) {
-                                tab.addModel(new Bookmark(tab));
+                            callback: (tab: Tab) => {
+                                tab.addModel(new Bookmark(this.app, tab));
                             }
                         });
                         break;
                     case "tag":
                         tab = new Tab({
-                            callback(tab: Tab) {
-                                tab.addModel(new Tag(tab));
+                            callback: (tab: Tab) => {
+                                tab.addModel(new Tag(this.app, tab));
                             }
                         });
                         break;
                     case "outline":
                         tab = new Tab({
-                            callback(tab: Tab) {
+                            callback: (tab: Tab) => {
                                 const outline = new Outline({
+                                    app: this.app,
                                     type: "pin",
                                     tab,
                                     blockId: editor?.protyle?.block?.rootID,
@@ -364,8 +365,9 @@ export class Dock {
                         break;
                     case "graph":
                         tab = new Tab({
-                            callback(tab: Tab) {
+                            callback: (tab: Tab) => {
                                 tab.addModel(new Graph({
+                                    app: this.app,
                                     tab,
                                     blockId: editor?.protyle?.block?.rootID,
                                     type: "pin"
@@ -375,8 +377,9 @@ export class Dock {
                         break;
                     case "globalGraph":
                         tab = new Tab({
-                            callback(tab: Tab) {
+                            callback: (tab: Tab) => {
                                 tab.addModel(new Graph({
+                                    app: this.app,
                                     tab,
                                     type: "global"
                                 }));
@@ -385,8 +388,9 @@ export class Dock {
                         break;
                     case "backlink":
                         tab = new Tab({
-                            callback(tab: Tab) {
+                            callback: (tab: Tab) => {
                                 tab.addModel(new Backlink({
+                                    app: this.app,
                                     type: "pin",
                                     tab,
                                     blockId: editor?.protyle?.block?.rootID,
@@ -396,8 +400,8 @@ export class Dock {
                         break;
                     case "inbox":
                         tab = new Tab({
-                            callback(tab: Tab) {
-                                tab.addModel(new Inbox(tab));
+                            callback: (tab: Tab) => {
+                                tab.addModel(new Inbox(this.app, tab));
                             }
                         });
                         break;

@@ -2,6 +2,7 @@ import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {openMobileFileById} from "../editor";
+import {App} from "../../index";
 
 export class MobileBacklinks {
     public element: HTMLElement;
@@ -10,7 +11,7 @@ export class MobileBacklinks {
     private mTree: Tree;
     public beforeLen = 10;
 
-    constructor() {
+    constructor(app: App) {
         this.element = document.querySelector('#sidebar [data-type="sidebar-backlink"]');
         this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
@@ -43,14 +44,14 @@ export class MobileBacklinks {
             element: this.element.querySelector(".backlinkList") as HTMLElement,
             data: null,
             click(element: HTMLElement) {
-                openMobileFileById(element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
+                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
             }
         });
         this.mTree = new Tree({
             element: this.element.querySelector(".backlinkMList") as HTMLElement,
             data: null,
             click: (element) => {
-                openMobileFileById(element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
+                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]);
             },
         });
         this.element.addEventListener("click", (event) => {

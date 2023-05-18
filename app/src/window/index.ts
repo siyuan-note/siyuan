@@ -40,6 +40,7 @@ class App {
             ctrlIsPressed: false,
             altIsPressed: false,
             ws: new Model({
+                app: this,
                 id: genUUID(),
                 type: "main",
                 msgCallback: (data) => {
@@ -49,7 +50,7 @@ class App {
                     if (data) {
                         switch (data.cmd) {
                             case "syncMergeResult":
-                                reloadSync(data.data);
+                                reloadSync(this, data.data);
                                 break;
                             case "progress":
                                 progressLoading(data);
@@ -116,10 +117,10 @@ class App {
                                 }
                                 break;
                             case "createdailynote":
-                                openFileById({id: data.data.id, action: [Constants.CB_GET_FOCUS]});
+                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
                             case "openFileById":
-                                openFileById({id: data.data.id, action: [Constants.CB_GET_FOCUS]});
+                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
                         }
                     }
@@ -131,11 +132,11 @@ class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;
-                    window.siyuan.menus = new Menus(siyuanApp);
+                    window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        loadPlugins(siyuanApp);
-                        init(siyuanApp);
+                        loadPlugins(this);
+                        init(this);
                         setTitle(window.siyuan.languages.siyuanNote);
                         initMessage();
                     });
@@ -143,12 +144,12 @@ class App {
             });
         });
         setNoteBook();
-        initBlockPopover();
+        initBlockPopover(this);
         promiseTransactions();
     }
 }
 
-const siyuanApp = new App();
+new App();
 
 // 再次点击新窗口已打开的 PDF 时，需进行定位
 window.newWindow = {

@@ -3,19 +3,21 @@ import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
 import {genSearch} from "./util";
 import {setPanelFocus} from "../layout/util";
+import {App} from "../index";
 
 export class Search extends Model {
     private element: HTMLElement;
     public config: ISearchOption;
     public edit: Protyle;
 
-    constructor(options: { tab: Tab, config: ISearchOption }) {
+    constructor(options: { tab: Tab, config: ISearchOption, app: App }) {
         super({
+            app: options.app,
             id: options.tab.id,
         });
         this.element = options.tab.panelElement as HTMLElement;
         this.config = options.config;
-        this.edit = genSearch(this.config, this.element);
+        this.edit = genSearch(options.app, this.config, this.element);
         this.element.addEventListener("click", () => {
             setPanelFocus(this.element.parentElement.parentElement);
         });

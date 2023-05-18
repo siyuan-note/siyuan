@@ -13,12 +13,13 @@ import {pushBack} from "./util/MobileBackFoward";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
+import {App} from "../index";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
 };
 
-export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) => {
+export const openMobileFileById = (app: App, id: string, action = [Constants.CB_GET_HL]) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id, action};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     if (window.siyuan.mobile.editor) {
@@ -62,7 +63,7 @@ export const openMobileFileById = (id: string, action = [Constants.CB_GET_HL]) =
             });
             window.siyuan.mobile.editor.protyle.undo.clear();
         } else {
-            window.siyuan.mobile.editor = new Protyle(document.getElementById("editor"), {
+            window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), {
                 blockId: id,
                 action,
                 render: {

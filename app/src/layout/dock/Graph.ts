@@ -9,6 +9,7 @@ import {fetchPost} from "../../util/fetch";
 import {isCurrentEditor, openFileById} from "../../editor/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
+import {App} from "../../index";
 
 declare const vis: any;
 
@@ -29,12 +30,14 @@ export class Graph extends Model {
     public type: "local" | "pin" | "global";
 
     constructor(options: {
+        app: App
         tab: Tab
         blockId?: string
         rootId?: string
         type: "local" | "pin" | "global"
     }) {
         super({
+            app: options.app,
             id: options.tab.id,
             callback() {
                 if (this.type === "local") {
@@ -635,28 +638,35 @@ export class Graph extends Model {
                         return;
                     }
                     if (node.type === "textmark tag") {
-                        openGlobalSearch(`#${node.id}#`, !window.siyuan.ctrlIsPressed);
+                        openGlobalSearch(this.app, `#${node.id}#`, !window.siyuan.ctrlIsPressed);
                         return;
                     }
                     if (window.siyuan.shiftIsPressed) {
                         openFileById({
+                            app: this.app,
                             id: node.id,
                             position: "bottom",
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                         });
                     } else if (window.siyuan.altIsPressed) {
                         openFileById({
+                            app: this.app,
                             id: node.id,
                             position: "right",
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                         });
                     } else if (window.siyuan.ctrlIsPressed) {
                         window.siyuan.blockPanels.push(new BlockPanel({
+                            app: this.app,
                             targetElement: this.inputElement,
                             nodeIds: [node.id],
                         }));
                     } else {
-                        openFileById({id: node.id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]});
+                        openFileById({
+                            app: this.app,
+                            id: node.id,
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                        });
                     }
                 });
             }, 1000);

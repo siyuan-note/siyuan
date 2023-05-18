@@ -7,6 +7,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {escapeHtml} from "../util/escape";
 import * as dayjs from "dayjs";
 import {isMobile} from "../util/functions";
+import {App} from "../index";
 
 const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
     if (!data || data.length === 0) {
@@ -27,7 +28,7 @@ const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
 
 let leftEditor: Protyle;
 let rightEditor: Protyle;
-const renderCompare = (element: HTMLElement) => {
+const renderCompare = (app: App, element: HTMLElement) => {
     const listElement = hasClosestByClassName(element, "history__diff");
     if (!listElement) {
         return;
@@ -35,7 +36,7 @@ const renderCompare = (element: HTMLElement) => {
     const leftElement = listElement.nextElementSibling.firstElementChild;
     const rightElement = listElement.nextElementSibling.lastElementChild;
     if (!leftEditor) {
-        leftEditor = new Protyle(leftElement.lastElementChild as HTMLElement, {
+        leftEditor = new Protyle(app, leftElement.lastElementChild as HTMLElement, {
             blockId: "",
             action: [Constants.CB_GET_HISTORY],
             render: {
@@ -48,7 +49,7 @@ const renderCompare = (element: HTMLElement) => {
             typewriterMode: false
         });
         disabledProtyle(leftEditor.protyle);
-        rightEditor = new Protyle(rightElement.lastElementChild as HTMLElement, {
+        rightEditor = new Protyle(app, rightElement.lastElementChild as HTMLElement, {
             blockId: "",
             action: [Constants.CB_GET_HISTORY],
             render: {
@@ -98,7 +99,7 @@ const renderCompare = (element: HTMLElement) => {
     }
 };
 
-export const showDiff = (data: { id: string, time: string }[]) => {
+export const showDiff = (app: App, data: { id: string, time: string }[]) => {
     if (data.length !== 2) {
         return;
     }
@@ -137,7 +138,7 @@ export const showDiff = (data: { id: string, time: string }[]) => {
                 }
                 dialog.element.querySelector(".history__diff .b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                 target.classList.add("b3-list-item--focus");
-                renderCompare(target);
+                renderCompare(app, target);
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -159,7 +160,7 @@ export const showDiff = (data: { id: string, time: string }[]) => {
     genHTML(left, right, dialog, "left");
 };
 
-const genHTML = (left: string, right: string, dialog: Dialog, direct:string) => {
+const genHTML = (left: string, right: string, dialog: Dialog, direct: string) => {
     leftEditor = undefined;
     rightEditor = undefined;
     const isPhone = isMobile();

@@ -42,6 +42,7 @@ import {mathRender} from "../markdown/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {App} from "../../index";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -49,10 +50,11 @@ export class Toolbar {
     public subElementCloseCB: () => void;
     public range: Range;
     private toolbarHeight: number;
+    private app: App;
 
-    constructor(protyle: IProtyle) {
+    constructor(app: App, protyle: IProtyle) {
         const options = protyle.options;
-
+        this.app = app;
         const element = document.createElement("div");
         element.className = "protyle-toolbar fn__none";
         this.element = element;
@@ -224,7 +226,7 @@ export class Toolbar {
                 menuItemObj = new Font(protyle, menuItem);
                 break;
             case "a":
-                menuItemObj = new Link(protyle, menuItem);
+                menuItemObj = new Link(this.app, protyle, menuItem);
                 break;
         }
         if (!menuItemObj) {
@@ -500,23 +502,23 @@ export class Toolbar {
                         } else if (type === "block-ref" && (types.includes("a") || types.includes("file-annotation-ref"))) {
                             // 虚拟引用和链接/标注不能同时存在
                             types.find((item, index) => {
-                                if (item === "a"||item === "file-annotation-ref") {
+                                if (item === "a" || item === "file-annotation-ref") {
                                     types.splice(index, 1);
                                     return true;
                                 }
                             });
-                        } else if (type === "a" && (types.includes("block-ref")|| types.includes("file-annotation-ref"))) {
+                        } else if (type === "a" && (types.includes("block-ref") || types.includes("file-annotation-ref"))) {
                             // 链接和引用/标注不能同时存在
                             types.find((item, index) => {
-                                if (item === "block-ref"||item === "file-annotation-ref") {
+                                if (item === "block-ref" || item === "file-annotation-ref") {
                                     types.splice(index, 1);
                                     return true;
                                 }
                             });
-                        } else if (type === "file-annotation-ref" && (types.includes("block-ref")|| types.includes("a"))) {
+                        } else if (type === "file-annotation-ref" && (types.includes("block-ref") || types.includes("a"))) {
                             // 引用和链接/标注不能同时存在
                             types.find((item, index) => {
-                                if (item === "block-ref"||item === "a") {
+                                if (item === "block-ref" || item === "a") {
                                     types.splice(index, 1);
                                     return true;
                                 }
@@ -728,7 +730,7 @@ export class Toolbar {
             const aElement = newNodes[0] as HTMLElement;
             if (aElement.textContent.replace(Constants.ZWSP, "") === "" || !aElement.getAttribute("data-href")) {
                 needFocus = false;
-                linkMenu(protyle, aElement, aElement.getAttribute("data-href") ? true : false);
+                linkMenu(this.app, protyle, aElement, aElement.getAttribute("data-href") ? true : false);
             } else {
                 this.range.collapse(false);
             }

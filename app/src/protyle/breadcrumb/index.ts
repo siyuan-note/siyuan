@@ -25,6 +25,7 @@ import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
 import {deleteFile} from "../../editor/deleteFile";
+import {App} from "../../index";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -32,7 +33,7 @@ export class Breadcrumb {
     private id: string;
     private messageId: string;
 
-    constructor(protyle: IProtyle) {
+    constructor(app: App, protyle: IProtyle) {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
         const isFocus = protyle.options.action.includes(Constants.CB_GET_ALL) && !isMobile();
@@ -50,6 +51,7 @@ export class Breadcrumb {
                     if (protyle.options.render.breadcrumbDocName && window.siyuan.ctrlIsPressed) {
                         /// #if !MOBILE
                         openFileById({
+                            app,
                             id,
                             action: id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
                         });

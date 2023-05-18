@@ -31,6 +31,7 @@ import {Files} from "../layout/dock/Files";
 import {openNewWindowById} from "../window/openNewWindow";
 import {openCardByData} from "../card/openCard";
 import {viewCards} from "../card/viewCards";
+import {App} from "../index";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -55,7 +56,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     return window.siyuan.menus.menu;
 };
 
-export const initNavigationMenu = (liElement: HTMLElement) => {
+export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.remove();
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
@@ -133,7 +134,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
             click: () => {
                 fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                    openCardByData(response.data, "notebook", notebookId, name);
+                    openCardByData(app, response.data, "notebook", notebookId, name);
                 });
                 /// #if MOBILE
                 closePanel();
@@ -143,7 +144,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             iconHTML: Constants.ZWSP,
             label: window.siyuan.languages.mgmt,
             click: () => {
-                viewCards(notebookId, name, "Notebook");
+                viewCards(app, notebookId, name, "Notebook");
                 /// #if MOBILE
                 closePanel();
                 /// #endif
@@ -157,7 +158,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
         click() {
             /// #if MOBILE
             const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-            popSearch({
+            popSearch(app, {
                 removed: localData.removed,
                 sort: localData.sort,
                 group: localData.group,
@@ -171,7 +172,11 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
                 types: Object.assign({}, localData.types)
             });
             /// #else
-            openSearch(window.siyuan.config.keymap.general.search.custom, undefined, notebookId);
+            openSearch({
+                app,
+                hotkey: window.siyuan.config.keymap.general.search.custom,
+                notebookId,
+            });
             /// #endif
         }
     }).element);
@@ -183,7 +188,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
             click() {
                 /// #if MOBILE
                 const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-                popSearch({
+                popSearch(app, {
                     removed: localData.removed,
                     sort: localData.sort,
                     group: localData.group,
@@ -197,7 +202,11 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
                     types: Object.assign({}, localData.types)
                 });
                 /// #else
-                openSearch(window.siyuan.config.keymap.general.replace.custom, undefined, notebookId);
+                openSearch({
+                    app,
+                    hotkey: window.siyuan.config.keymap.general.replace.custom,
+                    notebookId,
+                });
                 /// #endif
             }
         }).element);
@@ -267,7 +276,7 @@ export const initNavigationMenu = (liElement: HTMLElement) => {
     return window.siyuan.menus.menu;
 };
 
-export const initFileMenu = (notebookId: string, pathString: string, liElement: Element) => {
+export const initFileMenu = (app: App, notebookId: string, pathString: string, liElement: Element) => {
     window.siyuan.menus.menu.remove();
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
@@ -303,7 +312,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                             paths.push(item.getAttribute("data-path"));
                         }
                     });
-                    newFile(notebookId, pathPosix().dirname(pathString), paths);
+                    newFile(app, notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -319,7 +328,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                             }
                         }
                     });
-                    newFile(notebookId, pathPosix().dirname(pathString), paths);
+                    newFile(app, notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -376,7 +385,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                        openCardByData(response.data, "doc", id, name);
+                        openCardByData(app, response.data, "doc", id, name);
                     });
                     /// #if MOBILE
                     closePanel();
@@ -389,7 +398,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     fetchPost("/api/filetree/getHPathByID", {
                         id
                     }, (response) => {
-                        viewCards(id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
+                        viewCards(app, id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
                     });
                     /// #if MOBILE
                     closePanel();
@@ -409,7 +418,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     path: searchPath + ".sy"
                 });
                 const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-                popSearch({
+                popSearch(app, {
                     removed: localData.removed,
                     sort: localData.sort,
                     group: localData.group,
@@ -423,7 +432,12 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     types: Object.assign({}, localData.types)
                 });
                 /// #else
-                openSearch(window.siyuan.config.keymap.general.search.custom, undefined, notebookId, searchPath);
+                openSearch({
+                    app,
+                    hotkey: window.siyuan.config.keymap.general.search.custom,
+                    notebookId,
+                    searchPath
+                });
                 /// #endif
             }
         }).element);
@@ -439,7 +453,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     path: searchPath + ".sy"
                 });
                 const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-                popSearch({
+                popSearch(app, {
                     removed: localData.removed,
                     sort: localData.sort,
                     group: localData.group,
@@ -453,7 +467,12 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
                     types: Object.assign({}, localData.types)
                 });
                 /// #else
-                openSearch(window.siyuan.config.keymap.general.replace.custom, undefined, notebookId, searchPath);
+                openSearch({
+                    app,
+                    hotkey: window.siyuan.config.keymap.general.replace.custom,
+                    notebookId,
+                    searchPath
+                });
                 /// #endif
             }
         }).element);
@@ -465,14 +484,14 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         label: window.siyuan.languages.insertRight,
         accelerator: "⌥Click",
         click: () => {
-            openFileById({id, position: "right", action: [Constants.CB_GET_FOCUS]});
+            openFileById({app, id, position: "right", action: [Constants.CB_GET_FOCUS]});
         }
     }, {
         icon: "iconLayoutBottom",
         label: window.siyuan.languages.insertBottom,
         accelerator: "⇧Click",
         click: () => {
-            openFileById({id, position: "bottom", action: [Constants.CB_GET_FOCUS]});
+            openFileById({app, id, position: "bottom", action: [Constants.CB_GET_FOCUS]});
         }
     }];
     if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
@@ -481,6 +500,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
             accelerator: "⌥⌘Click",
             click: () => {
                 openFileById({
+                    app,
                     id, action: [Constants.CB_GET_FOCUS],
                     removeCurrentTab: false
                 });
@@ -501,7 +521,7 @@ export const initFileMenu = (notebookId: string, pathString: string, liElement: 
         icon: "iconPreview",
         label: window.siyuan.languages.preview,
         click: () => {
-            openFileById({id, mode: "preview"});
+            openFileById({app, id, mode: "preview"});
         }
     });
     /// #if !BROWSER

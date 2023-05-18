@@ -10,6 +10,7 @@ import {getDockByType, setPanelFocus} from "../layout/util";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 
 export class Plugin {
+    private app: App;
     public i18n: IObject;
     public eventBus: EventBus;
     public data: any = {};
@@ -34,6 +35,7 @@ export class Plugin {
         name: string,
         i18n: IObject
     }) {
+        this.app = options.app;
         this.i18n = options.i18n;
         this.name = options.name;
         this.eventBus = new EventBus(options.name);
@@ -141,6 +143,7 @@ export class Plugin {
         const type2 = this.name + options.type;
         this.models[type2] = (arg: { data: any, tab: Tab }) => {
             const customObj = new Custom({
+                app: this.app,
                 tab: arg.tab,
                 type: type2,
                 data: arg.data,
@@ -173,6 +176,7 @@ export class Plugin {
             config: options.config,
             model: (arg: { tab: Tab }) => {
                 const customObj = new Custom({
+                    app: this.app,
                     tab: arg.tab,
                     type: type2,
                     data: options.data,

@@ -71,8 +71,9 @@ import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {quickMakeCard} from "../../card/makeCard";
 import {removeSearchMark} from "../toolbar/util";
+import {App} from "../../index";
 
-export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
+export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html") {
             event.stopPropagation();
@@ -441,6 +442,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const ids = protyle.path.split("/");
                 if (ids.length > 2) {
                     openFileById({
+                        app,
                         id: ids[ids.length - 2],
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
@@ -530,7 +532,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         removeSearchMark(inlineElement);
                     }
                     if (types.includes("block-ref")) {
-                        refMenu(protyle, inlineElement);
+                        refMenu(app, protyle, inlineElement);
                         return;
                     } else if (types.includes("inline-memo")) {
                         protyle.toolbar.showRender(protyle, inlineElement);
@@ -539,10 +541,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
                         return;
                     } else if (types.includes("a")) {
-                        linkMenu(protyle, inlineElement);
+                        linkMenu(app, protyle, inlineElement);
                         return;
                     } else if (types.includes("tag")) {
-                        tagMenu(protyle, inlineElement);
+                        tagMenu(app, protyle, inlineElement);
                         return;
                     }
                 }
@@ -952,7 +954,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         /// #if !MOBILE
-        if (commonHotkey(protyle, event)) {
+        if (commonHotkey(app, protyle, event)) {
             return true;
         }
         /// #endif
@@ -1588,6 +1590,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy.custom, event)) {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
+                        app,
                         id,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                         zoomIn: foldResponse.data
@@ -1600,6 +1603,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 打开块引和编辑器中引用、反链、书签中点击事件需保持一致，都加载上下文
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
+                        app,
                         id,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
                         keepCursor: true,
@@ -1612,6 +1616,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
+                        app,
                         id,
                         position: "right",
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
@@ -1624,6 +1629,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertBottom.custom, event)) {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
+                        app,
                         id,
                         position: "bottom",
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
@@ -1636,6 +1642,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.refPopover.custom, event)) {
                 // open popover
                 window.siyuan.blockPanels.push(new BlockPanel({
+                    app,
                     targetElement: refElement,
                     nodeIds: [id],
                 }));

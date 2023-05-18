@@ -17,6 +17,7 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {isTouchDevice} from "../../util/functions";
+import {App} from "../../index";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -24,8 +25,9 @@ export class Files extends Model {
     private actionsElement: HTMLElement;
     public closeElement: HTMLElement;
 
-    constructor(options: { tab: Tab }) {
+    constructor(options: { tab: Tab, app: App }) {
         super({
+            app: options.app,
             type: "filetree",
             id: options.tab.id,
             msgCallback(data) {
@@ -198,6 +200,7 @@ export class Files extends Model {
                 if (target.tagName === "LI" && !target.getAttribute("data-opening")) {
                     target.setAttribute("data-opening", "true");
                     openFileById({
+                        app: options.app,
                         removeCurrentTab: false,
                         id: target.getAttribute("data-node-id"),
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
@@ -240,13 +243,16 @@ export class Files extends Model {
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile(notebookId, pathString);
+                                newFile(options.app, notebookId, pathString);
                             } else if (type === "more-root") {
-                                initNavigationMenu(target.parentElement).popup({x: event.clientX, y: event.clientY});
+                                initNavigationMenu(options.app, target.parentElement).popup({
+                                    x: event.clientX,
+                                    y: event.clientY
+                                });
                             }
                         }
                         if (type === "more-file") {
-                            initFileMenu(notebookId, pathString, target.parentElement).popup({
+                            initFileMenu(options.app, notebookId, pathString, target.parentElement).popup({
                                 x: event.clientX,
                                 y: event.clientY
                             });
@@ -267,6 +273,7 @@ export class Files extends Model {
                                 target.setAttribute("data-opening", "true");
                                 if (event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
                                     openFileById({
+                                        app: options.app,
                                         id: target.getAttribute("data-node-id"),
                                         position: "right",
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
@@ -276,6 +283,7 @@ export class Files extends Model {
                                     });
                                 } else if (!event.altKey && !event.metaKey && !event.ctrlKey && event.shiftKey) {
                                     openFileById({
+                                        app: options.app,
                                         id: target.getAttribute("data-node-id"),
                                         position: "bottom",
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
@@ -286,6 +294,7 @@ export class Files extends Model {
                                 } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab &&
                                     event.altKey && (event.metaKey || event.ctrlKey) && !event.shiftKey) {
                                     openFileById({
+                                        app: options.app,
                                         removeCurrentTab: false,
                                         id: target.getAttribute("data-node-id"),
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
@@ -295,6 +304,7 @@ export class Files extends Model {
                                     });
                                 } else {
                                     openFileById({
+                                        app: options.app,
                                         id: target.getAttribute("data-node-id"),
                                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {

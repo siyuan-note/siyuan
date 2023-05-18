@@ -9,8 +9,9 @@ import {unicode2Emoji} from "../emoji";
 import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {App} from "../index";
 
-export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
+export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
     let pageIndex = 1;
     let edit: Protyle;
     fetchPost(`/api/riff/get${deckType}RiffCards`, {
@@ -55,7 +56,7 @@ export const viewCards = (deckID: string, title: string, deckType: "Tree" | "" |
             }
         });
         if (response.data.blocks.length > 0) {
-            edit = new Protyle(dialog.element.querySelector("#cardPreview") as HTMLElement, {
+            edit = new Protyle(app, dialog.element.querySelector("#cardPreview") as HTMLElement, {
                 blockId: "",
                 render: {
                     gutter: true,

@@ -27,8 +27,10 @@ import {showMessage} from "../dialog/message";
 import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
+import {App} from "../index";
 
 export const openFileById = async (options: {
+    app: App,
     id: string,
     position?: string,
     mode?: TEditorMode,
@@ -47,6 +49,7 @@ export const openFileById = async (options: {
             options.removeCurrentTab = true;
         }
         openFile({
+            app: options.app,
             fileName: data.data.rootTitle,
             rootIcon: data.data.rootIcon,
             rootID: data.data.rootID,
@@ -62,12 +65,13 @@ export const openFileById = async (options: {
     });
 };
 
-export const openAsset = (assetPath: string, page: number | string, position?: string) => {
+export const openAsset = (app: App, assetPath: string, page: number | string, position?: string) => {
     const suffix = pathPosix().extname(assetPath.split("?page")[0]);
     if (!Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
         return;
     }
     openFile({
+        app,
         assetPath,
         page,
         position,
@@ -379,6 +383,7 @@ const newTab = (options: IOpenFileOptions) => {
                 title: getDisplayName(options.assetPath),
                 callback(tab) {
                     tab.addModel(new Asset({
+                        app: options.app,
                         tab,
                         path: options.assetPath,
                         page: options.page,
@@ -405,6 +410,7 @@ const newTab = (options: IOpenFileOptions) => {
             title: window.siyuan.languages.search,
             callback(tab) {
                 tab.addModel(new Search({
+                    app: options.app,
                     tab,
                     config: options.searchData
                 }));
@@ -419,12 +425,14 @@ const newTab = (options: IOpenFileOptions) => {
                 let editor;
                 if (options.zoomIn) {
                     editor = new Editor({
+                        app: options.app,
                         tab,
                         blockId: options.id,
                         action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
                     });
                 } else {
                     editor = new Editor({
+                        app: options.app,
                         tab,
                         blockId: options.id,
                         mode: options.mode,

@@ -39,7 +39,7 @@ export const init = (app: App) => {
         window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
     });
     initStatus(true);
-    initWindow();
+    initWindow(app);
     appearance.onSetappearance(window.siyuan.config.appearance);
     initAssets();
     renderSnippet();

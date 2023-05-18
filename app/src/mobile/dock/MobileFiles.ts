@@ -13,14 +13,16 @@ import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {newFile} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
+import {App} from "../../index";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
     private actionsElement: HTMLElement;
     private closeElement: HTMLElement;
 
-    constructor() {
+    constructor(app: App) {
         super({
+            app,
             id: genUUID(),
             type: "filetree",
             msgCallback(data) {
@@ -177,15 +179,15 @@ export class MobileFiles extends Model {
                         const notebookId = ulElement.getAttribute("data-url");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile(notebookId, pathString);
+                                newFile(app, notebookId, pathString);
                             } else if (type === "more-root") {
-                                initNavigationMenu(target.parentElement);
+                                initNavigationMenu(app, target.parentElement);
                                 window.siyuan.menus.menu.fullscreen("bottom");
                                 window.siyuan.menus.menu.element.style.zIndex = "310";
                             }
                         }
                         if (type === "more-file") {
-                            initFileMenu(notebookId, pathString, target.parentElement);
+                            initFileMenu(app, notebookId, pathString, target.parentElement);
                             window.siyuan.menus.menu.fullscreen("bottom");
                             window.siyuan.menus.menu.element.style.zIndex = "310";
                         }
@@ -196,7 +198,7 @@ export class MobileFiles extends Model {
                 } else if (target.tagName === "LI") {
                     this.setCurrent(target);
                     if (target.getAttribute("data-type") === "navigation-file") {
-                        openMobileFileById(target.getAttribute("data-node-id"));
+                        openMobileFileById(app, target.getAttribute("data-node-id"));
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const ulElement = hasTopClosestByTag(target, "UL");
                         if (ulElement) {

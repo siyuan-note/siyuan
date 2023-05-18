@@ -100,7 +100,7 @@ export class Wnd {
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new") {
                     setPanelFocus(this.headersElement.parentElement.parentElement);
-                    newFile(undefined, undefined, undefined, true);
+                    newFile(app, undefined, undefined, undefined, true);
                     break;
                 } else if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "more") {
                     this.renderTabList(target);
@@ -211,6 +211,7 @@ export class Wnd {
                 event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",").forEach(item => {
                     if (item) {
                         openFileById({
+                            app,
                             id: item,
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                         });
@@ -435,6 +436,7 @@ export class Wnd {
             if (initData) {
                 const json = JSON.parse(initData);
                 currentTab.addModel(new Editor({
+                    app: this.app,
                     tab: currentTab,
                     blockId: json.blockId,
                     mode: json.mode,
@@ -476,6 +478,7 @@ export class Wnd {
                     scrollCenter(currentTab.model.editor.protyle, nodeElement, true);
                 } else {
                     openFileById({
+                        app: this.app,
                         id: keepCursorId,
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                     });
@@ -767,7 +770,7 @@ export class Wnd {
                 /// #endif
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
-                wnd.addTab(newCenterEmptyTab());
+                wnd.addTab(newCenterEmptyTab(this.app));
             }
         }
         /// #if !BROWSER

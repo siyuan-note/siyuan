@@ -4,11 +4,12 @@ import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {focusByRange, focusByWbr} from "../util/selection";
 import {readText} from "../util/compatibility";
 import {Constants} from "../../constants";
+import {App} from "../../index";
 
 export class Link extends ToolbarItem {
     public element: HTMLElement;
 
-    constructor(protyle: IProtyle, menuItem: IMenuItem) {
+    constructor(app: App, protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
         // 不能用 getEventName，否则会导致光标位置变动到点击的文档中
         this.element.addEventListener("click", async (event: MouseEvent & { changedTouches: MouseEvent[] }) => {
@@ -22,7 +23,7 @@ export class Link extends ToolbarItem {
             }
             const aElement = hasClosestByAttribute(range.startContainer, "data-type", "a");
             if (aElement) {
-                linkMenu(protyle, aElement);
+                linkMenu(app, protyle, aElement);
                 return;
             }
 

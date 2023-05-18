@@ -4,6 +4,7 @@ import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 import {getCurrentEditor} from "../editor";
 import {linkMenu, refMenu, tagMenu} from "../../menus/protyle";
+import {App} from "../../index";
 
 let clientX: number;
 let clientY: number;
@@ -23,7 +24,7 @@ const popSide = (render = true) => {
     }
 };
 
-export const handleTouchEnd = (event: TouchEvent) => {
+export const handleTouchEnd = (app: App, event: TouchEvent) => {
     const editor = getCurrentEditor();
     if (editor) {
         document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
@@ -44,13 +45,13 @@ export const handleTouchEnd = (event: TouchEvent) => {
             return;
         }
         if (types.includes("block-ref")) {
-            refMenu(editor.protyle, target);
+            refMenu(app, editor.protyle, target);
         } else if (types.includes("file-annotation-ref")) {
             editor.protyle.toolbar.showFileAnnotationRef(editor.protyle, target);
         } else if (types.includes("tag")) {
-            tagMenu(editor.protyle, target);
+            tagMenu(app, editor.protyle, target);
         } else if (types.includes("a")) {
-            linkMenu(editor.protyle, target);
+            linkMenu(app, editor.protyle, target);
         }
         return;
     }

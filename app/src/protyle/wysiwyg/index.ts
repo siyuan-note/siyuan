@@ -1502,6 +1502,9 @@ export class WYSIWYG {
 
         let shiftStartElement: HTMLElement;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+            this.app.plugins.forEach(item => {
+                item.eventBus.emit("click-editorcontent", event);
+            });
             hideElements(["hint", "util"], protyle);
             const ctrlIsPressed = event.metaKey || event.ctrlKey;
             /// #if !MOBILE

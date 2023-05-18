@@ -30,8 +30,11 @@ export class Asset extends Model {
         this.element = options.tab.panelElement;
         this.path = options.path;
         this.pdfId = options.page;
-        this.element.addEventListener("click", () => {
+        this.element.addEventListener("click", (event) => {
             setPanelFocus(this.element.parentElement.parentElement);
+            this.app.plugins.forEach(item => {
+                item.eventBus.emit("click-pdf", event);
+            });
         });
         if (typeof this.pdfId === "string") {
             this.getPdfId(() => {

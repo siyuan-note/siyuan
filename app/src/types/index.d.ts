@@ -22,7 +22,7 @@ type TOperation =
     | "removeFlashcards"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
-type TEventBus = "ws-main" | "click-blockicon"
+type TEventBus = "ws-main" | "click-blockicon" | "click-editorcontent" | "click-pdf"
 
 declare module "blueimp-md5"
 

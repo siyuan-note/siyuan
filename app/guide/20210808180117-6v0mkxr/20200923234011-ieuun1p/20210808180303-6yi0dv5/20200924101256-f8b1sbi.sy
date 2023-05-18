@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20230420190018"
+		"updated": "20230518100627"
 	},
 	"Children": [
 		{
@@ -634,6 +634,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "Filter"
+				}
+			]
+		},
+		{
+			"ID": "20230518100549-bu599ue",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230518100549-bu599ue",
+				"updated": "20230518100627"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After enabling "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "[[ only search documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: "
 				}
 			]
 		},

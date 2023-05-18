@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
-		"updated": "20230420190022"
+		"updated": "20230518100713"
 	},
 	"Children": [
 		{
@@ -639,6 +639,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "篩選"
+				}
+			]
+		},
+		{
+			"ID": "20230518100654-6zhp6jh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230518100654-6zhp6jh",
+				"updated": "20230518100713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "[[ 僅搜索文檔"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 後："
 				}
 			]
 		},

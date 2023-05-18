@@ -181,7 +181,7 @@ export class Inbox extends Model {
     <span data-type="back" class="toolbar__text fn__flex-1">${data.shorthandTitle}</span>
     ${linkHTML}
 </div>
-<div class="b3-typography b3-typography--default" style="padding: 0 8px 8px">
+<div class="b3-typography b3-typography--default" style="padding: 0 8px 8px;user-select: text">
 ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
 </div>`;
         /// #else

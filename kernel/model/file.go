@@ -673,7 +673,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 
 	var keywords []string
-	if 0 == queryMethod || 1 == queryMethod { // 只有关键字搜索和查询语法搜索才支持高亮
+	if "" != query && (0 == queryMethod || 1 == queryMethod) { // 只有关键字搜索和查询语法搜索才支持高亮
 		if 0 == queryMethod {
 			query = stringQuery(query)
 		}

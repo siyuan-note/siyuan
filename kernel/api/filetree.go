@@ -710,7 +710,7 @@ func getDoc(c *gin.Context) {
 	if nil != startIDArg && nil != endIDArg {
 		startID = startIDArg.(string)
 		endID = endIDArg.(string)
-		size = 36
+		size = model.Conf.Editor.DynamicLoadBlocks
 	}
 	isBacklinkArg := arg["isBacklink"]
 	isBacklink := false

@@ -255,7 +255,6 @@ export class Protyle {
     private getDoc(mergedOptions: IOptions) {
         fetchPost("/api/filetree/getDoc", {
             id: mergedOptions.blockId,
-            k: mergedOptions.key || "",
             isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
             // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
             mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,

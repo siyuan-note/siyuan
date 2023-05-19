@@ -625,7 +625,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 getArticle({
                                     edit,
                                     id: target.getAttribute("data-node-id"),
-                                    k: getKeyByLiElement(target)
+                                    config,
+                                    value: searchInputElement.value,
                                 });
                                 searchInputElement.focus();
                             } else if (target.classList.contains("b3-list-item--focus")) {
@@ -740,7 +741,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             }
             getArticle({
                 id: currentList.getAttribute("data-node-id"),
-                k: getKeyByLiElement(currentList),
+                config,
+                value: searchInputElement.value,
                 edit
             });
             event.preventDefault();
@@ -766,7 +768,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             }
             getArticle({
                 id: currentList.getAttribute("data-node-id"),
-                k: getKeyByLiElement(currentList),
+                config,
+                value: searchInputElement.value,
                 edit
             });
             event.preventDefault();
@@ -888,15 +891,18 @@ const renderNextSearchMark = (options: {
 
 const getArticle = (options: {
     id: string,
-    k: string,
+    config: ISearchOption,
     edit: Protyle
+    value: string,
 }) => {
     fetchPost("/api/block/checkBlockFold", {id: options.id}, (foldResponse) => {
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
         fetchPost("/api/filetree/getDoc", {
             id: options.id,
-            k: options.k,
+            query: options.value,
+            method: options.config.method,
+            types: options.config.types,
             mode: foldResponse.data ? 0 : 3,
             size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
             zoom: foldResponse.data,
@@ -920,6 +926,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     }
     const searchPanelElement = element.querySelector("#searchList");
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
+    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
 
     const loadElement = replaceInputElement.nextElementSibling;
     if (!loadElement.classList.contains("fn__none")) {
@@ -943,7 +950,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         rootIds = [currentList.getAttribute("data-root-id")];
     }
     fetchPost("/api/search/findReplace", {
-        k: config.method === 0 ? getKeyByLiElement(currentList) : (element.querySelector("#searchInput") as HTMLInputElement).value,
+        k: config.method === 0 ? getKeyByLiElement(currentList) : searchInputElement.value,
         r: replaceInputElement.value,
         ids,
         types: config.types,
@@ -997,7 +1004,8 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         getArticle({
             edit,
             id: currentList.getAttribute("data-node-id"),
-            k: getKeyByLiElement(currentList)
+            config,
+            value: searchInputElement.value,
         });
     });
 };
@@ -1017,7 +1025,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
         const nextElement = element.querySelector('[data-type="next"]');
         if (inputValue === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                onSearch(response.data, edit, element);
+                onSearch(response.data, edit, element, config);
                 loadingElement.classList.add("fn__none");
                 element.querySelector("#searchResult").innerHTML = "";
                 previousElement.setAttribute("disabled", "true");
@@ -1046,7 +1054,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 } else {
                     nextElement.setAttribute("disabled", "disabled");
                 }
-                onSearch(response.data.blocks, edit, element);
+                onSearch(response.data.blocks, edit, element, config);
                 element.querySelector("#searchResult").innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
 <span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>`;
                 loadingElement.classList.add("fn__none");
@@ -1056,7 +1064,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
     return inputTimeout;
 };
 
-const onSearch = (data: IBlock[], edit: Protyle, element: Element) => {
+const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: ISearchOption) => {
     let resultHTML = "";
     data.forEach((item, index) => {
         const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
@@ -1089,20 +1097,20 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
     if (data[0]) {
         edit.protyle.element.classList.remove("fn__none");
         element.querySelector(".search__drag").classList.remove("fn__none");
-        const contentElement = document.createElement("div");
+        const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
         if (data[0].children) {
-            contentElement.innerHTML = data[0].children[0].content;
             getArticle({
                 edit,
                 id: data[0].children[0].id,
-                k: getKeyByLiElement(contentElement),
+                config,
+                value: searchInputElement.value,
             });
         } else {
-            contentElement.innerHTML = data[0].content;
             getArticle({
                 edit,
                 id: data[0].id,
-                k: getKeyByLiElement(contentElement),
+                config,
+                value: searchInputElement.value,
             });
         }
     } else {

@@ -1304,7 +1304,6 @@ export class WYSIWYG {
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
                     mode: 1,
-                    k: protyle.options.key || "",
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     preventGetTopHTML = false;

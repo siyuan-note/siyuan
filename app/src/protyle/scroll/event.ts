@@ -66,7 +66,6 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 fetchPost("/api/filetree/getDoc", {
                     id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
                     mode: 1,
-                    k: protyle.options.key || "",
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     protyle.contentElement.style.overflow = "";
@@ -81,7 +80,6 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             fetchPost("/api/filetree/getDoc", {
                 id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                 mode: 2,
-                k: protyle.options.key || "",
                 size: window.siyuan.config.editor.dynamicLoadBlocks,
             }, getResponse => {
                 onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);

@@ -246,7 +246,6 @@ const setHTML = (options: {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
             mode: 2,
-            k: protyle.options.key || "",
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);

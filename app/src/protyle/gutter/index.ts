@@ -579,7 +579,9 @@ export class Gutter {
                 }).element);
             }
         }
-        AIActions(selectsElement, protyle);
+        if (!protyle.disabled) {
+            AIActions(selectsElement, protyle);
+        }
         const copyMenu: IMenu[] = [{
             label: window.siyuan.languages.copy,
             accelerator: "⌘C",
@@ -710,6 +712,7 @@ export class Gutter {
         }
         this.app?.plugins?.forEach((plugin) => {
             plugin.eventBus.emit("click-blockicon", {
+                protyle,
                 menu: window.siyuan.menus.menu,
                 blockElements: selectsElement,
             });
@@ -996,7 +999,9 @@ export class Gutter {
                 submenu: turnIntoSubmenu
             }).element);
         }
-        AIActions([nodeElement], protyle);
+        if (!protyle.disabled) {
+            AIActions([nodeElement], protyle);
+        }
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
             label: window.siyuan.languages.copy,
             accelerator: "⌘C",
@@ -1509,6 +1514,7 @@ export class Gutter {
         }).element);
         this.app?.plugins?.forEach((plugin) => {
             plugin.eventBus.emit("click-blockicon", {
+                protyle,
                 menu: window.siyuan.menus.menu,
                 blockElements: [nodeElement]
             });

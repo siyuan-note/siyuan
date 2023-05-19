@@ -89,5 +89,4 @@ export const API = {
     Plugin,
     Dialog,
     Menu,
-    Lute
 };

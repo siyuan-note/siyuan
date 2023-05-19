@@ -244,6 +244,7 @@ export const showPopover = async (app: App, showRef = false) => {
         window.siyuan.blockPanels.push(new BlockPanel({
             app,
             targetElement: popoverTargetElement,
+            isBacklink: showRef || popoverTargetElement.classList.contains("protyle-attr--refcount") || popoverTargetElement.classList.contains("counter"),
             nodeIds: ids,
             defIds,
         }));

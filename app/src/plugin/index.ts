@@ -8,6 +8,7 @@ import {Custom} from "../layout/dock/Custom";
 import {Tab} from "../layout/Tab";
 import {getDockByType, setPanelFocus} from "../layout/util";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
+import {BlockPanel} from "../block/Panel";
 
 export class Plugin {
     private app: App;
@@ -197,5 +198,24 @@ export class Plugin {
         };
         return this.docks[type2];
         /// #endif
+    }
+
+    public addFloatLayer = (options: {
+        ids: string[],
+        defIds?: string[],
+        x?: number,
+        y?: number,
+        targetElement?: HTMLElement,
+        isBacklink: boolean,
+    }) => {
+        window.siyuan.blockPanels.push(new BlockPanel({
+            app: this.app,
+            targetElement: options.targetElement,
+            isBacklink: options.isBacklink,
+            x: options.x,
+            y: options.y,
+            nodeIds: options.ids,
+            defIds: options.defIds,
+        }));
     }
 }

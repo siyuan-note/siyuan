@@ -658,7 +658,9 @@ export class Graph extends Model {
                     } else if (window.siyuan.ctrlIsPressed) {
                         window.siyuan.blockPanels.push(new BlockPanel({
                             app: this.app,
-                            targetElement: this.inputElement,
+                            isBacklink: false,
+                            x: params.event.center.x,
+                            y: params.event.center.y,
                             nodeIds: [node.id],
                         }));
                     } else {

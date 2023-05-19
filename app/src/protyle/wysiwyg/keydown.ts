@@ -1643,6 +1643,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 // open popover
                 window.siyuan.blockPanels.push(new BlockPanel({
                     app,
+                    isBacklink: false,
                     targetElement: refElement,
                     nodeIds: [id],
                 }));

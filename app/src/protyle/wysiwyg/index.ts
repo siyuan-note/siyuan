@@ -1759,6 +1759,7 @@ export class WYSIWYG {
                     window.siyuan.blockPanels.push(new BlockPanel({
                         app: this.app,
                         targetElement: embedItemElement,
+                        isBacklink: false,
                         nodeIds: [embedId],
                     }));
                 }

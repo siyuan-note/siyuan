@@ -19,27 +19,30 @@ export class BlockPanel {
     public nodeIds: string[];
     public defIds: string[] = [];
     public id: string;
-    private stmt: string;
     private app: App;
+    private x: number;
+    private y: number;
+    private isBacklink: boolean;
     public editors: Protyle[] = [];
-    public esc: () => void;
 
-    // stmt 非空且 id 为空为查询嵌入
+    // x,y 和 targetElement 二选一必传
     constructor(options: {
         app: App,
-        targetElement: HTMLElement,
+        targetElement?: HTMLElement,
         nodeIds?: string[],
         defIds?: string[],
-        stmt?: string,
-        esc?: () => void,
+        isBacklink: boolean,
+        x?: number,
+        y?: number
     }) {
         this.id = genUUID();
-        this.stmt = options.stmt;
         this.targetElement = options.targetElement;
         this.nodeIds = options.nodeIds;
         this.defIds = options.defIds || [];
-        this.esc = options.esc;
         this.app = options.app;
+        this.x = options.x;
+        this.y = options.y;
+        this.isBacklink = options.isBacklink;
 
         this.element = document.createElement("div");
         this.element.classList.add("block__popover", "block__popover--move", "block__popover--top");
@@ -192,7 +195,9 @@ export class BlockPanel {
             };
         });
 
-        this.targetElement.style.cursor = "wait";
+        if (this.targetElement) {
+            this.targetElement.style.cursor = "wait";
+        }
 
         this.element.setAttribute("data-pin", "false");
         this.element.addEventListener("dblclick", (event) => {
@@ -218,7 +223,7 @@ export class BlockPanel {
             while (target && !target.isEqualNode(this.element)) {
                 if (target.classList.contains("block__icon") || target.classList.contains("block__logo")) {
                     const type = target.getAttribute("data-type");
-                    if (type === "close" && this.targetElement) {
+                    if (type === "close") {
                         this.destroy();
                     } else if (type === "pin") {
                         if (target.classList.contains("block__icon--active")) {
@@ -252,15 +257,14 @@ export class BlockPanel {
                 showMessage(response.msg);
                 return;
             }
-            if (!this.targetElement) {
+            if (!this.targetElement && typeof this.x === "undefined" && typeof this.y === "undefined") {
                 return;
             }
             const action = [];
             if (response.data.rootID !== this.nodeIds[index]) {
                 action.push(Constants.CB_GET_ALL);
             }
-            if (this.targetElement.classList.contains("protyle-attr--refcount") ||
-                this.targetElement.classList.contains("counter")) {
+            if (this.isBacklink) {
                 action.push(Constants.CB_GET_BACKLINK);
             }
             const editor = new Protyle(this.app, editorElement, {
@@ -358,10 +362,12 @@ export class BlockPanel {
                 observer.observe(item);
             }
         });
-        this.targetElement.style.cursor = "";
+        if (this.targetElement) {
+            this.targetElement.style.cursor = "";
+        }
         this.element.classList.add("block__popover--open");
         let targetRect;
-        if (this.targetElement.classList.contains("protyle-wysiwyg__embed")) {
+        if (this.targetElement && this.targetElement.classList.contains("protyle-wysiwyg__embed")) {
             targetRect = this.targetElement.getBoundingClientRect();
             // 嵌入块过长时，单击弹出的悬浮窗位置居下 https://ld246.com/article/1634292738717
             let top = targetRect.top;
@@ -374,7 +380,7 @@ export class BlockPanel {
             }
             // 单击嵌入块悬浮窗的位置最好是覆盖嵌入块
             setPosition(this.element, targetRect.left, Math.max(top - 84, Constants.SIZE_TOOLBAR_HEIGHT), 0, 8);
-        } else {
+        } else if (this.targetElement) {
             if (this.targetElement.classList.contains("pdf__rect")) {
                 targetRect = this.targetElement.firstElementChild.getBoundingClientRect();
             } else {
@@ -382,8 +388,9 @@ export class BlockPanel {
             }
             // 靠边不宜拖拽 https://github.com/siyuan-note/siyuan/issues/2937
             setPosition(this.element, targetRect.left, targetRect.top + targetRect.height + 4, targetRect.height + 12, 8);
+        } else if (typeof this.x === "number" && typeof this.y === "number") {
+            setPosition(this.element, this.x, this.y);
         }
-
         this.element.style.maxHeight = (window.innerHeight - this.element.getBoundingClientRect().top - 8) + "px";
     }
 }

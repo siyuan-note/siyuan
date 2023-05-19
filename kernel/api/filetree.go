@@ -675,11 +675,24 @@ func getDoc(c *gin.Context) {
 	if nil != idx {
 		index = int(idx.(float64))
 	}
-	k := arg["k"]
-	var keyword string
-	if nil != k {
-		keyword = k.(string)
+
+	var query string
+	if queryArg := arg["query"]; nil != queryArg {
+		query = queryArg.(string)
 	}
+	var queryMethod int
+	if queryMethodArg := arg["queryMethod"]; nil != queryMethodArg {
+		queryMethod = int(queryMethodArg.(float64))
+	}
+	var queryTypes map[string]bool
+	if queryTypesArg := arg["queryTypes"]; nil != queryTypesArg {
+		typesArg := queryTypesArg.(map[string]interface{})
+		queryTypes = map[string]bool{}
+		for t, b := range typesArg {
+			queryTypes[t] = b.(bool)
+		}
+	}
+
 	m := arg["mode"] // 0: 仅当前 ID，1：向上 2：向下，3：上下都加载，4：加载末尾
 	mode := 0
 	if nil != m {
@@ -705,7 +718,7 @@ func getDoc(c *gin.Context) {
 		isBacklink = isBacklinkArg.(bool)
 	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, err := model.GetDoc(startID, endID, id, index, keyword, mode, size, isBacklink)
+	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, err := model.GetDoc(startID, endID, id, index, query, queryTypes, queryMethod, mode, size, isBacklink)
 	if model.ErrBlockNotFound == err {
 		ret.Code = 3
 		return

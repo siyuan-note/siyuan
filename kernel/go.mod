@@ -145,8 +145,7 @@ replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20
 //replace github.com/siyuan-note/riff => D:\88250\riff
 //replace github.com/siyuan-note/httpclient => D:\88250\httpclient
 //replace github.com/siyuan-note/filelock => D:\88250\filelock
-replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute
-
+//replace github.com/88250/lute => D:\gogogo\src\github.com\88250\lute
 //replace github.com/88250/pdfcpu => D:\88250\pdfcpu
 //replace github.com/88250/gulu => D:\88250\gulu
 //replace github.com/mattn/go-sqlite3 => D:\88250\go-sqlite3

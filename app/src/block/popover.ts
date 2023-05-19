@@ -111,7 +111,7 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement, path: HTMLElemen
         const blockElement = hasClosestByClassName(targetElement, "block__popover", true);
         const maxEditLevels: { [key: string]: number } = {oid: 0};
         window.siyuan.blockPanels.forEach((item) => {
-            if (item.targetElement && item.element.getAttribute("data-pin") === "true") {
+            if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "true") {
                 const level = parseInt(item.element.getAttribute("data-level"));
                 const oid = item.element.getAttribute("data-oid");
                 if (maxEditLevels[oid]) {
@@ -126,7 +126,7 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement, path: HTMLElemen
         if (blockElement) {
             for (let i = 0; i < window.siyuan.blockPanels.length; i++) {
                 const item = window.siyuan.blockPanels[i];
-                if (item.targetElement &&
+                if ((item.targetElement || typeof item.x === "number") &&
                     parseInt(item.element.getAttribute("data-level")) > (maxEditLevels[item.element.getAttribute("data-oid")] || 0) &&
                     item.element.getAttribute("data-pin") === "false" &&
                     parseInt(item.element.getAttribute("data-level")) > parseInt(blockElement.getAttribute("data-level"))) {
@@ -137,7 +137,7 @@ const hidePopover = (event: MouseEvent & { target: HTMLElement, path: HTMLElemen
         } else {
             for (let i = 0; i < window.siyuan.blockPanels.length; i++) {
                 const item = window.siyuan.blockPanels[i];
-                if (item.targetElement && item.element.getAttribute("data-pin") === "false" &&
+                if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false" &&
                     parseInt(item.element.getAttribute("data-level")) > (maxEditLevels[item.element.getAttribute("data-oid")] || 0)) {
                     item.destroy();
                     i--;
@@ -232,7 +232,7 @@ export const showPopover = async (app: App, showRef = false) => {
 
     let hasPin = false;
     window.siyuan.blockPanels.find((item) => {
-        if (item.targetElement && item.element.getAttribute("data-pin") === "true"
+        if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "true"
             && JSON.stringify(ids) === JSON.stringify(item.nodeIds)) {
             hasPin = true;
             return true;

@@ -20,8 +20,8 @@ export class BlockPanel {
     public defIds: string[] = [];
     public id: string;
     private app: App;
-    private x: number;
-    private y: number;
+    public x: number;
+    public y: number;
     private isBacklink: boolean;
     public editors: Protyle[] = [];
 

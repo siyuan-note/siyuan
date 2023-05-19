@@ -266,6 +266,14 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             blockRefData[2] === sideElement.textContent;
     }
 
+    if (textObj.type === "file-annotation-ref") {
+        if (currentElement.nodeType !== 3) {
+            return currentElement.getAttribute("data-id") === sideElement.getAttribute("data-id") &&
+                currentElement.textContent === sideElement.textContent;
+        }
+        return textObj.color === sideElement.getAttribute("data-id");
+    }
+
     let color = "";
     let webkitTextFillColor = "";
     let webkitTextStroke = "";

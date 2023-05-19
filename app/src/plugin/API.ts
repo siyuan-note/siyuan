@@ -2,7 +2,6 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {Plugin} from "./index";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
-import {MenuItem} from "../menus/Menu";
 import {Menu as SiyuanMenu} from "../menus/Menu";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
@@ -42,11 +41,11 @@ export class Menu {
         return this.menu.addItem(option);
     }
 
-    addSeparator() {
+    addSeparator(index?: number) {
         if (this.isOpen) {
             return;
         }
-        this.menu.addSeparator();
+        this.menu.addSeparator(index);
     }
 
     open(options: { x: number, y: number, h?: number, w?: number, isLeft: false }) {

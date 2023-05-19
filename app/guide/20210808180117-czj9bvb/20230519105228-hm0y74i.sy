@@ -1,0 +1,472 @@
+{
+	"ID": "20230519105228-hm0y74i",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f6e3",
+		"id": "20230519105228-hm0y74i",
+		"title": "最新进展",
+		"updated": "20230519112131"
+	},
+	"Children": [
+		{
+			"ID": "20230519105228-0t37vwc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230519105228-0t37vwc",
+				"updated": "20230519105330"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230519105330-qyti1xv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230519105330-qyti1xv",
+				"updated": "20230519105649"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在这里我们将介绍如何获取思源笔记相关最新进展，主要包括运营和开发两个方面。"
+				}
+			]
+		},
+		{
+			"ID": "20230519105649-s4dmkkj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230519105649-s4dmkkj",
+				"updated": "20230519110202"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "运营"
+				}
+			]
+		},
+		{
+			"ID": "20230519110202-1k238kq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230519110202-1k238kq",
+				"updated": "20230519112131"
+			},
+			"Children": [
+				{
+					"ID": "20230519110330-3wo6me7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519110330-3wo6me7",
+						"updated": "20230519112131"
+					},
+					"Children": [
+						{
+							"ID": "20230519110330-gcjb0yi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519110330-gcjb0yi",
+								"updated": "20230519110341"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "微信公众号 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log开源"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20230519110335-l2v1hcq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519110335-l2v1hcq",
+								"updated": "20230519112131"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Properties": {
+										"parent-style": "max-width: 140px;",
+										"style": "width: 130px;"
+									},
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "image.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/image-20220119231125-qt2ooye.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"width: 130px;\" parent-style=\"max-width: 140px;\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519110343-w05bgc1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519110343-w05bgc1",
+						"updated": "20230519112121"
+					},
+					"Children": [
+						{
+							"ID": "20230519110343-5a34m79",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519110343-5a34m79",
+								"updated": "20230519111105"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "微博 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log开源社区"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://weibo.com/b3log",
+									"TextMarkTextContent": "https://weibo.com/b3log"
+								}
+							]
+						},
+						{
+							"ID": "20230519111041-cnvj53y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111041-cnvj53y",
+								"updated": "20230519112121"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "weibo"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/weibo-20230519111041-ezla9f8.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519111123-ra6yjat",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111123-ra6yjat"
+					},
+					"Children": [
+						{
+							"ID": "20230519111123-jwmarc1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111123-jwmarc1",
+								"updated": "20230519111143"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Twitter "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log Open Source"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://twitter.com/b3logos",
+									"TextMarkTextContent": "https://twitter.com/b3logos"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519111239-83o3a2y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111239-83o3a2y",
+						"updated": "20230519111248"
+					},
+					"Children": [
+						{
+							"ID": "20230519111239-2guijgg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111239-2guijgg",
+								"updated": "20230519111248"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "链滴 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/tag/siyuan-announcement",
+									"TextMarkTextContent": "https://ld246.com/tag/siyuan-announcement"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230519105652-7uw5gs3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230519105652-7uw5gs3",
+				"updated": "20230519105653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "开发"
+				}
+			]
+		},
+		{
+			"ID": "20230519111614-pkuxkgq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230519111614-pkuxkgq",
+				"updated": "20230519112016"
+			},
+			"Children": [
+				{
+					"ID": "20230519111614-0l5e5eb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111614-0l5e5eb",
+						"updated": "20230519112016"
+					},
+					"Children": [
+						{
+							"ID": "20230519111614-rqjn64e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111614-rqjn64e",
+								"updated": "20230519112016"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan/releases",
+									"TextMarkTextContent": "版本发布"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519111634-xhpvvq0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111634-xhpvvq0",
+						"updated": "20230519112014"
+					},
+					"Children": [
+						{
+							"ID": "20230519111634-2bsk3o2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111634-2bsk3o2",
+								"updated": "20230519112014"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan/milestones",
+									"TextMarkTextContent": "版本计划"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519111639-3zg8lne",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111639-3zg8lne",
+						"updated": "20230519112001"
+					},
+					"Children": [
+						{
+							"ID": "20230519111639-9ib397o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111639-9ib397o",
+								"updated": "20230519112001"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/orgs/siyuan-note/projects/1",
+									"TextMarkTextContent": "路线图"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519111933-telr1ph",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111933-telr1ph",
+						"updated": "20230519111933"
+					},
+					"Children": [
+						{
+							"ID": "20230519111933-2hch0k4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111933-2hch0k4",
+								"updated": "20230519111933"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+									"TextMarkTextContent": "社区集市"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230519111423-06jsy8x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230519111423-06jsy8x",
+				"updated": "20230519111932"
+			}
+		}
+	]
+}

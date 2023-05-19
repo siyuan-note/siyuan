@@ -901,8 +901,8 @@ const getArticle = (options: {
         fetchPost("/api/filetree/getDoc", {
             id: options.id,
             query: options.value,
-            method: options.config.method,
-            types: options.config.types,
+            queryMethod: options.config.method,
+            queryTypes: options.config.types,
             mode: foldResponse.data ? 0 : 3,
             size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
             zoom: foldResponse.data,

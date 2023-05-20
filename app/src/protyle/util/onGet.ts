@@ -180,7 +180,10 @@ const setHTML = (options: {
             // 使用动态滚动条定位到最后一个块，重启后无法触发滚动事件，需要再次更新 index
             protyle.scroll.updateIndex(protyle, options.scrollAttr.startId);
             // https://github.com/siyuan-note/siyuan/issues/8224
-            if (protyle.wysiwyg.element.clientHeight - parseInt(protyle.wysiwyg.element.style.paddingBottom) < protyle.contentElement.clientHeight) {
+            const contentRect = protyle.contentElement.getBoundingClientRect();
+            if (protyle.wysiwyg.element.clientHeight - parseInt(protyle.wysiwyg.element.style.paddingBottom) < protyle.contentElement.clientHeight &&
+                protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom < contentRect.bottom &&
+                protyle.wysiwyg.element.firstElementChild.getBoundingClientRect().top > contentRect.top) {
                 showMessage(window.siyuan.languages.scrollGetMore);
             }
         }

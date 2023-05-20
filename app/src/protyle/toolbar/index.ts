@@ -807,9 +807,13 @@ export class Toolbar {
                     refElement.innerHTML = "*";
                 }
                 this.range.setStartAfter(refElement);
-                focusByRange(this.range);
+                if (getSelection().rangeCount === 0) {
+                    focusByRange(this.range);
+                }
             } else {
-                focusByWbr(nodeElement, this.range);
+                if (getSelection().rangeCount === 0) {
+                    focusByWbr(nodeElement, this.range);
+                }
             }
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, id, nodeElement.outerHTML, html);

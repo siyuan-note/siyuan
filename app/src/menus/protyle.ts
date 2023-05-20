@@ -59,17 +59,6 @@ export const refMenu = (app: App, protyle: IProtyle, element: HTMLElement) => {
         bind(menuItemElement) {
             const inputElement = menuItemElement.querySelector("input");
             inputElement.value = element.getAttribute("data-subtype") === "d" ? "" : element.textContent;
-            inputElement.addEventListener("blur", (event) => {
-                if (nodeElement.outerHTML !== oldHTML) {
-                    nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-                    oldHTML = nodeElement.outerHTML;
-                }
-                protyle.toolbar.range.selectNodeContents(element);
-                protyle.toolbar.range.collapse(false);
-                focusByRange(protyle.toolbar.range);
-                event.stopPropagation();
-            });
             inputElement.addEventListener("input", () => {
                 if (inputElement.value) {
                     // 不能使用 textContent，否则 < 会变为 &lt;
@@ -290,6 +279,19 @@ export const refMenu = (app: App, protyle: IProtyle, element: HTMLElement) => {
         h: 26
     });
     window.siyuan.menus.menu.element.querySelector("input").select();
+    window.siyuan.menus.menu.removeCB = () => {
+        if (nodeElement.outerHTML !== oldHTML) {
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            oldHTML = nodeElement.outerHTML;
+        }
+        const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
+        if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
+            protyle.toolbar.range.selectNodeContents(element);
+            protyle.toolbar.range.collapse(false);
+            focusByRange(protyle.toolbar.range);
+        }
+    };
 };
 
 export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
@@ -890,9 +892,10 @@ export const linkMenu = (app: App, protyle: IProtyle, linkElement: HTMLElement, 
             linkElement.removeAttribute("data-title");
         }
         linkElement.setAttribute("data-href", Lute.EscapeHTMLStr(textElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
+        const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
         if (linkElement.textContent === "" || linkElement.textContent === Constants.ZWSP) {
-            removeLink(linkElement, protyle.toolbar.range);
-        } else {
+            removeLink(linkElement, (currentRange && !protyle.element.contains(currentRange.startContainer)) ? protyle.toolbar.range : undefined);
+        } else if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
             protyle.toolbar.range.selectNodeContents(linkElement);
             protyle.toolbar.range.collapse(false);
             focusByRange(protyle.toolbar.range);

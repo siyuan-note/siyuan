@@ -1,4 +1,5 @@
 {
+  "color": "Color",
   "confirmPassword": "Ya he recordado la contraseña",
   "passwordNoMatch": "Las contraseñas ingresadas dos veces no coinciden",
   "cloudConfigTip": "Configure en [Configuración - Nube]",
@@ -247,7 +248,7 @@
   "importDataTip": "Importar el archivo zip exportado, sobrescribiendo la carpeta <code class='fn__code'>workspace/data/</code> por la ruta",
   "includeChildDoc": "Incluir los documentos de los niños",
   "text": "Texto",
-  "lastUsed": "Fuentes utilizadas recientemente",
+  "lastUsed": "Fuentes utilizadas apariencia",
   "removedNotebook": "Cuaderno de notas eliminado",
   "querySyntax": "Sintaxis de consulta",
   "rollback": "Rollback",

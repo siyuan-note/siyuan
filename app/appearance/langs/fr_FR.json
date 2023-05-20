@@ -1,4 +1,5 @@
 {
+  "color": "Couleur",
   "confirmPassword": "J'ai déjà retenu le mot de passe",
   "passwordNoMatch": "Les mots de passe saisis deux fois ne correspondent pas",
   "cloudConfigTip": "Veuillez configurer dans [Paramètres - Cloud]",
@@ -247,7 +248,7 @@
   "importDataTip": "Importer l'archive zip exportée, en écrasant le dossier <code class='fn__code'>workspace/data/</code> par le chemin",
   "includeChildDoc": "Inclure les documents enfants",
   "text": "Texte",
-  "lastUsed": "Polices récemment utilisées",
+  "lastUsed": "Apparence récemment utilisée",
   "removedNotebook": "Cahier supprimé",
   "querySyntax": "Syntaxe de la requête",
   "rollback": "Rollback",

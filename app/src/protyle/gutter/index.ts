@@ -39,6 +39,8 @@ import {AIActions} from "../../ai/actions";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {hideTooltip} from "../../dialog/tooltip";
 import {App} from "../../index";
+import {appearanceMenu} from "../toolbar/Font";
+import {setPosition} from "../../util/setPosition";
 
 export class Gutter {
     public element: HTMLElement;
@@ -676,7 +678,19 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         const appearanceElement = new MenuItem({
             label: window.siyuan.languages.appearance,
-            submenu: this.genCardStyle(selectsElement, protyle).concat(this.genFontStyle(selectsElement, protyle)).concat(this.genBGStyle(selectsElement, protyle))
+            click() {
+                protyle.toolbar.element.classList.add("fn__none");
+                protyle.toolbar.subElement.innerHTML = "";
+                protyle.toolbar.subElement.style.width = "";
+                protyle.toolbar.subElement.style.padding = "";
+                protyle.toolbar.subElement.append(appearanceMenu(protyle, selectsElement));
+                protyle.toolbar.subElement.classList.remove("fn__none");
+                protyle.toolbar.subElementCloseCB = undefined;
+                /// #if !MOBILE
+                const position = selectsElement[0].getBoundingClientRect();
+                setPosition(protyle.toolbar.subElement, position.left, position.top);
+                /// #endif
+            }
         }).element;
         window.siyuan.menus.menu.append(appearanceElement);
         if (!isMobile()) {
@@ -1461,7 +1475,19 @@ export class Gutter {
         if (!protyle.disabled) {
             const appearanceElement = new MenuItem({
                 label: window.siyuan.languages.appearance,
-                submenu: this.genCardStyle([nodeElement], protyle).concat(this.genFontStyle([nodeElement], protyle)).concat(this.genBGStyle([nodeElement], protyle))
+                click() {
+                    protyle.toolbar.element.classList.add("fn__none");
+                    protyle.toolbar.subElement.innerHTML = "";
+                    protyle.toolbar.subElement.style.width = "";
+                    protyle.toolbar.subElement.style.padding = "";
+                    protyle.toolbar.subElement.append(appearanceMenu(protyle, [nodeElement]));
+                    protyle.toolbar.subElement.classList.remove("fn__none");
+                    protyle.toolbar.subElementCloseCB = undefined;
+                    /// #if !MOBILE
+                    const position = nodeElement.getBoundingClientRect();
+                    setPosition(protyle.toolbar.subElement, position.left, position.top);
+                    /// #endif
+                }
             }).element;
             window.siyuan.menus.menu.append(appearanceElement);
             if (!isMobile()) {
@@ -1622,47 +1648,6 @@ export class Gutter {
         }).element);
     }
 
-    private genBGStyle(nodeElements: Element[], protyle: IProtyle) {
-        const styles: IMenu[] = [];
-        const isM = isMobile();
-        ["var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
-            "var(--b3-font-background5)", "var(--b3-font-background6)", "var(--b3-font-background7)", "var(--b3-font-background8)",
-            "var(--b3-font-background9)", "var(--b3-font-background10)", "var(--b3-font-background11)", "var(--b3-font-background12)",
-            "var(--b3-font-background13)"].forEach((item, index) => {
-            styles.push({
-                iconHTML: isM ? `<span style="background-color:${item};" class="color__square fn__flex-center"></span>` : Constants.ZWSP,
-                label: isM ? `${window.siyuan.languages.colorPrimary} ${index + 1}` : `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.colorPrimary} ${index + 1}">
-    <span style="background-color:${item};" class="color__square fn__flex-center"></span>
-</div>`,
-                click: () => {
-                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.backgroundColor = item;
-                    });
-                }
-            });
-        });
-        styles.push({
-            type: "separator"
-        });
-        styles.push({
-            iconHTML: isM ? '<span class="color__square fn__flex-center">A</span>' : Constants.ZWSP,
-            label: isM ? window.siyuan.languages.clearFontStyle : `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.clearFontStyle}">
-    <span class="color__square fn__flex-center">A</span>
-</div>`,
-            click: () => {
-                this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                    e.style.color = "";
-                    e.style.webkitTextFillColor = "";
-                    e.style.webkitTextStroke = "";
-                    e.style.textShadow = "";
-                    e.style.backgroundColor = "";
-                    e.style.fontSize = "";
-                });
-            }
-        });
-        return styles;
-    }
-
     private genWidths(nodeElements: Element[], protyle: IProtyle) {
         const styles: IMenu[] = [];
         ["25%", "33%", "50%", "67%", "75%"].forEach((item) => {
@@ -1738,77 +1723,6 @@ export class Gutter {
                 }
             }]),
         }).element);
-    }
-
-    private genFontStyle(nodeElements: Element[], protyle: IProtyle) {
-        const styles: IMenu[] = [];
-        const isM = isMobile();
-        ["var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
-            "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
-            "var(--b3-font-color9)", "var(--b3-font-color10)", "var(--b3-font-color11)", "var(--b3-font-color12)",
-            "var(--b3-font-color13)"].forEach((item, index) => {
-            styles.push({
-                iconHTML: isM ? `<span style="color:${item};" class="color__square fn__flex-center">A</span>` : Constants.ZWSP,
-                label: isM ? `${window.siyuan.languages.colorFont} ${index + 1}` : `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.colorFont} ${index + 1}">
-    <span style="color:${item};" class="color__square fn__flex-center">A</span>
-</div>`,
-                click: () => {
-                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.color = item;
-                    });
-                }
-            });
-        });
-        styles.push({
-            type: "separator"
-        });
-        return styles;
-    }
-
-    private genCardStyle(nodeElements: Element[], protyle: IProtyle) {
-        const styles: IMenu[] = [];
-        const isM = isMobile();
-        ["error", "warning", "info", "success"].forEach((item) => {
-            styles.push({
-                iconHTML: isM ? `<span style="color: var(--b3-card-${item}-color);background-color: var(--b3-card-${item}-background);" class="color__square fn__flex-center">A</span>` : Constants.ZWSP,
-                label: isM ? window.siyuan.languages[item + "Style"] : `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages[item + "Style"]}">
-    <span style="color: var(--b3-card-${item}-color);background-color: var(--b3-card-${item}-background);" class="color__square fn__flex-center">A</span>    
-</div>`,
-                click: () => {
-                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.color = `var(--b3-card-${item}-color)`;
-                        e.style.backgroundColor = `var(--b3-card-${item}-background)`;
-                    });
-                }
-            });
-        });
-        styles.push({
-            type: "separator"
-        });
-        return styles.concat([{
-            iconHTML: isM ? '<span style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;" class="color__square fn__flex-center">A</span>' : Constants.ZWSP,
-            label: isM ? window.siyuan.languages.hollow : `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.hollow}">
-    <span style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;" class="color__square fn__flex-center">A</span>
-</div>`,
-            click: () => {
-                this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                    e.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
-                    e.style.webkitTextFillColor = "transparent";
-                });
-            }
-        }, {
-            iconHTML: isM ? ' <span style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" class="color__square fn__flex-center">A</span>' : Constants.ZWSP,
-            label: isM ? window.siyuan.languages.shadow : `<div class="fn__flex" data-type="a" aria-label="${window.siyuan.languages.shadow}">
-    <span style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" class="color__square fn__flex-center">A</span>
-</div>`,
-            click: () => {
-                this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                    e.style.textShadow = "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)";
-                });
-            }
-        }, {
-            type: "separator"
-        }]);
     }
 
     private genCopyTextRef(selectsElement: Element[]): false | IMenu {

@@ -229,8 +229,8 @@ export class Options {
             tipPosition: "n",
         }, {
             name: "text",
-            lang: "font",
-            hotkey: window.siyuan.config.keymap.editor.insert.font.custom,
+            lang: "appearance",
+            hotkey: window.siyuan.config.keymap.editor.insert.appearance.custom,
             icon: "iconFont",
             tipPosition: "n",
         }, {

@@ -196,7 +196,7 @@ export abstract class Constants {
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
             },
             insert: {
-                font: {default: "⌥⌘X", custom: "⌥⌘X"},
+                appearance: {default: "⌥⌘X", custom: "⌥⌘X"},
                 lastUsed: {default: "⌥X", custom: "⌥X"},
                 ref: {default: "⌥[", custom: "⌥["},
                 kbd: {default: "⌘'", custom: "⌘'"},

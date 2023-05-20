@@ -1,9 +1,10 @@
 import {setStorageVal, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
 import {setPosition} from "../../util/setPosition";
-import {focusByRange, getSelectionPosition} from "../util/selection";
+import {focusBlock, focusByRange, getSelectionPosition} from "../util/selection";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute} from "../util/hasClosest";
+import {updateBatchTransaction} from "../wysiwyg/transaction";
 
 export class Font extends ToolbarItem {
     public element: HTMLElement;
@@ -18,7 +19,7 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
-            protyle.toolbar.subElement.append(fontMenu(protyle));
+            protyle.toolbar.subElement.append(appearanceMenu(protyle));
             protyle.toolbar.subElement.classList.remove("fn__none");
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
@@ -30,7 +31,7 @@ export class Font extends ToolbarItem {
     }
 }
 
-const fontMenu = (protyle: IProtyle) => {
+export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     let colorHTML = "";
     ["var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
@@ -76,19 +77,38 @@ const fontMenu = (protyle: IProtyle) => {
                 case "fontSize":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
                     break;
+                case "style1":
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}" class="color__square">A</button>`;
+                    break;
             }
         });
         lastColorHTML += "</div>";
     }
-    let textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
+    let textElement: HTMLElement
     let fontSize = "16px";
-    if (!textElement) {
-        textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
+    if (nodeElements) {
+        if (nodeElements.length === 1) {
+            textElement = nodeElements[0] as HTMLElement
+        }
+    } else {
+        textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
+        if (!textElement) {
+            textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
+        }
     }
     if (textElement) {
         fontSize = textElement.style.fontSize || "16px";
     }
     element.innerHTML = `${lastColorHTML}
+<div class="fn__hr"></div>
+<div>${window.siyuan.languages.color}</div>
+<div class="fn__hr--small"></div>
+<div class="fn__flex">
+    <button class="color__square" data-type="style1" style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);">A</button>
+    <button class="color__square" data-type="style1" style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);">A</button>
+    <button class="color__square" data-type="style1" style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);">A</button>
+    <button class="color__square" data-type="style1" style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);">A</button>
+</div>
 <div class="fn__hr"></div>
 <div>${window.siyuan.languages.colorFont}</div>
 <div class="fn__hr--small"></div>
@@ -136,10 +156,38 @@ const fontMenu = (protyle: IProtyle) => {
         while (target && !target.isEqualNode(element)) {
             const dataType = target.getAttribute("data-type");
             if (target.tagName === "BUTTON") {
-                if (dataType === "clear") {
-                    protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"});
+                if (nodeElements) {
+                    updateBatchTransaction(nodeElements, protyle, (e: HTMLElement) => {
+                        if (dataType === "clear") {
+                            e.style.color = "";
+                            e.style.webkitTextFillColor = "";
+                            e.style.webkitTextStroke = "";
+                            e.style.textShadow = "";
+                            e.style.backgroundColor = "";
+                            e.style.fontSize = "";
+                        } else if (dataType === "style1") {
+                            e.style.backgroundColor = target.style.backgroundColor;
+                            e.style.color = target.style.color;
+                        } else if (dataType === "style2") {
+                            e.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
+                            e.style.webkitTextFillColor = "transparent";
+                        } else if (dataType === "style4") {
+                            e.style.textShadow = "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)";
+                        } else if (dataType === "color") {
+                            e.style.color = target.style.color;
+                        } else if (dataType === "backgroundColor") {
+                            e.style.backgroundColor = target.style.backgroundColor;
+                        }
+                    });
+                    focusBlock(nodeElements[0]);
                 } else {
-                    fontEvent(protyle, dataType, target.style.backgroundColor || target.style.color || target.textContent);
+                    if (dataType === "clear") {
+                        protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"});
+                    } else if (dataType === "style1") {
+                        fontEvent(protyle, dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
+                    } else {
+                        fontEvent(protyle, dataType, target.style.backgroundColor || target.style.color || target.textContent);
+                    }
                 }
                 break;
             }
@@ -147,7 +195,14 @@ const fontMenu = (protyle: IProtyle) => {
         }
     });
     element.querySelector("select").addEventListener("change", function (event: Event) {
-        fontEvent(protyle, "fontSize", (event.target as HTMLSelectElement).value);
+        if (nodeElements) {
+            updateBatchTransaction(nodeElements, protyle, (e: HTMLElement) => {
+                e.style.fontSize = (event.target as HTMLSelectElement).value;
+            });
+            focusBlock(nodeElements[0]);
+        } else {
+            fontEvent(protyle, "fontSize", (event.target as HTMLSelectElement).value);
+        }
     });
     return element;
 };
@@ -164,8 +219,8 @@ export const fontEvent = (protyle: IProtyle, type?: string, color?: string) => {
         setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     } else {
         if (localFontStyles.length === 0) {
-            type = "color";
-            color = "var(--b3-font-color1)";
+            type = "style1";
+            color = "var(--b3-card-error-color)" + Constants.ZWSP + "var(--b3-card-error-background)";
         } else {
             const fontStyles = localFontStyles[0].split(Constants.ZWSP);
             type = fontStyles[0];
@@ -213,6 +268,10 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 break;
             case "backgroundColor":
                 textElement.style.backgroundColor = textOption.color;
+                break;
+            case "style1":
+                textElement.style.backgroundColor = textOption.color.split(Constants.ZWSP)[0];
+                textElement.style.color = textOption.color.split(Constants.ZWSP)[1];
                 break;
             case "style2":
                 textElement.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
@@ -303,6 +362,14 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             textShadow === sideElement.style.textShadow &&
             fontSize === sideElement.style.fontSize &&
             textObj.color === sideElement.style.backgroundColor;
+    }
+    if (textObj.type === "style1") {
+        return textObj.color.split(Constants.ZWSP)[0] === sideElement.style.color &&
+            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
+            webkitTextStroke === sideElement.style.webkitTextStroke &&
+            textShadow === sideElement.style.textShadow &&
+            fontSize === sideElement.style.fontSize &&
+            textObj.color.split(Constants.ZWSP)[1] === sideElement.style.backgroundColor;
     }
     if (textObj.type === "style2") {
         return color === sideElement.style.color &&

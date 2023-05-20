@@ -1,4 +1,5 @@
 {
+  "color": "顏色",
   "confirmPassword": "我已經牢記密碼了",
   "passwordNoMatch": "兩次輸入的密碼不一致",
   "cloudConfigTip": "請在 [設置 - 雲端] 中進行配置",
@@ -247,7 +248,7 @@
   "importDataTip": "將導出的 zip 壓縮包導入，按路徑覆蓋 <code class='fn__code'>工作空間/data/</code> 文件夾",
   "includeChildDoc": "包含子文檔",
   "text": "文字",
-  "lastUsed": "最近使用過的字體",
+  "lastUsed": "最近使用過的外觀",
   "removedNotebook": "已刪除的筆記本",
   "querySyntax": "查詢語法",
   "rollback": "回滾",

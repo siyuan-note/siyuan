@@ -217,5 +217,5 @@ export class Plugin {
             nodeIds: options.ids,
             defIds: options.defIds,
         }));
-    }
+    };
 }

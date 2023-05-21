@@ -116,7 +116,7 @@ export class Menu {
             return;
         }
         if (typeof index === "number") {
-            const insertElement = this.element.querySelectorAll(".b3-menu__items > .b3-menu__separator")[index]
+            const insertElement = this.element.querySelectorAll(".b3-menu__items > .b3-menu__separator")[index];
             if (insertElement) {
                 insertElement.before(element);
                 return;

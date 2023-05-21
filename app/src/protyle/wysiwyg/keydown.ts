@@ -1290,11 +1290,11 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
         // toolbar action
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {
             protyle.toolbar.range = range;
-            let selectElements: Element[] = []
+            let selectElements: Element[] = [];
             if (selectText === "") {
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (selectElements.length === 0) {
-                    selectElements = [nodeElement]
+                    selectElements = [nodeElement];
                 }
             }
             fontEvent(protyle, selectElements);

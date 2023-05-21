@@ -14,11 +14,11 @@ export class Font extends ToolbarItem {
         this.element.addEventListener("click", () => {
             let nodeElements: Element[];
             if (protyle.toolbar.range.toString() === "") {
-                nodeElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"))
+                nodeElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (nodeElements.length === 0) {
                     const nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer);
                     if (nodeElement) {
-                        nodeElements = [nodeElement]
+                        nodeElements = [nodeElement];
                     }
                 }
             }
@@ -94,7 +94,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         });
         lastColorHTML += "</div>";
     }
-    let textElement: HTMLElement
+    let textElement: HTMLElement;
     let fontSize = "16px";
     if (nodeElements && nodeElements.length > 0) {
         textElement = nodeElements[0] as HTMLElement;
@@ -216,7 +216,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.backgroundColor = "";
                 e.style.fontSize = "";
             } else if (type === "style1") {
-                const colorList = color.split(Constants.ZWSP)
+                const colorList = color.split(Constants.ZWSP);
                 e.style.backgroundColor = colorList[0];
                 e.style.color = colorList[1];
             } else if (type === "style2") {

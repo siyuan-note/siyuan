@@ -35,6 +35,7 @@ class App {
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
         window.siyuan = {
+            notebooks: [],
             transactions: [],
             reqIds: {},
             backStack: [],
@@ -75,10 +76,12 @@ class App {
                         window.siyuan.user = userResponse.data;
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                            initFramework(this);
-                            initRightMenu(this);
-                            loadPlugins(this);
-                            openChangelog();
+                            setNoteBook(() => {
+                                initFramework(this);
+                                initRightMenu(this);
+                                loadPlugins(this);
+                                openChangelog();
+                            });
                         });
                     });
                     addGA();
@@ -90,7 +93,6 @@ class App {
                 handleTouchEnd(this, event);
             }, false);
         });
-        setNoteBook();
         promiseTransactions();
     }
 }

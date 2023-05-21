@@ -1290,7 +1290,14 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
         // toolbar action
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {
             protyle.toolbar.range = range;
-            fontEvent(protyle);
+            let selectElements: Element[] = []
+            if (selectText === "") {
+                selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                if (selectElements.length === 0) {
+                    selectElements = [nodeElement]
+                }
+            }
+            fontEvent(protyle, selectElements);
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -1304,7 +1311,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
-                    if (["block-ref", "text"].includes(menuItem.name) && protyle.toolbar.range.toString() === "") {
+                    if (["block-ref"].includes(menuItem.name) && protyle.toolbar.range.toString() === "") {
                         return true;
                     }
                     findToolbar = true;

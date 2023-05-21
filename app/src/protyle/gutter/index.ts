@@ -678,6 +678,8 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         const appearanceElement = new MenuItem({
             label: window.siyuan.languages.appearance,
+            icon: "iconFont",
+            accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
             click() {
                 protyle.toolbar.element.classList.add("fn__none");
                 protyle.toolbar.subElement.innerHTML = "";
@@ -1475,6 +1477,8 @@ export class Gutter {
         if (!protyle.disabled) {
             const appearanceElement = new MenuItem({
                 label: window.siyuan.languages.appearance,
+                icon: "iconFont",
+                accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
                 click() {
                     protyle.toolbar.element.classList.add("fn__none");
                     protyle.toolbar.subElement.innerHTML = "";

@@ -3,7 +3,7 @@ import {showMessage} from "../dialog/message";
 import {isMobile} from "./functions";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
-import {getNotebookName, getOpenNotebookCount} from "./pathName";
+import {getOpenNotebookCount} from "./pathName";
 import {validateName} from "../editor/rename";
 import {setStorageVal} from "../protyle/util/compatibility";
 

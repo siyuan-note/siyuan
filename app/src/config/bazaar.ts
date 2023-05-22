@@ -491,8 +491,19 @@ export const bazaar = {
                                 });
                                 return;
                             }
-                            bazaar._genMyHTML(bazaarType, app);
                             bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
+                            bazaar._genMyHTML(bazaarType, app);
+                            if (bazaarType === "plugins") {
+                                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip, () => {
+                                    fetchPost("/api/petal/setPetalEnabled", {
+                                        packageName: dataObj.name,
+                                        enabled: true,
+                                    }, (response) => {
+                                        loadPlugin(app, response.data);
+                                        bazaar._genMyHTML(bazaarType, app);
+                                    });
+                                });
+                            }
                         });
                     }
                     event.preventDefault();

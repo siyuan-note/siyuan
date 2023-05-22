@@ -4,8 +4,8 @@ import {Constants} from "../constants";
 export const moveResize = (element: HTMLElement, afterCB?: (type: string) => void) => {
     element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
         let iconsElement = hasClosestByClassName(event.target, "resize__move");
-        let x: number
-        let y: number
+        let x: number;
+        let y: number;
         const elementRect = element.getBoundingClientRect();
         if (!iconsElement) {
             x = event.clientX;
@@ -124,4 +124,4 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
             }
         };
     });
-}
+};

@@ -140,7 +140,7 @@ export class BlockPanel {
             pinElement.classList.add("block__icon--active");
             pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
             this.element.setAttribute("data-pin", "true");
-        })
+        });
         /// #endif
         this.render();
     }

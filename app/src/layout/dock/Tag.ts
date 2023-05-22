@@ -90,7 +90,7 @@ export class Tag extends Model {
                 openGlobalSearch(app, `#${element.getAttribute("data-label")}#`, !window.siyuan.ctrlIsPressed);
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
-                openTagMenu(element, event, element.getAttribute("data-label"))
+                openTagMenu(element, event, element.getAttribute("data-label"));
             },
             blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
             topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'

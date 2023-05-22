@@ -12,6 +12,7 @@ import {disabledProtyle} from "../protyle/util/onGet";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";
+import {moveResize} from "../dialog/moveResize";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -66,134 +67,6 @@ export class BlockPanel {
             }
         }
         document.body.insertAdjacentElement("beforeend", this.element);
-        this.element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
-            document.querySelectorAll(".block__popover--top").forEach(item => {
-                item.classList.remove("block__popover--top");
-            });
-            if (this.element && window.siyuan.blockPanels.length > 1) {
-                this.element.classList.add("block__popover--top");
-            }
-            if (hasClosestByClassName(event.target, "block__icon")) {
-                return;
-            }
-            let iconsElement = hasClosestByClassName(event.target, "block__icons");
-            let type = "move";
-            let x = event.clientX - parseInt(this.element.style.left);
-            let y = event.clientY - parseInt(this.element.style.top);
-            const height = this.element.clientHeight;
-            const width = this.element.clientWidth;
-            if (!iconsElement) {
-                x = event.clientX;
-                y = event.clientY;
-                iconsElement = hasClosestByClassName(event.target, "block__rd") ||
-                    hasClosestByClassName(event.target, "block__r") ||
-                    hasClosestByClassName(event.target, "block__rt") ||
-                    hasClosestByClassName(event.target, "block__d") ||
-                    hasClosestByClassName(event.target, "block__l") ||
-                    hasClosestByClassName(event.target, "block__ld") ||
-                    hasClosestByClassName(event.target, "block__lt") ||
-                    hasClosestByClassName(event.target, "block__t");
-                if (!iconsElement) {
-                    return;
-                }
-                type = iconsElement.className;
-            }
-            const documentSelf = document;
-            this.element.style.userSelect = "none";
-
-            documentSelf.ondragstart = () => false;
-
-            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                if (!this.element) {
-                    return;
-                }
-                if (type === "move") {
-                    let positionX = moveEvent.clientX - x;
-                    let positionY = moveEvent.clientY - y;
-                    if (positionX > window.innerWidth - width) {
-                        positionX = window.innerWidth - width;
-                    }
-                    if (positionY > window.innerHeight - height) {
-                        positionY = window.innerHeight - height;
-                    }
-                    this.element.style.left = Math.max(positionX, 0) + "px";
-                    this.element.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
-                } else {
-                    if (type === "block__r" &&
-                        moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth) {
-                        this.element.style.width = moveEvent.clientX - x + width + "px";
-                    } else if (type === "block__d" &&
-                        moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
-                        this.element.style.height = moveEvent.clientY - y + height + "px";
-                        this.element.style.maxHeight = "";
-                    } else if (type === "block__t" &&
-                        moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
-                        this.element.style.top = moveEvent.clientY + "px";
-                        this.element.style.maxHeight = "";
-                        this.element.style.height = (y - moveEvent.clientY + height) + "px";
-                    } else if (type === "block__l" &&
-                        moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200) {
-                        this.element.style.left = moveEvent.clientX + "px";
-                        this.element.style.width = (x - moveEvent.clientX + width) + "px";
-                    } else if (type === "block__rd" &&
-                        moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth &&
-                        moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
-                        this.element.style.height = moveEvent.clientY - y + height + "px";
-                        this.element.style.maxHeight = "";
-                        this.element.style.width = moveEvent.clientX - x + width + "px";
-                    } else if (type === "block__rt" &&
-                        moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth &&
-                        moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
-                        this.element.style.width = moveEvent.clientX - x + width + "px";
-                        this.element.style.top = moveEvent.clientY + "px";
-                        this.element.style.maxHeight = "";
-                        this.element.style.height = (y - moveEvent.clientY + height) + "px";
-                    } else if (type === "block__lt" &&
-                        moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200 &&
-                        moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
-                        this.element.style.left = moveEvent.clientX + "px";
-                        this.element.style.width = (x - moveEvent.clientX + width) + "px";
-                        this.element.style.top = moveEvent.clientY + "px";
-                        this.element.style.maxHeight = "";
-                        this.element.style.height = (y - moveEvent.clientY + height) + "px";
-                    } else if (type === "block__ld" &&
-                        moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200 &&
-                        moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
-                        this.element.style.left = moveEvent.clientX + "px";
-                        this.element.style.width = (x - moveEvent.clientX + width) + "px";
-                        this.element.style.height = moveEvent.clientY - y + height + "px";
-                        this.element.style.maxHeight = "";
-                    }
-                }
-            };
-
-            documentSelf.onmouseup = () => {
-                if (!this.element) {
-                    return;
-                }
-                if (window.siyuan.dragElement) {
-                    // 反向链接拖拽 https://ld246.com/article/1632915506502
-                    window.siyuan.dragElement.style.opacity = "";
-                    window.siyuan.dragElement = undefined;
-                }
-                this.element.style.userSelect = "auto";
-                documentSelf.onmousemove = null;
-                documentSelf.onmouseup = null;
-                documentSelf.ondragstart = null;
-                documentSelf.onselectstart = null;
-                documentSelf.onselect = null;
-                if (type !== "move") {
-                    this.editors.forEach(item => {
-                        setPadding(item.protyle);
-                    });
-                } else {
-                    const pinElement = this.element.firstElementChild.querySelector('[data-type="pin"]');
-                    pinElement.classList.add("block__icon--active");
-                    pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
-                    this.element.setAttribute("data-pin", "true");
-                }
-            };
-        });
 
         if (this.targetElement) {
             this.targetElement.style.cursor = "wait";
@@ -219,6 +92,13 @@ export class BlockPanel {
             }
         });
         this.element.addEventListener("click", (event) => {
+            document.querySelectorAll(".block__popover--top").forEach(item => {
+                item.classList.remove("block__popover--top");
+            });
+            if (this.element && window.siyuan.blockPanels.length > 1) {
+                this.element.classList.add("block__popover--top");
+            }
+
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
                 if (target.classList.contains("block__icon") || target.classList.contains("block__logo")) {
@@ -247,6 +127,17 @@ export class BlockPanel {
                 target = target.parentElement;
             }
         });
+        moveResize(this.element, (type: string) => {
+            if (type !== "move") {
+                this.editors.forEach(item => {
+                    setPadding(item.protyle);
+                });
+            }
+            const pinElement = this.element.firstElementChild.querySelector('[data-type="pin"]');
+            pinElement.classList.add("block__icon--active");
+            pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+            this.element.setAttribute("data-pin", "true");
+        })
         this.render();
     }
 
@@ -324,15 +215,15 @@ export class BlockPanel {
         let openHTML = "";
         /// #if !BROWSER
         if (this.nodeIds.length === 1) {
-            openHTML = `<span data-type="open" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg><use xlink:href="#iconOpenWindow"></use></svg></span>
+            openHTML = `<span data-type="open" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg><use xlink:href="#iconOpenWindow"></use></svg></span>
 <span class="fn__space"></span>`;
         }
         /// #endif
         let html = `<div class="block__icons block__icons--menu">
-    <span class="fn__space fn__flex-1"></span>${openHTML}
-    <span data-type="pin" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></span>
+    <span class="fn__space fn__flex-1 resize__move"></span>${openHTML}
+    <span data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="close" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></span>
+    <span data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.close}"><svg style="width: 10px"><use xlink:href="#iconClose"></use></svg></span>
 </div>
 <div class="block__content">`;
         if (this.nodeIds.length === 0) {
@@ -343,7 +234,7 @@ export class BlockPanel {
             });
         }
         if (html) {
-            html += '</div><div class="block__rd"></div><div class="block__ld"></div><div class="block__lt"></div><div class="block__rt"></div><div class="block__r"></div><div class="block__d"></div><div class="block__t"></div><div class="block__l"></div>';
+            html += '</div><div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>';
         }
         this.element.innerHTML = html;
         const observer = new IntersectionObserver((e) => {

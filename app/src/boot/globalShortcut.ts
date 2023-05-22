@@ -694,9 +694,6 @@ export const globalShortcut = (app: App) => {
                 if (item.targetElement && item.element.getAttribute("data-pin") === "false" &&
                     parseInt(item.element.getAttribute("data-level")) > (maxEditLevels[item.element.getAttribute("data-oid")] || 0)) {
                     item.destroy();
-                    if (item.esc) {
-                        item.esc();
-                    }
                     destroyBlock = true;
                     i--;
                 }

@@ -72,6 +72,15 @@ func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
 	return IsInFoldedHeading(heading, currentHeading)
 }
 
+func GetHeadingFold(nodes []*ast.Node) (ret []*ast.Node) {
+	for _, n := range nodes {
+		if "1" == n.IALAttr("heading-fold") {
+			ret = append(ret, n)
+		}
+	}
+	return
+}
+
 func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {
 	start := heading.Next
 	if nil == start {

@@ -1,4 +1,5 @@
 {
+  "enablePluginTip": "Avez-vous besoin d'activer ce plugin maintenant ? Vous pouvez l'activer, le désactiver ou le désinstaller plus tard dans [Téléchargé - Plugin]",
   "color": "Couleur",
   "confirmPassword": "J'ai déjà retenu le mot de passe",
   "passwordNoMatch": "Les mots de passe saisis deux fois ne correspondent pas",

@@ -1,4 +1,5 @@
 {
+  "enablePluginTip": "現在需要啟用該插件嗎？後續可以在 [已下載 - 插件] 中進行啟用、禁用或者卸載",
   "color": "顏色",
   "confirmPassword": "我已經牢記密碼了",
   "passwordNoMatch": "兩次輸入的密碼不一致",

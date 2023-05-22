@@ -1,11 +1,10 @@
-name: CI/CD For SiYuan
+name: CD For SiYuan
 
 on:
   push:
     tags:
       - '*-dev*'
   workflow_dispatch:
-  
 
 jobs:
 

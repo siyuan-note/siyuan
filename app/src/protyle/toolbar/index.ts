@@ -26,6 +26,9 @@ import {blockRender} from "../markdown/blockRender";
 /// #if !BROWSER
 import {openBy} from "../../editor/util";
 /// #endif
+/// if !MOBILE
+import {moveResize} from "../../dialog/moveResize";
+/// #endif
 import {fetchPost} from "../../util/fetch";
 import {isArrayEqual, isMobile} from "../../util/functions";
 import * as dayjs from "dayjs";
@@ -889,8 +892,10 @@ export class Toolbar {
             this.subElement.style.padding = "0";
         }
         this.subElement.innerHTML = `<div ${(isPin && this.subElement.firstElementChild.getAttribute("data-drag") === "true") ? 'data-drag="true"' : ""}><div class="block__icons block__icons--menu fn__flex">
-    ${title}
-    <span class="fn__flex-1 fn__space"></span>
+    <span class="fn__flex-1 resize__move">
+        ${title}
+    </span>
+    <span class="fn__space"></span>
     <button data-type="refresh" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${(isPin && !this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) ? "" : " block__icon--active"}${types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="before" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages["insert-before"]}"><svg><use xlink:href="#iconBefore"></use></svg></button>
@@ -1008,41 +1013,14 @@ export class Toolbar {
                 });
             }, Constants.TIMEOUT_LOAD);
         };
-        headerElement.addEventListener("mousedown", (event: MouseEvent) => {
-            if (hasClosestByClassName(event.target as HTMLElement, "block__icon")) {
-                return;
-            }
-            event.stopPropagation();
-            const documentSelf = document;
-            this.subElement.style.userSelect = "none";
-            const x = event.clientX - parseInt(this.subElement.style.left);
-            const y = event.clientY - parseInt(this.subElement.style.top);
-            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                let positionX = moveEvent.clientX - x;
-                let positionY = moveEvent.clientY - y;
-                if (positionX > window.innerWidth - this.subElement.clientWidth) {
-                    positionX = window.innerWidth - this.subElement.clientWidth;
-                }
-                if (positionY > window.innerHeight - this.subElement.clientHeight) {
-                    positionY = window.innerHeight - this.subElement.clientHeight;
-                }
-                this.subElement.style.left = Math.max(positionX, 0) + "px";
-                this.subElement.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
-                this.subElement.firstElementChild.setAttribute("data-drag", "true");
-            };
-            documentSelf.onmouseup = () => {
-                const pinElement = headerElement.querySelector('[data-type="pin"]');
-                pinElement.classList.add("block__icon--active");
-                pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
-                this.subElement.style.userSelect = "auto";
-                documentSelf.onmousemove = null;
-                documentSelf.onmouseup = null;
-                documentSelf.ondragstart = null;
-                documentSelf.onselectstart = null;
-                documentSelf.onselect = null;
-            };
-            return;
+        /// if !MOBILE
+        moveResize(this.subElement, () => {
+            const pinElement = headerElement.querySelector('[data-type="pin"]');
+            pinElement.classList.add("block__icon--active");
+            pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+            this.subElement.firstElementChild.setAttribute("data-drag", "true");
         });
+        /// #endif
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
         if (types.includes("NodeHTMLBlock")) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");

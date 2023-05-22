@@ -8,11 +8,13 @@ import {Constants} from "../constants";
 /// #if !BROWSER
 import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
+/// #if !MOBILE
+import {moveResize} from "../dialog/moveResize";
+/// #endif
 import {disabledProtyle} from "../protyle/util/onGet";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";
-import {moveResize} from "../dialog/moveResize";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -127,6 +129,7 @@ export class BlockPanel {
                 target = target.parentElement;
             }
         });
+        /// if !MOBILE
         moveResize(this.element, (type: string) => {
             if (type !== "move") {
                 this.editors.forEach(item => {
@@ -138,6 +141,7 @@ export class BlockPanel {
             pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
             this.element.setAttribute("data-pin", "true");
         })
+        /// #endif
         this.render();
     }
 

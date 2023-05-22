@@ -1,6 +1,8 @@
 import {genUUID} from "../util/genID";
-import {isMobile} from "../util/functions";
+/// if !MOBILE
 import {moveResize} from "./moveResize";
+/// #endif
+import {isMobile} from "../util/functions";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;

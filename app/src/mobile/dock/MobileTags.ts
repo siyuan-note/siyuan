@@ -2,12 +2,10 @@ import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {MenuItem} from "../../menus/Menu";
-import {Dialog} from "../../dialog";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {escapeHtml} from "../../util/escape";
 import {popSearch} from "../menu/search";
 import {Constants} from "../../constants";
 import {App} from "../../index";
+import {openTagMenu} from "../../menus/tag";
 
 export class MobileTags {
     public element: HTMLElement;
@@ -34,56 +32,32 @@ export class MobileTags {
         this.tree = new Tree({
             element: this.element.querySelector(".tagList") as HTMLElement,
             data: null,
-            click: (element: HTMLElement) => {
-                const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
-                if (actionElement) {
-                    const labelName = element.getAttribute("data-label");
-                    if (actionElement.getAttribute("data-type") === "edit") {
-                        const dialog = new Dialog({
-                            title: window.siyuan.languages.rename,
-                            content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="${labelName}"></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                            width: "92vw",
-                        });
-                        const btnsElement = dialog.element.querySelectorAll(".b3-button");
-                        btnsElement[0].addEventListener("click", () => {
-                            dialog.destroy();
-                        });
-                        const inputElement = dialog.element.querySelector("input");
-                        dialog.bindInput(inputElement, () => {
-                            (btnsElement[1] as HTMLButtonElement).click();
-                        });
-                        inputElement.focus();
-                        inputElement.select();
-                        btnsElement[1].addEventListener("click", () => {
-                            fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
-                        });
-                    } else {
-                        confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
-                            fetchPost("/api/tag/removeTag", {label: labelName});
-                        });
+            click: (element: HTMLElement, event?: MouseEvent) => {
+                const labelName = element.getAttribute("data-label");
+                if (event) {
+                    const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
+                    if (actionElement) {
+                        openTagMenu(actionElement.parentElement, event, labelName);
+                        return;
                     }
-                } else {
-                    const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-                    popSearch(app, {
-                        removed: searchOption.removed,
-                        sort: searchOption.sort,
-                        group: searchOption.group,
-                        hasReplace: false,
-                        method: 0,
-                        hPath: "",
-                        idPath: [],
-                        k: `#${element.getAttribute("data-label")}#`,
-                        r: "",
-                        page: 1,
-                        types: Object.assign({}, searchOption.types)
-                    });
                 }
+                const searchOption = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+                popSearch(app, {
+                    removed: searchOption.removed,
+                    sort: searchOption.sort,
+                    group: searchOption.group,
+                    hasReplace: false,
+                    method: 0,
+                    hPath: "",
+                    idPath: [],
+                    k: `#${labelName}#`,
+                    r: "",
+                    page: 1,
+                    types: Object.assign({}, searchOption.types)
+                });
             },
-            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action" data-type="edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="b3-list-item__action" data-type="remove"><svg><use xlink:href="#iconTrashcan"></use></svg></span>'
+            blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
+            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'
         });
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

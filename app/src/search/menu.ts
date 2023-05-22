@@ -10,7 +10,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 export const filterMenu = (config: ISearchOption, cb: () => void) => {
     const filterDialog = new Dialog({
         title: window.siyuan.languages.type,
-        content: `<div class="b3-dialog__content" style="height:calc(70vh - 45px);overflow: auto">
+        content: `<div class="b3-dialog__content">
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconMath"></use></svg>
         <span class="fn__space"></span>
@@ -125,6 +125,7 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
+        height: "70vh",
     });
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {

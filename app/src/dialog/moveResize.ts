@@ -4,10 +4,9 @@ import {Constants} from "../constants";
 export const moveResize = (element: HTMLElement, afterCB?: (type: string) => void) => {
     element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
         let iconsElement = hasClosestByClassName(event.target, "resize__move");
-        let x = event.clientX - parseInt(element.style.left);
-        let y = event.clientY - parseInt(element.style.top);
-        const height = element.clientHeight;
-        const width = element.clientWidth;
+        let x: number
+        let y: number
+        const elementRect = element.getBoundingClientRect();
         if (!iconsElement) {
             x = event.clientX;
             y = event.clientY;
@@ -20,13 +19,24 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
                 hasClosestByClassName(event.target, "resize__lt") ||
                 hasClosestByClassName(event.target, "resize__t");
 
+        } else {
+            x = event.clientX - elementRect.left;
+            y = event.clientY - elementRect.top;
         }
         if (!iconsElement) {
             return;
         }
+        const height = element.clientHeight;
+        const width = element.clientWidth;
         const type = iconsElement.className.split("resize__")[1].split(" ")[0];
         const documentSelf = document;
         element.style.userSelect = "none";
+        if (element.classList.contains("b3-dialog__container") && element.parentElement.style.display !== "block") {
+            element.parentElement.style.display = "block";
+            element.style.left = elementRect.left + "px";
+            element.style.top = elementRect.top + "px";
+            element.style.width = elementRect.width + "px";
+        }
 
         documentSelf.ondragstart = () => false;
 

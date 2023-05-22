@@ -15,7 +15,7 @@ import {ai} from "./ai";
 import {flashcard} from "./flashcard";
 import {App} from "../index";
 
-export const genItemPanel = (type: string, containerElement:Element, app: App) => {
+export const genItemPanel = (type: string, containerElement: Element, app: App) => {
     switch (type) {
         case "filetree":
             containerElement.innerHTML = fileTree.genHTML();
@@ -82,7 +82,7 @@ export const genItemPanel = (type: string, containerElement:Element, app: App) =
     }
 };
 
-export const openSetting = (app:App) => {
+export const openSetting = (app: App) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector(".config__tab-container")) {
             item.destroy();
@@ -125,6 +125,7 @@ export const openSetting = (app:App) => {
   <div class="config__tab-container fn__none" data-name="about"></div>
 </div>`,
         width: "90vw",
+        height: "90vh",
     });
 
     initConfigSearch(dialog.element, app);

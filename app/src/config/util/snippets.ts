@@ -45,29 +45,28 @@ export const openSnippets = () => {
         });
         const dialog = new Dialog({
             width: "70vw",
-            content: `<div style="height: 60vh;" class="fn__flex-column">
-    <div class="layout-tab-bar fn__flex fn__flex-shrink" style="border-radius: 4px 4px 0 0">
-        <div data-type="css" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">CSS</span><span class="fn__flex-1"></span></div>
-        <div data-type="js" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">JS</span><span class="fn__flex-1"></span></div>
-    </div>
-    <div class="fn__flex-1" style="overflow:auto;padding: 16px 24px">
-        <div>
-            ${cssHTML}
-            <div class="fn__flex">
-                <div class="fn__flex-1"></div>
-                <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetCSS">
-                    <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} CSS
-                </button>
-            </div>
+            height: "80vh",
+            content: `<div class="layout-tab-bar fn__flex fn__flex-shrink" style="border-radius: 4px 4px 0 0">
+    <div data-type="css" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">CSS</span><span class="fn__flex-1"></span></div>
+    <div data-type="js" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">JS</span><span class="fn__flex-1"></span></div>
+</div>
+<div class="fn__flex-1" style="overflow:auto;padding: 16px 24px">
+    <div>
+        ${cssHTML}
+        <div class="fn__flex">
+            <div class="fn__flex-1"></div>
+            <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetCSS">
+                <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} CSS
+            </button>
         </div>
-        <div class="fn__none">
-            ${jsHTML}
-            <div class="fn__flex">
-                <div class="fn__flex-1"></div>
-                <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetJS">
-                    <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} JS
-                </button>
-            </div>
+    </div>
+    <div class="fn__none">
+        ${jsHTML}
+        <div class="fn__flex">
+            <div class="fn__flex-1"></div>
+            <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="addCodeSnippetJS">
+                <svg><use xlink:href="#iconAdd"></use></svg> ${window.siyuan.languages.addAttr} JS
+            </button>
         </div>
     </div>
 </div>

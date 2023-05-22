@@ -104,7 +104,7 @@ export const openSearch = async (options: {
         sort: localData.sort,
         types: Object.assign({}, localData.types),
         page:  options.key ? 1 : localData.page
-    }, dialog.element.querySelector(".b3-dialog__container").lastElementChild, () => {
+    }, dialog.element.querySelector(".b3-dialog__body"), () => {
         dialog.destroy({focus: "false"});
     });
     // 搜索面板层级需高于 201（.protyle-hint） 且小于205（.block__popover）

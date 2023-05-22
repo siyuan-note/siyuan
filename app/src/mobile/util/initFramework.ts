@@ -66,7 +66,7 @@ export const initFramework = (app: App) => {
                     if (!bookmark) {
                         bookmark = new MobileBookmarks(app);
                     } else {
-                        backlink.update();
+                        bookmark.update();
                     }
                 } else if (type === "sidebar-tag-tab") {
                     if (!tag) {

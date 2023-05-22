@@ -36,7 +36,12 @@ export const newDailyNote = () => {
         return;
     }
     const localNotebookId = window.siyuan.storage[Constants.LOCAL_DAILYNOTEID];
-    if (localNotebookId && getNotebookName(localNotebookId) && !isMobile()) {
+    const localNotebookIsOpen = window.siyuan.notebooks.find((item) => {
+        if (item.id === localNotebookId && !item.closed) {
+            return true;
+        }
+    });
+    if (localNotebookId && localNotebookIsOpen && !isMobile()) {
         fetchPost("/api/filetree/createDailyNote", {
             notebook: localNotebookId,
             app: Constants.SIYUAN_APPID,

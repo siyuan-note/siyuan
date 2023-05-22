@@ -57,9 +57,18 @@
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
   }
 
+  &__body {
+    overflow: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
   &__content {
     padding: 16px 24px;
     word-break: break-all;
+    flex: 1;
+    overflow: auto;
   }
 
   &__action {

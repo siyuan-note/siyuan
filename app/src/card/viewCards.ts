@@ -21,8 +21,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         const dialog = new Dialog({
             content: `<div class="fn__flex-column" style="height: 100%">
     <div class="block__icons">
-        <span class="fn__flex-center">${escapeHtml(title)}</span>
-        <div class="fn__flex-1"></div>
+        <span class="fn__flex-1 fn__flex-center resize__move">${escapeHtml(title)}</span>
         <span class="fn__space"></span>
         <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
         <span class="fn__space"></span>

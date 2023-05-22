@@ -38,7 +38,7 @@ export const genCardHTML = (options: {
             <svg><use xlink:href="#iconRiffCard"></use></svg>
         </div>
         <span class="fn__space"></span>
-        <span class="fn__flex-1 fn__flex-center">${window.siyuan.languages.riffCard}</span>`}
+        <span class="fn__flex-1 fn__flex-center resize__move">${window.siyuan.languages.riffCard}</span>`}
         <span class="fn__space"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.blocks.length === 0 ? " fn__none" : ""}">1/${options.blocks.length}</span></div>
         <div class="fn__space"></div>

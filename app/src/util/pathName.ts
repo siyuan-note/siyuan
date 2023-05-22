@@ -142,20 +142,19 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     const dialog = new Dialog({
         title: `${title || window.siyuan.languages.move}
 <div style="max-height: 16px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>`,
-        content: `<div>
-    <div class="b3-form__icon" style="margin: 8px">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input class="b3-text-field fn__block b3-form__icon-input" value="" placeholder="${window.siyuan.languages.search}">
-    </div>
-    <ul id="foldList" class="fn__none b3-list b3-list--background${isMobile() ? " b3-list--mobile" : ""}" style="height: 50vh;overflow: auto;position: relative"></ul>
-    <div id="foldTree" class="${isMobile() ? "b3-list--mobile" : ""}" style="height: 50vh;overflow: auto;position: relative"></div>
-    <div class="fn__hr"></div>
+        content: `<div class="b3-form__icon" style="margin: 8px">
+    <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+    <input class="b3-text-field fn__block b3-form__icon-input" value="" placeholder="${window.siyuan.languages.search}">
 </div>
+<ul id="foldList" class="fn__flex-1 fn__none b3-list b3-list--background${isMobile() ? " b3-list--mobile" : ""}" style="overflow: auto;position: relative"></ul>
+<div id="foldTree" class="fn__flex-1${isMobile() ? " b3-list--mobile" : ""}" style="overflow: auto;position: relative"></div>
+<div class="fn__hr"></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: isMobile() ? "92vw" : "50vw",
+        height: isMobile() ? "80vh" : "70vh",
         destroyCallback() {
             if (range) {
                 focusByRange(range);

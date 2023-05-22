@@ -18,6 +18,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
     const id = element.getAttribute("data-node-id");
     if (!id && !window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconEdit",
             label: window.siyuan.languages.rename,
             click: () => {
                 const oldBookmark = element.querySelector(".b3-list-item__text").textContent;

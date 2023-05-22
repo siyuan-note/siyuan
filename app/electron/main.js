@@ -134,8 +134,8 @@ const showErrorWindow = (title, content) => {
         errorHTMLPath = path.join(appDir, "electron", "error.html");
     }
     const errWindow = new BrowserWindow({
-        width: screen.getPrimaryDisplay().size.width / 2,
-        height: screen.getPrimaryDisplay().workAreaSize.height / 2,
+        width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
+        height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
         frame: false,
         icon: path.join(appDir, "stage", "icon-large.png"),
         webPreferences: {
@@ -179,25 +179,30 @@ const writeLog = (out) => {
 };
 
 const boot = () => {
+    let windowStateInitialized = true;
     // 恢复主窗体状态
     let oldWindowState = {};
     try {
         oldWindowState = JSON.parse(fs.readFileSync(windowStatePath, "utf8"));
+        if (!oldWindowState.x) {
+            windowStateInitialized = false;
+        }
     } catch (e) {
         fs.writeFileSync(windowStatePath, "{}");
+        windowStateInitialized = false;
     }
     let defaultWidth;
     let defaultHeight;
     let workArea;
     try {
-        defaultWidth = screen.getPrimaryDisplay().size.width;
-        defaultHeight = screen.getPrimaryDisplay().workAreaSize.height;
+        defaultWidth = Math.floor(screen.getPrimaryDisplay().size.width * 0.8);
+        defaultHeight = Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8);
         workArea = screen.getPrimaryDisplay().workArea;
     } catch (e) {
         console.error(e);
     }
     const windowState = Object.assign({}, {
-        isMaximized: true,
+        isMaximized: false,
         fullscreen: false,
         isDevToolsOpened: false,
         x: 0,
@@ -244,8 +249,6 @@ const boot = () => {
         height: windowState.height,
         minWidth: 493,
         minHeight: 376,
-        x,
-        y,
         fullscreenable: true,
         fullscreen: windowState.fullscreen,
         trafficLightPosition: {x: 8, y: 8},
@@ -260,6 +263,7 @@ const boot = () => {
         titleBarStyle: "hidden",
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
+    windowStateInitialized? currentWindow.setPosition(x, y): currentWindow.center();
     require("@electron/remote/main").enable(currentWindow.webContents);
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron";
 
@@ -396,8 +400,8 @@ const showWindow = (wnd) => {
 const initKernel = (workspace, port, lang) => {
     return new Promise(async (resolve) => {
         bootWindow = new BrowserWindow({
-            width: screen.getPrimaryDisplay().size.width / 2,
-            height: screen.getPrimaryDisplay().workAreaSize.height / 2,
+            width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
+            height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
             frame: false,
             icon: path.join(appDir, "stage", "icon-large.png"),
             transparent: "linux" !== process.platform,
@@ -799,8 +803,8 @@ app.whenReady().then(() => {
 
     if (firstOpen) {
         const firstOpenWindow = new BrowserWindow({
-            width: screen.getPrimaryDisplay().size.width * 0.6,
-            height: screen.getPrimaryDisplay().workAreaSize.height * 0.8,
+            width: Math.floor(screen.getPrimaryDisplay().size.width * 0.6),
+            height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
             frame: false,
             icon: path.join(appDir, "stage", "icon-large.png"),
             transparent: "linux" !== process.platform,

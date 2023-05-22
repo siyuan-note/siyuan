@@ -1,4 +1,5 @@
 {
+  "enablePluginTip": "Do you need to enable this plugin now? You can enable, disable or uninstall it later in [Downloaded - Plugins]",
   "color": "Color",
   "confirmPassword": "I have already remembered the password",
   "passwordNoMatch": "The passwords entered twice do not match",

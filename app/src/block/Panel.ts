@@ -45,7 +45,7 @@ export class BlockPanel {
         this.isBacklink = options.isBacklink;
 
         this.element = document.createElement("div");
-        this.element.classList.add("block__popover", "block__popover--move", "block__popover--top");
+        this.element.classList.add("block__popover", "block__popover--top");
 
         const parentElement = hasClosestByClassName(this.targetElement, "block__popover", true);
         let level = 1;

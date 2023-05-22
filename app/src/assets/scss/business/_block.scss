@@ -23,91 +23,88 @@
       z-index: 206;
     }
 
-    &--move {
-      & > .block {
-        &__icons {
-          cursor: move;
-          border-radius: 4px 4px 0 0;
+    & > .block {
+      &__icons {
+        border-radius: 4px 4px 0 0;
 
-          .block__icon {
-            opacity: 1;
-          }
+        .block__icon {
+          opacity: 1;
         }
+      }
 
-        &__rd,
-        &__ld,
-        &__lt,
-        &__rt,
-        &__r,
-        &__l,
-        &__t,
-        &__d {
-          position: absolute;
-        }
+      &__rd,
+      &__ld,
+      &__lt,
+      &__rt,
+      &__r,
+      &__l,
+      &__t,
+      &__d {
+        position: absolute;
+      }
 
-        &__rd {
-          height: 16px;
-          width: 16px;
-          cursor: nwse-resize;
-          right: -8px;
-          bottom: -8px;
-        }
+      &__rd {
+        height: 16px;
+        width: 16px;
+        cursor: nwse-resize;
+        right: -8px;
+        bottom: -8px;
+      }
 
-        &__lt {
-          height: 16px;
-          width: 16px;
-          cursor: nwse-resize;
-          left: -8px;
-          top: -8px;
-        }
+      &__lt {
+        height: 16px;
+        width: 16px;
+        cursor: nwse-resize;
+        left: -8px;
+        top: -8px;
+      }
 
-        &__ld {
-          height: 16px;
-          width: 16px;
-          cursor: nesw-resize;
-          left: -8px;
-          bottom: -8px;
-        }
+      &__ld {
+        height: 16px;
+        width: 16px;
+        cursor: nesw-resize;
+        left: -8px;
+        bottom: -8px;
+      }
 
-        &__rt {
-          height: 16px;
-          width: 16px;
-          cursor: nesw-resize;
-          top: -8px;
-          right: -8px;
-        }
+      &__rt {
+        height: 16px;
+        width: 16px;
+        cursor: nesw-resize;
+        top: -8px;
+        right: -8px;
+      }
 
-        &__d {
-          height: 8px;
-          cursor: ns-resize;
-          left: 8px;
-          right: 8px;
-          bottom: -8px;
-        }
+      &__d {
+        height: 8px;
+        cursor: ns-resize;
+        left: 8px;
+        right: 8px;
+        bottom: -8px;
+      }
 
-        &__t {
-          height: 8px;
-          cursor: ns-resize;
-          left: 8px;
-          right: 8px;
-          top: -8px;
-        }
+      &__t {
+        height: 8px;
+        cursor: ns-resize;
+        left: 8px;
+        right: 8px;
+        top: -8px;
+      }
 
-        &__r {
-          width: 8px;
-          cursor: ew-resize;
-          top: 8px;
-          right: -8px;
-          bottom: 8px;
-        }
+      &__r {
+        width: 8px;
+        cursor: ew-resize;
+        top: 8px;
+        right: -8px;
+        bottom: 8px;
+      }
 
-        &__l {
-          width: 8px;
-          cursor: ew-resize;
-          top: 8px;
-          left: -8px;
-          bottom: 8px;
-        }
+      &__l {
+        width: 8px;
+        cursor: ew-resize;
+        top: 8px;
+        left: -8px;
+        bottom: 8px;
       }
     }
   }
@@ -172,7 +169,6 @@
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-icon-hover);
     }
-
 
     &--show {
       opacity: 1;

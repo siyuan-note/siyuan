@@ -56,7 +56,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	golang.org/x/image v0.7.0
-	golang.org/x/mobile v0.0.0-20220722155234-aaac322e2105
+	golang.org/x/mobile v0.0.0-20230427221453-e8d11dd0ba41
 	golang.org/x/mod v0.10.0
 	golang.org/x/text v0.9.0
 )

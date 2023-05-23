@@ -411,6 +411,13 @@ export class Title {
 ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`
             }).element);
             window.siyuan.menus.menu.popup(position);
+            this.app?.plugins?.forEach((plugin) => {
+                plugin.eventBus.emit("click-editortitleicon", {
+                    protyle,
+                    menu: window.siyuan.menus.menu,
+                    data: response.data,
+                });
+            });
         });
     }
 

@@ -171,6 +171,36 @@ func readDir(c *gin.Context) {
 	ret.Data = files
 }
 
+func renameFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	filePath := arg["path"].(string)
+	newPath := arg["newPath"].(string)
+	filePath = filepath.Join(util.WorkspaceDir, filePath)
+	_, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		c.Status(404)
+		return
+	}
+	if nil != err {
+		logging.LogErrorf("stat [%s] failed: %s", filePath, err)
+		c.Status(500)
+		return
+	}
+
+	if err = filelock.Rename(filePath, newPath); nil != err {
+		c.Status(500)
+		return
+	}
+}
+
 func removeFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

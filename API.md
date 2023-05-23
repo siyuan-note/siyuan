@@ -42,6 +42,7 @@
     * [Get file](#Get-file)
     * [Put file](#Put-file)
     * [Remove file](#Remove-file)
+    * [Rename file](#Rename-file)
     * [List files](#List-files)
 * [Export](#Export)
     * [Export Markdown](#Export-Markdown)
@@ -993,6 +994,29 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
     * `path`: the file path under the workspace path
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### Rename file
+
+* `/api/file/renameFile`
+* Parameters
+
+  ```json
+  {
+    "path": "/data/assets/image-20230523085812-k3o9t32.png",
+    "newPath": "/data/assets/test-20230523085812-k3o9t32.png"
+  }
+  ```
+  * `path`: the file path under the workspace path
+  * `newPath`: the new file path under the workspace path
 * Return value
 
   ```json

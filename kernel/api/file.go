@@ -182,7 +182,6 @@ func renameFile(c *gin.Context) {
 	}
 
 	filePath := arg["path"].(string)
-	newPath := arg["newPath"].(string)
 	filePath = filepath.Join(util.WorkspaceDir, filePath)
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
@@ -194,6 +193,9 @@ func renameFile(c *gin.Context) {
 		c.Status(500)
 		return
 	}
+
+	newPath := arg["newPath"].(string)
+	newPath = filepath.Join(util.WorkspaceDir, newPath)
 
 	if err = filelock.Rename(filePath, newPath); nil != err {
 		logging.LogErrorf("rename file [%s] to [%s] failed: %s", filePath, newPath, err)

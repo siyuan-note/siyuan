@@ -398,6 +398,7 @@ const newTab = (options: IOpenFileOptions) => {
             title: options.custom.title,
             callback(tab) {
                 tab.addModel(options.custom.fn({
+                    app: options.app,
                     tab,
                     data: options.custom.data
                 }));

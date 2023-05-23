@@ -323,7 +323,11 @@ declare interface IOpenFileOptions {
         title: string,
         icon: string,
         data?: any
-        fn?: (options: { tab: import("../layout/Tab").Tab, data: any }) => import("../layout/Model").Model,
+        fn?: (options: {
+            tab: import("../layout/Tab").Tab,
+            data: any,
+            app: import("../index").App
+        }) => import("../layout/Model").Model,
     }
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填

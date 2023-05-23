@@ -185,12 +185,13 @@ func renameFile(c *gin.Context) {
 	filePath = filepath.Join(util.WorkspaceDir, filePath)
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		c.Status(404)
+		ret.Code = 404
 		return
 	}
 	if nil != err {
 		logging.LogErrorf("stat [%s] failed: %s", filePath, err)
-		c.Status(500)
+		ret.Code = 500
+		ret.Msg = err.Error()
 		return
 	}
 
@@ -199,7 +200,8 @@ func renameFile(c *gin.Context) {
 
 	if err = filelock.Rename(filePath, newPath); nil != err {
 		logging.LogErrorf("rename file [%s] to [%s] failed: %s", filePath, newPath, err)
-		c.Status(500)
+		ret.Code = 500
+		ret.Msg = err.Error()
 		return
 	}
 }

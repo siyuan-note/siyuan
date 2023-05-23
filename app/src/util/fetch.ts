@@ -35,7 +35,7 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
                 code: response.status,
             };
         } else {
-            if (response.headers.get("content-type").indexOf("application/json") > -1) {
+            if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
                 return response.json();
             } else {
                 return response.text();

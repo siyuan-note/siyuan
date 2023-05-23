@@ -238,7 +238,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
 </div>`;
         if (dialog) {
             dialog.element.querySelector(".b3-dialog__header").innerHTML = window.siyuan.languages.cloudSyncDir;
-            dialog.element.querySelector(".b3-dialog__container").lastElementChild.innerHTML = listHTML;
+            dialog.element.querySelector(".b3-dialog__body").innerHTML = listHTML;
         } else {
             dialog = new Dialog({
                 title: window.siyuan.languages.cloudSyncDir,

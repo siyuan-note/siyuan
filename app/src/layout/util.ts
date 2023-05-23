@@ -256,7 +256,11 @@ const pushPluginDock = (app: App, dockItem: IDockTab[], position: TPluginDockPos
             });
         }
     });
-    dockItem.forEach(existSubItem => {
+    dockItem.forEach((existSubItem, index) => {
+        if (!["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink"].includes(existSubItem.type)) {
+            dockItem.splice(index, 1);
+            return;
+        }
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
             existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom;
@@ -944,7 +948,7 @@ export const newCenterEmptyTab = (app: App) => {
                 let target = event.target as HTMLElement;
                 while (target && !target.isEqualNode(tab.panelElement)) {
                     if (target.id === "editorEmptySearch") {
-                        openSearch( {
+                        openSearch({
                             app,
                             hotkey: window.siyuan.config.keymap.general.globalSearch.custom,
                         });

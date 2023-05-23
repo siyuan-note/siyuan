@@ -196,6 +196,7 @@ func renameFile(c *gin.Context) {
 	}
 
 	if err = filelock.Rename(filePath, newPath); nil != err {
+		logging.LogErrorf("rename file [%s] to [%s] failed: %s", filePath, newPath, err)
 		c.Status(500)
 		return
 	}
@@ -225,6 +226,7 @@ func removeFile(c *gin.Context) {
 	}
 
 	if err = filelock.Remove(filePath); nil != err {
+		logging.LogErrorf("remove [%s] failed: %s", filePath, err)
 		c.Status(500)
 		return
 	}

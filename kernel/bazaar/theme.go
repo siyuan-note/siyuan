@@ -64,8 +64,12 @@ func Themes() (ret []*Theme) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		theme.URL = strings.TrimSuffix(theme.URL, "/")
 
+		if disallowDisplayBazaarPackage(theme.MinAppVersion) {
+			return
+		}
+
+		theme.URL = strings.TrimSuffix(theme.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		theme.RepoURL = "https://github.com/" + repoURLHash[0]
 		theme.RepoHash = repoURLHash[1]

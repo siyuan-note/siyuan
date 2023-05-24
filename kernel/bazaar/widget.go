@@ -63,8 +63,12 @@ func Widgets() (widgets []*Widget) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		widget.URL = strings.TrimSuffix(widget.URL, "/")
 
+		if disallowDisplayBazaarPackage(widget.MinAppVersion) {
+			return
+		}
+
+		widget.URL = strings.TrimSuffix(widget.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		widget.RepoURL = "https://github.com/" + repoURLHash[0]
 		widget.RepoHash = repoURLHash[1]

@@ -63,8 +63,12 @@ func Templates() (templates []*Template) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		template.URL = strings.TrimSuffix(template.URL, "/")
 
+		if disallowDisplayBazaarPackage(template.MinAppVersion) {
+			return
+		}
+
+		template.URL = strings.TrimSuffix(template.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		template.RepoURL = "https://github.com/" + repoURLHash[0]
 		template.RepoHash = repoURLHash[1]

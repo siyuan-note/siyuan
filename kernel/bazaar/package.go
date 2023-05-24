@@ -19,6 +19,7 @@ package bazaar
 import (
 	"bytes"
 	"errors"
+	"golang.org/x/mod/semver"
 	"os"
 	"path/filepath"
 	"strings"
@@ -64,14 +65,14 @@ type Funding struct {
 }
 
 type Package struct {
-	Author      string       `json:"author"`
-	URL         string       `json:"url"`
-	Version     string       `json:"version"`
-	DisplayName *DisplayName `json:"displayName"`
-	Description *Description `json:"description"`
-	Readme      *Readme      `json:"readme"`
-	Funding     *Funding     `json:"funding"`
-	I18N        []string     `json:"i18n"`
+	Author        string       `json:"author"`
+	URL           string       `json:"url"`
+	Version       string       `json:"version"`
+	MinAppVersion string       `json:"minAppVersion"`
+	DisplayName   *DisplayName `json:"displayName"`
+	Description   *Description `json:"description"`
+	Readme        *Readme      `json:"readme"`
+	Funding       *Funding     `json:"funding"`
 
 	PreferredFunding string `json:"preferredFunding"`
 	PreferredName    string `json:"preferredName"`
@@ -648,4 +649,15 @@ func getBazaarIndex() map[string]*bazaarPackage {
 	}
 	bazaarIndexCacheTime = now
 	return cachedBazaarIndex
+}
+
+// defaultMinAppVersion 如果集市包中缺失 minAppVersion 项，则使用该值作为最低支持的版本号，小于该版本号时不显示集市包
+// Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330
+const defaultMinAppVersion = "2.9.0"
+
+func disallowDisplayBazaarPackage(minAppVersion string) bool {
+	if "" == minAppVersion { // 目前暂时放过所有不带 minAppVersion 的集市包，后续版本会使用 defaultMinAppVersion
+		return false
+	}
+	return 0 > semver.Compare("v"+minAppVersion, "v"+util.Ver)
 }

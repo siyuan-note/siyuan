@@ -64,8 +64,12 @@ func Plugins() (plugins []*Plugin) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
 
+		if disallowDisplayBazaarPackage(plugin.MinAppVersion) {
+			return
+		}
+
+		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		plugin.RepoURL = "https://github.com/" + repoURLHash[0]
 		plugin.RepoHash = repoURLHash[1]

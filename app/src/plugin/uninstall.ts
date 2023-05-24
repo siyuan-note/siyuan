@@ -2,6 +2,7 @@ import {App} from "../index";
 import {Plugin} from "../plugin";
 import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
+import {Constants} from "../constants";
 
 export const uninstall = (app: App, name: string) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -43,11 +44,14 @@ export const uninstall = (app: App, name: string) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
-            exportLayout({
-                reload: false,
-                onlyData: false,
-                errorExit: false
-            });
+
+            setTimeout(() => {
+                exportLayout({
+                    reload: false,
+                    onlyData: false,
+                    errorExit: false
+                });
+            }, Constants.TIMEOUT_LOAD); // 移除页签时切换到新的文档页签，需等待新页签初始化完成，才有 editor.protyle.block 等数据
             return true;
         }
     });

@@ -478,7 +478,7 @@ export const globalShortcut = (app: App) => {
                         rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`;
                         icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
                     } else if (initData) {
-                        const initDataObj = JSON.parse(initData)
+                        const initDataObj = JSON.parse(initData);
                         if (initDataObj.instance === "Editor") {
                             rootId = ` data-node-id="${initDataObj.rootId}"`;
                             icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);

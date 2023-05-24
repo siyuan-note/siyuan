@@ -65,23 +65,23 @@ export class Dock {
         this.position = options.position;
         this.pin = options.data.pin;
         this.data = {};
-        let showDock = false
+        let showDock = false;
         if (options.data.data.length !== 0) {
             if (!showDock) {
                 options.data.data[0].find(item => {
                     if (TYPES.includes(item.type)) {
-                        showDock = true
-                        return true
+                        showDock = true;
+                        return true;
                     }
-                })
+                });
             }
             if (!showDock && options.data.data[1]) {
                 options.data.data[1].find(item => {
                     if (TYPES.includes(item.type)) {
-                        showDock = true
-                        return true
+                        showDock = true;
+                        return true;
                     }
-                })
+                });
             }
         }
         if (!showDock) {

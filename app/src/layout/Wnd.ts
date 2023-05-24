@@ -434,7 +434,7 @@ export class Wnd {
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
             if (initData) {
-                currentTab.addModel(newModelByInitData(this.app, currentTab, JSON.parse(initData)))
+                currentTab.addModel(newModelByInitData(this.app, currentTab, JSON.parse(initData)));
                 currentTab.headElement.removeAttribute("data-initdata");
                 return;
             }

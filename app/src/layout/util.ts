@@ -406,6 +406,29 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     app.plugins.forEach(item => {
         afterLoadPlugin(item);
     });
+    // 移除没有插件的 tab
+    document.querySelectorAll('li[data-type="tab-header"]').forEach((item: HTMLElement) => {
+        const initData = item.getAttribute("data-initdata")
+        if (initData) {
+            const initDataObj = JSON.parse(initData);
+            if (initDataObj.instance === "Custom") {
+                let hasPlugin = false;
+                app.plugins.find(plugin => {
+                    if (Object.keys(plugin.models).includes(initDataObj.customModelType)) {
+                        hasPlugin = true
+                        return true
+                    }
+                });
+                if (!hasPlugin) {
+                    const tabId = item.getAttribute("data-id")
+                    const tab = getInstanceById(tabId) as Tab
+                    if (tab) {
+                        tab.parent.removeTab(tabId, false, false, false);
+                    }
+                }
+            }
+        }
+    });
     const idZoomIn = getIdZoomInByPath();
     if (idZoomIn.id) {
         openFileById({

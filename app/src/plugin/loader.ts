@@ -91,6 +91,7 @@ const updateDock = (dockItem: IDockTab[], index: number, plugin: Plugin, type: s
                 plugin.docks[tabItem.type].config.position = index === 0 ? "BottomLeft" : "BottomRight";
             }
             plugin.docks[tabItem.type].config.index = tabIndex;
+            plugin.docks[tabItem.type].config.show = tabItem.show;
             plugin.docks[tabItem.type].config.size = tabItem.size;
         }
     })
@@ -126,7 +127,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             window.siyuan.layout.leftDock.genButton([{
                 type: key,
                 size: dock.config.size,
-                show: false,
+                show: dock.config.show,
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
@@ -135,7 +136,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             window.siyuan.layout.bottomDock.genButton([{
                 type: key,
                 size: dock.config.size,
-                show: false,
+                show: dock.config.show,
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
@@ -144,7 +145,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             window.siyuan.layout.rightDock.genButton([{
                 type: key,
                 size: dock.config.size,
-                show: false,
+                show: dock.config.show,
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey

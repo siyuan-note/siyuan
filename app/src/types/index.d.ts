@@ -314,6 +314,7 @@ declare interface IPluginDockTab {
     hotkey?: string,
     title: string,
     index?: number
+    show?: boolean
 }
 
 declare interface IOpenFileOptions {

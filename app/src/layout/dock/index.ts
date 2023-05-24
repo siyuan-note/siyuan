@@ -75,7 +75,7 @@ export class Dock {
                     }
                 })
             }
-            if (!showDock) {
+            if (!showDock && options.data.data[1]) {
                 options.data.data[1].find(item => {
                     if (TYPES.includes(item.type)) {
                         showDock = true
@@ -662,6 +662,13 @@ export class Dock {
                 }
             } else {
                 this.element.lastElementChild.innerHTML = html;
+            }
+        }
+
+        if (typeof tabIndex === "number") {
+            this.element.classList.remove("fn__none");
+            if (data[0].show) {
+                this.toggleModel(data[0].type, true);
             }
         }
     }

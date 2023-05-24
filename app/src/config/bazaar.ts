@@ -215,6 +215,12 @@ export const bazaar = {
 </div>`;
     },
     _genMyHTML(bazaarType: TBazaarType, app: App) {
+        const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
+        if (contentElement.getAttribute("data-loading") === "true" ||
+            contentElement.previousElementSibling.querySelector(`[data-type="my${bazaarType.replace(bazaarType[0], bazaarType[0].toUpperCase()).substring(0, bazaarType.length - 1)}"]`).classList.contains("b3-button--outline")) {
+            return;
+        }
+        contentElement.setAttribute("data-loading", "true");
         let url = "/api/bazaar/getInstalledTheme";
         if (bazaarType === "icons") {
             url = "/api/bazaar/getInstalledIcon";
@@ -226,6 +232,7 @@ export const bazaar = {
             url = "/api/bazaar/getInstalledPlugin";
         }
         fetchPost(url, {}, response => {
+            contentElement.removeAttribute("data-loading");
             let html = "";
             let showSwitch = false;
             if (["icons", "themes"].includes(bazaarType)) {
@@ -288,7 +295,7 @@ export const bazaar = {
 </div>`;
             });
             bazaar._data.downloaded = response.data.packages;
-            bazaar.element.querySelector("#configBazaarDownloaded").innerHTML = html ? html : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            contentElement.innerHTML = html ? html : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
     },
     _data: {
@@ -447,7 +454,9 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (["myTheme", "myTemplate", "myIcon", "myWidget", "myPlugin"].includes(type)) {
-                    if (target.classList.contains("b3-button--outline")) {
+                    const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
+                    if (target.classList.contains("b3-button--outline") &&
+                        !contentElement.getAttribute("data-loading")) {
                         target.parentElement.childNodes.forEach((item: HTMLElement) => {
                             if (item.nodeType !== 3 && item.classList.contains("b3-button")) {
                                 item.classList.add("b3-button--outline");

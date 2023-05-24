@@ -170,6 +170,9 @@ export class Plugin {
     }) {
         /// #if !MOBILE
         const type2 = this.name + options.type;
+        if (typeof options.config.index === "undefined") {
+            options.config.index = 1000;
+        }
         this.docks[type2] = {
             config: options.config,
             model: (arg: { tab: Tab }) => {

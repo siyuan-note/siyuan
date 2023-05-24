@@ -72,7 +72,7 @@ export class Plugin {
             iconElement.setAttribute("data-menu", "true");
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
             iconElement.addEventListener("click", options.callback);
-            iconElement.setAttribute("data-position", options.position );
+            iconElement.setAttribute("data-position", options.position);
         }
         this.topBarIcons.push(iconElement);
         return iconElement;

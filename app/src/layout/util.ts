@@ -37,6 +37,7 @@ import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {openRecentDocs} from "../business/openRecentDocs";
 import {App} from "../index";
+import {afterLoadPlugin} from "../plugin/loader";
 
 export const setPanelFocus = (element: Element) => {
     if (element.classList.contains("layout__tab--active") || element.classList.contains("layout__wnd--active")) {
@@ -239,55 +240,24 @@ export const exportLayout = (options: {
     });
 };
 
-const pushPluginDock = (app: App, dockItem: IDockTab[], position: TPluginDockPosition) => {
-    const needPushData: { [key: string]: IPluginDockTab } = {};
-    app.plugins.forEach((pluginItem) => {
-        let isExist = false;
-        dockItem.forEach(existSubItem => {
-            if (Object.keys(pluginItem.docks).includes(existSubItem.type)) {
-                isExist = true;
-            }
-        });
-        if (!isExist) {
-            Object.keys(pluginItem.docks).forEach(pluginDockKey => {
-                if (pluginItem.docks[pluginDockKey].config.position === position) {
-                    needPushData[pluginDockKey] = pluginItem.docks[pluginDockKey].config;
-                }
-            });
-        }
-    });
-    dockItem.forEach((existSubItem, index) => {
-        if (!["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink"].includes(existSubItem.type)) {
-            dockItem.splice(index, 1);
-            return;
-        }
+const initInternalDock = (dockItem: IDockTab[]) => {
+    dockItem.forEach((existSubItem) => {
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
             existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom;
         }
     });
-    Object.keys(needPushData).forEach(key => {
-        const item = needPushData[key];
-        dockItem.push({
-            type: key,
-            size: item.size,
-            show: false,
-            icon: item.icon,
-            hotkey: item.hotkey || "",
-            title: item.title,
-        });
-    });
 };
 
 const JSONToDock = (json: any, app: App) => {
-    json.left.data.forEach((existItem: IDockTab[], index: number) => {
-        pushPluginDock(app, existItem, index === 0 ? "LeftTop" : "LeftBottom");
+    json.left.data.forEach((existItem: IDockTab[]) => {
+        initInternalDock(existItem);
     });
-    json.right.data.forEach((existItem: IDockTab[], index: number) => {
-        pushPluginDock(app, existItem, index === 0 ? "RightTop" : "RightBottom");
+    json.right.data.forEach((existItem: IDockTab[]) => {
+        initInternalDock(existItem);
     });
-    json.bottom.data.forEach((existItem: IDockTab[], index: number) => {
-        pushPluginDock(app, existItem, index === 0 ? "BottomLeft" : "BottomRight");
+    json.bottom.data.forEach((existItem: IDockTab[]) => {
+        initInternalDock(existItem);
     });
     window.siyuan.layout.centerLayout = window.siyuan.layout.layout.children[0].children[1] as Layout;
     window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left, app});
@@ -472,21 +442,8 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             });
         }
         app.plugins.forEach(item => {
-            try {
-                item.onLayoutReady();
-            } catch (e) {
-                console.error(`plugin ${item.name} onLayoutReady error:`, e);
-            }
-
-            item.topBarIcons.forEach(element=> {
-                if (isMobile()) {
-                   document.querySelector("#menuAbout").after(element);
-                } else if (!isWindow()) {
-                    document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barSearch" : "drag")).before(element);
-                }
-            });
+            afterLoadPlugin(item);
         });
-        // 等待 tab、dock 完成后再 init Tab model，dock
     }, Constants.TIMEOUT_LOAD);
 };
 

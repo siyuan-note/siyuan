@@ -5,6 +5,7 @@ import {Plugin} from "./index";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {API} from "./API";
+import {isMobile, isWindow} from "../util/functions";
 
 const getObject = (key: string) => {
     const api = {
@@ -64,6 +65,61 @@ const loadPluginJS = (app: App, item: IPluginData) => {
 
 export const loadPlugin = (app: App, item: IPluginData) => {
     const plugin = loadPluginJS(app, item);
+    const styleElement = document.createElement("style");
+    styleElement.textContent = item.css;
+    document.head.append(styleElement);
+    afterLoadPlugin(plugin);
+    /// #if !MOBILE
+    exportLayout({
+        reload: false,
+        onlyData: false,
+        errorExit: false
+    });
+    /// #endif
+};
+
+
+const updateDock = (dockItem: IDockTab[], index: number, plugin: Plugin, type: string) => {
+    const dockKeys = Object.keys(plugin.docks)
+    dockItem.forEach((tabItem: IDockTab, tabIndex: number) => {
+        if (dockKeys.includes(tabItem.type)) {
+            if (type === "Left") {
+                plugin.docks[tabItem.type].config.position = index === 0 ? "LeftTop" : "LeftBottom";
+            } else if (type === "Right") {
+                plugin.docks[tabItem.type].config.position = index === 0 ? "RightTop" : "RightBottom";
+            } else if (type === "Bottom") {
+                plugin.docks[tabItem.type].config.position = index === 0 ? "BottomLeft" : "BottomRight";
+            }
+            plugin.docks[tabItem.type].config.index = tabIndex;
+            plugin.docks[tabItem.type].config.size = tabItem.size;
+        }
+    })
+}
+
+export const afterLoadPlugin = (plugin: Plugin) => {
+    try {
+        plugin.onLayoutReady();
+    } catch (e) {
+        console.error(`plugin ${plugin.name} onLayoutReady error:`, e);
+    }
+
+    plugin.topBarIcons.forEach(element => {
+        if (isMobile()) {
+            document.querySelector("#menuAbout").after(element);
+        } else if (!isWindow()) {
+            document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barSearch" : "drag")).before(element);
+        }
+    });
+
+    window.siyuan.config.uiLayout.left.data.forEach((dockItem: IDockTab[], index: number) => {
+        updateDock(dockItem, index, plugin, "Left")
+    })
+    window.siyuan.config.uiLayout.right.data.forEach((dockItem: IDockTab[], index: number) => {
+        updateDock(dockItem, index, plugin, "Right")
+    })
+    window.siyuan.config.uiLayout.bottom.data.forEach((dockItem: IDockTab[], index: number) => {
+        updateDock(dockItem, index, plugin, "Bottom")
+    })
     Object.keys(plugin.docks).forEach(key => {
         const dock = plugin.docks[key];
         if (dock.config.position.startsWith("Left")) {
@@ -74,7 +130,7 @@ export const loadPlugin = (app: App, item: IPluginData) => {
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
-            }], dock.config.position === "LeftBottom" ? 1 : 0, true);
+            }], dock.config.position === "LeftBottom" ? 1 : 0, dock.config.index);
         } else if (dock.config.position.startsWith("Bottom")) {
             window.siyuan.layout.bottomDock.genButton([{
                 type: key,
@@ -83,7 +139,7 @@ export const loadPlugin = (app: App, item: IPluginData) => {
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
-            }], dock.config.position === "BottomRight" ? 1 : 0, true);
+            }], dock.config.position === "BottomRight" ? 1 : 0, dock.config.index);
         } else if (dock.config.position.startsWith("Right")) {
             window.siyuan.layout.rightDock.genButton([{
                 type: key,
@@ -92,17 +148,8 @@ export const loadPlugin = (app: App, item: IPluginData) => {
                 icon: dock.config.icon,
                 title: dock.config.title,
                 hotkey: dock.config.hotkey
-            }], dock.config.position === "RightBottom" ? 1 : 0, true);
+            }], dock.config.position === "RightBottom" ? 1 : 0, dock.config.index);
         }
     });
-    const styleElement = document.createElement("style");
-    styleElement.textContent = item.css;
-    document.head.append(styleElement);
-    /// #if !MOBILE
-    exportLayout({
-        reload: false,
-        onlyData: false,
-        errorExit: false
-    });
-    /// #endif
-};
+    // 等待 tab 完成后再 init Tab model
+}

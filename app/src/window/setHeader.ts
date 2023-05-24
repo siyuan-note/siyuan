@@ -66,7 +66,9 @@ export const setModelsHash = () => {
             const initTab = tab.headElement.getAttribute("data-initdata");
             if (initTab) {
                 const initTabData = JSON.parse(initTab);
-                hash += initTabData.rootId + Constants.ZWSP;
+                if (initTabData.instance === "Editor") {
+                    hash += initTabData.rootId + Constants.ZWSP;
+                }
             }
         } else if (tab.model instanceof Editor) {
             hash += tab.model.editor.protyle.block.rootID + Constants.ZWSP;

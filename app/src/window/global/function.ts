@@ -17,7 +17,7 @@ export const switchTabById = (id: string) => {
             const initTab = tab.headElement.getAttribute("data-initdata");
             if (initTab) {
                 const initTabData = JSON.parse(initTab);
-                if (initTabData.rootId === id) {
+                if (initTabData.instance === "Editor" && initTabData.rootId === id) {
                     tab.parent.switchTab(tab.headElement);
                     return true;
                 }

@@ -436,7 +436,7 @@ export const globalShortcut = (app: App) => {
             if (event.key === "Shift") {
                 window.siyuan.shiftIsPressed = true;
                 if (!event.repeat) {
-                    showPopover(app,true);
+                    showPopover(app, true);
                 }
             } else {
                 window.siyuan.shiftIsPressed = false;
@@ -478,8 +478,11 @@ export const globalShortcut = (app: App) => {
                         rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`;
                         icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
                     } else if (initData) {
-                        rootId = ` data-node-id="${JSON.parse(initData).rootId}"`;
-                        icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
+                        const initDataObj = JSON.parse(initData)
+                        if (initDataObj.instance === "Editor") {
+                            rootId = ` data-node-id="${initDataObj.rootId}"`;
+                            icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
+                        }
                     }
                     tabHtml += `<li data-index="${index}" data-id="${item.id}"${rootId} class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;
                 });

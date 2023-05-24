@@ -265,7 +265,7 @@ const JSONToDock = (json: any, app: App) => {
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom, app});
 };
 
-export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd | Tab | Model, isStart = false) => {
+export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd | Tab | Model) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
         if (!layout) {
@@ -376,75 +376,51 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
             config: json.config
         }));
     } else if (json.instance === "Custom") {
-        if (json.customModelType === "siyuan-card") {
-            (layout as Tab).addModel(newCardModel({
-                app,
-                tab: (layout as Tab),
-                data: json.customModelData
-            }));
-        } else {
-            app.plugins.find(item => {
-                if (item.models[json.customModelType]) {
-                    (layout as Tab).addModel(item.models[json.customModelType]({
-                        tab: (layout as Tab),
-                        data: json.customModelData
-                    }));
-                    return true;
-                }
-            });
+        if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+            (layout as Tab).headElement.classList.add("item--unupdate");
         }
+        (layout as Tab).headElement.setAttribute("data-initdata", JSON.stringify(json));
     }
     if (json.children) {
         if (Array.isArray(json.children)) {
-            json.children.forEach((item: any, index: number) => {
-                JSONToCenter(app, item, layout ? child : window.siyuan.layout.layout, isStart);
-                if (item.instance === "Tab" && index === (json.children as ILayoutJSON[]).length - 1) {
-                    const activeTabElement = (child as Wnd).headersElement.querySelector('[data-init-active="true"]') as HTMLElement;
-                    if (activeTabElement) {
-                        if (window.siyuan.config.fileTree.closeTabsOnStart && isStart &&
-                            !item.pin && item.title) {
-                            // 启动时关闭所有页签就不应该再初始化它
-                        } else {
-                            activeTabElement.removeAttribute("data-init-active");
-                            (child as Wnd).switchTab(activeTabElement, false, false);
-                        }
-                    }
-                }
+            json.children.forEach((item: any) => {
+                JSONToCenter(app, item, layout ? child : window.siyuan.layout.layout);
             });
         } else {
-            JSONToCenter(app, json.children, child, isStart);
+            JSONToCenter(app, json.children, child);
         }
     }
 };
 
 export const JSONToLayout = (app: App, isStart: boolean) => {
-    JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined, isStart);
+    JSONToCenter(app, window.siyuan.config.uiLayout.layout, undefined);
     JSONToDock(window.siyuan.config.uiLayout, app);
     // 启动时不打开页签，需要移除没有钉住的页签
     if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
         getAllTabs().forEach(item => {
             if (item.headElement && !item.headElement.classList.contains("item--pin")) {
-                item.parent.removeTab(item.id);
+                item.parent.removeTab(item.id, false, false, false);
             }
         });
     }
+    app.plugins.forEach(item => {
+        afterLoadPlugin(item);
+    });
     const idZoomIn = getIdZoomInByPath();
-
-
-    setTimeout(() => {
-        // 启动时 layout 中有该文档，该文档还原会在此之后，因此需有延迟
-        if (idZoomIn.id) {
-            openFileById({
-                app,
-                id: idZoomIn.id,
-                action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                zoomIn: idZoomIn.isZoomIn
-            });
-        }
-        app.plugins.forEach(item => {
-            afterLoadPlugin(item);
+    if (idZoomIn.id) {
+        openFileById({
+            app,
+            id: idZoomIn.id,
+            action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+            zoomIn: idZoomIn.isZoomIn
         });
-    }, Constants.TIMEOUT_LOAD);
+    } else {
+        document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
+            item.removeAttribute("data-init-active");
+            const tab = getInstanceById(item.getAttribute("data-id")) as Tab
+            tab.parent.switchTab(item, false, false);
+        });
+    }
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, dropEditScroll = false) => {
@@ -706,22 +682,51 @@ export const copyTab = (app: App, tab: Tab) => {
                 }
             } else if (!tab.model && tab.headElement) {
                 const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
-                if (initData.scrollAttr) {
-                    initData.scrollAttr.rootId = initData.rootId;
+                if (initData) {
+                    // 历史数据兼容 2023-05-24
+                    if (initData.scrollAttr) {
+                        initData.scrollAttr.rootId = initData.rootId;
+                    }
+                    model = newModelByInitData(app, newTab, initData);
                 }
-                model = new Editor({
-                    app,
-                    tab: newTab,
-                    blockId: initData.blockId,
-                    mode: initData.mode,
-                    action: typeof initData.action === "string" ? [initData.action] : initData.action,
-                    scrollAttr: initData.scrollAttr,
-                });
             }
             newTab.addModel(model);
         }
     });
 };
+
+export const newModelByInitData = (app: App, tab: Tab, json: any) => {
+    let model: Model
+    if (json.instance === "Custom") {
+        if (json.customModelType === "siyuan-card") {
+            model = newCardModel({
+                app,
+                tab: tab,
+                data: json.customModelData
+            })
+        } else {
+            app.plugins.find(item => {
+                if (item.models[json.customModelType]) {
+                    model = item.models[json.customModelType]({
+                        tab: tab,
+                        data: json.customModelData
+                    });
+                    return true;
+                }
+            });
+        }
+    } else if (json.instance === "Editor") {
+        model = new Editor({
+            app,
+            tab,
+            blockId: json.blockId,
+            mode: json.mode,
+            action: typeof json.action === "string" ? [json.action] : json.action,
+            scrollAttr: json.scrollAttr,
+        });
+    }
+    return model;
+}
 
 export const pdfIsLoading = (element: HTMLElement) => {
     const isLoading = element.querySelector('.layout-tab-container > [data-loading="true"]') ? true : false;

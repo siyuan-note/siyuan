@@ -110,6 +110,16 @@ export const openFile = (options: IOpenFileOptions) => {
             }
         });
         if (custom) {
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
+            return;
+        }
+        const hasModel = getUnInitTab(options);
+        if (hasModel) {
+            if (options.afterOpen) {
+                options.afterOpen();
+            }
             return;
         }
     } else if (options.searchData) {
@@ -284,7 +294,8 @@ const getUnInitTab = (options: IOpenFileOptions) => {
         const initData = item.headElement?.getAttribute("data-initdata");
         if (initData) {
             const initObj = JSON.parse(initData);
-            if (initObj.rootId === options.rootID || initObj.blockId === options.rootID) {
+            if (initObj.instance === "Editor" &&
+                (initObj.rootId === options.rootID || initObj.blockId === options.rootID)) {
                 initObj.blockId = options.id;
                 initObj.mode = options.mode;
                 if (options.zoomIn) {
@@ -294,6 +305,9 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 }
                 delete initObj.scrollAttr;
                 item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
+                item.parent.switchTab(item.headElement);
+                return true;
+            } else if (initObj.instance === "Custom" && objEquals(initObj.customModelData, options.custom.data)) {
                 item.parent.switchTab(item.headElement);
                 return true;
             }

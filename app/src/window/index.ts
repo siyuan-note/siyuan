@@ -64,7 +64,7 @@ class App {
                                         const initTab = tab.headElement.getAttribute("data-initdata");
                                         if (initTab) {
                                             const initTabData = JSON.parse(initTab);
-                                            if (initTabData.rootId === data.data.id) {
+                                            if (initTabData.instance === "Editor" && initTabData.rootId === data.data.id) {
                                                 tab.updateTitle(data.data.title);
                                             }
                                         }
@@ -77,7 +77,7 @@ class App {
                                         const initTab = tab.headElement.getAttribute("data-initdata");
                                         if (initTab) {
                                             const initTabData = JSON.parse(initTab);
-                                            if (data.data.box === initTabData.notebookId) {
+                                            if (initTabData.instance === "Editor" && data.data.box === initTabData.notebookId) {
                                                 tab.parent.removeTab(tab.id);
                                             }
                                         }
@@ -90,7 +90,7 @@ class App {
                                         const initTab = tab.headElement.getAttribute("data-initdata");
                                         if (initTab) {
                                             const initTabData = JSON.parse(initTab);
-                                            if (data.data.ids.includes(initTabData.rootId)) {
+                                            if (initTabData.instance === "Editor" && data.data.ids.includes(initTabData.rootId)) {
                                                 tab.parent.removeTab(tab.id);
                                             }
                                         }

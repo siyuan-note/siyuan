@@ -3,7 +3,7 @@ import {genUUID} from "../util/genID";
 import {
     getInstanceById,
     getWndByLayout, JSONToCenter,
-    newCenterEmptyTab, pdfIsLoading,
+    newCenterEmptyTab, newModelByInitData, pdfIsLoading,
     resizeTabs,
     setPanelFocus,
     switchWnd
@@ -434,15 +434,7 @@ export class Wnd {
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
             if (initData) {
-                const json = JSON.parse(initData);
-                currentTab.addModel(new Editor({
-                    app: this.app,
-                    tab: currentTab,
-                    blockId: json.blockId,
-                    mode: json.mode,
-                    action: typeof json.action === "string" ? [json.action] : json.action,
-                    scrollAttr: json.scrollAttr,
-                }));
+                currentTab.addModel(newModelByInitData(this.app, currentTab, JSON.parse(initData)))
                 currentTab.headElement.removeAttribute("data-initdata");
                 return;
             }

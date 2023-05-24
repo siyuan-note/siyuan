@@ -176,7 +176,9 @@ export const initTabMenu = (app: App, tab: Tab) => {
         const initData = tab.headElement.getAttribute("data-initdata");
         if (initData) {
             const initDataObj = JSON.parse(initData);
-            rootId = initDataObj.rootId || initDataObj.blockId;
+            if (initDataObj && initDataObj.instance === "Editor") {
+                rootId = initDataObj.rootId || initDataObj.blockId;
+            }
         }
     }
     if (rootId) {

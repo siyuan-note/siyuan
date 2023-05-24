@@ -1,4 +1,4 @@
-import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE

@@ -135,6 +135,10 @@ func getPreferredReadme(readme *Readme) string {
 		if "" != readme.ZhCN {
 			ret = readme.ZhCN
 		}
+	case "zh_CHT":
+		if "" != readme.ZhCN {
+			ret = readme.ZhCN
+		}
 	case "en_US":
 		if "" != readme.EnUS {
 			ret = readme.EnUS
@@ -158,6 +162,10 @@ func getPreferredName(pkg *Package) string {
 		if "" != pkg.DisplayName.ZhCN {
 			ret = pkg.DisplayName.ZhCN
 		}
+	case "zh_CHT":
+		if "" != pkg.DisplayName.ZhCN {
+			ret = pkg.DisplayName.ZhCN
+		}
 	case "en_US":
 		if "" != pkg.DisplayName.EnUS {
 			ret = pkg.DisplayName.EnUS
@@ -178,6 +186,10 @@ func getPreferredDesc(desc *Description) string {
 	ret := desc.Default
 	switch util.Lang {
 	case "zh_CN":
+		if "" != desc.ZhCN {
+			ret = desc.ZhCN
+		}
+	case "zh_CHT":
 		if "" != desc.ZhCN {
 			ret = desc.ZhCN
 		}

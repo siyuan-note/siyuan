@@ -9,7 +9,7 @@ export const openChangelog = () => {
             return;
         }
         const dialog = new Dialog({
-            title: `✨ ${window.siyuan.languages.whatsNewInSiYuan}`,
+            title: `✨ ${window.siyuan.languages.whatsNewInSiYuan} v${window.siyuan.config.system.kernelVersion}`,
             width: isMobile() ? "92vw" : "768px",
             height: isMobile() ? "80vh" : "70vh",
             content: `<div style="overflow:auto;" class="b3-dialog__content b3-typography b3-typography--default">${response.data.html}</div>`

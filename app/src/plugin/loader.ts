@@ -1,4 +1,4 @@
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
@@ -18,17 +18,16 @@ const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
 };
 
-export const loadPlugins = (app: App) => {
-    fetchPost("/api/petal/loadPetals", {}, response => {
-        let css = "";
-        response.data.forEach((item: IPluginData) => {
-            loadPluginJS(app, item);
-            css += item.css || "" + "\n";
-        });
-        const styleElement = document.createElement("style");
-        styleElement.textContent = css;
-        document.head.append(styleElement);
+export const loadPlugins = async (app: App) => {
+    const response = await fetchSyncPost("/api/petal/loadPetals");
+    let css = "";
+    response.data.forEach((item: IPluginData) => {
+        loadPluginJS(app, item);
+        css += item.css || "" + "\n";
     });
+    const styleElement = document.createElement("style");
+    styleElement.textContent = css;
+    document.head.append(styleElement);
 };
 
 const loadPluginJS = (app: App, item: IPluginData) => {
@@ -58,7 +57,7 @@ const loadPluginJS = (app: App, item: IPluginData) => {
     try {
         plugin.onload();
     } catch (e) {
-        console.error(`plugin ${item.name} load error:`, e);
+        console.error(`plugin ${item.name} onload error:`, e);
     }
     return plugin;
 };

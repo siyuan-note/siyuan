@@ -34,6 +34,7 @@ class App {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        loadPlugins(this);
         window.siyuan = {
             notebooks: [],
             transactions: [],
@@ -79,7 +80,6 @@ class App {
                             setNoteBook(() => {
                                 initFramework(this);
                                 initRightMenu(this);
-                                loadPlugins(this);
                                 openChangelog();
                             });
                         });

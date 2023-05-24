@@ -30,6 +30,7 @@ class App {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        loadPlugins(this);
         window.siyuan = {
             transactions: [],
             reqIds: {},
@@ -135,7 +136,6 @@ class App {
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        loadPlugins(this);
                         init(this);
                         setTitle(window.siyuan.languages.siyuanNote);
                         initMessage();

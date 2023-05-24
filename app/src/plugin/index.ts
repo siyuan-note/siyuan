@@ -63,19 +63,16 @@ export class Plugin {
         const iconElement = document.createElement("div");
         if (isMobile()) {
             iconElement.className = "b3-menu__item";
-            iconElement.setAttribute("aria-label", options.title);
-            iconElement.setAttribute("data-menu", "true");
             iconElement.innerHTML = (options.icon.startsWith("icon") ? `<svg class="b3-menu__icon"><use xlink:href="#${options.icon}"></use></svg>` : options.icon) +
                 `<span class="b3-menu__label">${options.title}</span>`;
             iconElement.addEventListener("click", options.callback);
-            document.querySelector("#menuAbout").after(iconElement);
         } else if (!isWindow()) {
             iconElement.className = "toolbar__item b3-tooltips b3-tooltips__sw";
             iconElement.setAttribute("aria-label", options.title);
             iconElement.setAttribute("data-menu", "true");
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
             iconElement.addEventListener("click", options.callback);
-            document.querySelector("#" + (options.position === "right" ? "barSearch" : "drag")).before(iconElement);
+            iconElement.setAttribute("data-position", options.position );
         }
         this.topBarIcons.push(iconElement);
         return iconElement;

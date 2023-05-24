@@ -7,7 +7,11 @@ export const uninstall = (app: App, name: string) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
             // rm command
-            plugin.onunload();
+            try {
+                plugin.onunload();
+            } catch (e) {
+                console.error(`plugin ${plugin.name} onunload error:`, e);
+            }
             // rm tab
             const modelsKeys = Object.keys(plugin.models);
             getAllModels().custom.forEach(custom => {

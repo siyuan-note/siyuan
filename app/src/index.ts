@@ -41,6 +41,7 @@ export class App {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
+        loadPlugins(this);
         window.siyuan = {
             transactions: [],
             reqIds: {},
@@ -171,7 +172,6 @@ export class App {
                     bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
-                        loadPlugins(this);
                         onGetConfig(response.data.start, this);
                         account.onSetaccount();
                         resizeDrag();

@@ -26,7 +26,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {pdfResize} from "../asset/renderAssets";
 import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
-import {isWindow} from "../util/functions";
+import {isMobile, isWindow} from "../util/functions";
 /// #if !BROWSER
 import {setTabPosition} from "../window/setHeader";
 /// #endif
@@ -472,8 +472,21 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             });
         }
         app.plugins.forEach(item => {
-            item.onLayoutReady();
+            try {
+                item.onLayoutReady();
+            } catch (e) {
+                console.error(`plugin ${item.name} onLayoutReady error:`, e);
+            }
+
+            item.topBarIcons.forEach(element=> {
+                if (isMobile()) {
+                   document.querySelector("#menuAbout").after(element);
+                } else if (!isWindow()) {
+                    document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barSearch" : "drag")).before(element);
+                }
+            });
         });
+        // 等待 tab、dock 完成后再 init Tab model，dock
     }, Constants.TIMEOUT_LOAD);
 };
 

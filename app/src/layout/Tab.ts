@@ -129,8 +129,11 @@ export class Tab {
 
     public updateTitle(title: string) {
         this.title = title;
-        this.headElement.ariaLabel = title;
         this.headElement.querySelector(".item__text").innerHTML = escapeHtml(title);
+    }
+
+    public updateAriaLabel(ariaLabel: string) {
+        this.headElement.ariaLabel = ariaLabel;
     }
 
     public addModel(model: Model) {

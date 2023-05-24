@@ -34,7 +34,6 @@ class App {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
-        loadPlugins(this);
         window.siyuan = {
             notebooks: [],
             transactions: [],
@@ -61,9 +60,10 @@ class App {
                 window.siyuan.menus.menu.remove();
             }
         });
-        fetchPost("/api/system/getConf", {}, confResponse => {
+        fetchPost("/api/system/getConf", {}, async (confResponse) => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;
+            await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;

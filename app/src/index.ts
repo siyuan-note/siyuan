@@ -41,7 +41,6 @@ export class App {
         addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
-        loadPlugins(this);
         window.siyuan = {
             transactions: [],
             reqIds: {},
@@ -148,7 +147,7 @@ export class App {
             }),
         };
 
-        fetchPost("/api/system/getConf", {}, response => {
+        fetchPost("/api/system/getConf", {}, async (response) => {
             window.siyuan.config = response.data.conf;
             // 历史数据兼容，202306后可删除
             if (window.siyuan.config.uiLayout.left && !window.siyuan.config.uiLayout.left.data) {
@@ -165,6 +164,7 @@ export class App {
                     data: response.data.conf.uiLayout.bottom
                 };
             }
+            await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages) => {
                     window.siyuan.languages = lauguages;

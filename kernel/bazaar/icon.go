@@ -29,6 +29,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 type Icon struct {
@@ -62,8 +63,15 @@ func Icons() (icons []*Icon) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		icon.URL = strings.TrimSuffix(icon.URL, "/")
 
+		if "" == icon.MinAppVersion {
+			icon.MinAppVersion = defaultMinAppVersion
+		}
+		if 0 < semver.Compare("v"+icon.MinAppVersion, "v"+util.Ver) {
+			return
+		}
+
+		icon.URL = strings.TrimSuffix(icon.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		icon.RepoURL = "https://github.com/" + repoURLHash[0]
 		icon.RepoHash = repoURLHash[1]

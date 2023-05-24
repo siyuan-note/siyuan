@@ -29,6 +29,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 type Plugin struct {
@@ -64,8 +65,15 @@ func Plugins() (plugins []*Plugin) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
 
+		if "" == plugin.MinAppVersion {
+			plugin.MinAppVersion = defaultMinAppVersion
+		}
+		if 0 < semver.Compare("v"+plugin.MinAppVersion, "v"+util.Ver) {
+			return
+		}
+
+		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		plugin.RepoURL = "https://github.com/" + repoURLHash[0]
 		plugin.RepoHash = repoURLHash[1]

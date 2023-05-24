@@ -29,6 +29,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 type Theme struct {
@@ -64,8 +65,15 @@ func Themes() (ret []*Theme) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		theme.URL = strings.TrimSuffix(theme.URL, "/")
 
+		if "" == theme.MinAppVersion {
+			theme.MinAppVersion = defaultMinAppVersion
+		}
+		if 0 < semver.Compare("v"+theme.MinAppVersion, "v"+util.Ver) {
+			return
+		}
+
+		theme.URL = strings.TrimSuffix(theme.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		theme.RepoURL = "https://github.com/" + repoURLHash[0]
 		theme.RepoHash = repoURLHash[1]

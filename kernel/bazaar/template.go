@@ -30,6 +30,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 type Template struct {
@@ -63,8 +64,15 @@ func Templates() (templates []*Template) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		template.URL = strings.TrimSuffix(template.URL, "/")
 
+		if "" == template.MinAppVersion {
+			template.MinAppVersion = defaultMinAppVersion
+		}
+		if 0 < semver.Compare("v"+template.MinAppVersion, "v"+util.Ver) {
+			return
+		}
+
+		template.URL = strings.TrimSuffix(template.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		template.RepoURL = "https://github.com/" + repoURLHash[0]
 		template.RepoHash = repoURLHash[1]

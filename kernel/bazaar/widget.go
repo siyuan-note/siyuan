@@ -29,6 +29,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 type Widget struct {
@@ -63,8 +64,15 @@ func Widgets() (widgets []*Widget) {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
 			return
 		}
-		widget.URL = strings.TrimSuffix(widget.URL, "/")
 
+		if "" == widget.MinAppVersion {
+			widget.MinAppVersion = defaultMinAppVersion
+		}
+		if 0 < semver.Compare("v"+widget.MinAppVersion, "v"+util.Ver) {
+			return
+		}
+
+		widget.URL = strings.TrimSuffix(widget.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		widget.RepoURL = "https://github.com/" + repoURLHash[0]
 		widget.RepoHash = repoURLHash[1]

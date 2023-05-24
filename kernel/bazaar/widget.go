@@ -29,7 +29,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/mod/semver"
 )
 
 type Widget struct {
@@ -65,10 +64,7 @@ func Widgets() (widgets []*Widget) {
 			return
 		}
 
-		if "" == widget.MinAppVersion {
-			widget.MinAppVersion = defaultMinAppVersion
-		}
-		if 0 < semver.Compare("v"+widget.MinAppVersion, "v"+util.Ver) {
+		if disallowDisplayBazaarPackage(widget.MinAppVersion) {
 			return
 		}
 

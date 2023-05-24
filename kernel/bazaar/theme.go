@@ -29,7 +29,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/mod/semver"
 )
 
 type Theme struct {
@@ -66,10 +65,7 @@ func Themes() (ret []*Theme) {
 			return
 		}
 
-		if "" == theme.MinAppVersion {
-			theme.MinAppVersion = defaultMinAppVersion
-		}
-		if 0 < semver.Compare("v"+theme.MinAppVersion, "v"+util.Ver) {
+		if disallowDisplayBazaarPackage(theme.MinAppVersion) {
 			return
 		}
 

@@ -29,7 +29,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/mod/semver"
 )
 
 type Icon struct {
@@ -64,10 +63,7 @@ func Icons() (icons []*Icon) {
 			return
 		}
 
-		if "" == icon.MinAppVersion {
-			icon.MinAppVersion = defaultMinAppVersion
-		}
-		if 0 < semver.Compare("v"+icon.MinAppVersion, "v"+util.Ver) {
+		if disallowDisplayBazaarPackage(icon.MinAppVersion) {
 			return
 		}
 

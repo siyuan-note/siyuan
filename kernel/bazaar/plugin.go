@@ -29,7 +29,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/mod/semver"
 )
 
 type Plugin struct {
@@ -66,10 +65,7 @@ func Plugins() (plugins []*Plugin) {
 			return
 		}
 
-		if "" == plugin.MinAppVersion {
-			plugin.MinAppVersion = defaultMinAppVersion
-		}
-		if 0 < semver.Compare("v"+plugin.MinAppVersion, "v"+util.Ver) {
+		if disallowDisplayBazaarPackage(plugin.MinAppVersion) {
 			return
 		}
 

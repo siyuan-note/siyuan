@@ -30,7 +30,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/mod/semver"
 )
 
 type Template struct {
@@ -65,10 +64,7 @@ func Templates() (templates []*Template) {
 			return
 		}
 
-		if "" == template.MinAppVersion {
-			template.MinAppVersion = defaultMinAppVersion
-		}
-		if 0 < semver.Compare("v"+template.MinAppVersion, "v"+util.Ver) {
+		if disallowDisplayBazaarPackage(template.MinAppVersion) {
 			return
 		}
 

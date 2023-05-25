@@ -22,9 +22,11 @@ export const bazaar = {
     element: undefined as Element,
     genHTML() {
         if (!window.siyuan.config.bazaar.trust) {
-            return `<h3 class="b3-label ft__center">
+            return `<div class="fn__flex-column">
+<div class="fn__flex-1"></div>
+<div class="b3-label">
     ${window.siyuan.languages.bazaarTrust}
-</h3>
+</div>
 <div class="fn__flex b3-label">
     <svg class="b3-label__icon"><use xlink:href="#iconEye"></use></svg>
     <div>
@@ -40,26 +42,28 @@ export const bazaar = {
     </div>
 </div>
 <div class="fn__flex b3-label">
-    <svg class="b3-label__icon"><use xlink:href="#iconSelect"></use></svg>
+    <svg class="b3-label__icon"><use xlink:href="#iconUsers"></use></svg>
     <div>
         ${window.siyuan.languages.bazaarCommunityReview}
         <div class="b3-label__text">${window.siyuan.languages.bazaarPeerReviewTip}</div>
     </div>
 </div>
 <div class="fn__flex b3-label">
-    <svg class="b3-label__icon"><use xlink:href="#iconFeedback"></use></svg>
+    <svg class="b3-label__icon"><use xlink:href="#iconInfo"></use></svg>
     <div>
         ${window.siyuan.languages.bazaarUserReport}
         <div class="b3-label__text">${window.siyuan.languages.bazaarUserReportTip}</div>
     </div>
 </div>
-<div class="ft__center b3-label">
+<div class="b3-label b3-label--noborder">
     <div>${window.siyuan.languages.bazaarTrust1}</div>
     <div class="fn__hr--b"></div>
     <diiv>${window.siyuan.languages.bazaarTrust2}</diiv>
-    <div class="fn__hr--b"></div>
-    <div class="fn__hr--b"></div>
+</div>
+<div class="ft__center b3-label b3-label--noborder">
     <button class="b3-button fn__size200">${window.siyuan.languages.trust}</button>
+</div>
+<div class="fn__flex-1"></div>
 </div>`;
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];

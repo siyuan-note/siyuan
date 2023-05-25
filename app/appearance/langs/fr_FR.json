@@ -9,6 +9,7 @@
   "bazaarUserReport": "Rapport d'utilisateur",
   "bazaarUserReportTip": "Si vous trouvez du code malveillant ou des problèmes de sécurité dans le package marketplace, veuillez nous faire part de vos commentaires, et nous supprimerons le package marketplace dès que possible",
   "bazaarTrust1": "Une fois que vous avez choisi de faire confiance au marché, il ne peut pas être fermé. Si vous avez installé un package de marché contenant du code malveillant, veuillez le supprimer manuellement sur le système de fichiers",
+  "bazaarTrust2": "Avertissement : pour plus de détails, veuillez vous reporter aux termes pertinents de la licence open source AGPLv3 utilisée par SiYuan",
   "pinTableHead": "Épingler la tête du tableau",
   "unpinTableHead": "Désépingler l'en-tête du tableau",
   "enablePluginTip": "Avez-vous besoin d'activer ce plugin maintenant ? Vous pouvez l'activer, le désactiver ou le désinstaller plus tard dans [Téléchargé - Plugin]",

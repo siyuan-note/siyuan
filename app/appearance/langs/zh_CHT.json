@@ -9,6 +9,7 @@
   "bazaarUserReport": "用戶舉報",
   "bazaarUserReportTip": "如果你發現集市包存在惡意代碼或者安全問題，請向我們反饋，我們會盡快下架該集市包",
   "bazaarTrust1": "一旦選擇信任集市後就無法關閉，如果你已經安裝了包含惡意代碼的集市包，請在文件系統上手動刪除它",
+  "bazaarTrust2": "免責聲明：詳見思源筆記所使用的開源許可證 AGPLv3 中的相關條款",
   "pinTableHead": "固定表頭",
   "unpinTableHead": "取消固定表頭",
   "enablePluginTip": "現在需要啟用該插件嗎？後續可以在 [已下載 - 插件] 中進行啟用、禁用或者卸載",

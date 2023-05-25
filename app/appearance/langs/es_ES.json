@@ -9,6 +9,7 @@
   "bazaarUserReport": "Informe de Usuario",
   "bazaarUserReportTip": "Si encuentra un código malicioso o problemas de seguridad en el paquete del mercado, envíenos sus comentarios y eliminaremos el paquete del mercado lo antes posible",
   "bazaarTrust1": "Una vez que elige confiar en el mercado, no se puede cerrar. Si ha instalado un paquete de mercado que contiene código malicioso, elimínelo manualmente en el sistema de archivos",
+  "bazaarTrust2": "Descargo de responsabilidad: Para obtener más detalles, consulte los términos relevantes en la licencia de código abierto AGPLv3 utilizada por SiYuan",
   "pinTableHead": "Cabeza de la tabla de clavijas",
   "unpinTableHead": "Desanclar el encabezado de la tabla",
   "enablePluginTip": "¿Necesita habilitar este complemento ahora? Puede habilitarlo, deshabilitarlo o desinstalarlo más tarde en [Descargado - Complemento]",

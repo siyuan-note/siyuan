@@ -17,7 +17,7 @@
 package conf
 
 type Bazaar struct {
-	Trust bool `json:"bool"`
+	Trust bool `json:"trust"`
 }
 
 func NewBazaar() *Bazaar {

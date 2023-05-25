@@ -1,6 +1,7 @@
 {
   "trust": "信任",
-  "bazaarTrust": "在集市中安裝集市包存在一定的安全風險，為了盡量避免安全隱患，我們已經採取如下措施：",
+  "bazaarTrust": "集市包類似於第三方應用程序，它可以做任何它想做的事情，所以在集市中安裝集市包存在一定的安全風險。",
+  "bazaarTrust3": "我們非常重視潛在的安全問題，為了盡量避免安全隱患，目前已經採取如下措施：",
   "bazaarTrustCodeReview": "上架前代碼審查",
   "bazaarTrustCodeReviewTip": "在集市包上架前我們會對它的代碼進行審查，以盡量避免惡意代碼導致的安全問題",
   "bazaarTrustOpenSource": "開放源代碼",

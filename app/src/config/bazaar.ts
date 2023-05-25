@@ -25,7 +25,9 @@ export const bazaar = {
             return `<div class="fn__flex-column">
 <div class="fn__flex-1"></div>
 <div class="b3-label">
-    ${window.siyuan.languages.bazaarTrust}
+    <div>${window.siyuan.languages.bazaarTrust}</div>
+    <div class="fn__hr--b"></div>
+    <div>${window.siyuan.languages.bazaarTrust3}</div>
 </div>
 <div class="fn__flex b3-label">
     <svg class="b3-label__icon"><use xlink:href="#iconEye"></use></svg>

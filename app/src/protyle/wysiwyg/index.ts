@@ -397,7 +397,6 @@ export class WYSIWYG {
             if (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" || target.classList.contains("table__resize") || target.classList.contains("table__select")) {
                 tableBlockElement = hasClosestBlock(target);
                 if (tableBlockElement) {
-                    tableBlockElement.querySelector("table").classList.remove("select");
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
@@ -532,7 +531,6 @@ export class WYSIWYG {
                                 width = item.offsetLeft + item.clientWidth - left;
                             }
                         });
-                        tableBlockElement.querySelector("table").classList.add("select");
                         tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${height}px;width:${width + 1}px;`);
                         moveCellElement = moveTarget;
                     }
@@ -752,7 +750,6 @@ export class WYSIWYG {
                                             }
                                         }
                                     });
-                                    tableBlockElement.querySelector("table").classList.remove("select");
                                     tableSelectElement.removeAttribute("style");
                                     const oldHTML = tableBlockElement.outerHTML;
                                     let cellElement = selectCellElements[0];
@@ -840,7 +837,6 @@ export class WYSIWYG {
                                             selectCellElements.push(item);
                                         }
                                     });
-                                    tableBlockElement.querySelector("table").classList.remove("select");
                                     tableSelectElement.removeAttribute("style");
                                     setTableAlign(protyle, selectCellElements, tableBlockElement, "left", getEditorRange(tableBlockElement));
                                 }
@@ -862,7 +858,6 @@ export class WYSIWYG {
                                             selectCellElements.push(item);
                                         }
                                     });
-                                    tableBlockElement.querySelector("table").classList.remove("select");
                                     tableSelectElement.removeAttribute("style");
                                     setTableAlign(protyle, selectCellElements, tableBlockElement, "center", getEditorRange(tableBlockElement));
                                 }
@@ -884,7 +879,6 @@ export class WYSIWYG {
                                             selectCellElements.push(item);
                                         }
                                     });
-                                    tableBlockElement.querySelector("table").classList.remove("select");
                                     tableSelectElement.removeAttribute("style");
                                     setTableAlign(protyle, selectCellElements, tableBlockElement, "right", getEditorRange(tableBlockElement));
                                 }
@@ -905,7 +899,6 @@ export class WYSIWYG {
                                             selectCellElements.push(item);
                                         }
                                     });
-                                    tableBlockElement.querySelector("table").classList.remove("select");
                                     tableSelectElement.removeAttribute("style");
                                     const oldHTML = tableBlockElement.outerHTML;
                                     selectCellElements.forEach(item => {
@@ -1267,7 +1260,6 @@ export class WYSIWYG {
                     window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});
                     protyle.toolbar?.element.classList.add("fn__none");
                     if (nodeElement.classList.contains("table")) {
-                        nodeElement.querySelector("table").classList.remove("select");
                         nodeElement.querySelector(".table__select").removeAttribute("style");
                     }
                 }
@@ -1541,7 +1533,6 @@ export class WYSIWYG {
             const tableElement = hasClosestByClassName(event.target, "table");
             this.element.querySelectorAll(".table").forEach(item => {
                 if (!tableElement || !item.isSameNode(tableElement)) {
-                    item.querySelector("table").classList.remove("select");
                     item.querySelector(".table__select").removeAttribute("style");
                 }
                 if (tableElement && tableElement.isSameNode(item) && item.querySelector(".table__select").getAttribute("style")) {

@@ -1190,11 +1190,21 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
-    if (cellElement.rowSpan > 1 || cellElement.colSpan > 1 || thMatchElement.style.width) {
-        menus.push({
-            type: "separator"
-        });
-    }
+    const isPinHead = nodeElement.getAttribute("custom-pinthead")
+    menus.push({
+        icon: "iconPin",
+        label: isPinHead ? window.siyuan.languages.unpinTableHead : window.siyuan.languages.pinTableHead,
+        click: () => {
+            const html = nodeElement.outerHTML;
+            if (isPinHead) {
+                nodeElement.removeAttribute("custom-pinthead")
+            } else {
+                nodeElement.setAttribute("custom-pinthead", "true")
+            }
+            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+        }
+    });
+    menus.push({type: "separator"});
     menus.push({
         icon: "iconAlignLeft",
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,

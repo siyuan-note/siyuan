@@ -256,16 +256,14 @@
       padding: 0;
     }
 
-    &.table > [spellcheck] {
-      overflow: auto;
+    &.table[custom-pinthead="true"] {
+      table {
+        height: 50vh;
+      }
 
-      & > table.select {
-        position: relative;
-        z-index: 1;
-
-        tr {
-          background-color: transparent !important;
-        }
+      thead {
+        position: sticky;
+        top: -1px;
       }
     }
 

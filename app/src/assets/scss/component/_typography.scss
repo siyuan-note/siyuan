@@ -212,14 +212,13 @@
     display: inline-block;
     width: max-content;
 
-    tr td,
-    tr th {
-      background-color: var(--b3-theme-surface);
-      border-top: 1px solid var(--b3-theme-surface-lighter);
+    tr:nth-child(2n) td {
+      background-color: var(--b3-theme-background);
     }
 
     td,
     th {
+      background-color: var(--b3-theme-surface);
       padding: 4px 8px;
       border: 1px solid var(--b3-theme-surface-lighter);
       box-sizing: border-box;
@@ -239,10 +238,6 @@
     tbody th,
     tbody td {
       font-weight: normal;
-    }
-
-    tbody tr:nth-child(2n) td {
-      background-color: var(--b3-theme-background);
     }
   }
 

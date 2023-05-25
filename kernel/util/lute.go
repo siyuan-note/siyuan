@@ -46,3 +46,19 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetSanitize(true)
 	return
 }
+
+func NewStdLute() (ret *lute.Lute) {
+	ret = lute.New()
+	ret.SetFootnotes(false)
+	ret.SetToC(false)
+	ret.SetIndentCodeBlock(false)
+	ret.SetAutoSpace(false)
+	ret.SetHeadingID(false)
+	ret.SetSetext(false)
+	ret.SetYamlFrontMatter(false)
+	ret.SetLinkRef(false)
+	ret.SetGFMAutoLink(false) // 导入 Markdown 时不自动转换超链接 https://github.com/siyuan-note/siyuan/issues/7682
+	ret.SetImgPathAllowSpace(true)
+	ret.SetInlineMathAllowDigitAfterOpenMarker(true) // Formula parsing supports $ followed by numbers when importing Markdown https://github.com/siyuan-note/siyuan/issues/8362
+	return
+}

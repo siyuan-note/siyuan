@@ -186,30 +186,37 @@ export class MenuItem {
                 window.siyuan.menus.menu.remove();
             });
         }
-        let html = `<span class="b3-menu__label">${options.label}</span>`;
-        if (typeof options.iconHTML === "string") {
-            html = options.iconHTML + html;
-        } else {
-            html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
-        }
-        if (options.accelerator) {
-            html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;
-        }
-        if (options.action) {
-            html += `<svg class="b3-menu__action"><use xlink:href="#${options.action}"></use></svg>`;
-        }
         if (options.id) {
             this.element.setAttribute("data-id", options.id);
         }
         if (options.type === "readonly") {
             this.element.classList.add("b3-menu__item--readonly");
         }
-        this.element.innerHTML = html;
+
+        if (options.element) {
+            this.element.append(options.element);
+        } else {
+            let html = `<span class="b3-menu__label">${options.label}</span>`;
+            if (typeof options.iconHTML === "string") {
+                html = options.iconHTML + html;
+            } else {
+                html = `<svg class="b3-menu__icon${["HTML (SiYuan)", window.siyuan.languages.template].includes(options.label) ? " ft__error" : ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
+            }
+            if (options.accelerator) {
+                html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;
+            }
+            if (options.action) {
+                html += `<svg class="b3-menu__action"><use xlink:href="#${options.action}"></use></svg>`;
+            }
+            this.element.innerHTML = html;
+        }
+
         if (options.bind) {
             // 主题 rem craft 需要使用 b3-menu__item--custom 来区分自定义菜单 by 281261361
             this.element.classList.add("b3-menu__item--custom");
             options.bind(this.element);
         }
+
         if (options.submenu) {
             const submenuElement = document.createElement("div");
             submenuElement.classList.add("b3-menu__submenu");

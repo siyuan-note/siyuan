@@ -731,6 +731,7 @@ declare interface IMenu {
     current?: boolean
     bind?: (element: HTMLElement) => void
     index?: number
+    element?: HTMLElement
 }
 
 declare interface IBazaarItem {

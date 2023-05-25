@@ -16,7 +16,7 @@ export const resize = (protyle: IProtyle) => {
             });
         }
         // 保持光标位置不变 https://ld246.com/article/1673704873983/comment/1673765814595#comments
-        if (protyle.toolbar.range) {
+        if (!protyle.disabled && protyle.toolbar.range) {
             let rangeRect = protyle.toolbar.range.getBoundingClientRect();
             if (rangeRect.height === 0) {
                 const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);

@@ -21,6 +21,47 @@ import {loadPlugin} from "../plugin/loader";
 export const bazaar = {
     element: undefined as Element,
     genHTML() {
+        if (!window.siyuan.config.bazaar.trust) {
+            return `<h3 class="b3-label ft__center">
+    ${window.siyuan.languages.bazaarTrust}
+</h3>
+<div class="fn__flex b3-label">
+    <svg class="b3-label__icon"><use xlink:href="#iconEye"></use></svg>
+    <div>
+        ${window.siyuan.languages.bazaarTrustCodeReview}
+        <div class="b3-label__text">${window.siyuan.languages.bazaarTrustCodeReviewTip}</div>
+    </div>
+</div>
+<div class="fn__flex b3-label">
+    <svg class="b3-label__icon"><use xlink:href="#iconGithub"></use></svg>
+    <div>
+        ${window.siyuan.languages.bazaarTrustOpenSource}
+        <div class="b3-label__text">${window.siyuan.languages.bazaarTrustOpenSourceTip}</div>
+    </div>
+</div>
+<div class="fn__flex b3-label">
+    <svg class="b3-label__icon"><use xlink:href="#iconSelect"></use></svg>
+    <div>
+        ${window.siyuan.languages.bazaarCommunityReview}
+        <div class="b3-label__text">${window.siyuan.languages.bazaarPeerReviewTip}</div>
+    </div>
+</div>
+<div class="fn__flex b3-label">
+    <svg class="b3-label__icon"><use xlink:href="#iconFeedback"></use></svg>
+    <div>
+        ${window.siyuan.languages.bazaarUserReport}
+        <div class="b3-label__text">${window.siyuan.languages.bazaarUserReportTip}</div>
+    </div>
+</div>
+<div class="ft__center b3-label">
+    <div>${window.siyuan.languages.bazaarTrust1}</div>
+    <div class="fn__hr--b"></div>
+    <diiv>${window.siyuan.languages.bazaarTrust2}</diiv>
+    <div class="fn__hr--b"></div>
+    <div class="fn__hr--b"></div>
+    <button class="b3-button fn__size200">${window.siyuan.languages.trust}</button>
+</div>`;
+        }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
         const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 80}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
         return `<div class="fn__flex-column" style="height: 100%">
@@ -429,6 +470,16 @@ export const bazaar = {
         readmeElement.classList.add("config-bazaar__readme--show");
     },
     bindEvent(app: App) {
+        if (!window.siyuan.config.bazaar.trust) {
+            bazaar.element.querySelector("button").addEventListener("click", () => {
+                fetchPost("/api/setting/setBazaar", {trust: true}, () => {
+                    window.siyuan.config.bazaar.trust = true;
+                    bazaar.element.innerHTML = bazaar.genHTML();
+                    bazaar.bindEvent(app);
+                });
+            });
+            return;
+        }
         this._genMyHTML("themes", app);
         bazaar.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

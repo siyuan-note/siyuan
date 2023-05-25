@@ -458,6 +458,9 @@ declare interface IAccount {
 }
 
 declare interface IConfig {
+    bazaar: {
+        trust: boolean
+    }
     repo: {
         key: string
     },

@@ -120,6 +120,14 @@
     overflow: hidden !important;
   }
 
+  &__icon {
+    width: 36px;
+    height: 36px;
+    align-self: center;
+    margin-right: 16px;
+    color: var(--b3-theme-on-surface);
+  }
+
   &--inner {
     border-bottom: 0;
     padding: 0 !important;

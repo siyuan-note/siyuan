@@ -72,6 +72,7 @@ type AppConf struct {
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Flashcard      *conf.Flashcard  `json:"flashcard"`      // 闪卡配置
 	AI             *conf.AI         `json:"ai"`             // 人工智能配置
+	Bazaar         *conf.Bazaar     `json:"bazaar"`         // 集市配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
 	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
@@ -286,6 +287,10 @@ func InitConf() {
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()
+	}
+
+	if nil == Conf.Bazaar {
+		Conf.Bazaar = conf.NewBazaar()
 	}
 
 	if nil == Conf.Repo {

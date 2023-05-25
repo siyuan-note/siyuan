@@ -29,6 +29,35 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setBazaar(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	bazaar := &conf.Bazaar{}
+	if err = gulu.JSON.UnmarshalJSON(param, bazaar); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.Conf.Bazaar = bazaar
+	model.Conf.Save()
+
+	ret.Data = bazaar
+}
+
 func setAI(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

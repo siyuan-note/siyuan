@@ -54,6 +54,11 @@ export class Plugin {
         // 布局加载完成
     }
 
+    public addIcons(svg: string) {
+        document.body.insertAdjacentHTML("afterbegin", `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+<defs>${svg}</defs></svg>`);
+    }
+
     public addTopBar(options: {
         icon: string,
         title: string,

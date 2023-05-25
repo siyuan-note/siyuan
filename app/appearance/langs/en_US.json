@@ -1,6 +1,7 @@
 {
   "trust": "Trust",
-  "bazaarTrust": "Installing the marketplace package in the marketplace has certain security risks. In order to avoid security risks as much as possible, we have taken the following measures:",
+  "bazaarTrust": "The marketplace package is similar to a third-party application, it can do whatever it wants, so installing a marketplace package in the marketplace has certain security risks.",
+  "bazaarTrust3": "We attach great importance to potential security issues. In order to avoid security risks as much as possible, the following measures have been taken:",
   "bazaarTrustCodeReview": "Code review before listing",
   "bazaarTrustCodeReviewTip": "Before the marketplace package is put on the shelves, we will review its code to avoid security problems caused by malicious code",
   "bazaarTrustOpenSource": "Open Source",

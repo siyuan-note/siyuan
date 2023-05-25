@@ -1,6 +1,7 @@
 {
   "trust": "Confiar",
-  "bazaarTrust": "Instalar el paquete del mercado en el mercado tiene ciertos riesgos de seguridad. Para evitar los riesgos de seguridad tanto como sea posible, hemos tomado las siguientes medidas:",
+  "bazaarTrust": "El paquete del mercado es similar a una aplicación de terceros, puede hacer lo que quiera, por lo que instalar un paquete del mercado en el mercado tiene ciertos riesgos de seguridad".,
+  "bazaarTrust3": "Damos gran importancia a los posibles problemas de seguridad. Para evitar los riesgos de seguridad tanto como sea posible, se han tomado las siguientes medidas:",
   "bazaarTrustCodeReview": "Revisión del código antes de publicar",
   "bazaarTrustCodeReviewTip": "Antes de que el paquete del mercado se coloque en los estantes, revisaremos su código para evitar problemas de seguridad causados por código malicioso",
   "bazaarTrustOpenSource": "Código abierto",

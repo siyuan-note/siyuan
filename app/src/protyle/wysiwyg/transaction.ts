@@ -485,6 +485,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
             Object.keys(data.old).forEach(key => {
                 item.removeAttribute(key);
             });
+            if (data.new.style && data.new["custom-riff-decks"]) {
+                data.new.style += ";animation:addCard 450ms linear";
+            }
             Object.keys(data.new).forEach(key => {
                 item.setAttribute(key, data.new[key]);
                 if (key === "custom-riff-decks") {

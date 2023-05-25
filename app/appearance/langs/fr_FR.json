@@ -1,4 +1,5 @@
 {
+  "trust": "Confiance",
   "bazaarTrust": "L'installation du package marketplace sur le marché présente certains risques de sécurité. Afin d'éviter autant que possible les risques de sécurité, nous avons pris les mesures suivantes :",
   "bazaarTrustCodeReview": "Vérifier le code avant de le lister",
   "bazaarTrustCodeReviewTip": "Avant que le package marketplace ne soit mis sur les étagères, nous allons revoir son code pour éviter les problèmes de sécurité causés par un code malveillant",

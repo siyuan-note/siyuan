@@ -1,4 +1,5 @@
 {
+  "trust": "信任",
   "bazaarTrust": "在集市中安裝集市包存在一定的安全風險，為了盡量避免安全隱患，我們已經採取如下措施：",
   "bazaarTrustCodeReview": "上架前代碼審查",
   "bazaarTrustCodeReviewTip": "在集市包上架前我們會對它的代碼進行審查，以盡量避免惡意代碼導致的安全問題",

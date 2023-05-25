@@ -1,4 +1,5 @@
 {
+  "trust": "Trust",
   "bazaarTrust": "Installing the marketplace package in the marketplace has certain security risks. In order to avoid security risks as much as possible, we have taken the following measures:",
   "bazaarTrustCodeReview": "Code review before listing",
   "bazaarTrustCodeReviewTip": "Before the marketplace package is put on the shelves, we will review its code to avoid security problems caused by malicious code",

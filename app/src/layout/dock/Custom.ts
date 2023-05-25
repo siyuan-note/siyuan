@@ -24,7 +24,7 @@ export class Custom extends Model {
     }) {
         super({app: options.app, id: options.tab.id});
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
-            options.tab.headElement.classList.add("item--unupdate");
+            options.tab.headElement?.classList.add("item--unupdate");
         }
 
         this.element = options.tab.panelElement;

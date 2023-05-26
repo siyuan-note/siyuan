@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {webFrame} from "electron";
 import {globalShortcut} from "../boot/globalShortcut";
 import {fetchPost} from "../util/fetch";
-import {JSONToCenter, resizeTabs} from "../layout/util";
+import {getInstanceById, JSONToCenter, resizeTabs} from "../layout/util";
 import {initStatus} from "../layout/status";
 import {appearance} from "../config/appearance";
 import {initAssets, setInlineStyle} from "../util/assets";
@@ -10,6 +10,8 @@ import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
 import {initWindow} from "../boot/onGetConfig";
 import {App} from "../index";
+import {afterLoadPlugin} from "../plugin/loader";
+import {Tab} from "../layout/Tab";
 
 export const init = (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
@@ -21,6 +23,7 @@ export const init = (app: App) => {
         if (layout.layout) {
             JSONToCenter(app, layout.layout);
             window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
+            afterLayout(app);
             return;
         }
         const tabJSON = JSON.parse(getSearch("json"));
@@ -37,6 +40,7 @@ export const init = (app: App) => {
             }]
         });
         window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
+        afterLayout(app);
     });
     initStatus(true);
     initWindow(app);
@@ -52,3 +56,14 @@ export const init = (app: App) => {
         }, 200);
     });
 };
+
+const afterLayout = (app:App) => {
+    app.plugins.forEach(item => {
+        afterLoadPlugin(item);
+    });
+    document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
+        item.removeAttribute("data-init-active");
+        const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
+        tab.parent.switchTab(item, false, false);
+    });
+}

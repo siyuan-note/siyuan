@@ -104,6 +104,10 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         console.error(`plugin ${plugin.name} onLayoutReady error:`, e);
     }
 
+    if (isWindow()) {
+        return;
+    }
+
     plugin.topBarIcons.forEach(element => {
         if (isMobile()) {
             document.querySelector("#menuAbout").after(element);
@@ -112,6 +116,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         }
     });
 
+    /// if !MOBILE
     window.siyuan.config.uiLayout.left.data.forEach((dockItem: IDockTab[], index: number) => {
         updateDock(dockItem, index, plugin, "Left");
     });
@@ -152,5 +157,5 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             }], dock.config.position === "RightBottom" ? 1 : 0, dock.config.index);
         }
     });
-    // 等待 tab 完成后再 init Tab model
+    /// endif
 };

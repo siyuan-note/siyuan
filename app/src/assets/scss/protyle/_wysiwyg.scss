@@ -258,7 +258,7 @@
 
     &.table[custom-pinthead="true"] {
       table {
-        height: 50vh;
+        max-height: 50vh;
       }
 
       thead {

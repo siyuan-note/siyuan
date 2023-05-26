@@ -22,6 +22,7 @@ const runCode = (code: string, sourceURL: string) => {
 export const loadPlugins = async (app: App) => {
     const response = await fetchSyncPost("/api/petal/loadPetals");
     let css = "";
+    // 为加快启动速度，不进行 await
     response.data.forEach((item: IPluginData) => {
         loadPluginJS(app, item);
         css += item.css || "" + "\n";
@@ -31,7 +32,7 @@ export const loadPlugins = async (app: App) => {
     document.head.append(styleElement);
 };
 
-const loadPluginJS = (app: App, item: IPluginData) => {
+const loadPluginJS = async (app: App, item: IPluginData) => {
     const exportsObj: { [key: string]: any } = {};
     const moduleObj = {exports: exportsObj};
     try {
@@ -56,15 +57,15 @@ const loadPluginJS = (app: App, item: IPluginData) => {
     });
     app.plugins.push(plugin);
     try {
-        plugin.onload();
+        await plugin.onload();
     } catch (e) {
         console.error(`plugin ${item.name} onload error:`, e);
     }
     return plugin;
 };
 
-export const loadPlugin = (app: App, item: IPluginData) => {
-    const plugin = loadPluginJS(app, item);
+export const loadPlugin = async (app: App, item: IPluginData) => {
+    const plugin = await loadPluginJS(app, item);
     const styleElement = document.createElement("style");
     styleElement.textContent = item.css;
     document.head.append(styleElement);

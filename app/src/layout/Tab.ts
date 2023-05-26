@@ -133,7 +133,9 @@ export class Tab {
     }
 
     public updateAriaLabel(ariaLabel: string) {
-        this.headElement.ariaLabel = ariaLabel;
+        if (this.headElement) {
+            this.headElement.ariaLabel = ariaLabel;
+        }
     }
 
     public addModel(model: Model) {

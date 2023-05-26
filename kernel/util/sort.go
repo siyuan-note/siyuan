@@ -19,12 +19,17 @@ package util
 import (
 	"bytes"
 	"io"
+	"strings"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
 
 func PinYinCompare(str1, str2 string) bool {
+	// Doc tree, backlinks, tags and templates ignores case when sorting alphabetically by name https://github.com/siyuan-note/siyuan/issues/8360
+	str1 = strings.ToLower(str1)
+	str2 = strings.ToLower(str2)
+
 	a, _ := UTF82GBK(str1)
 	b, _ := UTF82GBK(str2)
 	bLen := len(b)
@@ -70,5 +75,5 @@ const (
 	SortModeSubDocCountDESC        // 14：子文档数降序
 	SortModeFileTree               // 15：使用文档树排序规则
 
-	SortModeUnassigned      = 256  // 256：未指定排序规则，按照笔记本优先于文档树获取排序规则
+	SortModeUnassigned = 256 // 256：未指定排序规则，按照笔记本优先于文档树获取排序规则
 )

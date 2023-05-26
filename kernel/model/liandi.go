@@ -220,11 +220,12 @@ func refreshSubscriptionExpirationRemind() {
 	}
 	subscriptionExpirationReminded = true
 
-	defer logging.Recover()
-
 	if "ios" == util.Container {
 		return
 	}
+
+	defer logging.Recover()
+
 	if IsSubscriber() && -1 != Conf.User.UserSiYuanProExpireTime {
 		expired := int64(Conf.User.UserSiYuanProExpireTime)
 		now := time.Now().UnixMilli()
@@ -242,7 +243,8 @@ func refreshSubscriptionExpirationRemind() {
 		}
 
 		if 0 < remains && expireDay > remains {
-			time.Sleep(3 * time.Minute)
+			util.WaitForUILoaded()
+			time.Sleep(time.Second * 3)
 			util.PushErrMsg(fmt.Sprintf(Conf.Language(127), remains), 0)
 			return
 		}

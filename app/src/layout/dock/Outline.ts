@@ -4,7 +4,7 @@ import {Tree} from "../../util/Tree";
 import {getDockByType, setPanelFocus} from "../util";
 import {fetchPost} from "../../util/fetch";
 import {getAllModels} from "../getAll";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
@@ -217,6 +217,13 @@ export class Outline extends Model {
                 id: this.blockId,
             }, response => {
                 this.update(response);
+                // https://github.com/siyuan-note/siyuan/issues/8372
+                if (getSelection().rangeCount > 0) {
+                    const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
+                    if (blockElement && blockElement.getAttribute("data-type") === "NodeHeading") {
+                        this.setCurrent(blockElement)
+                    }
+                }
             });
         }
     }

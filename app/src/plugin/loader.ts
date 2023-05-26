@@ -104,19 +104,20 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         console.error(`plugin ${plugin.name} onLayoutReady error:`, e);
     }
 
+    if (!isWindow() || isMobile()) {
+        plugin.topBarIcons.forEach(element => {
+            if (isMobile()) {
+                document.querySelector("#menuAbout").after(element);
+            } else if (!isWindow()) {
+                document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barSearch" : "drag")).before(element);
+            }
+        });
+    }
     if (isWindow()) {
         return;
     }
 
-    plugin.topBarIcons.forEach(element => {
-        if (isMobile()) {
-            document.querySelector("#menuAbout").after(element);
-        } else if (!isWindow()) {
-            document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barSearch" : "drag")).before(element);
-        }
-    });
-
-    /// if !MOBILE
+    /// #if !MOBILE
     window.siyuan.config.uiLayout.left.data.forEach((dockItem: IDockTab[], index: number) => {
         updateDock(dockItem, index, plugin, "Left");
     });
@@ -157,5 +158,5 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             }], dock.config.position === "RightBottom" ? 1 : 0, dock.config.index);
         }
     });
-    /// endif
+    /// #endif
 };

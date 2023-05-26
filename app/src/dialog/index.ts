@@ -1,5 +1,5 @@
 import {genUUID} from "../util/genID";
-/// if !MOBILE
+/// #if !MOBILE
 import {moveResize} from "./moveResize";
 /// #endif
 import {isMobile} from "../util/functions";
@@ -59,7 +59,7 @@ export class Dialog {
                 this.element.classList.add("b3-dialog--open");
             });
         }
-        /// if !MOBILE
+        /// #if !MOBILE
         moveResize(this.element.querySelector(".b3-dialog__container"));
         /// #endif
     }

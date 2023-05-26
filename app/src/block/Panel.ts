@@ -129,7 +129,7 @@ export class BlockPanel {
                 target = target.parentElement;
             }
         });
-        /// if !MOBILE
+        /// #if !MOBILE
         moveResize(this.element, (type: string) => {
             if (type !== "move") {
                 this.editors.forEach(item => {

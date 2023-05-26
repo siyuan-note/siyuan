@@ -22,7 +22,7 @@ import {getSearch} from "../util/functions";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
-import {loadPlugins} from "../plugin/loader";
+import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -81,6 +81,9 @@ class App {
                                 initFramework(this);
                                 initRightMenu(this);
                                 openChangelog();
+                                this.plugins.forEach(item => {
+                                    afterLoadPlugin(item);
+                                });
                             });
                         });
                     });

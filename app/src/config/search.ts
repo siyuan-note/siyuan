@@ -20,7 +20,8 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip",
             "editReadonly", "editReadonlyTip", "embedBlockBreadcrumb", "embedBlockBreadcrumbTip", "outlineOutdentTip",
             "outdent", "floatWindowMode", "floatWindowModeTip", "justify", "justifyTip", "rtl", "rtlTip", "spellcheck",
-            "spellcheckTip", "backlinkExpand", "backlinkExpandTip", "onlySearchForDocTip", "dynamicLoadBlocks", "dynamicLoadBlocksTip",
+            "spellcheckTip", "backlinkExpand", "backlinkExpandTip", "onlySearchForDocTip", "dynamicLoadBlocks",
+            "dynamicLoadBlocksTip", "fontSizeScrollZoom", "fontSizeScrollZoomTip"
         ]),
 
         // 文档树

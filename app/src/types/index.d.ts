@@ -380,6 +380,7 @@ declare interface IExport {
 
 declare interface IEditor {
     justify: boolean;
+    fontSizeScrollZoom: boolean;
     rtl: boolean;
     readOnly: boolean;
     listLogicalOutdent: boolean;

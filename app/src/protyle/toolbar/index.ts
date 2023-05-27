@@ -1199,6 +1199,12 @@ export class Toolbar {
         if (!protyle.disabled) {
             textElement.select();
         }
+        this.app.plugins.forEach(item => {
+            item.eventBus.emit("open-noneditableblock", {
+                protyle,
+                toolbar: this
+            });
+        });
     }
 
     public showCodeLanguage(protyle: IProtyle, languageElement: HTMLElement) {

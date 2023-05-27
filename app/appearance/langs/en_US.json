@@ -596,6 +596,8 @@
   "kernelFault2": "If the problem persists, please look for help or report bugs <a href=\"https://github.com/siyuan-note/siyuan/issues\" target=\"_blank\">here</a>",
   "fontSize": "Font Size",
   "fontSizeTip": "The default font size is <code class='fn__code'>16</code>, this setting affects the editor and exported PDF/HTML font size display",
+  "fontSizeScrollZoom": "Quickly adjust font size",
+  "fontSizeScrollZoomTip": "After enabling, press and hold <code class='fn__code'>Ctrl</code> to quickly adjust the font size through the mouse wheel or trackpad pinch-zoom gesture",
   "font1": "This setting only affects the font family display in the editor, choose <code class='fn__code'>Default</code> to use the theme&#039;s font family",
   "newNameFile": "The name of the new subdocument is",
   "newNameSettingFile": "The name of the new document is",

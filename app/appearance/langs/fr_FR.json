@@ -596,6 +596,8 @@
   "kernelFault2": "Si le problème persiste, veuillez rechercher de l'aide ou signaler les bogues <a href=\"https://github.com/siyuan-note/siyuan/issues\" target=\"_blank\">ici</a>",
   "fontSize": "Taille de la police",
   "fontSizeTip": "La taille de police par défaut est de <code class='fn__code'>16</code>, ce paramètre affecte l'éditeur et l'affichage de la taille de police PDF/HTML exportée",
+  "fontSizeScrollZoom": "Ajuster rapidement la taille de la police",
+  "fontSizeScrollZoomTip": "Après l'activation, maintenez enfoncée la touche <code class='fn__code'>Ctrl</code> pour ajuster rapidement la taille de la police via la molette de la souris ou le geste de zoom par pincement du trackpad",
   "font1": "Ce paramètre n'affecte que l'affichage de la famille de polices dans l'éditeur, choisissez <code class='fn__code'>Default</code> pour utiliser la famille de polices du thème.",
   "newNameFile": "Le nom du nouveau sous-document est",
   "newNameSettingFile": "Le nom du nouveau document est",

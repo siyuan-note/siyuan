@@ -23,7 +23,6 @@ import {
 } from "./dialog/processSystem";
 import {promiseTransactions} from "./protyle/wysiwyg/transaction";
 import {initMessage} from "./dialog/message";
-import {resizeDrag} from "./layout/util";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {updateEditModeElement} from "./layout/topBar";
@@ -174,7 +173,6 @@ export class App {
                         window.siyuan.user = userResponse.data;
                         onGetConfig(response.data.start, this);
                         account.onSetaccount();
-                        resizeDrag();
                         setTitle(window.siyuan.languages.siyuanNote);
                         initMessage();
                     });

@@ -1,4 +1,4 @@
-import {exportLayout, JSONToLayout, resetLayout, resizeDrag, resizeTabs} from "../layout/util";
+import {exportLayout, JSONToLayout, resetLayout, resizeTopbar, resizeTabs} from "../layout/util";
 import {hotKey2Electron, setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
@@ -154,7 +154,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         window.clearTimeout(resizeTimeout);
         resizeTimeout = window.setTimeout(() => {
             resizeTabs();
-            resizeDrag();
+            resizeTopbar();
         }, 200);
     });
     addGA();

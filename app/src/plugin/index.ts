@@ -9,6 +9,7 @@ import {Tab} from "../layout/Tab";
 import {getDockByType, setPanelFocus} from "../layout/util";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
+import {genUUID} from "../util/genID";
 
 export class Plugin {
     private app: App;
@@ -66,16 +67,16 @@ export class Plugin {
         callback: (evt: MouseEvent) => void
     }) {
         const iconElement = document.createElement("div");
+        iconElement.setAttribute("data-menu", "true");
+        iconElement.addEventListener("click", options.callback);
+        iconElement.id = "plugin" + genUUID();
         if (isMobile()) {
             iconElement.className = "b3-menu__item";
-            iconElement.setAttribute("data-menu", "true");
             iconElement.innerHTML = (options.icon.startsWith("icon") ? `<svg class="b3-menu__icon"><use xlink:href="#${options.icon}"></use></svg>` : options.icon) +
                 `<span class="b3-menu__label">${options.title}</span>`;
-            iconElement.addEventListener("click", options.callback);
         } else if (!isWindow()) {
             iconElement.className = "toolbar__item b3-tooltips b3-tooltips__sw";
             iconElement.setAttribute("aria-label", options.title);
-            iconElement.setAttribute("data-menu", "true");
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
             iconElement.addEventListener("click", options.callback);
             iconElement.setAttribute("data-position", options.position);

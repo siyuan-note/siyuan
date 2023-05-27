@@ -444,6 +444,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             tab.parent.switchTab(item, false, false);
         });
     }
+    resizeTopbar();
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, dropEditScroll = false) => {
@@ -578,18 +579,57 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
     }
 };
 
-export const resizeDrag = () => {
-    const dragElement = document.getElementById("drag");
+export const resizeTopbar = () => {
+    const toolbarElement = document.querySelector("#toolbar");
+    const dragElement = toolbarElement.querySelector("#drag") as HTMLElement;
+
+    dragElement.style.padding = "";
+    const barMoreElement = toolbarElement.querySelector("#barMore")
+    barMoreElement.classList.remove("fn__none")
+    barMoreElement.removeAttribute("data-hideids")
+
+    Array.from(toolbarElement.querySelectorAll('[data-hide="true"]')).forEach((item) => {
+        item.classList.remove("fn__none")
+        item.removeAttribute("data-hide");
+    })
+
+    let afterDragElement = dragElement.nextElementSibling
+    const hideIds: string[] = []
+    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
+        hideIds.push(afterDragElement.id)
+        afterDragElement.classList.add("fn__none")
+        afterDragElement.setAttribute("data-hide", "true")
+        afterDragElement = afterDragElement.nextElementSibling
+        if (afterDragElement.id === "barMore") {
+            break;
+        }
+    }
+
+    let beforeDragElement = dragElement.previousElementSibling
+    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
+        hideIds.push(beforeDragElement.id)
+        beforeDragElement.classList.add("fn__none")
+        beforeDragElement.setAttribute("data-hide", "true")
+        beforeDragElement = beforeDragElement.previousElementSibling
+        if (beforeDragElement.id === "barWorkspace") {
+            break;
+        }
+    }
+    if (hideIds.length > 0) {
+        barMoreElement.classList.remove("fn__none")
+    } else {
+        barMoreElement.classList.add("fn__none")
+    }
+    barMoreElement.setAttribute("data-hideids", hideIds.join(","))
+
     const width = dragElement.clientWidth;
     const dragRect = dragElement.getBoundingClientRect();
     const left = dragRect.left;
     const right = window.innerWidth - dragRect.right;
-    if (left > right && left - right < width) {
+    if (left > right && left - right < width / 3) {
         dragElement.style.paddingRight = (left - right) + "px";
-    } else if (left < right && right - left < width) {
+    } else if (left < right && right - left < width / 3) {
         dragElement.style.paddingLeft = (right - left) + "px";
-    } else {
-        dragElement.style.padding = "";
     }
 };
 

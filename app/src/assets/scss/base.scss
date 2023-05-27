@@ -101,7 +101,7 @@ html {
   }
 
   .protyle-breadcrumb > .protyle-breadcrumb__space,
-  & > .block__icons > .fn__flex-1{
+  & > .block__icons > .fn__flex-1 {
     -webkit-app-region: drag;
     min-width: 32px;
 
@@ -162,6 +162,8 @@ html {
     white-space: nowrap;
     align-self: center;
     font-size: 12px;
+    min-width: 148px;
+    box-sizing: border-box;
   }
 
   &__item {

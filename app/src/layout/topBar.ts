@@ -59,32 +59,70 @@ export const initBar = (app: App) => {
 <div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.appearanceMode}">
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
 </div>
+<div id="barMore" class="toolbar__item">
+    <svg><use xlink:href="#iconMore"></use></svg>
+</div>
 <div class="fn__flex" id="windowControls"></div>`;
     processSync();
     toolbarElement.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
+        if (typeof event.detail === "string") {
+            target = toolbarElement.querySelector("#" + event.detail);
+        }
         while (!target.classList.contains("toolbar")) {
-            if (target.id === "barBack") {
+            const targetId = typeof event.detail === "string" ? event.detail : target.id;
+            if (targetId === "barBack") {
                 goBack(app);
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barForward") {
+            } else if (targetId === "barMore") {
+                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === "barmore") {
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
+                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.element.setAttribute("data-name", "barmore");
+                (target.getAttribute("data-hideids") || "").split(",").forEach((itemId) => {
+                    const hideElement = toolbarElement.querySelector("#" + itemId);
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        label: itemId === "toolbarVIP" ? window.siyuan.languages.account : hideElement.getAttribute("aria-label"),
+                        icon: itemId === "toolbarVIP" ? "iconAccount" : hideElement.querySelector("use").getAttribute("xlink:href").substring(1),
+                        click: () => {
+                            if (itemId.startsWith("plugin")) {
+                                hideElement.dispatchEvent(new CustomEvent("click"));
+                            } else {
+                                toolbarElement.dispatchEvent(new CustomEvent("click", {detail: itemId}));
+                            }
+                            if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                                window.siyuan.menus.menu.element.getAttribute("data-name") === "barmore") {
+                                return false;
+                            }
+                            return true;
+                        }
+                    }).element);
+                });
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+                event.stopPropagation();
+                break;
+            } else if (targetId === "barForward") {
                 goForward(app);
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barSync") {
+            } else if (targetId === "barSync") {
                 syncGuide(app);
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barWorkspace") {
+            } else if (targetId === "barWorkspace") {
                 workspaceMenu(app, target.getBoundingClientRect());
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barReadonly") {
+            } else if (targetId === "barReadonly") {
                 editor.setReadonly();
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barMode") {
+            } else if (targetId === "barMode") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
                     window.siyuan.menus.menu.element.getAttribute("data-name") === "barmode") {
                     window.siyuan.menus.menu.remove();
@@ -116,25 +154,28 @@ export const initBar = (app: App) => {
                         setMode(2);
                     }
                 }).element);
-                const rect = target.getBoundingClientRect();
+                let rect = target.getBoundingClientRect();
+                if (rect.width === 0) {
+                    rect = toolbarElement.querySelector("#barMore").getBoundingClientRect();
+                }
                 window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
                 event.stopPropagation();
                 break;
-            } else if (target.id === "toolbarVIP") {
+            } else if (targetId === "toolbarVIP") {
                 if (!window.siyuan.config.readonly) {
                     const dialogSetting = openSetting(app);
                     dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
                 }
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barSearch") {
+            } else if (targetId === "barSearch") {
                 openSearch({
                     app,
                     hotkey: window.siyuan.config.keymap.general.globalSearch.custom
                 });
                 event.stopPropagation();
                 break;
-            } else if (target.id === "barZoom") {
+            } else if (targetId === "barZoom") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
                     window.siyuan.menus.menu.element.getAttribute("data-name") === "barZoom") {
                     window.siyuan.menus.menu.remove();
@@ -165,7 +206,10 @@ export const initBar = (app: App) => {
                         setZoom("restore");
                     }
                 }).element);
-                const rect = target.getBoundingClientRect();
+                let rect = target.getBoundingClientRect();
+                if (rect.width === 0) {
+                    rect = toolbarElement.querySelector("#barMore").getBoundingClientRect();
+                }
                 window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
                 event.stopPropagation();
                 break;

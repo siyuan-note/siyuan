@@ -161,9 +161,9 @@
 
 ## 🏘️ 社区
 
-* [中文讨论区](https://ld246.com/domain/siyuan) 官方支持渠道
-* [用户社区汇总](https://ld246.com/article/1640266171309) 由热心用户建立的社区
-* [Awesome SiYuan](https://github.com/siyuan-note/awesome) 由热心用户整理的资源
+* [中文讨论区](https://ld246.com/domain/siyuan)
+* [用户社区汇总](https://ld246.com/article/1640266171309)
+* [Awesome SiYuan](https://github.com/siyuan-note/awesome)
 
 ## 🛠️ 开发指南
 

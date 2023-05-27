@@ -18,6 +18,8 @@ Build Your Eternal Digital Garden
 SiYuan is a privacy-first personal knowledge management system, support fine-grained block-level reference and Markdown
 WYSIWYG.
 
+Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
+
 ![feature0.png](https://b3logfile.com/file/2022/10/feature0-EHMFc7T.png)
 
 ## 🔮 Features
@@ -156,9 +158,9 @@ We release insider preview before major updates, please visit [https://github.co
 
 ## 🏘️ Community
 
-* [Issues](https://github.com/siyuan-note/siyuan/issues) Official support channels
-* [Discord](https://discord.com/invite/bzfCBwMzdP) A community built by enthusiastic users
-* [Awesome SiYuan](https://github.com/siyuan-note/awesome) Resources organized by enthusiastic users
+* [English Discussion Forum](https://liuyun.io)
+* [Discord](https://discord.com/invite/bzfCBwMzdP)
+* [Awesome SiYuan](https://github.com/siyuan-note/awesome)
 
 ## 🛠️ Development Guide
 

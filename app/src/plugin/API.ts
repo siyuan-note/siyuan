@@ -6,7 +6,7 @@ import {Menu as SiyuanMenu} from "../menus/Menu";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 /// #if !MOBILE
-import {openFile} from "../editor/util";
+import {openFile, openFileById} from "../editor/util";
 /// #endif
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {newCardModel} from "../card/newCardTab";
@@ -80,11 +80,8 @@ openTab = () => {
 openTab = (options: {
     app: App,
     doc?: {
-        fileName: string,
-        rootIcon?: string, // 文档图标
         id: string,     // 块 id
-        rootID: string, // 文档 id
-        action: string [] // cb-get-all：获取所有内容；cb-get-focus：打开后光标定位在 id 所在的块；cb-get-hl: 打开后 id 块高亮
+        action?: string [] // cb-get-all：获取所有内容；cb-get-focus：打开后光标定位在 id 所在的块；cb-get-hl: 打开后 id 块高亮
         zoomIn?: boolean // 是否缩放
     },
     pdf?: {
@@ -97,7 +94,7 @@ openTab = (options: {
     },
     search?: ISearchOption
     card?: {
-        cardType: TCardType,
+        type: TCardType,
         id?: string, //  cardType 为 all 时不传，否则传文档或笔记本 id
         title?: string //  cardType 为 all 时不传，否则传文档或笔记本名称
     },
@@ -113,19 +110,20 @@ openTab = (options: {
     afterOpen?: () => void // 打开后回调
 }) => {
     if (options.doc) {
-        if (options.doc.zoomIn && !options.doc.action.includes(Constants.CB_GET_ALL)) {
-            options.doc.action.push(Constants.CB_GET_ALL);
+        if (options.doc.zoomIn) {
+            if (options.doc.action && !options.doc.action.includes(Constants.CB_GET_ALL)) {
+                options.doc.action.push(Constants.CB_GET_ALL);
+            } else {
+                options.doc.action = [Constants.CB_GET_ALL];
+            }
         }
-        openFile({
+        openFileById({
             app: options.app,
             keepCursor: options.keepCursor,
             removeCurrentTab: options.removeCurrentTab,
             position: options.position,
             afterOpen: options.afterOpen,
-            fileName: options.doc.fileName,
-            rootIcon: options.doc.rootIcon,
             id: options.doc.id,
-            rootID: options.doc.rootID,
             action: options.doc.action,
             zoomIn: options.doc.zoomIn
         });
@@ -155,6 +153,12 @@ openTab = (options: {
         return;
     }
     if (options.search) {
+        if (!options.search.idPath) {
+            options.search.idPath = [];
+        }
+        if (!options.search.hPath) {
+            options.search.hPath = "";
+        }
         openFile({
             app: options.app,
             keepCursor: options.keepCursor,
@@ -175,7 +179,11 @@ openTab = (options: {
             custom: {
                 icon: "iconRiffCard",
                 title: window.siyuan.languages.spaceRepetition,
-                data: options.card,
+                data: {
+                    cardType: options.card.type,
+                    id: options.card.id || "",
+                    title: options.card.title,
+                },
                 fn: newCardModel
             },
         });

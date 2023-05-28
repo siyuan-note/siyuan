@@ -367,7 +367,7 @@ export class Title {
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(this.app, response.data, "doc", protyle.block.rootID, this.editElement.textContent);
+                        openCardByData(this.app, response.data, "doc", protyle.block.rootID, this.editElement.textContent || "Untitled");
                     });
                 }
             }, {

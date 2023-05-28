@@ -9,6 +9,9 @@ import {isMobile} from "../util/functions";
 import {openFile} from "../editor/util";
 /// #endif
 import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {newCardModel} from "../card/newCardTab";
+import {App} from "../index";
+import {Constants} from "../constants";
 
 export class Menu {
     private menu: SiyuanMenu;
@@ -74,7 +77,116 @@ openTab = () => {
     // TODO: Mobile
 };
 /// #else
-openTab = openFile;
+openTab = (options: {
+    app: App,
+    doc?: {
+        fileName: string,
+        rootIcon?: string, // 文档图标
+        id: string,     // 块 id
+        rootID: string, // 文档 id
+        action: string [] // cb-get-all：获取所有内容；cb-get-focus：打开后光标定位在 id 所在的块；cb-get-hl: 打开后 id 块高亮
+        zoomIn?: boolean // 是否缩放
+    },
+    pdf?: {
+        path: string,
+        page?: number,  // pdf 页码
+        id?: string,    // File Annotation id
+    },
+    asset?: {
+        path: string,
+    },
+    search?: ISearchOption
+    card?: {
+        cardType: TCardType,
+        id?: string, //  cardType 为 all 时不传，否则传文档或笔记本 id
+        title?: string //  cardType 为 all 时不传，否则传文档或笔记本名称
+    },
+    custom?: {
+        title: string,
+        icon: string,
+        data?: any
+        fn?: () => any,
+    }
+    position?: "right" | "bottom",
+    keepCursor?: boolean // 是否跳转到新 tab 上
+    removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
+    afterOpen?: () => void // 打开后回调
+}) => {
+    if (options.doc) {
+        if (options.doc.zoomIn && !options.doc.action.includes(Constants.CB_GET_ALL)) {
+            options.doc.action.push(Constants.CB_GET_ALL);
+        }
+        openFile({
+            app: options.app,
+            keepCursor: options.keepCursor,
+            removeCurrentTab: options.removeCurrentTab,
+            position: options.position,
+            afterOpen: options.afterOpen,
+            fileName: options.doc.fileName,
+            rootIcon: options.doc.rootIcon,
+            id: options.doc.id,
+            rootID: options.doc.rootID,
+            action: options.doc.action,
+            zoomIn: options.doc.zoomIn
+        });
+        return;
+    }
+    if (options.asset) {
+        openFile({
+            app: options.app,
+            keepCursor: options.keepCursor,
+            removeCurrentTab: options.removeCurrentTab,
+            position: options.position,
+            afterOpen: options.afterOpen,
+            assetPath: options.asset.path,
+        });
+        return;
+    }
+    if (options.pdf) {
+        openFile({
+            app: options.app,
+            keepCursor: options.keepCursor,
+            removeCurrentTab: options.removeCurrentTab,
+            position: options.position,
+            afterOpen: options.afterOpen,
+            assetPath: options.pdf.path,
+            page: options.pdf.id || options.pdf.page,
+        });
+        return;
+    }
+    if (options.search) {
+        openFile({
+            app: options.app,
+            keepCursor: options.keepCursor,
+            removeCurrentTab: options.removeCurrentTab,
+            position: options.position,
+            afterOpen: options.afterOpen,
+            searchData: options.search,
+        });
+        return;
+    }
+    if (options.card) {
+        openFile({
+            app: options.app,
+            keepCursor: options.keepCursor,
+            removeCurrentTab: options.removeCurrentTab,
+            position: options.position,
+            afterOpen: options.afterOpen,
+            custom: {
+                icon: "iconRiffCard",
+                title: window.siyuan.languages.spaceRepetition,
+                data: options.card,
+                fn: newCardModel
+            },
+        });
+        return;
+    }
+    if (options.custom) {
+        openFile(options);
+        return;
+    }
+
+}
 /// #endif
 
 export const API = {

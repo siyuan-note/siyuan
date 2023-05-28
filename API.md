@@ -334,8 +334,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   ```
 
     * `data`: Created document ID
-    * If you use the same `path` to call this interface repeatedly, the existing document will not be overwritten, but a
-      new document ending with a random number will be created
+    * If you use the same `path` to call this interface repeatedly, the existing document will not be overwritten
 
 ### Rename a document
 

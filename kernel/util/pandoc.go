@@ -87,6 +87,24 @@ func initPandoc() {
 	}
 
 	pandocDir := filepath.Join(TempDir, "pandoc")
+
+	if confPath := filepath.Join(ConfDir, "conf.json"); gulu.File.IsExist(confPath) {
+		// Workspace built-in Pandoc is no longer initialized after customizing Pandoc path https://github.com/siyuan-note/siyuan/issues/8377
+		if data, err := os.ReadFile(confPath); nil == err {
+			conf := map[string]interface{}{}
+			if err = gulu.JSON.UnmarshalJSON(data, &conf); nil == err && nil != conf["export"] {
+				export := conf["export"].(map[string]interface{})
+				if customPandocBinPath := export["pandocBin"].(string); !strings.HasPrefix(customPandocBinPath, pandocDir) {
+					if pandocVer := getPandocVer(customPandocBinPath); "" != pandocVer {
+						PandocBinPath = customPandocBinPath
+						logging.LogInfof("custom pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+						return
+					}
+				}
+			}
+		}
+	}
+
 	if gulu.OS.IsWindows() {
 		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc.exe")
 	} else if gulu.OS.IsDarwin() || gulu.OS.IsLinux() {

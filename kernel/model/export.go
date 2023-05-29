@@ -60,6 +60,7 @@ func Export2Liandi(id string) (err error) {
 	}
 
 	if IsUserGuide(tree.Box) {
+		// Doc in the user guide no longer supports one-click sending to the community https://github.com/siyuan-note/siyuan/issues/8388
 		return errors.New(Conf.Language(204))
 	}
 

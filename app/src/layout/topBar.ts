@@ -94,11 +94,6 @@ export const initBar = (app: App) => {
                             } else {
                                 toolbarElement.dispatchEvent(new CustomEvent("click", {detail: itemId}));
                             }
-                            if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                                window.siyuan.menus.menu.element.getAttribute("data-name") === "barmore") {
-                                return false;
-                            }
-                            return true;
                         }
                     }).element);
                 });

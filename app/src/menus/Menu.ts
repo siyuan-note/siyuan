@@ -179,11 +179,11 @@ export class MenuItem {
                 if (this.element.getAttribute("disabled")) {
                     return;
                 }
-                const result = options.click(this.element);
+                options.click(this.element);
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 event.stopPropagation();
-                if (typeof result === "undefined" || !result) {
+                if (this.element.parentElement) {
                     window.siyuan.menus.menu.remove();
                 }
             });

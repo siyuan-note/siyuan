@@ -724,7 +724,7 @@ declare interface IModels {
 
 declare interface IMenu {
     label?: string,
-    click?: (element: HTMLElement) => boolean | void,
+    click?: (element: HTMLElement) => void,
     type?: "separator" | "submenu" | "readonly",
     accelerator?: string,
     action?: string,

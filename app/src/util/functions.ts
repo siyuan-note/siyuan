@@ -2,6 +2,25 @@ export const isMobile = () => {
     return document.getElementById("sidebar") ? true : false;
 };
 
+export const getFrontend = () => {
+    /// #if MOBILE
+    if (window.navigator.userAgent.startsWith("SiYuan/")) {
+        return "mobile";
+    } else {
+        return "browser-mobile";
+    }
+    /// #else
+    if (window.navigator.userAgent.startsWith("SiYuan/")) {
+        if (isWindow()) {
+            return "desktop-window";
+        }
+        return "desktop";
+    } else {
+        return "browser-desktop";
+    }
+    /// #endif
+};
+
 export const isWindow = () => {
     return document.getElementById("toolbar") ? false : true;
 };

@@ -5,7 +5,7 @@ import {Plugin} from "./index";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {API} from "./API";
-import {isMobile, isWindow} from "../util/functions";
+import {getFrontend, isMobile, isWindow} from "../util/functions";
 
 const getObject = (key: string) => {
     const api = {
@@ -20,7 +20,7 @@ const runCode = (code: string, sourceURL: string) => {
 };
 
 export const loadPlugins = async (app: App) => {
-    const response = await fetchSyncPost("/api/petal/loadPetals");
+    const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     let css = "";
     // 为加快启动速度，不进行 await
     response.data.forEach((item: IPluginData) => {

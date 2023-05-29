@@ -9,7 +9,7 @@ import {Constants} from "../constants";
 import {shell} from "electron";
 import * as path from "path";
 /// #endif
-import {isBrowser} from "../util/functions";
+import {getFrontend, isBrowser} from "../util/functions";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {Plugin} from "../plugin";
@@ -278,7 +278,9 @@ export const bazaar = {
         } else if (bazaarType === "plugins") {
             url = "/api/bazaar/getInstalledPlugin";
         }
-        fetchPost(url, {}, response => {
+        fetchPost(url, {
+            frontend: getFrontend()
+        }, response => {
             contentElement.removeAttribute("data-loading");
             let html = "";
             let showSwitch = false;
@@ -548,6 +550,7 @@ export const bazaar = {
                             packageName: dataObj.name,
                             repoHash: dataObj.repoHash,
                             mode: dataObj.themeMode === "dark" ? 1 : 0,
+                            frontend: getFrontend()
                         }, response => {
                             if (window.siyuan.config.appearance.themeJS && bazaarType === "themes") {
                                 exportLayout({
@@ -564,6 +567,7 @@ export const bazaar = {
                                     fetchPost("/api/petal/setPetalEnabled", {
                                         packageName: dataObj.name,
                                         enabled: true,
+                                        frontend: getFrontend()
                                     }, (response) => {
                                         loadPlugin(app, response.data);
                                         bazaar._genMyHTML(bazaarType, app);
@@ -598,6 +602,7 @@ export const bazaar = {
                                 repoHash: dataObj.repoHash,
                                 mode: dataObj.themeMode === "dark" ? 1 : 0,
                                 update: true,
+                                frontend: getFrontend()
                             }, response => {
                                 // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
                                 this._genMyHTML(bazaarType, app);
@@ -645,7 +650,8 @@ export const bazaar = {
                     } else {
                         confirmDialog(window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
                             fetchPost(url, {
-                                packageName
+                                packageName,
+                                frontend: getFrontend()
                             }, response => {
                                 this._genMyHTML(bazaarType, app);
                                 bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
@@ -719,6 +725,7 @@ export const bazaar = {
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: dataObj.name,
                             enabled,
+                            frontend: getFrontend()
                         }, (response) => {
                             target.removeAttribute("disabled");
                             if (enabled) {
@@ -764,7 +771,9 @@ export const bazaar = {
                                         bazaar._data.themes = response.data.packages;
                                     });
                                 } else if (type === "plugin") {
-                                    fetchPost("/api/bazaar/getBazaarPlugin", {}, response => {
+                                    fetchPost("/api/bazaar/getBazaarPlugin", {
+                                        frontend: getFrontend()
+                                    }, response => {
                                         bazaar._onBazaar(response, "plugins", false);
                                         bazaar._data.plugins = response.data.packages;
                                     });

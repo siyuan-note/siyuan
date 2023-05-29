@@ -66,4 +66,4 @@ const afterLayout = (app:App) => {
         const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
         tab.parent.switchTab(item, false, false);
     });
-}
+};

@@ -45,9 +45,6 @@ export const openFileById = async (options: {
             showMessage(data.msg);
             return;
         }
-        if (typeof options.removeCurrentTab === "undefined") {
-            options.removeCurrentTab = true;
-        }
         openFile({
             app: options.app,
             fileName: data.data.rootTitle,
@@ -80,6 +77,9 @@ export const openAsset = (app: App, assetPath: string, page: number | string, po
 };
 
 export const openFile = (options: IOpenFileOptions) => {
+    if (typeof options.removeCurrentTab === "undefined") {
+        options.removeCurrentTab = true;
+    }
     const allModels = getAllModels();
     // 文档已打开
     if (options.assetPath) {

@@ -221,7 +221,7 @@ export class Outline extends Model {
                 if (getSelection().rangeCount > 0) {
                     const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
                     if (blockElement && blockElement.getAttribute("data-type") === "NodeHeading") {
-                        this.setCurrent(blockElement)
+                        this.setCurrent(blockElement);
                     }
                 }
             });

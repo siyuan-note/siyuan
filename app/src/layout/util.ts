@@ -584,43 +584,43 @@ export const resizeTopbar = () => {
     const dragElement = toolbarElement.querySelector("#drag") as HTMLElement;
 
     dragElement.style.padding = "";
-    const barMoreElement = toolbarElement.querySelector("#barMore")
-    barMoreElement.classList.remove("fn__none")
-    barMoreElement.removeAttribute("data-hideids")
+    const barMoreElement = toolbarElement.querySelector("#barMore");
+    barMoreElement.classList.remove("fn__none");
+    barMoreElement.removeAttribute("data-hideids");
 
     Array.from(toolbarElement.querySelectorAll('[data-hide="true"]')).forEach((item) => {
-        item.classList.remove("fn__none")
+        item.classList.remove("fn__none");
         item.removeAttribute("data-hide");
-    })
+    });
 
-    let afterDragElement = dragElement.nextElementSibling
-    const hideIds: string[] = []
+    let afterDragElement = dragElement.nextElementSibling;
+    const hideIds: string[] = [];
     while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
-        hideIds.push(afterDragElement.id)
-        afterDragElement.classList.add("fn__none")
-        afterDragElement.setAttribute("data-hide", "true")
-        afterDragElement = afterDragElement.nextElementSibling
+        hideIds.push(afterDragElement.id);
+        afterDragElement.classList.add("fn__none");
+        afterDragElement.setAttribute("data-hide", "true");
+        afterDragElement = afterDragElement.nextElementSibling;
         if (afterDragElement.id === "barMore") {
             break;
         }
     }
 
-    let beforeDragElement = dragElement.previousElementSibling
+    let beforeDragElement = dragElement.previousElementSibling;
     while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
-        hideIds.push(beforeDragElement.id)
-        beforeDragElement.classList.add("fn__none")
-        beforeDragElement.setAttribute("data-hide", "true")
-        beforeDragElement = beforeDragElement.previousElementSibling
+        hideIds.push(beforeDragElement.id);
+        beforeDragElement.classList.add("fn__none");
+        beforeDragElement.setAttribute("data-hide", "true");
+        beforeDragElement = beforeDragElement.previousElementSibling;
         if (beforeDragElement.id === "barWorkspace") {
             break;
         }
     }
     if (hideIds.length > 0) {
-        barMoreElement.classList.remove("fn__none")
+        barMoreElement.classList.remove("fn__none");
     } else {
-        barMoreElement.classList.add("fn__none")
+        barMoreElement.classList.add("fn__none");
     }
-    barMoreElement.setAttribute("data-hideids", hideIds.join(","))
+    barMoreElement.setAttribute("data-hideids", hideIds.join(","));
 
     const width = dragElement.clientWidth;
     const dragRect = dragElement.getBoundingClientRect();

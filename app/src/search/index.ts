@@ -15,6 +15,9 @@ export class Search extends Model {
             app: options.app,
             id: options.tab.id,
         });
+        if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+            options.tab.headElement?.classList.add("item--unupdate");
+        }
         this.element = options.tab.panelElement as HTMLElement;
         this.config = options.config;
         this.edit = genSearch(options.app, this.config, this.element);

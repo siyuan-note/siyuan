@@ -1190,16 +1190,16 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
-    const isPinHead = nodeElement.getAttribute("custom-pinthead")
+    const isPinHead = nodeElement.getAttribute("custom-pinthead");
     menus.push({
         icon: "iconPin",
         label: isPinHead ? window.siyuan.languages.unpinTableHead : window.siyuan.languages.pinTableHead,
         click: () => {
             const html = nodeElement.outerHTML;
             if (isPinHead) {
-                nodeElement.removeAttribute("custom-pinthead")
+                nodeElement.removeAttribute("custom-pinthead");
             } else {
-                nodeElement.setAttribute("custom-pinthead", "true")
+                nodeElement.setAttribute("custom-pinthead", "true");
             }
             updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         }

@@ -194,7 +194,7 @@ openTab = (options: {
         return;
     }
 
-}
+};
 /// #endif
 
 export const API = {

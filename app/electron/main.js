@@ -265,7 +265,7 @@ const boot = () => {
     });
     windowStateInitialized? currentWindow.setPosition(x, y): currentWindow.center();
     require("@electron/remote/main").enable(currentWindow.webContents);
-    currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron";
+    currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
     currentWindow.webContents.session.setSpellCheckerLanguages(["en-US"]);
 

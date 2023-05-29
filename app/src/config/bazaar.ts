@@ -317,7 +317,7 @@ export const bazaar = {
         <div class="b3-card__actions">
             ${item.preferredFunding ? `<a target="_blank" href="${item.preferredFunding}" data-type="a" class="block__icon block__icon--show" aria-label="${window.siyuan.languages.sponsor} ${item.preferredFunding}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>` : ""}
             <div class="fn__flex-1"></div>
-            ${item.incompatible ? `${window.siyuan.languages.incompatible}<span class="fn__space"></span>` : ""}
+            ${item.incompatible ? `<span class="fn__flex-center">${window.siyuan.languages.incompatible}</span><span class="fn__space"></span>` : ""}
             <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${hasSetting ? "" : " fn__none"}" data-type="setting" aria-label="${window.siyuan.languages.config}">
                 <svg><use xlink:href="#iconSettings"></use></svg>
             </span>

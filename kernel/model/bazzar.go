@@ -32,8 +32,8 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	return
 }
 
-func BazaarPlugins() (plugins []*bazaar.Plugin) {
-	plugins = bazaar.Plugins()
+func BazaarPlugins(frontend string) (plugins []*bazaar.Plugin) {
+	plugins = bazaar.Plugins(frontend)
 	for _, plugin := range plugins {
 		plugin.Installed = util.IsPathRegularDirOrSymlinkDir(filepath.Join(util.DataDir, "plugins", plugin.Name))
 		if plugin.Installed {
@@ -49,8 +49,8 @@ func BazaarPlugins() (plugins []*bazaar.Plugin) {
 	return
 }
 
-func InstalledPlugins() (plugins []*bazaar.Plugin) {
-	plugins = bazaar.InstalledPlugins()
+func InstalledPlugins(frontend string) (plugins []*bazaar.Plugin) {
+	plugins = bazaar.InstalledPlugins(frontend)
 
 	petals := getPetals()
 	for _, plugin := range plugins {

@@ -69,6 +69,8 @@ type Package struct {
 	URL           string       `json:"url"`
 	Version       string       `json:"version"`
 	MinAppVersion string       `json:"minAppVersion"`
+	Backends      []string     `json:"backends"`
+	Frontends     []string     `json:"frontends"`
 	DisplayName   *DisplayName `json:"displayName"`
 	Description   *Description `json:"description"`
 	Readme        *Readme      `json:"readme"`
@@ -99,6 +101,8 @@ type Package struct {
 	HInstallDate string `json:"hInstallDate"`
 	HUpdated     string `json:"hUpdated"`
 	Downloads    int    `json:"downloads"`
+
+	Incompatible bool `json:"incompatible"`
 }
 
 type StagePackage struct {
@@ -655,9 +659,17 @@ func getBazaarIndex() map[string]*bazaarPackage {
 // Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330
 const defaultMinAppVersion = "2.9.0"
 
-func disallowDisplayBazaarPackage(minAppVersion string) bool {
-	if "" == minAppVersion { // 目前暂时放过所有不带 minAppVersion 的集市包，后续版本会使用 defaultMinAppVersion
+func disallowDisplayBazaarPackage(pkg *Package) bool {
+	if "" == pkg.MinAppVersion { // 目前暂时放过所有不带 minAppVersion 的集市包，后续版本会使用 defaultMinAppVersion
 		return false
 	}
-	return 0 < semver.Compare("v"+minAppVersion, "v"+util.Ver)
+	if 0 < semver.Compare("v"+pkg.MinAppVersion, "v"+util.Ver) {
+		return true
+	}
+
+	if 0 < len(pkg.Backends) {
+
+	}
+
+	return false
 }

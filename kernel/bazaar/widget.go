@@ -64,7 +64,7 @@ func Widgets() (widgets []*Widget) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(widget.MinAppVersion) {
+		if disallowDisplayBazaarPackage(widget.Package) {
 			return
 		}
 

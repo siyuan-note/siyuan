@@ -63,7 +63,7 @@ func Icons() (icons []*Icon) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(icon.MinAppVersion) {
+		if disallowDisplayBazaarPackage(icon.Package) {
 			return
 		}
 

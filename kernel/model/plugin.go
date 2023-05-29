@@ -38,10 +38,10 @@ type Petal struct {
 	I18n map[string]interface{} `json:"i18n"` // i18n text
 }
 
-func SetPetalEnabled(name string, enabled bool) (ret *Petal) {
+func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal) {
 	petals := getPetals()
 
-	plugins := bazaar.InstalledPlugins()
+	plugins := bazaar.InstalledPlugins(frontend)
 	var plugin *bazaar.Plugin
 	for _, p := range plugins {
 		if p.Name == name {

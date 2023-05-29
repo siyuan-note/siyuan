@@ -20,6 +20,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -36,7 +37,7 @@ type Plugin struct {
 	Enabled bool `json:"enabled"`
 }
 
-func Plugins() (plugins []*Plugin) {
+func Plugins(frontend string) (plugins []*Plugin) {
 	plugins = []*Plugin{}
 
 	stageIndex, err := getStageIndex("plugins")
@@ -65,9 +66,11 @@ func Plugins() (plugins []*Plugin) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(plugin.MinAppVersion) {
+		if disallowDisplayBazaarPackage(plugin.Package) {
 			return
 		}
+
+		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 
 		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
@@ -105,7 +108,7 @@ func Plugins() (plugins []*Plugin) {
 	return
 }
 
-func InstalledPlugins() (ret []*Plugin) {
+func InstalledPlugins(frontend string) (ret []*Plugin) {
 	ret = []*Plugin{}
 
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
@@ -119,7 +122,7 @@ func InstalledPlugins() (ret []*Plugin) {
 		return
 	}
 
-	bazaarPlugins := Plugins()
+	bazaarPlugins := Plugins(frontend)
 
 	for _, pluginDir := range pluginDirs {
 		if !util.IsDirRegularOrSymlink(pluginDir) {
@@ -133,7 +136,6 @@ func InstalledPlugins() (ret []*Plugin) {
 		}
 
 		installPath := filepath.Join(util.DataDir, "plugins", dirName)
-
 		plugin.Installed = true
 		plugin.RepoURL = plugin.URL
 		plugin.PreviewURL = "/plugins/" + dirName + "/preview.png"
@@ -160,6 +162,7 @@ func InstalledPlugins() (ret []*Plugin) {
 
 		plugin.PreferredReadme, _ = renderREADME(plugin.URL, readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
+		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 		ret = append(ret, plugin)
 	}
 	return
@@ -181,4 +184,40 @@ func UninstallPlugin(installPath string) error {
 	}
 	//logging.Logger.Infof("uninstalled plugin [%s]", installPath)
 	return nil
+}
+
+func isIncompatiblePlugin(plugin *Plugin, currentFrontend string) bool {
+	if 1 > len(plugin.Backends) {
+		return false
+	}
+
+	backendOk := false
+	for _, backend := range plugin.Backends {
+		if backend == getCurrentBackend() || "all" == backend {
+			backendOk = true
+			break
+		}
+	}
+
+	frontendOk := false
+	for _, frontend := range plugin.Frontends {
+		if frontend == currentFrontend || "all" == frontend {
+			frontendOk = true
+			break
+		}
+	}
+	return !backendOk || !frontendOk
+}
+
+func getCurrentBackend() string {
+	switch util.Container {
+	case util.ContainerDocker:
+		return "docker"
+	case util.ContainerIOS:
+		return "ios"
+	case util.ContainerAndroid:
+		return "android"
+	default:
+		return runtime.GOOS
+	}
 }

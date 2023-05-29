@@ -65,7 +65,7 @@ func Themes() (ret []*Theme) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(theme.MinAppVersion) {
+		if disallowDisplayBazaarPackage(theme.Package) {
 			return
 		}
 

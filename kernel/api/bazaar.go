@@ -46,8 +46,15 @@ func getBazaarPlugin(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	frontend := arg["frontend"].(string)
+
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarPlugins(),
+		"packages": model.BazaarPlugins(frontend),
 	}
 }
 
@@ -55,8 +62,15 @@ func getInstalledPlugin(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	frontend := arg["frontend"].(string)
+
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPlugins(),
+		"packages": model.InstalledPlugins(frontend),
 	}
 }
 
@@ -79,9 +93,11 @@ func installBazaarPlugin(c *gin.Context) {
 		return
 	}
 
+	frontend := arg["frontend"].(string)
+
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarPlugins(),
+		"packages": model.BazaarPlugins(frontend),
 	}
 }
 
@@ -102,8 +118,10 @@ func uninstallBazaarPlugin(c *gin.Context) {
 		return
 	}
 
+	frontend := arg["frontend"].(string)
+
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarPlugins(),
+		"packages": model.BazaarPlugins(frontend),
 	}
 }
 

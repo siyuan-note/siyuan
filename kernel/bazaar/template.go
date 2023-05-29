@@ -64,7 +64,7 @@ func Templates() (templates []*Template) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(template.MinAppVersion) {
+		if disallowDisplayBazaarPackage(template.Package) {
 			return
 		}
 

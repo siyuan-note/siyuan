@@ -659,5 +659,5 @@ func disallowDisplayBazaarPackage(minAppVersion string) bool {
 	if "" == minAppVersion { // 目前暂时放过所有不带 minAppVersion 的集市包，后续版本会使用 defaultMinAppVersion
 		return false
 	}
-	return 0 > semver.Compare("v"+minAppVersion, "v"+util.Ver)
+	return 0 < semver.Compare("v"+minAppVersion, "v"+util.Ver)
 }

@@ -1,4 +1,5 @@
 {
+  "incompatible": "Incompatible",
   "trust": "Confiar",
   "bazaarTrust": "El paquete del mercado es similar a una aplicación de terceros, puede hacer lo que quiera, por lo que instalar un paquete del mercado en el mercado tiene ciertos riesgos de seguridad",
   "bazaarTrust3": "Damos gran importancia a los posibles problemas de seguridad. Para evitar los riesgos de seguridad tanto como sea posible, se han tomado las siguientes medidas:",

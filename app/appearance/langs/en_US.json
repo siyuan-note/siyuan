@@ -1,4 +1,5 @@
 {
+  "incompatible": "Incompatible",
   "trust": "Trust",
   "bazaarTrust": "The marketplace package is similar to a third-party application, it can do whatever it wants, so installing a marketplace package in the marketplace has certain security risks.",
   "bazaarTrust3": "We attach great importance to potential security issues. In order to avoid security risks as much as possible, the following measures have been taken:",

@@ -740,6 +740,7 @@ declare interface IMenu {
 }
 
 declare interface IBazaarItem {
+    incompatible?: boolean  // 仅 plugin
     enabled: boolean
     preferredName: string
     preferredDesc: string

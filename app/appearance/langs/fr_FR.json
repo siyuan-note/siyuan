@@ -1158,6 +1158,7 @@
     "200": "Le temps de réponse de la recherche globale est lent, il est recommandé d'ajouter un filtrage de type ou des mots-clés pour restreindre la portée de la recherche",
     "201": "Échec de la purge du référentiel de données : %s",
     "202": "Nettoyage du référentiel de données...",
-    "203": "Le référentiel de données est purgé, [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré"
+    "203": "Le référentiel de données est purgé, [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré",
+    "204": "La documentation du guide de l'utilisateur ne prend pas en charge le partage avec la communauté"
   }
 }

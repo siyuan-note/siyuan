@@ -59,6 +59,11 @@ func Export2Liandi(id string) (err error) {
 		return
 	}
 
+	if IsUserGuide(tree.Box) {
+		// Doc in the user guide no longer supports one-click sending to the community https://github.com/siyuan-note/siyuan/issues/8388
+		return errors.New(Conf.Language(204))
+	}
+
 	sqlAssets := sql.QueryRootBlockAssets(id)
 	err = uploadAssets2Cloud(sqlAssets, bizTypeExport2Liandi)
 	if nil != err {

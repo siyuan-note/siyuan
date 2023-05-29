@@ -301,6 +301,16 @@ declare interface IDockTab {
     hotkeyLangId?: string   // 常量中无法存变量
 }
 
+declare interface ICommand {
+    langKey: string, // 多语言 key
+    hotkey: string,
+    customHotkey?: string,
+    callback?: () => void
+    fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void
+    editorCallback?: (protyle: IProtyle) => void
+    dockCallback?: (element: HTMLElement) => void
+}
+
 declare interface IPluginData {
     name: string,
     js: string,
@@ -635,6 +645,11 @@ declare interface IGraph {
 }
 
 declare interface IKeymap {
+    plugin: {
+        [key: string]: {
+            [key: string]: IKeymapItem
+        }
+    }
     general: { [key: string]: IKeymapItem }
     editor: {
         general: { [key: string]: IKeymapItem }

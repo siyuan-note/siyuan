@@ -265,7 +265,7 @@
   "importDataTip": "将导出的 zip 压缩包导入，按路径覆盖 <code class='fn__code'>工作空间/data/</code> 文件夹",
   "includeChildDoc": "包含子文档",
   "text": "文本",
-  "lastUsed": "Recently used appearance",
+  "lastUsed": "最近使用的外观",
   "removedNotebook": "已删除的笔记本",
   "querySyntax": "查询语法",
   "rollback": "回滚",

@@ -18,6 +18,7 @@ export class Plugin {
     public data: any = {};
     public name: string;
     public topBarIcons: Element[] = [];
+    public commands: ICommand[] = [];
     public models: {
         /// #if !MOBILE
         [key: string]: (options: { tab: Tab, data: any }) => Custom
@@ -53,6 +54,10 @@ export class Plugin {
 
     public onLayoutReady() {
         // 布局加载完成
+    }
+
+    public addCommand(command: ICommand) {
+        this.commands.push(command);
     }
 
     public addIcons(svg: string) {

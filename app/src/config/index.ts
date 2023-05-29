@@ -48,7 +48,7 @@ export const genItemPanel = (type: string, containerElement: Element, app: App) 
             appearance.bindEvent();
             break;
         case "keymap":
-            containerElement.innerHTML = keymap.genHTML();
+            containerElement.innerHTML = keymap.genHTML(app);
             keymap.element = containerElement;
             keymap.bindEvent();
             break;

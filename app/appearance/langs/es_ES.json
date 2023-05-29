@@ -265,7 +265,7 @@
   "importDataTip": "Importar el archivo zip exportado, sobrescribiendo la carpeta <code class='fn__code'>workspace/data/</code> por la ruta",
   "includeChildDoc": "Incluir los documentos de los niños",
   "text": "Texto",
-  "lastUsed": "Fuentes utilizadas apariencia",
+  "lastUsed": "Apariencia usada recientemente",
   "removedNotebook": "Cuaderno de notas eliminado",
   "querySyntax": "Sintaxis de consulta",
   "rollback": "Rollback",

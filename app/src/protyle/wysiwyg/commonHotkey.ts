@@ -39,8 +39,9 @@ export const commonHotkey = (app: App, protyle: IProtyle, event: KeyboardEvent) 
         netImg2LocalAssets(protyle);
         event.preventDefault();
         event.stopPropagation();
-        return;
+        return true;
     }
+
     if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) ||
         matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
         // 阻止输入 https://ld246.com/article/1679618995926
@@ -70,6 +71,23 @@ export const commonHotkey = (app: App, protyle: IProtyle, event: KeyboardEvent) 
             focusByOffset(target, offset.start, offset.end);
             return true;
         }
+    }
+
+    let matchCommand = false;
+    app.plugins.find(item => {
+        item.commands.find(command => {
+            if (command.editorCallback && matchHotKey(command.customHotkey, event)) {
+                matchCommand = true;
+                command.editorCallback(protyle);
+                return true;
+            }
+        });
+        if (matchCommand) {
+            return true;
+        }
+    });
+    if (matchCommand) {
+        return true;
     }
     /// #endif
 };

@@ -8,6 +8,7 @@ import {getCurrentWindow} from "@electron/remote";
 import {ipcRenderer} from "electron";
 /// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
+import {App} from "../index";
 
 export const keymap = {
     element: undefined as Element,
@@ -25,13 +26,55 @@ export const keymap = {
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>
     <span data-type="update" class="config-keymap__key">${keyValue}</span>
-    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field fn__none" value="${updateHotkeyTip(keymap[key].custom)}" spellcheck="false">
+    <input data-key="${keys + Constants.ZWSP + key}" data-value="${keymap[key].custom}" data-default="${keymap[key].default}" class="b3-text-field fn__none" value="${keyValue}" spellcheck="false">
 </label>`;
             }
         });
         return html;
     },
-    genHTML() {
+    genHTML(app: App) {
+        let pluginHtml = ''
+        app.plugins.forEach(item => {
+            let commandHTML = ''
+            item.commands.forEach(command => {
+                const keyValue = updateHotkeyTip(command.customHotkey);
+                commandHTML += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+    <span class="b3-list-item__text">${item.i18n[command.langKey]}</span>
+    <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
+    <span data-type="clear" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>
+    </span>
+    <span data-type="update" class="config-keymap__key">${keyValue}</span>
+    <input data-key="plugin${Constants.ZWSP}${item.name}${Constants.ZWSP}${command.langKey}" data-value="${command.customHotkey}" data-default="${command.hotkey}" class="b3-text-field fn__none" value="${keyValue}" spellcheck="false">
+</label>`;
+            });
+            if (commandHTML) {
+                pluginHtml += `<div class="b3-list__panel">
+    <div class="b3-list-item b3-list-item--narrow toggle">
+        <span class="b3-list-item__toggle b3-list-item__toggle--hl">
+            <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+        </span>
+        <span class="b3-list-item__text ft__on-surface">${item.name}</span>
+    </div>
+    <div class="fn__none b3-list__panel">
+        ${commandHTML}
+    </div>
+</div>`
+            }
+        })
+        if (pluginHtml) {
+            pluginHtml = `<div class="b3-list b3-list--border b3-list--background">
+    <div class="b3-list-item b3-list-item--narrow toggle">
+        <span class="b3-list-item__toggle b3-list-item__toggle--hl">
+            <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
+        </span>
+        <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.plugin}</span>
+    </div>
+    ${pluginHtml}
+</div>`
+        }
         return `<label class="fn__flex b3-label config__item">
     <span class="fn__flex-center">${window.siyuan.languages.keymapTip}</span>
     <span class="fn__flex-1"></span>
@@ -119,13 +162,17 @@ export const keymap = {
             <div class="fn__none b3-list__panel">${keymap._genItem(window.siyuan.config.keymap.editor.table, "editor" + Constants.ZWSP + "table")}</div>
         </div>
     </div>
+    ${pluginHtml}
 </div>`;
     },
     _setkeymap() {
         const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
-            if (keys[0] === "general") {
+            if (keys[0] === "plugin") {
+                window.siyuan.config.keymap.plugin[keys[1]][keys[2]].custom = item.getAttribute("data-value");
+                data.plugin = window.siyuan.config.keymap.plugin;
+            } else if (keys[0] === "general") {
                 data[keys[0]][keys[1]].custom = item.getAttribute("data-value");
             } else if (keys[0] === "editor" && (keys[1] === "general" || keys[1] === "insert" || keys[1] === "heading" || keys[1] === "list" || keys[1] === "table")) {
                 data[keys[0]][keys[1]][keys[2]].custom = item.getAttribute("data-value");
@@ -193,6 +240,17 @@ export const keymap = {
         } else {
             editorKeymapElement.firstElementChild.classList.remove("fn__none");
         }
+    },
+    _getTip(element: HTMLElement) {
+        const thirdElement = element.parentElement;
+        let tip = thirdElement.querySelector(".b3-list-item__text").textContent.trim()
+        const secondElement = thirdElement.parentElement.previousElementSibling;
+        tip = secondElement.textContent.trim() + "-" + tip;
+        const firstElement = secondElement.parentElement.previousElementSibling;
+        if (firstElement.classList.contains("b3-list-item")) {
+            tip = firstElement.textContent.trim() + "-" + tip;
+        }
+        return tip
     },
     bindEvent() {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
@@ -309,14 +367,9 @@ export const keymap = {
                     if (keys[1] === "heading") {
                         keys[1] = "headings";
                     }
-                    let tip = `${window.siyuan.languages.keymap} [${window.siyuan.languages[keys[0]]}-${window.siyuan.languages[keys[1]]}`;
-                    if (keys[2]) {
-                        tip += `-${window.siyuan.languages[keys[2]]}`;
-                    }
-
                     if (["⌘", "⇧", "⌥", "⌃"].includes(keymapStr.substr(keymapStr.length - 1, 1)) ||
                         ["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥", "⇧⌘⇥", "⌃⇥", "⌘⇥", "⌃⌘⇥", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦"].includes(keymapStr)) {
-                        showMessage(tip + "] " + window.siyuan.languages.invalid);
+                        showMessage(`${window.siyuan.languages.keymap} [${keymap._getTip(this)}] ${window.siyuan.languages.invalid}`);
                         return;
                     }
                     const hasConflict = Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find(inputItem => {
@@ -328,11 +381,7 @@ export const keymap = {
                             if (inputValueList[1] === "heading") {
                                 inputValueList[1] = "headings";
                             }
-                            let conflictTip = `${window.siyuan.languages[inputValueList[0]]}-${window.siyuan.languages[inputValueList[1]]}`;
-                            if (inputValueList[2]) {
-                                conflictTip += `-${window.siyuan.languages[inputValueList[2]]}`;
-                            }
-                            showMessage(`${tip}] [${conflictTip}] ${window.siyuan.languages.conflict}`);
+                            showMessage(`${window.siyuan.languages.keymap} [${keymap._getTip(this)}] [${keymap._getTip(inputItem)}] ${window.siyuan.languages.conflict}`);
                             return true;
                         }
                     });

@@ -802,8 +802,27 @@ export const globalShortcut = (app: App) => {
         }
 
         // 面板的操作
-        if (!isTabWindow && panelTreeKeydown(event)) {
+        if (!isTabWindow && panelTreeKeydown(app, event)) {
             return;
+        }
+
+        let matchCommand = false;
+        app.plugins.find(item => {
+            item.commands.find(command => {
+                if (command.callback &&
+                    !command.fileTreeCallback && !command.editorCallback&& !command.dockCallback
+                    && matchHotKey(command.customHotkey, event)) {
+                    matchCommand = true;
+                    command.callback();
+                    return true;
+                }
+            });
+            if (matchCommand) {
+                return true;
+            }
+        });
+        if (matchCommand) {
+            return true;
         }
 
         let searchKey = "";
@@ -1112,6 +1131,24 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
     const files = dockFile.data.file as Files;
+
+    let matchCommand = false;
+    app.plugins.find(item => {
+        item.commands.find(command => {
+            if (command.fileTreeCallback && matchHotKey(command.customHotkey, event)) {
+                matchCommand = true;
+                command.fileTreeCallback(files);
+                return true;
+            }
+        });
+        if (matchCommand) {
+            return true;
+        }
+    });
+    if (matchCommand) {
+        return true;
+    }
+
     if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
         event.preventDefault();
         const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
@@ -1402,7 +1439,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     }
 };
 
-const panelTreeKeydown = (event: KeyboardEvent) => {
+const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
     // 面板折叠展开操作
     const target = event.target as HTMLElement;
     if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
@@ -1450,6 +1487,23 @@ const panelTreeKeydown = (event: KeyboardEvent) => {
         activePanelElement.classList.contains("sy__globalGraph") ||
         activePanelElement.classList.contains("sy__graph")) {
         return false;
+    }
+
+    let matchCommand = false;
+    app.plugins.find(item => {
+        item.commands.find(command => {
+            if (command.dockCallback && matchHotKey(command.customHotkey, event)) {
+                matchCommand = true;
+                command.dockCallback(activePanelElement as HTMLElement);
+                return true;
+            }
+        });
+        if (matchCommand) {
+            return true;
+        }
+    });
+    if (matchCommand) {
+        return true;
     }
     const model = (getInstanceById(activePanelElement.getAttribute("data-id"), window.siyuan.layout.layout) as Tab)?.model;
     if (!model) {

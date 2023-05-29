@@ -243,7 +243,8 @@ export abstract class Constants {
                 "delete-row": {default: "⌘-", custom: "⌘-"},
                 "delete-column": {default: "⇧⌘_", custom: "⇧⌘_"}
             }
-        }
+        },
+        plugin: {},
     };
 
     public static readonly SIYUAN_EMPTY_LAYOUT: Record<string, unknown> = {

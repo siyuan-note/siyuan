@@ -52,7 +52,7 @@ func BazaarPlugins(frontend string) (plugins []*bazaar.Plugin) {
 func InstalledPlugins(frontend string) (plugins []*bazaar.Plugin) {
 	plugins = bazaar.InstalledPlugins(frontend, true)
 
-	petals := getPetals(frontend)
+	petals := getPetals()
 	for _, plugin := range plugins {
 		petal := getPetalByName(plugin.Name, petals)
 		if nil != petal {
@@ -78,7 +78,7 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 		return errors.New(fmt.Sprintf(Conf.Language(47), err.Error()))
 	}
 
-	petals := getPetals(frontend)
+	petals := getPetals()
 	var tmp []*Petal
 	for i, petal := range petals {
 		if petal.Name != pluginName {

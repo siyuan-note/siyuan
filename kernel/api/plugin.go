@@ -29,7 +29,14 @@ func loadPetals(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	petals := model.LoadPetals()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	frontend := arg["frontend"].(string)
+
+	petals := model.LoadPetals(frontend)
 	ret.Data = petals
 }
 
@@ -45,5 +52,12 @@ func setPetalEnabled(c *gin.Context) {
 	packageName := arg["packageName"].(string)
 	enabled := arg["enabled"].(bool)
 	frontend := arg["frontend"].(string)
-	ret.Data = model.SetPetalEnabled(packageName, enabled, frontend)
+	data, err := model.SetPetalEnabled(packageName, enabled, frontend)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = data
 }

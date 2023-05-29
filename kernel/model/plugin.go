@@ -17,6 +17,7 @@
 package model
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -30,52 +31,50 @@ import (
 
 // Petal represents a plugin's management status.
 type Petal struct {
-	Name    string `json:"name"`    // Plugin name
-	Enabled bool   `json:"enabled"` // Whether enabled
+	Name         string `json:"name"`         // Plugin name
+	Enabled      bool   `json:"enabled"`      // Whether enabled
+	Incompatible bool   `json:"incompatible"` // Whether incompatible
 
 	JS   string                 `json:"js"`   // JS code
 	CSS  string                 `json:"css"`  // CSS code
 	I18n map[string]interface{} `json:"i18n"` // i18n text
 }
 
-func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal) {
+func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, err error) {
 	petals := getPetals()
 
-	plugins := bazaar.InstalledPlugins(frontend)
-	var plugin *bazaar.Plugin
-	for _, p := range plugins {
-		if p.Name == name {
-			plugin = p
-			break
-		}
-	}
-	if nil == plugin {
+	found, incompatible := bazaar.IsIncompatibleInstalledPlugin(name, frontend)
+	if !found {
 		logging.LogErrorf("plugin [%s] not found", name)
 		return
 	}
 
-	ret = getPetalByName(plugin.Name, petals)
+	ret = getPetalByName(name, petals)
 	if nil == ret {
 		ret = &Petal{
-			Name:    plugin.Name,
-			Enabled: enabled,
+			Name: name,
 		}
 		petals = append(petals, ret)
-	} else {
-		ret.Enabled = enabled
+	}
+	ret.Enabled = enabled
+	ret.Incompatible = incompatible
+
+	if incompatible {
+		err = fmt.Errorf("plugin [%s] is incompatible", name)
+		return
 	}
 
 	savePetals(petals)
-
 	loadCode(ret)
 	return
 }
 
-func LoadPetals() (ret []*Petal) {
+func LoadPetals(frontend string) (ret []*Petal) {
 	ret = []*Petal{}
 	petals := getPetals()
 	for _, petal := range petals {
-		if !petal.Enabled {
+		_, petal.Incompatible = bazaar.IsIncompatibleInstalledPlugin(petal.Name, frontend)
+		if !petal.Enabled || petal.Incompatible {
 			continue
 		}
 

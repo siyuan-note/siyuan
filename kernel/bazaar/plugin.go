@@ -108,7 +108,39 @@ func Plugins(frontend string) (plugins []*Plugin) {
 	return
 }
 
-func InstalledPlugins(frontend string) (ret []*Plugin) {
+func IsIncompatibleInstalledPlugin(name, frontend string) (found, incompatible bool) {
+	pluginsPath := filepath.Join(util.DataDir, "plugins")
+	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
+		return
+	}
+
+	pluginDirs, err := os.ReadDir(pluginsPath)
+	if nil != err {
+		logging.LogWarnf("read plugins folder failed: %s", err)
+		return
+	}
+
+	for _, pluginDir := range pluginDirs {
+		if !util.IsDirRegularOrSymlink(pluginDir) {
+			continue
+		}
+		dirName := pluginDir.Name()
+		if name != dirName {
+			continue
+		}
+
+		plugin, parseErr := PluginJSON(dirName)
+		if nil != parseErr || nil == plugin {
+			return
+		}
+
+		found = true
+		incompatible = isIncompatiblePlugin(plugin, frontend)
+	}
+	return
+}
+
+func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 	ret = []*Plugin{}
 
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
@@ -122,7 +154,10 @@ func InstalledPlugins(frontend string) (ret []*Plugin) {
 		return
 	}
 
-	bazaarPlugins := Plugins(frontend)
+	var bazaarPlugins []*Plugin
+	if checkUpdate {
+		bazaarPlugins = Plugins(frontend)
+	}
 
 	for _, pluginDir := range pluginDirs {
 		if !util.IsDirRegularOrSymlink(pluginDir) {

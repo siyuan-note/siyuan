@@ -50,9 +50,9 @@ func BazaarPlugins(frontend string) (plugins []*bazaar.Plugin) {
 }
 
 func InstalledPlugins(frontend string) (plugins []*bazaar.Plugin) {
-	plugins = bazaar.InstalledPlugins(frontend)
+	plugins = bazaar.InstalledPlugins(frontend, true)
 
-	petals := getPetals()
+	petals := getPetals(frontend)
 	for _, plugin := range plugins {
 		petal := getPetalByName(plugin.Name, petals)
 		if nil != petal {
@@ -71,14 +71,14 @@ func InstallBazaarPlugin(repoURL, repoHash, pluginName string) error {
 	return nil
 }
 
-func UninstallBazaarPlugin(pluginName string) error {
+func UninstallBazaarPlugin(pluginName, frontend string) error {
 	installPath := filepath.Join(util.DataDir, "plugins", pluginName)
 	err := bazaar.UninstallPlugin(installPath)
 	if nil != err {
 		return errors.New(fmt.Sprintf(Conf.Language(47), err.Error()))
 	}
 
-	petals := getPetals()
+	petals := getPetals(frontend)
 	var tmp []*Petal
 	for i, petal := range petals {
 		if petal.Name != pluginName {

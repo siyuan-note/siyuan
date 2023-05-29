@@ -60,7 +60,7 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 	ret.Incompatible = incompatible
 
 	if incompatible {
-		err = fmt.Errorf("plugin [%s] is incompatible", name)
+		err = fmt.Errorf(Conf.Language(205))
 		return
 	}
 

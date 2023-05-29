@@ -110,15 +110,14 @@ func uninstallBazaarPlugin(c *gin.Context) {
 		return
 	}
 
+	frontend := arg["frontend"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarPlugin(packageName)
+	err := model.UninstallBazaarPlugin(packageName, frontend)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-
-	frontend := arg["frontend"].(string)
 
 	ret.Data = map[string]interface{}{
 		"packages": model.BazaarPlugins(frontend),

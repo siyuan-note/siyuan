@@ -1160,6 +1160,7 @@
     "201": "Error al purgar el repositorio de datos: %s",
     "202": "Limpiando repositorio de datos...",
     "203": "El repositorio de datos se purgó, [%d] instantáneas y [%d] objetos de datos se eliminaron y se liberó un total de [%s] espacio en disco",
-    "204": "La documentación en la guía del usuario no permite compartir con la comunidad"
+    "204": "La documentación en la guía del usuario no permite compartir con la comunidad",
+    "205": "El complemento no es compatible con el entorno actual"
   }
 }

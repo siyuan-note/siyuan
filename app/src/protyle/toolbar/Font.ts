@@ -82,7 +82,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>`;
                     break;
                 case "fontSize":
-                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="font-size:${lastFontStatus[1]};">${lastFontStatus[1]}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
                     break;
                 case "style1":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}" class="color__square">A</button>`;
@@ -167,7 +167,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
                 if (dataType === "style1") {
                     fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
                 } else if (dataType === "fontSize") {
-                    fontEvent(protyle, nodeElements, dataType, target.style.fontSize);
+                    fontEvent(protyle, nodeElements, dataType, target.textContent.trim());
                 } else if (dataType === "backgroundColor") {
                     fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor);
                 } else if (dataType === "color") {

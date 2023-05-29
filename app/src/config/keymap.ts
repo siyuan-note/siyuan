@@ -33,9 +33,9 @@ export const keymap = {
         return html;
     },
     genHTML(app: App) {
-        let pluginHtml = ''
+        let pluginHtml = "";
         app.plugins.forEach(item => {
-            let commandHTML = ''
+            let commandHTML = "";
             item.commands.forEach(command => {
                 const keyValue = updateHotkeyTip(command.customHotkey);
                 commandHTML += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
@@ -61,9 +61,9 @@ export const keymap = {
     <div class="fn__none b3-list__panel">
         ${commandHTML}
     </div>
-</div>`
+</div>`;
             }
-        })
+        });
         if (pluginHtml) {
             pluginHtml = `<div class="b3-list b3-list--border b3-list--background">
     <div class="b3-list-item b3-list-item--narrow toggle">
@@ -73,7 +73,7 @@ export const keymap = {
         <span class="b3-list-item__text ft__on-surface">${window.siyuan.languages.plugin}</span>
     </div>
     ${pluginHtml}
-</div>`
+</div>`;
         }
         return `<label class="fn__flex b3-label config__item">
     <span class="fn__flex-center">${window.siyuan.languages.keymapTip}</span>
@@ -243,14 +243,14 @@ export const keymap = {
     },
     _getTip(element: HTMLElement) {
         const thirdElement = element.parentElement;
-        let tip = thirdElement.querySelector(".b3-list-item__text").textContent.trim()
+        let tip = thirdElement.querySelector(".b3-list-item__text").textContent.trim();
         const secondElement = thirdElement.parentElement.previousElementSibling;
         tip = secondElement.textContent.trim() + "-" + tip;
         const firstElement = secondElement.parentElement.previousElementSibling;
         if (firstElement.classList.contains("b3-list-item")) {
             tip = firstElement.textContent.trim() + "-" + tip;
         }
-        return tip
+        return tip;
     },
     bindEvent() {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
@@ -372,7 +372,7 @@ export const keymap = {
                         showMessage(`${window.siyuan.languages.keymap} [${keymap._getTip(this)}] ${window.siyuan.languages.invalid}`);
                         return;
                     }
-                    const hasConflict = Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find(inputItem => {
+                    const hasConflict = Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find((inputItem: HTMLElement) => {
                         if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {

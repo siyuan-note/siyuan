@@ -99,23 +99,23 @@ const mergePluginHotkey = (app: App) => {
                         custom: command.hotkey,
                     }
                 };
-                return
+                return;
             }
             if (!window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
                 command.customHotkey = command.hotkey;
                 window.siyuan.config.keymap.plugin[plugin.name][command.langKey] = {
                     default: command.hotkey,
                     custom: command.hotkey,
-                }
+                };
                 return;
             }
             if (window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
                 command.customHotkey = window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom || command.hotkey;
-                window.siyuan.config.keymap.plugin[plugin.name][command.langKey]["default"] = command.hotkey
+                window.siyuan.config.keymap.plugin[plugin.name][command.langKey]["default"] = command.hotkey;
             }
-        })
-    })
-}
+        });
+    });
+};
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");

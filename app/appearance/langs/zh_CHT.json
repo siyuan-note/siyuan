@@ -1,4 +1,5 @@
 {
+  "incompatiblePluginTip": "該插件不支持在當前終端上使用",
   "incompatible": "不兼容",
   "trust": "信任",
   "bazaarTrust": "集市包類似於第三方應用程序，它可以做任何它想做的事情，所以在集市中安裝集市包存在一定的安全風險。",

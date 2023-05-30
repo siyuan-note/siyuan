@@ -1,4 +1,5 @@
 {
+  "incompatiblePluginTip": "Ce plugin n'est pas supporté sur le terminal actuel",
   "incompatible": "Incompatible",
   "trust": "Confiance",
   "bazaarTrust": "Le package marketplace est similaire à une application tierce, il peut faire ce qu'il veut, donc l'installation d'un package marketplace sur le marché présente certains risques de sécurité.",

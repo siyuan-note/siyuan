@@ -1,4 +1,5 @@
 {
+  "incompatiblePluginTip": "Este complemento no es compatible con el terminal actual",
   "incompatible": "Incompatible",
   "trust": "Confiar",
   "bazaarTrust": "El paquete del mercado es similar a una aplicación de terceros, puede hacer lo que quiera, por lo que instalar un paquete del mercado en el mercado tiene ciertos riesgos de seguridad",

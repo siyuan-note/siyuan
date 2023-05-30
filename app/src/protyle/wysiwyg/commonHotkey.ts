@@ -200,9 +200,9 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
     let focusElement;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    nodeElements.forEach((item, index) => {
+    nodeElements.reverse().forEach((item, index) => {
         const tempElement = item.cloneNode(true) as HTMLElement;
-        if (index === nodeElements.length - 1) {
+        if (index === 0) {
             focusElement = tempElement;
         }
         const newId = Lute.NewNodeID();
@@ -211,12 +211,12 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             childItem.setAttribute("data-node-id", Lute.NewNodeID());
         });
         item.classList.remove("protyle-wysiwyg--select");
-        item.after(tempElement);
+        nodeElements[0].after(tempElement);
         doOperations.push({
             action: "insert",
             data: tempElement.outerHTML,
             id: newId,
-            previousID: item.getAttribute("data-node-id"),
+            previousID: nodeElements[0].getAttribute("data-node-id"),
         });
         undoOperations.push({
             action: "delete",

@@ -391,7 +391,9 @@ export const bazaar = {
     </div>
     <div class="fn__flex-1"></div>
     <img class="item__img" src="${data.iconURL}" onerror="this.src='${data.previewURLThumb}'">
-    <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.name}</a>
+    <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.preferredName}</a>
+    <br>
+    <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${data.name}</a>
     <div class="block__icons">
         <span class="fn__flex-1"></span>
         ${data.preferredFunding ?

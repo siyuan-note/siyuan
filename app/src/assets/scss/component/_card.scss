@@ -46,6 +46,11 @@
   &__info {
     padding: 16px 16px 4px;
     line-height: 18px;
+
+    &--left {
+      padding-bottom: 16px;
+      padding-right: 8px;
+    }
   }
 
   &__desc {
@@ -62,5 +67,15 @@
     box-sizing: border-box;
     font-size: 12px;
     line-height: 14px;
+
+    &--right {
+      padding-left: 0;
+      padding-bottom: 0;
+      align-items: center;
+
+      .block__icon {
+        margin-left: 8px;
+      }
+    }
   }
 }

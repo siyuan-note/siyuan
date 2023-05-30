@@ -4,7 +4,7 @@ import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {Menu as SiyuanMenu} from "../menus/Menu";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
-import {getFrontend} from "../util/functions";
+import {getBackend, getFrontend} from "../util/functions";
 /// #if !MOBILE
 import {openFile, openFileById} from "../editor/util";
 /// #endif
@@ -205,6 +205,7 @@ export const API = {
     fetchSyncPost,
     fetchGet,
     getFrontend,
+    getBackend,
     openTab,
     Plugin,
     Dialog,

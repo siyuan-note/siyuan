@@ -291,6 +291,13 @@ func skipNewVerInstallPkg() bool {
 	if !Conf.System.DownloadInstallPkg {
 		return true
 	}
+	if gulu.OS.IsWindows() {
+		plat := strings.ToLower(Conf.System.OSPlatform)
+		// Windows 7, 8 and Server 2012 are no longer supported https://github.com/siyuan-note/siyuan/issues/7347
+		if strings.Contains(plat, " 7 ") || strings.Contains(plat, " 8 ") || strings.Contains(plat, "2012") {
+			return true
+		}
+	}
 	return false
 }
 

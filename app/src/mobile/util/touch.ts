@@ -1,4 +1,4 @@
-import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
@@ -75,7 +75,8 @@ export const handleTouchEnd = (app: App, event: TouchEvent) => {
     // 有些事件不经过 touchmove
 
     let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
-        hasClosestByAttribute(target, "data-type", "NodeTable");
+        hasClosestByAttribute(target, "data-type", "NodeTable") ||
+        hasTopClosestByClassName(target, "list");
     if (scrollElement) {
         if (scrollElement.classList.contains("table")) {
             scrollElement = scrollElement.firstElementChild as HTMLElement;
@@ -223,7 +224,8 @@ export const handleTouchMove = (event: TouchEvent) => {
     previousClientX = event.touches[0].clientX;
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
         let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
-            hasClosestByAttribute(target, "data-type", "NodeTable");
+            hasClosestByAttribute(target, "data-type", "NodeTable") ||
+            hasTopClosestByClassName(target, "list");
         if (scrollElement) {
             if (scrollElement.classList.contains("table")) {
                 scrollElement = scrollElement.firstElementChild as HTMLElement;

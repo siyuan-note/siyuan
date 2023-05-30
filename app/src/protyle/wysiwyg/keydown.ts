@@ -731,10 +731,10 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 }
             }
             // 行首转义符前删除 https://github.com/siyuan-note/siyuan/issues/6092
-            if (range.startOffset === 0 &&
+            if (range.startOffset === 0 && selectText === "" &&
                 previousSibling && previousSibling.parentElement.getAttribute("data-type")?.indexOf("backslash") > -1 &&
                 previousSibling.nodeType !== 3 && (previousSibling as HTMLElement).outerHTML === "<span>\\</span>" &&
-                !hasPreviousSibling(previousSibling)) {
+                !hasPreviousSibling(previousSibling.parentElement)) {
                 range.setStartBefore(previousSibling.parentElement);
                 removeBlock(protyle, nodeElement, range);
                 event.stopPropagation();

@@ -12,6 +12,7 @@ import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {newCardModel} from "../card/newCardTab";
 import {App} from "../index";
 import {Constants} from "../constants";
+import {Model} from "../layout/Model";
 
 export class Menu {
     private menu: SiyuanMenu;
@@ -102,7 +103,7 @@ openTab = (options: {
         title: string,
         icon: string,
         data?: any
-        fn?: () => any,
+        fn?: () => Model,
     }
     position?: "right" | "bottom",
     keepCursor?: boolean // 是否跳转到新 tab 上
@@ -117,7 +118,10 @@ openTab = (options: {
                 options.doc.action = [Constants.CB_GET_ALL];
             }
         }
-        openFileById({
+        if (!options.doc.action) {
+            options.doc.action = []
+        }
+        return openFileById({
             app: options.app,
             keepCursor: options.keepCursor,
             removeCurrentTab: options.removeCurrentTab,
@@ -127,10 +131,9 @@ openTab = (options: {
             action: options.doc.action,
             zoomIn: options.doc.zoomIn
         });
-        return;
     }
     if (options.asset) {
-        openFile({
+        return openFile({
             app: options.app,
             keepCursor: options.keepCursor,
             removeCurrentTab: options.removeCurrentTab,
@@ -138,10 +141,9 @@ openTab = (options: {
             afterOpen: options.afterOpen,
             assetPath: options.asset.path,
         });
-        return;
     }
     if (options.pdf) {
-        openFile({
+        return openFile({
             app: options.app,
             keepCursor: options.keepCursor,
             removeCurrentTab: options.removeCurrentTab,
@@ -150,7 +152,6 @@ openTab = (options: {
             assetPath: options.pdf.path,
             page: options.pdf.id || options.pdf.page,
         });
-        return;
     }
     if (options.search) {
         if (!options.search.idPath) {
@@ -159,7 +160,7 @@ openTab = (options: {
         if (!options.search.hPath) {
             options.search.hPath = "";
         }
-        openFile({
+        return openFile({
             app: options.app,
             keepCursor: options.keepCursor,
             removeCurrentTab: options.removeCurrentTab,
@@ -167,10 +168,9 @@ openTab = (options: {
             afterOpen: options.afterOpen,
             searchData: options.search,
         });
-        return;
     }
     if (options.card) {
-        openFile({
+        return openFile({
             app: options.app,
             keepCursor: options.keepCursor,
             removeCurrentTab: options.removeCurrentTab,
@@ -187,11 +187,9 @@ openTab = (options: {
                 fn: newCardModel
             },
         });
-        return;
     }
     if (options.custom) {
-        openFile(options);
-        return;
+        return openFile(options);
     }
 
 };

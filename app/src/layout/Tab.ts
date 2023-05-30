@@ -210,4 +210,8 @@ export class Tab {
             this.headElement.querySelector(".item__text").classList.remove("fn__none");
         }
     }
+
+    public close() {
+        this.parent.removeTab(this.id);
+    }
 }

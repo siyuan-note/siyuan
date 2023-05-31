@@ -61,7 +61,7 @@ export class Plugin {
     }
 
     public addIcons(svg: string) {
-        document.body.insertAdjacentHTML("afterbegin", `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+        document.body.insertAdjacentHTML("afterbegin", `<svg data-name="${this.name}" style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
 <defs>${svg}</defs></svg>`);
     }
 

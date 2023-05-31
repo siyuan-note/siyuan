@@ -105,7 +105,7 @@ export const loadAssets = (data: IAppearance) => {
         while (svgElement.tagName === "svg") {
             const currentSvgElement = svgElement;
             svgElement = svgElement.nextElementSibling;
-            if (currentSvgElement.id !== "emojiScriptSvg") {
+            if (currentSvgElement.id !== "emojiScriptSvg" && !currentSvgElement.getAttribute("data-name")) {
                 currentSvgElement.remove();
             }
         }

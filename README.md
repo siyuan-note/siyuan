@@ -74,14 +74,14 @@ Cloud services require a paid subscription.
 
 ![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
 
-* [bazzar](https://github.com/siyuan-note/bazaar)
-* [dejavu](https://github.com/siyuan-note/dejavu)
-* [riff](https://github.com/siyuan-note/riff)
-* [petal](https://github.com/siyuan-note/petal)
-* [chrome](https://github.com/siyuan-note/siyuan-chrome)
-* [lute](https://github.com/88250/lute)
-* [ios](https://github.com/siyuan-note/siyuan-ios)
-* [android](https://github.com/siyuan-note/siyuan-android)
+* [bazzar](https://github.com/siyuan-note/bazaar): Community marketplace
+* [dejavu](https://github.com/siyuan-note/dejavu): Data repo
+* [riff](https://github.com/siyuan-note/riff): Spaced repetition system
+* [petal](https://github.com/siyuan-note/petal): Plugin system
+* [chrome](https://github.com/siyuan-note/siyuan-chrome): Chrome extension
+* [lute](https://github.com/88250/lute): A structured editor engine that supports Go and JavaScript
+* [ios](https://github.com/siyuan-note/siyuan-ios): iOS APP
+* [android](https://github.com/siyuan-note/siyuan-android): Android APP
 
 ## 🌟 Star History
 

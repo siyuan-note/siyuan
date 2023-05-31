@@ -72,7 +72,7 @@
 
 ## 🏗️ 架构设计和开源生态
 
-![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-RZ8wYA7.png "思源笔记架构设计")
+![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "思源笔记架构设计")
 
 * [bazzar](https://github.com/siyuan-note/bazaar)
 * [dejavu](https://github.com/siyuan-note/dejavu)

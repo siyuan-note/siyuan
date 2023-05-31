@@ -72,7 +72,7 @@ Cloud services require a paid subscription.
 
 ## 🏗️ Architecture design and open source ecosystem
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-RZ8wYA7.png "SiYuan Arch")
+![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
 
 * [bazzar](https://github.com/siyuan-note/bazaar)
 * [dejavu](https://github.com/siyuan-note/dejavu)

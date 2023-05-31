@@ -85,9 +85,10 @@ export const initBar = (app: App) => {
                 window.siyuan.menus.menu.element.setAttribute("data-name", "barmore");
                 (target.getAttribute("data-hideids") || "").split(",").forEach((itemId) => {
                     const hideElement = toolbarElement.querySelector("#" + itemId);
-                    window.siyuan.menus.menu.append(new MenuItem({
+                    const useElement = hideElement.querySelector("use")
+                    const menuOptions: IMenu = {
                         label: itemId === "toolbarVIP" ? window.siyuan.languages.account : hideElement.getAttribute("aria-label"),
-                        icon: itemId === "toolbarVIP" ? "iconAccount" : hideElement.querySelector("use").getAttribute("xlink:href").substring(1),
+                        icon: itemId === "toolbarVIP" ? "iconAccount" : (useElement ? useElement.getAttribute("xlink:href").substring(1) : undefined),
                         click: () => {
                             if (itemId.startsWith("plugin")) {
                                 hideElement.dispatchEvent(new CustomEvent("click"));
@@ -95,7 +96,13 @@ export const initBar = (app: App) => {
                                 toolbarElement.dispatchEvent(new CustomEvent("click", {detail: itemId}));
                             }
                         }
-                    }).element);
+                    };
+                    if (!useElement) {
+                        const svgElement = hideElement.querySelector("svg")
+                        svgElement.classList.add("b3-menu__icon");
+                        menuOptions.iconHTML = svgElement.outerHTML;
+                    }
+                    window.siyuan.menus.menu.append(new MenuItem(menuOptions).element);
                 });
                 const rect = target.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);

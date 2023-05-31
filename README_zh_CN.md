@@ -70,6 +70,19 @@
 * 定时微信提醒
 * 云端收集箱
 
+## 🏗️ 架构设计和开源生态
+
+![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-RZ8wYA7.png "思源笔记架构设计")
+
+* [bazzar](https://github.com/siyuan-note/bazaar)
+* [dejavu](https://github.com/siyuan-note/dejavu)
+* [riff](https://github.com/siyuan-note/riff)
+* [petal](https://github.com/siyuan-note/petal)
+* [chrome](https://github.com/siyuan-note/siyuan-chrome)
+* [lute](https://github.com/88250/lute)
+* [ios](https://github.com/siyuan-note/siyuan-ios)
+* [android](https://github.com/siyuan-note/siyuan-android)
+
 ## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date)](https://star-history.com/#siyuan-note/siyuan&Date)

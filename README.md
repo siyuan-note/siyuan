@@ -70,10 +70,22 @@ Cloud services require a paid subscription.
 * WeChat notification
 * Cloud inbox
 
+## 🏗️ Architecture design and open source ecosystem
+
+![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-RZ8wYA7.png "SiYuan Arch")
+
+* [bazzar](https://github.com/siyuan-note/bazaar)
+* [dejavu](https://github.com/siyuan-note/dejavu)
+* [riff](https://github.com/siyuan-note/riff)
+* [petal](https://github.com/siyuan-note/petal)
+* [chrome](https://github.com/siyuan-note/siyuan-chrome)
+* [lute](https://github.com/88250/lute)
+* [ios](https://github.com/siyuan-note/siyuan-ios)
+* [android](https://github.com/siyuan-note/siyuan-android)
+
 ## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date)](https://star-history.com/#siyuan-note/siyuan&Date)
-
 
 ## 🗺️ Roadmap
 

@@ -18,6 +18,7 @@ export class Plugin {
     public data: any = {};
     public name: string;
     public topBarIcons: Element[] = [];
+    public statusBarIcons: Element[] = [];
     public commands: ICommand[] = [];
     public models: {
         /// #if !MOBILE
@@ -68,7 +69,7 @@ export class Plugin {
     public addTopBar(options: {
         icon: string,
         title: string,
-        position?: "right",
+        position?: "right" | "left",
         callback: (evt: MouseEvent) => void
     }) {
         const iconElement = document.createElement("div");
@@ -84,10 +85,21 @@ export class Plugin {
             iconElement.setAttribute("aria-label", options.title);
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
             iconElement.addEventListener("click", options.callback);
-            iconElement.setAttribute("data-position", options.position);
+            iconElement.setAttribute("data-position", options.position || "right");
         }
         this.topBarIcons.push(iconElement);
         return iconElement;
+    }
+
+    public addStatusBar(options: {
+        element: HTMLElement,
+        position?: "right" | "left",
+    }) {
+        /// #if !MOBILE
+        options.element.setAttribute("data-position", options.position || "right");
+        this.statusBarIcons.push(options.element);
+        return options.element;
+        /// #endif
     }
 
     public openSetting() {

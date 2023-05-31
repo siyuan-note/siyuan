@@ -114,6 +114,16 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             }
         });
     }
+    /// #if !MOBILE
+    plugin.statusBarIcons.forEach(element => {
+        const statusElement = document.getElementById("status")
+        if (element.getAttribute("data-position") === "right") {
+            statusElement.insertAdjacentElement("beforeend", element);
+        } else {
+            statusElement.insertAdjacentElement("afterbegin", element);
+        }
+    });
+    /// #endif
     if (isWindow()) {
         return;
     }

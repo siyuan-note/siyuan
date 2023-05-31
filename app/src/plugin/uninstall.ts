@@ -20,10 +20,16 @@ export const uninstall = (app: App, name: string) => {
                     custom.parent.parent.removeTab(custom.parent.id);
                 }
             });
-            // rm topbar
+            // rm topBar
             plugin.topBarIcons.forEach(item => {
                 item.remove();
             });
+            // rm statusBar
+            /// #if !MOBILE
+            plugin.statusBarIcons.forEach(item => {
+                item.remove();
+            });
+            /// #endif
             // rm dock
             const docksKeys = Object.keys(plugin.docks);
             docksKeys.forEach(key => {

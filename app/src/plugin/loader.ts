@@ -64,6 +64,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     return plugin;
 };
 
+// 启用插件
 export const loadPlugin = async (app: App, item: IPluginData) => {
     const plugin = await loadPluginJS(app, item);
     const styleElement = document.createElement("style");
@@ -98,6 +99,36 @@ const updateDock = (dockItem: IDockTab[], index: number, plugin: Plugin, type: s
     });
 };
 
+const mergePluginHotkey = (plugin: Plugin) => {
+    if (!window.siyuan.config.keymap.plugin) {
+        window.siyuan.config.keymap.plugin = {};
+    }
+    plugin.commands.forEach(command => {
+        if (!window.siyuan.config.keymap.plugin[plugin.name]) {
+            command.customHotkey = command.hotkey;
+            window.siyuan.config.keymap.plugin[plugin.name] = {
+                [command.langKey]: {
+                    default: command.hotkey,
+                    custom: command.hotkey,
+                }
+            };
+            return;
+        }
+        if (!window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
+            command.customHotkey = command.hotkey;
+            window.siyuan.config.keymap.plugin[plugin.name][command.langKey] = {
+                default: command.hotkey,
+                custom: command.hotkey,
+            };
+            return;
+        }
+        if (window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
+            command.customHotkey = window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom || command.hotkey;
+            window.siyuan.config.keymap.plugin[plugin.name][command.langKey]["default"] = command.hotkey;
+        }
+    });
+};
+
 export const afterLoadPlugin = (plugin: Plugin) => {
     try {
         plugin.onLayoutReady();
@@ -115,6 +146,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         });
     }
     /// #if !MOBILE
+    mergePluginHotkey(plugin);
     plugin.statusBarIcons.forEach(element => {
         const statusElement = document.getElementById("status")
         if (element.getAttribute("data-position") === "right") {

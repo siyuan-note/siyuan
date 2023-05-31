@@ -165,17 +165,27 @@ export const keymap = {
     ${pluginHtml}
 </div>`;
     },
-    _setkeymap() {
+    _setkeymap(app: App) {
         const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
+            const newHotkey = item.getAttribute("data-value")
             if (keys[0] === "plugin") {
-                window.siyuan.config.keymap.plugin[keys[1]][keys[2]].custom = item.getAttribute("data-value");
+                window.siyuan.config.keymap.plugin[keys[1]][keys[2]].custom = newHotkey;
                 data.plugin = window.siyuan.config.keymap.plugin;
+                app.plugins.forEach((plugin) => {
+                    if (plugin.name === keys[1]) {
+                        plugin.commands.forEach(command => {
+                            if (command.langKey === keys[2]) {
+                                command.customHotkey = newHotkey;
+                            }
+                        })
+                    }
+                })
             } else if (keys[0] === "general") {
-                data[keys[0]][keys[1]].custom = item.getAttribute("data-value");
+                data[keys[0]][keys[1]].custom = newHotkey;
             } else if (keys[0] === "editor" && (keys[1] === "general" || keys[1] === "insert" || keys[1] === "heading" || keys[1] === "list" || keys[1] === "table")) {
-                data[keys[0]][keys[1]][keys[2]].custom = item.getAttribute("data-value");
+                data[keys[0]][keys[1]][keys[2]].custom = newHotkey;
             }
         });
         window.siyuan.config.keymap = data;
@@ -252,7 +262,7 @@ export const keymap = {
         }
         return tip;
     },
-    bindEvent() {
+    bindEvent(app: App) {
         keymap.element.querySelector("#keymapRefreshBtn").addEventListener("click", () => {
             exportLayout({
                 reload: true,
@@ -308,7 +318,7 @@ export const keymap = {
                     inputElement.value = updateHotkeyTip(inputElement.getAttribute("data-default"));
                     inputElement.setAttribute("data-value", inputElement.getAttribute("data-default"));
                     inputElement.previousElementSibling.textContent = inputElement.value;
-                    keymap._setkeymap();
+                    keymap._setkeymap(app);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -317,7 +327,7 @@ export const keymap = {
                     inputElement.value = "";
                     inputElement.previousElementSibling.textContent = "";
                     inputElement.setAttribute("data-value", "");
-                    keymap._setkeymap();
+                    keymap._setkeymap(app);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -388,7 +398,7 @@ export const keymap = {
                     if (hasConflict) {
                         return;
                     }
-                    keymap._setkeymap();
+                    keymap._setkeymap(app);
                 }, 1000);
             });
             item.addEventListener("blur", function () {

@@ -85,38 +85,6 @@ const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edito
     return match;
 };
 
-const mergePluginHotkey = (app: App) => {
-    if (!window.siyuan.config.keymap.plugin) {
-        window.siyuan.config.keymap.plugin = {};
-    }
-    app.plugins.forEach(plugin => {
-        plugin.commands.forEach(command => {
-            if (!window.siyuan.config.keymap.plugin[plugin.name]) {
-                command.customHotkey = command.hotkey;
-                window.siyuan.config.keymap.plugin[plugin.name] = {
-                    [command.langKey]: {
-                        default: command.hotkey,
-                        custom: command.hotkey,
-                    }
-                };
-                return;
-            }
-            if (!window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
-                command.customHotkey = command.hotkey;
-                window.siyuan.config.keymap.plugin[plugin.name][command.langKey] = {
-                    default: command.hotkey,
-                    custom: command.hotkey,
-                };
-                return;
-            }
-            if (window.siyuan.config.keymap.plugin[plugin.name][command.langKey]) {
-                command.customHotkey = window.siyuan.config.keymap.plugin[plugin.name][command.langKey].custom || command.hotkey;
-                window.siyuan.config.keymap.plugin[plugin.name][command.langKey]["default"] = command.hotkey;
-            }
-        });
-    });
-};
-
 export const onGetConfig = (isStart: boolean, app: App) => {
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
@@ -131,7 +99,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     const hasKeymap4 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.heading, "editor", "heading");
     const hasKeymap5 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.list, "editor", "list");
     const hasKeymap6 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.table, "editor", "table");
-    mergePluginHotkey(app);
     if (!window.siyuan.config.readonly &&
         (!matchKeymap1 || !matchKeymap2 || !matchKeymap3 || !matchKeymap4 || !matchKeymap5 || !matchKeymap6 ||
             !hasKeymap1 || !hasKeymap2 || !hasKeymap3 || !hasKeymap4 || !hasKeymap5 || !hasKeymap6)) {

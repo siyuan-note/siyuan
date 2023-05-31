@@ -331,8 +331,8 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
             }
         }
     });
-    const content = Lute.EscapeHTMLStr(rangeContents.textContent);
-
+    // eslint-disable-next-line no-control-regex
+    const content = Lute.EscapeHTMLStr(rangeContents.textContent.replace(/[\x00]|\n/g, ""));
     const startPage = pdf.pdfViewer.getPageView(startIndex);
     const startPageRect = startPage.canvas.getClientRects()[0];
     const startViewport = startPage.viewport;

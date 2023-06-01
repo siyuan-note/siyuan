@@ -3,8 +3,9 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 
 !macro preInit
     ${IfNot} ${AtLeastWin10}
-    MessageBox MB_ICONEXCLAMATION "即将停止对 Windows 7/8 和 Server 2012 的支持，建议升级到 Windows 10 或者更高版本。$\n$\n\
-        Support for Windows 7/8 and Server 2012 will be stopped soon, it is recommended to upgrade to Windows 10 or higher version.$\n"
+        MessageBox MB_ICONEXCLAMATION "非常抱歉，思源笔记无法在 Windows 10 以下的系统上进行安装$\n$\n\
+            Sorry, SiYuan cannot be installed on systems below Windows 10$\n"
+        Quit
     ${EndIf}
 
     nsExec::Exec 'TASKKILL /F /IM "SiYuan.exe"'

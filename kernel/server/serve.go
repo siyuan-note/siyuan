@@ -36,7 +36,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/mssola/user_agent"
+	"github.com/mssola/useragent"
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/api"
@@ -205,10 +205,17 @@ func serveAppearance(ginServer *gin.Engine) {
 
 		if strings.Contains(userAgentHeader, "Electron") {
 			location.Path = "/stage/build/app/"
-		} else if user_agent.New(userAgentHeader).Mobile() {
-			location.Path = "/stage/build/mobile/"
 		} else {
-			location.Path = "/stage/build/desktop/"
+			ua := useragent.New(userAgentHeader)
+			if ua.Mobile() {
+				if strings.Contains(strings.ToLower(ua.Platform()), "pad") {
+					location.Path = "/stage/build/desktop/"
+				} else {
+					location.Path = "/stage/build/mobile/"
+				}
+			} else {
+				location.Path = "/stage/build/desktop/"
+			}
 		}
 
 		c.Redirect(302, location.String())

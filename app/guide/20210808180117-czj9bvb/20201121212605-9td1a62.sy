@@ -7,7 +7,7 @@
 		"id": "20201121212605-9td1a62",
 		"title": "致谢",
 		"type": "doc",
-		"updated": "20230329104237"
+		"updated": "20230601220833"
 	},
 	"Children": [
 		{
@@ -30,7 +30,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220522101224-ctmcj3d",
-				"updated": "20230329104237"
+				"updated": "20230601220833"
 			},
 			"Children": [
 				{
@@ -1332,7 +1332,7 @@
 					},
 					"Properties": {
 						"id": "20220522101224-zea3u6q",
-						"updated": "20220522101224"
+						"updated": "20230601220833"
 					},
 					"Children": [
 						{
@@ -1340,14 +1340,14 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220522101224-295m1cs",
-								"updated": "20220522101224"
+								"updated": "20230601220833"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/mssola/user_agent",
-									"TextMarkTextContent": "https://github.com/mssola/user_agent"
+									"TextMarkAHref": "https://github.com/mssola/useragent",
+									"TextMarkTextContent": "https://github.com/mssola/useragent"
 								},
 								{
 									"Type": "NodeText",

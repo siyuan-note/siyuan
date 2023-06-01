@@ -105,7 +105,7 @@ export const loadAssets = (data: IAppearance) => {
         while (svgElement.tagName === "svg") {
             const currentSvgElement = svgElement;
             svgElement = svgElement.nextElementSibling;
-            if (currentSvgElement.id !== "emojiScriptSvg" && !currentSvgElement.getAttribute("data-name")) {
+            if (!currentSvgElement.getAttribute("data-name")) {
                 currentSvgElement.remove();
             }
         }
@@ -116,15 +116,8 @@ export const loadAssets = (data: IAppearance) => {
 };
 
 export const initAssets = () => {
-    const emojiElement = document.getElementById("emojiScript");
     const loadingElement = document.getElementById("loading");
-    if (!emojiElement && !window.siyuan.config.appearance.nativeEmoji && !isMobile()) {
-        addScript("/appearance/emojis/twitter-emoji.js?v=1.0.1", "emojiScript").then(() => {
-            if (loadingElement) {
-                loadingElement.remove();
-            }
-        });
-    } else if (loadingElement) {
+    if (loadingElement) {
         setTimeout(() => {
             loadingElement.remove();
         }, 160);

@@ -434,7 +434,6 @@ declare interface IWebSocketData {
 declare interface IAppearance {
     modeOS: boolean,
     hideStatusBar: boolean,
-    nativeEmoji: boolean,
     themeJS: boolean,
     mode: number, // 1 暗黑；0 明亮
     icon: string,

@@ -693,8 +693,6 @@
   "appearance1": "Code Block Theme",
   "appearance10": "Close button settings",
   "appearance11": "shrink to the tray after clicking the close button",
-  "appearance14": "Doc icon uses the system native Emoji",
-  "appearance15": "The desktop uses Twitter Emoji by default, and the native Emoji font in the system will be used after it is turned on",
   "appearance16": "Hide bottom status bar",
   "appearance17": "Hide the status bar at the bottom of the desktop when enabled",
   "min": "Min",

@@ -24,7 +24,7 @@ export const unicode2Emoji = (unicode: string, assic = false, className = "", ne
     let emoji = "";
     if (unicode.indexOf(".") > -1) {
         emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/emojis/${unicode}"/>`;
-    } else if (isMobile() || window.siyuan.config.appearance.nativeEmoji || assic) {
+    } else {
         try {
             unicode.split("-").forEach(item => {
                 if (item.length < 5) {
@@ -40,8 +40,6 @@ export const unicode2Emoji = (unicode: string, assic = false, className = "", ne
             // 自定义表情搜索报错 https://github.com/siyuan-note/siyuan/issues/5883
             // 这里忽略错误不做处理
         }
-    } else {
-        emoji = `<svg class="${className || "custom-icon"}"><use xlink:href="#icon-${unicode}"></use></svg>`;
     }
     return emoji;
 };

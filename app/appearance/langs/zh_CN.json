@@ -693,8 +693,6 @@
   "appearance1": "代码块主题",
   "appearance10": "关闭按钮设置",
   "appearance11": "点击关闭按钮后缩小到托盘中",
-  "appearance14": "文档图标使用系统原生 Emoji",
-  "appearance15": "桌面端默认使用 Twitter Emoji，启用后将使用系统原生的 Emoji",
   "appearance16": "隐藏底部状态栏",
   "appearance17": "启用后将隐藏桌面端底部状态栏",
   "min": "最小化",

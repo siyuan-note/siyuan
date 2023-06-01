@@ -128,14 +128,6 @@ export const appearance = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
-        ${window.siyuan.languages.appearance14}
-        <div class="b3-label__text">${window.siyuan.languages.appearance15}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="nativeEmoji" type="checkbox"${window.siyuan.config.appearance.nativeEmoji ? " checked" : ""}>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
         ${window.siyuan.languages.appearance16}
         <div class="b3-label__text">${window.siyuan.languages.appearance17}</div>
     </div>
@@ -168,7 +160,6 @@ export const appearance = {
             icons: window.siyuan.config.appearance.icons,
             lang: (appearance.element.querySelector("#lang") as HTMLSelectElement).value,
             closeButtonBehavior: (appearance.element.querySelector("#closeButtonBehavior") as HTMLInputElement).checked ? 1 : 0,
-            nativeEmoji: (appearance.element.querySelector("#nativeEmoji") as HTMLInputElement).checked,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, response => {
             if (window.siyuan.config.appearance.themeJS) {
@@ -242,7 +233,7 @@ export const appearance = {
         });
     },
     onSetappearance(data: IAppearance) {
-        if (data.lang !== window.siyuan.config.appearance.lang || data.nativeEmoji !== window.siyuan.config.appearance.nativeEmoji) {
+        if (data.lang !== window.siyuan.config.appearance.lang) {
             exportLayout({
                 reload: true,
                 onlyData: false,

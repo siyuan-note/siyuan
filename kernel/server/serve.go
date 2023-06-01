@@ -209,6 +209,7 @@ func serveAppearance(ginServer *gin.Engine) {
 			ua := useragent.New(userAgentHeader)
 			if ua.Mobile() {
 				if strings.Contains(strings.ToLower(ua.Platform()), "pad") {
+					// Improve detecting Pad device, treat it as desktop device https://github.com/siyuan-note/siyuan/issues/8435
 					location.Path = "/stage/build/desktop/"
 				} else {
 					location.Path = "/stage/build/mobile/"

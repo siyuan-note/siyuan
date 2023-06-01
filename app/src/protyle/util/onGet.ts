@@ -270,6 +270,9 @@ const setHTML = (options: {
     if (protyle.options.render.breadcrumb) {
         protyle.breadcrumb.render(protyle);
     }
+    app.plugins.forEach(item => {
+        item.eventBus.emit("loaded-protyle", protyle);
+    });
 };
 
 export const disabledForeverProtyle = (protyle: IProtyle) => {

@@ -23,7 +23,7 @@ type TOperation =
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "click-blockicon" | "click-editorcontent" | "click-pdf" |
-    "click-editortitleicon" | "open-noneditableblock"
+    "click-editortitleicon" | "open-noneditableblock" | "loaded-protyle"
 
 declare module "blueimp-md5"
 

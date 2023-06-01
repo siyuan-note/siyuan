@@ -77,7 +77,7 @@ export class Protyle {
         this.protyle.undo = new Undo();
         this.protyle.wysiwyg = new WYSIWYG(app, this.protyle);
         this.protyle.toolbar = new Toolbar(app, this.protyle);
-        this.protyle.scroll = new Scroll(this.protyle); // 不能使用 render.scroll 来判读是否初始化，除非重构后面用到的相关变量
+        this.protyle.scroll = new Scroll(this.protyle, this.app); // 不能使用 render.scroll 来判读是否初始化，除非重构后面用到的相关变量
         if (this.protyle.options.render.gutter) {
             this.protyle.gutter = new Gutter(app, this.protyle);
         }
@@ -95,7 +95,7 @@ export class Protyle {
                     switch (data.cmd) {
                         case "reload":
                             if (data.data === this.protyle.block.rootID) {
-                                reloadProtyle(this.protyle, false);
+                                reloadProtyle(this.protyle, app, false);
                             }
                             break;
                         case "addLoading":
@@ -105,7 +105,7 @@ export class Protyle {
                             break;
                         case "transactions":
                             data.data[0].doOperations.forEach((item: IOperation) => {
-                                onTransaction(this.protyle, item, false);
+                                onTransaction(app, this.protyle, item, false);
                             });
                             break;
                         case "readonly":
@@ -123,10 +123,10 @@ export class Protyle {
                                         id: this.protyle.block.rootID,
                                         size: window.siyuan.config.editor.dynamicLoadBlocks,
                                     }, getResponse => {
-                                        onGet(getResponse, this.protyle);
+                                        onGet({data: getResponse, protyle: this.protyle, app: this.app});
                                     });
                                 } else {
-                                    reloadProtyle(this.protyle, false);
+                                    reloadProtyle(this.protyle, app, false);
                                 }
                                 /// #if !MOBILE
                                 if (data.cmd === "heading2doc") {
@@ -224,6 +224,7 @@ export class Protyle {
                         if (scrollObj) {
                             scrollObj.rootId = response.data.rootID;
                             getDocByScroll({
+                                app: this.app,
                                 protyle: this.protyle,
                                 scrollAttr: scrollObj,
                                 mergedOptions,
@@ -237,6 +238,7 @@ export class Protyle {
                     });
                 } else {
                     getDocByScroll({
+                        app: this.app,
                         protyle: this.protyle,
                         scrollAttr: options.scrollAttr,
                         mergedOptions,
@@ -260,7 +262,7 @@ export class Protyle {
             mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet(getResponse, this.protyle, mergedOptions.action);
+            onGet({data: getResponse, protyle: this.protyle, app: this.app, action: mergedOptions.action});
             this.afterOnGet(mergedOptions);
         });
     }
@@ -330,7 +332,7 @@ export class Protyle {
 
         this.protyle.preview = new Preview(this.app, this.protyle);
 
-        initUI(this.protyle);
+        initUI(this.protyle, this.app);
     }
 
     /** 聚焦到编辑器 */

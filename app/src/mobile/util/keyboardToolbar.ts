@@ -4,6 +4,7 @@ import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
+import {App} from "../../index";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -327,7 +328,7 @@ export const activeBlur = () => {
     (document.activeElement as HTMLElement).blur();
 };
 
-export const initKeyboardToolbar = () => {
+export const initKeyboardToolbar = (app: App) => {
     let preventRender = false;
     document.addEventListener("selectionchange", () => {
         if (!preventRender) {
@@ -416,10 +417,10 @@ export const initKeyboardToolbar = () => {
             return;
         }
         if (type === "undo") {
-            protyle.undo.undo(protyle);
+            protyle.undo.undo(app, protyle);
             return;
         } else if (type === "redo") {
-            protyle.undo.redo(protyle);
+            protyle.undo.redo(app, protyle);
             return;
         }
         if (getSelection().rangeCount === 0) {
@@ -475,7 +476,7 @@ export const initKeyboardToolbar = () => {
             }
             return;
         } else if (type === "more") {
-            protyle.breadcrumb.showMenu(protyle, {
+            protyle.breadcrumb.showMenu(app, protyle, {
                 x: 0,
                 y: 0
             });

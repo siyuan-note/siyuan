@@ -5,6 +5,7 @@ import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {isMobile} from "../../util/functions";
+import {App} from "../../index";
 
 export class Scroll {
     public element: HTMLElement;
@@ -13,7 +14,7 @@ export class Scroll {
     public lastScrollTop: number;
     public keepLazyLoad: boolean;   // 保持加载内容
 
-    constructor(protyle: IProtyle) {
+    constructor(protyle: IProtyle, app: App) {
         this.parentElement = document.createElement("div");
         this.parentElement.classList.add("protyle-scroll");
         if (!isMobile()) {
@@ -41,25 +42,25 @@ export class Scroll {
         });
         /// #if BROWSER
         this.inputElement.addEventListener("change", () => {
-            this.setIndex(protyle);
+            this.setIndex(protyle, app);
         });
         this.inputElement.addEventListener("touchend", () => {
-            this.setIndex(protyle);
+            this.setIndex(protyle, app);
         });
         /// #endif
         this.parentElement.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-scroll__up")) {
-                goHome(protyle);
+                goHome(protyle, app);
             } else if (hasClosestByClassName(target, "protyle-scroll__down")) {
-                goEnd(protyle);
+                goEnd(protyle, app);
             } else if (target.classList.contains("b3-slider")) {
-                this.setIndex(protyle);
+                this.setIndex(protyle, app);
             }
         });
     }
 
-    private setIndex(protyle: IProtyle) {
+    private setIndex(protyle: IProtyle, app: App) {
         if (protyle.wysiwyg.element.getAttribute("data-top")) {
             return;
         }
@@ -70,7 +71,12 @@ export class Scroll {
             mode: 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet(getResponse, protyle, [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID]);
+            onGet({
+                data: getResponse,
+                protyle,
+                action: [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID],
+                app
+            });
         });
     }
 

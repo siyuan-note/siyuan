@@ -434,16 +434,30 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     }
 };
 
-export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushBack = true, callback?: () => void, reload = false) => {
-    if (protyle.options.backlinkData) {
+export const zoomOut = (options: {
+    app: App,
+    protyle: IProtyle,
+    id: string,
+    focusId?: string,
+    isPushBack?: boolean,
+    callback?: () => void,
+    reload?: boolean
+}) => {
+    if (options.protyle.options.backlinkData) {
         return;
     }
-    const breadcrumbHLElement = protyle.breadcrumb?.element.querySelector(".protyle-breadcrumb__item--active");
-    if (!reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === id) {
-        if (id === protyle.block.rootID) {
+    if (typeof options.isPushBack === "undefined") {
+        options.isPushBack = true;
+    }
+    if (typeof options.reload === "undefined") {
+        options.reload = false;
+    }
+    const breadcrumbHLElement = options.protyle.breadcrumb?.element.querySelector(".protyle-breadcrumb__item--active");
+    if (!options.reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === options.id) {
+        if (options.id === options.protyle.block.rootID) {
             return;
         }
-        const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId || id}"]`);
+        const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId || options.id}"]`);
         if (focusElement) {
             focusBlock(focusElement);
             focusElement.scrollIntoView();
@@ -452,58 +466,73 @@ export const zoomOut = (protyle: IProtyle, id: string, focusId?: string, isPushB
     }
     if (window.siyuan.mobile?.editor) {
         window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
-            id,
-            action: id === protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
+            id: options.id,
+            action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
         };
         setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
-        if (isPushBack) {
+        if (options.isPushBack) {
             pushBack();
         }
     }
     /// #if !MOBILE
-    if (protyle.breadcrumb) {
-        protyle.breadcrumb.toggleExit(id === protyle.block.rootID);
+    if (options.protyle.breadcrumb) {
+        options.protyle.breadcrumb.toggleExit(options.id === options.protyle.block.rootID);
     }
     /// #endif
     fetchPost("/api/filetree/getDoc", {
-        id,
-        size: id === protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
+        id: options.id,
+        size: options.id === options.protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
     }, getResponse => {
-        if (isPushBack) {
-            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML]);
+        if (options.isPushBack) {
+            onGet({
+                data: getResponse,
+                protyle: options.protyle,
+                action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML],
+                app: options.app
+            });
         } else {
-            onGet(getResponse, protyle, id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]);
+            onGet({
+                data: getResponse,
+                protyle: options.protyle,
+                action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML],
+                app: options.app
+            });
         }
         // https://github.com/siyuan-note/siyuan/issues/4874
-        if (focusId) {
-            const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId}"]`);
+        if (options.focusId) {
+            const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);
             if (focusElement) {
                 focusBlock(focusElement);
                 focusElement.scrollIntoView();
-            } else if (id === protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来
+            } else if (options.id === options.protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来
                 fetchPost("/api/filetree/getDoc", {
-                    id: focusId,
+                    id: options.focusId,
                     mode: 3,
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getFocusResponse => {
-                    onGet(getFocusResponse, protyle, isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO]);
+                    onGet({
+                        data: getFocusResponse,
+                        protyle: options.protyle,
+                        action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
+                        app: options.app
+                    });
                 });
                 return;
             }
         }
         /// #if !MOBILE
-        if (protyle.model) {
+        if (options.protyle.model) {
             const allModels = getAllModels();
             allModels.outline.forEach(item => {
-                if (item.blockId === protyle.block.rootID) {
-                    item.setCurrent(protyle.wysiwyg.element.querySelector(`[data-node-id="${focusId || id}"]`));
+                if (item.blockId === options.protyle.block.rootID) {
+                    item.setCurrent(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId || options.id}"]`));
                 }
             });
-            updateBacklinkGraph(allModels, protyle);
+            updateBacklinkGraph(allModels, options.protyle);
         }
         /// #endif
-        if (callback) {
-            callback();
+        if (options.callback) {
+            options.callback();
         }
     });
 };

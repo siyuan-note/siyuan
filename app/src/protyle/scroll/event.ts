@@ -4,9 +4,10 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
+import {App} from "../../index";
 
 let getIndexTimeout: number;
-export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
+export const scrollEvent = (app: App, protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
     element.addEventListener("scroll", () => {
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
@@ -70,7 +71,12 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 }, getResponse => {
                     protyle.contentElement.style.overflow = "";
                     protyle.contentElement.style.width = "";
-                    onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
+                    onGet({
+                        data: getResponse,
+                        protyle,
+                        action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
+                        app
+                    });
                 });
             }
         } else if ((element.scrollTop > element.scrollHeight - element.clientHeight * 1.8) &&
@@ -82,7 +88,12 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 mode: 2,
                 size: window.siyuan.config.editor.dynamicLoadBlocks,
             }, getResponse => {
-                onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);
+                onGet({
+                    data: getResponse,
+                    protyle,
+                    action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
+                    app
+                });
             });
         }
         protyle.scroll.lastScrollTop = Math.max(element.scrollTop, 0);

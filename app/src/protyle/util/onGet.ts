@@ -16,84 +16,94 @@ import {removeLoading} from "../ui/initUI";
 import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
+import {App} from "../../index";
 
-export const onGet = (data: IWebSocketData, protyle: IProtyle, action: string[] = [], scrollAttr?: IScrollAttr) => {
-    protyle.wysiwyg.element.removeAttribute("data-top");
-    if (data.code === 1) {
+export const onGet = (options: {
+    data: IWebSocketData,
+    protyle: IProtyle,
+    action?: string[],
+    scrollAttr?: IScrollAttr
+    app: App
+}) => {
+    if (!options.action) {
+        options.action = [];
+    }
+    options.protyle.wysiwyg.element.removeAttribute("data-top");
+    if (options.data.code === 1) {
         // 其他报错
-        if (protyle.model) {
-            protyle.model.parent.parent.removeTab(protyle.model.parent.id, false, false);
+        if (options.protyle.model) {
+            options.protyle.model.parent.parent.removeTab(options.protyle.model.parent.id, false, false);
         } else {
-            protyle.element.innerHTML = `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`;
+            options.protyle.element.innerHTML = `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`;
         }
         return;
     }
-    if (data.code === 3) {
+    if (options.data.code === 3) {
         // block not found
         return;
     }
-    protyle.notebookId = data.data.box;
-    protyle.path = data.data.path;
+    options.protyle.notebookId = options.data.data.box;
+    options.protyle.path = options.data.data.path;
 
-    if (data.data.eof && !scrollAttr) {
-        if (action.includes(Constants.CB_GET_BEFORE)) {
-            protyle.wysiwyg.element.firstElementChild.setAttribute("data-eof", "1");
+    if (options.data.data.eof && !options.scrollAttr) {
+        if (options.action.includes(Constants.CB_GET_BEFORE)) {
+            options.protyle.wysiwyg.element.firstElementChild.setAttribute("data-eof", "1");
         } else {
-            protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "2");
+            options.protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "2");
         }
-        if (data.data.mode !== 4) {
+        if (options.data.data.mode !== 4) {
             return;
         }
     }
-    hideElements(["gutter"], protyle);
-    protyle.block.parentID = data.data.parentID;
-    protyle.block.parent2ID = data.data.parent2ID;
-    protyle.block.rootID = data.data.rootID;
-    protyle.block.showAll = false;
-    protyle.block.mode = data.data.mode;
-    protyle.block.blockCount = data.data.blockCount;
-    protyle.block.scroll = data.data.scroll;
-    protyle.block.action = action;
-    if (!action.includes(Constants.CB_GET_UNCHANGEID)) {
-        protyle.block.id = data.data.id;    // 非缩放情况时不一定是 rootID（搜索打开页签）；缩放时必为缩放 id，否则需查看代码
-        protyle.scroll.lastScrollTop = 0;
-        protyle.contentElement.scrollTop = 0;
-        protyle.wysiwyg.element.setAttribute("data-doc-type", data.data.type);
+    hideElements(["gutter"], options.protyle);
+    options.protyle.block.parentID = options.data.data.parentID;
+    options.protyle.block.parent2ID = options.data.data.parent2ID;
+    options.protyle.block.rootID = options.data.data.rootID;
+    options.protyle.block.showAll = false;
+    options.protyle.block.mode = options.data.data.mode;
+    options.protyle.block.blockCount = options.data.data.blockCount;
+    options.protyle.block.scroll = options.data.data.scroll;
+    options.protyle.block.action = options.action;
+    if (!options.action.includes(Constants.CB_GET_UNCHANGEID)) {
+        options.protyle.block.id = options.data.data.id;    // 非缩放情况时不一定是 rootID（搜索打开页签）；缩放时必为缩放 id，否则需查看代码
+        options.protyle.scroll.lastScrollTop = 0;
+        options.protyle.contentElement.scrollTop = 0;
+        options.protyle.wysiwyg.element.setAttribute("data-doc-type", options.data.data.type);
     }
 
     // 防止动态加载加载过多的内容
-    if (action.includes(Constants.CB_GET_APPEND) || action.includes(Constants.CB_GET_BEFORE) || action.includes(Constants.CB_GET_HTML)) {
+    if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE) || options.action.includes(Constants.CB_GET_HTML)) {
         setHTML({
-            content: data.data.content,
-            expand: data.data.isBacklinkExpand,
-            action,
-            scrollAttr,
-            isSyncing: data.data.isSyncing,
-        }, protyle);
-        removeLoading(protyle);
+            content: options.data.data.content,
+            expand: options.data.data.isBacklinkExpand,
+            action: options.action,
+            scrollAttr: options.scrollAttr,
+            isSyncing: options.data.data.isSyncing,
+        }, options.protyle, options.app);
+        removeLoading(options.protyle);
         return;
     }
 
     fetchPost("/api/block/getDocInfo", {
-        id: protyle.block.rootID
+        id: options.protyle.block.rootID
     }, (response) => {
-        if (protyle.options.render.title) {
+        if (options.protyle.options.render.title) {
             // 页签没有打开
-            protyle.title.render(protyle, response);
-        } else if (protyle.options.render.background) {
-            protyle.background.render(response.data.ial, protyle.block.rootID);
-            protyle.wysiwyg.renderCustom(response.data.ial);
+            options.protyle.title.render(options.protyle, response);
+        } else if (options.protyle.options.render.background) {
+            options.protyle.background.render(response.data.ial, options.protyle.block.rootID);
+            options.protyle.wysiwyg.renderCustom(response.data.ial);
         }
 
         setHTML({
-            content: data.data.content,
-            expand: data.data.isBacklinkExpand,
-            action,
-            scrollAttr,
-            isSyncing: data.data.isSyncing,
-        }, protyle);
+            content: options.data.data.content,
+            expand: options.data.data.isBacklinkExpand,
+            action: options.action,
+            scrollAttr: options.scrollAttr,
+            isSyncing: options.data.data.isSyncing,
+        }, options.protyle, options.app);
         setTitle(response.data.ial.title);
-        removeLoading(protyle);
+        removeLoading(options.protyle);
     });
 };
 
@@ -103,7 +113,7 @@ const setHTML = (options: {
     isSyncing: boolean,
     expand: boolean,
     scrollAttr?: IScrollAttr
-}, protyle: IProtyle) => {
+}, protyle: IProtyle, app: App) => {
     if (protyle.contentElement.classList.contains("fn__none")) {
         return;
     }
@@ -251,7 +261,7 @@ const setHTML = (options: {
             mode: 2,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet(getResponse, protyle, [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]);
+            onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID], app});
         });
     }
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {

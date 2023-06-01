@@ -96,13 +96,13 @@ class App {
                 handleTouchEnd(this, event);
             }, false);
         });
-        promiseTransactions();
+        promiseTransactions(this);
     }
 }
 
 const siyuanApp = new App();
 
-window.goBack = goBack;
+window.goBack = goBack.apply(siyuanApp);
 window.showKeyboardToolbar = (height) => {
     document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.innerHeight / 2 - 42).toString());
     showKeyboardToolbar();

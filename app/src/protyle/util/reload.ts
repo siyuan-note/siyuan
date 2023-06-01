@@ -4,8 +4,9 @@ import {getDocByScroll, saveScroll} from "../scroll/saveScroll";
 import {renderBacklink} from "../wysiwyg/renderBacklink";
 import {hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
+import {App} from "../../index";
 
-export const reloadProtyle = (protyle: IProtyle, focus: boolean) => {
+export const reloadProtyle = (protyle: IProtyle, app: App, focus: boolean) => {
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         protyle.wysiwyg.element.classList.add("protyle-wysiwyg--attr");
     } else {
@@ -39,6 +40,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean) => {
     } else {
         preventScroll(protyle);
         getDocByScroll({
+            app,
             protyle,
             focus,
             scrollAttr: saveScroll(protyle, true)

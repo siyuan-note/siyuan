@@ -7,8 +7,9 @@ import {Constants} from "../../constants";
 import {hideAllElements, hideElements} from "../ui/hideElements";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {reloadProtyle} from "../util/reload";
+import {App} from "../../index";
 
-export const netImg2LocalAssets = (protyle: IProtyle) => {
+export const netImg2LocalAssets = (protyle: IProtyle, app: App) => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
         return;
     }
@@ -18,11 +19,11 @@ export const netImg2LocalAssets = (protyle: IProtyle) => {
         id: protyle.block.rootID
     }, () => {
         /// #if MOBILE
-        reloadProtyle(protyle, false);
+        reloadProtyle(protyle, app, false);
         /// #else
         getAllModels().editor.forEach(item => {
             if (item.editor.protyle.block.rootID === protyle.block.rootID) {
-                reloadProtyle(item.editor.protyle, item.editor.protyle.element.isSameNode(protyle.element));
+                reloadProtyle(item.editor.protyle, app, item.editor.protyle.element.isSameNode(protyle.element));
             }
         });
         /// #endif

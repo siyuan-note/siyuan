@@ -19,6 +19,7 @@ import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
+import {App} from "../../index";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
@@ -461,7 +462,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     hideElements(["util"], protyle);
 };
 
-export const hintMoveBlock = (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
+export const hintMoveBlock = (pathString: string, sourceElements: Element[], protyle: IProtyle, app: App) => {
     if (pathString === "/") {
         return;
     }
@@ -512,7 +513,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
         });
     } else if (protyle.block.showAll && parentElement.classList.contains("protyle-wysiwyg") && parentElement.childElementCount === 0) {
         setTimeout(() => {
-            zoomOut(protyle, protyle.block.parent2ID, protyle.block.parent2ID);
+            zoomOut({app, protyle, id: protyle.block.parent2ID, focusId:protyle.block.parent2ID});
         }, Constants.TIMEOUT_INPUT * 2 + 100);
     } else if (parentElement.classList.contains("protyle-wysiwyg") && parentElement.innerHTML === "" &&
         !hasClosestByClassName(parentElement, "block__edit", true) &&

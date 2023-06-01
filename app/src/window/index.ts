@@ -145,7 +145,7 @@ class App {
         });
         setNoteBook();
         initBlockPopover(this);
-        promiseTransactions();
+        promiseTransactions(this);
     }
 }
 

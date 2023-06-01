@@ -343,7 +343,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         return true;
     }
     if (options.zoomIn) {
-        zoomOut(editor.editor.protyle, options.id);
+        zoomOut({app: options.app, protyle: editor.editor.protyle, id: options.id});
         return true;
     }
     let nodeElement = editor.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.id}"]`);
@@ -353,7 +353,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet(getResponse, editor.editor.protyle, options.action);
+            onGet({data: getResponse, protyle: editor.editor.protyle, action: options.action, app: options.app});
             // 大纲点击折叠标题下的内容时，需更新反链面板
             updateBacklinkGraph(allModels, editor.editor.protyle);
         });

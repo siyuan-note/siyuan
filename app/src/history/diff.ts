@@ -74,7 +74,12 @@ const renderCompare = (app: App, element: HTMLElement) => {
         } else {
             textElement.classList.add("fn__none");
             leftElement.lastElementChild.classList.remove("fn__none");
-            onGet(response, leftEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+            onGet({
+                data: response,
+                protyle: leftEditor.protyle,
+                action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                app
+            });
         }
         textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
     });
@@ -90,7 +95,12 @@ const renderCompare = (app: App, element: HTMLElement) => {
             } else {
                 textElement.classList.add("fn__none");
                 rightElement.lastElementChild.classList.remove("fn__none");
-                onGet(response, rightEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                onGet({
+                    data: response,
+                    protyle: rightEditor.protyle,
+                    action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                    app
+                });
             }
             textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
         });

@@ -164,7 +164,7 @@ export class Gutter {
                 return;
             }
             if (event.ctrlKey || event.metaKey) {
-                zoomOut(protyle, id);
+                zoomOut({protyle, id, app});
             } else if (event.altKey) {
                 let foldElement: Element;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
@@ -648,7 +648,7 @@ export class Gutter {
                     });
                     writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
+                    removeBlock(this.app, protyle, selectsElement[0], getEditorRange(selectsElement[0]));
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
                     document.execCommand("cut");
@@ -661,7 +661,7 @@ export class Gutter {
             icon: "iconMove",
             click: () => {
                 movePathTo((toPath) => {
-                    hintMoveBlock(toPath[0], selectsElement, protyle);
+                    hintMoveBlock(toPath[0], selectsElement, protyle, this.app);
                 });
             }
         }).element);
@@ -671,7 +671,7 @@ export class Gutter {
             accelerator: "⌫",
             click: () => {
                 protyle.breadcrumb?.hide();
-                removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]));
+                removeBlock(this.app, protyle, selectsElement[0], getEditorRange(selectsElement[0]));
             }
         }).element);
 
@@ -1078,7 +1078,7 @@ export class Gutter {
                 click: () => {
                     if (isNotEditBlock(nodeElement)) {
                         writeText(protyle.lute.BlockDOM2StdMd(removeEmbed(nodeElement)).trimEnd());
-                        removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
+                        removeBlock(this.app, protyle, nodeElement, getEditorRange(nodeElement));
                         protyle.breadcrumb?.hide();
                     } else {
                         focusByRange(getEditorRange(nodeElement));
@@ -1092,7 +1092,7 @@ export class Gutter {
                 icon: "iconMove",
                 click: () => {
                     movePathTo((toPath) => {
-                        hintMoveBlock(toPath[0], [nodeElement], protyle);
+                        hintMoveBlock(toPath[0], [nodeElement], protyle, this.app);
                     });
                 }
             }).element);
@@ -1102,7 +1102,7 @@ export class Gutter {
                 accelerator: "⌫",
                 click: () => {
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, nodeElement, getEditorRange(nodeElement));
+                    removeBlock(this.app, protyle, nodeElement, getEditorRange(nodeElement));
                 }
             }).element);
         }
@@ -1401,8 +1401,8 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘Click")}`,
                 label: window.siyuan.languages.enter,
-                click() {
-                    zoomOut(protyle, id);
+                click:()=> {
+                    zoomOut({protyle, id, app: this.app});
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -1423,7 +1423,7 @@ export class Gutter {
                             /// #endif
                         }
                     } else {
-                        zoomOut(protyle, protyle.block.parent2ID, id);
+                        zoomOut({protyle, id:protyle.block.parent2ID, focusId:id, app: this.app});
                     }
                 }
             }).element);

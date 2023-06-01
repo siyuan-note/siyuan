@@ -36,7 +36,7 @@ export const commonHotkey = (app: App, protyle: IProtyle, event: KeyboardEvent) 
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
-        netImg2LocalAssets(protyle);
+        netImg2LocalAssets(protyle, app);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -228,7 +228,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
     scrollCenter(protyle);
 };
 
-export const goHome = (protyle: IProtyle) => {
+export const goHome = (protyle: IProtyle, app: App) => {
     if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
         protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
         protyle.options.backlinkData) {
@@ -241,12 +241,12 @@ export const goHome = (protyle: IProtyle) => {
             mode: 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS], app});
         });
     }
 };
 
-export const goEnd = (protyle: IProtyle) => {
+export const goEnd = (protyle: IProtyle, app: App) => {
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
         fetchPost("/api/filetree/getDoc", {
@@ -254,7 +254,7 @@ export const goEnd = (protyle: IProtyle) => {
             mode: 4,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet(getResponse, protyle, [Constants.CB_GET_FOCUS]);
+            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS], app});
         });
     } else {
         protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;

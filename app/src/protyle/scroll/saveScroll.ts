@@ -3,6 +3,7 @@ import {getSelectionOffset} from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
+import {App} from "../../index";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
@@ -45,6 +46,7 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
 };
 
 export const getDocByScroll = (options: {
+    app: App,
     protyle: IProtyle,
     scrollAttr: IScrollAttr,
     mergedOptions?: IOptions,
@@ -68,7 +70,13 @@ export const getDocByScroll = (options: {
         }, response => {
             actions.push(Constants.CB_GET_ALL);
             options.protyle.breadcrumb?.toggleExit(false);
-            onGet(response, options.protyle, actions, options.scrollAttr);
+            onGet({
+                data: response,
+                protyle: options.protyle,
+                action: actions,
+                scrollAttr: options.scrollAttr,
+                app: options.app
+            });
             if (options.cb) {
                 options.cb();
             }
@@ -81,7 +89,13 @@ export const getDocByScroll = (options: {
         endID: options.scrollAttr.endId,
     }, response => {
         options.protyle.breadcrumb?.toggleExit(true);
-        onGet(response, options.protyle, actions, options.scrollAttr);
+        onGet({
+            data: response,
+            protyle: options.protyle,
+            action: actions,
+            scrollAttr: options.scrollAttr,
+            app: options.app
+        });
         if (options.cb) {
             options.cb();
         }

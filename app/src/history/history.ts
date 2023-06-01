@@ -611,7 +611,12 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         } else {
                             mdElement.classList.add("fn__none");
                             docElement.classList.remove("fn__none");
-                            onGet(response, historyEditor.protyle, [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML]);
+                            onGet({
+                                data: response,
+                                protyle: historyEditor.protyle,
+                                action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                                app
+                            });
                         }
                     });
                 }

@@ -143,7 +143,12 @@ export const bindCardEvent = (options: {
             mode: 0,
             size: Constants.SIZE_GET_MAX
         }, (response) => {
-            onGet(response, editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
+            onGet({
+                data: response,
+                protyle: editor.protyle,
+                action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                app: options.app
+            });
         });
     }
     (options.element.firstElementChild as HTMLElement).style.zIndex = "200";
@@ -163,6 +168,7 @@ export const bindCardEvent = (options: {
             options.blocks = treeCards.data.cards;
             if (options.blocks.length > 0) {
                 nextCard({
+                    app: options.app,
                     countElement,
                     editor,
                     actionElements,
@@ -336,6 +342,7 @@ export const bindCardEvent = (options: {
             if (index > 0) {
                 index--;
                 nextCard({
+                    app: options.app,
                     countElement,
                     editor,
                     actionElements,
@@ -379,6 +386,7 @@ export const bindCardEvent = (options: {
                             }
                         } else {
                             nextCard({
+                                app: options.app,
                                 countElement,
                                 editor,
                                 actionElements,
@@ -390,6 +398,7 @@ export const bindCardEvent = (options: {
                     return;
                 }
                 nextCard({
+                    app: options.app,
                     countElement,
                     editor,
                     actionElements,
@@ -449,6 +458,7 @@ export const openCardByData = (app: App, cardsData: {
 };
 
 const nextCard = (options: {
+    app: App,
     countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, index: number, blocks: ICard[]
 }) => {
     options.editor.protyle.element.classList.add("card__block--hide");
@@ -477,7 +487,12 @@ const nextCard = (options: {
         mode: 0,
         size: Constants.SIZE_GET_MAX
     }, (response) => {
-        onGet(response, options.editor.protyle, [Constants.CB_GET_ALL, Constants.CB_GET_HTML]);
+        onGet({
+            data: response,
+            protyle: options.editor.protyle,
+            action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+            app: options.app
+        });
     });
 };
 

@@ -3,8 +3,9 @@ import {fetchPost} from "../../util/fetch";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {setInlineStyle} from "../../util/assets";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {App} from "../../index";
 
-const setEditor = (modelMainElement: Element) => {
+const setEditor = (app: App, modelMainElement: Element) => {
     let dynamicLoadBlocks = parseInt((modelMainElement.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value);
     if (48 > dynamicLoadBlocks) {
         dynamicLoadBlocks = 48;
@@ -40,12 +41,12 @@ const setEditor = (modelMainElement: Element) => {
     window.siyuan.config.editor.historyRetentionDays = parseInt((modelMainElement.querySelector("#historyRetentionDays") as HTMLInputElement).value);
     fetchPost("/api/setting/setEditor", window.siyuan.config.editor, response => {
         window.siyuan.config.editor = response.data;
-        reloadProtyle(window.siyuan.mobile.editor.protyle, false);
+        reloadProtyle(window.siyuan.mobile.editor.protyle, app, false);
         setInlineStyle();
     });
 };
 
-export const initEditor = () => {
+export const initEditor = (app: App) => {
     openModel({
         title: window.siyuan.languages.editor,
         icon: "iconEdit",
@@ -230,12 +231,12 @@ export const initEditor = () => {
 
             modelMainElement.querySelectorAll("input.b3-switch, select.b3-select, input.b3-slider").forEach((item) => {
                 item.addEventListener("change", () => {
-                    setEditor(modelMainElement);
+                    setEditor(app, modelMainElement);
                 });
             });
             modelMainElement.querySelectorAll("textarea.b3-text-field, input.b3-text-field, input.b3-slider").forEach((item) => {
                 item.addEventListener("blur", () => {
-                    setEditor(modelMainElement);
+                    setEditor(app, modelMainElement);
                 });
             });
             modelMainElement.querySelectorAll("input.b3-slider").forEach((item) => {

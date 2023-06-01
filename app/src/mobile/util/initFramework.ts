@@ -23,7 +23,7 @@ import {App} from "../../index";
 export const initFramework = (app: App) => {
     setInlineStyle();
     renderSnippet();
-    initKeyboardToolbar();
+    initKeyboardToolbar(app);
     const sidebarElement = document.getElementById("sidebar");
     let outline: MobileOutline;
     let backlink: MobileBacklinks;

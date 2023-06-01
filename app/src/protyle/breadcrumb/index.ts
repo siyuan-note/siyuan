@@ -57,25 +57,25 @@ export class Breadcrumb {
                         });
                         /// #endif
                     } else {
-                        zoomOut(protyle, id);
+                        zoomOut({protyle, id, app});
                     }
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-menu") === "true") {
-                    this.showMenu(protyle, {
+                    this.showMenu(app, protyle, {
                         x: event.clientX,
                         y: event.clientY
                     });
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-type") === "exit-focus") {
-                    zoomOut(protyle, protyle.block.rootID, protyle.block.id);
+                    zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id, app});
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-type") === "context") {
                     event.preventDefault();
                     if (target.classList.contains("block__icon--active")) {
-                        zoomOut(protyle, protyle.options.blockId);
+                        zoomOut({protyle, id: protyle.options.blockId, app});
                         target.classList.remove("block__icon--active");
                     } else {
                         fetchPost("/api/filetree/getDoc", {
@@ -83,7 +83,7 @@ export class Breadcrumb {
                             mode: 3,
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
-                            onGet(getResponse, protyle, [Constants.CB_GET_HL]);
+                            onGet({data: getResponse, protyle, action: [Constants.CB_GET_HL], app});
                             this.toggleExit(true);
                         });
                         target.classList.add("block__icon--active");
@@ -158,7 +158,7 @@ export class Breadcrumb {
         }
     }
 
-    public showMenu(protyle: IProtyle, position: { x: number, y: number }) {
+    public showMenu(app: App, protyle: IProtyle, position: { x: number, y: number }) {
         let id;
         const cursorNodeElement = hasClosestBlock(getEditorRange(protyle.element).startContainer);
         if (cursorNodeElement) {
@@ -260,7 +260,7 @@ export class Breadcrumb {
                     icon: "iconTransform",
                     accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
                     click() {
-                        netImg2LocalAssets(protyle);
+                        netImg2LocalAssets(protyle, app);
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -303,7 +303,7 @@ export class Breadcrumb {
                 accelerator: window.siyuan.config.keymap.editor.general.refresh.custom,
                 label: window.siyuan.languages.refresh,
                 click: () => {
-                    reloadProtyle(protyle, !isMobile());
+                    reloadProtyle(protyle, app, !isMobile());
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

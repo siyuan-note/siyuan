@@ -152,23 +152,29 @@ const focusStack = async (app: App, stack: IBackStack) => {
             }
             return false;
         }
-        zoomOut(stack.protyle, stack.zoomId || stack.protyle.block.rootID, undefined, false, () => {
-            Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
-                if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
-                    blockElement = item;
-                    return true;
+        zoomOut({
+            app,
+            protyle: stack.protyle,
+            id: stack.zoomId || stack.protyle.block.rootID,
+            isPushBack: false,
+            callback: () => {
+                Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
+                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                        blockElement = item;
+                        return true;
+                    }
+                });
+                if (!blockElement) {
+                    return;
                 }
-            });
-            if (!blockElement) {
-                return;
+                getAllModels().outline.forEach(item => {
+                    if (item.blockId === stack.protyle.block.rootID) {
+                        item.setCurrent(blockElement);
+                    }
+                });
+                focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
+                scrollCenter(stack.protyle, blockElement, true);
             }
-            getAllModels().outline.forEach(item => {
-                if (item.blockId === stack.protyle.block.rootID) {
-                    item.setCurrent(blockElement);
-                }
-            });
-            focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-            scrollCenter(stack.protyle, blockElement, true);
         });
         return true;
     }

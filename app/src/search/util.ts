@@ -271,7 +271,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             if (type === "next") {
                 if (!target.getAttribute("disabled")) {
                     config.page++;
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
                 }
                 event.stopPropagation();
                 event.preventDefault();
@@ -279,7 +279,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (type === "previous") {
                 if (!target.getAttribute("disabled")) {
                     config.page--;
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
                 }
                 event.stopPropagation();
                 event.preventDefault();
@@ -288,7 +288,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 config.removed = false;
                 criteriaData.find(item => {
                     if (item.name === target.innerText.trim()) {
-                        updateConfig(element, item, config, edit);
+                        updateConfig(element, item, config, edit, app);
                         return true;
                     }
                 });
@@ -319,7 +319,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 config.page = 1;
                 searchPathInputElement.innerHTML = config.hPath;
                 searchPathInputElement.setAttribute("title", "");
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
                 const includeElement = element.querySelector("#searchInclude");
                 includeElement.classList.remove("b3-button--cancel");
                 includeElement.setAttribute("disabled", "disabled");
@@ -375,7 +375,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         } else {
                             includeElement.setAttribute("disabled", "disabled");
                         }
-                        inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                        inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
                     });
                 }, [], undefined, window.siyuan.languages.specifyPath);
                 event.stopPropagation();
@@ -397,7 +397,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     });
                 }
                 config.page = 1;
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -419,14 +419,14 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchRefresh") {
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "searchMore") {
                 moreMenu(config, criteriaData, element, () => {
                     config.page = 1;
-                    inputEvent(element, config, undefined, edit);
+                    inputEvent(element, config, undefined, edit, app);
                 }, () => {
                     updateConfig(element, {
                         removed: true,
@@ -453,7 +453,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             paragraph: window.siyuan.config.search.paragraph,
                             embedBlock: window.siyuan.config.search.embedBlock,
                         }
-                    }, config, edit);
+                    }, config, edit, app);
                 }, () => {
                     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
                     const isPopover = hasClosestByClassName(element, "b3-dialog__container");
@@ -513,7 +513,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (target.id === "searchFilter") {
                 filterMenu(config, () => {
                     config.page = 1;
-                    inputEvent(element, config, undefined, edit);
+                    inputEvent(element, config, undefined, edit, app);
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -522,7 +522,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 queryMenu(config, () => {
                     element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", getQueryTip(config.method));
                     config.page = 1;
-                    inputEvent(element, config, undefined, edit);
+                    inputEvent(element, config, undefined, edit, app);
                 });
                 window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
                 event.stopPropagation();
@@ -577,12 +577,12 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceAllBtn") {
-                replace(element, config, edit, true);
+                replace(element, config, edit, app, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "replaceBtn") {
-                replace(element, config, edit, false);
+                replace(element, config, edit, app, false);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -596,7 +596,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 if (target.parentElement.id === "searchHistoryList") {
                     searchInputElement.value = target.textContent;
                     config.page = 1;
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
                 } else if (target.parentElement.id === "replaceHistoryList") {
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
@@ -627,6 +627,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                     id: target.getAttribute("data-node-id"),
                                     config,
                                     value: searchInputElement.value,
+                                    app,
                                 });
                                 searchInputElement.focus();
                             } else if (target.classList.contains("b3-list-item--focus")) {
@@ -670,11 +671,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
 
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
         config.page = 1;
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, app, event);
     });
     searchInputElement.addEventListener("input", (event: InputEvent) => {
         config.page = 1;
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, app, event);
     });
     searchInputElement.addEventListener("blur", () => {
         if (config.removed) {
@@ -743,7 +744,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 id: currentList.getAttribute("data-node-id"),
                 config,
                 value: searchInputElement.value,
-                edit
+                edit,
+                app
             });
             event.preventDefault();
         } else if (event.key === "ArrowUp") {
@@ -770,7 +772,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 id: currentList.getAttribute("data-node-id"),
                 config,
                 value: searchInputElement.value,
-                edit
+                edit,
+                app
             });
             event.preventDefault();
         }
@@ -779,10 +782,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         if (event.isComposing || event.key !== "Enter") {
             return;
         }
-        replace(element, config, edit, false);
+        replace(element, config, edit, app, false);
         event.preventDefault();
     });
-    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+    inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
     return edit;
 };
 
@@ -805,7 +808,7 @@ const getQueryTip = (method: number) => {
     return methodTip;
 };
 
-const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle) => {
+const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle, app: App) => {
     const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
     if (dialogElement && dialogElement.getAttribute("data-key") === window.siyuan.config.keymap.general.search.custom) {
         // https://github.com/siyuan-note/siyuan/issues/6828
@@ -861,7 +864,7 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     Object.assign(config, item);
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
     setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
-    inputEvent(element, config, undefined, edit);
+    inputEvent(element, config, undefined, edit, app);
     window.siyuan.menus.menu.remove();
 };
 
@@ -894,6 +897,7 @@ const getArticle = (options: {
     config: ISearchOption,
     edit: Protyle
     value: string,
+    app: App
 }) => {
     fetchPost("/api/block/checkBlockFold", {id: options.id}, (foldResponse) => {
         options.edit.protyle.scroll.lastScrollTop = 0;
@@ -907,7 +911,12 @@ const getArticle = (options: {
             size: foldResponse.data ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
             zoom: foldResponse.data,
         }, getResponse => {
-            onGet(getResponse, options.edit.protyle, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML]);
+            onGet({
+                data: getResponse,
+                protyle: options.edit.protyle,
+                action: foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
+                app: options.app
+            });
             const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
             if (matchElement) {
                 matchElement.classList.add("search-mark--hl");
@@ -919,7 +928,7 @@ const getArticle = (options: {
     });
 };
 
-const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: boolean) => {
+const replace = (element: Element, config: ISearchOption, edit: Protyle, app: App, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
@@ -966,7 +975,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
         }
         getAllModels().editor.forEach(item => {
             if (rootIds[0] === item.editor.protyle.block.rootID) {
-                reloadProtyle(item.editor.protyle, false);
+                reloadProtyle(item.editor.protyle, app, false);
             }
         });
         if (currentList.nextElementSibling) {
@@ -1006,11 +1015,12 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
             id: currentList.getAttribute("data-node-id"),
             config,
             value: searchInputElement.value,
+            app,
         });
     });
 };
 
-const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, event?: InputEvent) => {
+const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, app: App, event?: InputEvent) => {
     if (event && event.isComposing) {
         return;
     }
@@ -1025,7 +1035,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
         const nextElement = element.querySelector('[data-type="next"]');
         if (inputValue === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                onSearch(response.data, edit, element, config);
+                onSearch(response.data, edit, app, element, config);
                 loadingElement.classList.add("fn__none");
                 element.querySelector("#searchResult").innerHTML = "";
                 previousElement.setAttribute("disabled", "true");
@@ -1054,7 +1064,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 } else {
                     nextElement.setAttribute("disabled", "disabled");
                 }
-                onSearch(response.data.blocks, edit, element, config);
+                onSearch(response.data.blocks, edit, app, element, config);
                 element.querySelector("#searchResult").innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
 <span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>`;
                 loadingElement.classList.add("fn__none");
@@ -1064,7 +1074,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
     return inputTimeout;
 };
 
-const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: ISearchOption) => {
+const onSearch = (data: IBlock[], edit: Protyle, app: App, element: Element, config: ISearchOption) => {
     let resultHTML = "";
     data.forEach((item, index) => {
         const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
@@ -1104,6 +1114,7 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
                 id: data[0].children[0].id,
                 config,
                 value: searchInputElement.value,
+                app,
             });
         } else {
             getArticle({
@@ -1111,6 +1122,7 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
                 id: data[0].id,
                 config,
                 value: searchInputElement.value,
+                app
             });
         }
     } else {

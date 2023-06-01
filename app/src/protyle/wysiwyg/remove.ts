@@ -15,6 +15,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
+import {App} from "../../index";
 
 const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
@@ -177,7 +178,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range) => {
     focusByWbr(previousLastElement.parentElement, range);
 };
 
-export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Range) => {
+export const removeBlock = (app: App, protyle: IProtyle, blockElement: Element, range: Range) => {
     // 删除后，防止滚动条滚动后调用 get 请求，因为返回的请求已查找不到内容块了
     preventScroll(protyle);
     const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
@@ -241,7 +242,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         if (sideElement) {
             if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {
                 setTimeout(() => {
-                    zoomOut(protyle, protyle.block.parent2ID, protyle.block.parent2ID);
+                    zoomOut({app, protyle, id:protyle.block.parent2ID, focusId:protyle.block.parent2ID});
                 }, Constants.TIMEOUT_INPUT * 2 + 100);
             } else {
                 if ((sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0)) {
@@ -294,7 +295,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     // 空代码块直接删除
     if (blockElement.getAttribute("data-type") === "NodeCodeBlock" && getContenteditableElement(blockElement).textContent.trim() === "") {
         blockElement.classList.add("protyle-wysiwyg--select");
-        removeBlock(protyle, blockElement, range);
+        removeBlock(app, protyle, blockElement, range);
         return;
     }
     // 设置 bq 和代码块光标

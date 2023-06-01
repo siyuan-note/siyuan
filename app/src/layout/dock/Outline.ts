@@ -156,7 +156,12 @@ export class Outline extends Model {
                                     mode: 0,
                                     size: window.siyuan.config.editor.dynamicLoadBlocks,
                                 }, getResponse => {
-                                    onGet(getResponse, item.editor.protyle, [Constants.CB_GET_FOCUS]);
+                                    onGet({
+                                        data: getResponse,
+                                        protyle: item.editor.protyle,
+                                        action: [Constants.CB_GET_FOCUS],
+                                        app: options.app
+                                    });
                                 });
                             }
                             return true;

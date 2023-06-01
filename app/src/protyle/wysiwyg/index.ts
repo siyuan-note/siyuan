@@ -95,7 +95,7 @@ export class WYSIWYG {
         }
         this.bindEvent(protyle);
         keydown(app, protyle, this.element);
-        dropEvent(protyle, this.element);
+        dropEvent(app, protyle, this.element);
     }
 
     public renderCustom(ial: IObject) {
@@ -1025,7 +1025,7 @@ export class WYSIWYG {
                     }
                 }
                 const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
-                removeBlock(protyle, nodeElement, range);
+                removeBlock(this.app, protyle, nodeElement, range);
                 if (nextElement) {
                     // Ctrl+X 剪切后光标应跳到下一行行首 https://github.com/siyuan-note/siyuan/issues/5485
                     focusBlock(nextElement);
@@ -1299,7 +1299,12 @@ export class WYSIWYG {
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
                 }, getResponse => {
                     preventGetTopHTML = false;
-                    onGet(getResponse, protyle, [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID]);
+                    onGet({
+                        data: getResponse,
+                        protyle,
+                        action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
+                        app: this.app
+                    });
                 });
                 preventGetTopHTML = true;
             }
@@ -1860,7 +1865,7 @@ export class WYSIWYG {
                     } else if (event.shiftKey) {
                         openAttr(actionElement.parentElement, protyle);
                     } else if (ctrlIsPressed) {
-                        zoomOut(protyle, actionElement.parentElement.getAttribute("data-node-id"));
+                        zoomOut({protyle, id: actionElement.parentElement.getAttribute("data-node-id"), app: this.app});
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             const html = actionElement.parentElement.outerHTML;

@@ -214,7 +214,7 @@ const renderViewItem = (blocks: IBlock[], title: string, deckType: string) => {
             }
             listHTML += `<div data-type="card-item" class="b3-list-item${isFirst ? " b3-list-item--focus" : ""}${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${item.id}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
-${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
+${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content || Constants.ZWSP}</span>
 <span data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>

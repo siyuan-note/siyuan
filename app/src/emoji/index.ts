@@ -17,7 +17,7 @@ export const getRandomEmoji = () => {
     return emojis.items[getRandom(0, emojis.items.length - 1)].unicode;
 };
 
-export const unicode2Emoji = (unicode: string, assic = false, className = "", needSpan = false, lazy = false) => {
+export const unicode2Emoji = (unicode: string, className = "", needSpan = false, lazy = false) => {
     if (!unicode) {
         return "";
     }
@@ -44,7 +44,7 @@ export const unicode2Emoji = (unicode: string, assic = false, className = "", ne
     return emoji;
 };
 
-export const lazyLoadEmoji = (element: HTMLElement, assic = false) => {
+export const lazyLoadEmoji = (element: HTMLElement) => {
     const emojiIntersectionObserver = new IntersectionObserver((entries) => {
         entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
             const index = entrie.target.getAttribute("data-index");
@@ -52,7 +52,7 @@ export const lazyLoadEmoji = (element: HTMLElement, assic = false) => {
                 let html = "";
                 window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
                     html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode, assic)}</button>`;
+${unicode2Emoji(emoji.unicode)}</button>`;
                 });
                 entrie.target.innerHTML = html;
                 entrie.target.removeAttribute("data-index");
@@ -79,7 +79,7 @@ export const lazyLoadEmojiImg = (element: Element) => {
     });
 };
 
-export const filterEmoji = (key = "", max?: number, assic = false) => {
+export const filterEmoji = (key = "", max?: number) => {
     let html = "";
     const recentEmojis: {
         unicode: string,
@@ -109,18 +109,18 @@ export const filterEmoji = (key = "", max?: number, assic = false) => {
         category.items.forEach(emoji => {
             if (key) {
                 if (window.siyuan.config.editor.emoji.includes(emoji.unicode) &&
-                    (unicode2Emoji(emoji.unicode, true) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
+                    (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                     recentEmojis.push(emoji);
                 }
                 if (max && maxCount > max) {
                     return;
                 }
-                if (unicode2Emoji(emoji.unicode, true) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1) {
+                if (unicode2Emoji(emoji.unicode) === key || emoji.keywords.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description.toLowerCase().indexOf(key.toLowerCase()) > -1 || emoji.description_zh_cn.toLowerCase().indexOf(key.toLowerCase()) > -1) {
                     if (category.id === "custom") {
                         customStore.push(emoji);
                     } else {
                         keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode, assic, undefined, false, true)}</button>`;
+${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                     }
                     maxCount++;
                 }
@@ -130,7 +130,7 @@ ${unicode2Emoji(emoji.unicode, assic, undefined, false, true)}</button>`;
                 }
                 if (index < 2) {
                     html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
-${unicode2Emoji(emoji.unicode, assic, undefined, false, true)}</button>`;
+${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                 }
             }
         });
@@ -155,7 +155,7 @@ ${unicode2Emoji(emoji.unicode, assic, undefined, false, true)}</button>`;
             return 0;
         }).forEach(item => {
             html += `<button data-unicode="${item.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? item.description_zh_cn : item.description}">
-${unicode2Emoji(item.unicode, assic, undefined, false, true)}</button>`;
+${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
         });
         html = html + keyHTML + "</div>";
     }
@@ -166,7 +166,7 @@ ${unicode2Emoji(item.unicode, assic, undefined, false, true)}</button>`;
             const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
             if (emoji[0]) {
                 recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji[0].description_zh_cn : emoji[0].description}">
-${unicode2Emoji(emoji[0].unicode, assic, undefined, false, true)}
+${unicode2Emoji(emoji[0].unicode, undefined, false, true)}
 </button>`;
             }
         });
@@ -415,7 +415,7 @@ export const updateOutlineEmoji = (unicode: string, id: string) => {
     /// #if !MOBILE
     getAllModels().outline.forEach(model => {
         if (model.blockId === id) {
-            model.headerElement.nextElementSibling.firstElementChild.outerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true);
+            model.headerElement.nextElementSibling.firstElementChild.outerHTML = unicode2Emoji(unicode || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic", true);
         }
     });
     /// #endif

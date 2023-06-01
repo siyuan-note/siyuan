@@ -185,7 +185,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic", true)}
+    ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
     ${countHTML}
 </li></ul>`;
@@ -230,7 +230,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
                 fileHTML += `<li style="padding: 4px" class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
-    ${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-list-item__graphic", true)}
+    ${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE, "b3-list-item__graphic", true)}
     <span class="b3-list-item__showall">${escapeHtml(item.hPath)}</span>
     ${countHTML}
 </li>`;
@@ -503,7 +503,7 @@ data-box="${notebookId}" class="b3-list-item" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    ${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER), false, "b3-list-item__graphic", true)}
+    ${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER), "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${getDisplayName(item.name, true, true)}</span>
     ${countHTML}
 </li>`;

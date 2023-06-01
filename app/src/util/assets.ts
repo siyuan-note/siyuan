@@ -5,7 +5,6 @@ import {addStyle} from "../protyle/util/addStyle";
 import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
-import {isMobile} from "./functions";
 import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
 

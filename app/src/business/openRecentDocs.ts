@@ -18,7 +18,7 @@ export const openRecentDocs = () => {
         let tabHtml = "";
         response.data.forEach((item: any, index: number) => {
             tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
-${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, false, "b3-list-item__graphic", true)}
+${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
 </li>`;
         });

@@ -213,7 +213,7 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
                     if (!item.closed) {
                         submenu.push({
                             label: escapeHtml(item.name),
-                            iconHTML: unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, false, "b3-menu__icon", true),
+                            iconHTML: unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, "b3-menu__icon", true),
                             accelerator: window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] === item.id ? window.siyuan.config.keymap.general.dailyNote.custom : "",
                             click: () => {
                                 fetchPost("/api/filetree/createDailyNote", {

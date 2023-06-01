@@ -15,12 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const {
-    app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray,
+    net, app, BrowserWindow, shell, Menu, screen, ipcMain, globalShortcut, Tray,
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
-const net = require("net");
-const fetch = require("electron-fetch").default;
+const gNet = require("net");
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
 const isDevEnv = process.env.NODE_ENV === "development";
@@ -263,7 +262,7 @@ const boot = () => {
         titleBarStyle: "hidden",
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
-    windowStateInitialized? currentWindow.setPosition(x, y): currentWindow.center();
+    windowStateInitialized ? currentWindow.setPosition(x, y) : currentWindow.center();
     require("@electron/remote/main").enable(currentWindow.webContents);
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
@@ -423,7 +422,7 @@ const initKernel = (workspace, port, lang) => {
                 const getAvailablePort = () => {
                     // https://gist.github.com/mikeal/1840641
                     return new Promise((portResolve, portReject) => {
-                        const server = net.createServer();
+                        const server = gNet.createServer();
                         server.on("error", error => {
                             writeLog(error);
                             kernelPort = "";
@@ -512,7 +511,7 @@ const initKernel = (workspace, port, lang) => {
         writeLog("checking kernel version");
         while (!gotVersion && count < 15) {
             try {
-                const apiResult = await fetch(getServer() + "/api/system/version");
+                const apiResult = await net.fetch(getServer() + "/api/system/version");
                 apiData = await apiResult.json();
                 gotVersion = true;
                 bootWindow.setResizable(false);
@@ -540,14 +539,14 @@ const initKernel = (workspace, port, lang) => {
             writeLog("got kernel version [" + apiData.data + "]");
             if (!isDevEnv && apiData.data !== appVer) {
                 writeLog(`kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`);
-                fetch(getServer() + "/api/system/exit", {method: "POST"});
+                net.fetch(getServer() + "/api/system/exit", {method: "POST"});
                 bootWindow.destroy();
                 resolve(false);
             } else {
                 let progressing = false;
                 while (!progressing) {
                     try {
-                        const progressResult = await fetch(getServer() + "/api/system/bootProgress");
+                        const progressResult = await net.fetch(getServer() + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
                         if (progressData.data.progress >= 100) {
                             resolve(true);
@@ -557,7 +556,7 @@ const initKernel = (workspace, port, lang) => {
                         }
                     } catch (e) {
                         writeLog("get boot progress failed: " + e.message);
-                        fetch(getServer() + "/api/system/exit", {method: "POST"});
+                        net.fetch(getServer() + "/api/system/exit", {method: "POST"});
                         bootWindow.destroy();
                         resolve(false);
                         progressing = true;
@@ -755,7 +754,7 @@ app.whenReady().then(() => {
                 return true;
             }
         });
-        await fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
+        await net.fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
     });
     ipcMain.on("siyuan-hotkey", (event, data) => {
         globalShortcut.unregisterAll();
@@ -959,9 +958,8 @@ powerMonitor.on("resume", async () => {
     // 桌面端系统休眠唤醒后判断网络连通性后再执行数据同步 https://github.com/siyuan-note/siyuan/issues/6687
     writeLog("system resume");
 
-    const eNet = require("electron").net;
     const isOnline = async () => {
-        return eNet.isOnline();
+        return net.isOnline();
     };
     let online = false;
     for (let i = 0; i < 7; i++) {
@@ -983,7 +981,7 @@ powerMonitor.on("resume", async () => {
         const currentURL = new URL(item.browserWindow.getURL());
         const server = getServer(currentURL.port);
         writeLog("sync after system resume [" + server + "/api/sync/performSync" + "]");
-        fetch(server + "/api/sync/performSync", {method: "POST"});
+        net.fetch(server + "/api/sync/performSync", {method: "POST"});
     });
 });
 
@@ -991,6 +989,6 @@ powerMonitor.on("shutdown", () => {
     writeLog("system shutdown");
     workspaces.forEach(item => {
         const currentURL = new URL(item.browserWindow.getURL());
-        fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
+        net.fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
     });
 });

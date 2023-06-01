@@ -45,7 +45,6 @@ import {mathRender} from "../markdown/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {App} from "../../index";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -53,11 +52,9 @@ export class Toolbar {
     public subElementCloseCB: () => void;
     public range: Range;
     private toolbarHeight: number;
-    private app: App;
 
-    constructor(app: App, protyle: IProtyle) {
+    constructor(protyle: IProtyle) {
         const options = protyle.options;
-        this.app = app;
         const element = document.createElement("div");
         element.className = "protyle-toolbar fn__none";
         this.element = element;
@@ -229,7 +226,7 @@ export class Toolbar {
                 menuItemObj = new Font(protyle, menuItem);
                 break;
             case "a":
-                menuItemObj = new Link(this.app, protyle, menuItem);
+                menuItemObj = new Link(protyle, menuItem);
                 break;
         }
         if (!menuItemObj) {
@@ -733,7 +730,7 @@ export class Toolbar {
             const aElement = newNodes[0] as HTMLElement;
             if (aElement.textContent.replace(Constants.ZWSP, "") === "" || !aElement.getAttribute("data-href")) {
                 needFocus = false;
-                linkMenu(this.app, protyle, aElement, aElement.getAttribute("data-href") ? true : false);
+                linkMenu(protyle, aElement, aElement.getAttribute("data-href") ? true : false);
             } else {
                 this.range.collapse(false);
             }
@@ -1199,7 +1196,7 @@ export class Toolbar {
         if (!protyle.disabled) {
             textElement.select();
         }
-        this.app.plugins.forEach(item => {
+        protyle.app.plugins.forEach(item => {
             item.eventBus.emit("open-noneditableblock", {
                 protyle,
                 toolbar: this

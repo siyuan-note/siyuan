@@ -915,7 +915,6 @@ const getArticle = (options: {
                 data: getResponse,
                 protyle: options.edit.protyle,
                 action: foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
-                app: options.app
             });
             const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
             if (matchElement) {
@@ -975,7 +974,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, app: Ap
         }
         getAllModels().editor.forEach(item => {
             if (rootIds[0] === item.editor.protyle.block.rootID) {
-                reloadProtyle(item.editor.protyle, app, false);
+                reloadProtyle(item.editor.protyle, false);
             }
         });
         if (currentList.nextElementSibling) {

@@ -17,14 +17,13 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../markdown/highlightRender";
 import {speechRender} from "../markdown/speechRender";
-import {App} from "../../index";
 
 export class Preview {
     public element: HTMLElement;
     public previewElement: HTMLElement;
     private mdTimeoutId: number;
 
-    constructor(app: App, protyle: IProtyle) {
+    constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.className = "protyle-preview fn__none";
 
@@ -56,7 +55,7 @@ export class Preview {
                 if (isLocalPath(linkAddress)) {
                     /// #if !MOBILE
                     if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
-                        openAsset(app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
+                        openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
                     } else {
                         /// #if !BROWSER
                         openBy(linkAddress, "folder");

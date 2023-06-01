@@ -49,7 +49,7 @@ interface Window {
 
     Protyle: import("../protyle/method").default
 
-    goBack(app: import("../index").App): void
+    goBack(): void
 
     showKeyboardToolbar(height: number): void
 

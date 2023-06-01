@@ -615,7 +615,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 data: response,
                                 protyle: historyEditor.protyle,
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
-                                app
                             });
                         }
                     });

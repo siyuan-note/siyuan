@@ -7,7 +7,6 @@ import {scrollCenter} from "../../util/highlightById";
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {matchHotKey} from "../util/hotKey";
-import {App} from "../../index";
 
 interface IOperations {
     doOperations: IOperation[],
@@ -24,7 +23,7 @@ export class Undo {
         this.undoStack = [];
     }
 
-    public undo(app: App, protyle: IProtyle) {
+    public undo(protyle: IProtyle) {
         if (protyle.disabled) {
             return;
         }
@@ -32,13 +31,13 @@ export class Undo {
             return;
         }
         const state = this.undoStack.pop();
-        this.render(app, protyle, state, false);
+        this.render(protyle, state, false);
         this.hasUndo = true;
         this.redoStack.push(state);
     }
 
 
-    public redo(app: App, protyle: IProtyle) {
+    public redo(protyle: IProtyle) {
         if (protyle.disabled) {
             return;
         }
@@ -46,21 +45,21 @@ export class Undo {
             return;
         }
         const state = this.redoStack.pop();
-        this.render(app, protyle, state, true);
+        this.render(protyle, state, true);
         this.undoStack.push(state);
     }
 
-    private render(app: App, protyle: IProtyle, state: IOperations, redo: boolean) {
+    private render(protyle: IProtyle, state: IOperations, redo: boolean) {
         hideElements(["hint", "gutter"], protyle);
         protyle.wysiwyg.lastHTMLs = {};
         if (!redo) {
             state.undoOperations.forEach(item => {
-               onTransaction(app, protyle, item, true);
+               onTransaction(protyle, item, true);
             });
             transaction(protyle, state.undoOperations);
         } else {
             state.doOperations.forEach(item => {
-                onTransaction(app, protyle, item, true);
+                onTransaction(protyle, item, true);
             });
             transaction(protyle, state.doOperations);
         }

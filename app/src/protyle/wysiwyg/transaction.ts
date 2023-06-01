@@ -17,7 +17,6 @@ import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {needSubscribe} from "../../util/needSubscribe";
-import {App} from "../../index";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -49,7 +48,7 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
 };
 
 // 用于执行操作，外加处理当前编辑器中引用块、嵌入块的更新
-const promiseTransaction = (app: App) => {
+const promiseTransaction = () => {
     const protyle = window.siyuan.transactions[0].protyle;
     const doOperations = window.siyuan.transactions[0].doOperations;
     const undoOperations = window.siyuan.transactions[0].undoOperations;
@@ -65,9 +64,9 @@ const promiseTransaction = (app: App) => {
         }]
     }, (response) => {
         if (window.siyuan.transactions.length === 0) {
-            promiseTransactions(app);
+            promiseTransactions();
         } else {
-            promiseTransaction(app);
+            promiseTransaction();
         }
 
         countBlockWord([], protyle.block.rootID, true);
@@ -140,7 +139,6 @@ const promiseTransaction = (app: App) => {
                             data: getResponse,
                             protyle,
                             action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
-                            app
                         });
                     });
                 }
@@ -312,18 +310,18 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
     }
 };
 
-export const promiseTransactions = (app: App) => {
+export const promiseTransactions = () => {
     window.siyuan.transactionsTimeout = window.setInterval(() => {
         if (window.siyuan.transactions.length === 0) {
             return;
         }
         window.clearInterval(window.siyuan.transactionsTimeout);
-        promiseTransaction(app);
+        promiseTransaction();
     }, Constants.TIMEOUT_INPUT * 2);
 };
 
 // 用于推送和撤销
-export const onTransaction = (app: App, protyle: IProtyle, operation: IOperation, focus: boolean) => {
+export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: boolean) => {
     const updateElements: Element[] = [];
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
         if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
@@ -655,7 +653,7 @@ export const onTransaction = (app: App, protyle: IProtyle, operation: IOperation
         return;
     }
     if (operation.action === "append") {
-        reloadProtyle(protyle, app, false);
+        reloadProtyle(protyle, false);
     }
 };
 

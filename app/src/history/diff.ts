@@ -78,7 +78,6 @@ const renderCompare = (app: App, element: HTMLElement) => {
                 data: response,
                 protyle: leftEditor.protyle,
                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
-                app
             });
         }
         textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
@@ -99,7 +98,6 @@ const renderCompare = (app: App, element: HTMLElement) => {
                     data: response,
                     protyle: rightEditor.protyle,
                     action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
-                    app
                 });
             }
             textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");

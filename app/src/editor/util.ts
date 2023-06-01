@@ -277,13 +277,13 @@ export const openFile = (options: IOpenFileOptions) => {
                     }
                 }
             });
-            createdTab = newTab(options)
+            createdTab = newTab(options);
             wnd.addTab(createdTab);
             if (unUpdateTab && options.removeCurrentTab) {
                 wnd.removeTab(unUpdateTab.id, false, true, false);
             }
         } else {
-            createdTab = newTab(options)
+            createdTab = newTab(options);
             wnd.addTab(createdTab);
         }
         wnd.showHeading();
@@ -343,7 +343,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         return true;
     }
     if (options.zoomIn) {
-        zoomOut({app: options.app, protyle: editor.editor.protyle, id: options.id});
+        zoomOut({protyle: editor.editor.protyle, id: options.id});
         return true;
     }
     let nodeElement = editor.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.id}"]`);
@@ -353,7 +353,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle: editor.editor.protyle, action: options.action, app: options.app});
+            onGet({data: getResponse, protyle: editor.editor.protyle, action: options.action});
             // 大纲点击折叠标题下的内容时，需更新反链面板
             updateBacklinkGraph(allModels, editor.editor.protyle);
         });

@@ -25,7 +25,6 @@ import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
 import {deleteFile} from "../../editor/deleteFile";
-import {App} from "../../index";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -33,7 +32,7 @@ export class Breadcrumb {
     private id: string;
     private messageId: string;
 
-    constructor(app: App, protyle: IProtyle) {
+    constructor(protyle: IProtyle) {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
         const isFocus = protyle.options.action.includes(Constants.CB_GET_ALL) && !isMobile();
@@ -51,31 +50,31 @@ export class Breadcrumb {
                     if (protyle.options.render.breadcrumbDocName && window.siyuan.ctrlIsPressed) {
                         /// #if !MOBILE
                         openFileById({
-                            app,
+                            app:protyle.app,
                             id,
                             action: id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
                         });
                         /// #endif
                     } else {
-                        zoomOut({protyle, id, app});
+                        zoomOut({protyle, id});
                     }
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-menu") === "true") {
-                    this.showMenu(app, protyle, {
+                    this.showMenu(protyle, {
                         x: event.clientX,
                         y: event.clientY
                     });
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-type") === "exit-focus") {
-                    zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id, app});
+                    zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id});
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-type") === "context") {
                     event.preventDefault();
                     if (target.classList.contains("block__icon--active")) {
-                        zoomOut({protyle, id: protyle.options.blockId, app});
+                        zoomOut({protyle, id: protyle.options.blockId});
                         target.classList.remove("block__icon--active");
                     } else {
                         fetchPost("/api/filetree/getDoc", {
@@ -83,7 +82,7 @@ export class Breadcrumb {
                             mode: 3,
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
-                            onGet({data: getResponse, protyle, action: [Constants.CB_GET_HL], app});
+                            onGet({data: getResponse, protyle, action: [Constants.CB_GET_HL]});
                             this.toggleExit(true);
                         });
                         target.classList.add("block__icon--active");
@@ -158,7 +157,7 @@ export class Breadcrumb {
         }
     }
 
-    public showMenu(app: App, protyle: IProtyle, position: { x: number, y: number }) {
+    public showMenu(protyle: IProtyle, position: { x: number, y: number }) {
         let id;
         const cursorNodeElement = hasClosestBlock(getEditorRange(protyle.element).startContainer);
         if (cursorNodeElement) {
@@ -260,7 +259,7 @@ export class Breadcrumb {
                     icon: "iconTransform",
                     accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
                     click() {
-                        netImg2LocalAssets(protyle, app);
+                        netImg2LocalAssets(protyle);
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -303,7 +302,7 @@ export class Breadcrumb {
                 accelerator: window.siyuan.config.keymap.editor.general.refresh.custom,
                 label: window.siyuan.languages.refresh,
                 click: () => {
-                    reloadProtyle(protyle, app, !isMobile());
+                    reloadProtyle(protyle, !isMobile());
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

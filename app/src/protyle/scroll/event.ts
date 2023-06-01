@@ -4,10 +4,9 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
-import {App} from "../../index";
 
 let getIndexTimeout: number;
-export const scrollEvent = (app: App, protyle: IProtyle, element: HTMLElement) => {
+export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     let elementRect = element.getBoundingClientRect();
     element.addEventListener("scroll", () => {
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
@@ -75,7 +74,6 @@ export const scrollEvent = (app: App, protyle: IProtyle, element: HTMLElement) =
                         data: getResponse,
                         protyle,
                         action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
-                        app
                     });
                 });
             }
@@ -92,7 +90,6 @@ export const scrollEvent = (app: App, protyle: IProtyle, element: HTMLElement) =
                     data: getResponse,
                     protyle,
                     action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
-                    app
                 });
             });
         }

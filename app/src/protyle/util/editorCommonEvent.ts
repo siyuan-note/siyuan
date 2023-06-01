@@ -19,7 +19,6 @@ import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
-import {App} from "../../index";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -696,7 +695,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     focusBlock(sourceElements[0]);
 };
 
-export const dropEvent = (app: App, protyle: IProtyle, editorElement: HTMLElement) => {
+export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("dragstart", (event) => {
         const target = event.target as HTMLElement;
         if (target.tagName === "IMG") {
@@ -853,7 +852,7 @@ export const dropEvent = (app: App, protyle: IProtyle, editorElement: HTMLElemen
                 id: protyle.block.id,
                 size: window.siyuan.config.editor.dynamicLoadBlocks,
             }, getResponse => {
-                onGet({data: getResponse, protyle, app});
+                onGet({data: getResponse, protyle});
                 /// #if !MOBILE
                 // 文档标题互转后，需更新大纲
                 updatePanelByEditor({

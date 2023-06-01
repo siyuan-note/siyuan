@@ -5,9 +5,9 @@ export const isMobile = () => {
 // "windows" | "linux" | "darwin" | "docker" | "android" | "ios"
 export const getBackend = () => {
     if (["docker", "ios", "android"].includes(window.siyuan.config.system.container)) {
-        return window.siyuan.config.system.container
+        return window.siyuan.config.system.container;
     } else {
-        return window.siyuan.config.system.os
+        return window.siyuan.config.system.os;
     }
 };
 

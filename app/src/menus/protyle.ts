@@ -42,9 +42,8 @@ import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
-import {App} from "../index";
 
-export const refMenu = (app: App, protyle: IProtyle, element: HTMLElement) => {
+export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
     if (!nodeElement) {
         return;
@@ -89,7 +88,7 @@ export const refMenu = (app: App, protyle: IProtyle, element: HTMLElement) => {
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
-                    app,
+                    app: protyle.app,
                     id: refBlockId,
                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                     zoomIn: foldResponse.data
@@ -103,7 +102,7 @@ export const refMenu = (app: App, protyle: IProtyle, element: HTMLElement) => {
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
-                    app,
+                    app: protyle.app,
                     id: refBlockId,
                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
                     keepCursor: true,
@@ -119,7 +118,7 @@ export const refMenu = (app: App, protyle: IProtyle, element: HTMLElement) => {
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
-                    app,
+                    app: protyle.app,
                     id: refBlockId,
                     position: "right",
                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
@@ -135,7 +134,7 @@ export const refMenu = (app: App, protyle: IProtyle, element: HTMLElement) => {
         click() {
             fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
                 openFileById({
-                    app,
+                    app: protyle.app,
                     id: refBlockId,
                     position: "bottom",
                     action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
@@ -435,7 +434,6 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
 };
 
 export const zoomOut = (options: {
-    app: App,
     protyle: IProtyle,
     id: string,
     focusId?: string,
@@ -488,14 +486,12 @@ export const zoomOut = (options: {
                 data: getResponse,
                 protyle: options.protyle,
                 action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML],
-                app: options.app
             });
         } else {
             onGet({
                 data: getResponse,
                 protyle: options.protyle,
                 action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML],
-                app: options.app
             });
         }
         // https://github.com/siyuan-note/siyuan/issues/4874
@@ -514,7 +510,6 @@ export const zoomOut = (options: {
                         data: getFocusResponse,
                         protyle: options.protyle,
                         action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
-                        app: options.app
                     });
                 });
                 return;
@@ -537,7 +532,7 @@ export const zoomOut = (options: {
     });
 };
 
-export const imgMenu = (app: App, protyle: IProtyle, range: Range, assetElement: HTMLElement, position: {
+export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLElement, position: {
     clientX: number,
     clientY: number
 }) => {
@@ -739,7 +734,7 @@ export const imgMenu = (app: App, protyle: IProtyle, range: Range, assetElement:
     const imgSrc = imgElement.getAttribute("src");
     if (imgSrc) {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        openMenu(app, imgSrc, false, false);
+        openMenu(protyle.app, imgSrc, false, false);
     }
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
     const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
@@ -758,7 +753,7 @@ export const imgMenu = (app: App, protyle: IProtyle, range: Range, assetElement:
     };
 };
 
-export const linkMenu = (app: App, protyle: IProtyle, linkElement: HTMLElement, focusText = false) => {
+export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText = false) => {
     window.siyuan.menus.menu.remove();
     const nodeElement = hasClosestBlock(linkElement);
     if (!nodeElement) {
@@ -851,7 +846,7 @@ export const linkMenu = (app: App, protyle: IProtyle, linkElement: HTMLElement, 
         }
     }).element);
     if (linkAddress) {
-        openMenu(app, linkAddress, false, true);
+        openMenu(protyle.app, linkAddress, false, true);
     }
     if (linkAddress?.startsWith("siyuan://blocks/")) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -934,7 +929,7 @@ export const linkMenu = (app: App, protyle: IProtyle, linkElement: HTMLElement, 
     };
 };
 
-export const tagMenu = (app: App, protyle: IProtyle, tagElement: HTMLElement) => {
+export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     window.siyuan.menus.menu.remove();
     const nodeElement = hasClosestBlock(tagElement);
     if (!nodeElement) {
@@ -990,7 +985,7 @@ export const tagMenu = (app: App, protyle: IProtyle, tagElement: HTMLElement) =>
         accelerator: "Click",
         icon: "iconSearch",
         click() {
-            openGlobalSearch(app, `#${tagElement.textContent}#`, false);
+            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false);
         }
     }).element);
     /// #endif
@@ -1054,7 +1049,7 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
     };
 };
 
-export const iframeMenu = (app: App, protyle: IProtyle, nodeElement: Element) => {
+export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     const id = nodeElement.getAttribute("data-node-id");
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
@@ -1113,12 +1108,12 @@ export const iframeMenu = (app: App, protyle: IProtyle, nodeElement: Element) =>
         subMenus.push({
             type: "separator"
         });
-        return subMenus.concat(openMenu(app, iframeSrc, true, false) as IMenu[]);
+        return subMenus.concat(openMenu(protyle.app, iframeSrc, true, false) as IMenu[]);
     }
     return subMenus;
 };
 
-export const videoMenu = (app: App, protyle: IProtyle, nodeElement: Element, type: string) => {
+export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string) => {
     const id = nodeElement.getAttribute("data-node-id");
     const videoElement = nodeElement.querySelector(type === "NodeVideo" ? "video" : "audio");
     let html = nodeElement.outerHTML;
@@ -1150,7 +1145,7 @@ export const videoMenu = (app: App, protyle: IProtyle, nodeElement: Element, typ
     /// #endif
     const VideoSrc = videoElement.getAttribute("src");
     if (VideoSrc) {
-        return subMenus.concat(openMenu(app, VideoSrc, true, false) as IMenu[]);
+        return subMenus.concat(openMenu(protyle.app, VideoSrc, true, false) as IMenu[]);
     }
     return subMenus;
 };

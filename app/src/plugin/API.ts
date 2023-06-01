@@ -119,7 +119,7 @@ openTab = (options: {
             }
         }
         if (!options.doc.action) {
-            options.doc.action = []
+            options.doc.action = [];
         }
         return openFileById({
             app: options.app,

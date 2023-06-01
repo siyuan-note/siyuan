@@ -58,7 +58,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                 size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
             }, getResponse => {
-                onGet({data: getResponse, protyle: window.siyuan.mobile.editor.protyle, action, app});
+                onGet({data: getResponse, protyle: window.siyuan.mobile.editor.protyle, action});
                 window.siyuan.mobile.editor.protyle.breadcrumb?.render(window.siyuan.mobile.editor.protyle);
             });
             window.siyuan.mobile.editor.protyle.undo.clear();

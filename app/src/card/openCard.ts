@@ -147,7 +147,6 @@ export const bindCardEvent = (options: {
                 data: response,
                 protyle: editor.protyle,
                 action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
-                app: options.app
             });
         });
     }
@@ -168,7 +167,6 @@ export const bindCardEvent = (options: {
             options.blocks = treeCards.data.cards;
             if (options.blocks.length > 0) {
                 nextCard({
-                    app: options.app,
                     countElement,
                     editor,
                     actionElements,
@@ -342,7 +340,6 @@ export const bindCardEvent = (options: {
             if (index > 0) {
                 index--;
                 nextCard({
-                    app: options.app,
                     countElement,
                     editor,
                     actionElements,
@@ -386,7 +383,6 @@ export const bindCardEvent = (options: {
                             }
                         } else {
                             nextCard({
-                                app: options.app,
                                 countElement,
                                 editor,
                                 actionElements,
@@ -398,7 +394,6 @@ export const bindCardEvent = (options: {
                     return;
                 }
                 nextCard({
-                    app: options.app,
                     countElement,
                     editor,
                     actionElements,
@@ -458,8 +453,11 @@ export const openCardByData = (app: App, cardsData: {
 };
 
 const nextCard = (options: {
-    app: App,
-    countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, index: number, blocks: ICard[]
+    countElement: Element,
+    editor: Protyle,
+    actionElements: NodeListOf<Element>,
+    index: number,
+    blocks: ICard[]
 }) => {
     options.editor.protyle.element.classList.add("card__block--hide");
     if (window.siyuan.config.flashcard.superBlock) {
@@ -491,7 +489,6 @@ const nextCard = (options: {
             data: response,
             protyle: options.editor.protyle,
             action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
-            app: options.app
         });
     });
 };

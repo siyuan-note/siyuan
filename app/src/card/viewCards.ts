@@ -68,7 +68,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             if (window.siyuan.config.editor.readOnly) {
                 disabledProtyle(edit.protyle);
             }
-            getArticle(app, edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
+            getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         }
         const previousElement = dialog.element.querySelector('[data-type="previous"]');
         const nextElement = dialog.element.querySelector('[data-type="next"]');
@@ -93,7 +93,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     if (currentRect.top < parentRect.top || currentRect.bottom > parentRect.bottom) {
                         currentElement.scrollIntoView(currentRect.top < parentRect.top);
                     }
-                    getArticle(app, edit, currentElement.getAttribute("data-id"));
+                    getArticle(edit, currentElement.getAttribute("data-id"));
                     currentElement.classList.add("b3-list-item--focus");
                 }
                 event.stopPropagation();
@@ -125,7 +125,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks, title, deckType);
                         listElement.scrollTop = 0;
-                        getArticle(app, edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -145,13 +145,13 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                         nextElement.nextElementSibling.nextElementSibling.textContent = `${pageIndex}/${cardsResponse.data.pageCount || 1}`;
                         listElement.innerHTML = renderViewItem(cardsResponse.data.blocks, title, deckType);
                         listElement.scrollTop = 0;
-                        getArticle(app, edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
+                        getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
                     });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
                 } else if (type === "card-item") {
-                    getArticle(app, edit, target.getAttribute("data-id"));
+                    getArticle(edit, target.getAttribute("data-id"));
                     listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                     target.classList.add("b3-list-item--focus");
                     event.stopPropagation();
@@ -171,10 +171,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                         }
 
                         if (!nextElment) {
-                            getArticle(app, edit, "");
+                            getArticle(edit, "");
                             listElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
                         } else {
-                            getArticle(app, edit, nextElment.getAttribute("data-id"));
+                            getArticle(edit, nextElment.getAttribute("data-id"));
                             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                             nextElment.classList.add("b3-list-item--focus");
                             target.parentElement.remove();
@@ -240,7 +240,7 @@ ${unicode2Emoji(item.ial.icon, false, "b3-list-item__graphic", true)}
 };
 
 
-const getArticle = (app: App, edit: Protyle, id: string) => {
+const getArticle = (edit: Protyle, id: string) => {
     if (!id) {
         edit.protyle.element.classList.add("fn__none");
         edit.protyle.element.nextElementSibling.classList.remove("fn__none");
@@ -256,7 +256,7 @@ const getArticle = (app: App, edit: Protyle, id: string) => {
         size: Constants.SIZE_GET_MAX,
     }, getResponse => {
         onGet({
-            data: getResponse, protyle: edit.protyle, action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML], app
+            data: getResponse, protyle: edit.protyle, action: [Constants.CB_GET_ALL, Constants.CB_GET_HTML]
         });
     });
 };

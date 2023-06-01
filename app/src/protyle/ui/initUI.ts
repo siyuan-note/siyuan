@@ -7,9 +7,8 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";
-import {App} from "../../index";
 
-export const initUI = (protyle: IProtyle, app: App) => {
+export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
     if (window.siyuan.config.editor.fullWidth) {
@@ -25,7 +24,7 @@ export const initUI = (protyle: IProtyle, app: App) => {
     }
     protyle.contentElement.appendChild(protyle.wysiwyg.element);
     if (!protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
-        scrollEvent(app, protyle, protyle.contentElement);
+        scrollEvent(protyle, protyle.contentElement);
     }
     protyle.element.append(protyle.contentElement);
     protyle.element.appendChild(protyle.preview.element);

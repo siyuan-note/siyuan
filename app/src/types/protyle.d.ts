@@ -407,6 +407,7 @@ interface IOptions {
 }
 
 interface IProtyle {
+    app: import("../index").App,
     transactionTime: number,
     id: string,
     block: {

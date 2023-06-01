@@ -5,7 +5,6 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {setPadding} from "../protyle/ui/initUI";
 import {reloadProtyle} from "../protyle/util/reload";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
-import {App} from "../index";
 
 export const editor = {
     element: undefined as Element,
@@ -258,7 +257,7 @@ export const editor = {
     </div>
 </label>`;
     },
-    bindEvent: (app: App) => {
+    bindEvent: () => {
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;
         if (fontFamilyElement.tagName === "SELECT") {
             let fontFamilyHTML = `<option value="">${window.siyuan.languages.default}</option>`;
@@ -318,7 +317,7 @@ export const editor = {
                 fontFamily: fontFamilyElement.value,
                 emoji: window.siyuan.config.editor.emoji
             }, response => {
-                editor.onSetEditor(response.data, app);
+                editor.onSetEditor(response.data);
             });
         };
         editor.element.querySelectorAll("input.b3-switch, select.b3-select, input.b3-slider").forEach((item) => {
@@ -338,13 +337,13 @@ export const editor = {
             });
         });
     },
-    onSetEditor: (editorData: IEditor, app: App) => {
+    onSetEditor: (editorData: IEditor) => {
         if (editorData.readOnly !== window.siyuan.config.editor.readOnly) {
             editor.setReadonly(editorData.readOnly);
         }
         window.siyuan.config.editor = editorData;
         getAllModels().editor.forEach((item) => {
-            reloadProtyle(item.editor.protyle, app, false);
+            reloadProtyle(item.editor.protyle, false);
             setPadding(item.editor.protyle);
             if (window.siyuan.config.editor.fullWidth) {
                 item.editor.protyle.contentElement.setAttribute("data-fullwidth", "true");

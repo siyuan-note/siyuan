@@ -20,9 +20,8 @@ import {transaction, updateTransaction} from "./transaction";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
-import {App} from "../../index";
 
-export const commonHotkey = (app: App, protyle: IProtyle, event: KeyboardEvent) => {
+export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
     const target = event.target as HTMLElement;
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
         fetchPost("/api/filetree/getHPathByID", {
@@ -36,7 +35,7 @@ export const commonHotkey = (app: App, protyle: IProtyle, event: KeyboardEvent) 
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
-        netImg2LocalAssets(protyle, app);
+        netImg2LocalAssets(protyle);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -53,20 +52,20 @@ export const commonHotkey = (app: App, protyle: IProtyle, event: KeyboardEvent) 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            openBacklink(app, protyle);
+            openBacklink(protyle);
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.graphView.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            openGraph(app, protyle);
+            openGraph(protyle);
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
             const offset = getSelectionOffset(target);
-            openOutline(app, protyle);
+            openOutline(protyle);
             // switchWnd 后，range会被清空，需要重新设置
             focusByOffset(target, offset.start, offset.end);
             return true;
@@ -74,7 +73,7 @@ export const commonHotkey = (app: App, protyle: IProtyle, event: KeyboardEvent) 
     }
 
     let matchCommand = false;
-    app.plugins.find(item => {
+    protyle.app.plugins.find(item => {
         item.commands.find(command => {
             if (command.editorCallback && matchHotKey(command.customHotkey, event)) {
                 matchCommand = true;
@@ -228,7 +227,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
     scrollCenter(protyle);
 };
 
-export const goHome = (protyle: IProtyle, app: App) => {
+export const goHome = (protyle: IProtyle) => {
     if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
         protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
         protyle.options.backlinkData) {
@@ -241,12 +240,12 @@ export const goHome = (protyle: IProtyle, app: App) => {
             mode: 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS], app});
+            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS]});
         });
     }
 };
 
-export const goEnd = (protyle: IProtyle, app: App) => {
+export const goEnd = (protyle: IProtyle) => {
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
         fetchPost("/api/filetree/getDoc", {
@@ -254,7 +253,7 @@ export const goEnd = (protyle: IProtyle, app: App) => {
             mode: 4,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS], app});
+            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS]});
         });
     } else {
         protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;

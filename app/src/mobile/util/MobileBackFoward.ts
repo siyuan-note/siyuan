@@ -11,11 +11,10 @@ import {setStorageVal} from "../../protyle/util/compatibility";
 import {closePanel} from "./closePanel";
 import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
-import {App} from "../../index";
 
 const forwardStack: IBackStack[] = [];
 
-const focusStack = (backStack: IBackStack, app: App) => {
+const focusStack = (backStack: IBackStack) => {
     const protyle = getCurrentEditor().protyle;
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
         id: backStack.id,
@@ -52,7 +51,6 @@ const focusStack = (backStack: IBackStack, app: App) => {
             fetchPost("/api/block/checkBlockExist", {id: backStack.id}, existResponse => {
                 if (existResponse.data) {
                     zoomOut({
-                        app,
                         protyle,
                         id: backStack.id,
                         isPushBack: false,
@@ -111,29 +109,7 @@ export const pushBack = () => {
     });
 };
 
-export const goForward = (app: App) => {
-    if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
-        !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
-        window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
-        return;
-    } else if (document.getElementById("model").style.transform === "translateY(0px)" ||
-        document.getElementById("menu").style.transform === "translateX(0px)" ||
-        document.getElementById("sidebar").style.transform === "translateX(0px)") {
-        closePanel();
-        return;
-    }
-    if (window.JSAndroid && forwardStack.length < 2) {
-        window.JSAndroid.returnDesktop();
-        return;
-    }
-    if (forwardStack.length < 2) {
-        return;
-    }
-    window.siyuan.backStack.push(forwardStack.pop());
-    focusStack(forwardStack[forwardStack.length - 1], app);
-};
-
-export const goBack = (app: App) => {
+export const goBack = () => {
     const editor = getCurrentEditor();
     if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
@@ -181,5 +157,5 @@ export const goBack = (app: App) => {
     }
     const item = window.siyuan.backStack.pop();
     forwardStack.push(item);
-    focusStack(item, app);
+    focusStack(item);
 };

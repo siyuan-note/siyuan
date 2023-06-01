@@ -16,7 +16,7 @@ import {reloadProtyle} from "../../protyle/util/reload";
 import {activeBlur, hideKeyboardToolbar} from "../util/keyboardToolbar";
 import {App} from "../../index";
 
-const replace = (app: App,element: Element, config: ISearchOption, isAll: boolean) => {
+const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
@@ -60,7 +60,7 @@ const replace = (app: App,element: Element, config: ISearchOption, isAll: boolea
         if (ids.length > 1) {
             return;
         }
-        reloadProtyle(window.siyuan.mobile.editor.protyle, app, false);
+        reloadProtyle(window.siyuan.mobile.editor.protyle, false);
 
         if (currentLiElement.nextElementSibling) {
             currentLiElement.nextElementSibling.classList.add("b3-list-item--focus");
@@ -478,12 +478,12 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 event.preventDefault();
                 break;
             } else if (type === "replace-all") {
-                replace(app, element, config, true);
+                replace(element, config, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "replace") {
-                replace(app, element, config, false);
+                replace(element, config, false);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

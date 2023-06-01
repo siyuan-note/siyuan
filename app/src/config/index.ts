@@ -146,6 +146,6 @@ export const openSetting = (app: App) => {
         });
     });
     editor.element = dialog.element.querySelector('.config__tab-container[data-name="editor"]');
-    editor.bindEvent(app);
+    editor.bindEvent();
     return dialog;
 };

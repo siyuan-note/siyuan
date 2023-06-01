@@ -71,9 +71,8 @@ import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {quickMakeCard} from "../../card/makeCard";
 import {removeSearchMark} from "../toolbar/util";
-import {App} from "../../index";
 
-export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement) => {
+export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html") {
             event.stopPropagation();
@@ -431,7 +430,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 topNodeElement.nextElementSibling?.classList.contains("list") && topNodeElement.previousElementSibling.classList.contains("protyle-action")) {
                 topNodeElement = topNodeElement.parentElement;
             }
-            zoomOut({protyle, id:topNodeElement.getAttribute("data-node-id"), app});
+            zoomOut({protyle, id: topNodeElement.getAttribute("data-node-id")});
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -442,13 +441,13 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 const ids = protyle.path.split("/");
                 if (ids.length > 2) {
                     openFileById({
-                        app,
+                        app: protyle.app,
                         id: ids[ids.length - 2],
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
                 }
             } else {
-                zoomOut({protyle, id:protyle.block.parent2ID, focusId:nodeElement.getAttribute("data-node-id"), app});
+                zoomOut({protyle, id: protyle.block.parent2ID, focusId: nodeElement.getAttribute("data-node-id")});
             }
             event.preventDefault();
             event.stopPropagation();
@@ -477,14 +476,14 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
         }
         // ctrl+home 光标移动到顶
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "Home") {
-            goHome(protyle, app);
+            goHome(protyle);
             event.stopPropagation();
             event.preventDefault();
             return;
         }
         // ctrl+end 光标移动到尾
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "End") {
-            goEnd(protyle, app);
+            goEnd(protyle);
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -532,7 +531,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                         removeSearchMark(inlineElement);
                     }
                     if (types.includes("block-ref")) {
-                        refMenu(app, protyle, inlineElement);
+                        refMenu(protyle, inlineElement);
                         return;
                     } else if (types.includes("inline-memo")) {
                         protyle.toolbar.showRender(protyle, inlineElement);
@@ -541,10 +540,10 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                         protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
                         return;
                     } else if (types.includes("a")) {
-                        linkMenu(app, protyle, inlineElement);
+                        linkMenu(protyle, inlineElement);
                         return;
                     } else if (types.includes("tag")) {
-                        tagMenu(app, protyle, inlineElement);
+                        tagMenu(protyle, inlineElement);
                         return;
                     }
                 }
@@ -694,7 +693,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
         // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
         if (!event.altKey && (event.key === "Backspace" || event.key === "Delete")) {
             if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
-                removeBlock(app, protyle, nodeElement, range);
+                removeBlock(protyle, nodeElement, range);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -736,7 +735,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 previousSibling.nodeType !== 3 && (previousSibling as HTMLElement).outerHTML === "<span>\\</span>" &&
                 !hasPreviousSibling(previousSibling.parentElement)) {
                 range.setStartBefore(previousSibling.parentElement);
-                removeBlock(app, protyle, nodeElement, range);
+                removeBlock(protyle, nodeElement, range);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -746,7 +745,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 range.startContainer.parentElement.getAttribute("data-type")?.indexOf("backslash") > -1 &&
                 !hasPreviousSibling(range.startContainer.parentElement)) {
                 range.setStartBefore(range.startContainer.parentElement);
-                removeBlock(app, protyle, nodeElement, range);
+                removeBlock(protyle, nodeElement, range);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -768,7 +767,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 const editElement = getContenteditableElement(nodeElement);
                 if (!editElement) {
                     nodeElement.classList.add("protyle-wysiwyg--select");
-                    removeBlock(app, protyle, nodeElement, range);
+                    removeBlock(protyle, nodeElement, range);
                     event.stopPropagation();
                     event.preventDefault();
                     return;
@@ -783,7 +782,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                             if (nextRange) {
                                 const nextBlockElement = hasClosestBlock(nextRange.startContainer);
                                 if (nextBlockElement) {
-                                    removeBlock(app, protyle, nextBlockElement, nextRange);
+                                    removeBlock(protyle, nextBlockElement, nextRange);
                                 }
                             }
                             event.stopPropagation();
@@ -801,7 +800,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                         range.startOffset === 0 ||
                         (currentNode && currentNode.nodeType === 3 && !hasPreviousSibling(currentNode) && currentNode.textContent === "") // https://ld246.com/article/1649251218696
                     )) {
-                        removeBlock(app, protyle, nodeElement, range);
+                        removeBlock(protyle, nodeElement, range);
                         event.stopPropagation();
                         event.preventDefault();
                         return;
@@ -810,7 +809,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                         nodeElement.getAttribute("data-type") === "NodeTable" &&
                         (range.startContainer as HTMLElement).children[range.startOffset - 1]?.tagName === "TABLE") {
                         nodeElement.classList.add("protyle-wysiwyg--select");
-                        removeBlock(app, protyle, nodeElement, range);
+                        removeBlock(protyle, nodeElement, range);
                         event.stopPropagation();
                         event.preventDefault();
                         return;
@@ -927,14 +926,14 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
-            protyle.undo.undo(app, protyle);
+            protyle.undo.undo(protyle);
             event.preventDefault();
             event.stopPropagation();
             return;
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
-            protyle.undo.redo(app, protyle);
+            protyle.undo.redo(protyle);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -954,7 +953,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
             return true;
         }
         /// #if !MOBILE
-        if (commonHotkey(app, protyle, event)) {
+        if (commonHotkey(protyle, event)) {
             return true;
         }
         /// #endif
@@ -1446,7 +1445,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
             });
             writeText(protyle.lute.BlockDOM2StdMd(html).trimEnd());
             const nextElement = getNextBlock(selectElements[selectElements.length - 1]);
-            removeBlock(app, protyle, nodeElement, range);
+            removeBlock(protyle, nodeElement, range);
             if (nextElement) {
                 focusBlock(nextElement);
             }
@@ -1597,7 +1596,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
             if (matchHotKey(window.siyuan.config.keymap.editor.general.openBy.custom, event)) {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
-                        app,
+                        app: protyle.app,
                         id,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                         zoomIn: foldResponse.data
@@ -1610,7 +1609,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
                 // 打开块引和编辑器中引用、反链、书签中点击事件需保持一致，都加载上下文
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
-                        app,
+                        app: protyle.app,
                         id,
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
                         keepCursor: true,
@@ -1623,7 +1622,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
-                        app,
+                        app: protyle.app,
                         id,
                         position: "right",
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
@@ -1636,7 +1635,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.insertBottom.custom, event)) {
                 fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
                     openFileById({
-                        app,
+                        app: protyle.app,
                         id,
                         position: "bottom",
                         action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
@@ -1649,7 +1648,7 @@ export const keydown = (app: App, protyle: IProtyle, editorElement: HTMLElement)
             } else if (matchHotKey(window.siyuan.config.keymap.editor.general.refPopover.custom, event)) {
                 // open popover
                 window.siyuan.blockPanels.push(new BlockPanel({
-                    app,
+                    app: protyle.app,
                     isBacklink: false,
                     targetElement: refElement,
                     nodeIds: [id],

@@ -93,16 +93,16 @@ class App {
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", (event) => {
-                handleTouchEnd(this, event);
+                handleTouchEnd(event);
             }, false);
         });
-        promiseTransactions(this);
+        promiseTransactions();
     }
 }
 
 const siyuanApp = new App();
 
-window.goBack = goBack.apply(siyuanApp);
+window.goBack = goBack;
 window.showKeyboardToolbar = (height) => {
     document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.innerHeight / 2 - 42).toString());
     showKeyboardToolbar();

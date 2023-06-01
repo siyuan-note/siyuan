@@ -36,16 +36,13 @@ import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {viewCards} from "../../card/viewCards";
 import {getNotebookName, pathPosix} from "../../util/pathName";
 import {commonClick} from "../wysiwyg/commonClick";
-import {App} from "../../index";
 
 export class Title {
     public element: HTMLElement;
     public editElement: HTMLElement;
     private timeout: number;
-    private app: App;
 
-    constructor(app: App, protyle: IProtyle) {
-        this.app = app;
+    constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.className = "protyle-title";
         if (window.siyuan.config.editor.displayBookmarkIcon) {
@@ -93,14 +90,14 @@ export class Title {
                 return;
             }
 
-            if (commonHotkey(app, protyle, event)) {
+            if (commonHotkey(protyle, event)) {
                 return true;
             }
             if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
                 const ids = protyle.path.split("/");
                 if (ids.length > 2) {
                     openFileById({
-                        app,
+                        app: protyle.app,
                         id: ids[ids.length - 2],
                         action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
@@ -268,7 +265,7 @@ export class Title {
             fetchPost("/api/block/getDocInfo", {
                 id: protyle.block.rootID
             }, (response) => {
-                commonClick(app, event, protyle, response.data.ial);
+                commonClick(event, protyle, response.data.ial);
             });
         });
     }
@@ -334,7 +331,7 @@ export class Title {
                 label: window.siyuan.languages.outline,
                 accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
                 click: () => {
-                    openOutline(this.app, protyle);
+                    openOutline(protyle);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -342,7 +339,7 @@ export class Title {
                 label: window.siyuan.languages.backlinks,
                 accelerator: window.siyuan.config.keymap.editor.general.backlinks.custom,
                 click: () => {
-                    openBacklink(this.app, protyle);
+                    openBacklink(protyle);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -350,7 +347,7 @@ export class Title {
                 label: window.siyuan.languages.graphView,
                 accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
                 click: () => {
-                    openGraph(this.app, protyle);
+                    openGraph(protyle);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -367,7 +364,7 @@ export class Title {
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(this.app, response.data, "doc", protyle.block.rootID, this.editElement.textContent || "Untitled");
+                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, this.editElement.textContent || "Untitled");
                     });
                 }
             }, {
@@ -377,7 +374,7 @@ export class Title {
                     fetchPost("/api/filetree/getHPathByID", {
                         id: protyle.block.rootID
                     }, (response) => {
-                        viewCards(this.app, protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
+                        viewCards(protyle.app, protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
                     });
                 }
             }, {
@@ -393,7 +390,7 @@ export class Title {
                     iconHTML: Constants.ZWSP,
                     label: window.siyuan.languages.addToDeck,
                     click: () => {
-                        makeCard(this.app, [protyle.block.rootID]);
+                        makeCard(protyle.app, [protyle.block.rootID]);
                     }
                 });
             }
@@ -411,7 +408,7 @@ export class Title {
 ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`
             }).element);
             window.siyuan.menus.menu.popup(position);
-            this.app?.plugins?.forEach((plugin) => {
+            protyle.app?.plugins?.forEach((plugin) => {
                 plugin.eventBus.emit("click-editortitleicon", {
                     protyle,
                     menu: window.siyuan.menus.menu,

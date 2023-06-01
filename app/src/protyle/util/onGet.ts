@@ -16,14 +16,12 @@ import {removeLoading} from "../ui/initUI";
 import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
-import {App} from "../../index";
 
 export const onGet = (options: {
     data: IWebSocketData,
     protyle: IProtyle,
     action?: string[],
     scrollAttr?: IScrollAttr
-    app: App
 }) => {
     if (!options.action) {
         options.action = [];
@@ -79,7 +77,7 @@ export const onGet = (options: {
             action: options.action,
             scrollAttr: options.scrollAttr,
             isSyncing: options.data.data.isSyncing,
-        }, options.protyle, options.app);
+        }, options.protyle);
         removeLoading(options.protyle);
         return;
     }
@@ -101,7 +99,7 @@ export const onGet = (options: {
             action: options.action,
             scrollAttr: options.scrollAttr,
             isSyncing: options.data.data.isSyncing,
-        }, options.protyle, options.app);
+        }, options.protyle);
         setTitle(response.data.ial.title);
         removeLoading(options.protyle);
     });
@@ -113,7 +111,7 @@ const setHTML = (options: {
     isSyncing: boolean,
     expand: boolean,
     scrollAttr?: IScrollAttr
-}, protyle: IProtyle, app: App) => {
+}, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none")) {
         return;
     }
@@ -261,7 +259,7 @@ const setHTML = (options: {
             mode: 2,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID], app});
+            onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
         });
     }
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
@@ -270,7 +268,7 @@ const setHTML = (options: {
     if (protyle.options.render.breadcrumb) {
         protyle.breadcrumb.render(protyle);
     }
-    app.plugins.forEach(item => {
+    protyle.app.plugins.forEach(item => {
         item.eventBus.emit("loaded-protyle", protyle);
     });
 };

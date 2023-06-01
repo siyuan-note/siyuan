@@ -85,7 +85,7 @@ export const initBar = (app: App) => {
                 window.siyuan.menus.menu.element.setAttribute("data-name", "barmore");
                 (target.getAttribute("data-hideids") || "").split(",").forEach((itemId) => {
                     const hideElement = toolbarElement.querySelector("#" + itemId);
-                    const useElement = hideElement.querySelector("use")
+                    const useElement = hideElement.querySelector("use");
                     const menuOptions: IMenu = {
                         label: itemId === "toolbarVIP" ? window.siyuan.languages.account : hideElement.getAttribute("aria-label"),
                         icon: itemId === "toolbarVIP" ? "iconAccount" : (useElement ? useElement.getAttribute("xlink:href").substring(1) : undefined),
@@ -98,7 +98,7 @@ export const initBar = (app: App) => {
                         }
                     };
                     if (!useElement) {
-                        const svgElement = hideElement.querySelector("svg")
+                        const svgElement = hideElement.querySelector("svg");
                         svgElement.classList.add("b3-menu__icon");
                         menuOptions.iconHTML = svgElement.outerHTML;
                     }

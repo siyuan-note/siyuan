@@ -153,7 +153,6 @@ const focusStack = async (app: App, stack: IBackStack) => {
             return false;
         }
         zoomOut({
-            app,
             protyle: stack.protyle,
             id: stack.zoomId || stack.protyle.block.rootID,
             isPushBack: false,

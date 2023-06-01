@@ -37,7 +37,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);
         } else {
-            reloadProtyle(window.siyuan.mobile.popEditor.protyle, app, false);
+            reloadProtyle(window.siyuan.mobile.popEditor.protyle, false);
             window.siyuan.mobile.popEditor.protyle.breadcrumb.render(window.siyuan.mobile.popEditor.protyle, true);
         }
     }
@@ -45,7 +45,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
         if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
             setEmpty(app);
         } else {
-            reloadProtyle(window.siyuan.mobile.editor.protyle, app, false);
+            reloadProtyle(window.siyuan.mobile.editor.protyle, false);
             fetchPost("/api/block/getDocInfo", {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
@@ -60,7 +60,7 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
     const allModels = getAllModels();
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
-            reloadProtyle(item.editor.protyle, app, false);
+            reloadProtyle(item.editor.protyle, false);
             updateTitle(item.editor.protyle.block.rootID, item.parent);
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
             item.parent.parent.removeTab(item.parent.id, false, false, false);

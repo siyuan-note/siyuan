@@ -144,7 +144,7 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuEditor") {
-                initEditor(app);
+                initEditor();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

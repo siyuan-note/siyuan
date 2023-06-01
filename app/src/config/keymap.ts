@@ -169,7 +169,7 @@ export const keymap = {
         const data: IKeymap = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
         keymap.element.querySelectorAll("label.b3-list-item input").forEach((item) => {
             const keys = item.getAttribute("data-key").split(Constants.ZWSP);
-            const newHotkey = item.getAttribute("data-value")
+            const newHotkey = item.getAttribute("data-value");
             if (keys[0] === "plugin") {
                 window.siyuan.config.keymap.plugin[keys[1]][keys[2]].custom = newHotkey;
                 data.plugin = window.siyuan.config.keymap.plugin;
@@ -179,9 +179,9 @@ export const keymap = {
                             if (command.langKey === keys[2]) {
                                 command.customHotkey = newHotkey;
                             }
-                        })
+                        });
                     }
-                })
+                });
             } else if (keys[0] === "general") {
                 data[keys[0]][keys[1]].custom = newHotkey;
             } else if (keys[0] === "editor" && (keys[1] === "general" || keys[1] === "insert" || keys[1] === "heading" || keys[1] === "list" || keys[1] === "table")) {

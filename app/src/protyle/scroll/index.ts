@@ -5,7 +5,6 @@ import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {isMobile} from "../../util/functions";
-import {App} from "../../index";
 
 export class Scroll {
     public element: HTMLElement;
@@ -14,7 +13,7 @@ export class Scroll {
     public lastScrollTop: number;
     public keepLazyLoad: boolean;   // 保持加载内容
 
-    constructor(protyle: IProtyle, app: App) {
+    constructor(protyle: IProtyle) {
         this.parentElement = document.createElement("div");
         this.parentElement.classList.add("protyle-scroll");
         if (!isMobile()) {
@@ -42,25 +41,25 @@ export class Scroll {
         });
         /// #if BROWSER
         this.inputElement.addEventListener("change", () => {
-            this.setIndex(protyle, app);
+            this.setIndex(protyle);
         });
         this.inputElement.addEventListener("touchend", () => {
-            this.setIndex(protyle, app);
+            this.setIndex(protyle);
         });
         /// #endif
         this.parentElement.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-scroll__up")) {
-                goHome(protyle, app);
+                goHome(protyle);
             } else if (hasClosestByClassName(target, "protyle-scroll__down")) {
-                goEnd(protyle, app);
+                goEnd(protyle);
             } else if (target.classList.contains("b3-slider")) {
-                this.setIndex(protyle, app);
+                this.setIndex(protyle);
             }
         });
     }
 
-    private setIndex(protyle: IProtyle, app: App) {
+    private setIndex(protyle: IProtyle) {
         if (protyle.wysiwyg.element.getAttribute("data-top")) {
             return;
         }
@@ -75,7 +74,6 @@ export class Scroll {
                 data: getResponse,
                 protyle,
                 action: [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID],
-                app
             });
         });
     }

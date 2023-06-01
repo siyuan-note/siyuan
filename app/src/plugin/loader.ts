@@ -148,7 +148,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     /// #if !MOBILE
     mergePluginHotkey(plugin);
     plugin.statusBarIcons.forEach(element => {
-        const statusElement = document.getElementById("status")
+        const statusElement = document.getElementById("status");
         if (element.getAttribute("data-position") === "right") {
             statusElement.insertAdjacentElement("beforeend", element);
         } else {

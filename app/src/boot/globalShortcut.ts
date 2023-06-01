@@ -1071,7 +1071,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 selectElements = [nodeElement];
             }
             movePathTo((toPath) => {
-                hintMoveBlock(toPath[0], selectElements, protyle, app);
+                hintMoveBlock(toPath[0], selectElements, protyle);
             });
         }
         event.preventDefault();
@@ -1084,7 +1084,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
-        reloadProtyle(protyle, app, true);
+        reloadProtyle(protyle, true);
         event.preventDefault();
         return true;
     }
@@ -1106,19 +1106,19 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             id: protyle.block.parentID,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle, app});
+            onGet({data: getResponse, protyle});
         });
         event.preventDefault();
         return true;
     }
     // 没有光标时，无法撤销 https://ld246.com/article/1624021111567
     if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {
-        protyle.undo.undo(app, protyle);
+        protyle.undo.undo(protyle);
         event.preventDefault();
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.redo.custom, event)) {
-        protyle.undo.redo(app, protyle);
+        protyle.undo.redo(protyle);
         event.preventDefault();
         return true;
     }

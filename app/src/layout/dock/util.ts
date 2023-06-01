@@ -4,9 +4,8 @@ import {Graph} from "./Graph";
 import {Outline} from "./Outline";
 import {switchWnd} from "../util";
 import {Backlink} from "./Backlink";
-import {App} from "../../index";
 
-export const openBacklink = (app: App, protyle: IProtyle) => {
+export const openBacklink = (protyle: IProtyle) => {
     const backlink = getAllModels().backlink.find(item => {
         if (item.blockId === protyle.block.id && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
@@ -22,7 +21,7 @@ export const openBacklink = (app: App, protyle: IProtyle) => {
         title: protyle.title.editElement.textContent || "Untitled",
         callback(tab: Tab) {
             tab.addModel(new Backlink({
-                app,
+                app: protyle.app,
                 type: "local",
                 tab,
                 // 通过搜索打开的包含上下文，但不是缩放，因此需要传 rootID https://ld246.com/article/1666786639708
@@ -34,7 +33,7 @@ export const openBacklink = (app: App, protyle: IProtyle) => {
     newWnd.addTab(tab);
 };
 
-export const openGraph = (app: App, protyle: IProtyle) => {
+export const openGraph = (protyle: IProtyle) => {
     const graph = getAllModels().graph.find(item => {
         if (item.blockId === protyle.block.id && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
@@ -50,7 +49,7 @@ export const openGraph = (app: App, protyle: IProtyle) => {
         title: protyle.title.editElement.textContent || "Untitled",
         callback(tab: Tab) {
             tab.addModel(new Graph({
-                app,
+                app: protyle.app,
                 type: "local",
                 tab,
                 blockId: protyle.block.id,
@@ -61,7 +60,7 @@ export const openGraph = (app: App, protyle: IProtyle) => {
     wnd.addTab(tab);
 };
 
-export const openOutline = (app: App,protyle: IProtyle) => {
+export const openOutline = (protyle: IProtyle) => {
     const outlinePanel = getAllModels().outline.find(item => {
         if (item.blockId === protyle.block.rootID && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
@@ -77,7 +76,7 @@ export const openOutline = (app: App,protyle: IProtyle) => {
         title: protyle.title.editElement.textContent || "Untitled",
         callback(tab: Tab) {
             tab.addModel(new Outline({
-                app,
+                app: protyle.app,
                 type: "local",
                 tab,
                 blockId: protyle.block.rootID,

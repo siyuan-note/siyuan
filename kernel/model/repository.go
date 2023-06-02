@@ -81,51 +81,74 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 	if nil != err {
 		return
 	}
-	luteEngine := NewLute()
-	isLargeDoc, snapshotTree, updated, err := parseTreeInSnapshot(fileID, repo, luteEngine)
+
+	file, err := repo.GetFile(fileID)
 	if nil != err {
-		logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 		return
 	}
-	id = snapshotTree.Root.ID
-	rootID = snapshotTree.Root.ID
 
-	if !isLargeDoc {
-		renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
-
-		var unlinks []*ast.Node
-		ast.Walk(snapshotTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			n.RemoveIALAttr("heading-fold")
-			n.RemoveIALAttr("fold")
-			return ast.WalkContinue
-		})
-
-		for _, unlink := range unlinks {
-			unlink.Unlink()
-		}
-
-		var appends []*ast.Node
-		for n := snapshotTree.Root.FirstChild; nil != n; n = n.Next {
-			appends = append(appends, n)
-		}
-		for _, n := range appends {
-			renderTree.Root.AppendChild(n)
-		}
-
-		snapshotTree = renderTree
+	data, err := repo.OpenFile(file)
+	if nil != err {
+		return
 	}
 
-	luteEngine.RenderOptions.ProtyleContenteditable = false
-	if isLargeDoc {
-		util.PushMsg(Conf.Language(36), 5000)
-		formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions)
-		content = gulu.Str.FromBytes(formatRenderer.Render())
+	updated = file.Updated
+
+	if strings.HasSuffix(file.Path, ".sy") {
+		luteEngine := NewLute()
+		var snapshotTree *parse.Tree
+		isLargeDoc, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
+		if nil != err {
+			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
+			return
+		}
+		id = snapshotTree.Root.ID
+		rootID = snapshotTree.Root.ID
+
+		if !isLargeDoc {
+			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
+
+			var unlinks []*ast.Node
+			ast.Walk(snapshotTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering {
+					return ast.WalkContinue
+				}
+
+				n.RemoveIALAttr("heading-fold")
+				n.RemoveIALAttr("fold")
+				return ast.WalkContinue
+			})
+
+			for _, unlink := range unlinks {
+				unlink.Unlink()
+			}
+
+			var appends []*ast.Node
+			for n := snapshotTree.Root.FirstChild; nil != n; n = n.Next {
+				appends = append(appends, n)
+			}
+			for _, n := range appends {
+				renderTree.Root.AppendChild(n)
+			}
+
+			snapshotTree = renderTree
+		}
+
+		luteEngine.RenderOptions.ProtyleContenteditable = false
+		if isLargeDoc {
+			util.PushMsg(Conf.Language(36), 5000)
+			formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions)
+			content = gulu.Str.FromBytes(formatRenderer.Render())
+		} else {
+			content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions)
+		}
 	} else {
-		content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions)
+		isLargeDoc = true
+		if strings.HasSuffix(file.Path, ".json") {
+			content = gulu.Str.FromBytes(data)
+		} else {
+			content = file.Path
+		}
 	}
 	return
 }
@@ -250,46 +273,33 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		return
 	}
 
-	if !strings.HasSuffix(file.Path, ".sy") {
-		return
-	}
+	title = path.Base(file.Path)
+	if strings.HasSuffix(file.Path, ".sy") {
+		var data []byte
+		data, err = repo.OpenFile(file)
+		if nil != err {
+			logging.LogErrorf("open file [%s] failed: %s", fileID, err)
+			return
+		}
 
-	var data []byte
-	data, err = repo.OpenFile(file)
-	if nil != err {
-		logging.LogErrorf("open file [%s] failed: %s", fileID, err)
-		return
-	}
+		var tree *parse.Tree
+		tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		if nil != err {
+			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
+			return
+		}
 
-	var tree *parse.Tree
-	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
-	if nil != err {
-		logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
-		return
+		title = tree.Root.IALAttr("title")
 	}
-
-	title = tree.Root.IALAttr("title")
 	return
 }
 
-func parseTreeInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, updated int64, err error) {
-	file, err := repo.GetFile(fileID)
-	if nil != err {
-		return
-	}
-
-	data, err := repo.OpenFile(file)
-	if nil != err {
-		return
-	}
-
+func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
 	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		return
 	}
-
-	updated = file.Updated
 	return
 }
 

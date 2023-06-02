@@ -22,7 +22,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -313,7 +312,7 @@ func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error
 			op.PreviousID = n.Previous.ID
 		}
 		op.Action = "insert"
-		op.Data = lute.RenderNodeBlockDOM(n, luteEngine.ParseOptions, luteEngine.RenderOptions)
+		op.Data = luteEngine.RenderNodeBlockDOM(n)
 		transaction.UndoOperations = append(transaction.UndoOperations, op)
 	}
 	return
@@ -391,7 +390,7 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 		op := &Operation{}
 		op.ID = c.ID
 		op.Action = "update"
-		op.Data = lute.RenderNodeBlockDOM(c, luteEngine.ParseOptions, luteEngine.RenderOptions)
+		op.Data = luteEngine.RenderNodeBlockDOM(c)
 		transaction.UndoOperations = append(transaction.UndoOperations, op)
 
 		c.HeadingLevel += diff
@@ -404,7 +403,7 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 		op = &Operation{}
 		op.ID = c.ID
 		op.Action = "update"
-		op.Data = lute.RenderNodeBlockDOM(c, luteEngine.ParseOptions, luteEngine.RenderOptions)
+		op.Data = luteEngine.RenderNodeBlockDOM(c)
 		transaction.DoOperations = append(transaction.DoOperations, op)
 	}
 	return
@@ -421,7 +420,7 @@ func GetBlockDOM(id string) (ret string) {
 	}
 	node := treenode.GetNodeInTree(tree, id)
 	luteEngine := NewLute()
-	ret = lute.RenderNodeBlockDOM(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+	ret = luteEngine.RenderNodeBlockDOM(node)
 	return
 }
 

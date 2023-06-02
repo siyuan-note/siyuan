@@ -77,6 +77,10 @@ export class Model {
             }
         };
         ws.onerror = (err: Event & { target: { url: string, readyState: number } }) => {
+            if (!window.errorStack) {
+                window.errorStack = []
+            }
+            window.errorStack.push(err)
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 kernelError();
             }

@@ -28,6 +28,7 @@ type TEventBus = "ws-main" | "click-blockicon" | "click-editorcontent" | "click-
 declare module "blueimp-md5"
 
 interface Window {
+    errorStack: any[]
     dataLayer: any[]
     siyuan: ISiyuan
     webkit: any

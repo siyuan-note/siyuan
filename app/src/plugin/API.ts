@@ -13,6 +13,7 @@ import {newCardModel} from "../card/newCardTab";
 import {App} from "../index";
 import {Constants} from "../constants";
 import {Model} from "../layout/Model";
+import {Setting} from "./Setting";
 
 export class Menu {
     private menu: SiyuanMenu;
@@ -208,4 +209,5 @@ export const API = {
     Plugin,
     Dialog,
     Menu,
+    Setting
 };

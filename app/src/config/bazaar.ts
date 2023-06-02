@@ -302,7 +302,7 @@ export const bazaar = {
                     app.plugins.find((item: Plugin) => {
                         if (item.name === dataObj.name) {
                             // @ts-ignore
-                            hasSetting = item.__proto__.hasOwnProperty("openSetting");
+                            hasSetting = item.setting || item.__proto__.hasOwnProperty("openSetting");
                             return true;
                         }
                     });

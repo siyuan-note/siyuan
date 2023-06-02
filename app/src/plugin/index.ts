@@ -10,6 +10,7 @@ import {getDockByType, setPanelFocus} from "../layout/util";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {genUUID} from "../util/genID";
+import {Setting} from "./Setting";
 
 export class Plugin {
     private app: App;
@@ -18,6 +19,7 @@ export class Plugin {
     public data: any = {};
     public name: string;
     public topBarIcons: Element[] = [];
+    public setting: Setting;
     public statusBarIcons: Element[] = [];
     public commands: ICommand[] = [];
     public models: {
@@ -103,7 +105,10 @@ export class Plugin {
     }
 
     public openSetting() {
-        // 打开设置
+        if (!this.setting) {
+            return;
+        }
+        this.setting.open(this.name);
     }
 
     public loadData(storageName: string) {

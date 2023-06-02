@@ -83,6 +83,14 @@ interface ICard {
     nextDues: IObject
 }
 
+interface IPluginSettingOption {
+    title: string
+    description?: string
+    actionElement?: HTMLElement
+
+    createActionElement?(): HTMLElement
+}
+
 interface ISearchOption {
     page: number
     removed?: boolean  // 移除后需记录搜索内容 https://github.com/siyuan-note/siyuan/issues/7745

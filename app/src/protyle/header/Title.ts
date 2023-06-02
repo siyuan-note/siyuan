@@ -5,7 +5,7 @@ import {
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
-import {MenuItem} from "../../menus/Menu";
+import {MenuItem, subMenu} from "../../menus/Menu";
 import {
     copySubMenu,
     movePathToMenu,
@@ -400,6 +400,24 @@ export class Title {
                 icon: "iconRiffCard",
                 submenu: riffCardMenu,
             }).element);
+
+            const pluginSubMenu = new subMenu();
+            protyle.app?.plugins?.forEach((plugin) => {
+                plugin.eventBus.emit("click-editortitleicon", {
+                    protyle,
+                    menu: pluginSubMenu,
+                    data: response.data,
+                });
+            });
+            if (pluginSubMenu.menus.length > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({ type: "separator" }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.plugin,
+                    type: "submenu",
+                    submenu: pluginSubMenu.menus,
+                }).element);
+            }
+
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 iconHTML: Constants.ZWSP,
@@ -408,13 +426,6 @@ export class Title {
 ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`
             }).element);
             window.siyuan.menus.menu.popup(position);
-            protyle.app?.plugins?.forEach((plugin) => {
-                plugin.eventBus.emit("click-editortitleicon", {
-                    protyle,
-                    menu: window.siyuan.menus.menu,
-                    data: response.data,
-                });
-            });
         });
     }
 

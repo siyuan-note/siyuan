@@ -4,7 +4,7 @@ import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import * as dayjs from "dayjs";
 import {isMobile} from "../util/functions";
 import {App} from "../index";
@@ -20,7 +20,7 @@ const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
             id2 = `data-id2="${data2[index].fileID}"`;
         }
         html += `<li style="padding-left: 40px;" class="b3-list-item" ${id2} data-id="${item.fileID}">
-    <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
+    <span class="b3-list-item__text" title="${escapeAttr(item.title)}">${escapeHtml(item.title)}</span>
 </li>`;
     });
     return html;

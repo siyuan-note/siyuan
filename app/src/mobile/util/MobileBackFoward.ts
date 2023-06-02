@@ -26,9 +26,11 @@ const focusStack = (backStack: IBackStack) => {
         setEditMode(protyle, "wysiwyg");
     }
 
-    const startEndId = backStack.endId.split(Constants.ZWSP);
-    if (startEndId[0] === protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") &&
-        startEndId[1] === protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id")) {
+    protyle.notebookId = backStack.data.notebookId;
+    protyle.path = backStack.data.path;
+
+    if (backStack.data.startId === protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") &&
+        backStack.data.endId === protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id")) {
         protyle.contentElement.scrollTo({
             top: backStack.scrollTop,
             behavior: "smooth"
@@ -68,8 +70,8 @@ const focusStack = (backStack: IBackStack) => {
 
     fetchPost("/api/filetree/getDoc", {
         id: backStack.id,
-        startID: startEndId[0],
-        endID: startEndId[1],
+        startID: backStack.data.startId,
+        endID: backStack.data.endId,
     }, getResponse => {
         protyle.block.parentID = getResponse.data.parentID;
         protyle.block.parent2ID = getResponse.data.parent2ID;
@@ -102,7 +104,12 @@ export const pushBack = () => {
     const protyle = getCurrentEditor().protyle;
     window.siyuan.backStack.push({
         id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
-        endId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") + Constants.ZWSP + protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+        data: {
+            startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+            endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+            notebookId: protyle.notebookId,
+            path: protyle.path,
+        },
         scrollTop: protyle.contentElement.scrollTop,
         callback: protyle.block.action,
         zoomId: protyle.block.showAll ? protyle.block.id : undefined
@@ -149,7 +156,12 @@ export const goBack = () => {
         const protyle = editor.protyle;
         forwardStack.push({
             id: protyle.block.showAll ? protyle.block.id : protyle.block.rootID,
-            endId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id") + Constants.ZWSP + protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+            data: {
+                startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+                endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+                notebookId: protyle.notebookId,
+                path: protyle.path,
+            },
             scrollTop: protyle.contentElement.scrollTop,
             callback: protyle.block.action,
             zoomId: protyle.block.showAll ? protyle.block.id : undefined

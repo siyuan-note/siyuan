@@ -149,7 +149,12 @@ interface IPdfAnno {
 
 interface IBackStack {
     id: string,
-    endId?: string,
+    data?: {
+        startId: string,
+        endId: string
+        path: string
+        notebookId: string
+    },
     scrollTop?: number,
     callback?: string[],
     position?: { start: number, end: number }

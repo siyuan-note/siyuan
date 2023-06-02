@@ -195,7 +195,7 @@ func serveAppearance(ginServer *gin.Engine) {
 	siyuan := ginServer.Group("", model.CheckAuth)
 
 	siyuan.Handle("GET", "/", func(c *gin.Context) {
-		userAgentHeader := c.GetHeader("User-Agent")
+		userAgentHeaderLower := strings.ToLower(c.GetHeader("User-Agent"))
 
 		/* Carry query parameters when redirecting */
 		location := url.URL{}
@@ -203,17 +203,15 @@ func serveAppearance(ginServer *gin.Engine) {
 		queryParams.Set("r", gulu.Rand.String(7))
 		location.RawQuery = queryParams.Encode()
 
-		if strings.Contains(userAgentHeader, "Electron") {
+		if strings.Contains(userAgentHeaderLower, "electron") {
 			location.Path = "/stage/build/app/"
+		} else if strings.Contains(userAgentHeaderLower, "pad") {
+			// Improve detecting Pad device, treat it as desktop device https://github.com/siyuan-note/siyuan/issues/8435
+			location.Path = "/stage/build/desktop/"
 		} else {
-			ua := useragent.New(userAgentHeader)
+			ua := useragent.New(userAgentHeaderLower)
 			if ua.Mobile() {
-				if strings.Contains(strings.ToLower(ua.Platform()), "pad") {
-					// Improve detecting Pad device, treat it as desktop device https://github.com/siyuan-note/siyuan/issues/8435
-					location.Path = "/stage/build/desktop/"
-				} else {
-					location.Path = "/stage/build/mobile/"
-				}
+				location.Path = "/stage/build/mobile/"
 			} else {
 				location.Path = "/stage/build/desktop/"
 			}

@@ -149,6 +149,7 @@ interface IPdfAnno {
 
 interface IBackStack {
     id: string,
+    // 仅移动端
     data?: {
         startId: string,
         endId: string
@@ -158,6 +159,7 @@ interface IBackStack {
     scrollTop?: number,
     callback?: string[],
     position?: { start: number, end: number }
+    // 仅桌面端
     protyle?: IProtyle,
     zoomId?: string
 }

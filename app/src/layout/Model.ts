@@ -65,6 +65,7 @@ export class Model {
                 window.errorStack = []
             }
             window.errorStack.push({onclose: ev})
+            console.log(window.errorStack)
             if (0 <= ev.reason.indexOf("unauthenticated")) {
                 return;
             }
@@ -85,6 +86,7 @@ export class Model {
                 window.errorStack = []
             }
             window.errorStack.push({"onerror": err})
+            console.log(window.errorStack)
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 kernelError();
             }

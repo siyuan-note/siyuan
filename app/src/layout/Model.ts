@@ -46,7 +46,7 @@ export class Model {
             if (logElement) {
                 // 内核中断后无法 catch fetch 请求错误，重连会导致无法执行 transactionsTimeout
                 reloadSync(this.app, {upsertRootIDs: [], removeRootIDs: []});
-                window.siyuan.dialogs.find(item =>{
+                window.siyuan.dialogs.find(item => {
                     if (item.element.id === "errorLog") {
                         item.destroy();
                         return true;
@@ -61,6 +61,10 @@ export class Model {
             }
         };
         ws.onclose = (ev) => {
+            if (!window.errorStack) {
+                window.errorStack = []
+            }
+            window.errorStack.push({onclose: ev})
             if (0 <= ev.reason.indexOf("unauthenticated")) {
                 return;
             }
@@ -80,7 +84,7 @@ export class Model {
             if (!window.errorStack) {
                 window.errorStack = []
             }
-            window.errorStack.push(err)
+            window.errorStack.push({"onerror": err})
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 kernelError();
             }

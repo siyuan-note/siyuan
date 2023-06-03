@@ -32,6 +32,7 @@ import {openNewWindowById} from "../window/openNewWindow";
 import {openCardByData} from "../card/openCard";
 import {viewCards} from "../card/viewCards";
 import {App} from "../index";
+import {openDocHistory} from "../history/doc";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -540,6 +541,15 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         submenu: openSubmenus,
     }).element);
     /// #endif
+    if (!window.siyuan.config.readonly) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.dataHistory,
+            icon: "iconHistory",
+            click() {
+                openDocHistory(app, id);
+            }
+        }).element);
+    }
     genImportMenu(notebookId, pathString);
     window.siyuan.menus.menu.append(exportMd(id));
     return window.siyuan.menus.menu;

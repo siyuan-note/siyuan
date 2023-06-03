@@ -104,10 +104,10 @@ const siyuanApp = new App();
 
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {
-    window.siyuan.ws.ws.send("ping");
-    window.siyuan.mobile.files.ws.send("ping");
-    window.siyuan.mobile.editor.protyle.ws.ws.send("ping");
-    window.siyuan.mobile.popEditor.protyle.ws.ws.send("ping");
+    window.siyuan.ws.send("ping", {});
+    window.siyuan.mobile.files.send("ping", {});
+    window.siyuan.mobile.editor.protyle.ws.send("ping", {});
+    window.siyuan.mobile.popEditor.protyle.ws.send("ping", {});
 };
 window.goBack = goBack;
 window.showKeyboardToolbar = (height) => {

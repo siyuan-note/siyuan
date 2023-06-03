@@ -165,6 +165,7 @@ type LeftRightDiff struct {
 type DiffFile struct {
 	FileID  string `json:"fileID"`
 	Title   string `json:"title"`
+	Path    string `json:"path"`
 	Updated int64  `json:"updated"`
 }
 
@@ -209,6 +210,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 		ret.AddsLeft = append(ret.AddsLeft, &DiffFile{
 			FileID:  removeRight.ID,
 			Title:   title,
+			Path:    removeRight.Path,
 			Updated: removeRight.Updated,
 		})
 	}
@@ -225,6 +227,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 		ret.RemovesRight = append(ret.RemovesRight, &DiffFile{
 			FileID:  addLeft.ID,
 			Title:   title,
+			Path:    addLeft.Path,
 			Updated: addLeft.Updated,
 		})
 	}
@@ -241,6 +244,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 		ret.UpdatesLeft = append(ret.UpdatesLeft, &DiffFile{
 			FileID:  updateLeft.ID,
 			Title:   title,
+			Path:    updateLeft.Path,
 			Updated: updateLeft.Updated,
 		})
 	}
@@ -257,6 +261,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 		ret.UpdatesRight = append(ret.UpdatesRight, &DiffFile{
 			FileID:  updateRight.ID,
 			Title:   title,
+			Path:    updateRight.Path,
 			Updated: updateRight.Updated,
 		})
 	}

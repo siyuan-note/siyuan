@@ -141,7 +141,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             if (isMobile()) {
                 document.querySelector("#menuAbout").after(element);
             } else if (!isWindow()) {
-                document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barSearch" : "drag")).before(element);
+                document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
     }

@@ -413,6 +413,7 @@ export class Title {
                 window.siyuan.menus.menu.append(new MenuItem({ type: "separator" }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.plugin,
+                    icon: "iconPlugin",
                     type: "submenu",
                     submenu: pluginSubMenu.menus,
                 }).element);

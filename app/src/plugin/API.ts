@@ -53,7 +53,7 @@ export class Menu {
         this.menu.addSeparator(index);
     }
 
-    open(options: { x: number, y: number, h?: number, w?: number, isLeft: false }) {
+    open(options: { x: number, y: number, h?: number, w?: number, isLeft?: boolean }) {
         if (this.isOpen) {
             return;
         }

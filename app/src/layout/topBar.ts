@@ -15,6 +15,7 @@ import {webFrame} from "electron";
 /// #endif
 import {Constants} from "../constants";
 import {isBrowser, isWindow} from "../util/functions";
+import {Menu} from "../plugin/API";
 
 export const updateEditModeElement = () => {
     const target = document.querySelector("#barReadonly");
@@ -47,6 +48,9 @@ export const initBar = (app: App) => {
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
 <div id="toolbarVIP" class="fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
+<div id="barPlugins" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.plugin}">
+    <svg><use xlink:href="#iconPlugin"></use></svg>
+</div>
 <div id="barSearch" class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.globalSearch} ${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}">
     <svg><use xlink:href="#iconSearch"></use></svg>
 </div>
@@ -177,6 +181,10 @@ export const initBar = (app: App) => {
                 });
                 event.stopPropagation();
                 break;
+            } else if (targetId === "barPlugins") {
+                openPlugin(app, target);
+                event.stopPropagation();
+                break;
             } else if (targetId === "barZoom") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
                     window.siyuan.menus.menu.element.getAttribute("data-name") === "barZoom") {
@@ -259,3 +267,62 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
     }
     /// #endif
 };
+
+const openPlugin = (app: App, target: Element) => {
+    const menu = new Menu("topBarPlugin");
+    let hasPlugin = false;
+    app.plugins.forEach((plugin) => {
+        // @ts-ignore
+        const hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
+        plugin.topBarIcons.forEach(item => {
+            const menuOption: IMenu = {
+                icon: "iconInfo",
+                label: item.getAttribute("aria-label"),
+                click() {
+                    item.dispatchEvent(new CustomEvent("click"))
+                },
+                type: "submenu",
+                submenu: [{
+                    icon: "iconPin",
+                    label: window.siyuan.languages.pin,
+                    click() {
+
+                    }
+                }, {
+                    icon: "iconSettings",
+                    label: window.siyuan.languages.config,
+                    disabled: !hasSetting,
+                    click() {
+                        plugin.openSetting();
+                    },
+                }]
+            }
+            if (item.querySelector("use")) {
+                menuOption.icon = item.querySelector("use").getAttribute("xlink:href").replace("#", "");
+            } else {
+                const svgElement = item.querySelector("svg");
+                svgElement.classList.add("b3-menu__icon")
+                menuOption.iconHTML = svgElement.outerHTML;
+            }
+            menu.addItem(menuOption);
+            hasPlugin = true
+        })
+    })
+
+    if (hasPlugin) {
+        menu.addSeparator()
+    }
+    menu.addItem({
+        icon: "iconSettings",
+        label: window.siyuan.languages.config,
+        click() {
+            const dialogSetting = openSetting(app);
+            dialogSetting.element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+        }
+    });
+    let rect = target.getBoundingClientRect();
+    if (rect.width === 0) {
+        rect = document.querySelector("#barMore").getBoundingClientRect();
+    }
+    menu.open({x: rect.right, y: rect.bottom, isLeft: true})
+}

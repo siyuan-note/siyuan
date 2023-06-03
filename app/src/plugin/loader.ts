@@ -2,10 +2,11 @@ import {fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
-import {exportLayout} from "../layout/util";
+import {exportLayout, resizeTopbar} from "../layout/util";
 /// #endif
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
+import {Constants} from "../constants";
 
 const getObject = (key: string) => {
     const api = {
@@ -141,9 +142,13 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             if (isMobile()) {
                 document.querySelector("#menuAbout").after(element);
             } else if (!isWindow()) {
+                if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
+                    element.classList.add("fn__none");
+                }
                 document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
+        resizeTopbar();
     }
     /// #if !MOBILE
     mergePluginHotkey(plugin);

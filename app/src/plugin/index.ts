@@ -77,7 +77,7 @@ export class Plugin {
         const iconElement = document.createElement("div");
         iconElement.setAttribute("data-menu", "true");
         iconElement.addEventListener("click", options.callback);
-        iconElement.id = "plugin" + genUUID();
+        iconElement.id = `plugin_${this.name}_${this.topBarIcons.length}`;
         if (isMobile()) {
             iconElement.className = "b3-menu__item";
             iconElement.innerHTML = (options.icon.startsWith("icon") ? `<svg class="b3-menu__icon"><use xlink:href="#${options.icon}"></use></svg>` : options.icon) +

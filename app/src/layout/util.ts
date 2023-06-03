@@ -631,6 +631,9 @@ export const resizeTopbar = () => {
     } else if (left < right && right - left < width / 3) {
         dragElement.style.paddingLeft = (right - left) + "px";
     }
+    window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].forEach((id: string) => {
+        toolbarElement.querySelector("#" + id)?.classList.add("fn__none");
+    });
 };
 
 let resizeTimeout: number;

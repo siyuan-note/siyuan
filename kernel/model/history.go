@@ -313,7 +313,7 @@ type HistoryItem struct {
 
 func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, pageCount, totalCount int) {
 	query = gulu.Str.RemoveInvisible(query)
-	if "" != query {
+	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
 

@@ -370,7 +370,7 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		case HistoryTypeDoc:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
 		case HistoryTypeDocID:
-			stmt += table + " id = '" + query + "'"
+			stmt += " id = '" + query + "'"
 		case HistoryTypeAsset:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
 		}
@@ -378,14 +378,12 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		stmt += "1=1"
 	}
 
-	if HistoryTypeDocName == typ || HistoryTypeDoc == typ || HistoryTypeDocID == typ {
+	if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
 		if "all" != op {
 			stmt += " AND op = '" + op + "'"
 		}
 		if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
 			stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
-		} else if HistoryTypeDocID == typ {
-			stmt += " AND id = '" + query + "'"
 		}
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"

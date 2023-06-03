@@ -1,8 +1,6 @@
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {renderAssetsPreview} from "../asset/renderAssets";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
@@ -23,7 +21,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         previousElement.setAttribute("disabled", "disabled");
     }
     const opElement = element.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
-    const listElement = element.querySelector('.b3-list--background')
+    const listElement = element.querySelector(".b3-list--background");
     element.querySelector('.history__text[data-type="docPanel"]').classList.add("fn__none");
     element.querySelector('.history__text[data-type="mdPanel"]').classList.remove("fn__none");
     fetchPost("/api/history/searchHistory", {
@@ -126,7 +124,7 @@ export const openDocHistory = (options: {
         while (target && !target.isEqualNode(dialog.element)) {
             const type = target.getAttribute("data-type");
             if (type === "close") {
-                dialog.destroy()
+                dialog.destroy();
             } else if (type === "rollback" && !isLoading) {
                 getHistoryPath(target.parentElement, opElement.value, options.id, (dataPath) => {
                     isLoading = false;
@@ -181,7 +179,7 @@ export const openDocHistory = (options: {
 
 const getHistoryPath = (target: Element, op: string, id: string, cb: (path: string) => void) => {
     isLoading = true;
-    const path = target.getAttribute("data-path")
+    const path = target.getAttribute("data-path");
     if (path) {
         cb(path);
     }
@@ -191,6 +189,6 @@ const getHistoryPath = (target: Element, op: string, id: string, cb: (path: stri
         type: 3,
         created: target.getAttribute("data-created")
     }, (response) => {
-        cb(response.data.items[0].path)
+        cb(response.data.items[0].path);
     });
-}
+};

@@ -9,7 +9,6 @@ import {Tab} from "../layout/Tab";
 import {getDockByType, setPanelFocus} from "../layout/util";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
-import {genUUID} from "../util/genID";
 import {Setting} from "./Setting";
 
 export class Plugin {

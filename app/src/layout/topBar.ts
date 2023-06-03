@@ -282,11 +282,11 @@ const openPlugin = (app: App, target: Element) => {
                 click() {
                     if (hasUnpin) {
                         window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].splice(window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].indexOf(item.id), 1);
-                        item.classList.remove("fn__none")
+                        item.classList.remove("fn__none");
                     } else {
                         window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].push(item.id);
                         window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN] = Array.from(new Set(window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]));
-                        item.classList.add("fn__none")
+                        item.classList.add("fn__none");
                     }
                     setStorageVal(Constants.LOCAL_PLUGINTOPUNPIN, window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]);
                 }
@@ -298,31 +298,31 @@ const openPlugin = (app: App, target: Element) => {
                     click() {
                         plugin.openSetting();
                     },
-                })
+                });
             }
             const menuOption: IMenu = {
                 icon: "iconInfo",
                 label: item.getAttribute("aria-label"),
                 click() {
-                    item.dispatchEvent(new CustomEvent("click"))
+                    item.dispatchEvent(new CustomEvent("click"));
                 },
                 type: "submenu",
                 submenu
-            }
+            };
             if (item.querySelector("use")) {
                 menuOption.icon = item.querySelector("use").getAttribute("xlink:href").replace("#", "");
             } else {
                 const svgElement = item.querySelector("svg").cloneNode(true) as HTMLElement;
-                svgElement.classList.add("b3-menu__icon")
+                svgElement.classList.add("b3-menu__icon");
                 menuOption.iconHTML = svgElement.outerHTML;
             }
             menu.addItem(menuOption);
-            hasPlugin = true
-        })
-    })
+            hasPlugin = true;
+        });
+    });
 
     if (hasPlugin) {
-        menu.addSeparator()
+        menu.addSeparator();
     }
     menu.addItem({
         icon: "iconSettings",
@@ -336,5 +336,5 @@ const openPlugin = (app: App, target: Element) => {
     if (rect.width === 0) {
         rect = document.querySelector("#barMore").getBoundingClientRect();
     }
-    menu.open({x: rect.right, y: rect.bottom, isLeft: true})
-}
+    menu.open({x: rect.right, y: rect.bottom, isLeft: true});
+};

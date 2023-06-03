@@ -43,7 +43,7 @@ export class Setting {
         });
         const contentElement = dialog.element.querySelector(".b3-dialog__content");
         this.items.forEach((item) => {
-            let html = ""
+            let html = "";
             let actionElement = item.actionElement;
             if (!item.actionElement && item.createActionElement) {
                 actionElement = item.createActionElement();
@@ -55,7 +55,7 @@ export class Setting {
         ${item.description ? `<div class="b3-label__text">${item.description}</div>` : ""}
         <div class="fn__hr"></div>
     </div>
-</label>`
+</label>`;
             } else {
                 html = `<label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
@@ -63,7 +63,7 @@ export class Setting {
         ${item.description ? `<div class="b3-label__text">${item.description}</div>` : ""}
     </div>
     <span class="fn__space${actionElement ? "" : " fn__none"}"></span>
-</label>`
+</label>`;
             }
             contentElement.insertAdjacentHTML("beforeend", html);
             if (actionElement) {
@@ -78,7 +78,7 @@ export class Setting {
                     contentElement.lastElementChild.insertAdjacentElement("beforeend", actionElement);
                 }
             }
-        })
+        });
         contentElement.querySelector("input")?.focus();
         const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
         btnsElement[0].addEventListener("click", () => {

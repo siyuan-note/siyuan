@@ -723,6 +723,7 @@ export class Gutter {
                 }
             }).element);
         }
+
         const pluginSubMenu = new subMenu();
         protyle.app?.plugins?.forEach((plugin) => {
             plugin.eventBus.emit("click-blockicon", {
@@ -739,6 +740,7 @@ export class Gutter {
                 submenu: pluginSubMenu.menus,
             }).element);
         }
+
         return window.siyuan.menus.menu;
     }
 

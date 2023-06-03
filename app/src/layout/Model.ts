@@ -61,6 +61,7 @@ export class Model {
             }
         };
         ws.onclose = (ev) => {
+            console.error("ws.onclose", ev)
             if (0 <= ev.reason.indexOf("unauthenticated")) {
                 return;
             }
@@ -77,6 +78,7 @@ export class Model {
             }
         };
         ws.onerror = (err: Event & { target: { url: string, readyState: number } }) => {
+            console.error("ws.onerror", err)
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 kernelError();
             }

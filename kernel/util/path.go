@@ -193,3 +193,26 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 func IsAssetLinkDest(dest []byte) bool {
 	return bytes.HasPrefix(dest, []byte("assets/"))
 }
+
+var (
+	SiYuanAssetsImage = []string{".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"}
+	SiYuanAssetsAudio = []string{".mp3", ".wav", ".ogg", ".m4a"}
+	SiYuanAssetsVideo = []string{".mov", ".weba", ".mkv", ".mp4", ".webm"}
+)
+
+func IsDisplayableAsset(p string) bool {
+	ext := strings.ToLower(filepath.Ext(p))
+	if "" == ext {
+		return false
+	}
+	if gulu.Str.Contains(ext, SiYuanAssetsImage) {
+		return true
+	}
+	if gulu.Str.Contains(ext, SiYuanAssetsAudio) {
+		return true
+	}
+	if gulu.Str.Contains(ext, SiYuanAssetsVideo) {
+		return true
+	}
+	return false
+}

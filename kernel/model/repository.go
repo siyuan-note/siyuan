@@ -145,8 +145,20 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 		if strings.HasSuffix(file.Path, ".json") {
 			content = gulu.Str.FromBytes(data)
 		} else {
-			if strings.Contains(file.Path, "assets/") {
-				content = file.Path[strings.Index(file.Path, "assets/"):]
+			if strings.Contains(file.Path, "assets/") { // 剔除笔记本级或者文档级资源文件路径前缀
+				file.Path = file.Path[strings.Index(file.Path, "assets/"):]
+				if util.IsDisplayableAsset(file.Path) {
+					dir, f := filepath.Split(file.Path)
+					tempRepoDiffDir := filepath.Join(util.TempDir, "repo", "diff", dir)
+					if mkErr := os.MkdirAll(tempRepoDiffDir, 0755); nil != mkErr {
+						logging.LogErrorf("mkdir [%s] failed: %v", tempRepoDiffDir, mkErr)
+					} else {
+						if wrErr := os.WriteFile(filepath.Join(tempRepoDiffDir, f), data, 0644); nil != wrErr {
+							logging.LogErrorf("write file [%s] failed: %v", filepath.Join(tempRepoDiffDir, file.Path), wrErr)
+						}
+					}
+					content = path.Join("repo", "diff", file.Path)
+				}
 			} else {
 				content = file.Path
 			}

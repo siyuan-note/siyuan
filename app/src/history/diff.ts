@@ -90,7 +90,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
             });
         }
-        textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
+        leftElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
     });
     const id2 = element.getAttribute("data-id2");
     if (id2) {
@@ -118,7 +118,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
                     action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                 });
             }
-            textElement.previousElementSibling.textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
+            rightElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
         });
     } else {
         rightElement.classList.add("fn__none");
@@ -241,13 +241,13 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
     <div class="fn__flex-1 fn__flex">
         <div class="fn__none fn__flex-1 fn__flex-column">
             <div class="history__date">${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
-            <div class="history__asset"></div>
+            <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>
         </div>
         <div class="fn__none fn__flex-1 fn__flex-column" style="border-left: 1px solid var(--b3-border-color);">
             <div class="history__date">${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
-            <div class="history__asset"></div>
+            <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>
         </div>

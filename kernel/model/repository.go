@@ -71,7 +71,7 @@ type TypeCount struct {
 	Count int    `json:"count"`
 }
 
-func OpenRepoSnapshotDoc(fileID string) (content string, isLargeDoc bool, updated int64, err error) {
+func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -97,13 +97,13 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isLargeDoc bool, update
 	if strings.HasSuffix(file.Path, ".sy") {
 		luteEngine := NewLute()
 		var snapshotTree *parse.Tree
-		isLargeDoc, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
+		isProtyleDoc, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
 		if nil != err {
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
 
-		if !isLargeDoc {
+		if !isProtyleDoc {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
 
 			var unlinks []*ast.Node
@@ -133,7 +133,7 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isLargeDoc bool, update
 		}
 
 		luteEngine.RenderOptions.ProtyleContenteditable = false
-		if isLargeDoc {
+		if isProtyleDoc {
 			util.PushMsg(Conf.Language(36), 5000)
 			formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions)
 			content = gulu.Str.FromBytes(formatRenderer.Render())
@@ -141,7 +141,7 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isLargeDoc bool, update
 			content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions)
 		}
 	} else {
-		isLargeDoc = true
+		isProtyleDoc = true
 		if strings.HasSuffix(file.Path, ".json") {
 			content = gulu.Str.FromBytes(data)
 		} else {
@@ -306,8 +306,8 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	return
 }
 
-func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
-	isLargeDoc = 1024*1024*1 <= len(data)
+func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isProtyleDoc bool, tree *parse.Tree, err error) {
+	isProtyleDoc = 1024*1024*1 <= len(data)
 	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		return

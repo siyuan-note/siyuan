@@ -651,7 +651,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	for _, asset := range assets {
 		p := strings.TrimPrefix(asset, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
-		_, id := util.LastID(asset)
+		_, id := util.LastID(p)
 		if !ast.IsNodeIDPattern(id) {
 			id = ""
 		}

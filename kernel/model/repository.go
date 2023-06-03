@@ -71,7 +71,7 @@ type TypeCount struct {
 	Count int    `json:"count"`
 }
 
-func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc bool, updated int64, err error) {
+func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -97,15 +97,13 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 	if strings.HasSuffix(file.Path, ".sy") {
 		luteEngine := NewLute()
 		var snapshotTree *parse.Tree
-		isLargeDoc, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
+		isProtyleDoc, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
 		if nil != err {
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
-		id = snapshotTree.Root.ID
-		rootID = snapshotTree.Root.ID
 
-		if !isLargeDoc {
+		if !isProtyleDoc {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
 
 			var unlinks []*ast.Node
@@ -135,7 +133,7 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 		}
 
 		luteEngine.RenderOptions.ProtyleContenteditable = false
-		if isLargeDoc {
+		if isProtyleDoc {
 			util.PushMsg(Conf.Language(36), 5000)
 			formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions)
 			content = gulu.Str.FromBytes(formatRenderer.Render())
@@ -143,11 +141,27 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 			content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions)
 		}
 	} else {
-		isLargeDoc = true
+		isProtyleDoc = true
 		if strings.HasSuffix(file.Path, ".json") {
 			content = gulu.Str.FromBytes(data)
 		} else {
-			content = file.Path
+			if strings.Contains(file.Path, "assets/") { // 剔除笔记本级或者文档级资源文件路径前缀
+				file.Path = file.Path[strings.Index(file.Path, "assets/"):]
+				if util.IsDisplayableAsset(file.Path) {
+					dir, f := filepath.Split(file.Path)
+					tempRepoDiffDir := filepath.Join(util.TempDir, "repo", "diff", dir)
+					if mkErr := os.MkdirAll(tempRepoDiffDir, 0755); nil != mkErr {
+						logging.LogErrorf("mkdir [%s] failed: %v", tempRepoDiffDir, mkErr)
+					} else {
+						if wrErr := os.WriteFile(filepath.Join(tempRepoDiffDir, f), data, 0644); nil != wrErr {
+							logging.LogErrorf("write file [%s] failed: %v", filepath.Join(tempRepoDiffDir, file.Path), wrErr)
+						}
+					}
+					content = path.Join("repo", "diff", file.Path)
+				}
+			} else {
+				content = file.Path
+			}
 		}
 	}
 	return
@@ -304,8 +318,8 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	return
 }
 
-func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
-	isLargeDoc = 1024*1024*1 <= len(data)
+func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isProtyleDoc bool, tree *parse.Tree, err error) {
+	isProtyleDoc = 1024*1024*1 <= len(data)
 	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if nil != err {
 		return

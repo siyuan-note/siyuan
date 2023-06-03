@@ -75,6 +75,7 @@ func Serve(fastMode bool) {
 	servePlugins(ginServer)
 	serveEmojis(ginServer)
 	serveTemplates(ginServer)
+	serveRepoDiff(ginServer)
 	api.ServeAPI(ginServer)
 
 	var host string
@@ -344,6 +345,15 @@ func serveAssets(ginServer *gin.Engine) {
 	})
 	ginServer.GET("/history/*path", model.CheckAuth, func(context *gin.Context) {
 		p := filepath.Join(util.HistoryDir, context.Param("path"))
+		http.ServeFile(context.Writer, context.Request, p)
+		return
+	})
+}
+
+func serveRepoDiff(ginServer *gin.Engine) {
+	ginServer.GET("/repo/diff/*path", model.CheckAuth, func(context *gin.Context) {
+		requestPath := context.Param("path")
+		p := filepath.Join(util.TempDir, "repo", "diff", requestPath)
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})

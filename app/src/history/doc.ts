@@ -11,6 +11,7 @@ import {isMobile} from "../util/functions";
 import {App} from "../index";
 
 let historyEditor: Protyle;
+let isLoading = false;
 
 const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
@@ -22,12 +23,9 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         previousElement.setAttribute("disabled", "disabled");
     }
     const opElement = element.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
-    const docElement = element.querySelector('.history__text[data-type="docPanel"]');
-    const assetElement = element.querySelector('.history__text[data-type="assetPanel"]');
-    const mdElement = element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
-    docElement.classList.add("fn__none");
-    mdElement.classList.add("fn__none");
-        assetElement.classList.remove("fn__none");
+    const listElement = element.querySelector('.b3-list--background')
+    element.querySelector('.history__text[data-type="docPanel"]').classList.add("fn__none");
+    element.querySelector('.history__text[data-type="mdPanel"]').classList.add("fn__none");
     fetchPost("/api/history/searchHistory", {
         query: id,
         page: currentPage,
@@ -41,30 +39,32 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         }
         nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount || 1}`;
         if (response.data.histories.length === 0) {
-            element.lastElementChild.lastElementChild.previousElementSibling.classList.add("fn__none");
-            element.lastElementChild.lastElementChild.classList.add("fn__none");
-            element.lastElementChild.firstElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+            listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }
         let logsHTML = "";
         response.data.histories.forEach((item: string) => {
-            logsHTML += `<li class="b3-list-item" data-type="toggle" data-created="${item}">
-    <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
-    <span style="padding-left: 4px" class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
+            logsHTML += `<li class="b3-list-item" data-created="${item}">
+    <span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
+    <span class="fn__space"></span>
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
 </li>`;
         });
-        element.lastElementChild.firstElementChild.innerHTML = logsHTML;
+        listElement.innerHTML = logsHTML;
     });
 };
 
-export const openDocHistory = (app: App, id: string) => {
+export const openDocHistory = (options: {
+    app: App,
+    id: string,
+    notebookId: string,
+    pathString: string
+}) => {
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
         <div class="block__icons">
-            <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-            <span class="fn__space"></span>
-            <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
-            <span class="fn__space"></span>
-            <span>1/1</span>
+            ${isMobile() ? "" : options.pathString}
             <span class="fn__space"></span>
             <div class="fn__flex-1"></div>
             <select data-type="opselect" class="b3-select">
@@ -76,36 +76,39 @@ export const openDocHistory = (app: App, id: string) => {
                 <option value="sync">sync</option>
                 <option value="replace">replace</option>
             </select>
+            <span class="fn__space"></span>
+            <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__s" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href="#iconLeft"></use></svg></span>
+            <span class="fn__space"></span>
+            <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__s" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href="#iconRight"></use></svg></span>
+            <span class="fn__space"></span>
+            <span>1/1</span>
+            ${isMobile() ? '<span class="fn__space"></span><span data-type="close" class="block__icon block__icon--show"><svg><use xlink:href="#iconClose"></use></svg></span>' : ""}
         </div>
-        <div class="fn__flex fn__flex-1">
+        <div class="fn__flex fn__flex-1 history__panel">
             <ul class="b3-list b3-list--background" style="overflow:auto;">
                 <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
             </ul>
-            <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
-            <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
+            <textarea class="fn__flex-1 history__text fn__none" readonly data-type="mdPanel"></textarea>
             <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
         </div>
 </div>`;
     const dialog = new Dialog({
         content: contentHTML,
-        width: isMobile() ? "92vw" : "768px",
-        height: isMobile() ? "80vh" : "70vh",
+        width: isMobile() ? "100vw" : "1024px",
+        height: isMobile() ? "100vh" : "80vh",
         destroyCallback() {
             historyEditor = undefined;
         }
     });
-    bindEvent(app, dialog.element, id);
-};
 
-const bindEvent = (app: App, element: HTMLElement, id: string) => {
-    element.querySelector(".b3-select").addEventListener("change", () => {
-        renderDoc(element, 1, id);
+    const opElement = dialog.element.querySelector(".b3-select") as HTMLSelectElement;
+    opElement.addEventListener("change", () => {
+        renderDoc(dialog.element, 1, options.id);
     });
-    const docElement = element.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
-    const assetElement = element.querySelector('.history__text[data-type="assetPanel"]');
-    const mdElement = element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
-    renderDoc(element, 1, id);
-    historyEditor = new Protyle(app, docElement, {
+    const docElement = dialog.element.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
+    const mdElement = dialog.element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
+    renderDoc(dialog.element, 1, options.id);
+    historyEditor = new Protyle(options.app, docElement, {
         blockId: "",
         action: [Constants.CB_GET_HISTORY],
         render: {
@@ -118,35 +121,29 @@ const bindEvent = (app: App, element: HTMLElement, id: string) => {
         typewriterMode: false,
     });
     disabledProtyle(historyEditor.protyle);
-    element.addEventListener("click", (event) => {
+    dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
-        while (target && !target.isEqualNode(element)) {
+        while (target && !target.isEqualNode(dialog.element)) {
             const type = target.getAttribute("data-type");
-            if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
-                confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
-                    const dataType = target.parentElement.getAttribute("data-type");
-                    if (dataType === "assets") {
-                        fetchPost("/api/history/rollbackAssetsHistory", {
-                            historyPath: target.parentElement.getAttribute("data-path")
-                        });
-                    } else if (dataType === "doc") {
+            if (type === "close") {
+                dialog.destroy()
+            } else if (type === "rollback" && !isLoading) {
+                getHistoryPath(target.parentElement, opElement.value, options.id, (dataPath) => {
+                    isLoading = false;
+                    confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
                         fetchPost("/api/history/rollbackDocHistory", {
-                            // notebook: (firstPanelElement.querySelector('.b3-select[data-type="notebookselect"]') as HTMLSelectElement).value,
-                            historyPath: target.parentElement.getAttribute("data-path")
+                            notebook: options.notebookId,
+                            historyPath: dataPath
                         });
-                    }
+                    });
                 });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.classList.contains("b3-list-item")) {
-                const dataPath = target.getAttribute("data-path");
-                if (type === "assets") {
-                    assetElement.innerHTML = renderAssetsPreview(dataPath);
-                } else if (type === "doc") {
+            } else if (target.classList.contains("b3-list-item") && !isLoading) {
+                getHistoryPath(target, opElement.value, options.notebookId, (dataPath) => {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
-                        // k: (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value
                     }, (response) => {
                         if (response.data.isLargeDoc) {
                             mdElement.value = response.data.content;
@@ -161,22 +158,17 @@ const bindEvent = (app: App, element: HTMLElement, id: string) => {
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
                         }
+                        isLoading = false;
                     });
-                }
-                let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;
-                if (currentItem) {
-                    currentItem = currentItem.querySelector(".b3-list-item--focus");
-                    if (currentItem) {
-                        currentItem.classList.remove("b3-list-item--focus");
-                    }
-                }
-                target.classList.add("b3-list-item--focus");
+                    target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                    target.classList.add("b3-list-item--focus");
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
-                const currentPage = parseInt(element.getAttribute("data-page"));
-                renderDoc(element, type === "docprevious" ? currentPage - 1 : currentPage + 1, id);
+                const currentPage = parseInt(dialog.element.getAttribute("data-page"));
+                renderDoc(dialog.element, type === "docprevious" ? currentPage - 1 : currentPage + 1, options.id);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -185,3 +177,20 @@ const bindEvent = (app: App, element: HTMLElement, id: string) => {
         }
     });
 };
+
+
+const getHistoryPath = (target: Element, op: string, id: string, cb: (path: string) => void) => {
+    isLoading = true;
+    const path = target.getAttribute("data-path")
+    if (path) {
+        cb(path);
+    }
+    fetchPost("/api/history/getHistoryItems", {
+        query: id,
+        op,
+        type: 3,
+        created: target.getAttribute("data-created")
+    }, (response) => {
+        cb(response.data.items[0].path)
+    });
+}

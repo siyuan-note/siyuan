@@ -546,7 +546,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             label: window.siyuan.languages.dataHistory,
             icon: "iconHistory",
             click() {
-                openDocHistory(app, id);
+                openDocHistory({app, id, notebookId, pathString: name});
             }
         }).element);
     }

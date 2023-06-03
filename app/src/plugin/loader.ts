@@ -148,9 +148,9 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
-        resizeTopbar();
     }
     /// #if !MOBILE
+    resizeTopbar();
     mergePluginHotkey(plugin);
     plugin.statusBarIcons.forEach(element => {
         const statusElement = document.getElementById("status");

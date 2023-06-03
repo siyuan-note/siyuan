@@ -337,6 +337,8 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 			stmt += " AND op = '" + op + "'"
 		}
 		stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
+	} else if HistoryTypeDocID == typ {
+		stmt += " AND id = '" + query + "'"
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
@@ -387,6 +389,8 @@ func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []
 			stmt += " AND op = '" + op + "'"
 		}
 		stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
+	} else if HistoryTypeDocID == typ {
+		stmt += " AND id = '" + query + "'"
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
@@ -592,9 +596,10 @@ func ReindexHistory() (err error) {
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync, HistoryOpReplace}
 
 const (
-	HistoryTypeDocName = 0
-	HistoryTypeDoc     = 1
-	HistoryTypeAsset   = 2
+	HistoryTypeDocName = 0 // Search docs by doc name
+	HistoryTypeDoc     = 1 // Search docs by doc name and content
+	HistoryTypeAsset   = 2 // Search assets
+	HistoryTypeDocID   = 3 // Search docs by doc id
 )
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) {
@@ -640,6 +645,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		p := strings.TrimPrefix(doc, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
 		histories = append(histories, &sql.History{
+			ID:      tree.Root.ID,
 			Type:    HistoryTypeDoc,
 			Op:      op,
 			Title:   title,
@@ -652,7 +658,12 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	for _, asset := range assets {
 		p := strings.TrimPrefix(asset, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
+		_, id := util.LastID(asset)
+		if !ast.IsNodeIDPattern(id) {
+			id = ""
+		}
 		histories = append(histories, &sql.History{
+			ID:      id,
 			Type:    HistoryTypeAsset,
 			Op:      op,
 			Title:   filepath.Base(asset),

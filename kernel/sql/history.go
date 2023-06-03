@@ -27,6 +27,7 @@ import (
 )
 
 type History struct {
+	ID      string
 	Type    int
 	Op      string
 	Title   string
@@ -87,7 +88,7 @@ func SelectHistoriesRawStmt(stmt string) (ret []*History) {
 
 func scanHistoryRows(rows *sql.Rows) (ret *History) {
 	var history History
-	if err := rows.Scan(&history.Type, &history.Op, &history.Title, &history.Content, &history.Path, &history.Created); nil != err {
+	if err := rows.Scan(&history.ID, &history.Type, &history.Op, &history.Title, &history.Content, &history.Path, &history.Created); nil != err {
 		logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
 		return
 	}
@@ -112,8 +113,8 @@ func deleteHistoriesByPathPrefix(tx *sql.Tx, pathPrefix string, context map[stri
 }
 
 const (
-	HistoriesFTSCaseInsensitiveInsert = "INSERT INTO histories_fts_case_insensitive (type, op, title, content, path, created) VALUES %s"
-	HistoriesPlaceholder              = "(?, ?, ?, ?, ?, ?)"
+	HistoriesFTSCaseInsensitiveInsert = "INSERT INTO histories_fts_case_insensitive (id, type, op, title, content, path, created) VALUES %s"
+	HistoriesPlaceholder              = "(?, ?, ?, ?, ?, ?, ?)"
 )
 
 func insertHistories(tx *sql.Tx, histories []*History, context map[string]interface{}) (err error) {
@@ -146,6 +147,7 @@ func insertHistories0(tx *sql.Tx, bulk []*History, context map[string]interface{
 	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(HistoriesPlaceholder, "?"))
 	for _, b := range bulk {
 		valueStrings = append(valueStrings, HistoriesPlaceholder)
+		valueArgs = append(valueArgs, b.ID)
 		valueArgs = append(valueArgs, b.Type)
 		valueArgs = append(valueArgs, b.Op)
 		valueArgs = append(valueArgs, b.Title)

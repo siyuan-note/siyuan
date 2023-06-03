@@ -32,7 +32,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         query: id,
         page: currentPage,
         op: opElement.value,
-        type: 4
+        type: 3
     }, (response) => {
         if (currentPage < response.data.pageCount) {
             nextElement.removeAttribute("disabled");

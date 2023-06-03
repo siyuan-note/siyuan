@@ -322,24 +322,7 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 
 	table := "histories_fts_case_insensitive"
 	stmt := "SELECT DISTINCT created FROM " + table + " WHERE "
-	if "" != query {
-		stmt += table + " MATCH '{title content}:(" + query + ")'"
-	} else {
-		stmt += "1=1"
-	}
-
-	if HistoryTypeDocName == typ {
-		stmt = strings.ReplaceAll(stmt, "{title content}", "{title}")
-	}
-
-	if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
-		if "all" != op {
-			stmt += " AND op = '" + op + "'"
-		}
-		stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
-	} else if HistoryTypeAsset == typ {
-		stmt += " AND path LIKE '%/assets/%'"
-	}
+	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
 	countStmt := strings.ReplaceAll(stmt, "SELECT DISTINCT created", "SELECT COUNT(DISTINCT created) AS total")
 	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa(offset)
 	result, err := sql.QueryHistory(stmt)
@@ -372,27 +355,41 @@ func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []
 
 	table := "histories_fts_case_insensitive"
 	stmt := "SELECT * FROM " + table + " WHERE "
+	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
+	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", Conf.Search.Limit)
+	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
+	ret = fromSQLHistories(sqlHistories)
+	return
+}
+
+func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt string) {
 	if "" != query {
-		stmt += table + " MATCH '{title content}:(" + query + ")'"
+		switch typ {
+		case HistoryTypeDocName:
+			stmt += table + " MATCH '{title}:(" + query + ")'"
+		case HistoryTypeDoc:
+			stmt += table + " MATCH '{title content}:(" + query + ")'"
+		case HistoryTypeDocID:
+			stmt += table + " id = '" + query + "'"
+		case HistoryTypeAsset:
+			stmt += table + " MATCH '{title content}:(" + query + ")'"
+		}
 	} else {
 		stmt += "1=1"
 	}
 
-	if HistoryTypeDocName == typ {
-		stmt = strings.ReplaceAll(stmt, "{title content}", "{title}")
-	}
-
-	if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
+	if HistoryTypeDocName == typ || HistoryTypeDoc == typ || HistoryTypeDocID == typ {
 		if "all" != op {
 			stmt += " AND op = '" + op + "'"
 		}
-		stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
+		if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
+			stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"
+		} else if HistoryTypeDocID == typ {
+			stmt += " AND id = '" + query + "'"
+		}
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
 	}
-	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", Conf.Search.Limit)
-	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
-	ret = fromSQLHistories(sqlHistories)
 	return
 }
 
@@ -592,9 +589,10 @@ func ReindexHistory() (err error) {
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync, HistoryOpReplace}
 
 const (
-	HistoryTypeDocName = 0
-	HistoryTypeDoc     = 1
-	HistoryTypeAsset   = 2
+	HistoryTypeDocName = 0 // Search docs by doc name
+	HistoryTypeDoc     = 1 // Search docs by doc name and content
+	HistoryTypeAsset   = 2 // Search assets
+	HistoryTypeDocID   = 3 // Search docs by doc id
 )
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) {
@@ -640,6 +638,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		p := strings.TrimPrefix(doc, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
 		histories = append(histories, &sql.History{
+			ID:      tree.Root.ID,
 			Type:    HistoryTypeDoc,
 			Op:      op,
 			Title:   title,
@@ -652,7 +651,12 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	for _, asset := range assets {
 		p := strings.TrimPrefix(asset, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
+		_, id := util.LastID(asset)
+		if !ast.IsNodeIDPattern(id) {
+			id = ""
+		}
 		histories = append(histories, &sql.History{
+			ID:      id,
 			Type:    HistoryTypeAsset,
 			Op:      op,
 			Title:   filepath.Base(asset),

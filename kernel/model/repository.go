@@ -71,7 +71,7 @@ type TypeCount struct {
 	Count int    `json:"count"`
 }
 
-func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc bool, updated int64, err error) {
+func OpenRepoSnapshotDoc(fileID string) (content string, isLargeDoc bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -102,8 +102,6 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
-		id = snapshotTree.Root.ID
-		rootID = snapshotTree.Root.ID
 
 		if !isLargeDoc {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
@@ -147,7 +145,11 @@ func OpenRepoSnapshotDoc(fileID string) (id, rootID, content string, isLargeDoc 
 		if strings.HasSuffix(file.Path, ".json") {
 			content = gulu.Str.FromBytes(data)
 		} else {
-			content = file.Path
+			if strings.Contains(file.Path, "assets/") {
+				content = file.Path[strings.Index(file.Path, "assets/"):]
+			} else {
+				content = file.Path
+			}
 		}
 	}
 	return

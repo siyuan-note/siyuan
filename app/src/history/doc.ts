@@ -25,7 +25,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
     const opElement = element.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
     const listElement = element.querySelector('.b3-list--background')
     element.querySelector('.history__text[data-type="docPanel"]').classList.add("fn__none");
-    element.querySelector('.history__text[data-type="mdPanel"]').classList.add("fn__none");
+    element.querySelector('.history__text[data-type="mdPanel"]').classList.remove("fn__none");
     fetchPost("/api/history/searchHistory", {
         query: id,
         page: currentPage,

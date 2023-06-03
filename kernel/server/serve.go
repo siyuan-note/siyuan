@@ -373,11 +373,11 @@ func serveWebSocket(ginServer *gin.Engine) {
 	})
 
 	util.WebSocketServer.HandlePong(func(session *melody.Session) {
-		logging.LogInfof("pong")
+		//logging.LogInfof("pong")
 	})
 
 	util.WebSocketServer.HandleConnect(func(s *melody.Session) {
-		logging.LogInfof("ws check auth for [%s]", s.Request.RequestURI)
+		//logging.LogInfof("ws check auth for [%s]", s.Request.RequestURI)
 		authOk := true
 
 		if "" != model.Conf.AccessAuthCode {
@@ -415,24 +415,24 @@ func serveWebSocket(ginServer *gin.Engine) {
 		}
 
 		util.AddPushChan(s)
-		sessionId, _ := s.Get("id")
-		logging.LogInfof("ws [%s] connected", sessionId)
+		//sessionId, _ := s.Get("id")
+		//logging.LogInfof("ws [%s] connected", sessionId)
 	})
 
 	util.WebSocketServer.HandleDisconnect(func(s *melody.Session) {
 		util.RemovePushChan(s)
-		sessionId, _ := s.Get("id")
-		logging.LogInfof("ws [%s] disconnected", sessionId)
+		//sessionId, _ := s.Get("id")
+		//logging.LogInfof("ws [%s] disconnected", sessionId)
 	})
 
 	util.WebSocketServer.HandleError(func(s *melody.Session, err error) {
-		sessionId, _ := s.Get("id")
-		logging.LogDebugf("ws [%s] failed: %s", sessionId, err)
+		//sessionId, _ := s.Get("id")
+		//logging.LogWarnf("ws [%s] failed: %s", sessionId, err)
 	})
 
 	util.WebSocketServer.HandleClose(func(s *melody.Session, i int, str string) error {
-		sessionId, _ := s.Get("id")
-		logging.LogDebugf("ws [%s] closed: %v, %v", sessionId, i, str)
+		//sessionId, _ := s.Get("id")
+		//logging.LogDebugf("ws [%s] closed: %v, %v", sessionId, i, str)
 		return nil
 	})
 

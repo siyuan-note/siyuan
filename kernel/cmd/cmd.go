@@ -54,6 +54,8 @@ func NewCommand(cmdStr string, cmdId float64, param map[string]interface{}, sess
 	switch cmdStr {
 	case "closews":
 		ret = &closews{baseCmd}
+	case "ping":
+		ret = &ping{baseCmd}
 	}
 
 	if nil == ret {

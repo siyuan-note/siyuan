@@ -378,7 +378,7 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		stmt += "1=1"
 	}
 
-	if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
+	if HistoryTypeDocName == typ || HistoryTypeDoc == typ || HistoryTypeDocID == typ {
 		if "all" != op {
 			stmt += " AND op = '" + op + "'"
 		}

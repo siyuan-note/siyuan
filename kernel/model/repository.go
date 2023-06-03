@@ -166,6 +166,7 @@ type DiffFile struct {
 	FileID  string `json:"fileID"`
 	Title   string `json:"title"`
 	Path    string `json:"path"`
+	HSize   string `json:"hSize"`
 	Updated int64  `json:"updated"`
 }
 
@@ -211,6 +212,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  removeRight.ID,
 			Title:   title,
 			Path:    removeRight.Path,
+			HSize:   humanize.Bytes(uint64(removeRight.Size)),
 			Updated: removeRight.Updated,
 		})
 	}
@@ -228,6 +230,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  addLeft.ID,
 			Title:   title,
 			Path:    addLeft.Path,
+			HSize:   humanize.Bytes(uint64(addLeft.Size)),
 			Updated: addLeft.Updated,
 		})
 	}
@@ -245,6 +248,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  updateLeft.ID,
 			Title:   title,
 			Path:    updateLeft.Path,
+			HSize:   humanize.Bytes(uint64(updateLeft.Size)),
 			Updated: updateLeft.Updated,
 		})
 	}
@@ -262,6 +266,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 			FileID:  updateRight.ID,
 			Title:   title,
 			Path:    updateRight.Path,
+			HSize:   humanize.Bytes(uint64(updateRight.Size)),
 			Updated: updateRight.Updated,
 		})
 	}

@@ -39,7 +39,6 @@ export class Model {
         const websocketURL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type ? "&type=" + options.type : ""}`);
         ws.onopen = () => {
-            alert("onopen")
             if (options.callback) {
                 options.callback.call(this);
             }
@@ -62,7 +61,6 @@ export class Model {
             }
         };
         ws.onclose = (ev) => {
-            alert(ev.reason)
             if (0 <= ev.reason.indexOf("unauthenticated")) {
                 return;
             }
@@ -79,7 +77,6 @@ export class Model {
             }
         };
         ws.onerror = (err: Event & { target: { url: string, readyState: number } }) => {
-            alert("onerror")
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
                 kernelError();
             }

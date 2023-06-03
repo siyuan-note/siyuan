@@ -51,6 +51,8 @@ interface Window {
 
     goBack(): void
 
+    reconnectWebSocket(): void
+
     showKeyboardToolbar(height: number): void
 
     hideKeyboardToolbar(): void

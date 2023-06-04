@@ -524,8 +524,7 @@ func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	}
 
 	doc.Find("a").Each(func(i int, selection *goquery.Selection) {
-		href, ok := selection.Attr("href")
-		if ok {
+		if href, ok := selection.Attr("href"); ok {
 			if util.IsRelativePath(href) {
 				selection.SetAttr("href", linkBase+href)
 			}

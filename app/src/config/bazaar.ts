@@ -904,6 +904,9 @@ export const bazaar = {
                 html += item.outerHTML;
             });
         }
+        if (response.data.packages.length > 1 && response.data.packages.length % 2 ===1) {
+            html += '<div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div>';
+        }
         element.innerHTML = `<div class="b3-cards">${html}</div>`;
         if (reload) {
             appearance.onSetappearance(response.data.appearance);

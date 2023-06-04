@@ -148,8 +148,9 @@
     flex-direction: column;
     height: 100%;
     box-sizing: border-box;
+    position: relative;
 
-    #assetsList {
+    &__list {
       overflow: auto;
       flex: 1;
     }

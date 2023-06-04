@@ -11,72 +11,106 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 export const image = {
     element: undefined as Element,
     genHTML: () => {
-        return `
-<div class="b3-label config-assets">
-    <label class="fn__flex">
-        ${window.siyuan.languages.clearUnused}
-        <div class="fn__flex-1"></div>
-        <button id="removeAll" class="b3-button b3-button--outline fn__flex-center fn__size200">
-            <svg class="svg"><use xlink:href="#iconTrashcan"></use></svg>
-            ${window.siyuan.languages.delete}
-        </button>
-    </label>
-    <div class="fn__hr"></div>
-    <ul class="b3-list b3-list--background" id="assetsList">
-        <li class="ft__center" style="list-style: none"><img src="/stage/loading-pure.svg"></li>
-    </ul><div class="config-assets__preview"></div>
+        return `<div class="fn__flex-column" style="height: 100%">
+    <div class="layout-tab-bar fn__flex">
+        <div class="item item--full item--focus" data-type="remove">
+            <div class="fn__flex-1"></div>
+            ${window.siyuan.languages.clearUnused}
+            <div class="fn__flex-1"></div>
+        </div>
+        <div class="item item--full" data-type="missing">
+            <div class="fn__flex-1"></div>
+            ${window.siyuan.languages.missingAssets}
+            <div class="fn__flex-1"></div>
+        </div>
+    </div>
+    <div class="fn__flex-1">
+        <div class="config-assets" data-type="remove" data-init="true">
+            <div class="fn__hr--b"></div>
+            <label class="fn__flex">
+                <div class="fn__space"></div>
+                <button id="removeAll" class="b3-button b3-button--outline fn__flex-center fn__size200">
+                    <svg class="svg"><use xlink:href="#iconTrashcan"></use></svg>
+                    ${window.siyuan.languages.delete}
+                </button>
+            </label>
+            <div class="fn__hr"></div>
+            <ul class="b3-list b3-list--background config-assets__list">
+                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+            </ul>
+            <div class="config-assets__preview"></div>
+        </div>
+        <div class="fn__none config-assets" data-type="missing">
+            <div class="fn__hr"></div>
+            <ul class="b3-list b3-list--background config-assets__list">
+                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+            </ul>
+            <div class="fn__hr"></div>
+        </div>
+    </div>
 </div>`;
     },
     bindEvent: () => {
-        const assetsListElement = image.element.querySelector("#assetsList");
-        image.element.querySelector("#removeAll").addEventListener("click", () => {
-            confirmDialog(window.siyuan.languages.clearUnused,
-                `${window.siyuan.languages.clearAll}`,
-                () => {
-                    fetchPost("/api/asset/removeUnusedAssets", {}, response => {
-                        getAllModels().asset.forEach(item => {
-                            if (response.data.paths.includes(item.path)) {
-                                item.parent.parent.removeTab(item.parent.id);
-                            }
-                        });
-                        assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                        image.element.querySelector(".config-assets__preview").innerHTML = "";
-                    });
-                });
-        });
-
-        assetsListElement.addEventListener("click", (event) => {
+        const assetsListElement = image.element.querySelector(".config-assets__list");
+        image.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
-            while (target && !target.isEqualNode(assetsListElement)) {
-                if (target.classList.contains("b3-tooltips")) {
-                    const pathString = target.parentElement.getAttribute("data-path");
-                    const type = target.getAttribute("data-type");
-                    if (type === "open") {
-                        /// #if !BROWSER
-                        openBy(pathString, "folder");
-                        /// #endif
-                    } else if (type === "clear") {
-                        confirmDialog(window.siyuan.languages.clearUnused,
-                            `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`,
-                            () => {
-                                fetchPost("/api/asset/removeUnusedAsset", {
-                                    path: pathString,
-                                }, response => {
-                                    getAllModels().asset.forEach(item => {
-                                        if (response.data.path === item.path) {
-                                            item.parent.parent.removeTab(item.parent.id);
-                                        }
-                                    });
-                                    const liElement = target.parentElement;
-                                    if (liElement.parentElement.querySelectorAll("li").length === 1) {
-                                        liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                                    } else {
-                                        liElement.remove();
-                                    }
-                                    image.element.querySelector(".config-assets__preview").innerHTML = "";
-                                });
+            while (target && !target.isEqualNode(image.element)) {
+                const type = target.getAttribute("data-type");
+                if (target.id === "removeAll") {
+                    confirmDialog(window.siyuan.languages.clearUnused, `${window.siyuan.languages.clearAll}`, () => {
+                        fetchPost("/api/asset/removeUnusedAssets", {}, response => {
+                            getAllModels().asset.forEach(item => {
+                                if (response.data.paths.includes(item.path)) {
+                                    item.parent.close();
+                                }
                             });
-                    }
+                            assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                            image.element.querySelector(".config-assets__preview").innerHTML = "";
+                        });
+                    });
+                } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
+                    image.element.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
+                    target.classList.add("item--focus");
+                    image.element.querySelectorAll(".config-assets").forEach(item => {
+                        if (type === item.getAttribute("data-type")) {
+                            item.classList.remove("fn__none");
+                            if (!item.getAttribute("data-init")) {
+                                fetchPost("/api/asset/getMissingAssets", {}, response => {
+                                    image._renderList(response.data.missingAssets, item.querySelector(".config-assets__list"), false);
+                                });
+                                item.setAttribute("data-init", "true");
+                            }
+                        } else {
+                            item.classList.add("fn__none");
+                        }
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "open") {
+                    /// #if !BROWSER
+                    openBy(target.parentElement.getAttribute("data-path"), "folder");
+                    /// #endif
+                } else if (type === "clear") {
+                    const pathString = target.parentElement.getAttribute("data-path");
+                    confirmDialog(window.siyuan.languages.clearUnused, `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`, () => {
+                        fetchPost("/api/asset/removeUnusedAsset", {
+                            path: pathString,
+                        }, response => {
+                            getAllModels().asset.forEach(item => {
+                                if (response.data.path === item.path) {
+                                    item.parent.parent.removeTab(item.parent.id);
+                                }
+                            });
+                            const liElement = target.parentElement;
+                            if (liElement.parentElement.querySelectorAll("li").length === 1) {
+                                liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                            } else {
+                                liElement.remove();
+                            }
+                            image.element.querySelector(".config-assets__preview").innerHTML = "";
+                        });
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -94,13 +128,13 @@ export const image = {
             }
         });
         fetchPost("/api/asset/getUnusedAssets", {}, response => {
-            image.onUnusedassets(response.data);
+            image._renderList(response.data.unusedAssets, assetsListElement);
         });
     },
-    onUnusedassets: (data: { unusedAssets: string[] }) => {
+    _renderList: (data: string[], element: Element, action = true) => {
         let html = "";
         let boxOpenHTML = "";
-        if (!isBrowser()) {
+        if (!isBrowser() && action) {
             boxOpenHTML = `<span data-type="open" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.showInFolder}">
     <svg><use xlink:href="#iconFolder"></use></svg>
 </span>`;
@@ -108,16 +142,15 @@ export const image = {
         const boxClearHTML = `<span data-type="clear" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>`;
-        data.unusedAssets.forEach((item) => {
+        data.forEach((item) => {
             const idx = item.indexOf("assets/");
             const dataPath = item.substr(idx);
             html += `<li data-path="${dataPath}"  class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${escapeHtml(item)}</span>
     ${boxOpenHTML}
-    ${boxClearHTML}
+    ${action ? boxClearHTML : ""}
 </li>`;
         });
-        image.element.querySelector("#assetsList").innerHTML = html || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-        image.element.querySelector(".config-assets__preview").innerHTML = "";
+        element.innerHTML = html || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
     }
 };

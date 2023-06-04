@@ -1,10 +1,4 @@
-import {
-    copySubMenu,
-    exportMd,
-    movePathToMenu,
-    openFileAttr,
-    renameMenu,
-} from "./commonMenuItem";
+import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu,} from "./commonMenuItem";
 /// #if !BROWSER
 import {FileFilter, shell} from "electron";
 import {dialog as remoteDialog} from "@electron/remote";
@@ -543,7 +537,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     /// #endif
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.dataHistory,
+            label: window.siyuan.languages.fileHistory,
             icon: "iconHistory",
             click() {
                 openDocHistory({app, id, notebookId, pathString: name});

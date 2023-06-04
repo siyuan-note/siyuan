@@ -635,7 +635,6 @@
   "sort": "Sort",
   "enterFullscreen": "Enter Full Screen",
   "exitFullscreen": "Exit Full Screen",
-  "clearUnused": "Unreferenced assets",
   "clearAll": "Are you sure to clean up all unreferenced assets?",
   "missingAssets": "Missing assets",
   "unreferencedAssets": "Unreferenced assets",

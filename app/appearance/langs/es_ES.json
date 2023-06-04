@@ -635,7 +635,6 @@
   "sort": "Ordenar",
   "enterFullscreen": "Entrar en pantalla completa",
   "exitFullscreen": "Salir de pantalla completa",
-  "clearUnused": "Activos no utilizados",
   "clearAll": "¿Está seguro de limpiar todos los activos no referenciados?",
   "missingAssets": "Activos faltantes",
   "unreferencedAssets": "Activos sin referencia",

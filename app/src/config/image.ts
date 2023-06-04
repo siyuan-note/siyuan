@@ -15,7 +15,7 @@ export const image = {
     <div class="layout-tab-bar fn__flex">
         <div class="item item--full item--focus" data-type="remove">
             <div class="fn__flex-1"></div>
-            ${window.siyuan.languages.clearUnused}
+            ${window.siyuan.languages.unreferencedAssets}
             <div class="fn__flex-1"></div>
         </div>
         <div class="item item--full" data-type="missing">
@@ -57,7 +57,7 @@ export const image = {
             while (target && !target.isEqualNode(image.element)) {
                 const type = target.getAttribute("data-type");
                 if (target.id === "removeAll") {
-                    confirmDialog(window.siyuan.languages.clearUnused, `${window.siyuan.languages.clearAll}`, () => {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
                         fetchPost("/api/asset/removeUnusedAssets", {}, response => {
                             getAllModels().asset.forEach(item => {
                                 if (response.data.paths.includes(item.path)) {
@@ -93,7 +93,7 @@ export const image = {
                     /// #endif
                 } else if (type === "clear") {
                     const pathString = target.parentElement.getAttribute("data-path");
-                    confirmDialog(window.siyuan.languages.clearUnused, `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`, () => {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`, () => {
                         fetchPost("/api/asset/removeUnusedAsset", {
                             path: pathString,
                         }, response => {

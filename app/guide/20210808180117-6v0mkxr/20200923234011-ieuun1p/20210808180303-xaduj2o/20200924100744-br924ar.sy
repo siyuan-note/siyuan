@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230505084035"
+		"updated": "20230604120806"
 	},
 	"Children": [
 		{
@@ -498,13 +498,123 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "Note"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ": Using absolute paths (local or network paths) will not be included Clean up calculations."
+					"Data": "​: Using absolute paths (local or network paths) will not be included Clean up calculations."
+				}
+			]
+		},
+		{
+			"ID": "20230604120616-qjigoyt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230604120616-qjigoyt",
+				"updated": "20230604120623"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "List missing assets"
+				}
+			]
+		},
+		{
+			"ID": "20230604120616-95dv931",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604120616-95dv931",
+				"updated": "20230604120637"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can view the missing resources in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, and you can find the references in the global search after copying the path."
+				}
+			]
+		},
+		{
+			"ID": "20230604120616-tjs4mx0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604120616-tjs4mx0",
+				"updated": "20230604120806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: To search asset paths, you need to enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Index"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Asset Path"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},

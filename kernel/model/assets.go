@@ -694,8 +694,11 @@ func MissingAssets() (ret []string) {
 	}
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
-		dests := map[string]bool{}
+		if notebook.Closed {
+			continue
+		}
 
+		dests := map[string]bool{}
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {
 			var trees []*parse.Tree
@@ -738,7 +741,6 @@ func MissingAssets() (ret []string) {
 				ret = append(ret, dest)
 				continue
 			}
-
 		}
 	}
 

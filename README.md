@@ -180,18 +180,6 @@ See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.githu
 
 ## ❓ FAQ
 
-### Is SiYuan right for me? Or how should I choose note-taking software?
-
-This question varies from person to person and is difficult to answer uniformly. If you're not sure if SiYuan is right for you, here are some suggestions:
-
-* If you need to frequently share notes or edit collaboratively with others, and need the data table function, it is recommended to use:
-
-  * [Notion - One workspace. Every team.](https://www.notion.so/)
-* If you like to use plain text Markdown files to store your notes, it is recommended to use:
-
-  * [Obsidian - A second brain, for you, forever.](https://obsidian.md/)
-  * [Logseq - A privacy-first, open-source knowledge base](https://logseq.com/)
-
 ### How does SiYuan store data?
 
 The data is saved in the workspace folder, in the workspace data folder:

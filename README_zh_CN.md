@@ -184,24 +184,6 @@
 
 ## ❓ 常见问题和解答
 
-### 听说思源笔记会通过用户电脑挖矿？
-
-以前不会、现在不会，将来也不会。详情请看[如何评价思源笔记? - 知乎](https://www.zhihu.com/question/434530733/answer/2644563326)。
-
-### 思源适合我吗？或者说我应该如何选择笔记软件？
-
-这个问题因人而异，很难统一回答。如果你不太确定思源是否适合你，请看如下建议：
-
-* 如果你需要经常分享笔记或者与别人协作编辑，并且需要数据表格功能，推荐使用：
-
-  * [FlowUs 息流 - 新一代知识管理与协作平台](https://flowus.cn/)
-  * [我来 wolai - 不仅仅是未来的云端协作平台与个人笔记](https://www.wolai.com/)
-  * [Notion - One workspace. Every team.](https://www.notion.so/)
-* 如果你喜欢使用纯文本 Markdown 文件存储笔记，推荐使用：
-
-  * [Obsidian - A second brain, for you, forever.](https://obsidian.md/)
-  * [Logseq - A privacy-first, open-source knowledge base](https://logseq.com/)
-
 ### 思源是如何存储数据的？
 
 数据保存在工作空间文件夹下，在工作空间 data 文件夹下：

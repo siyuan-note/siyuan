@@ -39,7 +39,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "apiKeyTip", "apiProxy", "apiProxyTip", "apiBaseURL", "apiBaseURLTip"])),
 
         // 图片
-        getLang(["assets", "clearUnused"]),
+        getLang(["assets", "clearUnused", "missingAssets"]),
 
         // 导出
         getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export11",

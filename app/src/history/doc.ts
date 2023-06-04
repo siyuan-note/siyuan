@@ -139,7 +139,7 @@ export const openDocHistory = (options: {
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && !isLoading) {
-                getHistoryPath(target, opElement.value, options.notebookId, (dataPath) => {
+                getHistoryPath(target, opElement.value, options.id, (dataPath) => {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
                     }, (response) => {

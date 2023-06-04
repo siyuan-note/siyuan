@@ -311,20 +311,21 @@ type HistoryItem struct {
 	Path  string `json:"path"`
 }
 
+const fileHistoryPageSize = 32
+
 func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, pageCount, totalCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
 
-	pageSize := 32
-	offset := (page - 1) * pageSize
+	offset := (page - 1) * fileHistoryPageSize
 
 	table := "histories_fts_case_insensitive"
 	stmt := "SELECT DISTINCT created FROM " + table + " WHERE "
 	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
 	countStmt := strings.ReplaceAll(stmt, "SELECT DISTINCT created", "SELECT COUNT(DISTINCT created) AS total")
-	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa(offset)
+	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(fileHistoryPageSize) + " OFFSET " + strconv.Itoa(offset)
 	result, err := sql.QueryHistory(stmt)
 	if nil != err {
 		return
@@ -343,20 +344,20 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 		return
 	}
 	totalCount = int(result[0]["total"].(int64))
-	pageCount = int(math.Ceil(float64(totalCount) / float64(pageSize)))
+	pageCount = int(math.Ceil(float64(totalCount) / float64(fileHistoryPageSize)))
 	return
 }
 
 func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []*HistoryItem) {
 	query = gulu.Str.RemoveInvisible(query)
-	if "" != query {
+	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
 
 	table := "histories_fts_case_insensitive"
 	stmt := "SELECT * FROM " + table + " WHERE "
 	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
-	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", Conf.Search.Limit)
+	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", fileHistoryPageSize)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
 	ret = fromSQLHistories(sqlHistories)
 	return

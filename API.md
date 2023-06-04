@@ -469,7 +469,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
         * `"/assets/sub/"`: workspace/data/assets/sub/ folder
 
       Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder
-      of the workspace.
+      of the workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
     * `file[]`: Uploaded file list
 * Return value
 

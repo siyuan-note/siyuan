@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230505084013"
+		"updated": "20230604120825"
 	},
 	"Children": [
 		{
@@ -483,13 +483,123 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用絕對路徑（本地路徑或者是網絡路徑）不會納入清理計算。"
+					"Data": "​：使用絕對路徑（本地路徑或者是網絡路徑）不會納入清理計算。"
+				}
+			]
+		},
+		{
+			"ID": "20230604120454-cxz64oc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230604120454-cxz64oc",
+				"updated": "20230604120454"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查看丟失資源"
+				}
+			]
+		},
+		{
+			"ID": "20230604120454-k7wee90",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604120454-k7wee90",
+				"updated": "20230604120520"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​中可以查看丟失的資源，複製路徑後可以在全局搜索中找到引用處。"
+				}
+			]
+		},
+		{
+			"ID": "20230604120454-m6jtopr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604120454-m6jtopr",
+				"updated": "20230604120825"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：搜索資源文件路徑需要先啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "索引"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資源文件路徑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
 				}
 			]
 		},

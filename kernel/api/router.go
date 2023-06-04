@@ -224,6 +224,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/setFileAnnotation", model.CheckAuth, model.CheckReadonly, setFileAnnotation)
 	ginServer.Handle("POST", "/api/asset/getFileAnnotation", model.CheckAuth, getFileAnnotation)
 	ginServer.Handle("POST", "/api/asset/getUnusedAssets", model.CheckAuth, getUnusedAssets)
+	ginServer.Handle("POST", "/api/asset/getMissingAssets", model.CheckAuth, getMissingAssets)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAsset", model.CheckAuth, model.CheckReadonly, removeUnusedAsset)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAssets", model.CheckAuth, model.CheckReadonly, removeUnusedAssets)
 	ginServer.Handle("POST", "/api/asset/getDocImageAssets", model.CheckAuth, model.CheckReadonly, getDocImageAssets)

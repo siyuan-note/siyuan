@@ -210,6 +210,16 @@ func getUnusedAssets(c *gin.Context) {
 	}
 }
 
+func getMissingAssets(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	missingAssets := model.MissingAssets()
+	ret.Data = map[string]interface{}{
+		"missingAssets": missingAssets,
+	}
+}
+
 func resolveAssetPath(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

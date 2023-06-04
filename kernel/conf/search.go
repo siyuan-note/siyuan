@@ -83,6 +83,8 @@ func NewSearch() *Search {
 		Memo:  true,
 		IAL:   false,
 
+		IndexAssetPath: true,
+
 		BacklinkMentionName:          true,
 		BacklinkMentionAlias:         false,
 		BacklinkMentionAnchor:        true,

@@ -92,7 +92,7 @@ export const openDocHistory = (options: {
 </div>`;
     const dialog = new Dialog({
         content: contentHTML,
-        width: isMobile() ? "100vw" : "1024px",
+        width: isMobile() ? "100vw" : "90vw",
         height: isMobile() ? "100vh" : "80vh",
         destroyCallback() {
             historyEditor = undefined;

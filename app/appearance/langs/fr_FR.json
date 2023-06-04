@@ -637,6 +637,8 @@
   "exitFullscreen": "Quitter le plein écran",
   "clearUnused": "assets non-référencés",
   "clearAll": "Êtes-vous sûr de nettoyer tous les assets non référencés ?",
+  "missingAssets": "Actifs manquants",
+  "unreferencedAssets": "Actifs non référencés",
   "paste": "Coller ",
   "pasteRef": "Coller  Block Ref",
   "pasteEmbed": "Coller Block Intégrer",

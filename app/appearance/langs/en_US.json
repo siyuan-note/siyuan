@@ -637,6 +637,8 @@
   "exitFullscreen": "Exit Full Screen",
   "clearUnused": "Unreferenced assets",
   "clearAll": "Are you sure to clean up all unreferenced assets?",
+  "missingAssets": "Missing assets",
+  "unreferencedAssets": "Unreferenced assets",
   "paste": "Paste",
   "pasteRef": "Paste Block Ref",
   "pasteEmbed": "Paste Block Embed",

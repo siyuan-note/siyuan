@@ -637,6 +637,8 @@
   "exitFullscreen": "退出全屏幕",
   "clearUnused": "未引用资源",
   "clearAll": "确认清理所有未引用资源？",
+  "missingAssets": "丢失的资源文件",
+  "unreferencedAssets": "未引用的资源文件",
   "paste": "粘贴",
   "pasteRef": "粘贴引用块",
   "pasteEmbed": "粘贴块嵌入",

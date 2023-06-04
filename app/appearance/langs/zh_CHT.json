@@ -637,6 +637,8 @@
   "exitFullscreen": "退出全螢幕",
   "clearUnused": "未引用資料",
   "clearAll": "確認清理所有未引用資料？",
+  "missingAssets": "丟失的資料文件",
+  "unreferencedAssets": "未引用的資料文件",
   "paste": "貼上",
   "pasteRef": "貼上引用塊",
   "pasteEmbed": "貼上塊嵌入",

@@ -637,6 +637,8 @@
   "exitFullscreen": "Salir de pantalla completa",
   "clearUnused": "Activos no utilizados",
   "clearAll": "¿Está seguro de limpiar todos los activos no referenciados?",
+  "missingAssets": "Activos faltantes",
+  "unreferencedAssets": "Activos sin referencia",
   "paste": "Pegar",
   "pasteRef": "Pegar bloque ref",
   "pasteEmbed": "Pegar bloque incrustado",

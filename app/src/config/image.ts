@@ -7,6 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {getAllModels} from "../layout/getAll";
 import {openBy} from "../editor/util";
 import {renderAssetsPreview} from "../asset/renderAssets";
+import {writeText} from "../protyle/util/compatibility";
 
 export const image = {
     element: undefined as Element,
@@ -87,6 +88,8 @@ export const image = {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "copy") {
+                    writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim());
                 } else if (type === "open") {
                     /// #if !BROWSER
                     openBy(target.parentElement.getAttribute("data-path"), "folder");
@@ -139,16 +142,23 @@ export const image = {
     <svg><use xlink:href="#iconFolder"></use></svg>
 </span>`;
         }
-        const boxClearHTML = `<span data-type="clear" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
+        let boxClearHTML = ""
+        if (action) {
+            boxClearHTML = `<span data-type="clear" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>`;
+        } else {
+            boxClearHTML = `<span data-type="copy" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.copy}">
+    <svg><use xlink:href="#iconCopy"></use></svg>
+</span>`;
+        }
         data.forEach((item) => {
             const idx = item.indexOf("assets/");
             const dataPath = item.substr(idx);
             html += `<li data-path="${dataPath}"  class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__text">${escapeHtml(item)}</span>
     ${boxOpenHTML}
-    ${action ? boxClearHTML : ""}
+    ${boxClearHTML}
 </li>`;
         });
         element.innerHTML = html || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;

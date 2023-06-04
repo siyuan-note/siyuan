@@ -524,8 +524,14 @@ func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	}
 
 	doc.Find("a").Each(func(i int, selection *goquery.Selection) {
-		if href, ok := selection.Attr("href"); ok && util.IsRelativePath(href) {
-			selection.SetAttr("href", linkBase+href)
+		href, ok := selection.Attr("href")
+		if ok {
+			if util.IsRelativePath(href) {
+				selection.SetAttr("href", linkBase+href)
+			}
+
+			// The hyperlink in the marketplace package README fails to jump to the browser to open https://github.com/siyuan-note/siyuan/issues/8452
+			selection.SetAttr("target", "_blank")
 		}
 	})
 

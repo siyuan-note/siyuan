@@ -1,4 +1,5 @@
 import {App} from "../index";
+import {Constants} from "../constants";
 
 export const customBlockRender = (app: App, element: Element) => {
     // TODO

@@ -766,9 +766,7 @@ app.whenReady().then(() => {
                 const mainWindow = item.browserWindow;
                 if (mainWindow.isMinimized()) {
                     mainWindow.restore();
-                    if (!mainWindow.isVisible()) {
-                        mainWindow.show();
-                    }
+                    mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
                 } else {
                     if (mainWindow.isVisible()) {
                         if (1 === workspaces.length) { // 改进 `Alt+M` 激活窗口 https://github.com/siyuan-note/siyuan/issues/7258

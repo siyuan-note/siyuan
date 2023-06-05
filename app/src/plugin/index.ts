@@ -17,6 +17,15 @@ export class Plugin {
     public eventBus: EventBus;
     public data: any = {};
     public name: string;
+    // TODO
+    public customBlockRenders: {
+        [key: string]: {
+            icon: string,
+            action: "edit" | "more"[],
+            genCursor: boolean,
+            render: (options: { app: App, element: Element }) => void
+        }
+    } = {};
     public topBarIcons: Element[] = [];
     public setting: Setting;
     public statusBarIcons: Element[] = [];

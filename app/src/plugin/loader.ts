@@ -39,7 +39,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     try {
         runCode(item.js, "plugin:" + encodeURIComponent(item.name))(getObject, moduleObj, exportsObj);
     } catch (e) {
-        console.error(`eval plugin ${item.name} error:`, e);
+        console.error(`plugin ${item.name} run error:`, e);
         return;
     }
     const pluginClass = (moduleObj.exports || exportsObj).default || moduleObj.exports;

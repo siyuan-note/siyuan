@@ -73,6 +73,10 @@ export class Plugin {
         position?: "right" | "left",
         callback: (evt: MouseEvent) => void
     }) {
+        if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
+            console.error(`plugin ${this.name} addTopBar error: icon must be svg id or svg tag`);
+            return;
+        }
         const iconElement = document.createElement("div");
         iconElement.setAttribute("data-menu", "true");
         iconElement.addEventListener("click", options.callback);

@@ -581,6 +581,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
 
 export const resizeTopbar = () => {
     const toolbarElement = document.querySelector("#toolbar");
+    if (!toolbarElement) {
+        return;
+    }
     const dragElement = toolbarElement.querySelector("#drag") as HTMLElement;
 
     dragElement.style.padding = "";

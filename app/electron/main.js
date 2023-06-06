@@ -119,8 +119,10 @@ const exitApp = (port, errorWindowId) => {
     }
 };
 
+const localServer = "http://127.0.0.1"
+
 const getServer = (port = kernelPort) => {
-    return "http://127.0.0.1:" + port;
+    return localServer + ":" + port;
 };
 
 const sleep = (ms) => {
@@ -359,16 +361,13 @@ const boot = () => {
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
     // 当前页面链接使用浏览器打开
-    currentWindow.webContents.on("will-navigate", (event, url) => {
-        if (event.sender) {
-            const currentURL = new URL(event.sender.getURL());
-            if (url.startsWith(getServer(currentURL.port))) {
-                return;
-            }
-
-            event.preventDefault();
-            shell.openExternal(url);
+    currentWindow.webContents.on("will-navigate", (event) => {
+        const url = event.url;
+        event.preventDefault();
+        if (url.startsWith(localServer)) {
+            return;
         }
+        shell.openExternal(url);
     });
 
     currentWindow.on("close", (event) => {
@@ -664,10 +663,10 @@ app.whenReady().then(() => {
         BrowserWindow.fromId(id).webContents.send("siyuan-export-close", id);
     });
     ipcMain.on("siyuan-export-prevent", (event, id) => {
-        BrowserWindow.fromId(id).webContents.on("will-navigate", (event, url) => {
-            const currentURL = new URL(event.sender.getURL());
+        BrowserWindow.fromId(id).webContents.on("will-navigate", (event) => {
+            const url = event.url;
             event.preventDefault();
-            if (url.startsWith(getServer(currentURL.port))) {
+            if (url.startsWith(localServer)) {
                 return;
             }
             shell.openExternal(url);

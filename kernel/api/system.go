@@ -66,10 +66,11 @@ func getChangelog(c *gin.Context) {
 
 	model.Conf.ShowChangelog = false
 	luteEngine := lute.New()
-	htmlContent := luteEngine.Markdown("", contentData)
+	htmlContent := luteEngine.MarkdownStr("", string(contentData))
+	htmlContent = util.LinkTarget(htmlContent, "")
 
 	data["show"] = true
-	data["html"] = gulu.Str.FromBytes(htmlContent)
+	data["html"] = htmlContent
 	ret.Data = data
 }
 

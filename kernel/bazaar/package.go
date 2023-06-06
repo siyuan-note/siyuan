@@ -28,7 +28,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
-	"github.com/PuerkitoBio/goquery"
 	"github.com/araddon/dateparse"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/filelock"
@@ -517,24 +516,7 @@ func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	linkBase := "https://cdn.jsdelivr.net/gh/" + strings.TrimPrefix(repoURL, "https://github.com/")
 	luteEngine.SetLinkBase(linkBase)
 	ret = luteEngine.Md2HTML(string(mdData))
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(ret))
-	if nil != err {
-		logging.LogErrorf("parse HTML failed: %s", err)
-		return
-	}
-
-	doc.Find("a").Each(func(i int, selection *goquery.Selection) {
-		if href, ok := selection.Attr("href"); ok {
-			if util.IsRelativePath(href) {
-				selection.SetAttr("href", linkBase+href)
-			}
-
-			// The hyperlink in the marketplace package README fails to jump to the browser to open https://github.com/siyuan-note/siyuan/issues/8452
-			selection.SetAttr("target", "_blank")
-		}
-	})
-
-	ret, _ = doc.Find("body").Html()
+	ret = util.LinkTarget(ret, linkBase)
 	return
 }
 

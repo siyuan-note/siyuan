@@ -824,26 +824,27 @@ export const bazaar = {
                     const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
                     const panelElement = selectElement.parentElement.parentElement;
                     let html = "";
+                    const cardElements = Array.from(panelElement.querySelectorAll(".b3-card"));
                     if (selectElement.value === "0") { // 更新时间降序
-                        Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
+                        cardElements.sort((a, b) => {
                             return JSON.parse(b.getAttribute("data-obj")).updated < JSON.parse(a.getAttribute("data-obj")).updated ? -1 : 1;
                         }).forEach((item) => {
                             html += item.outerHTML;
                         });
                     } else if (selectElement.value === "1") { // 更新时间升序
-                        Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
+                        cardElements.sort((a, b) => {
                             return JSON.parse(b.getAttribute("data-obj")).updated < JSON.parse(a.getAttribute("data-obj")).updated ? 1 : -1;
                         }).forEach((item) => {
                             html += item.outerHTML;
                         });
                     } else if (selectElement.value === "2") { // 下载次数降序
-                        Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
+                        cardElements.sort((a, b) => {
                             return JSON.parse(b.getAttribute("data-obj")).downloads < JSON.parse(a.getAttribute("data-obj")).downloads ? -1 : 1;
                         }).forEach((item) => {
                             html += item.outerHTML;
                         });
                     } else if (selectElement.value === "3") { // 下载次数升序
-                        Array.from(panelElement.querySelectorAll(".b3-card")).sort((a, b) => {
+                        cardElements.sort((a, b) => {
                             return JSON.parse(b.getAttribute("data-obj")).downloads < JSON.parse(a.getAttribute("data-obj")).downloads ? 1 : -1;
                         }).forEach((item) => {
                             html += item.outerHTML;
@@ -851,6 +852,9 @@ export const bazaar = {
                     }
                     localSort[selectElement.parentElement.parentElement.getAttribute("data-type")] = selectElement.value;
                     setStorageVal(Constants.LOCAL_BAZAAR, window.siyuan.storage[Constants.LOCAL_BAZAAR]);
+                    if (cardElements.length > 1 && cardElements.length % 2 ===1) {
+                        html += '<div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div>';
+                    }
                     panelElement.querySelector(".b3-cards").innerHTML = html;
                 }
             });

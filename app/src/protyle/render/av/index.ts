@@ -19,8 +19,11 @@ export const avRender = (element: Element) => {
                 filter:{},
                 sorts: {},
                 columns:[{
+                    width: "",
+                    icon:"",
                     id:"",
                     name:"",
+                    wrap:"",
                     type:"",
                 }],
                 rows:[{

@@ -119,7 +119,7 @@ const exitApp = (port, errorWindowId) => {
     }
 };
 
-const localServer = "http://127.0.0.1"
+const localServer = "http://127.0.0.1";
 
 const getServer = (port = kernelPort) => {
     return localServer + ":" + port;

@@ -685,7 +685,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                             item.style.minWidth = "60px";
                         });
                     } else if (nodeElement.classList.contains("av")) {
-                        avRender(nodeElement)
+                        avRender(nodeElement);
                     }
                     transaction(protyle, [{
                         data: oldHTML,

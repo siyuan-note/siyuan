@@ -142,7 +142,7 @@ export const image = {
     <svg><use xlink:href="#iconFolder"></use></svg>
 </span>`;
         }
-        let boxClearHTML = ""
+        let boxClearHTML = "";
         if (action) {
             boxClearHTML = `<span data-type="clear" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>

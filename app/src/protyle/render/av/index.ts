@@ -29,8 +29,8 @@ export const avRender = (element: Element) => {
                         value:"",
                     }]
                 }]
-            }
+            };
             e.setAttribute("data-render", "true");
         });
     }
-}
+};

@@ -123,6 +123,7 @@
 
       text-align: center;
       font-size: 16px;
+      font-family: var(--b3-font-family-emoji);
       margin-right: 4px;
       line-height: 22px;
       transition: var(--b3-transition);
@@ -155,6 +156,7 @@
       width: 14px;
       line-height: 14px;
       font-size: 12px;
+      font-family: var(--b3-font-family-emoji);
 
       // doc icon in the bookmark panel
       svg {

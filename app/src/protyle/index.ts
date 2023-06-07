@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {Hint} from "./hint";
-import {setLute} from "./markdown/setLute";
+import {setLute} from "./render/setLute";
 import {Preview} from "./preview";
 import {addLoading, initUI, removeLoading, setPadding} from "./ui/initUI";
 import {Undo} from "./undo";

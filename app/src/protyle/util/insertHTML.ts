@@ -3,9 +3,9 @@ import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {fixTableRange, focusBlock, focusByWbr, getEditorRange} from "./selection";
-import {mathRender} from "../markdown/mathRender";
+import {mathRender} from "../render/mathRender";
 import {Constants} from "../../constants";
-import {highlightRender} from "../markdown/highlightRender";
+import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,

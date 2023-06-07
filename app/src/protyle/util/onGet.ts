@@ -3,8 +3,8 @@ import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
-import {highlightRender} from "../markdown/highlightRender";
-import {blockRender} from "../markdown/blockRender";
+import {highlightRender} from "../render/highlightRender";
+import {blockRender} from "../render/blockRender";
 import {highlightById} from "../../util/highlightById";
 /// #if !MOBILE
 import {pushBack} from "../../util/backForward";

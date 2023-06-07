@@ -14,7 +14,7 @@ import {Tab} from "../../layout/Tab";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {Editor} from "../../editor";
-import {blockRender} from "../markdown/blockRender";
+import {blockRender} from "../render/blockRender";
 import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";

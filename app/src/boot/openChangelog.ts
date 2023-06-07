@@ -1,6 +1,6 @@
 import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
-import {highlightRender} from "../protyle/markdown/highlightRender";
+import {highlightRender} from "../protyle/render/highlightRender";
 import {isMobile} from "../util/functions";
 
 export const openChangelog = () => {

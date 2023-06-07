@@ -1,11 +1,11 @@
-import {abcRender} from "../markdown/abcRender";
-import {chartRender} from "../markdown/chartRender";
-import {graphvizRender} from "../markdown/graphvizRender";
-import {mathRender} from "../markdown/mathRender";
-import {mermaidRender} from "../markdown/mermaidRender";
-import {mindmapRender} from "../markdown/mindmapRender";
-import {flowchartRender} from "../markdown/flowchartRender";
-import {plantumlRender} from "../markdown/plantumlRender";
+import {abcRender} from "../render/abcRender";
+import {chartRender} from "../render/chartRender";
+import {graphvizRender} from "../render/graphvizRender";
+import {mathRender} from "../render/mathRender";
+import {mermaidRender} from "../render/mermaidRender";
+import {mindmapRender} from "../render/mindmapRender";
+import {flowchartRender} from "../render/flowchartRender";
+import {plantumlRender} from "../render/plantumlRender";
 import {Constants} from "../../constants";
 
 export const processPasteCode = (html: string, text: string) => {

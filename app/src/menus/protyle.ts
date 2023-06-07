@@ -14,7 +14,7 @@ import {
     moveRowToUp,
     setTableAlign
 } from "../protyle/util/table";
-import {mathRender} from "../protyle/markdown/mathRender";
+import {mathRender} from "../protyle/render/mathRender";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost} from "../util/fetch";
@@ -31,9 +31,9 @@ import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
 import {getSearch, isMobile} from "../util/functions";
 import {removeFoldHeading} from "../protyle/util/heading";
-import {lineNumberRender} from "../protyle/markdown/highlightRender";
+import {lineNumberRender} from "../protyle/render/highlightRender";
 import * as dayjs from "dayjs";
-import {blockRender} from "../protyle/markdown/blockRender";
+import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";

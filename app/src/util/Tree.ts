@@ -1,7 +1,7 @@
 import {getIconByType} from "../editor/getIcon";
 import {hasClosestByMatchTag, hasClosestByTag} from "../protyle/util/hasClosest";
 import {isMobile} from "./functions";
-import {mathRender} from "../protyle/markdown/mathRender";
+import {mathRender} from "../protyle/render/mathRender";
 import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
 

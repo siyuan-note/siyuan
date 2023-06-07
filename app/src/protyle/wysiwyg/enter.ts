@@ -9,7 +9,7 @@ import {
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
 import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
-import {highlightRender} from "../markdown/highlightRender";
+import {highlightRender} from "../render/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";

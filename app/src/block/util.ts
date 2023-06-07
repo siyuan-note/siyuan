@@ -6,7 +6,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
 import {Constants} from "../constants";
 import {hideElements} from "../protyle/ui/hideElements";
-import {blockRender} from "../protyle/markdown/blockRender";
+import {blockRender} from "../protyle/render/blockRender";
 
 export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const doOperations: IOperation[] = [];

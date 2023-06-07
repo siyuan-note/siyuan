@@ -2,7 +2,7 @@ import {appearance} from "./appearance";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {highlightRender} from "../protyle/markdown/highlightRender";
+import {highlightRender} from "../protyle/render/highlightRender";
 import {exportLayout} from "../layout/util";
 import {Constants} from "../constants";
 /// #if !BROWSER

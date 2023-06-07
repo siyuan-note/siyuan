@@ -61,7 +61,7 @@ import {fetchPost} from "../../util/fetch";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
-import {highlightRender} from "../markdown/highlightRender";
+import {highlightRender} from "../render/highlightRender";
 import {countBlockWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {pasteAsPlainText} from "../util/paste";

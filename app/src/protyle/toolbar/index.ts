@@ -17,12 +17,12 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
 import {getEventName, openByMobile, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
-import {highlightRender} from "../markdown/highlightRender";
+import {highlightRender} from "../render/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {processRender} from "../util/processCode";
 import {BlockRef} from "./BlockRef";
 import {hintRenderAssets, hintRenderTemplate, hintRenderWidget} from "../hint/extend";
-import {blockRender} from "../markdown/blockRender";
+import {blockRender} from "../render/blockRender";
 /// #if !BROWSER
 import {openBy} from "../../editor/util";
 /// #endif
@@ -41,7 +41,7 @@ import {previewTemplate} from "./util";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
-import {mathRender} from "../markdown/mathRender";
+import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";

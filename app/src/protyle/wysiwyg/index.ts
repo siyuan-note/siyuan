@@ -43,9 +43,9 @@ import {getEnableHTML, removeEmbed} from "./removeEmbed";
 import {keydown} from "./keydown";
 import {openMobileFileById} from "../../mobile/editor";
 import {removeBlock} from "./remove";
-import {highlightRender} from "../markdown/highlightRender";
+import {highlightRender} from "../render/highlightRender";
 import {openAttr} from "../../menus/commonMenuItem";
-import {blockRender} from "../markdown/blockRender";
+import {blockRender} from "../render/blockRender";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 import {pushBack} from "../../util/backForward";

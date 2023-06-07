@@ -3,8 +3,8 @@ import {removeLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {processRender} from "../util/processCode";
-import {highlightRender} from "../markdown/highlightRender";
-import {blockRender} from "../markdown/blockRender";
+import {highlightRender} from "../render/highlightRender";
+import {blockRender} from "../render/blockRender";
 import {disabledForeverProtyle, disabledProtyle} from "../util/onGet";
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: {

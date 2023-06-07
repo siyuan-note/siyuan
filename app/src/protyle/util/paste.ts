@@ -7,8 +7,8 @@ import {clipboard} from "electron";
 /// #endif
 import {hasClosestBlock} from "./hasClosest";
 import {getEditorRange} from "./selection";
-import {blockRender} from "../markdown/blockRender";
-import {highlightRender} from "../markdown/highlightRender";
+import {blockRender} from "../render/blockRender";
+import {highlightRender} from "../render/highlightRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";

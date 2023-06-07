@@ -15,8 +15,8 @@ import {openAsset, openBy} from "../../editor/util";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
-import {highlightRender} from "../markdown/highlightRender";
-import {speechRender} from "../markdown/speechRender";
+import {highlightRender} from "../render/highlightRender";
+import {speechRender} from "../render/speechRender";
 
 export class Preview {
     public element: HTMLElement;

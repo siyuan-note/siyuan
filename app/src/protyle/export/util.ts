@@ -9,7 +9,7 @@ import {Dialog} from "../../dialog";
 import {addScript} from "../util/addScript";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
-import {highlightRender} from "../markdown/highlightRender";
+import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {openByMobile, setStorageVal} from "../util/compatibility";
 

@@ -32,6 +32,7 @@ import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
 import {isCtrl} from "../util/compatibility";
+import {avRender} from "../render/av";
 
 export class Hint {
     public timeId: number;
@@ -683,6 +684,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                         nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
                             item.style.minWidth = "60px";
                         });
+                    } else if (nodeElement.classList.contains("av")) {
+                        avRender(nodeElement)
                     }
                     transaction(protyle, [{
                         data: oldHTML,

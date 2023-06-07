@@ -16,6 +16,7 @@ import {removeLoading} from "../ui/initUI";
 import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
+import {avRender} from "../render/av";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -161,6 +162,7 @@ const setHTML = (options: {
     }
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
+    avRender(protyle.wysiwyg.element);
     blockRender(protyle, protyle.wysiwyg.element);
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;

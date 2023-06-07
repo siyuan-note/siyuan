@@ -4,6 +4,7 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
 import {genBreadcrumb} from "../wysiwyg/renderBacklink";
+import {avRender} from "./av";
 
 export const blockRender = (protyle: IProtyle, element: Element, top?: number) => {
     let blockElements: Element[] = [];
@@ -70,6 +71,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
 
             processRender(item);
             highlightRender(item);
+            avRender(item);
             if (top) {
                 // 前进后退定位 https://ld246.com/article/1667652729995
                 protyle.contentElement.scrollTop = top;

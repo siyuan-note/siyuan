@@ -40,6 +40,7 @@ import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
+import {avRender} from "../render/av";
 
 export class Gutter {
     public element: HTMLElement;
@@ -380,6 +381,7 @@ export class Gutter {
                 blockRender(options.protyle, options.protyle.wysiwyg.element);
                 processRender(options.protyle.wysiwyg.element);
                 highlightRender(options.protyle.wysiwyg.element);
+                avRender(options.protyle.wysiwyg.element);
             }
         };
     }

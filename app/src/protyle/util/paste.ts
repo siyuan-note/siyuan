@@ -14,6 +14,7 @@ import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
+import {avRender} from "../render/av";
 
 const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     let needRender = true;
@@ -78,6 +79,7 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
     blockRender(protyle, protyle.wysiwyg.element);
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
+    avRender(protyle.wysiwyg.element);
     filterClipboardHint(protyle, textPlain);
     scrollCenter(protyle, undefined, false, "smooth");
 };
@@ -198,6 +200,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
+        avRender(protyle.wysiwyg.element);
     } else if (code) {
         if (!code.startsWith('<div data-type="NodeCodeBlock" class="code-block" data-node-id="')) {
             // 原有代码在行内元素中粘贴会嵌套
@@ -247,6 +250,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 blockRender(protyle, protyle.wysiwyg.element);
                 processRender(protyle.wysiwyg.element);
                 highlightRender(protyle.wysiwyg.element);
+                avRender(protyle.wysiwyg.element);
                 filterClipboardHint(protyle, response.data);
                 scrollCenter(protyle, undefined, false, "smooth");
             });
@@ -284,6 +288,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
+        avRender(protyle.wysiwyg.element);
     }
     scrollCenter(protyle, undefined, false, "smooth");
 };

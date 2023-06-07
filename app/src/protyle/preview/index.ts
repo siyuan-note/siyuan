@@ -17,6 +17,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
+import {avRender} from "../render/av";
 
 export class Preview {
     public element: HTMLElement;
@@ -163,6 +164,7 @@ export class Preview {
                 protyle.preview.previewElement.innerHTML = response.data.html;
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
+                avRender(protyle.preview.previewElement);
                 speechRender(protyle.preview.previewElement, protyle.options.lang);
             });
         }, protyle.options.preview.delay);

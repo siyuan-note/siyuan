@@ -265,13 +265,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 } else if (isFileAnnotation(textPlain)) {
                     protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {
                         type: "file-annotation-ref",
-                        color: textPlain.substring(2).replace(/ ".+">>$/, "") + Constants.ZWSP + range.toString()
+                        color: textPlain.substring(2).replace(/ ".+">>$/, "")
                     });
                     return;
                 } else if (protyle.lute.IsValidLinkDest(textPlain)) {
+                    // https://github.com/siyuan-note/siyuan/issues/8475
                     protyle.toolbar.setInlineMark(protyle, "a", "range", {
                         type: "a",
-                        color: textPlain + Constants.ZWSP + range.toString()
+                        color: textPlain
                     });
                     return;
                 }

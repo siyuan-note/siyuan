@@ -56,9 +56,9 @@ export const avRender = (element: Element) => {
             //     }]
             // };
             fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-node-id")}, (response) => {
-                const data = response.data
+                const data = response.data.av;
                 let tableHTML = '<div class="av__row av__row--header" style="background-color: var(--b3-theme-background)"><div class="av__firstcol"><input style="margin-top: 14px" type="checkbox"></div>';
-                data.columns.forEach((column) => {
+                data.columns.forEach((column: IAVColumn) => {
                     tableHTML += `
 <div class="av__cell" style="width: ${column.width}px;">${column.name}</div>`
                 });
@@ -68,10 +68,10 @@ export const avRender = (element: Element) => {
     <div class="block__icon block__icon--show"><svg><use xlink:href="#iconMore"></use></svg></div>
 </div>
 </div>`;
-                data.rows.forEach((row) => {
+                data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}"><div class="av__firstcol"><input type="checkbox"></div>`;
                     row.cells.forEach((cell, index) => {
-                        tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width}px;background-color: ${cell.bgColor||""};color: ${cell.color||""}">${cell.value}</div>`
+                        tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`
                     });
                     tableHTML += `<div></div></div>`;
                 });

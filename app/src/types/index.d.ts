@@ -799,3 +799,23 @@ interface IBazaarItem {
     hUpdated: string
     preferredFunding: string
 }
+
+interface IAVColumn {
+    width: number,
+    icon: string,
+    id: string,
+    name: string,
+    wrap: boolean,
+    type: string,
+}
+
+interface IAVRow {
+    id: string,
+    cells: IAVCell[]
+}
+
+interface IAVCell {
+    color: string,
+    bgColor: string,
+    value: string,
+}

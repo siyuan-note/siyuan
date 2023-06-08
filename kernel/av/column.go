@@ -35,6 +35,10 @@ type Column struct {
 	ID   string     `json:"id"`   // 列 ID
 	Name string     `json:"name"` // 列名
 	Type ColumnType `json:"type"` // 列类型
+	Icon string     `json:"icon"` // 列图标
+	Wrap bool       `json:"wrap"` // 是否换行
+
+	// 以下是某些列类型的特有属性
 
 	AttributeViewID  string                `json:"attributeViewId"`  // 关联的属性视图 ID
 	RelationColumnID string                `json:"relationColumnId"` // 目标关联列 ID

@@ -28,16 +28,14 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-func RenderAttributeView(avID string) (dom string, err error) {
+func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
-	attrView, err := av.ParseAttributeView(avID)
+	ret, err = av.ParseAttributeView(avID)
 	if nil != err {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
-
-	_ = attrView
 	return
 }
 

@@ -116,7 +116,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             y: cellRect.bottom,
             h: cellRect.height
         });
-        (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).select();
+        (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement)?.select();
         event.preventDefault();
         event.stopPropagation();
         return true;

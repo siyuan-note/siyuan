@@ -282,6 +282,7 @@
           padding: 4px 0 4px 8px;
           line-height: 22px;
           flex-shrink: 0;
+          font-family: var(--b3-font-family-emoji);
 
           & > img,
           & > svg {
@@ -298,6 +299,7 @@
           height: 14px;
           width: 14px;
           flex-shrink: 0;
+          font-family: var(--b3-font-family-emoji);
         }
 
         &__text {

@@ -307,10 +307,7 @@ const boot = () => {
             if (currentWindow.isMinimized()) {
                 currentWindow.restore();
             }
-            if (!currentWindow.isVisible()) {
-                currentWindow.show();
-            }
-            currentWindow.focus();
+            currentWindow.show();
             setTimeout(() => { // 等待界面js执行完毕
                 writeLog(siyuanOpenURL);
                 currentWindow.webContents.send("siyuan-openurl", siyuanOpenURL);
@@ -389,10 +386,7 @@ const showWindow = (wnd) => {
     if (wnd.isMinimized()) {
         wnd.restore();
     }
-    if (!wnd.isVisible()) {
-        wnd.show();
-    }
-    wnd.focus();
+    wnd.show();
 };
 
 const initKernel = (workspace, port, lang) => {

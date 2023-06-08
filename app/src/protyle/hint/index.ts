@@ -684,8 +684,6 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                         nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
                             item.style.minWidth = "60px";
                         });
-                    } else if (nodeElement.classList.contains("av")) {
-                        avRender(nodeElement);
                     }
                     transaction(protyle, [{
                         data: oldHTML,
@@ -723,6 +721,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
                 } else if (value === "---") {
                     focusBlock(nodeElement);
+                } else if (nodeElement.classList.contains("av")) {
+                    avRender(nodeElement);
                 } else {
                     focusByWbr(nodeElement, range);
                 }

@@ -360,10 +360,10 @@ const boot = () => {
     // 当前页面链接使用浏览器打开
     currentWindow.webContents.on("will-navigate", (event) => {
         const url = event.url;
-        event.preventDefault();
         if (url.startsWith(localServer)) {
             return;
         }
+        event.preventDefault();
         shell.openExternal(url);
     });
 

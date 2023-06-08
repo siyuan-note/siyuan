@@ -33,8 +33,33 @@
     }
 
     &.av {
-      .av__scroll {
-        overflow: auto hidden;
+      .av {
+        &__scroll {
+          overflow: auto hidden;
+          cursor: pointer;
+        }
+
+        &__row {
+          display: flex;
+          border-bottom: 1px solid var(--b3-theme-surface-lighter);
+        }
+
+        &__cell {
+          padding: 5px;
+          flex-shrink: 0;
+          border-right: 1px solid var(--b3-theme-surface-lighter)
+        }
+
+        &__firstcol {
+          input {
+            margin: 11px 5px;
+            opacity: 0;
+          }
+
+          &:hover input {
+            opacity: 1;
+          }
+        }
       }
     }
 

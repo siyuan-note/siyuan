@@ -53,17 +53,23 @@ export const avRender = (element: Element) => {
                     }]
                 }]
             };
-            let tableHTML = "<div class='fn__flex'>";
+            let tableHTML = '<div class="av__row av__row--header" style="background-color: var(--b3-theme-background)"><div class="av__firstcol"><input style="margin-top: 14px" type="checkbox"></div>';
             data.columns.forEach((column) => {
-                tableHTML += `<div style="flex-shrink: 0;width: ${column.width}px;">${column.name}</div>`
+                tableHTML += `
+<div class="av__cell" style="width: ${column.width}px;">${column.name}</div>`
             });
-            tableHTML += "</div>";
+            tableHTML += `<div class="block__icons">
+    <div class="block__icon block__icon--show"><svg><use xlink:href="#iconAdd"></use></svg></div>
+    <div class="fn__space"></div>
+    <div class="block__icon block__icon--show"><svg><use xlink:href="#iconMore"></use></svg></div>
+</div>
+</div>`;
             data.rows.forEach((row) => {
-                tableHTML += "<div class='fn__flex'>";
+                tableHTML += '<div class="av__row"><div class="av__firstcol"><input type="checkbox"></div>';
                 row.cells.forEach((cell, index) => {
-                    tableHTML += `<div style="flex-shrink: 0;width: ${data.columns[index].width}px;background-color: ${cell.bgColor};color: ${cell.color}">${cell.value}</div>`
+                    tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width}px;background-color: ${cell.bgColor};color: ${cell.color}">${cell.value}</div>`
                 });
-                tableHTML += "</div>";
+                tableHTML += `<div></div></div>`;
             });
             const paddingLeft = e.parentElement.style.paddingLeft;
             const paddingRight = e.parentElement.style.paddingRight;
@@ -82,7 +88,11 @@ export const avRender = (element: Element) => {
     <div class="av__scroll">
         <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};min-width: 100%;float: left;">
             ${tableHTML}
-            <div>add</div>
+            <div class="block__icon block__icon--show">
+                <div class="fn__space"></div>
+                <svg><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>
+                ${window.siyuan.languages.addAttr}
+            </div>
         </div>
     </div>
 </div>`;

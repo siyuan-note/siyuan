@@ -100,7 +100,7 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 }
 
 func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := addAttributeViewColumn(operation.Name, operation.Typ, 1024, operation.ParentID)
+	err := addAttributeViewColumn(operation.Name, operation.Typ, -1, operation.ParentID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
 	}

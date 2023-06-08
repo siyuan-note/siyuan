@@ -1,6 +1,9 @@
 .protyle-wysiwyg {
   padding: 34px 16px 16px 24px;
   cursor: text;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
 
   box-sizing: border-box;
 
@@ -14,6 +17,7 @@
 
   [data-node-id] {
     position: relative;
+    width: 100%;
 
     &[custom-riff-decks] {
       box-shadow: -3px 0px 0px -1px var(--b3-protyle-inline-mark-background) inset;
@@ -29,9 +33,9 @@
     }
 
     &.av {
-      min-height: 100px;
-      border: 1px solid var(--b3-border-color);
-      border-radius: 4px;
+      .av__scroll {
+        overflow: auto hidden;
+      }
     }
 
     &.hr {

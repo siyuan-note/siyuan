@@ -18,6 +18,8 @@ type TOperation =
     | "append"
     | "insertAttrViewBlock"
     | "removeAttrViewBlock"
+    | "addAttrViewCol"
+    | "removeAttrViewCol"
     | "addFlashcards"
     | "removeFlashcards"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
@@ -279,6 +281,8 @@ interface IOperation {
     retData?: any
     nextID?: string // insert 专享
     srcIDs?: string[] // insertAttrViewBlock 专享
+    name?: string // addAttrViewCol 专享
+    type?: "text" | "date" | "number" | "relation" | "rollup" | "select" // addAttrViewCol 专享
     deckID?: string // add/removeFlashcards 专享
     blockIDs?: string[] // add/removeFlashcards 专享
 }

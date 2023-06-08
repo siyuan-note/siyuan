@@ -16,62 +16,27 @@ export const avRender = (element: Element) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
-            // const data = {
-            //     title: "table",
-            //     filter: {},
-            //     sorts: {},
-            //     columns: [{
-            //         width: 500,
-            //         icon: "",
-            //         id: "",
-            //         name: "columnA",
-            //         wrap: false,
-            //         type: "",
-            //     }, {
-            //         width: 500,
-            //         icon: "",
-            //         id: "",
-            //         name: "columnB",
-            //         wrap: false,
-            //         type: "",
-            //     }],
-            //     rows: [{
-            //         id: "",
-            //         cells: [{
-            //             value: "a",
-            //         }, {
-            //             color: "var(--b3-card-error-color)",
-            //             bgColor: "var(--b3-card-error-background)",
-            //             value: "a1",
-            //         }]
-            //     }, {
-            //         id: "",
-            //         cells: [{
-            //             color: "var(--b3-card-success-color)",
-            //             bgColor: "var(--b3-card-success-background)",
-            //             value: "b",
-            //         }, {
-            //             value: "b1",
-            //         }]
-            //     }]
-            // };
             fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id")}, (response) => {
                 const data = response.data.av;
+
+                // header
                 let tableHTML = '<div class="av__row av__row--header" style="background-color: var(--b3-theme-background)"><div class="av__firstcol"><input style="margin-top: 14px" type="checkbox"></div>';
                 data.columns.forEach((column: IAVColumn) => {
                     tableHTML += `
-<div class="av__cell" style="width: ${column.width}px;">${column.name}</div>`
+<div class="av__cell" style="width: ${column.width || 200}px;">${column.name}</div>`
                 });
                 tableHTML += `<div class="block__icons">
-    <div class="block__icon block__icon--show"><svg><use xlink:href="#iconAdd"></use></svg></div>
+    <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
     <div class="fn__space"></div>
-    <div class="block__icon block__icon--show"><svg><use xlink:href="#iconMore"></use></svg></div>
+    <div class="block__icon block__icon--show"  data-type="av-header-more"><svg><use xlink:href="#iconMore"></use></svg></div>
 </div>
 </div>`;
+
+                // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}"><div class="av__firstcol"><input type="checkbox"></div>`;
                     row.cells.forEach((cell, index) => {
-                        tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`
+                        tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width || 200}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`
                     });
                     tableHTML += `<div></div></div>`;
                 });

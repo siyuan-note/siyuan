@@ -66,6 +66,7 @@ import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 import {removeSearchMark} from "../toolbar/util";
 import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
+import {avClick} from "../render/av/action";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1909,6 +1910,10 @@ export class WYSIWYG {
                 if (protyle.options.render.breadcrumb) {
                     protyle.breadcrumb.render(protyle);
                 }
+                return;
+            }
+
+            if (avClick(protyle, event)) {
                 return;
             }
 

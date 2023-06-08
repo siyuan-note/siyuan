@@ -755,7 +755,7 @@
   "export20": "导出 Word .docx 文件需要使用 <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a> 进行格式转换",
   "export21": "导出 PDF 页脚模板",
   "export22": "<code class='fn__code'>%page</code> 为当前页码，<code class='fn__code'>%pages</code> 为总页码，支持 Sprig 模板函数",
-  "export23": "导出 Markdown 添加 YFM",
+  "export23": "导出 Markdown 添加 YAML front-matter",
   "export24": "启用后在导出的 Markdown 文件开头处添加一些较为通用的元数据信息",
   "theme11": "明亮模式下使用主题",
   "theme12": "暗黑模式下使用主题",

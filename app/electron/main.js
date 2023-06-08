@@ -395,8 +395,8 @@ const initKernel = (workspace, port, lang) => {
             width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
             frame: false,
+            backgroundColor: "#1e1f22",
             icon: path.join(appDir, "stage", "icon-large.png"),
-            transparent: "linux" !== process.platform,
         });
 
         const kernelName = "win32" === process.platform ? "SiYuan-Kernel.exe" : "SiYuan-Kernel";
@@ -675,7 +675,7 @@ app.whenReady().then(() => {
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
         const win = new BrowserWindow({
             show: true,
-            backgroundColor: "#FFF",
+            backgroundColor: "#FFF", // 桌面端主窗体背景色设置为 `#FFF` Fix https://github.com/siyuan-note/siyuan/issues/4544
             trafficLightPosition: {x: 8, y: 13},
             width: mainScreen.size.width * 0.7,
             height: mainScreen.size.height * 0.9,
@@ -797,7 +797,6 @@ app.whenReady().then(() => {
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
             frame: false,
             icon: path.join(appDir, "stage", "icon-large.png"),
-            transparent: "linux" !== process.platform,
             webPreferences: {
                 nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
             },

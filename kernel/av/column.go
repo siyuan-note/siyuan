@@ -32,11 +32,12 @@ const (
 
 // Column 描述了属性视图的基础结构。
 type Column struct {
-	ID   string     `json:"id"`   // 列 ID
-	Name string     `json:"name"` // 列名
-	Type ColumnType `json:"type"` // 列类型
-	Icon string     `json:"icon"` // 列图标
-	Wrap bool       `json:"wrap"` // 是否换行
+	ID     string     `json:"id"`     // 列 ID
+	Name   string     `json:"name"`   // 列名
+	Type   ColumnType `json:"type"`   // 列类型
+	Icon   string     `json:"icon"`   // 列图标
+	Wrap   bool       `json:"wrap"`   // 是否换行
+	Hidden bool       `json:"hidden"` // 是否隐藏
 
 	// 以下是某些列类型的特有属性
 

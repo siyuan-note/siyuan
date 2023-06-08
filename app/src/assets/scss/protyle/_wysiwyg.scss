@@ -42,6 +42,23 @@
         &__row {
           display: flex;
           border-bottom: 1px solid var(--b3-theme-surface-lighter);
+
+          &--header .av__cell {
+            display: flex;
+            align-items: center;
+
+            svg {
+              height: 14px;
+              width: 14px;
+              color: var(--b3-theme-on-surface);
+              margin-right: 5px;
+            }
+          }
+
+          &--header,
+          &--footer {
+            background-color: var(--b3-theme-background);
+          }
         }
 
         &__cell {

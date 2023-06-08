@@ -4,7 +4,7 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
 import {genBreadcrumb} from "../wysiwyg/renderBacklink";
-import {avRender} from "./av";
+import {avRender} from "./av/render";
 
 export const blockRender = (protyle: IProtyle, element: Element, top?: number) => {
     let blockElements: Element[] = [];

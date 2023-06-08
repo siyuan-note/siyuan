@@ -14,7 +14,7 @@ import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
-import {avRender} from "../render/av";
+import {avRender} from "../render/av/render";
 
 const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     let needRender = true;

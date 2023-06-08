@@ -17,7 +17,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
-import {avRender} from "../render/av";
+import {avRender} from "../render/av/render";
 
 export class Preview {
     public element: HTMLElement;

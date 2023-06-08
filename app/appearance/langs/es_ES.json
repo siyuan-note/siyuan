@@ -1,4 +1,7 @@
 {
+  "hide": "Ocultar",
+  "wrap": "Columna de ajuste",
+  "edit": "Editar",
   "incompatiblePluginTip": "Este complemento no es compatible con el terminal actual",
   "incompatible": "Incompatible",
   "trust": "Confiar",

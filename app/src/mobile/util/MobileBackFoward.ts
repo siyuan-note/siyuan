@@ -11,7 +11,7 @@ import {setStorageVal} from "../../protyle/util/compatibility";
 import {closePanel} from "./closePanel";
 import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
-import {avRender} from "../../protyle/render/av";
+import {avRender} from "../../protyle/render/av/render";
 
 const forwardStack: IBackStack[] = [];
 

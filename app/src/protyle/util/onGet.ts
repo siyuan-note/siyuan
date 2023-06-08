@@ -16,7 +16,7 @@ import {removeLoading} from "../ui/initUI";
 import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
-import {avRender} from "../render/av";
+import {avRender} from "../render/av/render";
 
 export const onGet = (options: {
     data: IWebSocketData,

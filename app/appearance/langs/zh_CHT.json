@@ -1,4 +1,7 @@
 {
+  "hide": "隱藏",
+  "wrap": "換行",
+  "edit": "編輯",
   "incompatiblePluginTip": "該插件不支持在當前終端上使用",
   "incompatible": "不兼容",
   "trust": "信任",

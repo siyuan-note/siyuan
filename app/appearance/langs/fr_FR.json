@@ -1,4 +1,7 @@
 {
+  "hide": "Masquer",
+  "wrap": "Reboucler la colonne",
+  "edit": "Modifier",
   "incompatiblePluginTip": "Ce plugin n'est pas supporté sur le terminal actuel",
   "incompatible": "Incompatible",
   "trust": "Confiance",

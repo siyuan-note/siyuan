@@ -6,7 +6,7 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {disabledForeverProtyle, disabledProtyle} from "../util/onGet";
-import {avRender} from "../render/av";
+import {avRender} from "../render/av/render";
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: {
     blockPaths: IBreadcrumb[],

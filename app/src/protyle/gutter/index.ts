@@ -40,7 +40,7 @@ import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
-import {avRender} from "../render/av";
+import {avRender} from "../render/av/render";
 
 export class Gutter {
     public element: HTMLElement;

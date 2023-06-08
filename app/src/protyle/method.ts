@@ -7,7 +7,7 @@ import { chartRender } from "./render/chartRender";
 import { abcRender } from "./render/abcRender";
 import { mindmapRender } from "./render/mindmapRender";
 import { plantumlRender } from "./render/plantumlRender";
-import { avRender } from "./render/av";
+import { avRender } from "./render/av/render";
 import "../assets/scss/export.scss";
 
 class Protyle {

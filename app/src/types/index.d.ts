@@ -26,6 +26,7 @@ type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "click-blockicon" | "click-editorcontent" | "click-pdf" |
     "click-editortitleicon" | "open-noneditableblock" | "loaded-protyle"
+type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block"
 
 declare module "blueimp-md5"
 
@@ -282,7 +283,7 @@ interface IOperation {
     nextID?: string // insert 专享
     srcIDs?: string[] // insertAttrViewBlock 专享
     name?: string // addAttrViewCol 专享
-    type?: "text" | "date" | "number" | "relation" | "rollup" | "select" // addAttrViewCol 专享
+    type?: TAVCol // addAttrViewCol 专享
     deckID?: string // add/removeFlashcards 专享
     blockIDs?: string[] // add/removeFlashcards 专享
 }
@@ -810,7 +811,8 @@ interface IAVColumn {
     id: string,
     name: string,
     wrap: boolean,
-    type: string,
+    hidden: boolean,
+    type: TAVCol,
 }
 
 interface IAVRow {

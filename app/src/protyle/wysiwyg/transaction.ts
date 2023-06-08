@@ -17,7 +17,7 @@ import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {needSubscribe} from "../../util/needSubscribe";
-import {avRender} from "../render/av";
+import {avRender} from "../render/av/render";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除

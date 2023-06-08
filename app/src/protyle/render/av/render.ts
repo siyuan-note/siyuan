@@ -1,5 +1,14 @@
 import {fetchPost} from "../../../util/fetch";
 
+export const getIconByType = (type: string) => {
+    switch (type) {
+        case "text":
+            return "iconAlignLeft";
+        case "block":
+            return "iconParagraph";
+    }
+}
+
 export const avRender = (element: Element) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
@@ -12,18 +21,23 @@ export const avRender = (element: Element) => {
         return;
     }
     if (avElements.length > 0) {
-        avElements.forEach((e: HTMLDivElement) => {
+        avElements.forEach((e: HTMLElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
             fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id")}, (response) => {
                 const data = response.data.av;
-
+                this.data = data;
                 // header
-                let tableHTML = '<div class="av__row av__row--header" style="background-color: var(--b3-theme-background)"><div class="av__firstcol"><input style="margin-top: 14px" type="checkbox"></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><input style="margin-top: 14px" type="checkbox"></div>';
                 data.columns.forEach((column: IAVColumn) => {
-                    tableHTML += `
-<div class="av__cell" style="width: ${column.width || 200}px;">${column.name}</div>`
+                    if (column.hidden) {
+                        return;
+                    }
+                    tableHTML += `<div class="av__cell" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
+    <svg><use xlink:href="#${column.icon || getIconByType(column.type)}"></use></svg>
+    <span>${column.name}</span>
+</div>`
                 });
                 tableHTML += `<div class="block__icons">
     <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
@@ -55,18 +69,19 @@ export const avRender = (element: Element) => {
         </div>
     </div>
     <div class="av__scroll">
-        <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};min-width: 100%;float: left;">
+        <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};float: left;">
             ${tableHTML}
             <div class="block__icon block__icon--show">
                 <div class="fn__space"></div>
                 <svg><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>
                 ${window.siyuan.languages.addAttr}
             </div>
+            <div class="av__row--footer">Calculate</div>
         </div>
     </div>
 </div>`;
                 e.setAttribute("data-render", "true");
-            })
+            });
         });
     }
 };

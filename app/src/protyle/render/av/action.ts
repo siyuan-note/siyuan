@@ -1,6 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {transaction} from "../../wysiwyg/transaction";
 import {Menu} from "../../../plugin/API";
+import {getIconByType} from "./render";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target)
@@ -23,13 +24,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     id,
                     parentID: blockElement.getAttribute("data-av-type"),
                 }]);
-
             }
         })
         const addRect = addElement.getBoundingClientRect()
         menu.open({
             x: addRect.left,
-            y: addRect.bottom
+            y: addRect.bottom,
+            h: addRect.height
         })
         event.preventDefault();
         event.stopPropagation();
@@ -37,6 +38,84 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
     const cellElement = hasClosestByClassName(event.target, "av__cell")
     if (cellElement && blockElement) {
+        const type = cellElement.getAttribute("data-dtype")
+        const menu = new Menu("av-header-cell")
+        menu.addItem({
+            icon: getIconByType(type),
+            label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
+            bind() {
+
+            }
+        })
+        if (type !== "block") {
+            menu.addItem({
+                icon: "iconEdit",
+                label: window.siyuan.languages.edit,
+                click() {
+
+                }
+            })
+        }
+        menu.addSeparator()
+        menu.addItem({
+            icon: "iconUp",
+            label: window.siyuan.languages.fileNameNatASC,
+            click() {
+
+            }
+        })
+        menu.addItem({
+            icon: "iconDown",
+            label: window.siyuan.languages.fileNameNatDESC,
+            click() {
+
+            }
+        })
+        menu.addItem({
+            icon: "iconFilter",
+            label: window.siyuan.languages.filter,
+            click() {
+
+            }
+        })
+        menu.addSeparator()
+        if (type !== "block") {
+            menu.addItem({
+                icon: "iconEyeoff",
+                label: window.siyuan.languages.hide,
+                click() {
+
+                }
+            })
+            menu.addItem({
+                icon: "iconCopy",
+                label: window.siyuan.languages.duplicate,
+                click() {
+
+                }
+            })
+            menu.addItem({
+                icon: "iconTrashcan",
+                label: window.siyuan.languages.delete,
+                click() {
+
+                }
+            })
+            menu.addSeparator()
+        }
+        menu.addItem({
+            label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.getAttribute("data-wrap") === "true" ? " checked" : ""}></div>`,
+            click() {
+
+            }
+        })
+        const cellRect = cellElement.getBoundingClientRect()
+        menu.open({
+            x: cellRect.left,
+            y: cellRect.bottom,
+            h: cellRect.height
+        })
         event.preventDefault();
         event.stopPropagation();
         return true

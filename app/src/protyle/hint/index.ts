@@ -32,7 +32,7 @@ import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
 import {isCtrl} from "../util/compatibility";
-import {avRender} from "../render/av";
+import {avRender} from "../render/av/render";
 
 export class Hint {
     public timeId: number;

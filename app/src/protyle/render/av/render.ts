@@ -7,7 +7,7 @@ export const getIconByType = (type: string) => {
         case "block":
             return "iconParagraph";
     }
-}
+};
 
 export const avRender = (element: Element) => {
     let avElements: Element[] = [];
@@ -37,7 +37,7 @@ export const avRender = (element: Element) => {
                     tableHTML += `<div class="av__cell" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
     <svg><use xlink:href="#${column.icon || getIconByType(column.type)}"></use></svg>
     <span>${column.name}</span>
-</div>`
+</div>`;
                 });
                 tableHTML += `<div class="block__icons">
     <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
@@ -50,9 +50,9 @@ export const avRender = (element: Element) => {
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}"><div class="av__firstcol"><input type="checkbox"></div>`;
                     row.cells.forEach((cell, index) => {
-                        tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width || 200}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`
+                        tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width || 200}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`;
                     });
-                    tableHTML += `<div></div></div>`;
+                    tableHTML += "<div></div></div>";
                 });
                 const paddingLeft = e.parentElement.style.paddingLeft;
                 const paddingRight = e.parentElement.style.paddingRight;

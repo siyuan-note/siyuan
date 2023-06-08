@@ -796,11 +796,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 拖拽到属性视图内
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
-                        let previousID = ""
+                        let previousID = "";
                         if (targetElement.classList.contains("dragover__bottom")) {
-                            previousID = targetElement.getAttribute("data-id") || ""
+                            previousID = targetElement.getAttribute("data-id") || "";
                         } else {
-                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || ""
+                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
                         }
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
@@ -1008,7 +1008,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 列表项不能拖入列表上方块的下面
                 disabledPosition = "bottom";
             }
-            const avRowElement = hasClosestByClassName(event.target, "av__row")
+            const avRowElement = hasClosestByClassName(event.target, "av__row");
             if (targetElement.classList.contains("av") && avRowElement) {
                 if (avRowElement.classList.contains("av__row--header")) {
                     // 表头之前不能插入

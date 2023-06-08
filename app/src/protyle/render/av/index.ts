@@ -55,7 +55,7 @@ export const avRender = (element: Element) => {
             //         }]
             //     }]
             // };
-            fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-node-id")}, (response) => {
+            fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id")}, (response) => {
                 const data = response.data.av;
                 let tableHTML = '<div class="av__row av__row--header" style="background-color: var(--b3-theme-background)"><div class="av__firstcol"><input style="margin-top: 14px" type="checkbox"></div>';
                 data.columns.forEach((column: IAVColumn) => {

@@ -14,6 +14,9 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
 };
 
 const mergeElement = (a: Element, b: Element, after = true) => {
+    if (!a.getAttribute("data-type") || !b.getAttribute("data-type")) {
+        return false;
+    }
     a.setAttribute("data-type", a.getAttribute("data-type").replace("search-mark", "").trim());
     b.setAttribute("data-type", b.getAttribute("data-type").replace("search-mark", "").trim());
     const attributes = a.attributes;

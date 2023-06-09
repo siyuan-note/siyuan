@@ -679,7 +679,7 @@ export const globalShortcut = (app: App) => {
             // remove blockpopover
             const maxEditLevels: { [key: string]: number } = {oid: 0};
             window.siyuan.blockPanels.forEach((item) => {
-                if (item.targetElement && item.element.getAttribute("data-pin") === "true") {
+                if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "true") {
                     const level = parseInt(item.element.getAttribute("data-level"));
                     const oid = item.element.getAttribute("data-oid");
                     if (maxEditLevels[oid]) {
@@ -694,7 +694,7 @@ export const globalShortcut = (app: App) => {
             let destroyBlock = false;
             for (let i = 0; i < window.siyuan.blockPanels.length; i++) {
                 const item = window.siyuan.blockPanels[i];
-                if (item.targetElement && item.element.getAttribute("data-pin") === "false" &&
+                if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false" &&
                     parseInt(item.element.getAttribute("data-level")) > (maxEditLevels[item.element.getAttribute("data-oid")] || 0)) {
                     item.destroy();
                     destroyBlock = true;

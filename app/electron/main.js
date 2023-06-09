@@ -245,7 +245,6 @@ const boot = () => {
     // 创建主窗体
     const currentWindow = new BrowserWindow({
         show: false,
-        backgroundColor: "#FFF", // 桌面端主窗体背景色设置为 `#FFF` Fix https://github.com/siyuan-note/siyuan/issues/4544
         width: windowState.width,
         height: windowState.height,
         minWidth: 493,
@@ -675,7 +674,6 @@ app.whenReady().then(() => {
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
         const win = new BrowserWindow({
             show: true,
-            backgroundColor: "#FFF", // 桌面端主窗体背景色设置为 `#FFF` Fix https://github.com/siyuan-note/siyuan/issues/4544
             trafficLightPosition: {x: 8, y: 13},
             width: mainScreen.size.width * 0.7,
             height: mainScreen.size.height * 0.9,

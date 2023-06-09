@@ -66,7 +66,7 @@ func InstallBazaarPlugin(repoURL, repoHash, pluginName string) error {
 	installPath := filepath.Join(util.DataDir, "plugins", pluginName)
 	err := bazaar.InstallPlugin(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
-		return errors.New(fmt.Sprintf(Conf.Language(46), pluginName))
+		return errors.New(fmt.Sprintf(Conf.Language(46), pluginName, err))
 	}
 	return nil
 }
@@ -119,7 +119,7 @@ func InstallBazaarWidget(repoURL, repoHash, widgetName string) error {
 	installPath := filepath.Join(util.DataDir, "widgets", widgetName)
 	err := bazaar.InstallWidget(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
-		return errors.New(fmt.Sprintf(Conf.Language(46), widgetName))
+		return errors.New(fmt.Sprintf(Conf.Language(46), widgetName, err))
 	}
 	return nil
 }
@@ -163,7 +163,7 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	installPath := filepath.Join(util.IconsPath, iconName)
 	err := bazaar.InstallIcon(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
-		return errors.New(fmt.Sprintf(Conf.Language(46), iconName))
+		return errors.New(fmt.Sprintf(Conf.Language(46), iconName, err))
 	}
 	Conf.Appearance.Icon = iconName
 	Conf.Save()
@@ -214,7 +214,7 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 	installPath := filepath.Join(util.ThemesPath, themeName)
 	err := bazaar.InstallTheme(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
-		return errors.New(fmt.Sprintf(Conf.Language(46), themeName))
+		return errors.New(fmt.Sprintf(Conf.Language(46), themeName, err))
 	}
 
 	if !update {
@@ -270,7 +270,7 @@ func InstallBazaarTemplate(repoURL, repoHash, templateName string) error {
 	installPath := filepath.Join(util.DataDir, "templates", templateName)
 	err := bazaar.InstallTemplate(repoURL, repoHash, installPath, Conf.System.ID)
 	if nil != err {
-		return errors.New(fmt.Sprintf(Conf.Language(46), templateName))
+		return errors.New(fmt.Sprintf(Conf.Language(46), templateName, err))
 	}
 	return nil
 }

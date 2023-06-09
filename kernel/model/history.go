@@ -564,7 +564,12 @@ func getHistoryDir(suffix string, t time.Time) (ret string, err error) {
 	return
 }
 
-func ReindexHistory() (err error) {
+func ReindexHistory() {
+	task.AppendTask(task.HistoryDatabaseIndexFull, fullReindexHistory)
+	return
+}
+
+func fullReindexHistory() {
 	historyDirs, err := os.ReadDir(util.HistoryDir)
 	if nil != err {
 		logging.LogErrorf("read history dir [%s] failed: %s", util.HistoryDir, err)

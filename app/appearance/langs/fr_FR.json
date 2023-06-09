@@ -1006,7 +1006,7 @@
     "43": "La capacité de stockage maximale de l'espace cloud [%s] a été dépassée et le téléchargement des données ne peut pas continuer",
     "44": "L'analyse du template a échoué : %s",
     "45": "En cours d'ouverture, veuillez patienter...",
-    "46": "Le téléchargement du [%s] a échoué en raison de problèmes de réseau, veuillez réessayer plus tard.",
+    "46": "Échec de l'installation du package du marché [%s]: %s",
     "47": "La désinstallation a échoué : %s",
     "48": "Seuls les premiers [%d] sous-documents sont listés, si vous avez besoin d'ajuster, veuillez modifier [Paramètres - Arbre des documents - Nombre maximum de documents à lister].",
     "49": "Veuillez spécifier le chemin d'enregistrement des notes quotidiennes dans les paramètres du carnet de notes.",

@@ -535,11 +535,11 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 	}).Get(u)
 	if nil != err {
 		logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
-		return nil, errors.New("get bazaar package failed")
+		return nil, errors.New("get bazaar package failed: " + err.Error())
 	}
 	if 200 != resp.StatusCode {
 		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
-		return nil, errors.New("get bazaar package failed")
+		return nil, errors.New("get bazaar package failed: " + resp.Status)
 	}
 	data = buf.Bytes()
 
@@ -575,7 +575,6 @@ func installPackage(data []byte, installPath string) (err error) {
 	unzipPath := filepath.Join(tmpPackage, name)
 	if err = gulu.Zip.Unzip(tmp, unzipPath); nil != err {
 		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
-		err = errors.New("write file failed")
 		return
 	}
 

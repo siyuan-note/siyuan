@@ -96,12 +96,7 @@ func reindexHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	err := model.ReindexHistory()
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	model.ReindexHistory()
 }
 
 func getNotebookHistory(c *gin.Context) {

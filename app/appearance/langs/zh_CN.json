@@ -943,6 +943,7 @@
     "task.database.index.fix": "执行数据库索引订正",
     "task.ocr.image": "执行图片 OCR 提取文本",
     "task.history.generateDoc": "执行生成文件历史",
+    "task.history.database.index.full": "执行历史数据库重建索引",
     "task.history.database.index.commit": "执行历史数据库索引提交",
     "task.database.index.embedBlock": "执行数据库索引嵌入块",
     "task.reload.ui": "执行重载界面",

@@ -316,11 +316,13 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
 };
 
 export const promiseTransactions = () => {
+    window.clearInterval(window.siyuan.transactionsTimeout);
     window.siyuan.transactionsTimeout = window.setInterval(() => {
         if (window.siyuan.transactions.length === 0) {
             return;
         }
         window.clearInterval(window.siyuan.transactionsTimeout);
+        window.siyuan.transactionsTimeout = undefined;
         promiseTransaction();
     }, Constants.TIMEOUT_INPUT * 2);
 };
@@ -930,6 +932,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         });
     }
     protyle.transactionTime = time;
+    if (typeof window.siyuan.transactionsTimeout === "undefined") {
+        promiseTransactions();
+    }
 };
 
 export const updateTransaction = (protyle: IProtyle, id: string, newHTML: string, html: string) => {

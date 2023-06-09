@@ -313,7 +313,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
                 item.parent.switchTab(item.headElement);
                 return true;
-            } else if (initObj.instance === "Custom" &&  options.custom && objEquals(initObj.customModelData, options.custom.data)) {
+            } else if (initObj.instance === "Custom" && options.custom && objEquals(initObj.customModelData, options.custom.data)) {
                 item.parent.switchTab(item.headElement);
                 return true;
             }

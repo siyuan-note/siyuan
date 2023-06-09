@@ -182,9 +182,6 @@ export class App {
         setNoteBook();
         initBlockPopover(this);
         promiseTransactions();
-        window.setInterval(() => {
-            console.log(new Date())
-        }, 10000);
     }
 }
 

@@ -535,7 +535,7 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 	}).Get(u)
 	if nil != err {
 		logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
-		return nil, errors.New("get bazaar package failed: " + err.Error())
+		return nil, errors.New("get bazaar package failed, please check your network")
 	}
 	if 200 != resp.StatusCode {
 		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)

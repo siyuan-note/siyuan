@@ -67,10 +67,11 @@ const promiseTransaction = () => {
             undoOperations // 目前用于 ws 推送更新大纲
         }]
     }, (response) => {
-        if (window.siyuan.transactions.length !== 0) {
+        if (window.siyuan.transactions.length === 0) {
+            countBlockWord([], protyle.block.rootID, true);
+        } else {
             promiseTransaction();
         }
-        countBlockWord([], protyle.block.rootID, true);
         /// #if MOBILE
         if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
             window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {

@@ -166,6 +166,12 @@ func BuildBookmark() (ret *Bookmarks) {
 	blocks := fromSQLBlocks(&sqlBlocks, "", 0)
 	for _, block := range blocks {
 		label := BookmarkLabel(block.IAL["bookmark"])
+
+		if "" != block.Name {
+			// Blocks in the bookmark panel display their name instead of content https://github.com/siyuan-note/siyuan/issues/8514
+			block.Content = block.Name
+		}
+
 		if bs, ok := labelBlocks[label]; ok {
 			bs = append(bs, block)
 			labelBlocks[label] = bs

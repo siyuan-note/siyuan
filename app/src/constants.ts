@@ -89,6 +89,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_LOAD = 300;
     public static readonly TIMEOUT_TRANSITION = 300;
+    public static readonly TIMEOUT_COUNT = 1000;
 
     // id
     public static readonly HELP_PATH = {

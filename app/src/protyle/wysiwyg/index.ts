@@ -949,7 +949,7 @@ export class WYSIWYG {
                         // 三击选中段落块时，rangeEnd 会在下一个块
                         if ((range.endContainer as HTMLElement).classList.contains("protyle-attr")) {
                             // 三击在悬浮层中会选择到 attr https://github.com/siyuan-note/siyuan/issues/4636
-                            range.setEndAfter(range.endContainer.previousSibling.lastChild);
+                            setLastNodeRange((range.endContainer as HTMLElement).previousElementSibling, range, false);
                         }
                     } else {
                         endBlockElement = hasClosestBlock(range.endContainer);
@@ -1954,7 +1954,6 @@ export class WYSIWYG {
                 /// #if !MOBILE
                 if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
                     protyle.toolbar.render(protyle, newRange);
-
                 } else {
                     hideElements(["toolbar"], protyle);
                 }

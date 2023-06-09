@@ -484,7 +484,9 @@ export const updatePanelByEditor = (options: {
         ) {
             return;
         }
-        title = options.protyle.title.editElement.textContent;
+        if (options.protyle.title) {
+            title = options.protyle.title.editElement.textContent;
+        }
         if (options.resize) {
             resize(options.protyle);
         }

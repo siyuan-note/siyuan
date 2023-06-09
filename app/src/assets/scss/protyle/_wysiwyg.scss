@@ -3,8 +3,8 @@
   cursor: text;
   display: flex;
   flex-direction: column;
-
   box-sizing: border-box;
+  user-select: auto;
 
   .protyle-breadcrumb__bar {
     font-size: 14px;

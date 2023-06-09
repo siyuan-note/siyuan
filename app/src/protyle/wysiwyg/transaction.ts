@@ -316,6 +316,9 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
 };
 
 export const promiseTransactions = () => {
+    window.setInterval(() => {
+        console.log(new Date().getTime())
+    }, 10000);
     window.siyuan.transactionsTimeout = window.setInterval(() => {
         if (window.siyuan.transactions.length === 0) {
             return;

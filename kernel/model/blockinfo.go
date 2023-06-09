@@ -124,11 +124,6 @@ func getBlockRefText(id string, tree *parse.Tree) (ret string) {
 		return
 	}
 
-	sqlBlock := sql.BuildBlockFromNode(node, tree)
-	if nil == sqlBlock {
-		return
-	}
-
 	ret = getNodeRefText(node)
 	ret = maxContent(ret, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 	return

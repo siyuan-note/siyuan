@@ -50,6 +50,9 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
 
 // 用于执行操作，外加处理当前编辑器中引用块、嵌入块的更新
 const promiseTransaction = () => {
+    if (window.siyuan.transactions.length === 0) {
+        return;
+    }
     const protyle = window.siyuan.transactions[0].protyle;
     const doOperations = window.siyuan.transactions[0].doOperations;
     const undoOperations = window.siyuan.transactions[0].undoOperations;
@@ -64,12 +67,9 @@ const promiseTransaction = () => {
             undoOperations // 目前用于 ws 推送更新大纲
         }]
     }, (response) => {
-        if (window.siyuan.transactions.length === 0) {
-            promiseTransactions();
-        } else {
+        if (window.siyuan.transactions.length !== 0) {
             promiseTransaction();
         }
-
         countBlockWord([], protyle.block.rootID, true);
         /// #if MOBILE
         if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
@@ -313,18 +313,6 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element);
     }
-};
-
-export const promiseTransactions = () => {
-    window.clearInterval(window.siyuan.transactionsTimeout);
-    window.siyuan.transactionsTimeout = window.setInterval(() => {
-        if (window.siyuan.transactions.length === 0) {
-            return;
-        }
-        window.clearInterval(window.siyuan.transactionsTimeout);
-        window.siyuan.transactionsTimeout = undefined;
-        promiseTransaction();
-    }, Constants.TIMEOUT_INPUT * 2);
 };
 
 // 用于推送和撤销
@@ -897,6 +885,7 @@ const updateRef = (protyle: IProtyle, id: string, index = 0) => {
     });
 };
 
+let transactionsTimeout: number;
 export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoOperations?: IOperation[]) => {
     const lastTransaction = window.siyuan.transactions[window.siyuan.transactions.length - 1];
     let needDebounce = false;
@@ -932,9 +921,10 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         });
     }
     protyle.transactionTime = time;
-    if (typeof window.siyuan.transactionsTimeout === "undefined") {
-        promiseTransactions();
-    }
+    window.clearTimeout(transactionsTimeout);
+    transactionsTimeout = window.setTimeout(() => {
+        promiseTransaction();
+    }, Constants.TIMEOUT_INPUT * 2);
 };
 
 export const updateTransaction = (protyle: IProtyle, id: string, newHTML: string, html: string) => {

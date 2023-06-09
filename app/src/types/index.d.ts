@@ -204,7 +204,6 @@ interface INotebook {
 interface ISiyuan {
     storage?: { [key: string]: any },
     printWin?: import("electron").BrowserWindow
-    transactionsTimeout?: number,
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],

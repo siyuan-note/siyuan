@@ -21,7 +21,6 @@ import {
     setTitle,
     transactionError
 } from "./dialog/processSystem";
-import {promiseTransactions} from "./protyle/wysiwyg/transaction";
 import {initMessage} from "./dialog/message";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
@@ -181,7 +180,6 @@ export class App {
         });
         setNoteBook();
         initBlockPopover(this);
-        promiseTransactions();
     }
 }
 

@@ -11,7 +11,6 @@ import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {addGA, initAssets, loadAssets} from "../util/assets";
-import {promiseTransactions} from "../protyle/wysiwyg/transaction";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
@@ -96,7 +95,6 @@ class App {
                 handleTouchEnd(event);
             }, false);
         });
-        promiseTransactions();
     }
 }
 

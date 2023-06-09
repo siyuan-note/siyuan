@@ -501,16 +501,17 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	clearPortJSON()
 	util.UnlockWorkspace()
 
+	time.Sleep(500 * time.Millisecond)
+	if waitSecondForExecInstallPkg {
+		util.PushMsg(Conf.Language(130), 1000*5)
+		// 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
+		// 这里多等待一段时间，等待安装程序启动
+		time.Sleep(4 * time.Second)
+	}
+	logging.LogInfof("exited kernel")
+	util.WebSocketServer.Close()
 	go func() {
 		time.Sleep(500 * time.Millisecond)
-		if waitSecondForExecInstallPkg {
-			util.PushMsg(Conf.Language(130), 1000*5)
-			// 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
-			// 这里多等待一段时间，等待安装程序启动
-			time.Sleep(4 * time.Second)
-		}
-		logging.LogInfof("exited kernel")
-		util.WebSocketServer.Close()
 		os.Exit(logging.ExitCodeOk)
 	}()
 	return

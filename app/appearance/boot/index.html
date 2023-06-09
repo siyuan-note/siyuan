@@ -6,11 +6,15 @@
     <style>
         html {
             overflow: hidden;
+            height: 100%;
         }
 
         body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             margin: 0;
-            color: #000;
+            background: #1e1f22;
             font-size: 12px;
             font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
         }
@@ -18,15 +22,15 @@
     </style>
 </head>
 <body>
-<div id="bg" style="background-color: #1e1f22; height: 100%;position: fixed;width: 100%;box-sizing: border-box;">
-    <img  style="width:36vh" src="icon.png"/>
+<div id="bg" style="width: 100%;display: flex;justify-content: space-around;flex: 1;">
+    <img style="width:36vh;align-self: center;" src="icon.png"/>
 </div>
-<div style="position: fixed;bottom: 34px;width: 100%;height: 1px;background-color: #3b3e43;">
+<div style="position: relative">
+    <div style="position: absolute;height: 1px;background-color: #3b3e43;width: 100%;top:0"></div>
     <div id="progress"
-         style="position: absolute;height: 1px;background-color: #d23f31;transition: width 50ms cubic-bezier(0, 0, 0.2, 1);bottom: 0;"></div>
-    <div style="position: absolute;bottom: -26px;left: 16px;display: flex;align-items: center;right: 16px;">
-        <span id="details" style="color: #9aa0a6;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;"></span>
-    </div>
+         style="position: absolute;height: 1px;background-color: #d23f31;transition: width 50ms cubic-bezier(0, 0, 0.2, 1);top:0"></div>
+    <div id="details"
+         style="color: #9aa0a6;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;padding: 8px;"></div>
 </div>
 <script>
     const sleep = (ms) => {

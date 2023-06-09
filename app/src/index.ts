@@ -183,7 +183,7 @@ export class App {
         initBlockPopover(this);
         promiseTransactions();
         window.setInterval(() => {
-            console.log(new Date().getTime())
+            console.log(new Date())
         }, 10000);
     }
 }

@@ -38,8 +38,6 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-const DatabaseVer = "20220501" // 修改表结构的话需要修改这里
-
 // IsUILoaded 是否已经加载了 UI。
 var IsUILoaded = false
 
@@ -64,6 +62,9 @@ var IsExiting = false
 
 // MobileOSVer 移动端操作系统版本。
 var MobileOSVer string
+
+// DatabaseVer 数据库版本。修改表结构的话需要修改这里。
+const DatabaseVer = "20220501"
 
 func logBootInfo() {
 	plat := GetOSPlatform()

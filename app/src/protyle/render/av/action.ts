@@ -36,9 +36,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
+
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && blockElement) {
-        const type = cellElement.getAttribute("data-dtype");
+        const type = cellElement.getAttribute("data-dtype") as TAVCol;
         const menu = new Menu("av-header-cell");
         menu.addItem({
             icon: getIconByType(type),
@@ -98,7 +99,18 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 icon: "iconTrashcan",
                 label: window.siyuan.languages.delete,
                 click() {
-
+                    const id = cellElement.getAttribute("data-id")
+                    transaction(protyle, [{
+                        action: "removeAttrViewCol",
+                        id,
+                        parentID: blockElement.getAttribute("data-av-type"),
+                    }], [{
+                        action: "addAttrViewCol",
+                        name: cellElement.textContent.trim(),
+                        parentID: blockElement.getAttribute("data-av-id"),
+                        type: type,
+                        id
+                    }]);
                 }
             });
             menu.addSeparator();

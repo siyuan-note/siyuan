@@ -1,6 +1,6 @@
 import {fetchPost} from "../../../util/fetch";
 
-export const getIconByType = (type: string) => {
+export const getIconByType = (type: TAVCol) => {
     switch (type) {
         case "text":
             return "iconAlignLeft";

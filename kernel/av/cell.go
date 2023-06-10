@@ -17,14 +17,21 @@
 package av
 
 type Cell struct {
-	ID          string      `json:"id"`
-	Value       *CellValue  `json:"value"`
-	RenderValue interface{} `json:"renderValue"`
-	Color       string      `json:"color"`
-	BgColor     string      `json:"bgColor"`
+	ID      string     `json:"id"`
+	Value   *CellValue `json:"value"`
+	Color   string     `json:"color"`
+	BgColor string     `json:"bgColor"`
 }
 
 type CellValue struct {
-	Type  ColumnType  `json:"type"`
-	Value interface{} `json:"value"`
+	Type ColumnType  `json:"type"`
+	Data interface{} `json:"data"`
+}
+
+func (v *CellValue) String() string {
+	switch v.Type {
+	case ColumnTypeText:
+		return v.Data.(string)
+	}
+	return v.Data.(string)
 }

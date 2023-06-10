@@ -180,7 +180,7 @@ func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 	colType := av.ColumnType(typ)
 	switch colType {
 	case av.ColumnTypeText:
-		col := &av.Column{ID: "av" + ast.NewNodeID(), Name: name, Type: colType}
+		col := &av.Column{ID: ast.NewNodeID(), Name: name, Type: colType}
 		attrView.Columns = append(attrView.Columns, col)
 		for _, row := range attrView.Rows {
 			row.Cells = append(row.Cells, av.NewCell(colType))

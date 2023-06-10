@@ -66,12 +66,17 @@
         }
 
         &__firstcol {
-          input {
-            margin: 11px 5px;
+          svg {
+            color: var(--b3-theme-on-surface);
+            height: 36px;
+            width: 24px;
             opacity: 0;
+            padding: 5px;
+            box-sizing: border-box;
+            float: left;
           }
 
-          &:hover input {
+          &:hover svg {
             opacity: 1;
           }
         }

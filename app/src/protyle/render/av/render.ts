@@ -28,7 +28,7 @@ export const avRender = (element: Element) => {
             fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id")}, (response) => {
                 const data = response.data.av;
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><input style="margin-top: 14px" type="checkbox"></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 42px"><use xlink:href="#iconUncheck"></use></svg></div>';
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
                         return;
@@ -47,7 +47,7 @@ export const avRender = (element: Element) => {
 
                 // body
                 data.rows.forEach((row: IAVRow) => {
-                    tableHTML += `<div class="av__row" data-id="${row.id}"><div class="av__firstcol"><input type="checkbox"></div>`;
+                    tableHTML += `<div class="av__row" data-id="${row.id}"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
                         tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width || 200}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`;
                     });

@@ -4,6 +4,7 @@ import {Menu} from "../../../plugin/API";
 import {getIconByType} from "./render";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
+import {popTextCell} from "./cell";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -42,97 +43,101 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && blockElement) {
         const type = cellElement.getAttribute("data-dtype") as TAVCol;
-        const menu = new Menu("av-header-cell");
-        menu.addItem({
-            icon: getIconByType(type),
-            label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
-            bind() {
-
-            }
-        });
-        if (type !== "block") {
+        if (cellElement.parentElement.classList.contains("av__row--header")) {
+            const menu = new Menu("av-header-cell");
             menu.addItem({
-                icon: "iconEdit",
-                label: window.siyuan.languages.edit,
-                click() {
+                icon: getIconByType(type),
+                label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
+                bind() {
 
                 }
             });
-        }
-        menu.addSeparator();
-        menu.addItem({
-            icon: "iconUp",
-            label: window.siyuan.languages.fileNameNatASC,
-            click() {
+            if (type !== "block") {
+                menu.addItem({
+                    icon: "iconEdit",
+                    label: window.siyuan.languages.edit,
+                    click() {
 
+                    }
+                });
             }
-        });
-        menu.addItem({
-            icon: "iconDown",
-            label: window.siyuan.languages.fileNameNatDESC,
-            click() {
-
-            }
-        });
-        menu.addItem({
-            icon: "iconFilter",
-            label: window.siyuan.languages.filter,
-            click() {
-
-            }
-        });
-        menu.addSeparator();
-        if (type !== "block") {
+            menu.addSeparator();
             menu.addItem({
-                icon: "iconEyeoff",
-                label: window.siyuan.languages.hide,
+                icon: "iconUp",
+                label: window.siyuan.languages.fileNameNatASC,
                 click() {
 
                 }
             });
             menu.addItem({
-                icon: "iconCopy",
-                label: window.siyuan.languages.duplicate,
+                icon: "iconDown",
+                label: window.siyuan.languages.fileNameNatDESC,
                 click() {
 
                 }
             });
             menu.addItem({
-                icon: "iconTrashcan",
-                label: window.siyuan.languages.delete,
+                icon: "iconFilter",
+                label: window.siyuan.languages.filter,
                 click() {
-                    const id = cellElement.getAttribute("data-id")
-                    transaction(protyle, [{
-                        action: "removeAttrViewCol",
-                        id,
-                        parentID: blockElement.getAttribute("data-av-id"),
-                    }], [{
-                        action: "addAttrViewCol",
-                        name: cellElement.textContent.trim(),
-                        parentID: blockElement.getAttribute("data-av-id"),
-                        type: type,
-                        id
-                    }]);
+
                 }
             });
             menu.addSeparator();
-        }
-        menu.addItem({
-            label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.getAttribute("data-wrap") === "true" ? " checked" : ""}></div>`,
-            click() {
+            if (type !== "block") {
+                menu.addItem({
+                    icon: "iconEyeoff",
+                    label: window.siyuan.languages.hide,
+                    click() {
 
+                    }
+                });
+                menu.addItem({
+                    icon: "iconCopy",
+                    label: window.siyuan.languages.duplicate,
+                    click() {
+
+                    }
+                });
+                menu.addItem({
+                    icon: "iconTrashcan",
+                    label: window.siyuan.languages.delete,
+                    click() {
+                        const id = cellElement.getAttribute("data-id")
+                        transaction(protyle, [{
+                            action: "removeAttrViewCol",
+                            id,
+                            parentID: blockElement.getAttribute("data-av-id"),
+                        }], [{
+                            action: "addAttrViewCol",
+                            name: cellElement.textContent.trim(),
+                            parentID: blockElement.getAttribute("data-av-id"),
+                            type: type,
+                            id
+                        }]);
+                    }
+                });
+                menu.addSeparator();
             }
-        });
-        const cellRect = cellElement.getBoundingClientRect();
-        menu.open({
-            x: cellRect.left,
-            y: cellRect.bottom,
-            h: cellRect.height
-        });
-        (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement)?.select();
-        event.preventDefault();
-        event.stopPropagation();
+            menu.addItem({
+                label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch fn__flex-center"${cellElement.getAttribute("data-wrap") === "true" ? " checked" : ""}></div>`,
+                click() {
+
+                }
+            });
+            const cellRect = cellElement.getBoundingClientRect();
+            menu.open({
+                x: cellRect.left,
+                y: cellRect.bottom,
+                h: cellRect.height
+            });
+            (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement)?.select();
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            popTextCell()
+        }
         return true;
     }
     return false;

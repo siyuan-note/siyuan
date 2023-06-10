@@ -814,7 +814,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             id: targetElement.getAttribute("data-node-id"),
                             parentID: targetElement.getAttribute("data-av-id"),
                         }]);
-                        addAVRow(blockElement, sourceIds, previousID)
+                        addAVRow(blockElement, sourceIds, previousID);
                     }
                     return;
                 }

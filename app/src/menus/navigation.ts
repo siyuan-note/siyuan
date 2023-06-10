@@ -472,7 +472,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     }
-    openEditorTab(app, id, notebookId, pathString)
+    openEditorTab(app, id, notebookId, pathString);
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.fileHistory,

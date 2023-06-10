@@ -3,8 +3,8 @@ import {hasClosestBlock} from "../../util/hasClosest";
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.children[parseInt(cellElement.getAttribute("data-index")) + 1].getAttribute("data-dtype") as TAVCol;
-    const cellRect = cellElement.getBoundingClientRect()
-    let html = ""
+    const cellRect = cellElement.getBoundingClientRect();
+    let html = "";
     if (type === "block") {
         html = `<textarea style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px" class="b3-text-field fn__size200">${cellElement.textContent}</textarea>`;
     }
@@ -16,33 +16,33 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     if (inputElement) {
         inputElement.select();
         inputElement.addEventListener("blur", () => {
-            updateCellValue(protyle, cellElement, type)
-        })
+            updateCellValue(protyle, cellElement, type);
+        });
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {
-                return
+                return;
             }
             if (event.key === "Escape" || event.key === "Enter") {
-                updateCellValue(protyle, cellElement, type)
+                updateCellValue(protyle, cellElement, type);
                 event.preventDefault();
                 event.stopPropagation();
             }
-        })
+        });
     }
     avMaskElement.addEventListener("click", (event) => {
         if ((event.target as HTMLElement).classList.contains("av__mask")) {
             avMaskElement?.remove();
         }
-    })
+    });
 };
 
 
 const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVCol) => {
     const avMaskElement = document.querySelector(".av__mask");
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-    const blockElement = hasClosestBlock(cellElement)
+    const blockElement = hasClosestBlock(cellElement);
     if (!blockElement) {
-        return
+        return;
     }
     transaction(protyle, [{
         action: "updateAttrViewCell",
@@ -60,5 +60,5 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     cellElement.textContent = inputElement.value;
     setTimeout(() => {
         avMaskElement.remove();
-    })
-}
+    });
+};

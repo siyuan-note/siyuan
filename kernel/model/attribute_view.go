@@ -183,7 +183,7 @@ func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 		col := &av.Column{ID: "av" + ast.NewNodeID(), Name: name, Type: colType}
 		attrView.Columns = append(attrView.Columns, col)
 		for _, row := range attrView.Rows {
-			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID()})
+			row.Cells = append(row.Cells, av.NewCell(colType))
 		}
 	default:
 		msg := fmt.Sprintf("invalid column type [%s]", typ)
@@ -275,12 +275,12 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 	}
 
 	row := av.NewRow()
-	row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: blockID})
+	row.Cells = append(row.Cells, av.NewCellBlock(blockID, getNodeRefText(node)))
 	if 1 < len(ret.Columns) {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 		for _, col := range ret.Columns[1:] {
 			attrs[NodeAttrNamePrefixAvCol+col.ID] = "" // 将列作为属性添加到块中
-			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID()})
+			row.Cells = append(row.Cells, av.NewCell(col.Type))
 		}
 
 		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {

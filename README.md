@@ -90,7 +90,7 @@ Cloud services require a paid subscription.
 * [bazzar](https://github.com/siyuan-note/bazaar): Community marketplace
 * [dejavu](https://github.com/siyuan-note/dejavu): Data repo
 * [riff](https://github.com/siyuan-note/riff): Spaced repetition system
-* [petal](https://github.com/siyuan-note/petal): Plugin system
+* [petal](https://github.com/siyuan-note/petal): Plugin API
 * [chrome](https://github.com/siyuan-note/siyuan-chrome): Chrome extension
 * [lute](https://github.com/88250/lute): A structured editor engine that supports Go and JavaScript
 * [ios](https://github.com/siyuan-note/siyuan-ios): iOS APP

@@ -90,7 +90,7 @@
 * [bazzar](https://github.com/siyuan-note/bazaar)：社区集市
 * [dejavu](https://github.com/siyuan-note/dejavu)：数据仓库
 * [riff](https://github.com/siyuan-note/riff)：间隔重复系统
-* [petal](https://github.com/siyuan-note/petal)：插件系统
+* [petal](https://github.com/siyuan-note/petal)：插件 API
 * [chrome](https://github.com/siyuan-note/siyuan-chrome)：Chrome 扩展
 * [lute](https://github.com/88250/lute)：结构化的编辑器引擎，支持 Go 和 JavaScript
 * [ios](https://github.com/siyuan-note/siyuan-ios): iOS APP

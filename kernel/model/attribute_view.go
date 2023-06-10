@@ -36,6 +36,8 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+
+	// TODO render value
 	return
 }
 
@@ -80,7 +82,7 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 
 	c.Value = parseCellData(operation.Data, av.ColumnType(operation.Typ))
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs["av"+c.ID] = c.Value
+	attrs[NodeAttrNamePrefixAvCol+c.ID] = c.Value
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
 		return
 	}
@@ -154,7 +156,7 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 }
 
 func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := addAttributeViewColumn(operation.Name, operation.Typ, -1, operation.ParentID)
+	err := addAttributeViewColumn(operation.Name, operation.Typ, operation.ParentID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
 	}
@@ -169,15 +171,20 @@ func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr)
 	return
 }
 
-func addAttributeViewColumn(name string, typ string, columnIndex int, avID string) (err error) {
+func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
-	switch av.ColumnType(typ) {
+	colType := av.ColumnType(typ)
+	switch colType {
 	case av.ColumnTypeText:
-		attrView.InsertColumn(columnIndex, &av.Column{ID: "av" + ast.NewNodeID(), Name: name, Type: av.ColumnTypeText})
+		col := &av.Column{ID: "av" + ast.NewNodeID(), Name: name, Type: colType}
+		attrView.Columns = append(attrView.Columns, col)
+		for _, row := range attrView.Rows {
+			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID()})
+		}
 	default:
 		msg := fmt.Sprintf("invalid column type [%s]", typ)
 		logging.LogErrorf(msg)
@@ -195,9 +202,16 @@ func removeAttributeViewColumn(columnID string, avID string) (err error) {
 		return
 	}
 
-	for i, column := range attrView.Columns[1:] {
+	for i, column := range attrView.Columns {
 		if column.ID == columnID {
 			attrView.Columns = append(attrView.Columns[:i], attrView.Columns[i+1:]...)
+			for _, row := range attrView.Rows {
+				if len(row.Cells) <= i {
+					continue
+				}
+
+				row.Cells = append(row.Cells[:i], row.Cells[i+1:]...)
+			}
 			break
 		}
 	}
@@ -265,8 +279,8 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 	if 1 < len(ret.Columns) {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 		for _, col := range ret.Columns[1:] {
-			attrs["av"+col.ID] = "" // 将列作为属性添加到块中
-			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: ""})
+			attrs[NodeAttrNamePrefixAvCol+col.ID] = "" // 将列作为属性添加到块中
+			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID()})
 		}
 
 		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -286,3 +300,5 @@ func parseCellData(data interface{}, colType av.ColumnType) string {
 	}
 	return ""
 }
+
+const NodeAttrNamePrefixAvCol = "av-col-"

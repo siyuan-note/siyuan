@@ -39,6 +39,60 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
+	avID := operation.ParentID
+	view, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: avID, msg: err.Error()}
+	}
+
+	var c *av.Cell
+	var blockID string
+	for _, row := range view.Rows {
+		if row.ID != operation.RowID {
+			continue
+		}
+
+		blockID = row.Cells[0].Value
+		for _, cell := range row.Cells[1:] {
+			if cell.ID == operation.ID {
+				c = cell
+				break
+			}
+		}
+		break
+	}
+
+	if nil == c {
+		return
+	}
+
+	tree, err := tx.loadTree(blockID)
+	if nil != err {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		return
+	}
+
+	c.Value = parseCellData(operation.Data, av.ColumnType(operation.Typ))
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	attrs["av"+c.ID] = c.Value
+	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+		return
+	}
+
+	if err = av.SaveAttributeView(view); nil != err {
+		return
+	}
+
+	sql.RebuildAttributeViewQueue(view)
+	return
+}
+
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
 	firstSrcID := operation.SrcIDs[0]
 	tree, err := tx.loadTree(firstSrcID)
@@ -223,4 +277,12 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 	ret.Rows = append(ret.Rows, row)
 	err = av.SaveAttributeView(ret)
 	return
+}
+
+func parseCellData(data interface{}, colType av.ColumnType) string {
+	switch colType {
+	case av.ColumnTypeText:
+		return data.(string)
+	}
+	return ""
 }

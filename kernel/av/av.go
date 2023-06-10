@@ -202,6 +202,5 @@ func RebuildAttributeViewTable(tx *sql.Tx, av *AttributeView) (err error) {
 			return
 		}
 	}
-
 	return
 }

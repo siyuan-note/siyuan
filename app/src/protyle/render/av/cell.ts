@@ -57,6 +57,7 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
         type,
         data: cellElement.textContent.trim(),
     }]);
+    cellElement.textContent = inputElement.value;
     setTimeout(() => {
         avMaskElement.remove();
     })

@@ -17,8 +17,9 @@
 package av
 
 type Cell struct {
-	ID      string `json:"id"`
-	Value   string `json:"value"`
-	Color   string `json:"color"`
-	BgColor string `json:"bgColor"`
+	ID          string      `json:"id"`
+	Value       string      `json:"value"`
+	RenderValue interface{} `json:"renderValue"`
+	Color       string      `json:"color"`
+	BgColor     string      `json:"bgColor"`
 }

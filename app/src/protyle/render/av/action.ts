@@ -103,8 +103,11 @@ const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
+    if (!blockElement) {
+        return false
+    }
     const addElement = hasClosestByAttribute(event.target, "data-type", "av-header-add");
-    if (addElement && blockElement) {
+    if (addElement) {
         const menu = new Menu("av-header-add");
         menu.addItem({
             icon: "iconAlignLeft",
@@ -137,8 +140,15 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const checkElement = hasClosestByClassName(event.target, "av__firstcol");
+    if (checkElement) {
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     const cellElement = hasClosestByClassName(event.target, "av__cell");
-    if (cellElement && blockElement) {
+    if (cellElement) {
         if (cellElement.parentElement.classList.contains("av__row--header")) {
             showHeaderCellMenu(protyle, blockElement, cellElement);
             event.preventDefault();
@@ -160,8 +170,18 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     if (!blockElement) {
         return false;
     }
+    event.preventDefault();
+    event.stopPropagation();
+
+    blockElement.querySelectorAll(".av__row--select").forEach(item => {
+        item.classList.remove("av__row--select");
+    });
     const rowId = rowElement.getAttribute("data-id");
     const menu = new Menu("av-row");
+    if (menu.isOpen) {
+        return true
+    }
+    rowElement.classList.add("av__row--select");
     menu.addItem({
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
@@ -222,8 +242,6 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         x: event.clientX,
         y: event.clientY,
     });
-    event.preventDefault();
-    event.stopPropagation();
     return true;
 };
 

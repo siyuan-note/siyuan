@@ -17,7 +17,7 @@ import {Setting} from "./Setting";
 
 export class Menu {
     private menu: SiyuanMenu;
-    private isOpen: boolean;
+    public isOpen: boolean;
 
     constructor(id?: string, closeCB?: () => void) {
         this.menu = window.siyuan.menus.menu;

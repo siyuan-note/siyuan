@@ -66,7 +66,7 @@ import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 import {removeSearchMark} from "../toolbar/util";
 import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
-import {avClick} from "../render/av/action";
+import {avClick, avContextmenu} from "../render/av/action";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1247,6 +1247,10 @@ export class WYSIWYG {
                 return false;
             }
             const nodeElement = hasClosestBlock(target);
+
+            if (avContextmenu(protyle, event, target)) {
+                return;
+            }
             if (!nodeElement) {
                 return false;
             }

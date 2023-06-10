@@ -22,7 +22,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 }], [{
                     action: "removeAttrViewCol",
                     id,
-                    parentID: blockElement.getAttribute("data-av-type"),
+                    parentID: blockElement.getAttribute("data-av-id"),
                 }]);
             }
         });
@@ -103,7 +103,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     transaction(protyle, [{
                         action: "removeAttrViewCol",
                         id,
-                        parentID: blockElement.getAttribute("data-av-type"),
+                        parentID: blockElement.getAttribute("data-av-id"),
                     }], [{
                         action: "addAttrViewCol",
                         name: cellElement.textContent.trim(),
@@ -135,3 +135,41 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
     return false;
 };
+
+
+export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: any }, target: HTMLElement) => {
+    const rowElement = hasClosestByClassName(target, "av__row");
+    if (rowElement) {
+        const menu = new Menu("av-row");
+        menu.addItem({
+            icon: "iconCopy",
+            label: window.siyuan.languages.duplicate,
+            click() {
+
+            }
+        });
+        menu.addItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.delete,
+            click() {
+
+            }
+        });
+        menu.addSeparator();
+        menu.addItem({
+            icon: "iconTrashcan",
+            label: window.siyuan.languages.open,
+            click() {
+
+            }
+        });
+        menu.open({
+            x: event.clientX,
+            y: event.clientY,
+        });
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    return  false
+}

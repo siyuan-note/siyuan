@@ -56,7 +56,7 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		blockID = row.Cells[0].Value.String()
+		blockID = row.Cells[0].Value
 		for _, cell := range row.Cells[1:] {
 			if cell.ID == operation.ID {
 				c = cell
@@ -80,9 +80,9 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	c.Value.Data = operation.Data
+	c.Value = parseCellData(operation.Data, av.ColumnType(operation.Typ))
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvCol+c.ID] = c.Value.String()
+	attrs[NodeAttrNamePrefixAvCol+c.ID] = c.Value
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
 		return
 	}
@@ -183,7 +183,7 @@ func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 		col := &av.Column{ID: "av" + ast.NewNodeID(), Name: name, Type: colType}
 		attrView.Columns = append(attrView.Columns, col)
 		for _, row := range attrView.Rows {
-			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: &av.CellValue{Type: colType}})
+			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID()})
 		}
 	default:
 		msg := fmt.Sprintf("invalid column type [%s]", typ)
@@ -233,7 +233,7 @@ func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (ret *av.A
 	}
 
 	for i, row := range ret.Rows {
-		if row.Cells[0].Value.String() == blockID {
+		if row.Cells[0].Value == blockID {
 			// 从行中移除，但是不移除属性
 			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
 			break
@@ -269,18 +269,18 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 
 	// 不允许重复添加相同的块到属性视图中
 	for _, row := range ret.Rows {
-		if row.Cells[0].Value.String() == blockID {
+		if row.Cells[0].Value == blockID {
 			return
 		}
 	}
 
 	row := av.NewRow()
-	row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: &av.CellValue{Type: av.ColumnTypeBlock, Data: blockID}})
+	row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: blockID})
 	if 1 < len(ret.Columns) {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 		for _, col := range ret.Columns[1:] {
 			attrs[NodeAttrNamePrefixAvCol+col.ID] = "" // 将列作为属性添加到块中
-			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID(), Value: &av.CellValue{Type: col.Type}})
+			row.Cells = append(row.Cells, &av.Cell{ID: ast.NewNodeID()})
 		}
 
 		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {

@@ -29,14 +29,16 @@ export const avRender = (element: Element) => {
                 const data = response.data.av;
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 42px"><use xlink:href="#iconUncheck"></use></svg></div>';
+                let index = 0
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
+                    tableHTML += `<div class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
     <svg><use xlink:href="#${column.icon || getIconByType(column.type)}"></use></svg>
     <span>${column.name}</span>
 </div>`;
+                    index++;
                 });
                 tableHTML += `<div class="block__icons">
     <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>

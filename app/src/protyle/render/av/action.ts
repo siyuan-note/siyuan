@@ -222,3 +222,20 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
 const addRow = () => {
 
 }
+
+const addCol = () => {
+
+}
+
+const removeRow = () => {
+
+}
+
+const removeCol = () => {
+
+}
+
+
+const updateCel = () => {
+
+}

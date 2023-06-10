@@ -2,10 +2,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock} from "../../util/hasClosest";
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
-    const index = parseInt(cellElement.getAttribute("data-index"))
-    const tableElement = cellElement.parentElement.parentElement
-    const colCellElement = tableElement.firstElementChild.children[index + 1];
-    const type = colCellElement.getAttribute("data-dtype") as TAVCol;
+    const type = cellElement.parentElement.parentElement.firstElementChild.children[parseInt(cellElement.getAttribute("data-index")) + 1].getAttribute("data-dtype") as TAVCol;
     const cellRect = cellElement.getBoundingClientRect()
     let html = ""
     if (type === "block") {

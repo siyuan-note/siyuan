@@ -35,6 +35,7 @@ import (
 type AttributeView struct {
 	Spec    int       `json:"spec"`
 	ID      string    `json:"id"`      // 属性视图 ID
+	Name    string    `json:"name"`    // 属性视图名称
 	Columns []*Column `json:"columns"` // 表格列名
 	Rows    []*Row    `json:"rows"`    // 表格行记录
 
@@ -55,6 +56,7 @@ func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
 		Spec:        0,
 		ID:          id,
+		Name:        "Table",
 		Columns:     []*Column{{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
 		Rows:        []*Row{},
 		Type:        AttributeViewTypeTable,

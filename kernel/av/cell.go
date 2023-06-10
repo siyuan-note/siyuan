@@ -16,10 +16,47 @@
 
 package av
 
+import "github.com/88250/lute/ast"
+
 type Cell struct {
 	ID          string      `json:"id"`
 	Value       string      `json:"value"`
+	ValueType   ColumnType  `json:"valueType"`
 	RenderValue interface{} `json:"renderValue"`
 	Color       string      `json:"color"`
 	BgColor     string      `json:"bgColor"`
+}
+
+func NewCellBlock(blockID, blockContent string) *Cell {
+	return &Cell{
+		ID:          ast.NewNodeID(),
+		Value:       blockID,
+		ValueType:   ColumnTypeBlock,
+		RenderValue: &RenderValueBlock{ID: blockID, Content: blockContent},
+	}
+}
+
+func NewCellText(text string) *Cell {
+	return &Cell{
+		ID:          ast.NewNodeID(),
+		Value:       text,
+		ValueType:   ColumnTypeText,
+		RenderValue: &RenderValueText{Content: text},
+	}
+}
+
+func NewCell(valueType ColumnType) *Cell {
+	return &Cell{
+		ID:        ast.NewNodeID(),
+		ValueType: valueType,
+	}
+}
+
+type RenderValueBlock struct {
+	ID      string `json:"id"`
+	Content string `json:"content"`
+}
+
+type RenderValueText struct {
+	Content string `json:"content"`
 }

@@ -32,6 +32,7 @@
 @import "business/card";
 @import "business/custom";
 @import "business/resize";
+@import "business/av";
 
 /*
 .status: 2
@@ -68,6 +69,8 @@ ctrl+p 搜索: 202
 // 历史中切换笔记本需临时大于 .b3-dialog https://github.com/siyuan-note/siyuan/issues/5107
 // 移动端排序和菜单需临时大于 .side-panel https://github.com/siyuan-note/siyuan/issues/5254
 .b3-menu: 310
+
+.av__mask: 320
 
 // 需大于 .b3-dialog
 progressLoading: 400

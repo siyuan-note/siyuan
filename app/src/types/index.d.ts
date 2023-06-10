@@ -22,6 +22,7 @@ type TOperation =
     | "removeAttrViewCol"
     | "addFlashcards"
     | "removeFlashcards"
+    | "updateAttrViewCell"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "click-blockicon" | "click-editorcontent" | "click-pdf" |
@@ -283,6 +284,7 @@ interface IOperation {
     srcIDs?: string[] // insertAttrViewBlock 专享
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享
+    rowID?: string // updateAttrViewCell 专享
     deckID?: string // add/removeFlashcards 专享
     blockIDs?: string[] // add/removeFlashcards 专享
 }

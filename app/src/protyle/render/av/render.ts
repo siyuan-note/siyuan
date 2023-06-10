@@ -49,7 +49,7 @@ export const avRender = (element: Element) => {
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
-                        tableHTML += `<div class="av__cell" style="width: ${data.columns[index].width || 200}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`;
+                        tableHTML += `<div class="av__cell" data-index="${index}" style="width: ${data.columns[index].width || 200}px;background-color: ${cell.bgColor || ""};color: ${cell.color || ""}">${cell.value}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });

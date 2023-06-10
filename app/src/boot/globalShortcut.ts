@@ -391,7 +391,7 @@ export const globalShortcut = (app: App) => {
     });
 
     window.addEventListener("keydown", (event) => {
-        if (document.getElementById("errorLog") || event.isComposing) {
+        if (document.querySelector(".av__mask") || document.getElementById("errorLog") || event.isComposing) {
             return;
         }
         const target = event.target as HTMLElement;

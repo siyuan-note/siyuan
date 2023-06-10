@@ -42,8 +42,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && blockElement) {
-        const type = cellElement.getAttribute("data-dtype") as TAVCol;
         if (cellElement.parentElement.classList.contains("av__row--header")) {
+            const type = cellElement.getAttribute("data-dtype") as TAVCol;
             const menu = new Menu("av-header-cell");
             menu.addItem({
                 icon: getIconByType(type),
@@ -136,7 +136,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
         } else {
-            popTextCell()
+            popTextCell(protyle, cellElement)
         }
         return true;
     }
@@ -216,4 +216,9 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     event.preventDefault();
     event.stopPropagation();
     return true;
+}
+
+
+const addRow = () => {
+
 }

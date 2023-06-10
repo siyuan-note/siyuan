@@ -18,8 +18,13 @@ package av
 
 type Cell struct {
 	ID          string      `json:"id"`
-	Value       string      `json:"value"`
+	Value       *CellValue  `json:"value"`
 	RenderValue interface{} `json:"renderValue"`
 	Color       string      `json:"color"`
 	BgColor     string      `json:"bgColor"`
+}
+
+type CellValue struct {
+	Type  ColumnType  `json:"type"`
+	Value interface{} `json:"value"`
 }

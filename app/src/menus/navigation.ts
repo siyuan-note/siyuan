@@ -11,7 +11,6 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
 /// #if !MOBILE
 import {openSearch} from "../search/spread";
-import {openFileById} from "../editor/util";
 /// #else
 import {closePanel} from "../mobile/util/closePanel";
 import {popSearch} from "../mobile/menu/search";
@@ -22,11 +21,11 @@ import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
 import {getDockByType} from "../layout/util";
 import {Files} from "../layout/dock/Files";
-import {openNewWindowById} from "../window/openNewWindow";
 import {openCardByData} from "../card/openCard";
 import {viewCards} from "../card/viewCards";
 import {App} from "../index";
 import {openDocHistory} from "../history/doc";
+import {openEditorTab} from "./util";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>) => {
     const fileItemElement = Array.from(selectItemElements).find(item => {
@@ -473,68 +472,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     }
-    /// #if !MOBILE
-    const openSubmenus: IMenu[] = [{
-        icon: "iconLayoutRight",
-        label: window.siyuan.languages.insertRight,
-        accelerator: "⌥Click",
-        click: () => {
-            openFileById({app, id, position: "right", action: [Constants.CB_GET_FOCUS]});
-        }
-    }, {
-        icon: "iconLayoutBottom",
-        label: window.siyuan.languages.insertBottom,
-        accelerator: "⇧Click",
-        click: () => {
-            openFileById({app, id, position: "bottom", action: [Constants.CB_GET_FOCUS]});
-        }
-    }];
-    if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
-        openSubmenus.push({
-            label: window.siyuan.languages.openInNewTab,
-            accelerator: "⌥⌘Click",
-            click: () => {
-                openFileById({
-                    app,
-                    id, action: [Constants.CB_GET_FOCUS],
-                    removeCurrentTab: false
-                });
-            }
-        });
-    }
-    /// #if !BROWSER
-    openSubmenus.push({
-        label: window.siyuan.languages.openByNewWindow,
-        icon: "iconOpenWindow",
-        click() {
-            openNewWindowById(id);
-        }
-    });
-    /// #endif
-    openSubmenus.push({type: "separator"});
-    openSubmenus.push({
-        icon: "iconPreview",
-        label: window.siyuan.languages.preview,
-        click: () => {
-            openFileById({app, id, mode: "preview"});
-        }
-    });
-    /// #if !BROWSER
-    openSubmenus.push({type: "separator"});
-    if (!window.siyuan.config.readonly) {
-        openSubmenus.push({
-            label: window.siyuan.languages.showInFolder,
-            click: () => {
-                shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, notebookId, pathString));
-            }
-        });
-    }
-    /// #endif
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.openBy,
-        submenu: openSubmenus,
-    }).element);
-    /// #endif
+    openEditorTab(app, id, notebookId, pathString)
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.fileHistory,

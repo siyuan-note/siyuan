@@ -2,6 +2,8 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {Menu} from "../../../plugin/API";
 import {getIconByType} from "./render";
+import {openEditorTab} from "../../../menus/util";
+import {copySubMenu} from "../../../menus/commonMenuItem";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -136,40 +138,77 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     return false;
 };
 
-
 export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: any }, target: HTMLElement) => {
     const rowElement = hasClosestByClassName(target, "av__row");
-    if (rowElement) {
-        const menu = new Menu("av-row");
-        menu.addItem({
-            icon: "iconCopy",
-            label: window.siyuan.languages.duplicate,
-            click() {
-
-            }
-        });
-        menu.addItem({
-            icon: "iconTrashcan",
-            label: window.siyuan.languages.delete,
-            click() {
-
-            }
-        });
-        menu.addSeparator();
-        menu.addItem({
-            icon: "iconTrashcan",
-            label: window.siyuan.languages.open,
-            click() {
-
-            }
-        });
-        menu.open({
-            x: event.clientX,
-            y: event.clientY,
-        });
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
+    if (!rowElement) {
+        return false;
     }
-    return  false
+    const blockElement = hasClosestBlock(rowElement);
+    if (!blockElement) {
+        return false;
+    }
+    const rowId = rowElement.getAttribute("data-id");
+    const menu = new Menu("av-row");
+    menu.addItem({
+        icon: "iconCopy",
+        label: window.siyuan.languages.duplicate,
+        click() {
+
+        }
+    });
+    menu.addItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.delete,
+        click() {
+            transaction(protyle, [{
+                action: "removeAttrViewBlock",
+                id: blockElement.getAttribute("data-node-id"),
+                parentID: blockElement.getAttribute("data-av-id"),
+            }], [{
+                action: "insertAttrViewBlock",
+                id: blockElement.getAttribute("data-node-id"),
+                parentID: blockElement.getAttribute("data-av-id"),
+                previousID: rowElement.previousElementSibling?.getAttribute("data-id") || "",
+                srcIDs: [rowId],
+            }]);
+        }
+    });
+    menu.addSeparator();
+    openEditorTab(protyle.app, rowId);
+    menu.addItem({
+        label: window.siyuan.languages.copy,
+        icon: "iconCopy",
+        type: "submenu",
+        submenu: copySubMenu(rowId)
+    });
+    menu.addSeparator();
+    menu.addItem({
+        icon: "iconEdit",
+        label: window.siyuan.languages.edit,
+        click() {
+
+        }
+    })
+    const editAttrSubmenu: IMenu[] = []
+    rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement) => {
+        editAttrSubmenu.push({
+            icon: getIconByType(cellElement.getAttribute("data-dtype") as TAVCol),
+            label: cellElement.textContent.trim(),
+            click() {
+            }
+        })
+    });
+    menu.addItem({
+        icon: "iconList",
+        label: window.siyuan.languages.attr,
+        type: "submenu",
+        submenu: editAttrSubmenu
+    })
+    menu.open({
+        x: event.clientX,
+        y: event.clientY,
+    });
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
 }

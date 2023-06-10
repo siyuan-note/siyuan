@@ -811,7 +811,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }], [{
                             action: "removeAttrViewBlock",
                             id: targetElement.getAttribute("data-node-id"),
-                            parentID: targetElement.getAttribute("data-av-type"),
+                            parentID: targetElement.getAttribute("data-av-id"),
                         }]);
                     }
                     return;

@@ -226,7 +226,7 @@ func syncData(exit, byHand, byWebSocket bool) {
 		connectSyncWebSocket()
 	}
 
-	if 1 == Conf.Sync.Mode && !byWebSocket {
+	if 1 == Conf.Sync.Mode && !byWebSocket && nil != webSocketConn {
 		// 如果处于自动同步模式且不是又 WS 触发的同步，则通知其他设备上的内核进行同步
 		request := map[string]interface{}{
 			"cmd":    "synced",
@@ -642,6 +642,10 @@ func connectSyncWebSocket() {
 		return
 	}
 
+	if util.ContainerDocker == util.Container {
+		return
+	}
+
 	webSocketConnLock.Lock()
 	defer webSocketConnLock.Unlock()
 
@@ -650,6 +654,7 @@ func connectSyncWebSocket() {
 	}
 
 	if "1602224134353" != Conf.User.UserId {
+		// TODO 测试账号
 		return
 	}
 
@@ -717,22 +722,6 @@ func connectSyncWebSocket() {
 
 				onlineKernelsLock.Unlock()
 			}
-		}
-	}()
-
-	go func() {
-		defer logging.Recover()
-
-		for {
-			time.Sleep(10 * time.Second)
-			//request := map[string]interface{}{
-			//	"cmd": "ping",
-			//}
-			//
-			//if writeErr := c.WriteJSON(request); nil != writeErr {
-			//	logging.LogErrorf("write sync websocket message failed: %s", writeErr)
-			//	return
-			//}
 		}
 	}()
 }

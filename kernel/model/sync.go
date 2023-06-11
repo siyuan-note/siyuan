@@ -136,7 +136,9 @@ func SyncDataJob() {
 func BootSyncData() {
 	defer logging.Recover()
 
-	connectSyncWebSocket()
+	if Conf.Sync.Perception {
+		connectSyncWebSocket()
+	}
 
 	if !checkSync(true, false, false) {
 		return
@@ -221,12 +223,12 @@ func syncData(exit, byHand, byWebSocket bool) {
 	}
 	util.BroadcastByType("main", "syncing", code, msg, nil)
 
-	if nil == webSocketConn {
+	if nil == webSocketConn && Conf.Sync.Perception {
 		// 如果 websocket 连接已经断开，则重新连接
 		connectSyncWebSocket()
 	}
 
-	if 1 == Conf.Sync.Mode && !byWebSocket && nil != webSocketConn {
+	if 1 == Conf.Sync.Mode && !byWebSocket && nil != webSocketConn && Conf.Sync.Perception {
 		// 如果处于自动同步模式且不是又 WS 触发的同步，则通知其他设备上的内核进行同步
 		request := map[string]interface{}{
 			"cmd":    "synced",

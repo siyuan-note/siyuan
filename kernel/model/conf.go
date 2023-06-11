@@ -509,7 +509,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		time.Sleep(4 * time.Second)
 	}
 	logging.LogInfof("exited kernel")
-	webSocketConn.Close()
+	closeSyncWebSocket()
 	util.WebSocketServer.Close()
 	go func() {
 		time.Sleep(500 * time.Millisecond)

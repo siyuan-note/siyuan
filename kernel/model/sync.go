@@ -372,6 +372,12 @@ func SetSyncEnable(b bool) {
 func SetSyncPerception(b bool) {
 	Conf.Sync.Perception = b
 	Conf.Save()
+
+	if b {
+		connectSyncWebSocket()
+	} else {
+		closeSyncWebSocket()
+	}
 	return
 }
 
@@ -640,6 +646,16 @@ var (
 	onlineKernels     []*OnlineKernel
 	onlineKernelsLock = sync.Mutex{}
 )
+
+func closeSyncWebSocket() {
+	webSocketConnLock.Lock()
+	defer webSocketConnLock.Unlock()
+
+	if nil != webSocketConn {
+		webSocketConn.Close()
+		webSocketConn = nil
+	}
+}
 
 func connectSyncWebSocket() {
 	defer logging.Recover()

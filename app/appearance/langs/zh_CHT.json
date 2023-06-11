@@ -1,5 +1,5 @@
 {
-  "syncPerception": "同步感知",
+  "syncPerception": "⚗\uFE0F 同步感知",
   "syncPerceptionTip": "啟用後將自動接收和發送數據同步信號，這樣可以盡量實時地為所有在線設備進行數據同步（該特性目前處於實驗階段）",
   "hide": "隱藏",
   "wrap": "換行",

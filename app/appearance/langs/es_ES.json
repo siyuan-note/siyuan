@@ -1,5 +1,5 @@
 {
-  "syncPerception": "Percepción de sincronización",
+  "syncPerception": "⚗\uFE0F Percepción de sincronización",
   "syncPerceptionTip": "Después de habilitarlo, automáticamente recibirá y enviará señales de sincronización de datos, de modo que la sincronización de datos se pueda realizar para todos los dispositivos en línea tanto como sea posible en tiempo real (esta función se encuentra actualmente en etapa experimental)",
   "hide": "Ocultar",
   "wrap": "Columna de ajuste",

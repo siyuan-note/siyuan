@@ -1,15 +1,8 @@
 import {fetchPost} from "../../../util/fetch";
+import {getColIconByType} from "./col";
+import {showHeaderCellMenu} from "./cell";
 
-export const getIconByType = (type: TAVCol) => {
-    switch (type) {
-        case "text":
-            return "iconAlignLeft";
-        case "block":
-            return "iconParagraph";
-    }
-};
-
-export const avRender = (element: Element) => {
+export const avRender = (element: Element, cb?: () => void) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -35,7 +28,7 @@ export const avRender = (element: Element) => {
                         return;
                     }
                     tableHTML += `<div class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
-    <svg><use xlink:href="#${column.icon || getIconByType(column.type)}"></use></svg>
+    <svg><use xlink:href="#${column.icon || getColIconByType(column.type)}"></use></svg>
     <span>${column.name}</span>
 </div>`;
                     index++;
@@ -85,7 +78,27 @@ export const avRender = (element: Element) => {
     </div>
 </div>`;
                 e.setAttribute("data-render", "true");
+                if (cb) {
+                    cb();
+                }
             });
         });
     }
 };
+
+export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    if (operation.action === "addAttrViewCol") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+            item.removeAttribute("data-render");
+            avRender(item, () => {
+                showHeaderCellMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
+            });
+        });
+    } else if (operation.action === "insertAttrViewBlock") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+            item.removeAttribute("data-render");
+            avRender(item);
+        });
+    }
+};
+

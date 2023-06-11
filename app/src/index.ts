@@ -2,7 +2,6 @@ import {Constants} from "./constants";
 import {Menus} from "./menus";
 import {Model} from "./layout/Model";
 import {onGetConfig} from "./boot/onGetConfig";
-import "./assets/scss/base.scss";
 import {initBlockPopover} from "./block/popover";
 import {account} from "./config/account";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
@@ -28,6 +27,7 @@ import {updateEditModeElement} from "./layout/topBar";
 import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
 import {loadPlugins} from "./plugin/loader";
+import "./assets/scss/base.scss";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];

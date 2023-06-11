@@ -25,7 +25,7 @@ export const resize = (protyle: IProtyle) => {
                 const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
                 avHeaderElement.style.paddingLeft = paddingLeft;
                 avHeaderElement.style.paddingRight = paddingRight;
-                const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement
+                const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
                 avBodyElement.style.paddingLeft = paddingLeft;
                 avBodyElement.style.paddingRight = paddingRight;
             }

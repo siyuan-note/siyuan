@@ -6,7 +6,7 @@ import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {popTextCell} from "./cell";
 
-const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
+export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const menu = new Menu("av-header-cell");
     menu.addItem({
@@ -104,7 +104,7 @@ const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
     if (!blockElement) {
-        return false
+        return false;
     }
     const addElement = hasClosestByAttribute(event.target, "data-type", "av-header-add");
     if (addElement) {
@@ -126,7 +126,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     id,
                     parentID: blockElement.getAttribute("data-av-id"),
                 }]);
-                addCol(protyle, blockElement, id, type);
             }
         });
         const addRect = addElement.getBoundingClientRect();
@@ -180,7 +179,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     const rowId = rowElement.getAttribute("data-id");
     const menu = new Menu("av-row");
     if (menu.isOpen) {
-        return true
+        return true;
     }
     rowElement.classList.add("av__row--select");
     menu.addItem({
@@ -246,29 +245,6 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     return true;
 };
 
-const addCol = (protyle: IProtyle, blockElement: HTMLElement, id: string, type: TAVCol) => {
-    let index = "0";
-    blockElement.querySelectorAll(".av__row--header .av__cell").forEach((item) => {
-        const dataIndex = item.getAttribute("data-index");
-        if (dataIndex > index) {
-            index = dataIndex;
-        }
-    });
-    blockElement.querySelectorAll(".av__row").forEach((item, index) => {
-        let html = "";
-        if (index === 0) {
-            html = `<div class="av__cell" data-index="${index}" data-id="${id}" data-dtype="${type}" data-wrap="false" style="width: 200px;">
-    <svg><use xlink:href="#iconAlignLeft"></use></svg>
-    <span>Text</span>
-</div>`;
-        } else {
-            html = `<div class="av__cell" data-index="${index}" style="width: 200px;"></div>`;
-        }
-        item.lastElementChild.insertAdjacentHTML("beforebegin", html);
-    });
-    showHeaderCellMenu(protyle, blockElement, blockElement.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
-};
-
 const removeCol = (cellElement: HTMLElement) => {
     const index = cellElement.getAttribute("data-index");
     const blockElement = hasClosestBlock(cellElement);
@@ -276,23 +252,6 @@ const removeCol = (cellElement: HTMLElement) => {
         return false;
     }
     blockElement.querySelectorAll(".av__row").forEach((item) => {
-        item.querySelector(`[data-index="${index}"]`).remove;
+        item.querySelector(`[data-index="${index}"]`).remove();
     });
-};
-
-
-export const addAVRow = (blockElement: HTMLElement, ids: string[], previousID: string) => {
-    const rowElement = previousID ? blockElement.querySelector(`[data-id=${previousID}]`) : blockElement.querySelector(".av__row--header");
-    let html = "";
-    ids.forEach((id) => {
-        html += "<div class=\"av__row\"><div class=\"av__firstcol\"><svg><use xlink:href=\"#iconUncheck\"></use></svg></div>";
-        Array.from(rowElement.children).forEach((item: HTMLElement, index) => {
-            if (index === 0 || index === rowElement.childElementCount - 1) {
-                return;
-            }
-            html += `<div class="av__cell" data-index="${index}" style="width: ${item.style.width};>${id}</div>`;
-        });
-        html += "<div></div></div>";
-    });
-    rowElement.insertAdjacentHTML("afterend", html);
 };

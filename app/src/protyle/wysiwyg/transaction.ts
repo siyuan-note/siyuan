@@ -11,13 +11,13 @@ import {onGet} from "../util/onGet";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
+import {avRender, refreshAV} from "../render/av/render";
 import {removeFoldHeading} from "../util/heading";
 import {genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {needSubscribe} from "../../util/needSubscribe";
-import {avRender} from "../render/av/render";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -289,6 +289,8 @@ const promiseTransaction = () => {
                 // });
                 // 更新引用块
                 updateRef(protyle, operation.id);
+            } else if (["addAttrViewCol", "insertAttrViewBlock"].includes(operation.action)) {
+                refreshAV(protyle, operation);
             }
         });
     });
@@ -649,10 +651,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         });
         // 更新 ws 引用块
         updateRef(protyle, operation.id);
-        return;
-    }
-    if (operation.action === "append") {
+    } else if (operation.action === "append") {
         reloadProtyle(protyle, false);
+    } else if (["addAttrViewCol", "insertAttrViewBlock"].includes(operation.action)) {
+        refreshAV(protyle, operation);
     }
 };
 

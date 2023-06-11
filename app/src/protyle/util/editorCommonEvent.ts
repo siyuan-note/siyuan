@@ -19,7 +19,6 @@ import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
-import {addAVRow} from "../render/av/action";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -814,7 +813,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             id: targetElement.getAttribute("data-node-id"),
                             parentID: targetElement.getAttribute("data-av-id"),
                         }]);
-                        addAVRow(blockElement, sourceIds, previousID);
                     }
                     return;
                 }

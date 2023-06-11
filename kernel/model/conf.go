@@ -469,7 +469,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 	if !force {
 		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
-			syncData(true, false)
+			syncData(true, false, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1
 				return
@@ -509,6 +509,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		time.Sleep(4 * time.Second)
 	}
 	logging.LogInfof("exited kernel")
+	webSocketConn.Close()
 	util.WebSocketServer.Close()
 	go func() {
 		time.Sleep(500 * time.Millisecond)

@@ -650,6 +650,8 @@ var (
 )
 
 func closeSyncWebSocket() {
+	defer logging.Recover()
+
 	webSocketConnLock.Lock()
 	defer webSocketConnLock.Unlock()
 
@@ -657,6 +659,8 @@ func closeSyncWebSocket() {
 		webSocketConn.Close()
 		webSocketConn = nil
 	}
+
+	logging.LogInfof("sync websocket closed")
 }
 
 func connectSyncWebSocket() {

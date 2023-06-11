@@ -19,6 +19,7 @@ package conf
 type Sync struct {
 	CloudName           string  `json:"cloudName"`           // 云端同步目录名称
 	Enabled             bool    `json:"enabled"`             // 是否开启同步
+	Perception          bool    `json:"perception"`          // 是否开启感知
 	Mode                int     `json:"mode"`                // 同步模式，0：未设置（为兼容已有配置，initConf 函数中会转换为 1），1：自动，2：手动 https://github.com/siyuan-note/siyuan/issues/5089，3：完全手动 https://github.com/siyuan-note/siyuan/issues/7295
 	Synced              int64   `json:"synced"`              // 最近同步时间
 	Stat                string  `json:"stat"`                // 最近同步统计信息
@@ -32,6 +33,7 @@ func NewSync() *Sync {
 	return &Sync{
 		CloudName:           "main",
 		Enabled:             false,
+		Perception:          false,
 		Mode:                1,
 		GenerateConflictDoc: false,
 		Provider:            ProviderSiYuan,

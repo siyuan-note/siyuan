@@ -1,4 +1,6 @@
 {
+  "syncPerception": "Perception de la synchronisation",
+  "syncPerceptionTip": "Après l'activation, il recevra et enverra automatiquement des signaux de synchronisation des données, afin que la synchronisation des données puisse être effectuée pour tous les appareils en ligne autant que possible en temps réel (cette fonctionnalité est actuellement en phase expérimentale)",
   "hide": "Masquer",
   "wrap": "Reboucler la colonne",
   "edit": "Modifier",

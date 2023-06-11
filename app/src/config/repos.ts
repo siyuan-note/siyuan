@@ -307,6 +307,14 @@ export const repos = {
         <option value="3" ${window.siyuan.config.sync.mode === 3 ? "selected" : ""}>${window.siyuan.languages.syncMode3}</option>
     </select>
 </label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.syncPerception}
+        <div class="b3-label__text">${window.siyuan.languages.syncPerceptionTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input type="checkbox" id="syncPerception"${window.siyuan.config.sync.perception ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
+</label>
 <div class="b3-label">
     <label class="fn__flex config__item">
         <div class="fn__flex-center">${window.siyuan.languages.cloudSyncDir}</div>
@@ -334,6 +342,13 @@ export const repos = {
             }
             fetchPost("/api/sync/setSyncEnable", {enabled: switchElement.checked}, () => {
                 window.siyuan.config.sync.enabled = switchElement.checked;
+                processSync();
+            });
+        });
+        const syncPerceptionElement = repos.element.querySelector("#syncPerception") as HTMLInputElement;
+        syncPerceptionElement.addEventListener("change", () => {
+            fetchPost("/api/sync/setSyncPerception", {enabled: syncPerceptionElement.checked}, () => {
+                window.siyuan.config.sync.perception = syncPerceptionElement.checked;
                 processSync();
             });
         });

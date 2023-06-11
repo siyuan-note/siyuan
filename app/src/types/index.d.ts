@@ -519,6 +519,7 @@ interface IConfig {
     sync: {
         generateConflictDoc: boolean
         enabled: boolean
+        perception: boolean
         mode: number
         synced: number
         stat: string

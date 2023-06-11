@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -29,6 +30,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/html"
 	"github.com/dustin/go-humanize"
+	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
@@ -132,6 +134,8 @@ func SyncDataJob() {
 
 func BootSyncData() {
 	defer logging.Recover()
+
+	connectSyncWebSocket()
 
 	if !checkSync(true, false, false) {
 		return
@@ -593,5 +597,91 @@ func isProviderOnline(byHand bool) (ret bool) {
 			autoSyncErrCount++
 		}
 	}
+	return
+}
+
+func connectSyncWebSocket() {
+	defer logging.Recover()
+
+	if !Conf.Sync.Enabled || !IsSubscriber() || conf.ProviderSiYuan != Conf.Sync.Provider {
+		return
+	}
+
+	if "1602224134353" != Conf.User.UserId {
+		return
+	}
+
+	logging.LogInfof("connecting sync websocket...")
+	c, dialErr := dialSyncWebSocket()
+	if nil != dialErr {
+		logging.LogWarnf("connect sync websocket failed: %s", dialErr)
+		return
+	}
+
+	logging.LogInfof("sync websocket connected")
+	c.SetCloseHandler(func(code int, text string) error {
+		logging.LogWarnf("sync websocket closed: %d, %s", code, text)
+		return nil
+	})
+
+	go func() {
+		defer logging.Recover()
+
+		for {
+			result := map[string]interface{}{}
+			if readErr := c.ReadJSON(&result); nil != readErr {
+				reconnected := false
+				for retries := 0; retries < 7; retries++ {
+					time.Sleep(7 * time.Second)
+					logging.LogWarnf("reconnecting sync websocket...")
+					c, dialErr = dialSyncWebSocket()
+					if nil != dialErr {
+						logging.LogWarnf("reconnect sync websocket failed: %s", dialErr)
+						continue
+					} else {
+						logging.LogInfof("sync websocket reconnected")
+						reconnected = true
+						break
+					}
+				}
+				if !reconnected {
+					logging.LogWarnf("reconnect sync websocket failed, do not retry")
+					return
+				}
+
+				continue
+			}
+
+			logging.LogInfof("sync websocket message: %v", result)
+		}
+	}()
+
+	go func() {
+		defer logging.Recover()
+
+		for {
+			time.Sleep(10 * time.Second)
+			//request := map[string]interface{}{
+			//	"cmd": "ping",
+			//}
+			//
+			//if writeErr := c.WriteJSON(request); nil != writeErr {
+			//	logging.LogErrorf("write sync websocket message failed: %s", writeErr)
+			//	return
+			//}
+		}
+	}()
+}
+
+func dialSyncWebSocket() (c *websocket.Conn, err error) {
+	path := "/apis/siyuan/dejavu/ws"
+	endpoint := util.AliyunWebSocketServer + path
+	//endpoint := "ws://127.0.0.1:64388" + path
+	header := http.Header{
+		"x-siyuan-uid":    []string{Conf.User.UserId},
+		"x-siyuan-kernel": []string{gulu.Rand.String(7)},
+		"x-siyuan-ver":    []string{util.Ver},
+	}
+	c, _, err = websocket.DefaultDialer.Dial(endpoint, header)
 	return
 }

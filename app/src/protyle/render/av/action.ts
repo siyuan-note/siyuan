@@ -142,6 +142,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const checkElement = hasClosestByClassName(event.target, "av__firstcol");
     if (checkElement) {
+        // TODO
         event.preventDefault();
         event.stopPropagation();
         return true;

@@ -825,4 +825,7 @@ interface IAVCell {
     color: string,
     bgColor: string,
     value: string,
+    renderValue: {
+        content: string,
+    }
 }

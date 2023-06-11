@@ -88,7 +88,7 @@ export const avRender = (element: Element, cb?: () => void) => {
 
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "addAttrViewCol") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             avRender(item, () => {
                 showHeaderCellMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);

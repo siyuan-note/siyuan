@@ -15,7 +15,7 @@ import {webFrame} from "electron";
 /// #endif
 import {Constants} from "../constants";
 import {isBrowser, isWindow} from "../util/functions";
-import {Menu} from "../plugin/API";
+import {Menu} from "../plugin/Meun";
 
 export const updateEditModeElement = () => {
     const target = document.querySelector("#barReadonly");

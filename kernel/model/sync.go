@@ -649,6 +649,8 @@ var (
 	onlineKernelsLock = sync.Mutex{}
 )
 
+var closedSyncWebSocket = false
+
 func closeSyncWebSocket() {
 	defer logging.Recover()
 
@@ -658,6 +660,7 @@ func closeSyncWebSocket() {
 	if nil != webSocketConn {
 		webSocketConn.Close()
 		webSocketConn = nil
+		closedSyncWebSocket = true
 	}
 
 	logging.LogInfof("sync websocket closed")
@@ -693,8 +696,8 @@ func connectSyncWebSocket() {
 		logging.LogWarnf("connect sync websocket failed: %s", dialErr)
 		return
 	}
-
 	logging.LogInfof("sync websocket connected")
+
 	webSocketConn.SetCloseHandler(func(code int, text string) error {
 		logging.LogWarnf("sync websocket closed: %d, %s", code, text)
 		return nil
@@ -706,6 +709,11 @@ func connectSyncWebSocket() {
 		for {
 			result := gulu.Ret.NewResult()
 			if readErr := webSocketConn.ReadJSON(&result); nil != readErr {
+				time.Sleep(1 * time.Second)
+				if closedSyncWebSocket {
+					return
+				}
+
 				reconnected := false
 				for retries := 0; retries < 7; retries++ {
 					time.Sleep(7 * time.Second)
@@ -768,5 +776,8 @@ func dialSyncWebSocket() (c *websocket.Conn, err error) {
 		"x-siyuan-repo":     []string{Conf.Sync.CloudName},
 	}
 	c, _, err = websocket.DefaultDialer.Dial(endpoint, header)
+	if nil == err {
+		closedSyncWebSocket = false
+	}
 	return
 }

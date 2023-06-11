@@ -54,6 +54,10 @@
       }
     }
 
+    &--header {
+      z-index: 1;
+    }
+
     &--header,
     &--footer {
       background-color: var(--b3-theme-background);

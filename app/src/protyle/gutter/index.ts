@@ -1403,7 +1403,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘Click")}`,
                 label: window.siyuan.languages.enter,
-                click:()=> {
+                click: () => {
                     zoomOut({protyle, id});
                 }
             }).element);
@@ -1425,7 +1425,7 @@ export class Gutter {
                             /// #endif
                         }
                     } else {
-                        zoomOut({protyle, id:protyle.block.parent2ID, focusId:id});
+                        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id});
                     }
                 }
             }).element);
@@ -1883,6 +1883,8 @@ export class Gutter {
         if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && this.element.childElementCount === 1) {
             // 嵌入块为列表时
             left = nodeElement.getBoundingClientRect().left - this.element.clientWidth - space;
+        } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
+            left = left + (parseInt((nodeElement.firstElementChild.firstElementChild as HTMLElement)?.style.paddingLeft) || 0);
         }
         this.element.style.left = `${left}px`;
         if (left < this.element.parentElement.getBoundingClientRect().left) {

@@ -1,4 +1,6 @@
 .av {
+  user-select: none;
+
   &__mask {
     position: fixed;
     z-index: 320;

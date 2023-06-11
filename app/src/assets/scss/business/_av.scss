@@ -1,5 +1,15 @@
 .av {
   user-select: none;
+  box-sizing: border-box;
+
+  &__gutters {
+    @extend .protyle-gutters;
+    position: absolute;
+    top: 5px;
+    left: -26px;
+    opacity: 0;
+    padding-right: 4px;
+  }
 
   &__mask {
     position: fixed;
@@ -18,6 +28,11 @@
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
+    position: relative;
+
+    &:hover .av__gutters {
+      opacity: 1;
+    }
 
     &--header .av__cell {
       display: flex;

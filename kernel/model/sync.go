@@ -372,6 +372,10 @@ func SetSyncEnable(b bool) {
 }
 
 func SetSyncPerception(b bool) {
+	if util.ContainerDocker == util.Container {
+		b = false
+	}
+
 	Conf.Sync.Perception = b
 	Conf.Save()
 
@@ -717,16 +721,16 @@ func connectSyncWebSocket() {
 				reconnected := false
 				for retries := 0; retries < 7; retries++ {
 					time.Sleep(7 * time.Second)
-					logging.LogWarnf("reconnecting sync websocket...")
+					//logging.LogInfof("reconnecting sync websocket...")
 					webSocketConn, dialErr = dialSyncWebSocket()
 					if nil != dialErr {
 						logging.LogWarnf("reconnect sync websocket failed: %s", dialErr)
 						continue
-					} else {
-						logging.LogInfof("sync websocket reconnected")
-						reconnected = true
-						break
 					}
+
+					logging.LogInfof("sync websocket reconnected")
+					reconnected = true
+					break
 				}
 				if !reconnected {
 					logging.LogWarnf("reconnect sync websocket failed, do not retry")

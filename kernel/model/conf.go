@@ -284,6 +284,9 @@ func InitConf() {
 	}
 	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
 	Conf.Sync.WebDAV.Timeout = util.NormalizeTimeout(Conf.Sync.WebDAV.Timeout)
+	if util.ContainerDocker == util.Container {
+		Conf.Sync.Perception = false
+	}
 
 	if nil == Conf.Api {
 		Conf.Api = conf.NewAPI()

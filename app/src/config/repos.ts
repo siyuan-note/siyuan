@@ -1,5 +1,6 @@
 import {needSubscribe} from "../util/needSubscribe";
 import {fetchPost} from "../util/fetch";
+import {isBrowser} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -307,7 +308,7 @@ export const repos = {
         <option value="3" ${window.siyuan.config.sync.mode === 3 ? "selected" : ""}>${window.siyuan.languages.syncMode3}</option>
     </select>
 </label>
-<label class="fn__flex b3-label">
+<label class="fn__flex b3-label${isBrowser() ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.syncPerception}
         <div class="b3-label__text">${window.siyuan.languages.syncPerceptionTip}</div>

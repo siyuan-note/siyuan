@@ -209,13 +209,7 @@ func setSyncMode(c *gin.Context) {
 	}
 
 	mode := int(arg["mode"].(float64))
-	err := model.SetSyncMode(mode)
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
-		return
-	}
+	model.SetSyncMode(mode)
 }
 
 func setSyncProvider(c *gin.Context) {

@@ -351,7 +351,7 @@ func SetSyncPerception(b bool) {
 	return
 }
 
-func SetSyncMode(mode int) (err error) {
+func SetSyncMode(mode int) {
 	Conf.Sync.Mode = mode
 	Conf.Save()
 	return

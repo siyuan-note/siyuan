@@ -16,6 +16,10 @@ import {webFrame} from "electron";
 import {Constants} from "../constants";
 import {isBrowser, isWindow} from "../util/functions";
 import {Menu} from "../plugin/Meun";
+import {fetchPost} from "../util/fetch";
+import {escapeAttr} from "../util/escape";
+import {needSubscribe} from "../util/needSubscribe";
+import * as dayjs from "dayjs";
 
 export const updateEditModeElement = () => {
     const target = document.querySelector("#barReadonly");
@@ -227,6 +231,32 @@ export const initBar = (app: App) => {
             target = target.parentElement;
         }
     });
+    const barSyncElement = toolbarElement.querySelector("#barSync");
+    barSyncElement.addEventListener("mouseenter", (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        fetchPost("/api/sync/getSyncInfo", {}, (response) => {
+            let html = ""
+            if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
+                html = response.data.stat;
+            } else {
+                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "\n\n"
+                response.data.kernels.forEach((item: {
+                    os: string;
+                    ver: string;
+                    hostname: string;
+                    id: string;
+                }) => {
+                    html += `${item.os}-${item.ver} ${item.hostname} ${item.id}\n`
+                })
+                if (response.data.kernels.length > 0) {
+                    html += "\n"
+                }
+                html += response.data.stat;
+            }
+            barSyncElement.setAttribute("aria-label", escapeAttr(html));
+        })
+    })
 };
 
 export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {

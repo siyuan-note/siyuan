@@ -101,4 +101,3 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
     }
 };
-

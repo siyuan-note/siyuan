@@ -441,7 +441,6 @@ export const processSync = (data?: IWebSocketData) => {
     if (!data) {
         iconElement.classList.remove("toolbar__item--active");
         if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
-            iconElement.setAttribute("aria-label", window.siyuan.languages["_kernel"]["53"]);
             useElement.setAttribute("xlink:href", "#iconCloudOff");
         } else {
             useElement.setAttribute("xlink:href", "#iconCloudSucc");
@@ -460,6 +459,5 @@ export const processSync = (data?: IWebSocketData) => {
         iconElement.classList.remove("toolbar__item--active");
         useElement.setAttribute("xlink:href", "#iconCloudSucc");
     }
-    iconElement.setAttribute("aria-label", data.msg);
     /// #endif
 };

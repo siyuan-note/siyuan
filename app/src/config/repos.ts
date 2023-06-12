@@ -307,7 +307,7 @@ export const repos = {
         <option value="3" ${window.siyuan.config.sync.mode === 3 ? "selected" : ""}>${window.siyuan.languages.syncMode3}</option>
     </select>
 </label>
-<label class="fn__flex b3-label${window.siyuan.config.system.container === "docker" ? " fn__none" : " fn__flex"}">
+<label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker") ? " fn__none" : ""}">
     <div class="fn__flex-1">
         ${window.siyuan.languages.syncPerception}
         <div class="b3-label__text">${window.siyuan.languages.syncPerceptionTip}</div>
@@ -361,12 +361,12 @@ export const repos = {
         const syncModeElement = repos.element.querySelector("#syncMode") as HTMLSelectElement;
         syncModeElement.addEventListener("change", () => {
             fetchPost("/api/sync/setSyncMode", {mode: parseInt(syncModeElement.value, 10)}, (response) => {
-                if (response.code === 1) {
-                    showMessage(response.msg);
-                    syncModeElement.value = "1";
+                if (syncModeElement.value === "1") {
+                    syncPerceptionElement.parentElement.classList.remove("fn__none")
                 } else {
-                    window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
+                    syncPerceptionElement.parentElement.classList.add("fn__none")
                 }
+                window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
             });
         });
         const syncConfigElement = repos.element.querySelector("#reposCloudSyncList");

@@ -62,20 +62,11 @@ func SyncDataDownload() {
 	Conf.Sync.Synced = now
 
 	err := syncRepoDownload()
-	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
-	if nil == err {
-		synced += Conf.Sync.Stat
-	} else {
-		synced += fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-	}
-	msg := fmt.Sprintf(Conf.Language(82), synced)
-	Conf.Sync.Stat = msg
-	Conf.Save()
 	code := 1
 	if nil != err {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, msg, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
 }
 
 func SyncDataUpload() {
@@ -98,20 +89,11 @@ func SyncDataUpload() {
 	Conf.Sync.Synced = now
 
 	err := syncRepoUpload()
-	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
-	if nil == err {
-		synced += Conf.Sync.Stat
-	} else {
-		synced += fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-	}
-	msg := fmt.Sprintf(Conf.Language(82), synced)
-	Conf.Sync.Stat = msg
-	Conf.Save()
 	code := 1
 	if nil != err {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, msg, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
 	return
 }
 
@@ -161,20 +143,11 @@ func BootSyncData() {
 	Conf.Sync.Synced = now
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 	err := bootSyncRepo()
-	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
-	if nil == err {
-		synced += Conf.Sync.Stat
-	} else {
-		synced += fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-	}
-	msg := fmt.Sprintf(Conf.Language(82), synced)
-	Conf.Sync.Stat = msg
-	Conf.Save()
 	code := 1
 	if nil != err {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, msg, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
 	return
 }
 
@@ -208,20 +181,11 @@ func syncData(exit, byHand, byWebSocket bool) {
 	Conf.Sync.Synced = now
 
 	err := syncRepo(exit, byHand)
-	synced := util.Millisecond2Time(Conf.Sync.Synced).Format("2006-01-02 15:04:05") + "\n\n"
-	if nil == err {
-		synced += Conf.Sync.Stat
-	} else {
-		synced += fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-	}
-	msg := fmt.Sprintf(Conf.Language(82), synced)
-	Conf.Sync.Stat = msg
-	Conf.Save()
 	code := 1
 	if nil != err {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, msg, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
 
 	if nil == webSocketConn && Conf.Sync.Perception {
 		// 如果 websocket 连接已经断开，则重新连接

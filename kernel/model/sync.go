@@ -653,6 +653,12 @@ var (
 	onlineKernelsLock = sync.Mutex{}
 )
 
+func GetOnlineKernels() []*OnlineKernel {
+	onlineKernelsLock.Lock()
+	defer onlineKernelsLock.Unlock()
+	return onlineKernels
+}
+
 var closedSyncWebSocket = false
 
 func closeSyncWebSocket() {

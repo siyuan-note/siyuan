@@ -26,6 +26,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getSyncInfo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if !model.Conf.Sync.Enabled {
+		ret.Msg = model.Conf.Language(53)
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"synced":  model.Conf.Sync.Synced,
+		"stat":    model.Conf.Sync.Stat,
+		"kernels": model.GetOnlineKernels(),
+	}
+}
+
 func getBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

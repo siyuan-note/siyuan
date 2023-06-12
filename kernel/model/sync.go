@@ -653,10 +653,19 @@ var (
 	onlineKernelsLock = sync.Mutex{}
 )
 
-func GetOnlineKernels() []*OnlineKernel {
+func GetOnlineKernels() (ret []*OnlineKernel) {
+	ret = []*OnlineKernel{}
 	onlineKernelsLock.Lock()
-	defer onlineKernelsLock.Unlock()
-	return onlineKernels
+	tmp := onlineKernels
+	onlineKernelsLock.Unlock()
+	for _, kernel := range tmp {
+		if kernel.ID == kernelID {
+			continue
+		}
+
+		ret = append(ret, kernel)
+	}
+	return
 }
 
 var closedSyncWebSocket = false

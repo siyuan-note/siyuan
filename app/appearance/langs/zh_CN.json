@@ -1,4 +1,6 @@
 {
+  "currentKernel": "当前内核",
+  "otherOnlineKernels": "其他联机内核",
   "syncPerception": "⚗\uFE0F 同步感知",
   "syncPerceptionTip": "启用后将自动接收和发送数据同步信号，这样可以尽量实时地为所有在线设备进行数据同步（该特性目前处于实验阶段）",
   "hide": "隐藏",

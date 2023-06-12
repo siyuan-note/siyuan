@@ -13,7 +13,7 @@ import {App} from "../index";
 import {Constants} from "../constants";
 import {Model} from "../layout/Model";
 import {Setting} from "./Setting";
-import {Menu} from "./Meun";
+import {Menu} from "./Menu";
 
 let openTab;
 /// #if MOBILE

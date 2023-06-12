@@ -15,7 +15,7 @@ import {webFrame} from "electron";
 /// #endif
 import {Constants} from "../constants";
 import {isBrowser, isWindow} from "../util/functions";
-import {Menu} from "../plugin/Meun";
+import {Menu} from "../plugin/Menu";
 import {fetchPost} from "../util/fetch";
 import {escapeAttr} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";

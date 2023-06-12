@@ -1,6 +1,6 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock} from "../../util/hasClosest";
-import {Menu} from "../../../plugin/Meun";
+import {Menu} from "../../../plugin/Menu";
 import {getColIconByType} from "./col";
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {

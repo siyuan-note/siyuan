@@ -246,14 +246,6 @@
     margin-right: 8px;
     color: var(--b3-theme-on-surface);
 
-    // 分屏下拉的页签列表
-    & > svg,
-    & > img {
-      float: left;
-      height: 14px;
-      width: 14px;
-    }
-
     &--arrow {
       margin: 0 0 0 8px;
       height: 10px;

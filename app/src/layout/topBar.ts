@@ -241,8 +241,9 @@ export const initBar = (app: App) => {
                 html = response.data.stat;
             } else {
                 html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "\n"
-                html += response.data.stat;
+                html += "  " + response.data.stat;
                 if (response.data.kernels.length > 0) {
+                    html += "\n"
                     html += window.siyuan.languages.currentKernel + "\n"
                     html += "  " + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")\n"
                     html += window.siyuan.languages.otherOnlineKernels + "\n"

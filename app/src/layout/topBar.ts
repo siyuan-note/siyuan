@@ -240,19 +240,22 @@ export const initBar = (app: App) => {
             if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
                 html = response.data.stat;
             } else {
-                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "\n\n"
-                response.data.kernels.forEach((item: {
-                    os: string;
-                    ver: string;
-                    hostname: string;
-                    id: string;
-                }) => {
-                    html += `${item.os}-${item.ver} ${item.hostname} ${item.id}\n`
-                })
+                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "\n"
+                html += "  " + response.data.stat;
                 if (response.data.kernels.length > 0) {
                     html += "\n"
+                    html += window.siyuan.languages.currentKernel + "\n"
+                    html += "  " + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")\n"
+                    html += window.siyuan.languages.otherOnlineKernels + "\n"
+                    response.data.kernels.forEach((item: {
+                        os: string;
+                        ver: string;
+                        hostname: string;
+                        id: string;
+                    }) => {
+                        html += `  ${item.id}/${item.ver} (${item.os}/${item.hostname}) \n`
+                    })
                 }
-                html += response.data.stat;
             }
             barSyncElement.setAttribute("aria-label", escapeAttr(html));
         })

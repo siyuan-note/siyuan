@@ -623,7 +623,7 @@ func GetOnlineKernels() (ret []*OnlineKernel) {
 	tmp := onlineKernels
 	onlineKernelsLock.Unlock()
 	for _, kernel := range tmp {
-		if kernel.ID == kernelID {
+		if kernel.ID == KernelID {
 			continue
 		}
 
@@ -740,14 +740,14 @@ func connectSyncWebSocket() {
 	}()
 }
 
-var kernelID = gulu.Rand.String(7)
+var KernelID = gulu.Rand.String(7)
 
 func dialSyncWebSocket() (c *websocket.Conn, err error) {
 	//endpoint := "ws://127.0.0.1:64388" + "/apis/siyuan/dejavu/ws"
 	endpoint := util.AliyunWebSocketServer + "/apis/siyuan/dejavu/ws"
 	header := http.Header{
 		"x-siyuan-uid":      []string{Conf.User.UserId},
-		"x-siyuan-kernel":   []string{kernelID},
+		"x-siyuan-kernel":   []string{KernelID},
 		"x-siyuan-ver":      []string{util.Ver},
 		"x-siyuan-os":       []string{runtime.GOOS},
 		"x-siyuan-hostname": []string{util.GetDeviceName()},

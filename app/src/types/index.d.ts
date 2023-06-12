@@ -555,6 +555,7 @@ interface IConfig {
             port: string
             scheme: string
         }
+        name: string
         kernelVersion: string
         isInsider: boolean
         appDir: string

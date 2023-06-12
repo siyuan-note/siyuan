@@ -1,4 +1,6 @@
 {
+  "currentKernel": "Current kernel",
+  "otherOnlineKernels": "Other online kernels",
   "syncPerception": "⚗\uFE0F Sync perception",
   "syncPerceptionTip": "After enabling, it will automatically receive and send data sync signals, so that data sync can be performed for all online devices as much as possible in real time (this feature is currently in the experimental stage)",
   "hide": "Hide",
@@ -1112,7 +1114,7 @@
     "147": "Created a new data snapshot, took %.2fs",
     "148": "Checked the data snapshot and found no changes, took %.2fs",
     "149": "Data snapshot has been synchronized, took %.2fs",
-    "150": "Uploaded/Downloaded files %d/%d\nUploaded/Downloaded chunks %d/%d\nSent/Received bytes %s/%s",
+    "150": "uploaded/downloaded files %d/%d\n  uploaded/downloaded chunks %d/%d\n  sent/received bytes %s/%s",
     "151": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
     "152": "Uploaded files %d, chunks %d, sent bytes %s",
     "153": "Downloaded files %d, chunks %d, received bytes %s",

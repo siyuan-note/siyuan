@@ -39,6 +39,7 @@ func getSyncInfo(c *gin.Context) {
 		"synced":  model.Conf.Sync.Synced,
 		"stat":    stat,
 		"kernels": model.GetOnlineKernels(),
+		"kernel":  model.KernelID,
 	}
 }
 

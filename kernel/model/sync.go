@@ -667,11 +667,6 @@ func connectSyncWebSocket() {
 		return
 	}
 
-	if "1602224134353" != Conf.User.UserId {
-		// TODO 测试账号
-		return
-	}
-
 	//logging.LogInfof("connecting sync websocket...")
 	var dialErr error
 	webSocketConn, dialErr = dialSyncWebSocket()

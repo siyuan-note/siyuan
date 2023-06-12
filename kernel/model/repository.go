@@ -50,7 +50,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1299,14 +1298,12 @@ func processSyncMergeResult(exit, byHand bool, start time.Time, mergeResult *dej
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
 	elapsed := time.Since(start)
 	go func() {
-		sql.WaitForWritingDatabase()
-		util.WaitForUILoaded()
-
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 			// 移动端不推送差异详情
 			upsertRootIDs = []string{}
 		}
 
+		util.WaitForUILoaded()
 		util.BroadcastByType("main", "syncMergeResult", 0, "",
 			map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
 

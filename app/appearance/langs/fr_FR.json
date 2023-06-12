@@ -441,7 +441,7 @@
   "syncMode2": "Manuelle (synchronisation automatique une seule fois lorsque le logiciel est démarré et fermé, les autres fois, il faut déclencher manuellement la synchronisation)",
   "syncMode3": "Manuelle Complète (pas de synchronisation au démarrage et à l'arrêt, contrôle manuel complet de la synchronisation et du sens de synchronisation)",
   "cloudSync": "Cloud Sync",
-  "cloudSyncDir": "Répertoire Cloud Sync",
+  "cloudSyncDir": "Répertoire de sync cloud",
   "emptyCloudSyncList": "La liste de sync du cloud est videy",
   "retry": "Réessayer",
   "insertVideoURL": "Insérer lien vidéo",

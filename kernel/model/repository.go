@@ -1102,7 +1102,7 @@ func bootSyncRepo() (err error) {
 	return
 }
 
-func syncRepo(exit, byHand bool) (mergeResult *dejavu.MergeResult, err error) {
+func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -1126,6 +1126,7 @@ func syncRepo(exit, byHand bool) (mergeResult *dejavu.MergeResult, err error) {
 		return
 	}
 
+	latest, _ := repo.Latest()
 	start := time.Now()
 	err = indexRepoBeforeCloudSync(repo)
 	if nil != err {
@@ -1166,6 +1167,9 @@ func syncRepo(exit, byHand bool) (mergeResult *dejavu.MergeResult, err error) {
 		}
 		return
 	}
+
+	syncedLatest, _ := repo.Latest()
+	dataChanged = nil == latest || latest.ID != syncedLatest.ID
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 	Conf.Sync.Synced = util.CurrentTimeMillis()

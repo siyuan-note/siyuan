@@ -1114,7 +1114,7 @@
     "147": "Created a new data snapshot, took %.2fs",
     "148": "Checked the data snapshot and found no changes, took %.2fs",
     "149": "Data snapshot has been synchronized, took %.2fs",
-    "150": "Uploaded/Downloaded files %d/%d\nUploaded/Downloaded chunks %d/%d\nSent/Received bytes %s/%s",
+    "150": "  Uploaded/Downloaded files %d/%d\n  Uploaded/Downloaded chunks %d/%d\n  Sent/Received bytes %s/%s",
     "151": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
     "152": "Uploaded files %d, chunks %d, sent bytes %s",
     "153": "Downloaded files %d, chunks %d, received bytes %s",

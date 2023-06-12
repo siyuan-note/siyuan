@@ -9,6 +9,7 @@ export class Custom extends Model {
     public type: string;
     public init: () => void;
     public destroy: () => void;
+    public beforeDestroy: () => void;
     public resize: () => void;
     public update: () => void;
 
@@ -18,6 +19,7 @@ export class Custom extends Model {
         tab: Tab,
         data: any,
         destroy?: () => void,
+        beforeDestroy?: () => void,
         resize?: () => void,
         update?: () => void,
         init: () => void
@@ -33,6 +35,7 @@ export class Custom extends Model {
         this.type = options.type;
         this.init = options.init;
         this.destroy = options.destroy;
+        this.beforeDestroy = options.beforeDestroy;
         this.resize = options.resize;
         this.update = options.update;
         this.init();

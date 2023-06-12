@@ -692,6 +692,11 @@ export class Wnd {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
+                if (item.model instanceof Custom) {
+                    if (item.model.beforeDestroy) {
+                        item.model.beforeDestroy();
+                    }
+                }
                 if (item.model instanceof Editor && hasSaveScroll) {
                     saveScroll(item.model.editor.protyle);
                 }

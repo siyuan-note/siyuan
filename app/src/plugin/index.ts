@@ -174,6 +174,7 @@ export class Plugin {
     public addTab(options: {
         type: string,
         destroy?: () => void,
+        beforeDestroy?: () => void,
         resize?: () => void,
         update?: () => void,
         init: () => void
@@ -187,6 +188,7 @@ export class Plugin {
                 type: type2,
                 data: arg.data,
                 init: options.init,
+                beforeDestroy: options.beforeDestroy,
                 destroy: options.destroy,
                 resize: options.resize,
                 update: options.update,

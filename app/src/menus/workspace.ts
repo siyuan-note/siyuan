@@ -281,10 +281,10 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
             label: window.siyuan.languages.feedback,
             icon: "iconFeedback",
             click: () => {
-                if ("zh_CN" === window.siyuan.config.lang) {
+                if ("zh_CN" === window.siyuan.config.lang || "zh_CHT" === window.siyuan.config.lang) {
                     window.open("https://ld246.com/article/1649901726096");
                 } else {
-                    window.open("https://github.com/siyuan-note/siyuan/issues");
+                    window.open("https://liuyun.io/article/1686530886208");
                 }
             }
         }).element);

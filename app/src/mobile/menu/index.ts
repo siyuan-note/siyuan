@@ -103,7 +103,7 @@ export const initRightMenu = (app: App) => {
     <div class="b3-menu__item" id="menuHelp">
         <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.help}</span>
     </div>
-    <a class="b3-menu__item" href="${"zh_CN" === window.siyuan.config.lang ? "https://ld246.com/article/1649901726096" : "https://github.com/siyuan-note/siyuan/issues"}" target="_blank">
+    <a class="b3-menu__item" href="${"zh_CN" === window.siyuan.config.lang || "zh_CHT" === window.siyuan.config.lang ? "https://ld246.com/article/1649901726096" : "https://liuyun.io/article/1686530886208"}" target="_blank">
         <svg class="b3-menu__icon"><use xlink:href="#iconFeedback"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.feedback}</span>
     </a>

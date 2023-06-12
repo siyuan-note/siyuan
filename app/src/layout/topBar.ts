@@ -243,13 +243,13 @@ export const initBar = (app: App) => {
                 html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + " " + response.data.kernel + "\n"
                 html += response.data.stat;
                 if (response.data.kernels.length > 0) {
+                    html += "\n\n"
                     response.data.kernels.forEach((item: {
                         os: string;
                         ver: string;
                         hostname: string;
                         id: string;
                     }) => {
-                        html += "\n\n"
                         html += `${item.os}-${item.ver} ${item.hostname} ${item.id}\n`
                     })
                 }

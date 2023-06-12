@@ -240,7 +240,7 @@ export const initBar = (app: App) => {
             if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
                 html = response.data.stat;
             } else {
-                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "\n\n"
+                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + " " + response.data.kernel + "\n\n"
                 response.data.kernels.forEach((item: {
                     os: string;
                     ver: string;

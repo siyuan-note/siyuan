@@ -7,6 +7,7 @@ import {exportLayout, resizeTopbar} from "../layout/util";
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
+import {Menu} from "./Menu";
 
 const getObject = (key: string) => {
     const api = {
@@ -138,9 +139,20 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     }
 
     if (!isWindow() || isMobile()) {
+        const pluginMenu: IMenu[] = []
         plugin.topBarIcons.forEach(element => {
             if (isMobile()) {
-                document.querySelector("#menuAbout").after(element);
+                if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
+                    pluginMenu.push({
+                        iconHTML: element.firstElementChild.outerHTML,
+                        label: element.textContent.trim(),
+                        click() {
+                            element.dispatchEvent(new CustomEvent("click"));
+                        }
+                    })
+                } else {
+                    document.querySelector("#menuAbout").after(element);
+                }
             } else if (!isWindow()) {
                 if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
                     element.classList.add("fn__none");
@@ -148,6 +160,20 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
+        if (isMobile() && pluginMenu.length > 0) {
+            const pluginElement = document.createElement("div")
+            pluginElement.classList.add("b3-menu__item")
+            pluginElement.setAttribute("data-menu", "true")
+            pluginElement.innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>`
+            pluginElement.addEventListener("click", () => {
+                const menu = new Menu()
+                pluginMenu.forEach(item => {
+                    menu.addItem(item)
+                })
+                menu.fullscreen();
+            })
+            document.querySelector("#menuAbout").after(pluginElement);
+        }
     }
     /// #if !MOBILE
     resizeTopbar();

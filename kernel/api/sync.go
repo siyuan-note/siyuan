@@ -30,14 +30,14 @@ func getSyncInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	stat := model.Conf.Sync.Stat
 	if !model.Conf.Sync.Enabled {
-		ret.Msg = model.Conf.Language(53)
-		return
+		stat = model.Conf.Language(53)
 	}
 
 	ret.Data = map[string]interface{}{
 		"synced":  model.Conf.Sync.Synced,
-		"stat":    model.Conf.Sync.Stat,
+		"stat":    stat,
 		"kernels": model.GetOnlineKernels(),
 	}
 }

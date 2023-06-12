@@ -689,7 +689,7 @@ func connectSyncWebSocket() {
 		return
 	}
 
-	logging.LogInfof("connecting sync websocket...")
+	//logging.LogInfof("connecting sync websocket...")
 	var dialErr error
 	webSocketConn, dialErr = dialSyncWebSocket()
 	if nil != dialErr {

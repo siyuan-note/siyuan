@@ -1092,7 +1092,7 @@ func bootSyncRepo() (err error) {
 
 	if 0 < len(fetchedFiles) {
 		go func() {
-			syncErr := syncRepo(false, false)
+			_, syncErr := syncRepo(false, false)
 			if nil != err {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)
 				return
@@ -1102,7 +1102,7 @@ func bootSyncRepo() (err error) {
 	return
 }
 
-func syncRepo(exit, byHand bool) (err error) {
+func syncRepo(exit, byHand bool) (mergeResult *dejavu.MergeResult, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)

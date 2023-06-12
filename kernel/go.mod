@@ -31,6 +31,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/flock v0.8.1
+	github.com/gorilla/websocket v1.5.0
 	github.com/imroc/req/v3 v3.35.2
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
@@ -44,7 +45,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-openai v1.9.5
 	github.com/shirou/gopsutil/v3 v3.23.5
-	github.com/siyuan-note/dejavu v0.0.0-20230610031820-8b10ca0d32b9
+	github.com/siyuan-note/dejavu v0.0.0-20230612120039-bba808ca7649
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20230523004741-d9121740f638
@@ -89,7 +90,6 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect

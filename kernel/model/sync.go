@@ -180,7 +180,7 @@ func syncData(exit, byHand, byWebSocket bool) {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	err := syncRepo(exit, byHand)
+	mergeResult, err := syncRepo(exit, byHand)
 	code := 1
 	if nil != err {
 		code = 2
@@ -192,7 +192,7 @@ func syncData(exit, byHand, byWebSocket bool) {
 		connectSyncWebSocket()
 	}
 
-	if 1 == Conf.Sync.Mode && !byWebSocket && nil != webSocketConn && Conf.Sync.Perception {
+	if 1 == Conf.Sync.Mode && !byWebSocket && nil != webSocketConn && Conf.Sync.Perception && mergeResult.DataChanged() {
 		// 如果处于自动同步模式且不是又 WS 触发的同步，则通知其他设备上的内核进行同步
 		request := map[string]interface{}{
 			"cmd":    "synced",

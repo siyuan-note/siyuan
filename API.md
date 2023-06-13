@@ -30,6 +30,7 @@
     * [Move a block](#Move-a-block)
     * [Get a block kramdown](#Get-a-block-kramdown)
     * [Get child blocks](#get-child-blocks)
+    * [Transfer block ref](#transfer-block-ref)
 * [Attributes](#Attributes)
     * [Set block attributes](#Set-block-attributes)
     * [Get block attributes](#Get-block-attributes)
@@ -812,6 +813,32 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
         "subType": "u"
       }
     ]
+  }
+  ```
+
+### Transfer block ref
+
+* `/api/block/transferBlockRef`
+* Parameters
+
+  ```json
+  {
+    "fromID": "20230612160235-mv6rrh1",
+    "toID": "20230613093045-uwcomng",
+    "refIDs": ["20230613092230-cpyimmd"]
+  }
+  ```
+
+  * `fromID`: Def block ID
+  * `toID`: Target block ID
+  * `refIDs`: Ref block IDs point to def block ID, optional, if not specified, all ref block IDs will be transferred
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
   }
   ```
 

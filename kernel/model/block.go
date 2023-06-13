@@ -117,7 +117,7 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	return
 }
 
-func TransferBlockRef(fromID, toID string) (err error) {
+func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 	toTree, _ := loadTreeByBlockID(toID)
 	if nil == toTree {
 		err = ErrBlockNotFound
@@ -132,7 +132,9 @@ func TransferBlockRef(fromID, toID string) (err error) {
 
 	util.PushMsg(Conf.Language(116), 7000)
 
-	refIDs, _ := sql.QueryRefIDsByDefID(fromID, false)
+	if 1 > len(refIDs) { // 如果不指定 refIDs，则转移所有引用了 fromID 的块
+		refIDs, _ = sql.QueryRefIDsByDefID(fromID, false)
+	}
 	for _, refID := range refIDs {
 		tree, _ := loadTreeByBlockID(refID)
 		if nil == tree {

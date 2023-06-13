@@ -47,7 +47,14 @@ func transferBlockRef(c *gin.Context) {
 		return
 	}
 
-	err := model.TransferBlockRef(fromID, toID)
+	var refIDs []string
+	if nil != arg["refIDs"] {
+		for _, refID := range arg["refIDs"].([]interface{}) {
+			refIDs = append(refIDs, refID.(string))
+		}
+	}
+
+	err := model.TransferBlockRef(fromID, toID, refIDs)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -4,7 +4,7 @@
   background-color: var(--b3-theme-background);
   position: relative;
   max-height: 100%;
-  min-height: 104px;
+  min-height: 155px; // 需考虑 scroll 最小高度
   display: flex;
   flex-direction: column;
 

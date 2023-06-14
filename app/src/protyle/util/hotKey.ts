@@ -3,7 +3,7 @@ import {Constants} from "../../constants";
 
 // 是否匹配 ⇧⌘[] / ⌘[] / ⌥[] / ⌥⌘[] / ⌥⇧[] / ⌥⇧⌘[] / ⇧[] / []
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
-    if (hotKey === "") {
+    if (!hotKey) {
         return false;
     }
 

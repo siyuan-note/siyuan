@@ -383,7 +383,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		return nil
 	})
 
-	if err = filelock.RoboCopy(unzipRootPath, targetDir); nil != err {
+	if err = filelock.Copy(unzipRootPath, targetDir); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", unzipRootPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return
@@ -440,7 +440,7 @@ func ImportData(zipPath string) (err error) {
 	}
 
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
-	if err = filelock.RoboCopy(tmpDataPath, util.DataDir); nil != err {
+	if err = filelock.Copy(tmpDataPath, util.DataDir); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")
 		return

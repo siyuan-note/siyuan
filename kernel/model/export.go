@@ -257,7 +257,7 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 	name = filepath.Base(zipPath)
 	targetZipPath := filepath.Join(exportFolder, name)
 	zipAbsPath := filepath.Join(util.TempDir, "export", name)
-	err = filelock.RoboCopy(zipAbsPath, targetZipPath)
+	err = filelock.Copy(zipAbsPath, targetZipPath)
 	if nil != err {
 		logging.LogErrorf("copy export zip from [%s] to [%s] failed: %s", zipAbsPath, targetZipPath, err)
 		return
@@ -291,7 +291,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	}
 
 	data := filepath.Join(util.WorkspaceDir, "data")
-	if err = filelock.RoboCopy(data, exportFolder); nil != err {
+	if err = filelock.Copy(data, exportFolder); nil != err {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
 		err = errors.New(fmt.Sprintf(Conf.Language(14), err.Error()))
 		return
@@ -333,7 +333,11 @@ func Preview(id string) string {
 
 func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 	if !util.IsValidPandocBin(Conf.Export.PandocBin) {
-		return errors.New(Conf.Language(115))
+		Conf.Export.PandocBin = util.PandocBinPath
+		Conf.Save()
+		if !util.IsValidPandocBin(Conf.Export.PandocBin) {
+			return errors.New(Conf.Language(115))
+		}
 	}
 
 	tmpDir := filepath.Join(util.TempDir, "export", gulu.Rand.String(7))

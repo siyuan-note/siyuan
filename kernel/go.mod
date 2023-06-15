@@ -48,7 +48,7 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20230612120039-bba808ca7649
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
-	github.com/siyuan-note/filelock v0.0.0-20230523004741-d9121740f638
+	github.com/siyuan-note/filelock v0.0.0-20230615011542-df9ae6b3f981
 	github.com/siyuan-note/httpclient v0.0.0-20230610031552-11458e2e39b0
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230516073320-b440b8feaabd
@@ -59,7 +59,7 @@ require (
 	golang.org/x/image v0.7.0
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda
 	golang.org/x/mod v0.10.0
-	golang.org/x/text v0.9.0
+	golang.org/x/text v0.10.0
 )
 
 require (
@@ -132,7 +132,7 @@ require (
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

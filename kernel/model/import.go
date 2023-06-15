@@ -82,6 +82,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
+	syncLock.Lock()
+	defer syncLock.Unlock()
+
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)
 	baseName = strings.TrimSuffix(baseName, ext)
@@ -411,6 +414,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 func ImportData(zipPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
+
+	syncLock.Lock()
+	defer syncLock.Unlock()
 
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)

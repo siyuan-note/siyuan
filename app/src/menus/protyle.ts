@@ -1054,6 +1054,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
+        iconHTML: "",
         label: `<div class="fn__hr--small"></div><textarea rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.link}">${iframeElement.getAttribute("src") || ""}</textarea><div class="fn__hr--small"></div>`,
         bind(element) {
             element.querySelector("textarea").addEventListener("change", (event) => {

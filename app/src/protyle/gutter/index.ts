@@ -1130,6 +1130,7 @@ export class Gutter {
                 icon: "iconCode",
                 label: window.siyuan.languages.code,
                 submenu: [{
+                    iconHTML: "",
                     label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.md31}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${linewrap === "true" ? " checked" : ((window.siyuan.config.editor.codeLineWrap && linewrap !== "false") ? " checked" : "")}></div>`,
                     bind(element) {
@@ -1149,6 +1150,7 @@ export class Gutter {
                         });
                     }
                 }, {
+                    iconHTML: "",
                     label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.md2}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${ligatures === "true" ? " checked" : ((window.siyuan.config.editor.codeLigatures && ligatures !== "false") ? " checked" : "")}></div>`,
                     bind(element) {
@@ -1168,6 +1170,7 @@ export class Gutter {
                         });
                     }
                 }, {
+                    iconHTML: "",
                     label: `<div class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.md27}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch fn__flex-center"${linenumber === "true" ? " checked" : ((window.siyuan.config.editor.codeSyntaxHighlightLineNum && linenumber !== "false") ? " checked" : "")}></div>`,
                     bind(element) {

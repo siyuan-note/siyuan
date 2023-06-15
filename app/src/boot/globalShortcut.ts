@@ -822,6 +822,8 @@ export const globalShortcut = (app: App) => {
             }
         });
         if (matchCommand) {
+            event.stopPropagation();
+            event.preventDefault();
             return true;
         }
 

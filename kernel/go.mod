@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
-	github.com/88250/gulu v1.2.3-0.20230501031728-4d62370997cd
+	github.com/88250/gulu v1.2.3-0.20230615033005-b519d6875346
 	github.com/88250/lute v1.7.6-0.20230608014232-e10343eb445d
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1

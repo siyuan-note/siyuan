@@ -56,7 +56,7 @@ export const exportImage = (id: string) => {
         (exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.height = "";
         setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
         setTimeout(() => {
-            addScript("stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
+            addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
                 window.html2canvas(previewElement.parentElement, {useCORS: true}).then((canvas) => {
                     canvas.toBlob((blob: Blob) => {
                         const formData = new FormData();

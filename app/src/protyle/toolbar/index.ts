@@ -995,7 +995,7 @@ export class Toolbar {
                 return;
             }
             setTimeout(() => {
-                addScript("stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
+                addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
                     window.html2canvas(renderElement, {useCORS: true}).then((canvas) => {
                         canvas.toBlob((blob: Blob) => {
                             const formData = new FormData();

@@ -13,7 +13,7 @@ module.exports = (env, argv) => {
         watch: argv.mode !== "production",
         devtool: argv.mode !== "production" ? "eval" : false,
         output: {
-            publicPath: "auto",
+            publicPath: "/stage/build/desktop/",
             filename: "[name].[chunkhash].js",
             path: path.resolve(__dirname, "stage/build/desktop"),
         },

@@ -14,7 +14,7 @@ import {globalShortcut} from "../boot/globalShortcut";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {addGA, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
-import {openFileById} from "../editor/util";
+import {openFile, openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
 import {getSearch, isWindow} from "../util/functions";
@@ -249,21 +249,51 @@ export const initWindow = (app: App) => {
     currentWindow.on("blur", winOnBlur);
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-            if (!isSYProtocol(url)) {
+            if (/^siyuan:\/\/plugins\//.test(url)) {
+                // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
+                const pluginId = url.replace("siyuan://plugins/", "").split("?")[0]
+                app.plugins.find(plugin => {
+                    const match = Object.keys(plugin.models).find(key => {
+                        if (key === pluginId) {
+                            let data = getSearch("data", url)
+                            try {
+                                data = JSON.parse(data || "{}");
+                            } catch (e) {
+                                console.log("Error open plugin tab with protocol:", e)
+                            }
+                            openFile({
+                                app,
+                                custom: {
+                                    title: getSearch("title", url),
+                                    icon: getSearch("icon", url),
+                                    data: JSON.parse(getSearch("data", url) || "{}"),
+                                    fn: plugin.models[key]
+                                },
+                            });
+                            return true
+                        }
+                    })
+                    if (match) {
+                        return true
+                    }
+                })
                 return;
             }
-            const id = getIdFromSYProtocol(url);
-            fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
-                if (existResponse.data) {
-                    openFileById({
-                        app,
-                        id,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                        zoomIn: getSearch("focus", url) === "1"
-                    });
-                    ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
-                }
-            });
+            if (isSYProtocol(url)) {
+                const id = getIdFromSYProtocol(url);
+                fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
+                    if (existResponse.data) {
+                        openFileById({
+                            app,
+                            id,
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                            zoomIn: getSearch("focus", url) === "1"
+                        });
+                        ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
+                    }
+                });
+                return;
+            }
         });
         ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
             winOnClose(currentWindow, close);

@@ -31,6 +31,7 @@ export const getIdZoomInByPath = () => {
         id, isZoomIn
     };
 };
+
 export const isSYProtocol = (url: string) => {
     return /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
 };

@@ -253,6 +253,10 @@ func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBloc
 }
 
 func init() {
+	subscribeSQLEvents()
+}
+
+func subscribeSQLEvents() {
 	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, current, total, blockCount int, hash string) {
 	//	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 	//		// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392

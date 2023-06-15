@@ -333,7 +333,11 @@ func Preview(id string) string {
 
 func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 	if !util.IsValidPandocBin(Conf.Export.PandocBin) {
-		return errors.New(Conf.Language(115))
+		Conf.Export.PandocBin = util.PandocBinPath
+		Conf.Save()
+		if !util.IsValidPandocBin(Conf.Export.PandocBin) {
+			return errors.New(Conf.Language(115))
+		}
 	}
 
 	tmpDir := filepath.Join(util.TempDir, "export", gulu.Rand.String(7))

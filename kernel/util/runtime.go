@@ -401,3 +401,7 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 	}
 	return false
 }
+
+const (
+	EvtConfPandocInitialized = "conf.pandoc.initialized"
+)

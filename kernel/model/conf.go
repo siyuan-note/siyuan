@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/sashabaranov/go-openai"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -35,6 +34,8 @@ import (
 	"github.com/Xuanwo/go-locale"
 	"github.com/dustin/go-humanize"
 	"github.com/getsentry/sentry-go"
+	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -891,4 +892,16 @@ func upgradeUserGuide() {
 
 		index(boxID)
 	}
+}
+
+func init() {
+	subscribeConfEvents()
+}
+
+func subscribeConfEvents() {
+	eventbus.Subscribe(util.EvtConfPandocInitialized, func() {
+		logging.LogInfof("pandoc initialized, set pandoc bin to [%s]", util.PandocBinPath)
+		Conf.Export.PandocBin = util.PandocBinPath
+		Conf.Save()
+	})
 }

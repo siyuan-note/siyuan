@@ -57,7 +57,7 @@ import (
 )
 
 func init() {
-	subscribeEvents()
+	subscribeRepoEvents()
 }
 
 type Snapshot struct {
@@ -1476,7 +1476,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	return
 }
 
-func subscribeEvents() {
+func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtIndexBeforeWalkData, func(context map[string]interface{}, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), path)
 		util.SetBootDetails(msg)

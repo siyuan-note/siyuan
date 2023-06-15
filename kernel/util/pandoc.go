@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 )
 
@@ -104,6 +105,8 @@ func initPandoc() {
 			}
 		}
 	}
+
+	defer eventbus.Publish(EvtConfPandocInitialized)
 
 	if gulu.OS.IsWindows() {
 		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc.exe")

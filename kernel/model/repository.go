@@ -1536,30 +1536,30 @@ func subscribeRepoEvents() {
 		coWalkDataCount++
 	})
 	var bootProgressPart float64
-	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFiles, func(context map[string]interface{}, files []*entity.File) {
-		msg := fmt.Sprintf(Conf.Language(162), len(files))
+	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFiles, func(context map[string]interface{}, total int) {
+		msg := fmt.Sprintf(Conf.Language(162), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = 10 / float64(len(files))
+		bootProgressPart = 10 / float64(total)
 		util.ContextPushMsg(context, msg)
 	})
 	coUpsertFileCount := 0
-	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFile, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(162), filepath.Base(path))
+	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFile, func(context map[string]interface{}, count, total int) {
+		msg := fmt.Sprintf(Conf.Language(162), count, total)
 		util.IncBootProgress(bootProgressPart, msg)
 		if 0 == coUpsertFileCount%64 {
 			util.ContextPushMsg(context, msg)
 		}
 		coUpsertFileCount++
 	})
-	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFiles, func(context map[string]interface{}, files []*entity.File) {
-		msg := fmt.Sprintf(Conf.Language(163), files)
+	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFiles, func(context map[string]interface{}, total int) {
+		msg := fmt.Sprintf(Conf.Language(163), 0, total)
 		util.SetBootDetails(msg)
-		bootProgressPart = 10 / float64(len(files))
+		bootProgressPart = 10 / float64(total)
 		util.ContextPushMsg(context, msg)
 	})
 	coRemoveFileCount := 0
-	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFile, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(163), filepath.Base(path))
+	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFile, func(context map[string]interface{}, count, total int) {
+		msg := fmt.Sprintf(Conf.Language(163), count, total)
 		util.IncBootProgress(bootProgressPart, msg)
 		if 0 == coRemoveFileCount%1024 {
 			util.ContextPushMsg(context, msg)

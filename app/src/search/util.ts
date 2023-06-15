@@ -16,7 +16,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
 import {matchHotKey} from "../protyle/util/hotKey";
-import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu} from "./menu";
+import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
 import {App} from "../index";
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
@@ -128,7 +128,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <div class="fn__space"></div>
         <div id="replaceHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
     </div>
-    <div id="criteria" class="b3-chips" style="background-color: var(--b3-theme-background)"></div>
+    <div id="criteria" class="fn__flex" style="min-height:40px;background-color: var(--b3-theme-background)"></div>
     <div class="block__icons">
         <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
         <span class="fn__space"></span>
@@ -268,7 +268,42 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         const searchPathInputElement = element.querySelector("#searchPathInput");
         while (target && !target.isSameNode(element)) {
             const type = target.getAttribute("data-type");
-            if (type === "next") {
+            if (type === "removeCriterion") {
+                updateConfig(element, {
+                    removed: true,
+                    sort: 0,
+                    group: 0,
+                    hasReplace: false,
+                    method: 0,
+                    hPath: "",
+                    idPath: [],
+                    k: "",
+                    r: "",
+                    page: 1,
+                    types: {
+                        document: window.siyuan.config.search.document,
+                        heading: window.siyuan.config.search.heading,
+                        list: window.siyuan.config.search.list,
+                        listItem: window.siyuan.config.search.listItem,
+                        codeBlock: window.siyuan.config.search.codeBlock,
+                        htmlBlock: window.siyuan.config.search.htmlBlock,
+                        mathBlock: window.siyuan.config.search.mathBlock,
+                        table: window.siyuan.config.search.table,
+                        blockquote: window.siyuan.config.search.blockquote,
+                        superBlock: window.siyuan.config.search.superBlock,
+                        paragraph: window.siyuan.config.search.paragraph,
+                        embedBlock: window.siyuan.config.search.embedBlock,
+                    }
+                }, config, edit, app);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "saveCriterion") {
+                saveCriterion(config, criteriaData, element);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "next") {
                 if (!target.getAttribute("disabled")) {
                     config.page++;
                     inputTimeout = inputEvent(element, config, inputTimeout, edit, app);
@@ -304,12 +339,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         return true;
                     }
                 });
-                if (target.parentElement.parentElement.childElementCount === 1) {
-                    target.parentElement.parentElement.classList.add("fn__none");
-                    target.parentElement.remove();
-                } else {
-                    target.parentElement.remove();
-                }
+                target.parentElement.remove();
                 event.stopPropagation();
                 event.preventDefault();
                 break;

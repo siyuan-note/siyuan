@@ -180,6 +180,55 @@ export const queryMenu = (config: ISearchOption, cb: () => void) => {
     }).element);
 };
 
+export const saveCriterion = (config: ISearchOption,
+                              criteriaData: ISearchOption[],
+                              element: Element,) => {
+    const saveDialog = new Dialog({
+        title: window.siyuan.languages.saveCriterion,
+        content: `<div class="b3-dialog__content">
+        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "520px",
+    });
+    const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
+    saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
+        btnsElement[1].dispatchEvent(new CustomEvent("click"));
+    });
+    btnsElement[0].addEventListener("click", () => {
+        saveDialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        const value = saveDialog.element.querySelector("input").value;
+        if (!value) {
+            showMessage(window.siyuan.languages["_kernel"]["142"]);
+            return;
+        }
+        if (isMobile()) {
+            config.k = (document.querySelector("#toolbarSearch") as HTMLInputElement).value;
+            config.r = (element.querySelector("#toolbarReplace") as HTMLInputElement).value;
+        } else {
+            config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
+            config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
+        }
+        config.removed = false;
+        const criterion = config;
+        criterion.name = value;
+        criteriaData.push(Object.assign({}, criterion));
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
+        fetchPost("/api/storage/setCriterion", {criterion}, () => {
+            saveDialog.destroy();
+            const criteriaElement = element.querySelector("#criteria");
+            criteriaElement.classList.remove("fn__none");
+            criteriaElement.firstElementChild.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.firstElementChild.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
+        });
+    });
+}
+
 export const moreMenu = async (config: ISearchOption,
                                criteriaData: ISearchOption[],
                                element: Element,
@@ -306,50 +355,7 @@ export const moreMenu = async (config: ISearchOption,
         label: window.siyuan.languages.saveCriterion,
         iconHTML: Constants.ZWSP,
         click() {
-            const saveDialog = new Dialog({
-                title: window.siyuan.languages.saveCriterion,
-                content: `<div class="b3-dialog__content">
-        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                width: isMobile() ? "92vw" : "520px",
-            });
-            const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
-            saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
-                btnsElement[1].dispatchEvent(new CustomEvent("click"));
-            });
-            btnsElement[0].addEventListener("click", () => {
-                saveDialog.destroy();
-            });
-            btnsElement[1].addEventListener("click", () => {
-                const value = saveDialog.element.querySelector("input").value;
-                if (!value) {
-                    showMessage(window.siyuan.languages["_kernel"]["142"]);
-                    return;
-                }
-                if (isMobile()) {
-                    config.k = (document.querySelector("#toolbarSearch") as HTMLInputElement).value;
-                    config.r = (element.querySelector("#toolbarReplace") as HTMLInputElement).value;
-                } else {
-                    config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
-                    config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
-                }
-                config.removed = false;
-                const criterion = config;
-                criterion.name = value;
-                criteriaData.push(Object.assign({}, criterion));
-                window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
-                setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
-                fetchPost("/api/storage/setCriterion", {criterion}, () => {
-                    saveDialog.destroy();
-                    const criteriaElement = element.querySelector("#criteria");
-                    criteriaElement.classList.remove("fn__none");
-                    criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
-                });
-            });
+            saveCriterion(config, criteriaData, element);
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
@@ -368,12 +374,25 @@ export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[]) =>
             data.push(item);
             html += `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
         });
-        element.innerHTML = html;
+        /// #if MOBILE
+        element.innerHTML = `<div class="b3-chips">
+    ${html}
+</div>`;
         if (html === "") {
             element.classList.add("fn__none");
         } else {
             element.classList.remove("fn__none");
         }
+        /// #else
+        element.innerHTML = `<div class="b3-chips">
+    ${html}
+</div>
+<span class="fn__flex-1"></span>
+<button data-type="saveCriterion" class="b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.saveCriterion}</button>
+<span class="fn__space"></span>
+<button data-type="removeCriterion" aria-label="${window.siyuan.languages.useCriterion}" class="b3-tooltips b3-tooltips__nw b3-button b3-button--small b3-button--outline fn__flex-center">${window.siyuan.languages.removeCriterion}</button>
+<span class="fn__space"></span>`;
+        /// #endif
     });
 };
 

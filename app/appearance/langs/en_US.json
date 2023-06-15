@@ -145,7 +145,7 @@
   "sortByRankDesc": "Relevance DESC",
   "sortByRankAsc": "Relevance ASC",
   "saveCriterion": "Save query criteria",
-  "useCriterion": "Use query criteria",
+  "useCriterion": "After clearing, the last query condition can be used",
   "removeCriterion": "Remove query criteria",
   "group": "Group",
   "noGroupBy": "No grouping",

@@ -145,7 +145,7 @@
   "sortByRankDesc": "Relevancia DESC",
   "sortByRankAsc": "Relevancia ASC",
   "saveCriterion": "Guardar criterios de consulta",
-  "useCriterion": "Usar criterios de consulta",
+  "useCriterion": "Después de borrar, se puede usar la última condición de consulta",
   "removeCriterion": "Eliminar criterios de consulta",
   "grupo": "Grupo",
   "noGroupBy": "Sin agrupar",

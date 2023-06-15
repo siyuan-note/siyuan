@@ -319,10 +319,8 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 });
                 if (target.parentElement.parentElement.childElementCount === 1) {
                     target.parentElement.parentElement.classList.add("fn__none");
-                    target.parentElement.remove();
-                } else {
-                    target.parentElement.remove();
                 }
+                target.parentElement.remove();
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -546,7 +544,7 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
         <button data-type="replace" class="b3-button b3-button--outline fn__flex-center">${window.siyuan.languages.replace}</button>
         <div class="fn__space"></div>
     </div>
-    <div id="criteria" style="background-color: var(--b3-theme-background);" class="b3-chips"></div>
+    <div id="criteria" style="background-color: var(--b3-theme-background);"></div>
     <div class="toolbar">
         <span class="fn__space"></span>
         <span data-type="result" class="fn__flex-1 fn__flex"></span>

@@ -145,7 +145,7 @@
   "sortByRankDesc": "按相關度降序",
   "sortByRankAsc": "按相關度升序",
   "saveCriterion": "保存查詢條件",
-  "useCriterion": "使用查詢條件",
+  "useCriterion": "清空後可使用上一次的查詢條件",
   "removeCriterion": "清空查詢條件",
   "group": "分組",
   "noGroupBy": "不分組",

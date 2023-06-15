@@ -145,7 +145,7 @@
   "sortByRankDesc": "DESC de pertinence",
   "sortByRankAsc": "ASC de pertinence",
   "saveCriterion": "Enregistrer les critères de requête",
-  "useCriterion": "Utiliser les critères de requête",
+  "useCriterion": "Après effacement, la dernière condition de requête peut être utilisée",
   "removeCriterion": "Supprimer les critères de requête",
   "groupe": "Groupe",
   "noGroupBy": "Aucun regroupement",

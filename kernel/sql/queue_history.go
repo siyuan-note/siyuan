@@ -83,7 +83,7 @@ func FlushHistoryQueue() {
 		if err = execHistoryOp(op, tx, context); nil != err {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
-			util.PushMsg("History database index failed, please try to manually rebuild it in [Data history - File history]", 5000)
+			eventbus.Publish(util.EvtSQLHistoryRebuild)
 			return
 		}
 

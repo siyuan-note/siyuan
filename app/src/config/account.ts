@@ -398,7 +398,7 @@ ${window.siyuan.languages.account9}
         }
         if (window.siyuan.config.account.displayTitle && window.siyuan.user) {
             window.siyuan.user.userTitles.forEach(item => {
-                html += `<div class="toolbar__item fn__a b3-tooltips b3-tooltips__sw" aria-label="${item.name}：${item.desc}">${item.icon}</div>`;
+                html += `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${item.name}：${item.desc}">${item.icon}</div>`;
             });
         }
         document.getElementById("toolbarVIP").innerHTML = html;

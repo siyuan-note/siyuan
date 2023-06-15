@@ -252,7 +252,7 @@
   "keyPlaceholder": "Please paste the key string here",
   "key": "Key",
   "genKey": "Auto-generate key",
-  "genKeyByPW": "Generate key by passphrase",
+  "genKeyByPW": "Gen key by passphrase",
   "dataRepoKeyTip1": "The data repo is used to encrypt and save data snapshots. Snapshots can be created and rolled back in the data history",
   "dataRepoKeyTip2": "All devices must use the same key, if the keys are inconsistent, the data cannot be synced to the cloud",
   "dataRepoKey": "Data repo key",

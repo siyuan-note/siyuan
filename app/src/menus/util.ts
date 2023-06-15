@@ -11,6 +11,7 @@ import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 import {MenuItem} from "./Menu";
 import {App} from "../index";
+import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const exportAsset = (src: string) => {
     /// #if !BROWSER
@@ -37,7 +38,7 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
     const openSubmenus: IMenu[] = [{
         icon: "iconLayoutRight",
         label: window.siyuan.languages.insertRight,
-        accelerator: "⌥Click",
+        accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥Click")}`,
         click: () => {
             openFileById({app, id, position: "right", action: [Constants.CB_GET_FOCUS]});
         }

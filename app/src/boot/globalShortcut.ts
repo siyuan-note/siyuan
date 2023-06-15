@@ -1212,6 +1212,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+
     if (matchHotKey("⌘/", event)) {
         const liRect = liElements[0].getBoundingClientRect();
         if (isFile) {
@@ -1224,6 +1225,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         }
         return true;
     }
+
     if (isFile && matchHotKey(window.siyuan.config.keymap.general.move.custom, event)) {
         window.siyuan.menus.menu.remove();
         const pathes = getTopPaths(liElements);
@@ -1233,6 +1235,19 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
+
+    if (isFile && matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
+        window.siyuan.menus.menu.remove();
+        openFileById({
+            app,
+            id: liElements[0].getAttribute("data-node-id"),
+            action: [Constants.CB_GET_FOCUS],
+            position: "right",
+        });
+        event.preventDefault();
+        return true;
+    }
+
     let searchKey = "";
     if (matchHotKey(window.siyuan.config.keymap.general.replace.custom, event)) {
         searchKey = window.siyuan.config.keymap.general.replace.custom;

@@ -168,7 +168,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <kbd>${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</kbd> ${window.siyuan.languages.new}
         <kbd>Enter/Double Click</kbd> ${window.siyuan.languages.searchTip2}
         <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
-        <kbd>${updateHotkeyTip("⌥Click")}</kbd> ${window.siyuan.languages.searchTip4}
+        <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥Click")}</kbd> ${window.siyuan.languages.searchTip4}
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
@@ -718,6 +718,24 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
         if (!currentList || event.isComposing) {
+            return;
+        }
+        if (searchInputElement.value && matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
+            const id = currentList.getAttribute("data-node-id");
+            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                openFileById({
+                    app,
+                    id,
+                    position: "right",
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                    zoomIn: foldResponse.data
+                });
+                if (closeCB) {
+                    closeCB();
+                }
+            });
+            event.preventDefault();
+            event.stopPropagation();
             return;
         }
         if (searchInputElement.value && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {

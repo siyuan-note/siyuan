@@ -584,6 +584,7 @@
   "closeTab": "Cerrar pestaña actual",
   "keymap": "Mapa de teclas",
   "clearFontStyle": "Limpiar estilo",
+  "clearInline": "Borrar elementos en línea",
   "fontStyle": "Efectos de fuentes",
   "font": "Fuente",
   "folder": "Carpeta",

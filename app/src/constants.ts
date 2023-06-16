@@ -217,7 +217,7 @@ export abstract class Constants {
                 check: {default: "⌘L", custom: "⌘L"},
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
-                clearFontStyle: {default: "⌘\\", custom: "⌘\\"},
+                clearInline: {default: "⌘\\", custom: "⌘\\"},
             },
             heading: {
                 paragraph: {default: "⌥⌘0", custom: "⌥⌘0"},

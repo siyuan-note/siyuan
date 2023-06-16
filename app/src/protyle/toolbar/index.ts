@@ -344,7 +344,7 @@ export class Toolbar {
                         return true;
                     }
                 });
-                if (rangeTypes.length === 0) {
+                if (rangeTypes.length === 0 || type === "clear") {
                     newNodes.push(document.createTextNode(Constants.ZWSP));
                 } else {
                     // 遇到以下类型结尾不应继承 https://github.com/siyuan-note/siyuan/issues/7200
@@ -393,6 +393,14 @@ export class Toolbar {
                         }
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
+                        if (selectText && type === "clear" && textObj && textObj.type === "text") {
+                            // 选中内容中没有样式需要清除时直接返回，否则清除粗体中部分内容会报错
+                            if (item.style.color === "" && item.style.webkitTextFillColor === "" && item.style.webkitTextStroke === "" && item.style.textShadow === "" && item.style.backgroundColor === "" && item.style.fontSize === "") {
+                                item.setAttribute("data-type", types.join(" "));
+                                newNodes.push(item);
+                                return true;
+                            }
+                        }
                         if (type === "clear") {
                             item.style.color = "";
                             item.style.webkitTextFillColor = "";

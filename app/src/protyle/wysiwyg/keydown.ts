@@ -1290,7 +1290,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {
             protyle.toolbar.range = range;
             let selectElements: Element[] = [];
-            if (selectText === "") {
+            if (selectText === "" && protyle.toolbar.getCurrentType(range).length === 0)  {
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (selectElements.length === 0) {
                     selectElements = [nodeElement];

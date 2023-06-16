@@ -232,7 +232,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.fontSize = color;
             }
         });
-        focusBlock(nodeElements[0]);
+        focusByRange(protyle.toolbar.range);
     } else {
         if (type === "clear") {
             protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"});
@@ -358,6 +358,15 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
         textShadow = currentElement.style.textShadow;
         backgroundColor = currentElement.style.backgroundColor;
         fontSize = currentElement.style.fontSize;
+    }
+    if (textObj.type === "text") {
+        // 清除样式
+        return color === sideElement.style.color &&
+            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
+            webkitTextStroke === sideElement.style.webkitTextStroke &&
+            textShadow === sideElement.style.textShadow &&
+            fontSize === sideElement.style.fontSize &&
+            backgroundColor === sideElement.style.backgroundColor;
     }
     if (textObj.type === "color") {
         return textObj.color === sideElement.style.color &&

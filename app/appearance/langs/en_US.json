@@ -584,6 +584,7 @@
   "closeTab": "Close current Tab",
   "keymap": "Keymap",
   "clearFontStyle": "Clear Style",
+  "clearInline": "Clear inline elements",
   "fontStyle": "Font Effects",
   "font": "Font",
   "folder": "Folder",

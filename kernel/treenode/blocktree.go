@@ -17,10 +17,8 @@
 package treenode
 
 import (
-	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -393,24 +391,13 @@ func InitBlockTree(force bool) {
 
 	size := uint64(0)
 
-	poolSize := runtime.NumCPU()
 	waitGroup := &sync.WaitGroup{}
-	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
+	p, _ := ants.NewPoolWithFunc(4, func(arg interface{}) {
 		defer waitGroup.Done()
 
 		entry := arg.(os.DirEntry)
 		p := filepath.Join(util.BlockTreePath, entry.Name())
-		var fh *os.File
-		fh, err = os.OpenFile(p, os.O_RDWR, 0644)
-		if nil != err {
-			logging.LogErrorf("open block tree file failed: %s", err)
-			os.Exit(logging.ExitCodeFileSysErr)
-			return
-		}
-
-		var data []byte
-		data, err = io.ReadAll(fh)
-		fh.Close()
+		data, err := os.ReadFile(p)
 		if nil != err {
 			logging.LogErrorf("read block tree failed: %s", err)
 			os.Exit(logging.ExitCodeFileSysErr)

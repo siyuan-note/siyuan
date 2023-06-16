@@ -755,7 +755,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
                 blockRender(protyle, protyle.wysiwyg.element);
-            } else if (targetElement) {
+            } else if (targetElement && targetElement.className.indexOf("dragover__") > -1) {
                 let queryClass = "";
                 selectedIds.forEach(item => {
                     queryClass += `[data-node-id="${item}"],`;

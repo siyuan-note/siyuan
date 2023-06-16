@@ -1492,19 +1492,18 @@ func subscribeRepoEvents() {
 		}
 		indexWalkDataCount++
 	})
-	eventbus.Subscribe(eventbus.EvtIndexBeforeGetLatestFiles, func(context map[string]interface{}, files []string) {
-		msg := fmt.Sprintf(Conf.Language(159), len(files))
+	eventbus.Subscribe(eventbus.EvtIndexBeforeGetLatestFiles, func(context map[string]interface{}, total int) {
+		msg := fmt.Sprintf(Conf.Language(159), 0, total)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	getLatestFileCount := 0
-	eventbus.Subscribe(eventbus.EvtIndexGetLatestFile, func(context map[string]interface{}, id string) {
-		msg := fmt.Sprintf(Conf.Language(159), id[:7])
-		if 0 == getLatestFileCount%1024 {
+
+	eventbus.Subscribe(eventbus.EvtIndexGetLatestFile, func(context map[string]interface{}, count int, total int) {
+		msg := fmt.Sprintf(Conf.Language(159), count, total)
+		if 0 == count%64 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
-		getLatestFileCount++
 	})
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFiles, func(context map[string]interface{}, files []*entity.File) {
 		msg := fmt.Sprintf(Conf.Language(160), len(files))
@@ -1557,14 +1556,13 @@ func subscribeRepoEvents() {
 		bootProgressPart = 10 / float64(total)
 		util.ContextPushMsg(context, msg)
 	})
-	coRemoveFileCount := 0
+
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFile, func(context map[string]interface{}, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), count, total)
 		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == coRemoveFileCount%1024 {
+		if 0 == count%64 {
 			util.ContextPushMsg(context, msg)
 		}
-		coRemoveFileCount++
 	})
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadIndex, func(context map[string]interface{}, id string) {
@@ -1579,14 +1577,13 @@ func subscribeRepoEvents() {
 		bootProgressPart = 10 / float64(total)
 		util.ContextPushMsg(context, msg)
 	})
-	downloadFileCount := 0
+
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFile, func(context map[string]interface{}, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), count, total)
 		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == downloadFileCount%8 {
+		if 0 == count%8 {
 			util.ContextPushMsg(context, msg)
 		}
-		downloadFileCount++
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunks, func(context map[string]interface{}, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), 0, total)
@@ -1594,14 +1591,12 @@ func subscribeRepoEvents() {
 		bootProgressPart = 10 / float64(total)
 		util.ContextPushMsg(context, msg)
 	})
-	downloadChunkCount := 0
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunk, func(context map[string]interface{}, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), count, total)
 		util.IncBootProgress(bootProgressPart, msg)
-		if 0 == downloadChunkCount%8 {
+		if 0 == count%8 {
 			util.ContextPushMsg(context, msg)
 		}
-		downloadChunkCount++
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadRef, func(context map[string]interface{}, ref string) {
 		msg := fmt.Sprintf(Conf.Language(167), ref)
@@ -1618,28 +1613,24 @@ func subscribeRepoEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	uploadFileCount := 0
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadFile, func(context map[string]interface{}, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(169), count, total)
-		if 0 == uploadFileCount%8 {
+		if 0 == count%8 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
-		uploadFileCount++
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadChunks, func(context map[string]interface{}, total int) {
 		msg := fmt.Sprintf(Conf.Language(170), 0, total)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	uploadChunkCount := 0
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadChunk, func(context map[string]interface{}, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(170), count, total)
-		if 0 == uploadChunkCount%8 {
+		if 0 == count%8 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
-		uploadChunkCount++
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadRef, func(context map[string]interface{}, ref string) {
 		msg := fmt.Sprintf(Conf.Language(171), ref)

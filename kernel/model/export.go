@@ -272,7 +272,8 @@ func ExportData() (zipPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
-	exportFolder := filepath.Join(util.TempDir, "export", util.CurrentTimeSecondsStr())
+	name := util.FilterFileName(filepath.Base(util.WorkspaceDir)) + "-" + util.CurrentTimeSecondsStr()
+	exportFolder := filepath.Join(util.TempDir, "export", name)
 	zipPath, err = exportData(exportFolder)
 	if nil != err {
 		return

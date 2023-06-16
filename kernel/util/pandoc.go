@@ -82,7 +82,7 @@ var (
 	PandocBinPath string // Pandoc 可执行文件路径
 )
 
-func initPandoc() {
+func InitPandoc() {
 	if ContainerStd != Container {
 		return
 	}

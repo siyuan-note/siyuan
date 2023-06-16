@@ -1124,7 +1124,7 @@
     "157": "The key is not recognized, please confirm that the copied key string is correct",
     "158": "Indexing data repo, walking data %s",
     "159": "Indexing data repo, getting the latest file %v/%v",
-    "160": "Indexing data repo, inserting file %v",
+    "160": "Indexing data repo, inserting file %v/%v",
     "161": "Checking out of data repo, walking data %s",
     "162": "Checking out data repo, inserting file %v/%v",
     "163": "Checking out data repo, deleting file %v/%v",

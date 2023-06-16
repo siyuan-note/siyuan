@@ -1505,19 +1505,17 @@ func subscribeRepoEvents() {
 			util.ContextPushMsg(context, msg)
 		}
 	})
-	eventbus.Subscribe(eventbus.EvtIndexUpsertFiles, func(context map[string]interface{}, files []*entity.File) {
-		msg := fmt.Sprintf(Conf.Language(160), len(files))
+	eventbus.Subscribe(eventbus.EvtIndexUpsertFiles, func(context map[string]interface{}, total int) {
+		msg := fmt.Sprintf(Conf.Language(160), 0, total)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	indexUpsertFileCount := 0
-	eventbus.Subscribe(eventbus.EvtIndexUpsertFile, func(context map[string]interface{}, path string) {
-		msg := fmt.Sprintf(Conf.Language(160), filepath.Base(path))
-		if 0 == indexUpsertFileCount%64 {
+	eventbus.Subscribe(eventbus.EvtIndexUpsertFile, func(context map[string]interface{}, count int, total int) {
+		msg := fmt.Sprintf(Conf.Language(160), count, total)
+		if 0 == count%64 {
 			util.SetBootDetails(msg)
 			util.ContextPushMsg(context, msg)
 		}
-		indexUpsertFileCount++
 	})
 
 	eventbus.Subscribe(eventbus.EvtCheckoutBeforeWalkData, func(context map[string]interface{}, path string) {

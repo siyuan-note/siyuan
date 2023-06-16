@@ -1124,7 +1124,7 @@
     "157": "No se reconoce la clave, confirme que la cadena de clave copiada es correcta",
     "158": "Indexando repositorio de datos, datos para caminar %s",
     "159": "Indexando repositorio de datos, obteniendo el último archivo %v/%v",
-    "160": "Indexando repositorio de datos, insertando archivo %v",
+    "160": "Indexando repositorio de datos, insertando archivo %v/%v",
     "161": "Revisando el repositorio de datos, recorriendo datos %s",
     "162": "Revisando el repositorio de datos, insertando el archivo %v/%v",
     "163": "Revisando el repositorio de datos, eliminando el archivo %v/%v",

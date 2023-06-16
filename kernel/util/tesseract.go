@@ -129,7 +129,7 @@ func Tesseract(imgAbsPath string) string {
 	return ret
 }
 
-func initTesseract() {
+func InitTesseract() {
 	ver := getTesseractVer()
 	if "" == ver {
 		return

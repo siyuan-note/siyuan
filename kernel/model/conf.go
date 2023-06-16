@@ -389,6 +389,9 @@ func InitConf() {
 	}
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
+
+	go util.InitPandoc()
+	go util.InitTesseract()
 }
 
 func initLang() {

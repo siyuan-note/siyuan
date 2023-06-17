@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230406111909"
+		"updated": "20230617085407"
 	},
 	"Children": [
 		{
@@ -1080,7 +1080,8 @@
 			"ID": "20220909100742-liorixq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220909100742-liorixq"
+				"id": "20220909100742-liorixq",
+				"updated": "20230617085407"
 			},
 			"Children": [
 				{
@@ -1094,7 +1095,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1103,7 +1104,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1112,7 +1113,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中 "
+					"Data": "​ 中 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1121,7 +1122,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，也可以通过关注 "
+					"Data": "​，也可以通过关注 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1131,17 +1132,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或者"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com/tag/siyuan-announcement",
-					"TextMarkTextContent": "思源笔记公告"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "来获取新版本。"
+					"Data": " 来获取新版本。"
 				}
 			]
 		},

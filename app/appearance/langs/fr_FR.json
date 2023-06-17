@@ -843,7 +843,7 @@
   "about17": "N'activez pas le proxy lorsqu'il est défini sur <code class='fn__code'>Connexion directe</code>.",
   "checkUpdate": "Vérifier la mise à jour",
   "currentVer": "Version actuelle",
-  "visitAnnouncements": "<a href=\"https://github.com/siyuan-note/siyuan/releases\" target=\"_blank\">Voir les annonces du système</a>",
+  "visitAnnouncements": "<a href=\"https://github.com/siyuan-note/siyuan/releases\" target=\"_blank\">Visitez toutes les versions publiées</a>",
   "themeLight": "Clair",
   "themeDark": "Sombre",
   "themeOS": "Suivre le système",

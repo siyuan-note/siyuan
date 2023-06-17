@@ -161,7 +161,7 @@ export abstract class Constants {
         90: "Z",
         91: "⌘",
         92: "⌘",
-        93: "⌘",
+        93: "ContextMenu",
         96: "0",
         97: "1",
         98: "2",

@@ -424,9 +424,25 @@ export const keymap = {
         if (isCtrl(event)) {
             keymapStr += "⌘";
         }
-        if (event.key !== "Shift" && event.key !== "Alt" && event.key !== "Meta" && event.key !== "Control") {
-            keymapStr += event.key === "Unidentified" ? "" :
-                (Constants.KEYCODELIST[event.keyCode] || (event.key.length > 1 ? event.key : event.key.toUpperCase()));
+        if (event.key !== "Shift" && event.key !== "Alt" && event.key !== "Meta" && event.key !== "Control" && event.key !== "Unidentified") {
+            if (event.keyCode === 229) {
+                // windows 中文输入法下 shift + - 等
+                if (event.code === "Minus") {
+                    keymapStr += "-";
+                } else if (event.code === "Semicolon") {
+                    keymapStr += ";";
+                } else if (event.code === "Quote") {
+                    keymapStr += "'";
+                } else if (event.code === "Comma") {
+                    keymapStr += ",";
+                } else if (event.code === "Period") {
+                    keymapStr += ".";
+                } else if (event.code === "Slash") {
+                    keymapStr += "/";
+                }
+            } else {
+                keymapStr += Constants.KEYCODELIST[event.keyCode] || (event.key.length > 1 ? event.key : event.key.toUpperCase());
+            }
         }
         it.setAttribute("data-value", keymapStr);
         // Mac 中文下会直接输入

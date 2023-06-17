@@ -5444,7 +5444,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+\u0026gt;"
+									"TextMarkTextContent": "Ctrl+Shift+."
 								},
 								{
 									"Type": "NodeText",
@@ -5453,7 +5453,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘\u0026gt;"
+									"TextMarkTextContent": "⇧⌘."
 								},
 								{
 									"Type": "NodeText",
@@ -8109,7 +8109,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+_"
+									"TextMarkTextContent": "Ctrl+Shift+-"
 								},
 								{
 									"Type": "NodeText",
@@ -8118,7 +8118,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘_"
+									"TextMarkTextContent": "⇧⌘-"
 								}
 							]
 						}

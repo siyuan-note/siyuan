@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230512170521"
+		"updated": "20230617085423"
 	},
 	"Children": [
 		{
@@ -1073,7 +1073,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100912-rvyxrtl",
-				"updated": "20220909100912"
+				"updated": "20230617085423"
 			},
 			"Children": [
 				{
@@ -1087,7 +1087,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1096,7 +1096,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1105,7 +1105,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中 "
+					"Data": "​ 中 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1114,7 +1114,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，也可以通過關注 "
+					"Data": "​，也可以通過關注 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1124,17 +1124,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或者"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com/tag/siyuan-announcement",
-					"TextMarkTextContent": "思源筆記公告"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "來獲取新版本。"
+					"Data": " 來獲取新版本。"
 				}
 			]
 		},

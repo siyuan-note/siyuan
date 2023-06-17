@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230512170538"
+		"updated": "20230617085510"
 	},
 	"Children": [
 		{
@@ -1080,7 +1080,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100946-9eyc3uh",
-				"updated": "20220909101124"
+				"updated": "20230617085510"
 			},
 			"Children": [
 				{
@@ -1094,7 +1094,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in "
+					"Data": "​ in "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1103,7 +1103,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1112,7 +1112,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1121,23 +1121,13 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", or by following "
+					"Data": "​, or by following "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https ://github.com/siyuan-note/siyuan/releases",
 					"TextMarkTextContent": "GitHub Releases"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com/tag/siyuan-announcement",
-					"TextMarkTextContent": "SiYuan Announcement"
 				},
 				{
 					"Type": "NodeText",

@@ -272,7 +272,8 @@ func ExportData() (zipPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
-	exportFolder := filepath.Join(util.TempDir, "export", util.CurrentTimeSecondsStr())
+	name := util.FilterFileName(filepath.Base(util.WorkspaceDir)) + "-" + util.CurrentTimeSecondsStr()
+	exportFolder := filepath.Join(util.TempDir, "export", name)
 	zipPath, err = exportData(exportFolder)
 	if nil != err {
 		return
@@ -317,7 +318,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	return
 }
 
-func Preview(id string) string {
+func Preview(id string) (retStdHTML string, retOutline []*Path) {
 	tree, _ := loadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
@@ -328,7 +329,13 @@ func Preview(id string) string {
 	luteEngine.SetFootnotes(true)
 	md := treenode.FormatNode(tree.Root, luteEngine)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
-	return luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+
+	if footnotesDefBlock := tree.Root.ChildByType(ast.NodeFootnotesDefBlock); nil != footnotesDefBlock {
+		footnotesDefBlock.Unlink()
+	}
+	retOutline = outline(tree)
+	return
 }
 
 func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {

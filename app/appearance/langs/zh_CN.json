@@ -843,7 +843,7 @@
   "about17": "设置为 <code class='fn__code'>直接连接</code> 时不启用代理",
   "checkUpdate": "检查更新",
   "currentVer": "当前版本",
-  "visitAnnouncements": "<a href=\"https://ld246.com/tag/siyuan-announcement\" target=\"_blank\">浏览系统公告</a>",
+  "visitAnnouncements": "<a href=\"https://github.com/siyuan-note/siyuan/releases\" target=\"_blank\">浏览所有已发布的版本</a>",
   "themeLight": "明亮",
   "themeDark": "暗黑",
   "themeOS": "跟随系统",

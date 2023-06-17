@@ -239,7 +239,7 @@ For more details, please refer to [Development Guide](https://github.com/siyuan-
 * If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
 * If it is installed by manual installation package, please download the installation package again to install
 
-You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or by following [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) or [SiYuan Announcement](https://ld246.com/tag/siyuan-announcement) to get the new version.
+You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or by following [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
 
 **Note**: Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory
 

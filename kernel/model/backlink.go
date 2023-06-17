@@ -252,7 +252,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	refs = removeDuplicatedRefs(refs) // 同一个块中引用多个相同块时反链去重 https://github.com/siyuan-note/siyuan/issues/3317
 
 	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
-	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink")
+	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink", nil)
 
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
@@ -282,7 +282,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	})
 
 	mentionRefs, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12)
-	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink")
+	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink", nil)
 	for _, l := range tmpBackmentions {
 		l.Blocks = nil
 		backmentions = append(backmentions, l)
@@ -442,7 +442,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 
 	mentions, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
 	mentionsCount = len(mentions)
-	mentionPaths = toFlatTree(mentions, 0, "backlink")
+	mentionPaths = toFlatTree(mentions, 0, "backlink", nil)
 	return
 }
 

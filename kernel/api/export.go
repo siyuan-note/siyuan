@@ -498,9 +498,10 @@ func exportPreview(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	stdHTML := model.Preview(id)
+	stdHTML, outline := model.Preview(id)
 	ret.Data = map[string]interface{}{
-		"html": stdHTML,
+		"html":    stdHTML,
+		"outline": outline,
 	}
 }
 

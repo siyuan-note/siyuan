@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -99,12 +100,12 @@ func createDocsByHPath(boxID, hPath, content, parentID string) (id string, exist
 	return
 }
 
-func toFlatTree(blocks []*Block, baseDepth int, typ string) (ret []*Path) {
+func toFlatTree(blocks []*Block, baseDepth int, typ string, tree *parse.Tree) (ret []*Path) {
 	var blockRoots []*Block
 	for _, block := range blocks {
 		root := getBlockIn(blockRoots, block.RootID)
 		if nil == root {
-			root, _ = getBlock(block.RootID, nil)
+			root, _ = getBlock(block.RootID, tree)
 			blockRoots = append(blockRoots, root)
 		}
 		if nil == root {

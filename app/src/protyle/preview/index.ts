@@ -18,6 +18,7 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
+import {setPanelFocus} from "../../layout/util";
 
 export class Preview {
     public element: HTMLElement;
@@ -34,51 +35,6 @@ export class Preview {
             previewElement.classList.add(protyle.options.classes.preview);
         }
         previewElement.style.padding = protyle.wysiwyg.element.style.padding;
-        previewElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-            if (event.target.tagName === "A") {
-                const linkAddress = event.target.getAttribute("href");
-                if (linkAddress.startsWith("#")) {
-                    // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
-                    previewElement.querySelector(linkAddress).scrollIntoView();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
-
-                if (isMobile()) {
-                    openByMobile(linkAddress);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
-                event.stopPropagation();
-                event.preventDefault();
-                if (isLocalPath(linkAddress)) {
-                    /// #if !MOBILE
-                    if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
-                        openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
-                    } else {
-                        /// #if !BROWSER
-                        openBy(linkAddress, "folder");
-                        /// #endif
-                    }
-                    /// #endif
-                } else {
-                    /// #if !BROWSER
-                    shell.openExternal(linkAddress).catch((e) => {
-                        showMessage(e);
-                    });
-                    /// #else
-                    window.open(linkAddress);
-                    /// #endif
-                }
-                return;
-            }
-
-            if (event.target.tagName === "IMG") {
-                previewImage((event.target as HTMLImageElement).src, protyle.block.rootID);
-            }
-        });
 
         const actions = protyle.options.preview.actions;
         const actionElement = document.createElement("div");
@@ -115,38 +71,80 @@ export class Preview {
         this.element.appendChild(actionElement);
         this.element.appendChild(previewElement);
 
-        actionElement.addEventListener(getEventName(), (event) => {
-            const btn = hasClosestByTag(event.target as HTMLElement, "BUTTON");
-            if (!btn) {
-                return;
+        this.element.addEventListener("click", (event) => {
+            if (protyle.model) {
+                setPanelFocus(protyle.model.element.parentElement.parentElement);
             }
-            const type = btn.getAttribute("data-type");
-            const actionCustom = actions.find((w: IPreviewActionCustom) => w?.key === type) as IPreviewActionCustom;
-            if (actionCustom) {
-                actionCustom.click(type);
-                return;
-            }
+            let target = event.target as HTMLElement;
+            while (target && !target.isEqualNode(this.element)) {
+                if (target.tagName === "A") {
+                    const linkAddress = target.getAttribute("href");
+                    if (linkAddress.startsWith("#")) {
+                        // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
+                        previewElement.querySelector(linkAddress).scrollIntoView();
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    }
 
-            if ((type === "mp-wechat" || type === "zhihu" || type === "yuque")) {
-                this.copyToX(this.element.lastElementChild.cloneNode(true) as HTMLElement, protyle, type);
-                return;
+                    if (isMobile()) {
+                        openByMobile(linkAddress);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                    if (isLocalPath(linkAddress)) {
+                        /// #if !MOBILE
+                        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
+                            openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
+                        } else {
+                            /// #if !BROWSER
+                            openBy(linkAddress, "folder");
+                            /// #endif
+                        }
+                        /// #endif
+                    } else {
+                        /// #if !BROWSER
+                        shell.openExternal(linkAddress).catch((e) => {
+                            showMessage(e);
+                        });
+                        /// #else
+                        window.open(linkAddress);
+                        /// #endif
+                    }
+                    break;
+                } else if (target.tagName === "IMG") {
+                    previewImage((event.target as HTMLImageElement).src, protyle.block.rootID);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (target.tagName === "BUTTON") {
+                    const type = target.getAttribute("data-type");
+                    const actionCustom = actions.find((w: IPreviewActionCustom) => w?.key === type) as IPreviewActionCustom;
+                    if (actionCustom) {
+                        actionCustom.click(type);
+                    } else if ((type === "mp-wechat" || type === "zhihu" || type === "yuque")) {
+                        this.copyToX(this.element.lastElementChild.cloneNode(true) as HTMLElement, protyle, type);
+                    } else if (type === "desktop") {
+                        previewElement.style.width = "";
+                        previewElement.style.padding = protyle.wysiwyg.element.style.padding;
+                    } else if (type === "tablet") {
+                        previewElement.style.width = "1024px";
+                        previewElement.style.padding = "8px 16px";
+                    } else {
+                        previewElement.style.width = "360px";
+                        previewElement.style.padding = "8px";
+                    }
+                    this.render(protyle);
+                    actionElement.querySelectorAll("button").forEach((item) => {
+                        item.classList.remove("protyle-preview__action--current");
+                    });
+                    target.classList.add("protyle-preview__action--current");
+                }
+                target = target.parentElement;
             }
-
-            if (type === "desktop") {
-                previewElement.style.width = "";
-                previewElement.style.padding = protyle.wysiwyg.element.style.padding;
-            } else if (type === "tablet") {
-                previewElement.style.width = "1024px";
-                previewElement.style.padding = "8px 16px";
-            } else {
-                previewElement.style.width = "360px";
-                previewElement.style.padding = "8px";
-            }
-            this.render(protyle);
-            actionElement.querySelectorAll("button").forEach((item) => {
-                item.classList.remove("protyle-preview__action--current");
-            });
-            btn.classList.add("protyle-preview__action--current");
         });
 
         this.previewElement = previewElement;

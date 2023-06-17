@@ -25,6 +25,7 @@ import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
 import {deleteFile} from "../../editor/deleteFile";
+import {setPanelFocus} from "../../layout/util";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -43,6 +44,9 @@ export class Breadcrumb {
 <button class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {
+            if (protyle.model) {
+                setPanelFocus(protyle.model.element.parentElement.parentElement);
+            }
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(element)) {
                 const id = target.getAttribute("data-node-id");

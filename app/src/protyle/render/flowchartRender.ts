@@ -39,13 +39,16 @@ const initFlowchart = (flowchartElements: Element[]) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
-        if (!item.firstElementChild.classList.contains("protyle-icons")) {
-            item.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+        //  preview 不需要进行设置
+        if (item.getAttribute("data-node-id")) {
+            if (!item.firstElementChild.classList.contains("protyle-icons")) {
+                item.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+            }
+            if (item.childElementCount < 4) {
+                item.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);
+            }
         }
-        if (item.childElementCount < 4) {
-            item.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);
-        }
-        const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
+        const renderElement = (item.firstElementChild.nextElementSibling || item.firstElementChild) as HTMLElement;
         const flowchartObj = flowchart.parse(Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
         renderElement.innerHTML = "";
         try {

@@ -425,36 +425,8 @@ export const keymap = {
             keymapStr += "⌘";
         }
         if (event.key !== "Shift" && event.key !== "Alt" && event.key !== "Meta" && event.key !== "Control") {
-            if (event.key === "ArrowUp") {
-                keymapStr += "↑";
-            } else if (event.key === "ArrowDown") {
-                keymapStr += "↓";
-            } else if (event.key === "ArrowLeft") {
-                keymapStr += "←";
-            } else if (event.key === "ArrowRight") {
-                keymapStr += "→";
-            } else if (event.key === "Tab") {
-                keymapStr += "⇥";
-            } else if (event.key === "Backspace") {
-                keymapStr += "⌫";
-            } else if (event.key === "Delete") {
-                keymapStr += "⌦";
-            } else if (event.key === "Enter") {
-                keymapStr += "↩";
-            } else if (Constants.KEYCODE[event.keyCode]) {
-                if (event.shiftKey) {
-                    keymapStr += Constants.KEYCODE[event.keyCode][1];
-                } else {
-                    keymapStr += Constants.KEYCODE[event.keyCode][0];
-                }
-            } else if (["/", ".", "+", "-", "*"].includes(event.key)) {
-                keymapStr += event.key;
-            } else if (event.code.startsWith("Digit") || event.code.startsWith("Key") || event.code.startsWith("Numpad")) {
-                // 新版 Electron 可以支持 Alt["I", "E", "N", "U"]，故移除原有判断
-                keymapStr += event.code.substring(event.code.length - 1).toUpperCase();
-            } else {
-                keymapStr += event.key === "Unidentified" ? "" : (event.key.length > 1 ? event.key : event.key.toUpperCase());
-            }
+            keymapStr += event.key === "Unidentified" ? "" :
+                (Constants.KEYCODELIST[event.keyCode] || (event.key.length > 1 ? event.key : event.key.toUpperCase()));
         }
         it.setAttribute("data-value", keymapStr);
         // Mac 中文下会直接输入

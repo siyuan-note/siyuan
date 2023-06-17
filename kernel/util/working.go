@@ -196,34 +196,30 @@ func initWorkspaceDir(workspaceArg string) {
 			defaultWorkspaceDir = filepath.Join(userProfile, "Documents", "SiYuan")
 		}
 	}
-	if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
-		logging.LogErrorf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
-		os.Exit(logging.ExitCodeInitWorkspaceErr)
-	}
 
 	var workspacePaths []string
 	if !gulu.File.IsExist(workspaceConf) {
 		WorkspaceDir = defaultWorkspaceDir
-		if "" != workspaceArg {
-			WorkspaceDir = workspaceArg
-		}
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
-
 		if 0 < len(workspacePaths) {
 			// 取最后一个（也就是最近打开的）工作空间
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
 		} else {
 			WorkspaceDir = defaultWorkspaceDir
 		}
+	}
 
-		if "" != workspaceArg {
-			WorkspaceDir = workspaceArg
-		}
+	if "" != workspaceArg {
+		WorkspaceDir = workspaceArg
 	}
 
 	if !gulu.File.IsDir(WorkspaceDir) {
 		logging.LogWarnf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
+		if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
+			logging.LogErrorf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
+			os.Exit(logging.ExitCodeInitWorkspaceErr)
+		}
 		WorkspaceDir = defaultWorkspaceDir
 	}
 	workspacePaths = append(workspacePaths, WorkspaceDir)

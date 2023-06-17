@@ -20,6 +20,7 @@ export class Outline extends Model {
     public headerElement: HTMLElement;
     public type: "pin" | "local";
     public blockId: string;
+    public isPreview: boolean;
     private openNodes: { [key: string]: string[] } = {};
 
     constructor(options: {
@@ -102,13 +103,17 @@ export class Outline extends Model {
             data: null,
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
-                fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
-                    openFileById({
-                        app: options.app,
-                        id,
-                        action: attrResponse.data["heading-fold"] === "1" ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+                if (this.isPreview) {
+                    document.getElementById(id)?.scrollIntoView()
+                } else {
+                    fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
+                        openFileById({
+                            app: options.app,
+                            id,
+                            action: attrResponse.data["heading-fold"] === "1" ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+                        });
                     });
-                });
+                }
             }
         });
         // 为了快捷键的 dispatch
@@ -200,6 +205,9 @@ export class Outline extends Model {
     }
 
     private onTransaction(data: IWebSocketData) {
+        if (this.isPreview) {
+            return;
+        }
         let needReload = false;
         data.data[0].doOperations.forEach((item: IOperation) => {
             if ((item.action === "update" || item.action === "insert") &&
@@ -286,18 +294,25 @@ export class Outline extends Model {
             currentId = currentElement.getAttribute("data-node-id");
         }
 
-        if (this.openNodes[this.blockId]) {
+        if (!this.isPreview && this.openNodes[this.blockId]) {
             this.openNodes[this.blockId] = this.tree.getExpandIds();
         }
         if (typeof callbackId !== "undefined") {
             this.blockId = callbackId;
         }
         this.tree.updateData(data.data);
-        if (this.openNodes[this.blockId] && !this.headerElement.querySelector('[data-type="expand"]').classList.contains("block__icon--active")) {
+        if (!this.isPreview && this.openNodes[this.blockId] && !this.headerElement.querySelector('[data-type="expand"]').classList.contains("block__icon--active")) {
             this.tree.setExpandIds(this.openNodes[this.blockId]);
         } else {
             this.tree.expandAll();
-            this.openNodes[this.blockId] = this.tree.getExpandIds();
+            if (!this.isPreview) {
+                this.openNodes[this.blockId] = this.tree.getExpandIds();
+            }
+        }
+        if (this.isPreview) {
+            this.tree.element.querySelectorAll(".popover__block").forEach(item => {
+                item.classList.remove("popover__block");
+            })
         }
 
         if (currentId) {

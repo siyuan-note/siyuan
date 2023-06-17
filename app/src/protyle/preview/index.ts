@@ -1,5 +1,4 @@
-import {getEventName, openByMobile, writeText} from "../util/compatibility";
-import {hasClosestByTag} from "../util/hasClosest";
+import {openByMobile, writeText} from "../util/compatibility";
 import {focusByRange} from "../util/selection";
 import {showMessage} from "../../dialog/message";
 import {isLocalPath, pathPosix} from "../../util/pathName";
@@ -19,6 +18,7 @@ import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
 import {setPanelFocus} from "../../layout/util";
+import {getAllModels} from "../../layout/getAll";
 
 export class Preview {
     public element: HTMLElement;
@@ -159,11 +159,24 @@ export class Preview {
             fetchPost("/api/export/preview", {
                 id: protyle.block.parentID || protyle.options.blockId,
             }, response => {
+                const oldScrollTop =  protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement);
                 speechRender(protyle.preview.previewElement, protyle.options.lang);
+                protyle.preview.previewElement.scrollTop = oldScrollTop;
+                getAllModels().outline.find(item => {
+                    if (item.type === "pin" || (item.type === "local" && item.blockId === protyle.block.rootID)) {
+                        response.data = response.data.outline;
+                        item.isPreview = true;
+                        item.update(response, protyle.block.rootID);
+                        if (item.type === "pin") {
+                            item.updateDocTitle(protyle.background.ial);
+                        }
+                        return;
+                    }
+                });
             });
         }, protyle.options.preview.delay);
     }

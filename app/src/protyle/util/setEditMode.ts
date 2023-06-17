@@ -1,5 +1,7 @@
 import {setPadding} from "../ui/initUI";
 import {hideElements} from "../ui/hideElements";
+import {getAllModels} from "../../layout/getAll";
+import {updateOutline} from "../../editor/util";
 
 export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
     if (type === "preview") {
@@ -29,6 +31,7 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
             protyle.breadcrumb?.element.classList.remove("fn__none");
             protyle.breadcrumb.toggleExit(!protyle.block.showAll);
         }
+        updateOutline(getAllModels(), protyle, true);
     }
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
 };

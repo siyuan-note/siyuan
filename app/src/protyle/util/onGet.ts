@@ -113,7 +113,7 @@ const setHTML = (options: {
     expand: boolean,
     scrollAttr?: IScrollAttr
 }, protyle: IProtyle) => {
-    if (protyle.contentElement.classList.contains("fn__none")) {
+    if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
         return;
     }
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);

@@ -80,6 +80,7 @@ export const openOutline = (protyle: IProtyle) => {
                 type: "local",
                 tab,
                 blockId: protyle.block.rootID,
+                isPreview: !protyle.preview.element.classList.contains("fn__none")
             }));
         }
     });

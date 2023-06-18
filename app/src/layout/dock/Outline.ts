@@ -1,7 +1,7 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
-import {getDockByType, setPanelFocus} from "../util";
+import {getDockByType, getInstanceById, setPanelFocus} from "../util";
 import {fetchPost} from "../../util/fetch";
 import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
@@ -27,7 +27,8 @@ export class Outline extends Model {
         app: App,
         tab: Tab,
         blockId: string,
-        type: "pin" | "local"
+        type: "pin" | "local",
+        isPreview: boolean
     }) {
         super({
             app: options.app,
@@ -75,6 +76,7 @@ export class Outline extends Model {
                 }
             }
         });
+        this.isPreview = options.isPreview;
         this.blockId = options.blockId;
         this.type = options.type;
         options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__outline");
@@ -104,7 +106,21 @@ export class Outline extends Model {
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
                 if (this.isPreview) {
-                    document.getElementById(id)?.scrollIntoView()
+                    const headElement = document.getElementById(id)
+                    if (headElement) {
+                        const tabElement = hasTopClosestByClassName(headElement, "protyle")
+                        if (tabElement) {
+                            const tab = getInstanceById(tabElement.getAttribute("data-id")) as Tab
+                            tab.parent.switchTab(tab.headElement)
+                        }
+                        headElement.scrollIntoView();
+                    } else {
+                        openFileById({
+                            app: options.app,
+                            id:  this.blockId,
+                            mode: "preview",
+                        });
+                    }
                 } else {
                     fetchPost("/api/attr/getBlockAttrs", {id}, (attrResponse) => {
                         openFileById({
@@ -177,11 +193,20 @@ export class Outline extends Model {
             }
         });
 
-        fetchPost("/api/outline/getDocOutline", {
-            id: this.blockId,
-        }, response => {
-            this.update(response);
-        });
+        if (this.isPreview) {
+            fetchPost("/api/export/preview", {
+                id: this.blockId,
+            }, response => {
+                response.data = response.data.outline;
+                this.update(response);
+            });
+        } else {
+            fetchPost("/api/outline/getDocOutline", {
+                id: this.blockId,
+            }, response => {
+                this.update(response);
+            });
+        }
     }
 
     public updateDocTitle(ial?: IObject) {

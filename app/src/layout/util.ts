@@ -366,6 +366,7 @@ export const JSONToCenter = (app: App, json: ILayoutJSON, layout?: Layout | Wnd 
             tab: (layout as Tab),
             blockId: json.blockId,
             type: json.type as "pin" | "local",
+            isPreview: json.isPreview,
         }));
     } else if (json.instance === "Tag") {
         (layout as Tab).addModel(new Tag(app, (layout as Tab)));
@@ -522,6 +523,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
     } else if (layout instanceof Outline) {
         json.blockId = layout.blockId;
         json.type = layout.type;
+        json.isPreview = layout.isPreview;
         json.instance = "Outline";
     } else if (layout instanceof Tag) {
         json.instance = "Tag";
@@ -710,7 +712,8 @@ export const copyTab = (app: App, tab: Tab) => {
                     app,
                     tab: newTab,
                     blockId: tab.model.blockId,
-                    type: tab.model.type
+                    type: tab.model.type,
+                    isPreview: tab.model.isPreview
                 });
             } else if (tab.model instanceof Backlink) {
                 model = new Backlink({

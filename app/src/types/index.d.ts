@@ -308,6 +308,7 @@ interface ILayoutJSON extends ILayoutOptions {
     rootId?: string
     active?: boolean
     pin?: boolean
+    isPreview?: boolean
     customModelData?: any
     customModelType?: string
     config?: ISearchOption

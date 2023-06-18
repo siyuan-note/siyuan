@@ -37,7 +37,7 @@ import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
-import {exportAsset} from "./util";
+import {copyPNG, exportAsset} from "./util";
 import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
@@ -593,29 +593,10 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.copy + " PNG",
+        accelerator: window.siyuan.config.keymap.editor.general.copyBlockRef.custom,
         icon: "iconImage",
         click() {
-            if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
-                window.JSAndroid.writeImageClipboard(imgElement.getAttribute("src"));
-                return;
-            } else {
-                const canvas = document.createElement("canvas");
-                const tempElement = document.createElement("img");
-                tempElement.onload = (e: Event & { target: HTMLImageElement }) => {
-                    canvas.width = e.target.width;
-                    canvas.height = e.target.height;
-                    canvas.getContext("2d").drawImage(e.target, 0, 0, e.target.width, e.target.height);
-                    canvas.toBlob((blob) => {
-                        navigator.clipboard.write([
-                            new ClipboardItem({
-                                // @ts-ignore
-                                ["image/png"]: blob
-                            })
-                        ]);
-                    }, "image/png", 1);
-                };
-                tempElement.src = imgElement.getAttribute("src");
-            }
+            copyPNG(imgElement);
         }
     }).element);
     /// #if !BROWSER

@@ -71,6 +71,7 @@ import {escapeHtml} from "../../util/escape";
 import {insertHTML} from "../util/insertHTML";
 import {quickMakeCard} from "../../card/makeCard";
 import {removeSearchMark} from "../toolbar/util";
+import {copyPNG} from "../../menus/util";
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("keydown", (event: KeyboardEvent & { target: HTMLElement }) => {
@@ -964,11 +965,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             let actionElement;
             if (selectElements.length === 1) {
                 actionElement = selectElements[0];
             } else {
+                const selectImgElement = nodeElement.querySelector(".img--select");
+                if (selectImgElement) {
+                    copyPNG(selectImgElement.querySelector("img"));
+                    return true;
+                }
                 actionElement = nodeElement;
             }
             const actionElementId = actionElement.getAttribute("data-node-id");
@@ -979,8 +987,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     writeText(`((${actionElementId} '${response.data}'))`);
                 });
             }
-            event.preventDefault();
-            event.stopPropagation();
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
@@ -1290,7 +1296,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {
             protyle.toolbar.range = range;
             let selectElements: Element[] = [];
-            if (selectText === "" && protyle.toolbar.getCurrentType(range).length === 0)  {
+            if (selectText === "" && protyle.toolbar.getCurrentType(range).length === 0) {
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 if (selectElements.length === 0) {
                     selectElements = [nodeElement];

@@ -150,7 +150,7 @@ export class Preview {
         this.previewElement = previewElement;
     }
 
-    public render(protyle: IProtyle) {
+    public render(protyle: IProtyle, cb?: (outlineData: IBlockTree[]) => void) {
         if (this.element.style.display === "none") {
             return;
         }
@@ -159,14 +159,18 @@ export class Preview {
             fetchPost("/api/export/preview", {
                 id: protyle.block.parentID || protyle.options.blockId,
             }, response => {
-                const oldScrollTop =  protyle.preview.previewElement.scrollTop;
+                const oldScrollTop = protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement);
                 speechRender(protyle.preview.previewElement, protyle.options.lang);
                 protyle.preview.previewElement.scrollTop = oldScrollTop;
-                /// #if !MOBILE
+                /// #if MOBILE
+                if (cb) {
+                    cb(response.data.outline);
+                }
+                /// #else
                 response.data = response.data.outline;
                 getAllModels().outline.forEach(item => {
                     if (item.type === "pin" || (item.type === "local" && item.blockId === protyle.block.rootID)) {

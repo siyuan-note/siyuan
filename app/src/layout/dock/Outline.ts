@@ -4,7 +4,7 @@ import {Tree} from "../../util/Tree";
 import {getDockByType, setPanelFocus} from "../util";
 import {fetchPost} from "../../util/fetch";
 import {getAllModels} from "../getAll";
-import {hasClosestBlock, hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";

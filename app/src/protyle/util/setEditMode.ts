@@ -31,7 +31,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
             protyle.breadcrumb?.element.classList.remove("fn__none");
             protyle.breadcrumb.toggleExit(!protyle.block.showAll);
         }
+        /// #if !MOBILE
         updateOutline(getAllModels(), protyle, true);
+        /// #endif
     }
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
 };

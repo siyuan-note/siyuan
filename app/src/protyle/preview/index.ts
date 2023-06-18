@@ -11,14 +11,14 @@ import {shell} from "electron";
 /// #endif
 /// #if !MOBILE
 import {openAsset, openBy} from "../../editor/util";
+import {getAllModels} from "../../layout/getAll";
+import {setPanelFocus} from "../../layout/util";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
-import {setPanelFocus} from "../../layout/util";
-import {getAllModels} from "../../layout/getAll";
 
 export class Preview {
     public element: HTMLElement;
@@ -166,17 +166,18 @@ export class Preview {
                 avRender(protyle.preview.previewElement);
                 speechRender(protyle.preview.previewElement, protyle.options.lang);
                 protyle.preview.previewElement.scrollTop = oldScrollTop;
-                getAllModels().outline.find(item => {
+                /// #if !MOBILE
+                response.data = response.data.outline;
+                getAllModels().outline.forEach(item => {
                     if (item.type === "pin" || (item.type === "local" && item.blockId === protyle.block.rootID)) {
-                        response.data = response.data.outline;
                         item.isPreview = true;
                         item.update(response, protyle.block.rootID);
                         if (item.type === "pin") {
                             item.updateDocTitle(protyle.background.ial);
                         }
-                        return;
                     }
                 });
+                /// #endif
             });
         }, protyle.options.preview.delay);
     }

@@ -79,6 +79,7 @@ type AppConf struct {
 	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
 	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
+	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 }
 
 func InitConf() {

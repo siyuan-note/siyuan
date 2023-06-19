@@ -553,7 +553,7 @@ func incPackageDownloads(repoURLHash, systemID string) {
 	}
 
 	repo := strings.Split(repoURLHash, "@")[0]
-	u := util.AliyunServer + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
+	u := util.ChinaServer + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
 	httpclient.NewCloudRequest30s().SetBody(
 		map[string]interface{}{
 			"systemID": systemID,

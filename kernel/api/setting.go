@@ -254,6 +254,8 @@ func setExport(c *gin.Context) {
 		if !util.IsValidPandocBin(export.PandocBin) {
 			util.PushErrMsg(fmt.Sprintf(model.Conf.Language(117), export.PandocBin), 5000)
 			export.PandocBin = util.PandocBinPath
+		} else {
+			util.PandocBinPath = export.PandocBin
 		}
 	}
 

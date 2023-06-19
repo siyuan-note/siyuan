@@ -939,6 +939,7 @@ func syncRepoDownload() (err error) {
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
+	BootSyncSucc = 0
 	logging.LogInfof("synced data repo download [provider=%d, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
 		Conf.Sync.Provider, trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
 
@@ -1008,6 +1009,7 @@ func syncRepoUpload() (err error) {
 	Conf.Sync.Stat = msg
 	Conf.Save()
 	autoSyncErrCount = 0
+	BootSyncSucc = 0
 	logging.LogInfof("synced data repo upload [provider=%d, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s] in [%.2fs]",
 		Conf.Sync.Provider, trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.Bytes(uint64(trafficStat.UploadBytes)), humanize.Bytes(uint64(trafficStat.DownloadBytes)), elapsed.Seconds())
 	return
@@ -1666,12 +1668,12 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		UserID:        userId,
 		Token:         token,
 		AvailableSize: availableSize,
-		Server:        util.AliyunServer,
+		Server:        util.ChinaServer,
 	}
 
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
-		ret.Endpoint = util.SiYuanSyncServer
+		ret.Endpoint = util.ChinaSyncServer
 	case conf.ProviderS3:
 		ret.S3 = &cloud.ConfS3{
 			Endpoint:      Conf.Sync.S3.Endpoint,

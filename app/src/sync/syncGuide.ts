@@ -99,12 +99,12 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
                 /// #if MOBILE
                 syncListHTML += `<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--two">
-    <div class="b3-list-item__first">
+    <div class="b3-list-item__first" data-name="${item.cloudName}">
         <input type="radio" name="cloudName"${item.cloudName === response.data.checkedSyncDir ? " checked" : ""}/>
         <span class="fn__space"></span>
         <span>${item.cloudName}</span>
         <span class="fn__flex-1 fn__space"></span>
-        <span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
+        <span data-type="removeCloud" class="b3-list-item__action">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
     </div>

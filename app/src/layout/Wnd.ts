@@ -580,18 +580,18 @@ export class Wnd {
         Array.from(this.headersElement.children).forEach((item: HTMLElement) => {
             const iconElement = item.querySelector(".item__icon");
             const graphicElement = item.querySelector(".item__graphic");
-            let iconHTML = undefined
+            let iconHTML = undefined;
             if (iconElement) {
                 if (iconElement.firstElementChild?.tagName === "IMG") {
                     // 图标为图片的文档
-                    iconHTML = `<img src="${iconElement.firstElementChild.getAttribute("src")}"  class="b3-menu__icon">`
+                    iconHTML = `<img src="${iconElement.firstElementChild.getAttribute("src")}"  class="b3-menu__icon">`;
                 } else {
                     // 有图标的文档
-                    iconHTML = `<span class="b3-menu__icon">${iconElement.innerHTML}</span>`
+                    iconHTML = `<span class="b3-menu__icon">${iconElement.innerHTML}</span>`;
                 }
             } else if (!graphicElement) {
                 // 没有图标的文档
-                iconHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE, "b3-menu__icon", true)
+                iconHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE, "b3-menu__icon", true);
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: escapeHtml(item.querySelector(".item__text").textContent),

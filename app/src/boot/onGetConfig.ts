@@ -251,32 +251,32 @@ export const initWindow = (app: App) => {
         ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
             if (/^siyuan:\/\/plugins\//.test(url)) {
                 // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-                const pluginId = url.replace("siyuan://plugins/", "").split("?")[0]
+                const pluginId = url.replace("siyuan://plugins/", "").split("?")[0];
                 app.plugins.find(plugin => {
                     const match = Object.keys(plugin.models).find(key => {
                         if (key === pluginId) {
-                            let data = getSearch("data", url)
+                            let data = getSearch("data", url);
                             try {
                                 data = JSON.parse(data || "{}");
                             } catch (e) {
-                                console.log("Error open plugin tab with protocol:", e)
+                                console.log("Error open plugin tab with protocol:", e);
                             }
                             openFile({
                                 app,
                                 custom: {
                                     title: getSearch("title", url),
                                     icon: getSearch("icon", url),
-                                    data: JSON.parse(getSearch("data", url) || "{}"),
+                                    data,
                                     fn: plugin.models[key]
                                 },
                             });
-                            return true
+                            return true;
                         }
-                    })
+                    });
                     if (match) {
-                        return true
+                        return true;
                     }
-                })
+                });
                 return;
             }
             if (isSYProtocol(url)) {

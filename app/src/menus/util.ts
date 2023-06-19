@@ -126,4 +126,4 @@ export const copyPNG = (imgElement: HTMLImageElement) => {
         };
         tempElement.src = imgElement.getAttribute("src");
     }
-}
+};

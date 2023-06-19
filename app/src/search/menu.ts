@@ -227,7 +227,7 @@ export const saveCriterion = (config: ISearchOption,
             criteriaElement.firstElementChild.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.firstElementChild.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
         });
     });
-}
+};
 
 export const moreMenu = async (config: ISearchOption,
                                criteriaData: ISearchOption[],

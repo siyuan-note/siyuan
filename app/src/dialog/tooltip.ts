@@ -26,7 +26,7 @@ export const showTooltip = (message: string, target: Element, error = false) => 
         messageElement.classList.add("tooltip--memo"); // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
     }
     let left = targetRect.left;
-    let topSpace = 8
+    let topSpace = 8;
     const position = target.getAttribute("data-position");
     if (position === "right") {
         left = targetRect.right - messageElement.clientWidth;

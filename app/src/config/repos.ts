@@ -360,11 +360,11 @@ export const repos = {
         });
         const syncModeElement = repos.element.querySelector("#syncMode") as HTMLSelectElement;
         syncModeElement.addEventListener("change", () => {
-            fetchPost("/api/sync/setSyncMode", {mode: parseInt(syncModeElement.value, 10)}, (response) => {
+            fetchPost("/api/sync/setSyncMode", {mode: parseInt(syncModeElement.value, 10)}, () => {
                 if (syncModeElement.value === "1") {
-                    syncPerceptionElement.parentElement.classList.remove("fn__none")
+                    syncPerceptionElement.parentElement.classList.remove("fn__none");
                 } else {
-                    syncPerceptionElement.parentElement.classList.add("fn__none")
+                    syncPerceptionElement.parentElement.classList.add("fn__none");
                 }
                 window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
             });

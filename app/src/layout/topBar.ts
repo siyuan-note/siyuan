@@ -17,7 +17,6 @@ import {Constants} from "../constants";
 import {isBrowser, isWindow} from "../util/functions";
 import {Menu} from "../plugin/Menu";
 import {fetchPost} from "../util/fetch";
-import {escapeAttr} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import * as dayjs from "dayjs";
 
@@ -236,30 +235,30 @@ export const initBar = (app: App) => {
         event.stopPropagation();
         event.preventDefault();
         fetchPost("/api/sync/getSyncInfo", {}, (response) => {
-            let html = ""
+            let html = "";
             if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
                 html = response.data.stat;
             } else {
-                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "<br>"
+                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "<br>";
                 html += "  " + response.data.stat;
                 if (response.data.kernels.length > 0) {
-                    html += "<br>"
-                    html += window.siyuan.languages.currentKernel + "<br>"
-                    html += "  " + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")<br>"
-                    html += window.siyuan.languages.otherOnlineKernels + "<br>"
+                    html += "<br>";
+                    html += window.siyuan.languages.currentKernel + "<br>";
+                    html += "  " + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")<br>";
+                    html += window.siyuan.languages.otherOnlineKernels + "<br>";
                     response.data.kernels.forEach((item: {
                         os: string;
                         ver: string;
                         hostname: string;
                         id: string;
                     }) => {
-                        html += `  ${item.id}/${item.ver} (${item.os}/${item.hostname}) <br>`
-                    })
+                        html += `  ${item.id}/${item.ver} (${item.os}/${item.hostname}) <br>`;
+                    });
                 }
             }
             barSyncElement.setAttribute("aria-label", html);
-        })
-    })
+        });
+    });
     barSyncElement.setAttribute("aria-label", window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom)));
 };
 

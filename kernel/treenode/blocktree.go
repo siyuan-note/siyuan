@@ -19,7 +19,6 @@ package treenode
 import (
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -443,7 +442,6 @@ func InitBlockTree(force bool) {
 	waitGroup.Wait()
 	p.Release()
 
-	debug.FreeOSMemory()
 	elapsed := time.Since(start).Seconds()
 	logging.LogInfof("read block tree [%s] to [%s], elapsed [%.2fs]", humanize.Bytes(uint64(size)), util.BlockTreePath, elapsed)
 	return

@@ -584,7 +584,7 @@
   "closeTab": "關閉當前分頁",
   "keymap": "快速鍵",
   "clearFontStyle": "清除樣式",
-  "clearInline": "清除行內元素",
+  "clearInline": "清除行級元素",
   "fontStyle": "字體效果",
   "font": "字體",
   "folder": "資料夾",

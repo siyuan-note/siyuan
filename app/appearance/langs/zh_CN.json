@@ -584,7 +584,7 @@
   "closeTab": "关闭当前页签",
   "keymap": "快捷键",
   "clearFontStyle": "清除样式",
-  "clearInline": "清除行内元素",
+  "clearInline": "清除行级元素",
   "fontStyle": "字体效果",
   "font": "字体",
   "folder": "文件夹",

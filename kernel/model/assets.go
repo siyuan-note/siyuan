@@ -367,7 +367,7 @@ func uploadAssets2Cloud(sqlAssets []*sql.Asset, bizType string) (err error) {
 			SetCookies(&http.Cookie{Name: "symphony", Value: uploadToken}).
 			SetHeader("meta-type", metaType).
 			SetHeader("biz-type", bizType).
-			Post(util.AliyunServer + "/apis/siyuan/upload?ver=" + util.Ver)
+			Post(util.ChinaServer + "/apis/siyuan/upload?ver=" + util.Ver)
 		if nil != reqErr {
 			logging.LogErrorf("upload assets failed: %s", reqErr)
 			return ErrFailedToConnectCloudServer

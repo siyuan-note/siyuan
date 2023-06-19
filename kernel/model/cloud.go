@@ -14,35 +14,41 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package util
+package model
 
-import (
-	"sync"
-	"time"
+import "github.com/siyuan-note/siyuan/kernel/util"
 
-	"github.com/siyuan-note/httpclient"
-	"github.com/siyuan-note/logging"
-)
-
-var cachedRhyResult = map[string]interface{}{}
-var rhyResultCacheTime int64
-var rhyResultLock = sync.Mutex{}
-
-func GetRhyResult(force bool) (map[string]interface{}, error) {
-	rhyResultLock.Lock()
-	defer rhyResultLock.Unlock()
-
-	now := time.Now().Unix()
-	if 3600 >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
-		return cachedRhyResult, nil
+func getCloudServer() string {
+	if 0 == Conf.CloudRegion {
+		return util.ChinaServer
 	}
+	return util.NorthAmericaServer
+}
 
-	request := httpclient.NewCloudRequest30s()
-	_, err := request.SetSuccessResult(&cachedRhyResult).Get(ChinaServer + "/apis/siyuan/version?ver=" + Ver)
-	if nil != err {
-		logging.LogErrorf("get version info failed: %s", err)
-		return nil, err
+func getCloudWebSocketServer() string {
+	if 0 == Conf.CloudRegion {
+		return util.ChinaWebSocketServer
 	}
-	rhyResultCacheTime = now
-	return cachedRhyResult, nil
+	return util.NorthAmericaWebSocketServer
+}
+
+func getCloudSyncServer() string {
+	if 0 == Conf.CloudRegion {
+		return util.ChinaSyncServer
+	}
+	return util.NorthAmericaSyncServer
+}
+
+func getCloudAssetsServer() string {
+	if 0 == Conf.CloudRegion {
+		return util.ChinaCloudAssetsServer
+	}
+	return util.NorthAmericaCloudAssetsServer
+}
+
+func getCloudAccountServer() string {
+	if 0 == Conf.CloudRegion {
+		return util.ChinaAccountServer
+	}
+	return util.NorthAmericaAccountServer
 }

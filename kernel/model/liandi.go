@@ -61,7 +61,7 @@ func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err 
 		SetSuccessResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		SetBody(payload).
-		Post(util.AliyunServer + "/apis/siyuan/ai/chatGPT")
+		Post(util.ChinaServer + "/apis/siyuan/ai/chatGPT")
 	if nil != err {
 		logging.LogErrorf("chat gpt failed: %s", err)
 		err = ErrFailedToConnectCloudServer
@@ -106,7 +106,7 @@ func StartFreeTrial() (err error) {
 	_, err = request.
 		SetSuccessResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/user/startFreeTrial")
+		Post(util.ChinaServer + "/apis/siyuan/user/startFreeTrial")
 	if nil != err {
 		logging.LogErrorf("start free trial failed: %s", err)
 		return ErrFailedToConnectCloudServer
@@ -123,7 +123,7 @@ func DeactivateUser() (err error) {
 	resp, err := request.
 		SetSuccessResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/user/deactivate")
+		Post(util.ChinaServer + "/apis/siyuan/user/deactivate")
 	if nil != err {
 		logging.LogErrorf("deactivate user failed: %s", err)
 		return ErrFailedToConnectCloudServer
@@ -149,7 +149,7 @@ func SetCloudBlockReminder(id, data string, timed int64) (err error) {
 		SetSuccessResult(requestResult).
 		SetBody(payload).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/calendar/setBlockReminder")
+		Post(util.ChinaServer + "/apis/siyuan/calendar/setBlockReminder")
 	if nil != err {
 		logging.LogErrorf("set block reminder failed: %s", err)
 		return ErrFailedToConnectCloudServer
@@ -181,7 +181,7 @@ func LoadUploadToken() (err error) {
 	resp, err := request.
 		SetSuccessResult(requestResult).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/upload/token")
+		Post(util.ChinaServer + "/apis/siyuan/upload/token")
 	if nil != err {
 		logging.LogErrorf("get upload token failed: %s", err)
 		return ErrFailedToConnectCloudServer
@@ -401,7 +401,7 @@ func RemoveCloudShorthands(ids []string) (err error) {
 		SetSuccessResult(&result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
 		SetBody(body).
-		Post(util.AliyunServer + "/apis/siyuan/inbox/removeCloudShorthands")
+		Post(util.ChinaServer + "/apis/siyuan/inbox/removeCloudShorthands")
 	if nil != err {
 		logging.LogErrorf("remove cloud shorthands failed: %s", err)
 		err = ErrFailedToConnectCloudServer
@@ -428,7 +428,7 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 	resp, err := request.
 		SetSuccessResult(&result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/inbox/getCloudShorthand?id=" + id)
+		Post(util.ChinaServer + "/apis/siyuan/inbox/getCloudShorthand?id=" + id)
 	if nil != err {
 		logging.LogErrorf("get cloud shorthand failed: %s", err)
 		err = ErrFailedToConnectCloudServer
@@ -459,7 +459,7 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	resp, err := request.
 		SetSuccessResult(&result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/inbox/getCloudShorthands?p=" + strconv.Itoa(page))
+		Post(util.ChinaServer + "/apis/siyuan/inbox/getCloudShorthands?p=" + strconv.Itoa(page))
 	if nil != err {
 		logging.LogErrorf("get cloud shorthands failed: %s", err)
 		err = ErrFailedToConnectCloudServer
@@ -496,7 +496,7 @@ func getUser(token string) (*conf.User, error) {
 	_, err := request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"token": token}).
-		Post(util.AliyunServer + "/apis/siyuan/user")
+		Post(util.ChinaServer + "/apis/siyuan/user")
 	if nil != err {
 		logging.LogErrorf("get community user failed: %s", err)
 		return nil, errors.New(Conf.Language(18))
@@ -530,7 +530,7 @@ func UseActivationcode(code string) (err error) {
 		SetSuccessResult(requestResult).
 		SetBody(map[string]string{"data": code}).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/useActivationcode")
+		Post(util.ChinaServer + "/apis/siyuan/useActivationcode")
 	if nil != err {
 		logging.LogErrorf("check activation code failed: %s", err)
 		return ErrFailedToConnectCloudServer
@@ -551,7 +551,7 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 		SetSuccessResult(requestResult).
 		SetBody(map[string]string{"data": code}).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-		Post(util.AliyunServer + "/apis/siyuan/checkActivationcode")
+		Post(util.ChinaServer + "/apis/siyuan/checkActivationcode")
 	if nil != err {
 		logging.LogErrorf("check activation code failed: %s", err)
 		msg = ErrFailedToConnectCloudServer.Error()
@@ -570,7 +570,7 @@ func Login(userName, password, captcha string) (ret *gulu.Result, err error) {
 	_, err = request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"userName": userName, "userPassword": password, "captcha": captcha}).
-		Post(util.AliyunServer + "/apis/siyuan/login")
+		Post(util.ChinaServer + "/apis/siyuan/login")
 	if nil != err {
 		logging.LogErrorf("login failed: %s", err)
 		return nil, errors.New(Conf.Language(18))
@@ -597,7 +597,7 @@ func Login2fa(token, code string) (map[string]interface{}, error) {
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"twofactorAuthCode": code}).
 		SetHeader("token", token).
-		Post(util.AliyunServer + "/apis/siyuan/login/2fa")
+		Post(util.ChinaServer + "/apis/siyuan/login/2fa")
 	if nil != err {
 		logging.LogErrorf("login 2fa failed: %s", err)
 		return nil, errors.New(Conf.Language(18))

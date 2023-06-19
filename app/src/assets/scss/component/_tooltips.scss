@@ -1,5 +1,5 @@
 .tooltip {
-  pointer-events: none;
+  user-select: none; // 同步悬浮需要点击链接，因此不能使用  pointer-events: none;
   position: fixed;
   z-index: 1000000;
   padding: 4px 8px;
@@ -15,6 +15,14 @@
   animation-duration: 150ms;
   animation-fill-mode: both;
   animation-name: zoomIn;
+
+  a {
+    color: var(--b3-theme-secondary);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 
   &--error {
     background: var(--b3-theme-error);

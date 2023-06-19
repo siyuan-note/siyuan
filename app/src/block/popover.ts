@@ -37,7 +37,7 @@ export const initBlockPopover = (app: App) => {
                 event.stopPropagation();
                 return;
             }
-        } else if (!aElement) {
+        } else if (!aElement && !hasClosestByAttribute(event.target, "id", "tooltip", true)) {
             hideTooltip();
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {

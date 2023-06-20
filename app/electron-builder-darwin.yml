@@ -26,6 +26,7 @@ mac:
       to: "kernel"
   target:
     - target: "dmg"
+      arch: "x64"
 
 extraResources:
   - from: "changelogs"

@@ -582,7 +582,6 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 		ret.Msg = Conf.Language(18) + ": " + err.Error()
 		return
 	}
-	logging.LogInfof(resp.Status)
 	ret = &gulu.Result{
 		Code: int(result["code"].(float64)),
 		Msg:  result["msg"].(string),

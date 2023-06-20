@@ -82,12 +82,8 @@ func deactivateUser(c *gin.Context) {
 
 func login(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	ret.Code = -1
-
-	arg := map[string]interface{}{}
-	if err := c.BindJSON(&arg); nil != err {
-		ret.Code = -1
-		ret.Msg = "parses request failed"
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
@@ -96,10 +92,6 @@ func login(c *gin.Context) {
 	password := arg["userPassword"].(string)
 	captcha := arg["captcha"].(string)
 	cloudRegion := int(arg["cloudRegion"].(float64))
-	result, err := model.Login(name, password, captcha, cloudRegion)
-	if nil != err {
-		return
-	}
-
-	c.JSON(http.StatusOK, result)
+	ret = model.Login(name, password, captcha, cloudRegion)
+	c.JSON(http.StatusOK, ret)
 }

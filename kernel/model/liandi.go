@@ -564,21 +564,25 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 	return
 }
 
-func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Result, err error) {
+func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Result) {
 	Conf.CloudRegion = cloudRegion
 	Conf.Save()
 	util.CurrentCloudRegion = cloudRegion
 
 	result := map[string]interface{}{}
 	request := httpclient.NewCloudRequest30s()
-	_, err = request.
+	resp, err := request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"userName": userName, "userPassword": password, "captcha": captcha}).
 		Post(util.GetCloudServer() + "/apis/siyuan/login")
 	if nil != err {
 		logging.LogErrorf("login failed: %s", err)
-		return nil, errors.New(Conf.Language(18))
+		ret = gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = Conf.Language(18) + ": " + err.Error()
+		return
 	}
+	logging.LogInfof(resp.Status)
 	ret = &gulu.Result{
 		Code: int(result["code"].(float64)),
 		Msg:  result["msg"].(string),

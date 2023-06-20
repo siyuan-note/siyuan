@@ -571,7 +571,7 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 
 	result := map[string]interface{}{}
 	request := httpclient.NewCloudRequest30s()
-	resp, err := request.
+	_, err := request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"userName": userName, "userPassword": password, "captcha": captcha}).
 		Post(util.GetCloudServer() + "/apis/siyuan/login")

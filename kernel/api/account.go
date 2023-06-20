@@ -95,7 +95,8 @@ func login(c *gin.Context) {
 	name := arg["userName"].(string)
 	password := arg["userPassword"].(string)
 	captcha := arg["captcha"].(string)
-	result, err := model.Login(name, password, captcha)
+	cloudRegion := int(arg["cloudRegion"].(float64))
+	result, err := model.Login(name, password, captcha, cloudRegion)
 	if nil != err {
 		return
 	}

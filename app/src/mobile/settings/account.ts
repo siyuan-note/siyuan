@@ -160,6 +160,7 @@ export const login = () => {
                     userName: userNameElement.value.replace(/(^\s*)|(\s*$)/g, ""),
                     userPassword: md5(userPasswordElement.value),
                     captcha: captchaElement.value.replace(/(^\s*)|(\s*$)/g, ""),
+                    cloudRegion: parseInt((modelMainElement.querySelector("#cloudRegion") as HTMLSelectElement).value)
                 }, (data) => {
                     if (data.code === 1) {
                         showMessage(data.msg);

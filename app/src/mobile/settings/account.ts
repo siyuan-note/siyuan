@@ -104,6 +104,14 @@ export const login = () => {
         <svg class="b3-form__icon-icon"><use xlink:href="#iconLock"></use></svg>
         <input type="password" id="userPassword" class="b3-text-field b3-form__icon-input fn__block" placeholder="${window.siyuan.languages.password}">
     </div>
+     <div class="fn__hr--b"></div>
+        <div class="b3-form__icon">
+            <svg class="b3-form__icon-icon"><use xlink:href="#iconFocus"></use></svg>
+            <select class="b3-select b3-form__icon-input fn__block" id="cloudRegion">
+                <option value="0">ld246.com(China)</option>
+                <option value="1">liuyun.io(Other)</option>
+            </select>
+        </div>
     <div class="b3-form__img fn__none">
         <div class="fn__hr--b"></div>
         <img id="captchaImg" class="fn__pointer" style="top: 17px">

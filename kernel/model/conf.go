@@ -186,6 +186,8 @@ func InitConf() {
 		Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
 	}
 
+	util.CurrentCloudRegion = Conf.CloudRegion
+
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()
 	}

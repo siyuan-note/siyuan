@@ -83,7 +83,7 @@ func Export2Liandi(id string) (err error) {
 		resp, getErr := request.
 			SetSuccessResult(result).
 			SetCookies(&http.Cookie{Name: "symphony", Value: Conf.User.UserToken}).
-			Get(util.ChinaAccountServer + "/api/v2/article/update/" + articleId)
+			Get(util.GetCloudAccountServer() + "/api/v2/article/update/" + articleId)
 		if nil != getErr {
 			logging.LogErrorf("get liandi article info failed: %s", getErr)
 			return getErr
@@ -105,7 +105,7 @@ func Export2Liandi(id string) (err error) {
 		}
 	}
 
-	apiURL := util.ChinaAccountServer + "/api/v2/article"
+	apiURL := util.GetCloudAccountServer() + "/api/v2/article"
 	if foundArticle {
 		apiURL += "/" + articleId
 	}
@@ -159,7 +159,7 @@ func Export2Liandi(id string) (err error) {
 		}
 	}
 
-	msg := fmt.Sprintf(Conf.Language(181), util.ChinaAccountServer+"/article/"+articleId)
+	msg := fmt.Sprintf(Conf.Language(181), util.GetCloudAccountServer()+"/article/"+articleId)
 	util.PushMsg(msg, 7000)
 	return
 }
@@ -992,7 +992,7 @@ func ExportStdMarkdown(id string) string {
 
 	cloudAssetsBase := ""
 	if IsSubscriber() {
-		cloudAssetsBase = util.ChinaCloudAssetsServer + Conf.User.UserId + "/"
+		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.User.UserId + "/"
 	}
 	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,

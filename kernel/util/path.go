@@ -35,22 +35,6 @@ var (
 	UserAgent = "SiYuan/" + Ver
 )
 
-const (
-	ChinaServer            = "https://siyuan-sync.b3logfile.com"    // 中国大陆云端服务地址，阿里云负载均衡，用于接口，数据同步文件上传、下载会走七牛云 OSS ChinaSyncServer
-	ChinaWebSocketServer   = "wss://siyuan-sync.b3logfile.com"      // 中国大陆云端服务地址，阿里云负载均衡，用于接口，数据同步文件上传、下载会走七牛云 OSS ChinaSyncServer
-	ChinaSyncServer        = "https://siyuan-data.b3logfile.com/"   // 中国大陆云端数据同步服务地址，七牛云 OSS，用于数据同步文件上传、下载
-	ChinaCloudAssetsServer = "https://assets.b3logfile.com/siyuan/" // 中国大陆云端图床服务地址，用于导出预览模式下订阅会员渲染图床
-	ChinaAccountServer     = "https://ld246.com"                    // 中国大陆链滴服务地址，用于账号登录、分享发布帖子
-
-	NorthAmericaServer            = "https://siyuan-cloud.liuyun.io"   // 北美云端服务地址，Cloudflare
-	NorthAmericaWebSocketServer   = "wss://siyuan-cloud.liuyun.io"     // 北美云端服务地址，Cloudflare，用于接口，数据同步文件上传、下载会走七牛云 OSS ChinaSyncServer
-	NorthAmericaSyncServer        = "https://siyuan-data.liuyun.io/"   // 北美云端数据同步服务地址，七牛云 OSS，用于数据同步文件上传、下载
-	NorthAmericaCloudAssetsServer = "https://assets.liuyun.io/siyuan/" // 北美云端图床服务地址，用于导出预览模式下订阅会员渲染图床
-	NorthAmericaAccountServer     = "https://liuyun.io"                // 流云服务地址，用于账号登录、分享发布帖子
-
-	BazaarStatServer = "http://bazaar.b3logfile.com" // 集市包统计服务地址，直接对接 Bucket 没有 CDN
-	BazaarOSSServer  = "https://oss.b3logfile.com"   // 云端对象存储地址，七牛云，仅用于读取集市包，全球 CDN
-)
 
 func ShortPathForBootingDisplay(p string) string {
 	if 25 > len(p) {

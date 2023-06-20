@@ -573,7 +573,7 @@ func planSyncAfter(d time.Duration) {
 }
 
 func isProviderOnline(byHand bool) (ret bool) {
-	checkURL := util.ChinaSyncServer
+	checkURL := util.GetCloudSyncServer()
 	skipTlsVerify := false
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
@@ -744,7 +744,7 @@ var KernelID = gulu.Rand.String(7)
 
 func dialSyncWebSocket() (c *websocket.Conn, err error) {
 	//endpoint := "ws://127.0.0.1:64388" + "/apis/siyuan/dejavu/ws"
-	endpoint := util.ChinaWebSocketServer + "/apis/siyuan/dejavu/ws"
+	endpoint := util.GetCloudWebSocketServer() + "/apis/siyuan/dejavu/ws"
 	header := http.Header{
 		"x-siyuan-uid":      []string{Conf.User.UserId},
 		"x-siyuan-kernel":   []string{KernelID},

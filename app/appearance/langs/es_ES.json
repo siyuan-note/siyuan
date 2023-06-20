@@ -1,4 +1,6 @@
 {
+  "cloudRegionNorthAmerica": "LiuYun (Centro de datos en América del Norte)"
+  "cloudRegionChina": "LianDi (Centro de datos en China continental)",
   "currentKernel": "Núcleo actual",
   "otherOnlineKernels": "Otros núcleos en línea",
   "syncPerception": "⚗\uFE0F Percepción de sincronización",
@@ -687,7 +689,7 @@
   "login": "Iniciar sesión",
   "accountTip": "He leído y estoy de acuerdo con la <a target='_blank' href='https://b3log.org/siyuan/privacy.html'>Política de privacidad de SiYuan</a>",
   "forgetPassword": "Olvidar la contraseña",
-  "accountName": "Nombre de usuario/correo electrónico/número de teléfono",
+  "accountName": "Nombre de usuario/correo electrónico",
   "account": "Cuenta",
   "globalGraph": "Gráfico global",
   "backlinks": "Enlaces externos",

@@ -108,8 +108,8 @@ export const login = () => {
         <div class="b3-form__icon">
             <svg class="b3-form__icon-icon"><use xlink:href="#iconFocus"></use></svg>
             <select class="b3-select b3-form__icon-input fn__block" id="cloudRegion">
-                <option value="0">ld246.com(China)</option>
-                <option value="1">liuyun.io(Other)</option>
+                <option value="0">${window.siyuan.languages.cloudRegionChina}</option>
+                <option value="1">${window.siyuan.languages.cloudRegionNorthAmerica}</option>
             </select>
         </div>
     <div class="b3-form__img fn__none">

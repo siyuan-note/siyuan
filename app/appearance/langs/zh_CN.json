@@ -1,4 +1,6 @@
 {
+  "cloudRegionNorthAmerica": "流云（北美数据中心）",
+  "cloudRegionChina": "链滴（中国大陆数据中心）",
   "currentKernel": "当前内核",
   "otherOnlineKernels": "其他联机内核",
   "syncPerception": "⚗\uFE0F 同步感知",
@@ -687,7 +689,7 @@
   "login": "登录",
   "accountTip": "我已阅读并同意<a target='_blank' href='https://b3log.org/siyuan/privacy.html'>思源笔记隐私政策</a>",
   "forgetPassword": "忘记密码",
-  "accountName": "用户名/邮箱/手机号",
+  "accountName": "用户名/邮箱",
   "account": "账号",
   "globalGraph": "全局关系图",
   "backlinks": "反向链接",

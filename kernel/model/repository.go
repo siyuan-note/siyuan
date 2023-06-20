@@ -1668,12 +1668,12 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		UserID:        userId,
 		Token:         token,
 		AvailableSize: availableSize,
-		Server:        util.ChinaServer,
+		Server:        util.GetCloudServer(),
 	}
 
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
-		ret.Endpoint = util.ChinaSyncServer
+		ret.Endpoint = util.GetCloudSyncServer()
 	case conf.ProviderS3:
 		ret.S3 = &cloud.ConfS3{
 			Endpoint:      Conf.Sync.S3.Endpoint,

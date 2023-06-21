@@ -36,7 +36,7 @@ ${window.siyuan.languages.account2}
     ${window.siyuan.languages.sponsor}
 </a>`;
         if (onlyPayHTML) {
-            return `<div class="ft__center">${payHTML}</div>`
+            return `<div class="ft__center">${payHTML}</div>`;
         }
         if (window.siyuan.user) {
             let userTitlesHTML = "";
@@ -63,7 +63,7 @@ ${window.siyuan.languages.account2}
     ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} 
     ${window.siyuan.languages.day} 
     <a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>
-</div>`
+</div>`;
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
                     subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
 ${renewHTML}
@@ -330,7 +330,7 @@ ${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account9 : ""
             element.querySelector(".config-account__center--text").innerHTML = account.genHTML(true);
             element.querySelector("#form1").lastElementChild.innerHTML = `<a href="${getCloudURL("forget-pwd")}" class="b3-button b3-button--cancel" target="_blank">${window.siyuan.languages.forgetPassword}</a>
 <span class="fn__space${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}"></span>
-<a href="${getCloudURL("register")}" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>`
+<a href="${getCloudURL("register")}" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>`;
         });
         loginBtnElement.addEventListener("click", () => {
             fetchPost("/api/account/login", {

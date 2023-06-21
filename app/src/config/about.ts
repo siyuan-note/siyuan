@@ -4,14 +4,13 @@ import {ipcRenderer, shell} from "electron";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
-import {setAccessAuthCode} from "./util/setAccessAuthCode";
+import {setAccessAuthCode, setProxy} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {setProxy} from "./util/setProxy";
 import {setKey} from "../sync/syncGuide";
 
 export const about = {

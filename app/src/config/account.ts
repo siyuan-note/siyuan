@@ -10,6 +10,7 @@ import {processSync} from "../dialog/processSystem";
 import {needSubscribe} from "../util/needSubscribe";
 import {syncGuide} from "../sync/syncGuide";
 import {hideElements} from "../protyle/ui/hideElements";
+import {getCloudURL} from "./util/about";
 
 export const account = {
     element: undefined as Element,
@@ -60,18 +61,22 @@ ${window.siyuan.languages.account2}
                 activeSubscriptionHTML = "";
                 subscriptionHTML = `<div class="b3-chip b3-chip--secondary">${Constants.SIYUAN_IMAGE_VIP}${window.siyuan.languages.account12}</div>`;
             } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
+                const renewHTML = `<div class="fn__hr--b"></div>
+<div class="ft__on-surface ft__smaller">
+    ${window.siyuan.languages.account6} 
+    ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} 
+    ${window.siyuan.languages.day} 
+    <a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>
+</div>`
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
                     subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
-<div class="fn__hr--b"></div>
-<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>
+${renewHTML}
 <div class="fn__hr--b"></div>
 ${window.siyuan.languages.account8}
 ${window.siyuan.languages.account9}
 `;
                 } else {
-                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>
-<div class="fn__hr--b"></div>
-<div class="ft__on-surface ft__smaller">${window.siyuan.languages.account6} ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} ${window.siyuan.languages.day} ${window.siyuan.languages.clickMeToRenew}</div>`;
+                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
                 }
             }
             return `<div class="fn__flex config-account">

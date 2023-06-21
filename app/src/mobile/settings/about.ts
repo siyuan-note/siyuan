@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {setAccessAuthCode} from "../../config/util/setAccessAuthCode";
+import {setAccessAuthCode} from "../../config/util/about";
 import {Dialog} from "../../dialog";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";

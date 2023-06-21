@@ -656,6 +656,13 @@ func (conf *AppConf) GetClosedBoxes() (ret []*Box) {
 }
 
 func (conf *AppConf) Language(num int) (ret string) {
+	ret = conf.language(num)
+	subscribeURL := util.GetCloudAccountServer() + "/subscribe/siyuan"
+	ret = strings.ReplaceAll(ret, "${url}", subscribeURL)
+	return
+}
+
+func (conf *AppConf) language(num int) (ret string) {
 	ret = util.Langs[conf.Lang][num]
 	if "" != ret {
 		return

@@ -11,6 +11,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {replaceFileName} from "../../editor/rename";
 import {getDisplayName, movePathTo, pathPosix} from "../../util/pathName";
 import {App} from "../../index";
+import {getCloudURL} from "../../config/util/about";
 
 export class Inbox extends Model {
     private element: Element;
@@ -303,7 +304,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
         相关功能可打开帮助文档搜索 <code>收集箱</code> 查看使用说明
     </li>
     <li class="b3-list--empty">
-        ${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29]}
+        ${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29].replace("${url}", getCloudURL("subscribe/siyuan"))}
     </li>
 </ul>`;
             loadingElement.classList.add("fn__none");

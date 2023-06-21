@@ -326,7 +326,8 @@ interface IDockTab {
 }
 
 interface ICommand {
-    langKey: string, // 多语言 key
+    langKey: string, // 用于区分不同快捷键的 key, 同时作为 i18n 的字段名
+    langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
     hotkey: string,
     customHotkey?: string,
     callback?: () => void

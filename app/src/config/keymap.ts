@@ -39,7 +39,7 @@ export const keymap = {
             item.commands.forEach(command => {
                 const keyValue = updateHotkeyTip(command.customHotkey);
                 commandHTML += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
-    <span class="b3-list-item__text">${item.i18n[command.langKey]}</span>
+    <span class="b3-list-item__text">${command.langText || item.i18n[command.langKey] || command.langKey}</span>
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>

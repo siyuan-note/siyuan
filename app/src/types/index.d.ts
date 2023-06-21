@@ -493,6 +493,7 @@ interface IAccount {
 }
 
 interface IConfig {
+    cloudRegion: number
     bazaar: {
         trust: boolean
     }

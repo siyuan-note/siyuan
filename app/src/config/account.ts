@@ -323,11 +323,12 @@ ${window.siyuan.languages.account9}
             captchaImgElement.setAttribute("src", `https://ld246.com/captcha/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
         });
         loginBtnElement.addEventListener("click", () => {
+            window.siyuan.config.cloudRegion =  parseInt((element.querySelector("#cloudRegion") as HTMLSelectElement).value)
             fetchPost("/api/account/login", {
                 userName: userNameElement.value.replace(/(^\s*)|(\s*$)/g, ""),
                 userPassword: md5(userPasswordElement.value),
                 captcha: captchaElement.value.replace(/(^\s*)|(\s*$)/g, ""),
-                cloudRegion: parseInt((element.querySelector("#cloudRegion") as HTMLSelectElement).value)
+                cloudRegion: window.siyuan.config.cloudRegion,
             }, (data) => {
                 let messageId;
                 if (data.code === 1) {

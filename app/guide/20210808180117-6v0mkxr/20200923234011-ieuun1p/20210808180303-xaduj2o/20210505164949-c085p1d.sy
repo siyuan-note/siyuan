@@ -6,7 +6,7 @@
 		"id": "20210505164949-c085p1d",
 		"title": "Web Clipping",
 		"type": "doc",
-		"updated": "20211019235241"
+		"updated": "20230621111806"
 	},
 	"Children": [
 		{
@@ -65,7 +65,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210505165011-7ik6g6y",
-				"updated": "20211019235222"
+				"updated": "20230621111806"
 			},
 			"Children": [
 				{
@@ -104,7 +104,7 @@
 					},
 					"Properties": {
 						"id": "20210505165011-h6wqx9o",
-						"updated": "20211019235222"
+						"updated": "20230621111806"
 					},
 					"Children": [
 						{
@@ -112,7 +112,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210505165011-crzzegk",
-								"updated": "20211019235222"
+								"updated": "20230621111806"
 							},
 							"Children": [
 								{
@@ -122,8 +122,8 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://ld246.com/article/1629423901669",
-									"TextMarkTextContent": "SiYuan Chome Extension"
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-chrome",
+									"TextMarkTextContent": "SiYuan Chrome Extension"
 								}
 							]
 						}

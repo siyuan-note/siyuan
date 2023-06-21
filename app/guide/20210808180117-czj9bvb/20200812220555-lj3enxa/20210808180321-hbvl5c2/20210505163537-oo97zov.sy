@@ -6,7 +6,7 @@
 		"id": "20210505163537-oo97zov",
 		"title": "剪藏",
 		"type": "doc",
-		"updated": "20220420001611"
+		"updated": "20230621111754"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210505164024-uwvunwm",
-				"updated": "20211019234828"
+				"updated": "20230621111754"
 			},
 			"Children": [
 				{
@@ -106,7 +106,7 @@
 					},
 					"Properties": {
 						"id": "20210505164209-g9651e2",
-						"updated": "20211019234828"
+						"updated": "20230621111754"
 					},
 					"Children": [
 						{
@@ -114,7 +114,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210505164209-s3gbivw",
-								"updated": "20211019234828"
+								"updated": "20230621111754"
 							},
 							"Children": [
 								{
@@ -125,7 +125,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com/article/1629423901669",
-									"TextMarkTextContent": "思源 Chome 扩展"
+									"TextMarkTextContent": "思源 Chrome 扩展"
 								}
 							]
 						}

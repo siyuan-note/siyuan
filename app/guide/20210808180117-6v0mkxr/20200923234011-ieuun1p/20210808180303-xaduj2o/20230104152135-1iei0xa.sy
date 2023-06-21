@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230104152135-1iei0xa",
 		"title": "Share document",
-		"updated": "20230104152253"
+		"updated": "20230621111843"
 	},
 	"Children": [
 		{
@@ -386,7 +386,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104152142-l7x5k2g",
-				"updated": "20230104152253"
+				"updated": "20230621111843"
 			},
 			"Children": [
 				{
@@ -398,7 +398,7 @@
 					},
 					"Properties": {
 						"id": "20230104152142-z9vvov0",
-						"updated": "20230104152142"
+						"updated": "20230621111843"
 					},
 					"Children": [
 						{
@@ -406,17 +406,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104152142-2uwf36x",
-								"updated": "20230104152142"
+								"updated": "20230621111843"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Points are required to share documents to Liandi, please refer to "
+									"Data": "Points are required to share documents to LiuYun, please refer to "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://ld246.com/article/1441724208848",
+									"TextMarkAHref": "https://liuyun.io/article/1685240430351",
 									"TextMarkTextContent": "point rules"
 								}
 							]

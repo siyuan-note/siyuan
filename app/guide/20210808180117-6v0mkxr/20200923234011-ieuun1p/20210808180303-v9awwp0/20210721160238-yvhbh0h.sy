@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721160238-yvhbh0h",
 		"title": "Assets hosting",
-		"updated": "20220708103450"
+		"updated": "20230621111510"
 	},
 	"Children": [
 		{
@@ -224,22 +224,54 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220407085720-uruuriu",
-				"updated": "20220708103445"
+				"updated": "20230621111510"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If you need to delete the files in the cloud assets hosting, please go to "
+					"Data": "If you need to delete the files in the "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " hosting, please go to "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com/settings/file?type=3",
-					"TextMarkTextContent": "LianDi - Settings - File - Note"
+					"TextMarkAHref": "https://liuyun.io/settings/file?type=3",
+					"TextMarkTextContent": "LiuYun - Settings - File - Note"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to operate. After deletion, the cloud storage space occupied by the file will be released immediately, but the CDN cache cleaning may not take effect in time, which will cause the file URL to remain accessible until the CDN cache expires automatically after 30 days."
+					"Data": " to operate. After deletion, the "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "storage"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " space occupied by the file will be released immediately, but the CDN cache cleaning may not take effect in time, which will cause the file URL to remain accessible until the CDN cache expires automatically after 30 days."
 				}
 			]
 		},

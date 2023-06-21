@@ -158,9 +158,9 @@ ${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account9 : ""
         <button id="login" disabled class="b3-button fn__block">${window.siyuan.languages.login}</button>
         <div class="fn__hr--b"></div>
         <div class="ft__center">
-            <a href="https://ld246.com/forget-pwd" class="b3-button b3-button--cancel" target="_blank">${window.siyuan.languages.forgetPassword}</a>
+            <a href="${getCloudURL("forget-pwd")}" class="b3-button b3-button--cancel" target="_blank">${window.siyuan.languages.forgetPassword}</a>
             <span class="fn__space${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}"></span>
-            <a href="https://ld246.com/register" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>
+            <a href="${getCloudURL("register")}" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>
         </div>
     </div>
     <div class="fn__none config-account__form" id="form2">
@@ -328,6 +328,9 @@ ${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account9 : ""
         cloudRegionElement.addEventListener("change", () => {
             window.siyuan.config.cloudRegion = parseInt(cloudRegionElement.value);
             element.querySelector(".config-account__center--text").innerHTML = account.genHTML(true);
+            element.querySelector("#form1").lastElementChild.innerHTML = `<a href="${getCloudURL("forget-pwd")}" class="b3-button b3-button--cancel" target="_blank">${window.siyuan.languages.forgetPassword}</a>
+<span class="fn__space${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}"></span>
+<a href="${getCloudURL("register")}" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>`
         });
         loginBtnElement.addEventListener("click", () => {
             fetchPost("/api/account/login", {

@@ -6,6 +6,7 @@ import {processSync} from "../../dialog/processSystem";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import md5 from "blueimp-md5";
+import {getCloudURL} from "../../config/util/about";
 
 export const showAccountInfo = () => {
     let userTitlesHTML = "";
@@ -108,8 +109,8 @@ export const login = () => {
         <div class="b3-form__icon">
             <svg class="b3-form__icon-icon"><use xlink:href="#iconFocus"></use></svg>
             <select class="b3-select b3-form__icon-input fn__block" id="cloudRegion">
-                <option value="0">${window.siyuan.languages.cloudRegionChina}</option>
-                <option value="1">${window.siyuan.languages.cloudRegionNorthAmerica}</option>
+                <option value="0"${window.siyuan.config.cloudRegion === 0 ? " selected" : ""}>${window.siyuan.languages.cloudRegionChina}</option>
+                <option value="1"${window.siyuan.config.cloudRegion === 1 ? " selected" : ""}>${window.siyuan.languages.cloudRegionNorthAmerica}</option>
             </select>
         </div>
     <div class="b3-form__img fn__none">
@@ -128,9 +129,9 @@ export const login = () => {
     <button id="login" disabled class="b3-button fn__block">${window.siyuan.languages.login}</button>
     <div class="fn__hr--b"></div>
     <div class="ft__center">
-        <a href="https://ld246.com/forget-pwd" class="b3-button b3-button--cancel" target="_blank">${window.siyuan.languages.forgetPassword}</a>
+        <a href="${getCloudURL("forget-pwd")}" class="b3-button b3-button--cancel" target="_blank">${window.siyuan.languages.forgetPassword}</a>
         <span class="fn__space${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}"></span>
-        <a href="https://ld246.com/register" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>
+        <a href="${getCloudURL("register")}" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>
     </div>
 </div>
 <div class="b3-form__space fn__none" id="form2">
@@ -163,8 +164,14 @@ export const login = () => {
             captchaImgElement.addEventListener("click", () => {
                 captchaImgElement.setAttribute("src", `https://ld246.com/captcha/login?needCaptcha=${needCaptcha}&t=${new Date().getTime()}`);
             });
+            const cloudRegionElement = modelMainElement.querySelector("#cloudRegion") as HTMLSelectElement;
+            cloudRegionElement.addEventListener("change", () => {
+                window.siyuan.config.cloudRegion = parseInt(cloudRegionElement.value);
+                modelMainElement.querySelector("#form1").lastElementChild.innerHTML = `<a href="${getCloudURL("forget-pwd")}" class="b3-button b3-button--cancel" target="_blank">${window.siyuan.languages.forgetPassword}</a>
+        <span class="fn__space${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}"></span>
+        <a href="${getCloudURL("register")}" class="b3-button b3-button--cancel${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}" target="_blank">${window.siyuan.languages.register}</a>`
+            });
             loginBtnElement.addEventListener("click", () => {
-                window.siyuan.config.cloudRegion = parseInt((modelMainElement.querySelector("#cloudRegion") as HTMLSelectElement).value)
                 fetchPost("/api/account/login", {
                     userName: userNameElement.value.replace(/(^\s*)|(\s*$)/g, ""),
                     userPassword: md5(userPasswordElement.value),

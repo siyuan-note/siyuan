@@ -52,6 +52,9 @@ func ConvertPandoc(args ...string) (err error) {
 
 func Pandoc(from, to, o, content string) (err error) {
 	if "" == from || "" == to || "md" == to {
+		if err = gulu.File.WriteFileSafer(o, []byte(content), 0644); nil != err {
+			logging.LogErrorf("write export markdown file [%s] failed: %s", o, err)
+		}
 		return
 	}
 

@@ -727,9 +727,17 @@ export const bazaar = {
                         }, (response) => {
                             target.removeAttribute("disabled");
                             if (enabled) {
-                                loadPlugin(app, response.data);
+                                loadPlugin(app, response.data).then((plugin: Plugin) => {
+                                    // @ts-ignore
+                                    if (plugin.setting || plugin.__proto__.hasOwnProperty("openSetting")) {
+                                        target.parentElement.querySelector('[data-type="setting"]').classList.remove("fn__none");
+                                    } else {
+                                        target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
+                                    }
+                                });
                             } else {
                                 uninstall(app, dataObj.name);
+                                target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
                             }
                         });
                     }
@@ -852,7 +860,7 @@ export const bazaar = {
                     }
                     localSort[selectElement.parentElement.parentElement.getAttribute("data-type")] = selectElement.value;
                     setStorageVal(Constants.LOCAL_BAZAAR, window.siyuan.storage[Constants.LOCAL_BAZAAR]);
-                    if (cardElements.length > 1 && cardElements.length % 2 ===1) {
+                    if (cardElements.length > 1 && cardElements.length % 2 === 1) {
                         html += '<div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div>';
                     }
                     panelElement.querySelector(".b3-cards").innerHTML = html;
@@ -908,7 +916,7 @@ export const bazaar = {
                 html += item.outerHTML;
             });
         }
-        if (response.data.packages.length > 1 && response.data.packages.length % 2 ===1) {
+        if (response.data.packages.length > 1 && response.data.packages.length % 2 === 1) {
             html += '<div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div>';
         }
         element.innerHTML = `<div class="b3-cards">${html}</div>`;

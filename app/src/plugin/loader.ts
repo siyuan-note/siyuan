@@ -80,6 +80,7 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
         errorExit: false
     });
     /// #endif
+    return plugin;
 };
 
 

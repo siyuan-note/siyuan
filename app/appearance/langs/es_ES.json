@@ -1117,7 +1117,7 @@
     "147": "Creó una nueva instantánea de datos, tomó %.2fs",
     "148": "Se ha comprobado la instantánea de los datos y no se encontro ningún cambio, tomó %.2fs",
     "149": "La instantánea de datos ha sido sincronizada, ha tomado %.2fs",
-    "150": "archivos cargados/descargados %d/%d\n  fragmentos cargados/descargados %d/%d\n  bytes enviados/recibidos %s/%s",
+    "150": "archivos cargados/descargados %d/%d<br>  fragmentos cargados/descargados %d/%d<br>  bytes enviados/recibidos %s/%s",
     "151": "No incluir símbolos \\ / : * ? &quot; &#039; &lt; &gt; |",
     "152": "Archivos cargados %d, fragmentos %d, bytes enviados %s",
     "153": "Archivos descargados %d, fragmentos %d, bytes recibidos %s",

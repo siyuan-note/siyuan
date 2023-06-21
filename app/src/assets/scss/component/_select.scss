@@ -12,6 +12,7 @@
   background: var(--b3-select-background);
   appearance: none;
   cursor: pointer;
+  overflow: hidden; // iphonex
 
   &:hover {
     box-shadow: inset 0 0 0 .6px var(--b3-theme-on-background);

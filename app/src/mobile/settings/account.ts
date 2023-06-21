@@ -23,15 +23,15 @@ export const showAccountInfo = () => {
         html: `<div class="fn__flex-column">
 <div class="config-account__bg">
     <div class="config-account__cover" style="background-image: url(${window.siyuan.user.userHomeBImgURL})"></div>
-    <a href="https://ld246.com/settings/avatar" class="config-account__avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
+    <a href="${getCloudURL("settings/avatar")}" class="config-account__avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
     <h1 class="config-account__name">
-        <a target="_blank" class="fn__a" href="https://ld246.com/member/${window.siyuan.user.userName}">${window.siyuan.user.userName}</a>
+        <a target="_blank" class="fn__a" href="${getCloudURL("member/" + window.siyuan.user.userName)}">${window.siyuan.user.userName}</a>
     </h1>
     ${userTitlesHTML}
 </div>
 <div class="config-account__info">
     <div class="fn__flex">
-        <a class="b3-button b3-button--text" href="https://ld246.com/settings" target="_blank">${window.siyuan.languages.accountManage}</a>
+        <a class="b3-button b3-button--text" href="${getCloudURL("settings")}" target="_blank">${window.siyuan.languages.accountManage}</a>
         <span class="fn__space"></span>
         <button class="b3-button b3-button--cancel" id="logout">
             ${window.siyuan.languages.logout}

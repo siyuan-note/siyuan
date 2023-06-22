@@ -307,6 +307,7 @@ const openPlugin = (app: App, target: Element) => {
     app.plugins.forEach((plugin) => {
         // @ts-ignore
         const hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
+        let hasTopBar = false;
         plugin.topBarIcons.forEach(item => {
             const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
             const submenu = [{
@@ -351,7 +352,18 @@ const openPlugin = (app: App, target: Element) => {
             }
             menu.addItem(menuOption);
             hasPlugin = true;
+            hasTopBar = true;
         });
+        if (!hasTopBar && hasSetting) {
+            hasPlugin = true;
+            menu.addItem({
+                icon: "iconSettings",
+                label: plugin.name,
+                click() {
+                    plugin.openSetting();
+                }
+            });
+        }
     });
 
     if (hasPlugin) {

@@ -398,9 +398,9 @@ const initKernel = (workspace, port, lang) => {
             icon: path.join(appDir, "stage", "icon-large.png"),
         });
 
-        let bootIndex = path.join(appDir, "app", "electron", "index.html");
+        let bootIndex = path.join(appDir, "app", "electron", "boot.html");
         if (isDevEnv) {
-            bootIndex = path.join(appDir, "electron", "index.html");
+            bootIndex = path.join(appDir, "electron", "boot.html");
         }
         bootWindow.loadFile(bootIndex);
         bootWindow.show();

@@ -522,20 +522,6 @@ func nodeContentByBlock(block *Block) (ret string) {
 	return
 }
 
-func nodeContentByNode(node *ast.Node, text string) (ret string) {
-	if ret = node.IALAttr("name"); "" != ret {
-		return
-	}
-	if ret = node.IALAttr("memo"); "" != ret {
-		return
-	}
-	if maxLen := 48; maxLen < utf8.RuneCountInString(text) {
-		text = gulu.Str.SubStr(text, maxLen) + "..."
-	}
-	ret = html.EscapeString(text)
-	return
-}
-
 func graphTypeFilter(local bool) string {
 	var inList []string
 

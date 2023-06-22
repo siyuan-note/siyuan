@@ -26,6 +26,7 @@ export const showAccountInfo = () => {
     <a href="${getCloudURL("settings/avatar")}" class="config-account__avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
     <h1 class="config-account__name">
         <a target="_blank" class="fn__a" href="${getCloudURL("member/" + window.siyuan.user.userName)}">${window.siyuan.user.userName}</a>
+        <span class="ft__on-surface ft__smaller">${0 === window.siyuan.config.cloudRegion ? "ld246.com":"liuyun.io"}</span>
     </h1>
     ${userTitlesHTML}
 </div>

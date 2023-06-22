@@ -398,6 +398,13 @@ const initKernel = (workspace, port, lang) => {
             icon: path.join(appDir, "stage", "icon-large.png"),
         });
 
+        let bootIndex = path.join(appDir, "app", "electron", "index.html");
+        if (isDevEnv) {
+            bootIndex = path.join(appDir, "electron", "index.html");
+        }
+        bootWindow.loadFile(bootIndex);
+        bootWindow.show();
+
         const kernelName = "win32" === process.platform ? "SiYuan-Kernel.exe" : "SiYuan-Kernel";
         const kernelPath = path.join(appDir, "kernel", kernelName);
         if (!fs.existsSync(kernelPath)) {

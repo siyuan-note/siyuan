@@ -52,7 +52,7 @@ var (
 )
 
 func Boot() {
-	IncBootProgress(3, "Booting...")
+	IncBootProgress(3, "Booting kernel...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
 	initHttpClient()

@@ -29,7 +29,7 @@ import (
 )
 
 func BootMobile(container, appDir, workspaceBaseDir, lang string) {
-	IncBootProgress(3, "Booting...")
+	IncBootProgress(3, "Booting kernel...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
 	initHttpClient()

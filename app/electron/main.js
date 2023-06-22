@@ -402,7 +402,7 @@ const initKernel = (workspace, port, lang) => {
         if (isDevEnv) {
             bootIndex = path.join(appDir, "electron", "boot.html");
         }
-        bootWindow.loadFile(bootIndex);
+        bootWindow.loadFile(bootIndex, {query: {v: appVer}});
         bootWindow.show();
 
         const kernelName = "win32" === process.platform ? "SiYuan-Kernel.exe" : "SiYuan-Kernel";

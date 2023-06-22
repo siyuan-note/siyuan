@@ -33,6 +33,23 @@
     const sleep = (ms) => {
         return new Promise(resolve => setTimeout(resolve, ms))
     }
+
+    const getSearch = (key) => {
+        if (window.location.search.indexOf('?') === -1) {
+            return ''
+        }
+        let value = ''
+        const data = window.location.search.split('?')[1].split('&')
+        data.find(item => {
+            const keyValue = item.split('=')
+            if (keyValue[0] === key) {
+                value = keyValue[1]
+                return true
+            }
+        })
+        return value
+    }
+
     const redirect = () => {
         const uri = 'http://127.0.0.1:' + location.port
         if (navigator.userAgent.match(/Android/i))
@@ -41,7 +58,8 @@
             window.location.replace(uri)
     }
     (async () => {
-        document.getElementById('details').textContent = 'Booting kernel...'
+        const v = getSearch('v')
+        document.getElementById('details').textContent = "v" + v + ' Booting kernel...'
         let progressing = false
         while (!progressing) {
             try {

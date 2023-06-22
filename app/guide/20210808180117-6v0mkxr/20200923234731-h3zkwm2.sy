@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230617085510"
+		"updated": "20230622164128"
 	},
 	"Children": [
 		{
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210428222603-moih9fe",
-				"updated": "20230512170538"
+				"updated": "20230622164128"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 					},
 					"Properties": {
 						"id": "20210428222603-gxgx3vi",
-						"updated": "20221202215029"
+						"updated": "20230622164117"
 					},
 					"Children": [
 						{
@@ -80,7 +80,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428222603-0goch51",
-								"updated": "20221202215029"
+								"updated": "20230622164117"
 							},
 							"Children": [
 								{
@@ -94,7 +94,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ is used to save all inserted "
+									"Data": "​ is used to save all inserted "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -116,7 +116,7 @@
 					},
 					"Properties": {
 						"id": "20221202214756-6a5qi9y",
-						"updated": "20221202215034"
+						"updated": "20230622164118"
 					},
 					"Children": [
 						{
@@ -124,7 +124,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202214756-polklnd",
-								"updated": "20221202215034"
+								"updated": "20230622164118"
 							},
 							"Children": [
 								{
@@ -138,7 +138,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ is used to save emoji images"
+									"Data": "​ is used to save emoji images"
 								}
 							]
 						}
@@ -153,7 +153,7 @@
 					},
 					"Properties": {
 						"id": "20221202214758-dtqv6vc",
-						"updated": "20221202215043"
+						"updated": "20230622164121"
 					},
 					"Children": [
 						{
@@ -161,7 +161,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202214758-5u6jitp",
-								"updated": "20221202215043"
+								"updated": "20230622164121"
 							},
 							"Children": [
 								{
@@ -175,7 +175,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ is used to save code snippets"
+									"Data": "​ is used to save code snippets"
 								}
 							]
 						}
@@ -190,7 +190,7 @@
 					},
 					"Properties": {
 						"id": "20221202214811-2s26txl",
-						"updated": "20230429085233"
+						"updated": "20230622164122"
 					},
 					"Children": [
 						{
@@ -198,7 +198,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202214811-p1eevpi",
-								"updated": "20230429085233"
+								"updated": "20230622164122"
 							},
 							"Children": [
 								{
@@ -212,7 +212,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ is used to save query conditions, layouts and "
+									"Data": "​ is used to save query conditions, layouts and "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -238,7 +238,7 @@
 					},
 					"Properties": {
 						"id": "20210428222603-vtr89xq",
-						"updated": "20221202215047"
+						"updated": "20230622164124"
 					},
 					"Children": [
 						{
@@ -246,7 +246,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428222603-criebuv",
-								"updated": "20221202215047"
+								"updated": "20230622164124"
 							},
 							"Children": [
 								{
@@ -260,7 +260,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ is used to save "
+									"Data": "​ is used to save "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -282,7 +282,7 @@
 					},
 					"Properties": {
 						"id": "20210428222603-456vgdh",
-						"updated": "20221202215048"
+						"updated": "20230622164126"
 					},
 					"Children": [
 						{
@@ -290,7 +290,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428222603-m3djncm",
-								"updated": "20221202215048"
+								"updated": "20230622164126"
 							},
 							"Children": [
 								{
@@ -304,7 +304,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ is used to save "
+									"Data": "​ is used to save "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -326,7 +326,7 @@
 					},
 					"Properties": {
 						"id": "20230512170526-zvfzhdo",
-						"updated": "20230512170538"
+						"updated": "20230622164127"
 					},
 					"Children": [
 						{
@@ -334,7 +334,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230512170526-3ivxdkg",
-								"updated": "20230512170538"
+								"updated": "20230622164127"
 							},
 							"Children": [
 								{
@@ -356,6 +356,43 @@
 									"TextMarkBlockRefID": "20230506205948-yah52eb",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "plugins"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230622163438-rv3hdrd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230622163438-rv3hdrd",
+						"updated": "20230622164128"
+					},
+					"Children": [
+						{
+							"ID": "20230622163438-7doq6me",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230622163438-7doq6me",
+								"updated": "20230622164128"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "public"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save public data"
 								}
 							]
 						}
@@ -391,7 +428,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​ in the notebook folder are used to save the document data, and the data format is JSON"
+									"Data": "​​​​ in the notebook folder are used to save the document data, and the data format is JSON"
 								}
 							]
 						}

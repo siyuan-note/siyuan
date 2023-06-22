@@ -204,6 +204,7 @@ The data is saved in the workspace folder, in the workspace data folder:
 * `templates` is used to save template snippets
 * `widgets` is used to save widgets
 * `plugins` is used to save plugins
+* `public` is used to save public data
 * The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
 
 ### Does it support data synchronization through a third-party sync disk?

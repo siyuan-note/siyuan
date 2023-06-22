@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230617085423"
+		"updated": "20230622164112"
 	},
 	"Children": [
 		{
@@ -55,7 +55,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115356-i1v42hf",
-				"updated": "20230512170521"
+				"updated": "20230622164112"
 			},
 			"Children": [
 				{
@@ -67,7 +67,7 @@
 					},
 					"Properties": {
 						"id": "20211226115356-2dufb3s",
-						"updated": "20220329160516"
+						"updated": "20230622164100"
 					},
 					"Children": [
 						{
@@ -75,7 +75,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115356-ymtmyye",
-								"updated": "20220329160516"
+								"updated": "20230622164100"
 							},
 							"Children": [
 								{
@@ -89,7 +89,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​ 用於保存所有插入的"
+									"Data": "​ 用於保存所有插入的"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -110,7 +110,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221202215155-za7sgpu"
+						"id": "20221202215155-za7sgpu",
+						"updated": "20230622164101"
 					},
 					"Children": [
 						{
@@ -118,7 +119,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202215155-gzavzm9",
-								"updated": "20221202215210"
+								"updated": "20230622164101"
 							},
 							"Children": [
 								{
@@ -132,7 +133,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 用於保存自定義圖標表情圖片"
+									"Data": "​ 用於保存自定義圖標表情圖片"
 								}
 							]
 						}
@@ -146,7 +147,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221202215213-i82djox"
+						"id": "20221202215213-i82djox",
+						"updated": "20230622164104"
 					},
 					"Children": [
 						{
@@ -154,7 +156,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202215213-r3f80k4",
-								"updated": "20221202215224"
+								"updated": "20230622164104"
 							},
 							"Children": [
 								{
@@ -168,7 +170,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 用於保存代碼片段"
+									"Data": "​ 用於保存代碼片段"
 								}
 							]
 						}
@@ -183,7 +185,7 @@
 					},
 					"Properties": {
 						"id": "20221202215226-ibnf53j",
-						"updated": "20230429085324"
+						"updated": "20230622164105"
 					},
 					"Children": [
 						{
@@ -191,7 +193,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202215226-n689p7u",
-								"updated": "20230429085324"
+								"updated": "20230622164105"
 							},
 							"Children": [
 								{
@@ -205,7 +207,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​ 用於保存查詢條件、佈局和"
+									"Data": "​ 用於保存查詢條件、佈局和"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -231,7 +233,7 @@
 					},
 					"Properties": {
 						"id": "20211226115356-dmkm408",
-						"updated": "20211228104617"
+						"updated": "20230622164108"
 					},
 					"Children": [
 						{
@@ -239,7 +241,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115356-k4ju5n9",
-								"updated": "20211228104617"
+								"updated": "20230622164108"
 							},
 							"Children": [
 								{
@@ -253,7 +255,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​ 用於保存"
+									"Data": "​ 用於保存"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -275,7 +277,7 @@
 					},
 					"Properties": {
 						"id": "20211226115356-nmsm4tw",
-						"updated": "20220329160520"
+						"updated": "20230622164109"
 					},
 					"Children": [
 						{
@@ -283,7 +285,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115356-za90b90",
-								"updated": "20220329160520"
+								"updated": "20230622164109"
 							},
 							"Children": [
 								{
@@ -297,7 +299,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​ 用於保存"
+									"Data": "​ 用於保存"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -319,7 +321,7 @@
 					},
 					"Properties": {
 						"id": "20230512170447-3eatvgq",
-						"updated": "20230512170521"
+						"updated": "20230622164111"
 					},
 					"Children": [
 						{
@@ -327,7 +329,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230512170447-iqoofli",
-								"updated": "20230512170521"
+								"updated": "20230622164111"
 							},
 							"Children": [
 								{
@@ -349,6 +351,43 @@
 									"TextMarkBlockRefID": "20230506211210-1roopyo",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "插件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230622163358-qstuia6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230622163358-qstuia6",
+						"updated": "20230622164112"
+					},
+					"Children": [
+						{
+							"ID": "20230622163358-umo8p61",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230622163358-umo8p61",
+								"updated": "20230622164112"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "public"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用於保存公開的數據"
 								}
 							]
 						}
@@ -385,7 +424,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​​ 後綴的文件用於保存文檔資料，資料格式為 JSON"
+									"Data": "​​​​ 後綴的文件用於保存文檔資料，資料格式為 JSON"
 								}
 							]
 						}

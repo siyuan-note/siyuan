@@ -14,6 +14,7 @@ import {Constants} from "../constants";
 import {Model} from "../layout/Model";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";
+import { Protyle } from "../protyle";
 
 let openTab;
 /// #if MOBILE
@@ -148,6 +149,7 @@ export const API = {
     getFrontend,
     getBackend,
     openTab,
+    Protyle,
     Plugin,
     Dialog,
     Menu,

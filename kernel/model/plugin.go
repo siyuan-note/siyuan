@@ -40,6 +40,34 @@ type Petal struct {
 	I18n map[string]interface{} `json:"i18n"` // i18n text
 }
 
+type PetalConf struct {
+	Enabled bool `json:"enabled"`
+}
+
+func (conf *PetalConf) Save() {
+	if util.ReadOnly {
+		return
+	}
+
+	petalsStoreLock.Lock()
+	defer petalsStoreLock.Unlock()
+
+	data, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	petalDir := filepath.Join(util.DataDir, "storage", "petal")
+	if err := os.MkdirAll(petalDir, 0777); nil != err {
+		logging.LogErrorf("create petal dir [%s] failed: %s", petalDir, err)
+		util.ReportFileSysFatalError(err)
+		return
+	}
+
+	confPath := filepath.Join(petalDir, "conf.json")
+	if err := filelock.WriteFile(confPath, data); nil != err {
+		logging.LogErrorf("write petal conf [%s] failed: %s", confPath, err)
+		util.ReportFileSysFatalError(err)
+		return
+	}
+}
+
 func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, err error) {
 	petals := getPetals()
 
@@ -71,6 +99,25 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 
 func LoadPetals(frontend string) (ret []*Petal) {
 	ret = []*Petal{}
+
+	petalDir := filepath.Join(util.DataDir, "storage", "petal")
+	confPath := filepath.Join(petalDir, "conf.json")
+	if gulu.File.IsExist(confPath) {
+		data, err := filelock.ReadFile(confPath)
+		if nil != err {
+			logging.LogErrorf("read petal conf [%s] failed: %s", confPath, err)
+		} else {
+			petalConf := &PetalConf{}
+			if err = gulu.JSON.UnmarshalJSON(data, petalConf); nil != err {
+				logging.LogErrorf("unmarshal petal conf [%s] failed: %s", confPath, err)
+			} else {
+				if !petalConf.Enabled {
+					return
+				}
+			}
+		}
+	}
+
 	petals := getPetals()
 	for _, petal := range petals {
 		_, petal.Incompatible = bazaar.IsIncompatibleInstalledPlugin(petal.Name, frontend)

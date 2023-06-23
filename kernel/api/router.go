@@ -363,4 +363,5 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, model.CheckReadonly, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckReadonly, setPetalEnabled)
+	ginServer.Handle("POST", "/api/petal/setPetalConf", model.CheckAuth, model.CheckReadonly, setPetalConf)
 }

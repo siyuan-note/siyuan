@@ -61,3 +61,29 @@ func setPetalEnabled(c *gin.Context) {
 
 	ret.Data = data
 }
+
+func setPetalConf(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	conf := &model.PetalConf{}
+	if err = gulu.JSON.UnmarshalJSON(param, conf); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	conf.Save()
+}

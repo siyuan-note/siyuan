@@ -72,7 +72,7 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 func LoadPetals(frontend string) (ret []*Petal) {
 	ret = []*Petal{}
 
-	if !Conf.Bazaar.Petal {
+	if Conf.Bazaar.PetalDisabled {
 		return
 	}
 

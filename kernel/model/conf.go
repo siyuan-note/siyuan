@@ -554,7 +554,7 @@ func (conf *AppConf) Save() {
 	}
 
 	confSaveLock.Lock()
-	confSaveLock.Unlock()
+	defer confSaveLock.Unlock()
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")

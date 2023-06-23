@@ -44,7 +44,7 @@ type PetalConf struct {
 	Enabled bool `json:"enabled"`
 }
 
-func (conf *PetalConf) Save() {
+func (pConf *PetalConf) Save() {
 	if util.ReadOnly {
 		return
 	}
@@ -52,11 +52,10 @@ func (conf *PetalConf) Save() {
 	petalsStoreLock.Lock()
 	defer petalsStoreLock.Unlock()
 
-	data, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	data, _ := gulu.JSON.MarshalIndentJSON(pConf, "", "  ")
 	petalDir := filepath.Join(util.DataDir, "storage", "petal")
 	if err := os.MkdirAll(petalDir, 0777); nil != err {
 		logging.LogErrorf("create petal dir [%s] failed: %s", petalDir, err)
-		util.ReportFileSysFatalError(err)
 		return
 	}
 

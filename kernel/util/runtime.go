@@ -165,6 +165,8 @@ func CheckFileSysStatus() {
 	}
 
 	for {
+		time.Sleep(10 * time.Second)
+		ReportFileSysFatalError(fmt.Errorf("test error"))
 		<-thirdPartySyncCheckTicker.C
 		checkFileSysStatus()
 	}

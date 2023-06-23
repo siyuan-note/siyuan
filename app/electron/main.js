@@ -135,8 +135,8 @@ const showErrorWindow = (title, content) => {
         errorHTMLPath = path.join(appDir, "electron", "error.html");
     }
     const errWindow = new BrowserWindow({
-        width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
-        height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
+        width: Math.floor(screen.getPrimaryDisplay().size.width * 0.5),
+        height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
         frame: false,
         icon: path.join(appDir, "stage", "icon-large.png"),
         webPreferences: {
@@ -488,7 +488,7 @@ const initKernel = (workspace, port, lang) => {
                             errorWindowId = showErrorWindow("⚠️ 初始化工作空间失败 Failed to create workspace directory", "<div>初始化工作空间失败。</div><div>Failed to init workspace.</div>");
                             break;
                         case 26:
-                            errorWindowId = showErrorWindow("⚠️ 文件系统读写错误 File system access error", "<div>1. 请检查文件系统权限，并确保没有其他程序正在读写文件<br>2. 请勿使用第三方同步盘进行数据同步，否则数据会被损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）<br><br>解决方案：请将工作空间移动到其他路径后再打开</div><div>1. Please check file system permissions and make sure no other programs are reading or writing to the file<br>2. Do not use a third-party sync disk for data sync, otherwise the data will be damaged (OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)<br><br>Solution: Please move the workspace to another path before opening it</div>");
+                            errorWindowId = showErrorWindow("🚒 已成功避免潜在的数据损坏<br>Successfully avoid potential data corruption", "<div>工作空间下的文件正在被第三方软件（比如同步盘 iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等）扫描读取占用，继续使用会导致数据损坏，思源内核已经安全退出。<br><br>请将工作空间移动到其他路径后再打开，停止同步盘同步工作空间。如果以上步骤无法解决问题，请参考<a href=\"https://ld246.com/article/1684586140917\">这里</a>或者<a href=\"https://ld246.com/article/1649901726096\" target=\"_blank\">发帖</a>寻求帮助。</div><hr><div>The files in the workspace are being scanned and read by third-party software (such as sync disk iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continuing to use it will cause data corruption, and the SiYuan kernel is already safe shutdown.<br><br>Move the workspace to another path and open it again, stop the sync disk to sync the workspace. If the above steps do not resolve the issue, please look for help or report bugs <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">here</a>.</div>");
                             break;
                         case 0:
                             break;

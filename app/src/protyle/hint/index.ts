@@ -619,6 +619,20 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
+            } else if (value.startsWith("plugin")) {
+                protyle.app.plugins.find((plugin) => {
+                    const ids = value.split(Constants.ZWSP)
+                    if (ids[1] === plugin.name) {
+                        plugin.protyleSlash.find((slash) => {
+                            if (slash.id === ids[2]){
+                                slash.callback(protyle.getInstance());
+                                return true;
+                            }
+                        })
+                        return  true;
+                    }
+                })
+                return;
             } else {
                 range.deleteContents();
                 if (value !== "![]()") {

@@ -46,13 +46,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         filter: ["ai chat"],
         value: Constants.ZWSP + 5,
         html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
-    },
-    // {
-    //     filter: ["属性视图", "shuxingshitu", "sxst", "attribute view"],
-    //     value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
-    //     html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.attributeView}</span></div>`,
-    // },
-    {
+    }/*,{
+        filter: ["属性视图", "shuxingshitu", "sxst", "attribute view"],
+        value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.attributeView}</span></div>`,
+    }*/, {
         filter: ["文档", "子文档", "wendang", "wd", "ziwendang", "zwd", "xjwd"],
         value: Constants.ZWSP + 4,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span></div>`,
@@ -249,6 +247,24 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: `style${Constants.ZWSP}`,
         html: `<div class="b3-list-item__first"><div class="color__square">A</div><span class="b3-list-item__text">${window.siyuan.languages.clearFontStyle}</span></div>`,
     }];
+    allList.push({
+        value: "",
+        html: "separator",
+    });
+    let hasPlugin = false;
+    protyle.app.plugins.forEach((plugin) => {
+        plugin.protyleSlash.forEach(slash => {
+            allList.push({
+                filter: slash.filter,
+                value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
+                html: slash.html
+            });
+            hasPlugin = true;
+        });
+    });
+    if (!hasPlugin) {
+        allList.pop();
+    }
     if (key === "") {
         return allList;
     }
@@ -309,7 +325,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
         id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
         rootID: protyle.block.rootID,
-        isSquareBrackets:  ["[[", "【【"].includes(protyle.hint.splitChar)
+        isSquareBrackets: ["[[", "【【"].includes(protyle.hint.splitChar)
     }, (response) => {
         const dataList: IHintData[] = [];
         if (response.data.newDoc) {
@@ -322,8 +338,8 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
         }
         response.data.blocks.forEach((item: IBlock) => {
             let iconHTML;
-            if (item.type === "NodeDocument" && item.ial.icon){
-                iconHTML  = unicode2Emoji(item.ial.icon, "b3-list-item__graphic popover__block", true);
+            if (item.type === "NodeDocument" && item.ial.icon) {
+                iconHTML = unicode2Emoji(item.ial.icon, "b3-list-item__graphic popover__block", true);
                 iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`);
             } else {
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
@@ -386,8 +402,8 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
         const dataList: IHintData[] = [];
         response.data.blocks.forEach((item: IBlock) => {
             let iconHTML;
-            if (item.type === "NodeDocument" && item.ial.icon){
-                iconHTML  = unicode2Emoji(item.ial.icon, "b3-list-item__graphic popover__block", true);
+            if (item.type === "NodeDocument" && item.ial.icon) {
+                iconHTML = unicode2Emoji(item.ial.icon, "b3-list-item__graphic popover__block", true);
                 iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`);
             } else {
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
@@ -514,7 +530,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
         });
     } else if (protyle.block.showAll && parentElement.classList.contains("protyle-wysiwyg") && parentElement.childElementCount === 0) {
         setTimeout(() => {
-            zoomOut({protyle, id: protyle.block.parent2ID, focusId:protyle.block.parent2ID});
+            zoomOut({protyle, id: protyle.block.parent2ID, focusId: protyle.block.parent2ID});
         }, Constants.TIMEOUT_INPUT * 2 + 100);
     } else if (parentElement.classList.contains("protyle-wysiwyg") && parentElement.innerHTML === "" &&
         !hasClosestByClassName(parentElement, "block__edit", true) &&

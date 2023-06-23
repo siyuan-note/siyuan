@@ -46,6 +46,7 @@ export class Protyle {
         const mergedOptions = getOptions.merge();
 
         this.protyle = {
+            getInstance: () => this,
             app,
             transactionTime: new Date().getTime(),
             id: genUUID(),

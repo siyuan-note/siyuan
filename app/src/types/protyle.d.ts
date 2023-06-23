@@ -407,6 +407,7 @@ interface IOptions {
 }
 
 interface IProtyle {
+    getInstance: () => import("../protyle").Protyle,
     app: import("../index").App,
     transactionTime: number,
     id: string,

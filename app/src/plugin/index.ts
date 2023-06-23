@@ -17,6 +17,12 @@ export class Plugin {
     public eventBus: EventBus;
     public data: any = {};
     public name: string;
+    public protyleSlash: {
+        filter: string[],
+        html: string,
+        id: string,
+        callback: (protyle: import("../protyle").Protyle) => void
+    }[] = [];
     // TODO
     public customBlockRenders: {
         [key: string]: {

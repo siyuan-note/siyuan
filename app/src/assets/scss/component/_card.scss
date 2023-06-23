@@ -32,6 +32,11 @@
     background-color: var(--b3-theme-primary-lightest)
   }
 
+  &--disabled {
+    opacity: .68;
+    pointer-events: none;
+  }
+
   &__img {
     margin: 16px 0 16px 16px;
 

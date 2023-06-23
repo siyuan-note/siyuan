@@ -497,6 +497,7 @@ interface IConfig {
     cloudRegion: number
     bazaar: {
         trust: boolean
+        petalDisabled: boolean
     }
     repo: {
         key: string

@@ -111,6 +111,7 @@ func LoadPetals(frontend string) (ret []*Petal) {
 				logging.LogErrorf("unmarshal petal conf [%s] failed: %s", confPath, err)
 			} else {
 				if !petalConf.Enabled {
+					logging.LogInfof("plugin system has been disabled")
 					return
 				}
 			}

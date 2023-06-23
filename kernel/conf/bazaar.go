@@ -18,10 +18,12 @@ package conf
 
 type Bazaar struct {
 	Trust bool `json:"trust"`
+	Petal bool `json:"petal"`
 }
 
 func NewBazaar() *Bazaar {
 	return &Bazaar{
 		Trust: false,
+		Petal: true,
 	}
 }

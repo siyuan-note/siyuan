@@ -13,7 +13,7 @@
     <Properties>
         <DisplayName>SiYuan</DisplayName>
         <PublisherDisplayName>云南链滴科技有限公司</PublisherDisplayName>
-        <Description>Build Your Eternal Digital Garden</Description>
+        <Description>Refactor your thinking</Description>
         <Logo>assets\StoreLogo.png</Logo>
     </Properties>
     <Resources>
@@ -33,7 +33,7 @@
                     DisplayName="SiYuan"
                     Square150x150Logo="assets\Square150x150Logo.png"
                     Square44x44Logo="assets\Square44x44Logo.png"
-                    Description="Build Your Eternal Digital Garden">
+                    Description="Refactor your thinking">
 
                 <uap:DefaultTile Wide310x150Logo="assets\Wide310x150Logo.png"/>
 

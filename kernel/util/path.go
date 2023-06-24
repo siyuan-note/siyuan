@@ -1,4 +1,4 @@
-// SiYuan - Build Your Eternal Digital Garden
+// SiYuan - Refactor your thinking
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,6 @@ var (
 	SSL       = false
 	UserAgent = "SiYuan/" + Ver
 )
-
 
 func ShortPathForBootingDisplay(p string) string {
 	if 25 > len(p) {

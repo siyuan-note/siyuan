@@ -138,7 +138,9 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	pushBroadcastAttrTransactions(oldAttrs, node)
 
 	go func() {
-		sql.WaitForWritingDatabase()
+		if !sql.IsEmptyQueue() {
+			sql.WaitForWritingDatabase()
+		}
 		refreshDynamicRefText(node, tree)
 	}()
 	return

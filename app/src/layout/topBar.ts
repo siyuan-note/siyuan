@@ -304,6 +304,21 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
 
 const openPlugin = (app: App, target: Element) => {
     const menu = new Menu("topBarPlugin");
+    menu.addItem({
+        icon: "iconSettings",
+        label: window.siyuan.languages.config,
+        click() {
+            openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+        }
+    });
+    menu.addItem({
+        icon: "iconLayoutBottom",
+        label: window.siyuan.languages.commandPanel,
+        click() {
+            commandPanel(app);
+        }
+    });
+    menu.addSeparator();
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {
         // @ts-ignore
@@ -366,25 +381,9 @@ const openPlugin = (app: App, target: Element) => {
             });
         }
     });
-
-    if (hasPlugin) {
-        menu.addSeparator();
+    if (!hasPlugin) {
+        window.siyuan.menus.menu.element.querySelector(".b3-menu__separator").remove()
     }
-    menu.addItem({
-        icon: "iconSettings",
-        label: window.siyuan.languages.config,
-        click() {
-            const dialogSetting = openSetting(app);
-            dialogSetting.element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
-        }
-    });
-    menu.addItem({
-        icon: "iconLayoutBottom",
-        label: window.siyuan.languages.commandPanel,
-        click() {
-            commandPanel();
-        }
-    });
     let rect = target.getBoundingClientRect();
     if (rect.width === 0) {
         rect = document.querySelector("#barMore").getBoundingClientRect();

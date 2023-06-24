@@ -411,8 +411,9 @@
         const path = require('path')
         const iCloudRoot = path.join(decodeURIComponent(getSearch('home')), 'Library', 'Mobile Documents')
         const allFiles = walk(iCloudRoot)
+        const absPathLower = absPath.toLowerCase()
         for (const file of allFiles) {
-            if (-1 < absPath.indexOf(file.toLowerCase())) {
+            if (-1 < absPathLower.indexOf(file.toLowerCase())) {
                 return true
             }
         }

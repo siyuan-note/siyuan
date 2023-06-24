@@ -502,7 +502,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		assetsDone := map[string]string{}
 
 		// md 转换 sy
-		i := 0
 		filepath.Walk(localPath, func(currentPath string, info os.FileInfo, walkErr error) error {
 			if strings.HasPrefix(info.Name(), ".") {
 				if info.IsDir() {
@@ -538,9 +537,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			if info.IsDir() {
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)
-				if err = indexWriteJSONQueue(tree); nil != err {
-					return io.EOF
-				}
+				importTrees = append(importTrees, tree)
 				return nil
 			}
 
@@ -623,12 +620,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			})
 
 			reassignIDUpdated(tree)
-			indexWriteJSONQueue(tree)
-
-			i++
-			if 0 == i%4 {
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d ", i)+util.ShortPathForBootingDisplay(tree.Path)))
-			}
+			importTrees = append(importTrees, tree)
 			return nil
 		})
 	} else { // 导入单个文件
@@ -707,7 +699,23 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		})
 
 		reassignIDUpdated(tree)
-		indexWriteJSONQueue(tree)
+		importTrees = append(importTrees, tree)
+	}
+
+	if 0 < len(importTrees) {
+		initSearchLinks()
+		convertWikiLinksAndTags()
+		buildBlockRefInText()
+
+		for i, tree := range importTrees {
+			indexWriteJSONQueue(tree)
+			if 0 == i%4 {
+				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", i, len(importTrees))+tree.HPath))
+			}
+		}
+
+		importTrees = []*parse.Tree{}
+		searchLinks = map[string]string{}
 	}
 
 	IncSync()
@@ -908,4 +916,166 @@ func domAttrValue(n *html.Node, attrName string) string {
 		}
 	}
 	return ""
+}
+
+var importTrees []*parse.Tree
+var searchLinks = map[string]string{}
+
+func initSearchLinks() {
+	for _, tree := range importTrees {
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || (ast.NodeDocument != n.Type && ast.NodeHeading != n.Type) {
+				return ast.WalkContinue
+			}
+
+			nodePath := tree.HPath + "#"
+			if ast.NodeHeading == n.Type {
+				nodePath += n.Text()
+			}
+
+			searchLinks[nodePath] = n.ID
+			return ast.WalkContinue
+		})
+	}
+}
+
+func convertWikiLinksAndTags() {
+	for _, tree := range importTrees {
+		convertWikiLinksAndTags0(tree)
+	}
+}
+
+func convertWikiLinksAndTags0(tree *parse.Tree) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeText != n.Type {
+			return ast.WalkContinue
+		}
+
+		text := n.TokensStr()
+		length := len(text)
+		start, end := 0, length
+		for {
+			part := text[start:end]
+			if idx := strings.Index(part, "]]"); 0 > idx {
+				break
+			} else {
+				end = start + idx
+			}
+			if idx := strings.Index(part, "[["); 0 > idx {
+				break
+			} else {
+				start += idx
+			}
+			if end <= start {
+				break
+			}
+
+			link := path.Join(path.Dir(tree.HPath), text[start+2:end]) // 统一转为绝对路径方便后续查找
+			linkText := path.Base(link)
+			if linkParts := strings.Split(link, "|"); 1 < len(linkParts) {
+				link = linkParts[0]
+				linkText = linkParts[1]
+			}
+			link, linkText = strings.TrimSpace(link), strings.TrimSpace(linkText)
+			if !strings.Contains(link, "#") {
+				link += "#" // 在结尾统一带上锚点方便后续查找
+			}
+
+			id := searchLinkID(link)
+			if "" == id {
+				start, end = end, length
+				continue
+			}
+
+			linkText = strings.TrimPrefix(linkText, "/")
+			repl := "((" + id + " '" + linkText + "'))"
+			end += 2
+			text = text[:start] + repl + text[end:]
+			start, end = start+len(repl), len(text)
+			length = end
+		}
+
+		text = convertTags(text) // 导入标签语法
+		n.Tokens = gulu.Str.ToBytes(text)
+		return ast.WalkContinue
+	})
+}
+
+func convertTags(text string) (ret string) {
+	pos, i := -1, 0
+	tokens := []byte(text)
+	for ; i < len(tokens); i++ {
+		if '#' == tokens[i] && (0 == i || ' ' == tokens[i-1] || (-1 < pos && '#' == tokens[pos])) {
+			if i < len(tokens)-1 && '#' == tokens[i+1] {
+				pos = -1
+				continue
+			}
+			pos = i
+			continue
+		}
+
+		if -1 < pos && ' ' == tokens[i] {
+			tokens = append(tokens, 0)
+			copy(tokens[i+1:], tokens[i:])
+			tokens[i] = '#'
+			pos = -1
+			i++
+		}
+	}
+	if -1 < pos && pos < i {
+		tokens = append(tokens, '#')
+	}
+	return string(tokens)
+}
+
+// buildBlockRefInText 将文本节点进行结构化处理。
+func buildBlockRefInText() {
+	lute := NewLute()
+	for _, tree := range importTrees {
+		var unlinkTextNodes []*ast.Node
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || ast.NodeText != n.Type {
+				return ast.WalkContinue
+			}
+
+			if nil == n.Tokens {
+				return ast.WalkContinue
+			}
+
+			t := parse.Inline("", n.Tokens, lute.ParseOptions) // 使用行级解析
+			var children []*ast.Node
+			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+				children = append(children, c)
+			}
+			for _, c := range children {
+				n.InsertBefore(c)
+			}
+			unlinkTextNodes = append(unlinkTextNodes, n)
+			return ast.WalkContinue
+		})
+
+		for _, node := range unlinkTextNodes {
+			node.Unlink()
+		}
+	}
+}
+
+func searchLinkID(link string) (id string) {
+	id = searchLinks[link]
+	if "" != id {
+		return
+	}
+
+	baseName := path.Base(link)
+	for searchLink, searchID := range searchLinks {
+		if path.Base(searchLink) == baseName {
+			return searchID
+		}
+	}
+	return
+}
+
+func cleanImport() {
+	importTrees = []*parse.Tree{}
+	searchLinks = map[string]string{}
 }

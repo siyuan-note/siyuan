@@ -250,6 +250,9 @@ func renderTemplate(p, id string) (string, error) {
 			// 重新生成 ID
 			n.ID = ast.NewNodeID()
 			n.SetIALAttr("id", n.ID)
+
+			// Blocks created via template update time earlier than creation time https://github.com/siyuan-note/siyuan/issues/8607
+			refreshUpdated(n)
 		}
 
 		if (ast.NodeListItem == n.Type && (nil == n.FirstChild ||

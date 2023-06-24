@@ -1059,7 +1059,7 @@ func (tx *Transaction) commit() (err error) {
 			return
 		}
 	}
-	refreshDynamicRefText(tx.nodes, tx.trees)
+	refreshDynamicRefTexts(tx.nodes, tx.trees)
 	IncSync()
 	tx.trees = nil
 	return
@@ -1099,9 +1099,17 @@ func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 	return
 }
 
-func refreshDynamicRefText(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
-	// 这个实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
+// refreshDynamicRefText 用于刷新引用块的动态锚文本。
+// 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
+func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
+	changedDefs := map[string]*ast.Node{updatedDefNode.ID: updatedDefNode}
+	changedTrees := map[string]*parse.Tree{updatedTree.ID: updatedTree}
+	refreshDynamicRefTexts(changedDefs, changedTrees)
+}
 
+// refreshDynamicRefTexts 用于批量刷新引用块的动态锚文本。
+// 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
+func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
 	treeRefNodeIDs := map[string]*hashset.Set{}
 	for _, updateNode := range updatedDefNodes {
 		refs := sql.GetRefsCacheByDefID(updateNode.ID)
@@ -1183,9 +1191,7 @@ func flushUpdateRefTextRenameDoc() {
 	defer updateRefTextRenameDocLock.Unlock()
 
 	for _, tree := range updateRefTextRenameDocs {
-		changedDefs := map[string]*ast.Node{tree.ID: tree.Root}
-		changedTrees := map[string]*parse.Tree{tree.ID: tree}
-		refreshDynamicRefText(changedDefs, changedTrees)
+		refreshDynamicRefText(tree.Root, tree)
 	}
 	updateRefTextRenameDocs = map[string]*parse.Tree{}
 }

@@ -2,6 +2,7 @@ import {Dialog} from "../dialog";
 import {App} from "../index";
 import {upDownHint} from "../util/upDownHint";
 import {openSetting} from "../config";
+import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const commandPanel = (app: App) => {
     const dialog = new Dialog({
@@ -23,7 +24,7 @@ export const commandPanel = (app: App) => {
             const liElement = document.createElement("li");
             liElement.classList.add("b3-list-item")
             liElement.innerHTML = `<span class="b3-list-item__text">${command.langText || plugin.i18n[command.langKey]}</span>
-<span class="b3-list-item__meta">${command.customHotkey}</span>`;
+<span class="b3-list-item__meta">${updateHotkeyTip(command.customHotkey)}</span>`;
             liElement.addEventListener("click", () => {
                 command.callback();
                 dialog.destroy();
@@ -46,6 +47,7 @@ export const commandPanel = (app: App) => {
     }
 
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+    inputElement.focus();
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         event.stopPropagation();
         if (event.isComposing) {

@@ -313,6 +313,7 @@ const openPlugin = (app: App, target: Element) => {
     });
     menu.addItem({
         icon: "iconLayoutBottom",
+        accelerator: window.siyuan.config.keymap.general.commandPanel.custom,
         label: window.siyuan.languages.commandPanel,
         click() {
             commandPanel(app);

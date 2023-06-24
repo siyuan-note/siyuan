@@ -54,6 +54,7 @@ import {fullscreen} from "../protyle/breadcrumb/action";
 import {setPadding} from "../protyle/ui/initUI";
 import {openRecentDocs} from "../business/openRecentDocs";
 import {App} from "../index";
+import {commandPanel} from "../plugin/commandPanel";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -600,6 +601,11 @@ export const globalShortcut = (app: App) => {
         if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.syncNow.custom, event)) {
             event.preventDefault();
             syncGuide(app);
+            return;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.general.commandPanel.custom, event)) {
+            event.preventDefault();
+            commandPanel(app);
             return;
         }
         if (matchHotKey(window.siyuan.config.keymap.general.editMode.custom, event)) {

@@ -19,6 +19,7 @@ import {Menu} from "../plugin/Menu";
 import {fetchPost} from "../util/fetch";
 import {needSubscribe} from "../util/needSubscribe";
 import * as dayjs from "dayjs";
+import {commandPanel} from "../plugin/commandPanel";
 
 export const updateEditModeElement = () => {
     const target = document.querySelector("#barReadonly");
@@ -375,6 +376,13 @@ const openPlugin = (app: App, target: Element) => {
         click() {
             const dialogSetting = openSetting(app);
             dialogSetting.element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+        }
+    });
+    menu.addItem({
+        icon: "iconLayoutBottom",
+        label: window.siyuan.languages.commandPanel,
+        click() {
+            commandPanel();
         }
     });
     let rect = target.getBoundingClientRect();

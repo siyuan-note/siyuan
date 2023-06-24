@@ -1,4 +1,5 @@
 {
+  "commandPanel": "命令面板",
   "cloudRegionNorthAmerica": "流雲（北美數據中心）",
   "cloudRegionChina": "鏈滴（中國大陸數據中心）",
   "currentKernel": "當前內核",

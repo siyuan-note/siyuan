@@ -1,4 +1,5 @@
 {
+  "commandPanel": "Command Palette",
   "cloudRegionNorthAmerica": "LiuYun (Data Center in North America)",
   "cloudRegionChina": "LianDi (Data Center in Mainland China)",
   "currentKernel": "Current kernel",

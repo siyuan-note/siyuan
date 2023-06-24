@@ -347,7 +347,7 @@
             const {dialog} = require('@electron/remote')
             const path = require('path')
             dialog.showOpenDialog({
-                defaultPath: path.join(decodeURIComponent(getSearch('home')), 'Documents'),
+                defaultPath: decodeURIComponent(getSearch('home')),
                 properties: ['openDirectory', 'createDirectory'],
             }).then((result) => {
                 if (result.canceled) {

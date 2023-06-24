@@ -972,9 +972,11 @@ func convertWikiLinksAndTags0(tree *parse.Tree) {
 
 			link := path.Join(path.Dir(tree.HPath), text[start+2:end]) // 统一转为绝对路径方便后续查找
 			linkText := path.Base(link)
+			dynamicAnchorText := true
 			if linkParts := strings.Split(link, "|"); 1 < len(linkParts) {
 				link = linkParts[0]
 				linkText = linkParts[1]
+				dynamicAnchorText = false
 			}
 			link, linkText = strings.TrimSpace(link), strings.TrimSpace(linkText)
 			if !strings.Contains(link, "#") {
@@ -989,6 +991,9 @@ func convertWikiLinksAndTags0(tree *parse.Tree) {
 
 			linkText = strings.TrimPrefix(linkText, "/")
 			repl := "((" + id + " '" + linkText + "'))"
+			if !dynamicAnchorText {
+				repl = "((" + id + " \"" + linkText + "\"))"
+			}
 			end += 2
 			text = text[:start] + repl + text[end:]
 			start, end = start+len(repl), len(text)

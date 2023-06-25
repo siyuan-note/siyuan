@@ -29,19 +29,19 @@
 
     /* 顶部工具栏 */
     --b3-toolbar-background: var(--b3-theme-surface);
-    --b3-toolbar-blur-background: #363636;
+    --b3-toolbar-blur-background: var(--b3-border-color);
     --b3-toolbar-color: var(--b3-theme-on-surface);
     --b3-toolbar-hover: var(--b3-theme-background-light);
     --b3-toolbar-left-mac: 69px;
 
     /* 线条 */
-    --b3-border-color: #353637;
+    --b3-border-color: #363636;
 
     /* 滚动条 */
     --b3-scroll-color: rgba(230, 230, 230, .2);
 
     /* 列表 */
-    --b3-list-hover: #363636;
+    --b3-list-hover: var(--b3-border-color);
     --b3-list-icon-hover: rgba(201, 209, 217, .1);
 
     /* 菜单 */
@@ -96,7 +96,7 @@
     --b3-width-transition: width .2s cubic-bezier(0, 0, .2, 1) 0ms;
 
     /* 下拉菜单 */
-    --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #363636;
+    --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-border-color);
 
     /* 阴影 */
     --b3-point-shadow: inset 0 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.09),

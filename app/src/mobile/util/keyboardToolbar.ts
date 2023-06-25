@@ -1,5 +1,10 @@
 import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
-import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "../../protyle/util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByMatchTag
+} from "../../protyle/util/hasClosest";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
@@ -449,10 +454,14 @@ export const initKeyboardToolbar = () => {
             focusByRange(range);
             return;
         } else if (["a", "block-ref", "inline-math", "inline-memo", "text"].includes(type)) {
-            protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));
+            if (!hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+                protyle.toolbar.element.querySelector(`[data-type="${type}"]`).dispatchEvent(new CustomEvent("click"));
+            }
             return;
         } else if (["strong", "em", "s", "code", "mark", "tag", "u", "sup", "clear", "sub", "kbd"].includes(type)) {
-            protyle.toolbar.setInlineMark(protyle, type, "toolbar");
+            if (!hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+                protyle.toolbar.setInlineMark(protyle, type, "toolbar");
+            }
             return;
         } else if (type === "moveup") {
             moveToUp(protyle, nodeElement, range);

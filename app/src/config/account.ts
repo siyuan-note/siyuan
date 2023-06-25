@@ -16,7 +16,7 @@ export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
         const payHTML = `<a class="b3-button b3-button--big" href="${getCloudURL("subscribe/siyuan")}" target="_blank">
-    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account1 : "Become lifetime VIP"}
 </a>
 <div class="fn__hr--b"></div>
 <div class="fn__hr--b"></div>
@@ -82,7 +82,7 @@ ${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account9 : ""
         <a href="${getCloudURL("settings/avatar")}" class="config-account__avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
         <h1 class="config-account__name">
             <a target="_blank" class="fn__a" href="${getCloudURL("member/" + window.siyuan.user.userName)}">${window.siyuan.user.userName}</a>
-            <span class="ft__on-surface ft__smaller">${0 === window.siyuan.config.cloudRegion ? "ld246.com":"liuyun.io"}</span>
+            <span class="ft__on-surface ft__smaller">${0 === window.siyuan.config.cloudRegion ? "ld246.com" : "liuyun.io"}</span>
         </h1>
         ${userTitlesHTML}
     </div>

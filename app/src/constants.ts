@@ -41,7 +41,7 @@ export abstract class Constants {
 
     // size
     public static readonly SIZE_LINK_TEXT_MAX: number = 24;
-    public static readonly SIZE_TOOLBAR_HEIGHT: number = isMobile() ? 0 : 32;
+    public static readonly SIZE_TOOLBAR_HEIGHT: number = isMobile() ? 0 : 28;
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;

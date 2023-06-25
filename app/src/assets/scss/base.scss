@@ -173,7 +173,9 @@ html {
     flex-shrink: 0;
     cursor: pointer;
     color: var(--b3-toolbar-color);
-    padding: 9px;
+    padding: 5px;
+    margin: 2px;
+    border-radius: 4px;
     box-sizing: border-box;
     transition: var(--b3-transition);
     display: flex;
@@ -181,6 +183,7 @@ html {
     background-color: transparent;
     border: 0;
     line-height: 13.5px;
+    height: 23.5px;
 
     &:not(.toolbar__item--disabled):not(.toolbar__item--close):hover,
     &--active {

@@ -459,6 +459,16 @@ func ImportData(zipPath string) (err error) {
 
 func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
+	defer func() {
+		util.PushClearProgress()
+
+		if e := recover(); nil != e {
+			stack := debug.Stack()
+			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, stack)
+			logging.LogErrorf("import from local path failed: %s", msg)
+			err = errors.New("import from local path failed, please check kernel log for details")
+		}
+	}()
 
 	WaitForWritingFiles()
 
@@ -1036,7 +1046,10 @@ func convertTags(text string) (ret string) {
 // buildBlockRefInText 将文本节点进行结构化处理。
 func buildBlockRefInText() {
 	lute := NewLute()
+	lute.SetHTMLTag2TextMark(true)
 	for _, tree := range importTrees {
+		tree.MergeText()
+
 		var unlinkTextNodes []*ast.Node
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || ast.NodeText != n.Type {
@@ -1078,9 +1091,4 @@ func searchLinkID(link string) (id string) {
 		}
 	}
 	return
-}
-
-func cleanImport() {
-	importTrees = []*parse.Tree{}
-	searchLinks = map[string]string{}
 }

@@ -6,7 +6,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
 	github.com/88250/gulu v1.2.3-0.20230615033005-b519d6875346
-	github.com/88250/lute v1.7.6-0.20230617074457-ffab89d50887
+	github.com/88250/lute v1.7.6-0.20230625020150-9c7e1f55e484
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20230220142845-f237b6348b3e
@@ -32,7 +32,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/flock v0.8.1
 	github.com/gorilla/websocket v1.5.0
-	github.com/imroc/req/v3 v3.37.0
+	github.com/imroc/req/v3 v3.37.1
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -43,20 +43,20 @@ require (
 	github.com/panjf2000/ants/v2 v2.7.5
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
-	github.com/sashabaranov/go-openai v1.9.5
+	github.com/sashabaranov/go-openai v1.12.0
 	github.com/shirou/gopsutil/v3 v3.23.5
-	github.com/siyuan-note/dejavu v0.0.0-20230621042407-82fc1d0c45d4
+	github.com/siyuan-note/dejavu v0.0.0-20230625034511-bd5deae72411
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230216103454-41885eac6c2b
 	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524
-	github.com/siyuan-note/httpclient v0.0.0-20230618032757-0d47fd43147d
+	github.com/siyuan-note/httpclient v0.0.0-20230625034122-2e57d97ca444
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230516073320-b440b8feaabd
 	github.com/steambap/captcha v1.4.1
-	github.com/studio-b12/gowebdav v0.0.0-20230203202212-3282f94193f2
+	github.com/studio-b12/gowebdav v0.9.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
-	golang.org/x/image v0.7.0
+	golang.org/x/image v0.8.0
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda
 	golang.org/x/mod v0.11.0
 	golang.org/x/text v0.10.0
@@ -70,7 +70,7 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.286 // indirect
+	github.com/aws/aws-sdk-go v1.44.289 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
@@ -80,7 +80,7 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.14.0 // indirect
+	github.com/go-playground/validator/v10 v10.14.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.1.1 // indirect
@@ -101,7 +101,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/juju/errors v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.6 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/lufia/plan9stats v0.0.0-20230326075908-cb1d2100619a // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -117,7 +117,7 @@ require (
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/qtls-go1-19 v0.3.2 // indirect
 	github.com/quic-go/qtls-go1-20 v0.2.2 // indirect
-	github.com/quic-go/quic-go v0.35.1 // indirect
+	github.com/quic-go/quic-go v0.36.0 // indirect
 	github.com/refraction-networking/utls v1.3.2 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
@@ -125,7 +125,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
-	github.com/tklauser/numcpus v0.6.0 // indirect
+	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect

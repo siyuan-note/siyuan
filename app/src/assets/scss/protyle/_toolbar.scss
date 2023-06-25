@@ -7,7 +7,6 @@
     border-radius: 4px;
     display: flex;
     transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms;
-    border: 1px solid var(--b3-theme-surface-lighter);
 
     &__item {
       color: var(--b3-theme-on-surface);
@@ -16,7 +15,7 @@
       height: 29px;
       box-sizing: border-box;
       font-size: 0;
-      padding: 0 6px;
+      padding: 1px 6px;
 
       &:focus {
         outline: none;

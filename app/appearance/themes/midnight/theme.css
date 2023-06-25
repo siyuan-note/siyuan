@@ -5,19 +5,19 @@
     --b3-theme-primary-lighter: rgba(53, 115, 240, 0.48);
     --b3-theme-primary-lightest: rgba(53, 115, 240, 0.24);
     --b3-theme-secondary: #f3a92f;
-    --b3-theme-background: #1e1f22;
-    --b3-theme-background-light: #353637;
-    --b3-theme-surface: #2b2d30;
+    --b3-theme-background: #1e1e1e;
+    --b3-theme-background-light: rgba(255, 255, 255, 0.075);
+    --b3-theme-surface: #262626;
     --b3-theme-surface-light: rgba(41, 42, 45, .86);
     --b3-theme-surface-lighter: rgba(230, 230, 230, .06);
     --b3-theme-error: #d23f31;
 
     /* 文字颜色 */
-    --b3-theme-on-primary: #fff;
+    --b3-theme-on-primary: #bababa;
     --b3-theme-on-secondary: #fff;
-    --b3-theme-on-background: #c9d1d9;
+    --b3-theme-on-background: #dadada;
     --b3-theme-on-surface: #9aa0a6;
-    --b3-theme-on-surface-light: rgba(154, 160, 166, .68);
+    --b3-theme-on-surface-light: var(--b3-theme-on-primary);
     --b3-theme-on-error: #fff;
 
     /* 字体 */
@@ -28,30 +28,30 @@
     --b3-font-family-math: KaTeX_Math;
 
     /* 顶部工具栏 */
-    --b3-toolbar-background: #2b2d30;
-    --b3-toolbar-blur-background: #373a41;
-    --b3-toolbar-color: #ced0d6;
-    --b3-toolbar-hover: #383a42;
+    --b3-toolbar-background: var(--b3-theme-surface);
+    --b3-toolbar-blur-background: #363636;
+    --b3-toolbar-color: var(--b3-theme-on-surface-light);
+    --b3-toolbar-hover: var(--b3-theme-background-light);
     --b3-toolbar-left-mac: 69px;
 
     /* 线条 */
-    --b3-border-color: #0e0f10;
+    --b3-border-color: #353637;
 
     /* 滚动条 */
     --b3-scroll-color: rgba(230, 230, 230, .2);
 
     /* 列表 */
-    --b3-list-hover: #3f4041;
+    --b3-list-hover: #363636;
     --b3-list-icon-hover: rgba(201, 209, 217, .1);
 
     /* 菜单 */
-    --b3-menu-background: #27282a;
+    --b3-menu-background: var(--b3-theme-surface);
 
     /* 提示 */
-    --b3-tooltips-color: rgba(70, 72, 76, .86);
+    --b3-tooltips-color: #030303;
 
     /* 遮罩 */
-    --b3-mask-background: rgba(0, 0, 0, 0.78);
+    --b3-mask-background: rgba(10, 10, 10, 0.4);
 
     /* 卡片背景 */
     --b3-card-error-color: rgb(243, 153, 147);
@@ -96,16 +96,22 @@
     --b3-width-transition: width .2s cubic-bezier(0, 0, .2, 1) 0ms;
 
     /* 下拉菜单 */
-    --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
+    --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #363636;
 
     /* 阴影 */
-    --b3-point-shadow: 0 3px 6px #010409;
-    --b3-dialog-shadow: 0 8px 24px #010409;
+    --b3-point-shadow: inset 0 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.09),
+    0 2px 4px 0 rgba(0, 0, 0, .15),
+    0 1px 1.5px 0 rgba(0, 0, 0, .1),
+    0 1px 2px 0 rgba(0, 0, 0, .2),
+    0 0 0 0 transparent;
+    --b3-dialog-shadow: 0px 1.8px 7.3px rgba(0, 0, 0, 0.071),
+    0px 6.3px 24.7px rgba(0, 0, 0, 0.112),
+    0px 30px 90px rgba(0, 0, 0, 0.2);
     --b3-button-shadow: 0px 5px 5px -3px rgb(0 0 0 / 0.2), 0px 8px 10px 1px rgb(0 0 0 / 0.14), 0px 3px 14px 2px rgb(0 0 0 / 0.12);
 
     /* 图表颜色 */
     --b3-graph-p-point: #076f7e;
-    --b3-graph-heading-point: #8957e5;
+    --b3-graph-heading-point: hsl(254, 80%, 74.8%);
     --b3-graph-math-point: #80FFA5;
     --b3-graph-code-point: #00DDFF;
     --b3-graph-table-point: #37A2FF;
@@ -140,10 +146,10 @@
     --b3-protyle-inline-em-color: #e8eaed;
     --b3-protyle-inline-s-color: #e8eaed;
     --b3-protyle-inline-link-color: #8ab4f8;
-    --b3-protyle-inline-mark-background: rgb(50, 89, 61);
-    --b3-protyle-inline-mark-color: #e8eaed;
+    --b3-protyle-inline-mark-background: rgba(255, 208, 0, .4);
+    --b3-protyle-inline-mark-color: var(--b3-theme-on-background);
     --b3-protyle-inline-tag-color: #9aa0a6;
-    --b3-protyle-inline-blockref-color: #8957e5;
+    --b3-protyle-inline-blockref-color: hsl(254, 80%, 74.8%);
     --b3-protyle-inline-fileref-color: var(--b3-theme-secondary);
 
     /* PDF */

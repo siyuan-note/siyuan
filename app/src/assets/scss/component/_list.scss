@@ -7,10 +7,7 @@
   &--background .b3-list-item {
     border-radius: 4px;
 
-    &:hover:not(.b3-list-item--focus) {
-      background-color: var(--b3-theme-background-light);
-    }
-
+    &:hover:not(.b3-list-item--focus),
     &--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
       background-color: var(--b3-list-hover);
     }
@@ -43,7 +40,7 @@
   &-item {
     line-height: 28px;
     min-height: 28px;
-    padding: 1px 4px;
+    padding: 0 4px;
     display: flex;
     cursor: pointer;
     align-items: center;
@@ -52,7 +49,7 @@
     text-align: left;
     border: 0;
     color: var(--b3-theme-on-background);
-    margin: 0 8px;
+    margin: 1px 8px;
 
     &[draggable="true"]:active {
       cursor: grabbing;

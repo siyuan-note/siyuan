@@ -459,6 +459,16 @@ func ImportData(zipPath string) (err error) {
 
 func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	util.PushEndlessProgress(Conf.Language(73))
+	defer func() {
+		util.PushClearProgress()
+
+		if e := recover(); nil != e {
+			stack := debug.Stack()
+			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, stack)
+			logging.LogErrorf("import from local path failed: %s", msg)
+			err = errors.New("import from local path failed, please check kernel log for details")
+		}
+	}()
 
 	WaitForWritingFiles()
 

@@ -872,7 +872,7 @@ export class Files extends Model {
         liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
         nextElement = liElement.nextElementSibling;
         setTimeout(() => {
-            nextElement.setAttribute("style", `height:${nextElement.childElementCount * liElement.clientHeight}px;`);
+            nextElement.setAttribute("style", `top: -1px;position: relative;height:${nextElement.childElementCount * (liElement.clientHeight + 1) - 1}px;`);
             setTimeout(() => {
                 this.element.querySelectorAll(".file-tree__sliderDown").forEach(item => {
                     item.classList.remove("file-tree__sliderDown");

@@ -1,8 +1,8 @@
 {
   "commandEmpty": "Aucune commande pour le moment, cliquez pour aller sur le marché pour télécharger plus de plugins",
   "commandPanel": "Palette de commandes",
-  "cloudRegionNorthAmerica": "LiuYun (centre de données en Amérique du Nord)",
-  "cloudRegionChina": "LianDi (centre de données en Chine continentale)",
+  "cloudRegionNorthAmerica": "LiuYun (Centre de données d'Amérique du Nord)",
+  "cloudRegionChina": "LianDi (Centre de données de Chine continentale)",
   "currentKernel": "Noyau actuel",
   "otherOnlineKernels": "Autres noyaux en ligne",
   "syncPerception": "⚗\uFE0F Perception de la synchronisation",

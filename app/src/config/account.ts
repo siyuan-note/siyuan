@@ -19,12 +19,8 @@ export const account = {
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
 </a>
 <div class="fn__hr--b"></div>
-<div class="fn__hr--b"></div>
-${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account8 : ""}
-${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account9 : ""}
 <div class="fn__hr"></div>
 ${window.siyuan.languages.account2}
-<div>${window.siyuan.languages.account7}</div>
 <div class="fn__hr--b"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
@@ -68,8 +64,6 @@ ${window.siyuan.languages.account2}
                     subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
 ${renewHTML}
 <div class="fn__hr--b"></div>
-${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account8 : ""}
-${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account9 : ""}
 `;
                 } else {
                     subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;

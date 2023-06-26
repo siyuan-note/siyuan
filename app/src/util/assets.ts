@@ -296,7 +296,7 @@ const updateMobileTheme = (OSTheme: string) => {
                 }
             }
             if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
-                window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1f22")) + " " + mode);
+                window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1e1e")) + " " + mode);
             } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
             }

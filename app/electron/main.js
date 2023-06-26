@@ -394,7 +394,7 @@ const initKernel = (workspace, port, lang) => {
             width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
             frame: false,
-            backgroundColor: "#1e1f22",
+            backgroundColor: "#1e1e1e",
             icon: path.join(appDir, "stage", "icon-large.png"),
         });
 

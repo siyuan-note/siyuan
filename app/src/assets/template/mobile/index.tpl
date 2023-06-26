@@ -8,7 +8,7 @@
 </head>
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">
-    <div class="b3-dialog__scrim" style="background-color: #1e1f22"></div>
+    <div class="b3-dialog__scrim" style="background-color: #1e1e1e"></div>
     <img style="position: absolute;width: 36vh;" src="../../icon.png">
 </div>
 <div class="toolbar toolbar--border">

@@ -184,7 +184,7 @@ We release insider preview before major updates, please visit [https://github.co
 ## 🏘️ Community
 
 * [English Discussion Forum](https://liuyun.io)
-* [Discord](https://discord.com/invite/bzfCBwMzdP)
+* [User community summary](https://liuyun.io/article/1687779743723)
 * [Awesome SiYuan](https://github.com/siyuan-note/awesome)
 
 ## 🛠️ Development Guide

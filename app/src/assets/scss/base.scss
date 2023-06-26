@@ -151,10 +151,7 @@ html {
     z-index: 502;
     right: 0;
     position: relative;
-
-    .toolbar__item svg {
-      width: 13px;
-    }
+    margin-left: 2px;
   }
 
   #drag {
@@ -208,9 +205,18 @@ html {
       cursor: not-allowed;
     }
 
+    &--win {
+      padding: 9px;
+      margin: 0;
+      height: 31.5px;
+      border-radius: 0;
+    }
+
     &--close {
       padding: 9px 16px;
-
+      margin: 0;
+      height: 31.5px;
+      border-radius: 0;
       svg {
         width: 10px !important;
       }

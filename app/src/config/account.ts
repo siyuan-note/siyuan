@@ -15,11 +15,11 @@ import {getCloudURL} from "./util/about";
 export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
-        const payHTML = `<a class="b3-button b3-button--big" href="${getCloudURL("subscribe/siyuan")}" target="_blank">
+        const payHTML = `<div>${window.siyuan.languages.account2}</div>
+<div class="fn__hr--b"></div>
+<a class="b3-button b3-button--big" href="${getCloudURL("subscribe/siyuan")}" target="_blank">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
 </a>
-<div class="fn__hr--b"></div>
-<div>${window.siyuan.languages.account2}</div>
 <div class="fn__hr--b"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>

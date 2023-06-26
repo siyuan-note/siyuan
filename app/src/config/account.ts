@@ -16,7 +16,7 @@ export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
         const payHTML = `<a class="b3-button b3-button--big" href="${getCloudURL("subscribe/siyuan")}" target="_blank">
-    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.config.cloudRegion === 0 ? window.siyuan.languages.account1 : "Become lifetime VIP"}
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
 </a>
 <div class="fn__hr--b"></div>
 <div class="fn__hr--b"></div>

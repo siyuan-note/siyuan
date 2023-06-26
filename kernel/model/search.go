@@ -559,12 +559,12 @@ func buildOrderBy(method, orderBy int) string {
 	case 6:
 		if 0 != method && 1 != method {
 			// 只有关键字搜索和查询语法搜索才支持按相关度升序 https://github.com/siyuan-note/siyuan/issues/7861
-			return "ORDER BY sort DESC"
+			return "ORDER BY sort DESC, updated DESC"
 		}
 		return "ORDER BY rank DESC" // 默认是按相关度降序，所以按相关度升序要反过来使用 DESC
 	case 7:
 		if 0 != method && 1 != method {
-			return "ORDER BY sort ASC"
+			return "ORDER BY sort ASC, updated DESC"
 		}
 		return "ORDER BY rank" // 默认是按相关度降序
 	default:

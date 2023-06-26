@@ -822,9 +822,9 @@
   }
   ```
 
-  * `fromID`：定义块 ID
-  * `toID`：目标块 ID
-  * `refIDs`：指向定义块 ID 的引用所在块 ID，可选，如果不指定，所有指向定义块 ID 的引用块 ID 都会被转移
+    * `fromID`：定义块 ID
+    * `toID`：目标块 ID
+    * `refIDs`：指向定义块 ID 的引用所在块 ID，可选，如果不指定，所有指向定义块 ID 的引用块 ID 都会被转移
 * 返回值
 
   ```json
@@ -834,7 +834,6 @@
     "data": null
   }
   ```
-
 
 ## 属性
 
@@ -1035,8 +1034,8 @@
     "newPath": "/data/assets/test-20230523085812-k3o9t32.png"
   }
   ```
-  * `path`：工作空间路径下的文件路径
-  * `newPath`：新的文件路径
+    * `path`：工作空间路径下的文件路径
+    * `newPath`：新的文件路径
 * 返回值
 
   ```json
@@ -1113,7 +1112,7 @@
 
 * `/api/convert/pandoc`
 * 工作目录
-    * 执行调用 pandoc 命令时工作目录会被设置在 `工作空间/temp/convert/pandoc/` 下
+    * 执行调用 pandoc 命令时工作目录会被设置在 `工作空间/temp/convert/pandoc/${test}` 下
     * 可先通过 API [`写入文件`](#写入文件) 将待转换文件写入该目录
     * 然后再调用该 API 进行转换，转换后的文件也会被写入该目录
     * 最后调用 API [`获取文件`](#获取文件) 获取转换后的文件内容
@@ -1123,6 +1122,7 @@
 
   ```json
   {
+    "dir": "test",
     "args": [
       "--to", "markdown_strict-raw_html",
       "foo.epub",
@@ -1138,9 +1138,12 @@
   {
     "code": 0,
     "msg": "",
-    "data": null
+    "data": {
+       "path": "/temp/convert/pandoc/test"
+    }
   }
   ```
+    * `path`：工作空间下的路径
 
 ## 通知
 

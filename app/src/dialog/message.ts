@@ -12,6 +12,13 @@ export const initMessage = () => {
                 hideMessage(target.parentElement.getAttribute("data-id"));
                 event.preventDefault();
                 break;
+            } else if (target.tagName === "A") {
+                break;
+            } else if (target.classList.contains("b3-snackbar")) {
+                hideMessage(target.getAttribute("data-id"));
+                event.preventDefault();
+                event.stopPropagation();
+                break;
             } else if (target.isSameNode(messageElement.lastElementChild)) {
                 target.parentElement.classList.remove("b3-snackbars--show");
                 setTimeout(() => {

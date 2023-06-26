@@ -470,7 +470,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
         * `"/assets/sub/"`: workspace/data/assets/sub/ folder
 
       Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder
-      of the workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
+      of the workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user
+      guide.
     * `file[]`: Uploaded file list
 * Return value
 
@@ -829,9 +830,9 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
 
-  * `fromID`: Def block ID
-  * `toID`: Target block ID
-  * `refIDs`: Ref block IDs point to def block ID, optional, if not specified, all ref block IDs will be transferred
+    * `fromID`: Def block ID
+    * `toID`: Target block ID
+    * `refIDs`: Ref block IDs point to def block ID, optional, if not specified, all ref block IDs will be transferred
 * Return value
 
   ```json
@@ -1041,8 +1042,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "newPath": "/data/assets/test-20230523085812-k3o9t32.png"
   }
   ```
-  * `path`: the file path under the workspace path
-  * `newPath`: the new file path under the workspace path
+    * `path`: the file path under the workspace path
+    * `newPath`: the new file path under the workspace path
 * Return value
 
   ```json
@@ -1119,7 +1120,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
 * `/api/convert/pandoc`
 * Working directory
-    * Executing the pandoc command will set the working directory to `workspace/temp/convert/pandoc/`
+    * Executing the pandoc command will set the working directory to `workspace/temp/convert/pandoc/${dir}`
     * API [`Put file`](#put-file) can be used to write the file to be converted to this directory first
     * Then call the API for conversion, and the converted file will also be written to this directory
     * Finally, call the API [`Get file`](#get-file) to get the converted file
@@ -1129,6 +1130,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
   ```json
   {
+    "dir": "test",
     "args": [
       "--to", "markdown_strict-raw_html",
       "foo.epub",
@@ -1144,9 +1146,12 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   {
     "code": 0,
     "msg": "",
-    "data": null
+    "data": {
+       "path": "/temp/convert/pandoc/test"
+    }
   }
   ```
+    * `path`: the path under the workspace
 
 ## Notification
 

@@ -188,6 +188,7 @@ html {
     &:not(.toolbar__item--disabled):not(.toolbar__item--close):hover,
     &--active {
       background-color: var(--b3-toolbar-hover);
+      color: var(--b3-theme-on-background);
     }
 
     svg {
@@ -245,7 +246,6 @@ html {
     text-overflow: ellipsis;
     white-space: nowrap;
     user-select: none;
-    color: #ebecf0;
   }
 }
 

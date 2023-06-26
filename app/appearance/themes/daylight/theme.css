@@ -7,15 +7,15 @@
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #fff;
     --b3-theme-background-light: #dfe0e1;
-    --b3-theme-surface: #f7f8fa;
+    --b3-theme-surface: #f6f6f6;
     --b3-theme-surface-light: rgba(243, 243, 243, .86);
-    --b3-theme-surface-lighter: rgba(0, 0, 0, .06);
+    --b3-theme-surface-lighter: #e0e0e0;
     --b3-theme-error: #d23f31;
 
     /* 文字颜色 */
     --b3-theme-on-primary: #fff;
     --b3-theme-on-secondary: #fff;
-    --b3-theme-on-background: #202124;
+    --b3-theme-on-background: #222;
     --b3-theme-on-surface: #5f6368;
     --b3-theme-on-surface-light: rgba(95, 99, 104, .68);
     --b3-theme-on-error: #fff;
@@ -28,30 +28,31 @@
     --b3-font-family-math: KaTeX_Math;
 
     /* 顶部工具栏 */
-    --b3-toolbar-background: #2b2d30;
-    --b3-toolbar-blur-background: #373a41;
-    --b3-toolbar-color: #9aa0a6;
-    --b3-toolbar-hover: #383a42;
+    --b3-toolbar-background: var(--b3-theme-surface);
+    --b3-toolbar-blur-background: #fcfcfc;
+    --b3-toolbar-color: var(--b3-theme-on-surface);
+    --b3-toolbar-hover: var(--b3-theme-background-light);
     --b3-toolbar-left-mac: 69px;
 
     /* 线条 */
-    --b3-border-color: rgba(0, 0, 0, .1);
+    --b3-border-color: var(--b3-theme-surface-lighter);
 
     /* 滚动条 */
     --b3-scroll-color: rgba(0, 0, 0, .2);
 
     /* 列表 */
-    --b3-list-hover: #e9eaea;
+    --b3-list-hover: rgba(0, 0, 0, .075);
     --b3-list-icon-hover: rgba(33, 34, 36, .1);
 
     /* 菜单 */
-    --b3-menu-background: #f8f9fa;
+    --b3-menu-background: var(--b3-theme-surface);
 
     /* 提示 */
-    --b3-tooltips-color: rgba(0, 0, 0, 0.54);
+    --b3-tooltips-color: rgba(0, 0, 0, .9);
+    --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .1);
 
     /* 遮罩 */
-    --b3-mask-background: rgba(0, 0, 0, 0.78);
+    --b3-mask-background: rgba(220, 220, 220, .4);
 
     /* 卡片背景 */
     --b3-card-error-color: rgb(97, 26, 21);
@@ -99,8 +100,8 @@
     --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(95, 99, 104, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
 
     /* 阴影 */
-    --b3-point-shadow: 0 3px 6px rgba(140, 149, 159, 0.15);
-    --b3-dialog-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+    --b3-point-shadow:  0 0 1px 0px rgba(0, 0, 0, 0.1), 0 0 2px 0px rgba(0, 0, 0, 0.2);
+    --b3-dialog-shadow: 0 8px 24px rgba(0,0,0, 0.2);
     --b3-button-shadow: 0px 5px 5px -3px rgb(0 0 0 / 0.2), 0px 8px 10px 1px rgb(0 0 0 / 0.14), 0px 3px 14px 2px rgb(0 0 0 / 0.12);
 
     /* 图表颜色 */

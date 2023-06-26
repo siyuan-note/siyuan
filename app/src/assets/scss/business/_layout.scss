@@ -362,8 +362,8 @@
   }
 
   svg {
-    height: 16px;
-    width: 16px;
+    height: 14px;
+    width: 14px;
   }
 
   &--vertical {
@@ -385,11 +385,11 @@
   }
 
   &__item {
-    padding: 8px;
+    padding: 6px;
     color: var(--b3-theme-on-surface-light);
     display: flex;
     border-radius: 6px;
-    margin: 5px;
+    margin: 7px;
 
     &--pin {
       opacity: 0;

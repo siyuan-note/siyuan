@@ -19,8 +19,7 @@ export const account = {
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account1}
 </a>
 <div class="fn__hr--b"></div>
-<div class="fn__hr"></div>
-${window.siyuan.languages.account2}
+<div>${window.siyuan.languages.account2}</div>
 <div class="fn__hr--b"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>

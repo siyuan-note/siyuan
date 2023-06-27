@@ -34,7 +34,19 @@
       cursor: pointer;
 
       & > div {
-        border-bottom: 1px solid var(--b3-theme-background-light)
+        padding-left: 100%;
+        position: relative;
+        height: 26px;
+
+        &:after {
+          position: absolute;
+          content: " ";
+          height: 1px;
+          background-color: var(--b3-theme-background-light);
+          width: calc(100% - 1px);
+          left: 0;
+          top: 13px;
+        }
       }
     }
 
@@ -514,10 +526,6 @@
     &.sb,
     &.table {
       height: 36px;
-    }
-
-    &.hr {
-      height: auto;
     }
 
     &.bq {

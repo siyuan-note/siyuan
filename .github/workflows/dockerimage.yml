@@ -33,4 +33,4 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t b3log/siyuan:latest -t b3log/siyuan:v2.9.2 .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t b3log/siyuan:latest -t b3log/siyuan:v2.9.3 .

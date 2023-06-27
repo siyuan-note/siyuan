@@ -33,7 +33,7 @@ WYSIWYG.
 
 Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
 
-![feature0.png](https://b3logfile.com/file/2022/10/feature0-EHMFc7T.png)
+![feature0.png](screenshots/feature0.png)
 
 ## 🔮 Features
 

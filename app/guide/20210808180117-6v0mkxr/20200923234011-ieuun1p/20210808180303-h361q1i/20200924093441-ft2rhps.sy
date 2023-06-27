@@ -2390,7 +2390,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Horizontal rule"
+					"Data": "Thematic break"
 				}
 			]
 		},

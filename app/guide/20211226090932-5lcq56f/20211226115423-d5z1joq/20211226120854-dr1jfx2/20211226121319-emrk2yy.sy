@@ -2382,7 +2382,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "分割線"
+					"Data": "分隔線"
 				}
 			]
 		},

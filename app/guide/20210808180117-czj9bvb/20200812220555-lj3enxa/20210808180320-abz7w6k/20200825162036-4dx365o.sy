@@ -2381,7 +2381,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "分割线"
+					"Data": "分隔线"
 				}
 			]
 		},

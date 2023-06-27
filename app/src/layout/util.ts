@@ -120,7 +120,7 @@ export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
             }
         }
     });
-    // 分割线
+    // 分隔线
     newWnd.element.after(newWnd.element.previousElementSibling);
     newWnd.parent.children.find((item, index) => {
         if (item.id === newWnd.id) {

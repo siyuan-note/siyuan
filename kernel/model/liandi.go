@@ -302,7 +302,9 @@ func refreshAnnouncement() {
 		}
 		if !exist {
 			existingAnnouncements = append(existingAnnouncements, announcement)
-			newAnnouncements = append(newAnnouncements, announcement)
+			if Conf.CloudRegion == announcement.Region {
+				newAnnouncements = append(newAnnouncements, announcement)
+			}
 		}
 	}
 

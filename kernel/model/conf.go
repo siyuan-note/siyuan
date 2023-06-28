@@ -516,7 +516,7 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		util.PushMsg(Conf.Language(130), 1000*5)
 		// 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
 		// 这里多等待一段时间，等待安装程序启动
-		time.Sleep(4 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 	logging.LogInfof("exited kernel")
 	closeSyncWebSocket()

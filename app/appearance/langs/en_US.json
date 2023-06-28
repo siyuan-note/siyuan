@@ -431,7 +431,7 @@
   "cloudIntro6": "Unlimited number of devices and number of workspaces",
   "cloudIntro7": "Different local workspaces correspond to different data synchronization directories in the cloud",
   "cloudIntro8": "Different devices keep their own data history, and data that is overwritten or deleted by synchronization will not be lost",
-  "cloudIntro9": "Cloud assets serving service",
+  "cloudIntro9": "Cloud assets hosting service",
   "cloudIntro10": "Upload local asset files to the cloud with one click",
   "cloudIntro11": "One-click to copy the document to the Wechat MP, Zhihu, Yuque etc. platforms",
   "selectAll": "Select all",

@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230622164112"
+		"updated": "20230627214818"
 	},
 	"Children": [
 		{
@@ -1859,18 +1859,19 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230406111448-rqncida",
-				"updated": "20230406111448"
+				"updated": "20230627214818"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/pricing.html",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226121232-23s79xr",
+					"TextMarkBlockRefSubtype": "s",
 					"TextMarkTextContent": "雲端服務"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "需要年付訂閱。目前僅支持中國大陸地區用戶訂閱，非中國大陸地區用戶請勿訂閱。"
+					"Data": "需要付費訂閱後才能使用。"
 				}
 			]
 		},

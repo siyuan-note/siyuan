@@ -97,12 +97,12 @@ export class Preview {
                     event.preventDefault();
                     if (isLocalPath(linkAddress)) {
                         /// #if !MOBILE
-                        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
-                            openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
-                        } else {
-                            /// #if !BROWSER
+                        if (event.metaKey || event.ctrlKey) {
                             openBy(linkAddress, "folder");
-                            /// #endif
+                        } else if (event.shiftKey) {
+                            openBy(linkAddress, "app");
+                        } else if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
+                            openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
                         }
                         /// #endif
                     } else {

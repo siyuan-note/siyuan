@@ -10,7 +10,7 @@
 ::-webkit-scrollbar-thumb {
   box-sizing: content-box;
   border: 4px solid transparent;
-  border-radius: 5px;
+  border-radius: var(--b3-border-radius);
   box-shadow: inset 0 0 5px 5px var(--b3-scroll-color);
 
   &:hover {

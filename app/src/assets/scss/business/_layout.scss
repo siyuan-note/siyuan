@@ -28,7 +28,7 @@
     transition: transform .2s cubic-bezier(0, 0, .2, 1) 0ms, opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
 
     &.layout__dockl {
-      border-radius: 0 8px 8px 0;
+      border-radius: 0 var(--b3-border-radius-b) var(--b3-border-radius-b) 0;
       border: 1px solid var(--b3-border-color);
       border-left: 0;
       overflow: hidden;
@@ -42,7 +42,7 @@
       border: 1px solid var(--b3-border-color);
       box-shadow: -8px 0px 24px rgb(140 149 159 / 20%);
       border-right: 0;
-      border-radius: 8px 0 0 8px;
+      border-radius: var(--b3-border-radius-b) 0 0 var(--b3-border-radius-b);
       overflow: hidden;
       top: 112px;
       bottom: 82px;
@@ -267,7 +267,7 @@
           content: "";
           width: 100%;
           height: 3px;
-          border-radius: 6px;
+          border-radius: var(--b3-border-radius);
           bottom: 0;
           position: absolute;
           background-color: var(--b3-theme-background-light);
@@ -289,7 +289,7 @@
             float: left;
             height: 18px;
             width: 18px;
-            border-radius: 2px;
+            border-radius: var(--b3-border-radius);
             margin-top: 1px;
           }
         }
@@ -318,7 +318,7 @@
           align-items: center;
 
           svg {
-            border-radius: 10px;
+            border-radius: var(--b3-border-radius-b);
             height: 8px;
             width: 8px;
             color: var(--b3-theme-on-surface);
@@ -388,7 +388,7 @@
     padding: 6px;
     color: var(--b3-theme-on-surface-light);
     display: flex;
-    border-radius: 6px;
+    border-radius: var(--b3-border-radius);
     margin: 7px;
 
     &--pin {

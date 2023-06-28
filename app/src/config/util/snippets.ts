@@ -46,7 +46,7 @@ export const openSnippets = () => {
         const dialog = new Dialog({
             width: "70vw",
             height: "80vh",
-            content: `<div class="layout-tab-bar fn__flex fn__flex-shrink" style="border-radius: 4px 4px 0 0">
+            content: `<div class="layout-tab-bar fn__flex fn__flex-shrink" style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
     <div data-type="css" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">CSS</span><span class="fn__flex-1"></span></div>
     <div data-type="js" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">JS</span><span class="fn__flex-1"></span></div>
 </div>

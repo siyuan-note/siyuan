@@ -12,7 +12,7 @@ export const initMessage = () => {
                 hideMessage(target.parentElement.getAttribute("data-id"));
                 event.preventDefault();
                 break;
-            } else if (target.tagName === "A") {
+            } else if (target.tagName === "A" || target.tagName === "BUTTON") {
                 break;
             } else if (target.classList.contains("b3-snackbar")) {
                 hideMessage(target.getAttribute("data-id"));

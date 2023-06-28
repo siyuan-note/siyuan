@@ -1,7 +1,7 @@
 .b3-card {
   box-shadow: var(--b3-point-shadow);
   background-color: var(--b3-theme-surface);
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius);
   margin: 16px;
   overflow: hidden;
   position: relative;
@@ -42,7 +42,7 @@
     img {
       height: 74px;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: var(--b3-border-radius);
       width: 74px;
     }
   }

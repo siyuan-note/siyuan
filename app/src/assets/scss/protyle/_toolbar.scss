@@ -4,7 +4,7 @@
     z-index: 3;
     position: fixed;
     box-shadow: var(--b3-point-shadow);
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
     display: flex;
     transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
@@ -47,7 +47,7 @@
 
   &-hint {
     position: fixed;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius-b);
     box-shadow: var(--b3-dialog-shadow);
     border: 1px solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-menu-background);
@@ -60,7 +60,7 @@
 
   &-util {
     position: fixed;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius-b);
     box-shadow: var(--b3-dialog-shadow);
     border: 1px solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-menu-background);
@@ -85,7 +85,7 @@
       margin-right: 4px;
       transition: var(--b3-transition);
       padding: 0 4px;
-      border-radius: 2px;
+      border-radius: var(--b3-border-radius);
       border: 1px solid transparent;
       color: var(--b3-theme-on-background);
       white-space: nowrap;

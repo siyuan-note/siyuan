@@ -156,7 +156,7 @@
 .annotationLayer .textWidgetAnnotation textarea:hover,
 .annotationLayer .choiceWidgetAnnotation select:hover,
 .annotationLayer .buttonWidgetAnnotation.checkBox input:hover {
-  border-radius: 2px;
+  border-radius: var(--b3-border-radius);
 }
 
 .annotationLayer .textWidgetAnnotation input:focus,
@@ -164,7 +164,7 @@
 .annotationLayer .choiceWidgetAnnotation select:focus {
   background: none;
   border: 2px solid var(--input-focus-border-color);
-  border-radius: 2px;
+  border-radius: var(--b3-border-radius);
   outline: var(--input-focus-outline);
 }
 
@@ -176,7 +176,7 @@
 
 .annotationLayer .buttonWidgetAnnotation.checkBox :focus {
   border: 2px solid var(--input-focus-border-color);
-  border-radius: 2px;
+  border-radius: var(--b3-border-radius);
   outline: var(--input-focus-outline);
 }
 

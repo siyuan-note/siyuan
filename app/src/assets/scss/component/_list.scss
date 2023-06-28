@@ -5,7 +5,7 @@
   }
 
   &--background .b3-list-item {
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
 
     &:hover:not(.b3-list-item--focus),
     &--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
@@ -104,7 +104,7 @@
       &--hl:hover {
         color: var(--b3-theme-on-background);
         background-color: var(--b3-list-icon-hover);
-        border-radius: 2px;
+        border-radius: var(--b3-border-radius);
       }
     }
 
@@ -115,7 +115,7 @@
         height: 16px;
         width: 16px;
         color: var(--b3-theme-on-surface);
-        border-radius: 2px;
+        border-radius: var(--b3-border-radius);
       }
 
       text-align: center;
@@ -131,7 +131,7 @@
       &:hover {
         color: var(--b3-theme-on-background);
         background-color: var(--b3-list-icon-hover);
-        border-radius: 2px;
+        border-radius: var(--b3-border-radius);
       }
     }
 
@@ -228,7 +228,7 @@
       &:hover {
         color: var(--b3-theme-on-background);
         background-color: var(--b3-list-icon-hover);
-        border-radius: 2px;
+        border-radius: var(--b3-border-radius);
       }
     }
 

@@ -50,7 +50,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                             label: {
                                 backgroundColor: "#f6f8fa",
                                 borderColor: "#d1d5da",
-                                borderRadius: 5,
+                                borderRadius: 6,
                                 borderWidth: 0.5,
                                 color: "#586069",
                                 lineHeight: 20,

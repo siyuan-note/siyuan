@@ -109,7 +109,7 @@ html {
     min-width: 32px;
 
     &:hover {
-      border-radius: 16px;
+      border-radius: var(--b3-border-radius-b);
       background-color: var(--b3-theme-surface-light);
     }
   }
@@ -172,7 +172,7 @@ html {
     color: var(--b3-toolbar-color);
     padding: 5px;
     margin: 2px;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
     box-sizing: border-box;
     transition: var(--b3-transition);
     display: flex;
@@ -295,7 +295,7 @@ html {
 
     & > div {
       height: 4px;
-      border-radius: 4px;
+      border-radius: var(--b3-border-radius);
       overflow: hidden;
       background-color: #fff;
       width: 64px;
@@ -373,7 +373,7 @@ html {
   line-height: 22px;
   padding: 0 8px;
   color: var(--b3-theme-on-surface-light);
-  border-radius: 2px;
+  border-radius: var(--b3-border-radius);
   font-size: 12px;
   user-select: none;
   height: 22px;

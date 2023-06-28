@@ -1,7 +1,7 @@
 .b3-button {
   cursor: pointer;
   color: var(--b3-theme-on-primary);
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius);
   line-height: 20px;
   padding: 4px 8px;
   background-color: var(--b3-theme-primary);
@@ -45,7 +45,7 @@
       top: 0;
       width: 50%;
       background-color: var(--b3-theme-primary);
-      border-radius: 4px;
+      border-radius: var(--b3-border-radius);
     }
   }
 

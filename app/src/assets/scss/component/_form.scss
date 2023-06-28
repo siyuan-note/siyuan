@@ -19,22 +19,6 @@
       width: 16px;
     }
 
-    &-action {
-      right: 9px;
-      top: 5px;
-      border-radius: 2px;
-      text-align: center;
-      padding: 2px;
-      position: absolute;
-      height: 16px;
-      width: 16px;
-
-      &:hover {
-        background-color: var(--b3-theme-surface);
-        color: var(--b3-theme-primary);
-      }
-    }
-
     &-input {
       padding-left: 35px !important;
     }
@@ -65,7 +49,6 @@
       width: 16px;
       cursor: pointer;
       padding: 5px;
-      border-radius: 2px;
 
       &:hover {
         color: var(--b3-theme-on-background);
@@ -87,7 +70,7 @@
       left: 1px;
       top: 1px;
       height: 28px;
-      border-radius: 3px 0 0 3px;
+      border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
     }
 
     input {

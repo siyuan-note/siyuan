@@ -122,7 +122,7 @@
     padding: 0.2em 0.4em;
     margin: 0;
     font-size: 85%;
-    border-radius: 3px;
+    border-radius: var(--b3-border-radius);
     font-family: var(--b3-font-family-code);
     word-break: break-word;
     background-size: 20px 20px;

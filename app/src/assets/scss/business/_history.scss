@@ -4,7 +4,7 @@
     padding: 16px;
     box-sizing: border-box;
     border: 0;
-    border-radius: 0 0 4px 0;
+    border-radius: 0 0 var(--b3-border-radius-b) 0;
     resize: none;
     color: var(--b3-theme-on-background);
   }
@@ -15,7 +15,7 @@
     flex-direction: column;
     height: 100%;
     box-sizing: border-box;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
   }
 
   &__date {

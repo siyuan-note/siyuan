@@ -62,13 +62,13 @@
       position: absolute;
 
       &:first-child {
-        border-bottom-left-radius: 3px;
-        border-top-left-radius: 3px;
+        border-bottom-left-radius: var(--b3-border-radius);
+        border-top-left-radius: var(--b3-border-radius);
       }
 
       &:last-child {
-        border-top-right-radius: 3px;
-        border-bottom-right-radius: 3px;
+        border-top-right-radius: var(--b3-border-radius);
+        border-bottom-right-radius: var(--b3-border-radius);
       }
     }
   }
@@ -77,7 +77,7 @@
     position: fixed;
     border: 2px solid var(--b3-pdf-background1);
     box-sizing: border-box;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
   }
 }
 
@@ -483,7 +483,7 @@
 }
 
 .thumbnailSelectionRing {
-  border-radius: 2px;
+  border-radius: var(--b3-border-radius);
   padding: 7px;
   margin: 0 auto;
   box-shadow: 0 0 1px 1px var(--b3-theme-surface-lighter);
@@ -522,7 +522,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   min-width: 95%;
   height: auto;
   margin-bottom: 1px;
-  border-radius: 2px;
+  border-radius: var(--b3-border-radius);
   line-height: 15px;
   user-select: none;
   white-space: normal;
@@ -625,7 +625,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   box-shadow: var(--b3-dialog-shadow);
   border: 1px solid var(--b3-theme-surface-lighter);
   background-color: var(--b3-theme-surface);
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius-b);
   width: 520px;
   position: absolute;
   inset-inline-start: 0px;

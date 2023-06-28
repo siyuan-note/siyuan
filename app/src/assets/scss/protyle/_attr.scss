@@ -42,7 +42,7 @@
     line-height: 16px;
     padding: 0 4px;
     color: var(--b3-theme-on-surface);
-    border-radius: 2px;
+    border-radius: var(--b3-border-radius);
     font-size: 12px;
     user-select: none;
     cursor: pointer;

@@ -46,7 +46,7 @@
   margin: -1px;
   padding: 1px;
   background-color: rgba(180, 0, 170, 1);
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius);
 }
 
 .textLayer .highlight.appended {
@@ -54,11 +54,11 @@
 }
 
 .textLayer .highlight.begin {
-  border-radius: 4px 0 0 4px;
+  border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
 }
 
 .textLayer .highlight.end {
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
 }
 
 .textLayer .highlight.middle {

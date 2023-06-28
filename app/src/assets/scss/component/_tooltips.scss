@@ -9,7 +9,7 @@
   color: #fff;
   word-wrap: break-word;
   background: var(--b3-tooltips-color);
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius);
   line-height: 17px;
   max-width: 320px;
   animation-duration: 150ms;
@@ -45,7 +45,7 @@
     white-space: pre;
     content: attr(aria-label);
     background: var(--b3-tooltips-color);
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
     line-height: 17px;
     transform: scale(0.8);
     max-width: 60vw;

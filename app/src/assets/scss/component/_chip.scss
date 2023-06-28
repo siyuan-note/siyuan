@@ -18,7 +18,7 @@
   align-items: center;
   box-sizing: border-box;
   padding: 8px 12px;
-  border-radius: 16px;
+  border-radius: var(--b3-border-radius-b);
   transition: var(--b3-transition);
   text-decoration: none;
 
@@ -92,7 +92,7 @@
   &__close {
     margin-right: -5px;
     margin-left: 6px;
-    border-radius: 10px;
+    border-radius: var(--b3-border-radius-b);
     height: 16px;
     width: 16px;
     transition: var(--b3-transition);

@@ -45,7 +45,7 @@
 
   &__content {
     line-height: 20px;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
     padding: 8px 16px;
     color: var(--b3-theme-on-primary);
     font-size: inherit;

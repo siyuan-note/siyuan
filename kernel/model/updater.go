@@ -41,7 +41,7 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
 	var cmd *exec.Cmd
 	if gulu.OS.IsWindows() {
-		cmd = exec.Command(newVerInstallPkgPath)
+		cmd = exec.Command("cmd.exe", "/C", "start", newVerInstallPkgPath)
 	} else if gulu.OS.IsDarwin() {
 		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("open", newVerInstallPkgPath)

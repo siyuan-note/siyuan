@@ -100,7 +100,7 @@ const renderPDF = (id: string) => {
         
         #action {
           width: 200px;
-          background: var(--b3-theme-background-light);
+          background: var(--b3-theme-surface);
           padding: 16px;
           position: fixed;
           right: 0;

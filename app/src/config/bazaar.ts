@@ -728,17 +728,17 @@ export const bazaar = {
                     if (!target.getAttribute("disabled")) {
                         target.setAttribute("disabled", "disabled");
                         window.siyuan.config.bazaar.petalDisabled = !(target as HTMLInputElement).checked;
-                        fetchPost("/api/setting/setBazaar", window.siyuan.config.bazaar, (response) => {
+                        fetchPost("/api/setting/setBazaar", window.siyuan.config.bazaar, () => {
                             target.removeAttribute("disabled");
                             if (window.siyuan.config.bazaar.petalDisabled) {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
                                     item.classList.add("b3-card--disabled");
                                     uninstall(app, JSON.parse(item.getAttribute("data-obj")).name);
-                                })
+                                });
                             } else {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
                                     item.classList.remove("b3-card--disabled");
-                                })
+                                });
                                 loadPlugins(app).then(() => {
                                     app.plugins.forEach(item => {
                                         afterLoadPlugin(item);

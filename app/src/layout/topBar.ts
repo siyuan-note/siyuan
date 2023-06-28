@@ -383,7 +383,7 @@ const openPlugin = (app: App, target: Element) => {
         }
     });
     if (!hasPlugin) {
-        window.siyuan.menus.menu.element.querySelector(".b3-menu__separator").remove()
+        window.siyuan.menus.menu.element.querySelector(".b3-menu__separator").remove();
     }
     let rect = target.getBoundingClientRect();
     if (rect.width === 0) {

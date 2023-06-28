@@ -8,7 +8,7 @@ export const commandPanel = (app: App) => {
     const dialog = new Dialog({
         width: "80vw",
         height: "70vh",
-        content: `<div class="fn__flex-column">
+        content: `<div class="fn__flex-column" style="border-radius: var(--b3-border-radius-b);overflow:hidden;">
     <div class="b3-form__icon search__header">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">

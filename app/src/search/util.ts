@@ -1005,6 +1005,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, app: Ap
         groupBy: config.group,
         orderBy: config.sort,
         page: config.page,
+        ids: isAll ? [] : [currentList.getAttribute("data-node-id")]
     }, (response) => {
         loadElement.classList.add("fn__none");
         if (response.code === 1) {

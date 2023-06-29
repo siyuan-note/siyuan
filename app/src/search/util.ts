@@ -996,11 +996,16 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, app: Ap
         return;
     }
     loadElement.classList.remove("fn__none");
-    const searchData: ISearchOption & { ids?: string[] } = Object.assign({}, config);
-    searchData.k = config.method === 0 ? getKeyByLiElement(currentList) : searchInputElement.value;
-    searchData.r = replaceInputElement.value;
-    searchData.ids = isAll ? [] : [currentList.getAttribute("data-node-id")];
-    fetchPost("/api/search/findReplace", searchData, (response) => {
+    fetchPost("/api/search/findReplace", {
+        k: config.method === 0 ? getKeyByLiElement(currentList) : searchInputElement.value,
+        r: replaceInputElement.value,
+        method: config.method,
+        types: config.types,
+        paths: config.idPath || [],
+        groupBy: config.group,
+        orderBy: config.sort,
+        page: config.page,
+    }, (response) => {
         loadElement.classList.add("fn__none");
         if (response.code === 1) {
             showMessage(response.msg);

@@ -3,7 +3,7 @@ import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 import {getCurrentEditor} from "../editor";
-import {linkMenu, refMenu, tagMenu} from "../../menus/protyle";
+import {fileAnnotationRefMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
 
 let clientX: number;
 let clientY: number;
@@ -46,7 +46,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         if (types.includes("block-ref")) {
             refMenu(editor.protyle, target);
         } else if (types.includes("file-annotation-ref")) {
-            editor.protyle.toolbar.showFileAnnotationRef(editor.protyle, target);
+           fileAnnotationRefMenu(editor.protyle, target);
         } else if (types.includes("tag")) {
             tagMenu(editor.protyle, target);
         } else if (types.includes("a")) {

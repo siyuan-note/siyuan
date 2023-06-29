@@ -20,7 +20,16 @@ import {getSearch, isMobile} from "../../util/functions";
 import {isLocalPath, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {previewImage} from "../preview/image";
-import {contentMenu, imgMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
+import {
+    contentMenu,
+    fileAnnotationRefMenu,
+    imgMenu,
+    linkMenu,
+    refMenu,
+    setFold,
+    tagMenu,
+    zoomOut
+} from "../../menus/protyle";
 import * as dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
 import {input} from "./input";
@@ -1218,7 +1227,7 @@ export class WYSIWYG {
                     }, 620);
                     return false;
                 } else if (types.includes("file-annotation-ref") && !protyle.disabled) {
-                    protyle.toolbar.showFileAnnotationRef(protyle, target);
+                    fileAnnotationRefMenu(protyle, target);
                     return false;
                 } else if (types.includes("tag") && !protyle.disabled) {
                     tagMenu(protyle, target);

@@ -52,7 +52,7 @@ import {
     goHome,
     upSelect
 } from "./commonHotkey";
-import {linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
+import {fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -538,7 +538,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         protyle.toolbar.showRender(protyle, inlineElement);
                         return;
                     } else if (types.includes("file-annotation-ref")) {
-                        protyle.toolbar.showFileAnnotationRef(protyle, inlineElement);
+                        fileAnnotationRefMenu(protyle, inlineElement);
                         return;
                     } else if (types.includes("a")) {
                         linkMenu(protyle, inlineElement);

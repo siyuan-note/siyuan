@@ -389,12 +389,14 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 			return
 		}
 
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), fmt.Sprintf("%d/%d", i, len(ids))))
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
-	for _, renameRoot := range renameRoots {
+	for i, renameRoot := range renameRoots {
 		newTitle := renameRootTitles[renameRoot.ID]
 		RenameDoc(renameRoot.Box, renameRoot.Path, newTitle)
+
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(207), i+1, len(ids)))
 	}
 
 	WaitForWritingFiles()

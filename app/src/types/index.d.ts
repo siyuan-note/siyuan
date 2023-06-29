@@ -25,8 +25,12 @@ type TOperation =
     | "updateAttrViewCell"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
-type TEventBus = "ws-main" | "click-blockicon" | "click-editorcontent" | "click-pdf" |
-    "click-editortitleicon" | "open-noneditableblock" | "loaded-protyle"
+type TEventBus = "ws-main" |
+    "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
+    "open-noneditableblock" |
+    "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
+    "open-menu-av" | "open-menu-content" |
+    "loaded-protyle"
 type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block"
 
 declare module "blueimp-md5"

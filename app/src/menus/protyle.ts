@@ -42,6 +42,7 @@ import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
+import {emitOpenMenu} from "../plugin/EventBus";
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -271,6 +272,19 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
+
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-blockref",
+            detail: {
+                protyle,
+                element: element,
+            },
+            separatorPosition: "top",
+        });
+    }
+
     const rect = element.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
@@ -715,6 +729,18 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         openMenu(protyle.app, imgSrc, false, false);
     }
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-image",
+            detail: {
+                protyle,
+                element: assetElement,
+            },
+            separatorPosition: "top",
+        });
+    }
+
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
     const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
     textElements[0].focus();
@@ -876,6 +902,18 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
+
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-link",
+            detail: {
+                protyle,
+                element: linkElement,
+            },
+            separatorPosition: "top",
+        });
+    }
     const rect = linkElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
@@ -995,6 +1033,19 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
+
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-tag",
+            detail: {
+                protyle,
+                element: tagElement,
+            },
+            separatorPosition: "top",
+        });
+    }
+
     const rect = tagElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,

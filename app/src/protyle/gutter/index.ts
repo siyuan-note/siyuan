@@ -1,7 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByMatchTag, hasClosestByTag} from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
-import {MenuItem, subMenu} from "../../menus/Menu";
+import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {copyPlainText, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
@@ -41,6 +41,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {avRender} from "../render/av/render";
+import {emitOpenMenu} from "../../plugin/EventBus";
 
 export class Gutter {
     public element: HTMLElement;
@@ -726,22 +727,16 @@ export class Gutter {
             }).element);
         }
 
-        const pluginSubMenu = new subMenu();
-        protyle.app?.plugins?.forEach((plugin) => {
-            plugin.eventBus.emit("click-blockicon", {
-                protyle,
-                menu: pluginSubMenu,
-                blockElements: selectsElement,
+        if (protyle?.app?.plugins) {
+            emitOpenMenu({
+                plugins:protyle.app.plugins,
+                type: "click-blockicon",
+                detail: {
+                    protyle,
+                    blockElements: selectsElement,
+                },
+                separatorPosition: "top",
             });
-        });
-        if (pluginSubMenu.menus.length > 0) {
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.plugin,
-                icon: "iconPlugin",
-                type: "submenu",
-                submenu: pluginSubMenu.menus,
-            }).element);
         }
 
         return window.siyuan.menus.menu;
@@ -1547,23 +1542,19 @@ export class Gutter {
             }
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
-        const pluginSubMenu = new subMenu();
-        protyle.app?.plugins?.forEach((plugin) => {
-            plugin.eventBus.emit("click-blockicon", {
-                protyle,
-                menu: pluginSubMenu,
-                blockElements: [nodeElement]
+
+        if (protyle?.app?.plugins) {
+            emitOpenMenu({
+                plugins:protyle.app.plugins,
+                type: "click-blockicon",
+                detail: {
+                    protyle,
+                    blockElements: [nodeElement]
+                },
+                separatorPosition: "bottom",
             });
-        });
-        if (pluginSubMenu.menus.length > 0) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.plugin,
-                icon: "iconPlugin",
-                type: "submenu",
-                submenu: pluginSubMenu.menus,
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
+
         let updateHTML = nodeElement.getAttribute("updated") || "";
         if (updateHTML) {
             updateHTML = `${window.siyuan.languages.modifiedAt} ${dayjs(updateHTML).format("YYYY-MM-DD HH:mm:ss")}<br>`;

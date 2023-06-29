@@ -5,6 +5,7 @@ import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {popTextCell, showHeaderCellMenu} from "./cell";
 import {getColIconByType} from "./col";
+import {emitOpenMenu} from "../../../plugin/EventBus";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -143,6 +144,17 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         type: "submenu",
         submenu: editAttrSubmenu
     });
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-av",
+            detail: {
+                protyle,
+                element: hasClosestByClassName(target, "av__cell"),
+            },
+            separatorPosition: "top",
+        });
+    }
     menu.open({
         x: event.clientX,
         y: event.clientY,

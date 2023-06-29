@@ -141,7 +141,13 @@ export const filterMenu = (config: ISearchOption, cb: () => void) => {
 };
 
 export const queryMenu = (config: ISearchOption, cb: () => void) => {
+    if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMethod") {
+        window.siyuan.menus.menu.remove();
+        return;
+    }
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", "searchMethod");
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.keyword,
@@ -235,7 +241,13 @@ export const moreMenu = async (config: ISearchOption,
                                cb: () => void,
                                removeCriterion: () => void,
                                layoutMenu?: () => void) => {
+    if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMore") {
+        window.siyuan.menus.menu.remove();
+        return;
+    }
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", "searchMore");
     const sortMenu = [{
         iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.type,

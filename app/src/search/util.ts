@@ -536,7 +536,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         }]
                     }).element);
                 });
-                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -554,7 +555,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     config.page = 1;
                     inputEvent(element, config, undefined, edit, app);
                 });
-                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

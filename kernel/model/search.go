@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path"
 	"path/filepath"
@@ -207,7 +208,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 	return
 }
 
-func FindReplace(keyword, replacement string, ids []string, method int) (err error) {
+func FindReplace(keyword, replacement string, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
 	if 1 == method || 2 == method {
 		err = errors.New(Conf.Language(132))
@@ -230,6 +231,14 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	if nil != err {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
+	}
+
+	if 1 > len(ids) {
+		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
+		blocks, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1, math.MaxInt)
+		for _, block := range blocks {
+			ids = append(ids, block.ID)
+		}
 	}
 
 	for _, id := range ids {
@@ -269,7 +278,7 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	}
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
-	for _, id := range ids {
+	for i, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
 			continue
@@ -379,11 +388,15 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 		if err = writeJSONQueue(tree); nil != err {
 			return
 		}
+
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
-	for _, renameRoot := range renameRoots {
+	for i, renameRoot := range renameRoots {
 		newTitle := renameRootTitles[renameRoot.ID]
 		RenameDoc(renameRoot.Box, renameRoot.Path, newTitle)
+
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(207), i+1, len(ids)))
 	}
 
 	WaitForWritingFiles()
@@ -396,14 +409,12 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	return
 }
 
-const pageSize = 32
-
 // FullTextSearchBlock 搜索内容块。
 //
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 // orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
-func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
 	query = strings.TrimSpace(query)
 	beforeLen := 36
 	var blocks []*Block
@@ -413,19 +424,19 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		filter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, filter, orderByClause, beforeLen, page)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, filter, orderByClause, beforeLen, page, pageSize)
 	case 2: // SQL
-		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen, page)
+		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen, page, pageSize)
 	case 3: // 正则表达式
 		typeFilter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, typeFilter, orderByClause, beforeLen, page)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, typeFilter, orderByClause, beforeLen, page, pageSize)
 	default: // 关键字
 		filter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, filter, orderByClause, beforeLen, page)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, filter, orderByClause, beforeLen, page, pageSize)
 	}
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
 
@@ -607,7 +618,7 @@ func buildTypeFilter(types map[string]bool) string {
 	return s.TypeFilter()
 }
 
-func searchBySQL(stmt string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	stmt = gulu.Str.RemoveInvisible(stmt)
 	stmt = strings.TrimSpace(stmt)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
@@ -655,7 +666,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	keyword = gulu.Str.RemoveInvisible(keyword)
 
 	if ast.IsNodeIDPattern(keyword) {
-		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36, 1)
+		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+keyword+"'", 36, 1, 32)
 		return
 	}
 
@@ -704,26 +715,26 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	return
 }
 
-func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if ast.IsNodeIDPattern(query) {
-		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page)
+		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
-	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page)
+	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
-func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	if ast.IsNodeIDPattern(query) {
-		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page)
+		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
 	query = stringQuery(query)
-	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page)
+	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
-func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	exp = gulu.Str.RemoveInvisible(exp)
 
 	fieldFilter := fieldRegexp(exp)
@@ -754,7 +765,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter string) 
 	return
 }
 
-func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"

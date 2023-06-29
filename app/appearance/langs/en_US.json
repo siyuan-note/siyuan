@@ -1171,6 +1171,8 @@
     "202": "Cleaning data repo...",
     "203": "The data repo is purged, [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released",
     "204": "The doc in the user guide does not support sharing to the community",
-    "205": "The plugin is not supported in the current environment"
+    "205": "The plugin is not supported in the current environment",
+    "206": "Executing content replacement [%d/%d]",
+    "207": "Executing path replacement [%d/%d]"
   }
 }

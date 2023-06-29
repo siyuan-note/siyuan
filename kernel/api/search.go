@@ -35,19 +35,16 @@ func findReplace(c *gin.Context) {
 		return
 	}
 
+	_, _, _, paths, boxes, types, method, orderBy, groupBy := parseSearchArgs(arg)
+
 	k := arg["k"].(string)
 	r := arg["r"].(string)
-	methodArg := arg["method"]
-	var method int // 0：文本，1：查询语法，2：SQL，3：正则表达式
-	if nil != methodArg {
-		method = int(methodArg.(float64))
-	}
 	idsArg := arg["ids"].([]interface{})
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
-	err := model.FindReplace(k, r, ids, method)
+	err := model.FindReplace(k, r, ids, paths, boxes, types, method, orderBy, groupBy)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -218,7 +215,18 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
-	page := 1
+	page, pageSize, query, paths, boxes, types, method, orderBy, groupBy := parseSearchArgs(arg)
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
+	ret.Data = map[string]interface{}{
+		"blocks":            blocks,
+		"matchedBlockCount": matchedBlockCount,
+		"matchedRootCount":  matchedRootCount,
+		"pageCount":         pageCount,
+	}
+}
+
+func parseSearchArgs(arg map[string]interface{}) (page, pageSize int, query string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) {
+	page = 1
 	if nil != arg["page"] {
 		page = int(arg["page"].(float64))
 	}
@@ -226,9 +234,20 @@ func fullTextSearchBlock(c *gin.Context) {
 		page = 1
 	}
 
-	query := arg["query"].(string)
+	pageSize = 32
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	if 0 >= pageSize {
+		pageSize = 32
+	}
+
+	queryArg := arg["query"]
+	if nil != queryArg {
+		query = queryArg.(string)
+	}
+
 	pathsArg := arg["paths"]
-	var paths, boxes []string
 	if nil != pathsArg {
 		for _, p := range pathsArg.([]interface{}) {
 			path := p.(string)
@@ -244,7 +263,7 @@ func fullTextSearchBlock(c *gin.Context) {
 		paths = gulu.Str.RemoveDuplicatedElem(paths)
 		boxes = gulu.Str.RemoveDuplicatedElem(boxes)
 	}
-	var types map[string]bool
+
 	if nil != arg["types"] {
 		typesArg := arg["types"].(map[string]interface{})
 		types = map[string]bool{}
@@ -252,26 +271,23 @@ func fullTextSearchBlock(c *gin.Context) {
 			types[t] = b.(bool)
 		}
 	}
+
+	// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 	methodArg := arg["method"]
-	var method int // 0：关键字，1：查询语法，2：SQL，3：正则表达式
 	if nil != methodArg {
 		method = int(methodArg.(float64))
 	}
+
+	// orderBy：0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 	orderByArg := arg["orderBy"]
-	var orderBy int // 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 	if nil != orderByArg {
 		orderBy = int(orderByArg.(float64))
 	}
+
+	// groupBy： 0：不分组，1：按文档分组
 	groupByArg := arg["groupBy"]
-	var groupBy int // 0：不分组，1：按文档分组
 	if nil != groupByArg {
 		groupBy = int(groupByArg.(float64))
 	}
-	blocks, matchedBlockCount, matchedRootCount, pageCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page)
-	ret.Data = map[string]interface{}{
-		"blocks":            blocks,
-		"matchedBlockCount": matchedBlockCount,
-		"matchedRootCount":  matchedRootCount,
-		"pageCount":         pageCount,
-	}
+	return
 }

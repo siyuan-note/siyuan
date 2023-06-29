@@ -233,6 +233,7 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 	}
 
 	if 1 > len(ids) {
+		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
 		blocks, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1)
 		for _, block := range blocks {
 			ids = append(ids, block.ID)

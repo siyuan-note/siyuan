@@ -35,7 +35,7 @@ func findReplace(c *gin.Context) {
 		return
 	}
 
-	_, _, paths, boxes, types, method, orderBy, groupBy := parseSearchArgs(arg)
+	_, _, _, paths, boxes, types, method, orderBy, groupBy := parseSearchArgs(arg)
 
 	k := arg["k"].(string)
 	r := arg["r"].(string)
@@ -215,8 +215,8 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
-	page, query, paths, boxes, types, method, orderBy, groupBy := parseSearchArgs(arg)
-	blocks, matchedBlockCount, matchedRootCount, pageCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page)
+	page, pageSize, query, paths, boxes, types, method, orderBy, groupBy := parseSearchArgs(arg)
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,
@@ -225,13 +225,21 @@ func fullTextSearchBlock(c *gin.Context) {
 	}
 }
 
-func parseSearchArgs(arg map[string]interface{}) (page int, query string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) {
+func parseSearchArgs(arg map[string]interface{}) (page, pageSize int, query string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) {
 	page = 1
 	if nil != arg["page"] {
 		page = int(arg["page"].(float64))
 	}
 	if 0 >= page {
 		page = 1
+	}
+
+	pageSize = 32
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	if 0 >= pageSize {
+		pageSize = 32
 	}
 
 	queryArg := arg["query"]

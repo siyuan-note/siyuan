@@ -996,34 +996,22 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, app: Ap
         return;
     }
     loadElement.classList.remove("fn__none");
-    let ids: string[] = [];
-    let rootIds: string[] = [];
-    if (isAll) {
-        searchPanelElement.querySelectorAll('.b3-list-item[data-type="search-item"]').forEach(item => {
-            ids.push(item.getAttribute("data-node-id"));
-            rootIds.push(item.getAttribute("data-root-id"));
-        });
-    } else {
-        ids = [currentList.getAttribute("data-node-id")];
-        rootIds = [currentList.getAttribute("data-root-id")];
-    }
-    fetchPost("/api/search/findReplace", {
-        k: config.method === 0 ? getKeyByLiElement(currentList) : searchInputElement.value,
-        r: replaceInputElement.value,
-        ids,
-        types: config.types,
-        method: config.method,
-    }, (response) => {
+    const searchData: ISearchOption & { ids?: string[] } = Object.assign({}, config);
+    searchData.k = config.method === 0 ? getKeyByLiElement(currentList) : searchInputElement.value;
+    searchData.r = replaceInputElement.value;
+    searchData.ids = isAll ? [] : [currentList.getAttribute("data-node-id")];
+    fetchPost("/api/search/findReplace", searchData, (response) => {
         loadElement.classList.add("fn__none");
         if (response.code === 1) {
             showMessage(response.msg);
             return;
         }
-        if (ids.length > 1) {
+        if (isAll) {
             return;
         }
+        const rootId = currentList.getAttribute("data-root-id")
         getAllModels().editor.forEach(item => {
-            if (rootIds[0] === item.editor.protyle.block.rootID) {
+            if (rootId === item.editor.protyle.block.rootID) {
                 reloadProtyle(item.editor.protyle, false);
             }
         });

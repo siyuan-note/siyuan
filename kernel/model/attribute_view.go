@@ -80,7 +80,7 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	c.Value = parseCellData(operation.Data, av.ColumnType(operation.Typ))
+	c.Value, c.RenderValue = parseCellData(operation)
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[NodeAttrNamePrefixAvCol+c.ID] = c.Value
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -293,12 +293,16 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 	return
 }
 
-func parseCellData(data interface{}, colType av.ColumnType) string {
+func parseCellData(operation *Operation) (val, renderVal string) {
+	data := operation.Data
+	colType := av.ColumnType(operation.Typ)
 	switch colType {
 	case av.ColumnTypeText:
-		return data.(string)
+		val = data.(string)
+		renderVal = val
+		return
 	}
-	return ""
+	return
 }
 
 const NodeAttrNamePrefixAvCol = "av-col-"

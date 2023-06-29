@@ -207,7 +207,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets 
 	return
 }
 
-func FindReplace(keyword, replacement string, ids []string, method int) (err error) {
+func FindReplace(keyword, replacement string, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
 	if 1 == method || 2 == method {
 		err = errors.New(Conf.Language(132))
@@ -230,6 +230,13 @@ func FindReplace(keyword, replacement string, ids []string, method int) (err err
 	if nil != err {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
+	}
+
+	if 1 > len(ids) {
+		blocks, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1)
+		for _, block := range blocks {
+			ids = append(ids, block.ID)
+		}
 	}
 
 	for _, id := range ids {

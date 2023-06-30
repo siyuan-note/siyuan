@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121808-fnxmngk",
 		"title": "資料庫表",
-		"updated": "20221014133129"
+		"updated": "20230630110035"
 	},
 	"Children": [
 		{
@@ -379,7 +379,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "去除了 Markdown 標記符的文本"
+									"Data": "去除了 Markdown 標記符的文字"
 								}
 							]
 						}
@@ -406,7 +406,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "第一個子塊去除了 Markdown 標記符的文本"
+									"Data": "第一個子塊去除了 Markdown 標記符的文字"
 								}
 							]
 						}
@@ -433,7 +433,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "包含完整 Markdown 標記符的文本"
+									"Data": "包含完整 Markdown 標記符的文字"
 								}
 							]
 						}
@@ -627,7 +627,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "創建時間，例如 "
+									"Data": "建立時間，例如 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -701,7 +701,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121831-oj726eb",
-				"updated": "20220427104444"
+				"updated": "20230630110035"
 			},
 			"Children": [
 				{
@@ -713,7 +713,7 @@
 					},
 					"Properties": {
 						"id": "20211226121831-pk3bq3y",
-						"updated": "20220427104444"
+						"updated": "20230630110035"
 					},
 					"Children": [
 						{
@@ -721,7 +721,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121831-6cm01kl",
-								"updated": "20220427104444"
+								"updated": "20230630110035"
 							},
 							"Children": [
 								{
@@ -735,16 +735,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，則最多只返回前 64 條結果，可通过 "
+									"Data": "​，則最多只返回前 64 條結果，可通過 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
+									"TextMarkTextContent": "設置"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -753,7 +753,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -762,7 +762,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 进行调整"
+									"Data": "​ 進行調整"
 								}
 							]
 						}

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226122459-08mi5cq",
 		"title": "Docker 伺服",
-		"updated": "20230406105250"
+		"updated": "20230630170719"
 	},
 	"Children": [
 		{
@@ -155,7 +155,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122519-dp4dv43",
-				"updated": "20211228132206"
+				"updated": "20230630170719"
 			},
 			"Children": [
 				{
@@ -249,7 +249,7 @@
 					},
 					"Properties": {
 						"id": "20211226122519-sn8phpz",
-						"updated": "20211228124516"
+						"updated": "20230630170719"
 					},
 					"Children": [
 						{
@@ -257,12 +257,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122519-s5nun1r",
-								"updated": "20211228124516"
+								"updated": "20230630170719"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "kernel：內核程式"
+									"Data": "kernel：核心程式"
 								}
 							]
 						}
@@ -555,7 +555,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "鏡像中是使用預設創建的普通用戶 "
+					"Data": "鏡像中是使用預設建立的普通用戶 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -564,7 +564,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（uid 1000/gid 1000）來啟動kernel程式的，所以在宿主機創建工作空間文件夾時請註意設置該文件夾所屬用戶組："
+					"Data": "（uid 1000/gid 1000）來啟動kernel程式的，所以在宿主機建立工作空間文件夾時請註意設置該文件夾所屬用戶組："
 				},
 				{
 					"Type": "NodeTextMark",
@@ -597,7 +597,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "隱藏端口"
+					"Data": "隱藏埠"
 				}
 			]
 		},
@@ -611,7 +611,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使用 NGINX 反向代理可以隱藏 6806 端口，請註意："
+					"Data": "使用 NGINX 反向代理可以隱藏 6806 埠，請註意："
 				}
 			]
 		},
@@ -714,7 +714,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "請務必確認掛載卷的正確性，否則容器刪除後數據會丟失"
+									"Data": "請務必確認掛載卷的正確性，否則容器刪除後資料會丟失"
 								}
 							]
 						}

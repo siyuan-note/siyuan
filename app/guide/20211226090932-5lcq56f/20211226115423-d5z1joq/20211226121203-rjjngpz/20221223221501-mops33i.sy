@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
-		"updated": "20230328100340"
+		"updated": "20230630132735"
 	},
 	"Children": [
 		{
@@ -465,7 +465,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "該使用方式默認關閉，如果需要可以在 "
+					"Data": "該使用方式預設關閉，如果需要可以在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -580,7 +580,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221223221502-2rwr82o",
-				"updated": "20221223221852"
+				"updated": "20230630132735"
 			},
 			"Children": [
 				{
@@ -605,7 +605,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "卡包數據通過 MessagePack 序列化協議存儲在 "
+									"Data": "卡包資料通過 MessagePack 序列化協議存儲在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -629,7 +629,7 @@
 					},
 					"Properties": {
 						"id": "20221223221502-vrom8jb",
-						"updated": "20221223221502"
+						"updated": "20230630132735"
 					},
 					"Children": [
 						{
@@ -637,12 +637,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221223221502-yfedqlh",
-								"updated": "20221223221502"
+								"updated": "20230630132735"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "啟動時加載所有卡包數據到內存，數據同步下載後重新加載一次"
+									"Data": "啟動時加載所有卡包資料到記憶體，資料同步下載後重新加載一次"
 								}
 							]
 						}

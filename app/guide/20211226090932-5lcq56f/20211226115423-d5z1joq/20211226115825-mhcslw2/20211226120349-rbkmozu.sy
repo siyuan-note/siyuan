@@ -387,7 +387,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "提及使用當前文檔中內容塊命名、別名、引用錨文本和文檔名作為關鍵字進行搜索（可在 "
+					"Data": "提及使用當前文檔中內容塊命名、別名、引用錨文字和文檔名作為關鍵字進行搜索（可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -410,7 +410,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "反鏈提及"
+					"TextMarkTextContent": "反連提及"
 				},
 				{
 					"Type": "NodeText",
@@ -437,7 +437,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：提及搜索僅會在普通文本中搜索，不會在粗體、斜體等行級元素和代碼塊、圖表等塊級元素中搜索，這一點和"
+					"Data": "​：提及搜索僅會在普通文字中搜索，不會在粗體、斜體等行級元素和代碼塊、圖表等塊級元素中搜索，這一點和"
 				},
 				{
 					"Type": "NodeTextMark",

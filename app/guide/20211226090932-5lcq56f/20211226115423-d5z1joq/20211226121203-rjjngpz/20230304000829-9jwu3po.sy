@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Chat API 實現文本對話。"
+					"Data": " Chat API 實現文字對話。"
 				}
 			]
 		},
@@ -97,7 +97,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "註冊 OpenAI 賬號，並創建 API Key"
+									"Data": "註冊 OpenAI 賬號，並建立 API Key"
 								}
 							]
 						}
@@ -282,7 +282,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "該功能會將相關文本發送至 OpenAI"
+									"Data": "該功能會將相關文字發送至 OpenAI"
 								}
 							]
 						}

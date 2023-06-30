@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230627214818"
+		"updated": "20230630143055"
 	},
 	"Children": [
 		{
@@ -55,7 +55,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226115356-i1v42hf",
-				"updated": "20230622164112"
+				"updated": "20230630143055"
 			},
 			"Children": [
 				{
@@ -111,7 +111,7 @@
 					},
 					"Properties": {
 						"id": "20221202215155-za7sgpu",
-						"updated": "20230622164101"
+						"updated": "20230630143055"
 					},
 					"Children": [
 						{
@@ -119,7 +119,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202215155-gzavzm9",
-								"updated": "20230622164101"
+								"updated": "20230630143055"
 							},
 							"Children": [
 								{
@@ -133,7 +133,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用於保存自定義圖標表情圖片"
+									"Data": "​ 用於保存自定義表情圖片"
 								}
 							]
 						}
@@ -218,7 +218,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "數據等"
+									"Data": "資料等"
 								}
 							]
 						}
@@ -387,7 +387,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用於保存公開的數據"
+									"Data": "​ 用於保存公開的資料"
 								}
 							]
 						}
@@ -415,7 +415,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "其余文件夾就是用戶自己創建的筆記本文件夾，筆記本文件夾下 "
+									"Data": "其余文件夾就是用戶自己建立的筆記本文件夾，筆記本文件夾下 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -443,7 +443,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "支持通過第三方同步盤進行數據同步嗎？"
+					"Data": "支持通過第三方同步硬碟進行資料同步嗎？"
 				}
 			]
 		},
@@ -457,7 +457,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "不支持通過第三方同步盤進行數據同步，否則可能會導致數據損壞。"
+					"Data": "不支持通過第三方同步硬碟進行資料同步，否則可能會導致資料損壞。"
 				}
 			]
 		},
@@ -471,7 +471,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "雖然不支持第三方同步盤，但是支持第三方雲端存儲服務，可在 "
+					"Data": "雖然不支持第三方同步硬碟，但是支持第三方雲端存儲服務，可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -621,7 +621,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過第三方雲端存儲服務同步數據同樣是"
+					"Data": "通過第三方雲端存儲服務同步資料同樣是"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -632,7 +632,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "的，第三方雲端存儲服務提供商無法獲得我們的明文數據。"
+					"Data": "的，第三方雲端存儲服務提供商無法獲得我們的明文資料。"
 				}
 			]
 		},
@@ -646,7 +646,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "另外，可以考慮手動導出導入 Data 實現數據同步："
+					"Data": "另外，可以考慮手動導出導入 Data 實現資料同步："
 				}
 			]
 		},
@@ -851,7 +851,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://github.com/siyuan-note/siyuan",
-									"TextMarkTextContent": "界面和內核"
+									"TextMarkTextContent": "界面和Kernel"
 								}
 							]
 						}
@@ -1227,7 +1227,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226122707-8cr09co",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "數據歷史"
+					"TextMarkTextContent": "資料歷史"
 				},
 				{
 					"Type": "NodeText",
@@ -1298,7 +1298,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在列表項下的第一個子塊是省略塊標的。可以將光標移到這個塊中，然後通過 "
+					"Data": "在列表項下的第一個子塊是省略塊標的。可以將游標移到這個塊中，然後通過 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1397,7 +1397,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 數據包"
+									"Data": "​ 資料包"
 								}
 							]
 						}
@@ -1509,7 +1509,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "數據倉庫密鑰遺失怎麼辦？"
+					"Data": "資料倉庫密鑰遺失怎麼辦？"
 				}
 			]
 		},
@@ -1544,7 +1544,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果之前在多個設備上正確初始化過數據倉庫密鑰的話，那麼該密鑰在所有設備上都是相同的，可以在 "
+									"Data": "如果之前在多個設備上正確初始化過資料倉庫密鑰的話，那麼該密鑰在所有設備上都是相同的，可以在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1567,7 +1567,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "數據倉庫密鑰"
+									"TextMarkTextContent": "資料倉庫密鑰"
 								},
 								{
 									"Type": "NodeText",
@@ -1647,7 +1647,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "手動備份好數據，可通過 "
+													"Data": "手動備份好資料，可通過 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1714,7 +1714,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "數據倉庫密鑰"
+													"TextMarkTextContent": "資料倉庫密鑰"
 												},
 												{
 													"Type": "NodeText",
@@ -1723,7 +1723,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "重置數據倉庫"
+													"TextMarkTextContent": "重置資料倉庫"
 												}
 											]
 										}
@@ -1753,7 +1753,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "重新初始化數據倉庫密鑰，在一台設備上初始化密鑰以後，其他設備導入密鑰"
+													"Data": "重新初始化資料倉庫密鑰，在一台設備上初始化密鑰以後，其他設備導入密鑰"
 												}
 											]
 										}

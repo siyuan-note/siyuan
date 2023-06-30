@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
-		"updated": "20220511190009"
+		"updated": "20230630112012"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支持導入 Markdown 文件。所以如果你需要導入其他筆記軟件的數據，請先將數據轉換為 Markdown 文件。"
+					"Data": "思源支持導入 Markdown 文件。所以如果你需要導入其他筆記軟體的資料，請先將資料轉換為 Markdown 文件。"
 				}
 			]
 		},
@@ -133,7 +133,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220511185951-brwja06",
-				"updated": "20220511185951"
+				"updated": "20230630111847"
 			},
 			"Children": [
 				{
@@ -147,7 +147,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "- "
+					"Data": "​- "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -156,7 +156,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、移動端右側欄 "
+					"Data": "​、移動端右側欄 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -165,7 +165,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中可以進行數據導入和導出。這裡的導出會將 "
+					"Data": "​ 中可以進行資料導入和導出。這裡的導出會將 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -174,7 +174,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文件夾完整復制並打包為 zip 壓縮包。"
+					"Data": "​ 文件夾完整複製並打包為 zip 壓縮檔。"
 				}
 			]
 		},
@@ -193,7 +193,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 功能僅支持處理以上步驟導出的 Data 壓縮包。導入按壓縮包中的文件路徑複製到當前 "
+					"Data": " 功能僅支持處理以上步驟導出的 Data 壓縮檔。導入按壓縮檔中的文件路徑複製到當前 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -316,7 +316,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用前請務必留意，避免已有數據被覆蓋無法恢復。"
+					"Data": "：使用前請務必留意，避免已有資料被覆蓋無法恢復。"
 				}
 			]
 		},
@@ -369,7 +369,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 即可，剪切板中是標準 Markdown 文本。"
+					"Data": " 即可，剪切板中是標準 Markdown 文字。"
 				}
 			]
 		},
@@ -378,12 +378,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223850-eh0bi4u",
-				"updated": "20220317224451"
+				"updated": "20230630112012"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果你需要復制 HTML 內容，請在編輯器頁簽右上角的 "
+					"Data": "如果你需要複製 HTML 內容，請在編輯器分頁右上角的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -392,7 +392,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 菜單中的 "
+					"Data": "​ 菜單中的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -401,7 +401,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 切換到 "
+					"Data": "​ 切換到 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -410,7 +410,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後再進行複制。"
+					"Data": "​ 後再進行複制。"
 				}
 			]
 		},
@@ -448,7 +448,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或者編輯器頁簽右上角的 "
+					"Data": " 或者編輯器分頁右上角的 "
 				},
 				{
 					"Type": "NodeTextMark",

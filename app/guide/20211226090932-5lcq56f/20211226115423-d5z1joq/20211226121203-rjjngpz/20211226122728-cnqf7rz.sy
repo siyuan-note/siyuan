@@ -228,7 +228,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "創建或者找到 "
+													"Data": "建立或者找到 "
 												},
 												{
 													"Type": "NodeTextMark",

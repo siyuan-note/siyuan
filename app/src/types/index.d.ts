@@ -837,8 +837,9 @@ interface IAVCell {
     color: string,
     bgColor: string,
     value: string,
+    valueType: TAVCol,
     renderValue: {
         content: string,
         id: string,
-    }
+    } | string
 }

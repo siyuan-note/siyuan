@@ -48,7 +48,19 @@ export const avRender = (element: Element, cb?: () => void) => {
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
-                        tableHTML += `<div class="av__cell" ${index === 0 ? 'data-block-id="' + (cell.renderValue?.id || "") + '"' : ""} data-id="${cell.id}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${cell.renderValue?.content || ""}</div>`;
+                        let text: string
+                        if (cell.valueType === "text") {
+                            text = cell.renderValue as string || ""
+                        } else if (cell.valueType === "block") {
+                            text = (cell.renderValue as {
+                                content: string,
+                                id: string,
+                            }).content as string || ""
+                        }
+                        tableHTML += `<div class="av__cell" ${index === 0 ? 'data-block-id="' + ((cell.renderValue as {
+                            content: string,
+                            id: string
+                        }).id || "") + '"' : ""} data-id="${cell.id}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });

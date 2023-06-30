@@ -5,8 +5,8 @@
   "cloudRegionChina": "LianDi (Centre de données de Chine continentale)",
   "currentKernel": "Noyau actuel",
   "otherOnlineKernels": "Autres noyaux en ligne",
-  "syncPerception": "⚗\uFE0F Perception de la synchronisation",
-  "syncPerceptionTip": "Après l'activation, il recevra et enverra automatiquement des signaux de synchronisation des données, afin que la synchronisation des données puisse être effectuée pour tous les appareils en ligne autant que possible en temps réel (cette fonctionnalité est actuellement en phase expérimentale)",
+  "syncPerception": "Perception de la synchronisation",
+  "syncPerceptionTip": "Après l'activation, il recevra et enverra automatiquement des signaux de synchronisation des données, afin que la synchronisation des données puisse être effectuée pour tous les appareils en ligne autant que possible en temps réel",
   "hide": "Masquer",
   "wrap": "Reboucler la colonne",
   "edit": "Modifier",
@@ -518,6 +518,7 @@
   "customSort": "Tri personnalisé",
   "collapse": "Collapse",
   "blockEmbed": "incorporer le bloc",
+  "rowTip": "Cliquez pour ouvrir le menu<br>Faites glisser pour trier",
   "gutterTip": "Cliquez pour ouvrir le menu<br>⌘Cliquez pour se concentrer<br>⌥Cliquez pour plier/agrandir<br>⇧Cliquez pour mettre à jour l'attribut<br>Faites glisser pour déplacer<br>⌃Faites glisser pour dupliquer<br>⌥ Faites glisser vers ref<br> ⇧Faites glisser pour incorporer<br>",
   "gutterTip2": "Cliquez pour ouvrir le menu<br>⇧Click Modifier les attribut",
   "linkDistance": "Distance du lien",
@@ -1171,6 +1172,8 @@
     "202": "Nettoyage du référentiel de données...",
     "203": "Le référentiel de données est purgé, [%d] instantanés et [%d] objets de données ont été supprimés, et un total de [%s] espace disque a été libéré",
     "204": "La documentation du guide de l'utilisateur ne prend pas en charge le partage avec la communauté",
-    "205": "Le plugin n'est pas pris en charge dans l'environnement actuel"
+    "205": "Le plugin n'est pas pris en charge dans l'environnement actuel",
+    "206": "Exécution du remplacement de contenu [%d/%d]",
+    "207": "Exécution du remplacement de chemin [%d/%d]"
   }
 }

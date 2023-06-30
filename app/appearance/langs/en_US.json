@@ -5,8 +5,8 @@
   "cloudRegionChina": "LianDi (Mainland China data center)",
   "currentKernel": "Current kernel",
   "otherOnlineKernels": "Other online kernels",
-  "syncPerception": "⚗\uFE0F Sync perception",
-  "syncPerceptionTip": "After enabling, it will automatically receive and send data sync signals, so that data sync can be performed for all online devices as much as possible in real time (this feature is currently in the experimental stage)",
+  "syncPerception": "Sync perception",
+  "syncPerceptionTip": "After enabling, it will automatically receive and send data sync signals, so that data sync can be performed for all online devices as much as possible in real time",
   "hide": "Hide",
   "wrap": "Wrap column",
   "edit": "Edit",
@@ -431,7 +431,7 @@
   "cloudIntro6": "Unlimited number of devices and number of workspaces",
   "cloudIntro7": "Different local workspaces correspond to different data synchronization directories in the cloud",
   "cloudIntro8": "Different devices keep their own data history, and data that is overwritten or deleted by synchronization will not be lost",
-  "cloudIntro9": "Cloud assets serving service",
+  "cloudIntro9": "Cloud assets hosting service",
   "cloudIntro10": "Upload local asset files to the cloud with one click",
   "cloudIntro11": "One-click to copy the document to the Wechat MP, Zhihu, Yuque etc. platforms",
   "selectAll": "Select all",
@@ -518,6 +518,7 @@
   "customSort": "Custom Sorting",
   "collapse": "Collapse",
   "blockEmbed": "Embed Block",
+  "rowTip": "Click to open menu<br>Drag to sort",
   "gutterTip": "Click to open menu<br>⌘Click to focus<br>⌥Click to fold/expand<br>⇧Click to update attr<br>Drag to move<br>⌃Drag to duplicate<br>⌥Drag to ref<br> ⇧Drag to embed<br>",
   "gutterTip2": "Click to open the menu<br>⇧Click Update attribute",
   "linkDistance": "Link distance",
@@ -761,7 +762,7 @@
   "export20": "Exporting Word .docx files requires format conversion using <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a>",
   "export21": "Export PDF footer template",
   "export22": "<code class='fn__code'>%page</code> is the current page number, <code class='fn__code'>%pages</code> is the total page number, and supports Sprig template functions",
-  "export23": "Export Markdown wit YAML front-matter",
+  "export23": "Export Markdown with YAML front-matter",
   "export24": "After enabling, add some general metadata information at the beginning of the exported Markdown file",
   "theme11": "Use theme in light mode",
   "theme12": "Use theme in dark mode",
@@ -1171,6 +1172,8 @@
     "202": "Cleaning data repo...",
     "203": "The data repo is purged, [%d] snapshots and [%d] data objects have been deleted, and a total of [%s] disk space has been released",
     "204": "The doc in the user guide does not support sharing to the community",
-    "205": "The plugin is not supported in the current environment"
+    "205": "The plugin is not supported in the current environment",
+    "206": "Executing content replacement [%d/%d]",
+    "207": "Executing path replacement [%d/%d]"
   }
 }

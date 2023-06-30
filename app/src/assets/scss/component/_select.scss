@@ -1,6 +1,6 @@
 .b3-select {
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius);
   padding: 4px 26px 4px 8px;
   box-sizing: border-box;
   line-height: 20px;

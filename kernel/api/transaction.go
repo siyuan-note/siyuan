@@ -19,6 +19,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -75,7 +76,15 @@ func performTransactions(c *gin.Context) {
 }
 
 func pushTransactions(app, session string, transactions []*model.Transaction) {
-	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcastExcludeSelf)
+	pushMode := util.PushModeBroadcastExcludeSelf
+	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
+		model.WaitForWritingFiles()
+		if strings.Contains(strings.ToLower(transactions[0].DoOperations[0].Action), "attrview") {
+			pushMode = util.PushModeBroadcast
+		}
+	}
+
+	evt := util.NewCmdResult("transactions", 0, pushMode)
 	evt.AppId = app
 	evt.SessionId = session
 	evt.Data = transactions

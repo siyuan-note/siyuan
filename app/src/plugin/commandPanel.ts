@@ -8,7 +8,7 @@ export const commandPanel = (app: App) => {
     const dialog = new Dialog({
         width: "80vw",
         height: "70vh",
-        content: `<div class="fn__flex-column">
+        content: `<div class="fn__flex-column" style="border-radius: var(--b3-border-radius-b);overflow:hidden;">
     <div class="b3-form__icon search__header">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">
@@ -17,21 +17,21 @@ export const commandPanel = (app: App) => {
     <ul class="b3-list b3-list--background fn__flex-1" id="commands"></ul>
     <div class="fn__hr"></div>
 </div>`
-    })
+    });
     const listElement = dialog.element.querySelector("#commands");
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");
-            liElement.classList.add("b3-list-item")
-            liElement.innerHTML = `<span class="b3-list-item__text">${command.langText || plugin.i18n[command.langKey]}</span>
+            liElement.classList.add("b3-list-item");
+            liElement.innerHTML = `<span class="b3-list-item__text">${plugin.displayName}: ${command.langText || plugin.i18n[command.langKey]}</span>
 <span class="b3-list-item__meta">${updateHotkeyTip(command.customHotkey)}</span>`;
             liElement.addEventListener("click", () => {
                 command.callback();
                 dialog.destroy();
-            })
+            });
             listElement.insertAdjacentElement("beforeend", liElement);
-        })
-    })
+        });
+    });
 
     if (listElement.childElementCount === 0) {
         const liElement = document.createElement("li");
@@ -40,7 +40,7 @@ export const commandPanel = (app: App) => {
         liElement.addEventListener("click", () => {
             dialog.destroy();
             openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
-        })
+        });
         listElement.insertAdjacentElement("beforeend", liElement);
     } else {
         listElement.firstElementChild.classList.add("b3-list-item--focus");
@@ -64,9 +64,9 @@ export const commandPanel = (app: App) => {
             dialog.destroy();
         }
     });
-    inputElement.addEventListener("compositionend", (event: InputEvent) => {
+    inputElement.addEventListener("compositionend", () => {
         filterList(inputElement, listElement);
-    })
+    });
     inputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
             return;
@@ -74,7 +74,7 @@ export const commandPanel = (app: App) => {
         event.stopPropagation();
         filterList(inputElement, listElement);
     });
-}
+};
 
 const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
     const inputValue = inputElement.value.toLowerCase();
@@ -83,7 +83,7 @@ const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
         if (inputValue.indexOf(elementValue) > -1 || elementValue.indexOf(inputValue) > -1) {
             element.classList.remove("fn__none");
         } else {
-            element.classList.add("fn__none")
+            element.classList.add("fn__none");
         }
-    })
-}
+    });
+};

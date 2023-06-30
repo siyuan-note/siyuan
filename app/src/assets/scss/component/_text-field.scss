@@ -1,6 +1,6 @@
 .b3-text-field {
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius);
   box-shadow: inset 0 0 0 .6px var(--b3-theme-on-surface);
   padding: 4px 8px;
   line-height: 20px;

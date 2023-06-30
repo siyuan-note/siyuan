@@ -36,6 +36,8 @@
 
     /* 线条 */
     --b3-border-color: var(--b3-theme-surface-lighter);
+    --b3-border-radius: 6px;
+    --b3-border-radius-b: 12px;
 
     /* 滚动条 */
     --b3-scroll-color: rgba(0, 0, 0, .2);

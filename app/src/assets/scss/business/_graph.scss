@@ -49,7 +49,7 @@
       pointer-events: none;
       position: absolute;
       border: 1px solid var(--b3-theme-surface-lighter);
-      border-radius: 4px;
+      border-radius: var(--b3-border-radius);
       box-shadow: var(--b3-dialog-shadow);
       background-color: var(--b3-theme-surface);
       padding: 4px 8px;

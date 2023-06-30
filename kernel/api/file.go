@@ -196,6 +196,7 @@ func renameFile(c *gin.Context) {
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
 		ret.Code = 404
+		ret.Msg = err.Error()
 		return
 	}
 	if nil != err {
@@ -207,6 +208,11 @@ func renameFile(c *gin.Context) {
 
 	newPath := arg["newPath"].(string)
 	newPath = filepath.Join(util.WorkspaceDir, newPath)
+	if gulu.File.IsExist(newPath) {
+		ret.Code = 409
+		ret.Msg = "the [newPath] file or directory already exists"
+		return
+	}
 
 	if err = filelock.Rename(filePath, newPath); nil != err {
 		logging.LogErrorf("rename file [%s] to [%s] failed: %s", filePath, newPath, err)

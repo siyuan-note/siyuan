@@ -200,17 +200,17 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 }
 
 func RebuildAttributeViewQueue(av *av.AttributeView) {
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-
-	newOp := &dbQueueOperation{av: av, inQueueTime: time.Now(), action: "av_rebuild"}
-	for i, op := range operationQueue {
-		if "av_rebuild" == op.action && op.av.ID == av.ID {
-			operationQueue[i] = newOp
-			return
-		}
-	}
-	operationQueue = append(operationQueue, newOp)
+	//dbQueueLock.Lock()
+	//defer dbQueueLock.Unlock()
+	//
+	//newOp := &dbQueueOperation{av: av, inQueueTime: time.Now(), action: "av_rebuild"}
+	//for i, op := range operationQueue {
+	//	if "av_rebuild" == op.action && op.av.ID == av.ID {
+	//		operationQueue[i] = newOp
+	//		return
+	//	}
+	//}
+	//operationQueue = append(operationQueue, newOp)
 }
 
 func BatchRemoveAssetsQueue(hashes []string) {

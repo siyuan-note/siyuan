@@ -311,7 +311,7 @@ export const openHistory = (app: App) => {
     });
 
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
-    <div class="layout-tab-bar fn__flex" style="border-radius: 4px 4px 0 0">
+    <div class="layout-tab-bar fn__flex" style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
         <div data-type="doc" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.fileHistory}</span><span class="fn__flex-1"></span></div>
         <div data-type="notebook" style="min-width: 160px" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.removedNotebook}</span><span class="fn__flex-1"></span></div>
         <div data-type="repo" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.dataSnapshot}</span><span class="fn__flex-1"></span></div>

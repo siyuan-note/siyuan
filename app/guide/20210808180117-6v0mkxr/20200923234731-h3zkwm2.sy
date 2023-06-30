@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230622164128"
+		"updated": "20230627215826"
 	},
 	"Children": [
 		{
@@ -1862,22 +1862,23 @@
 			]
 		},
 		{
-			"ID": "20230406111508-0lt5im7",
+			"ID": "20230627215819-kfmomdw",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230406111508-0lt5im7",
-				"updated": "20230406111508"
+				"id": "20230627215819-kfmomdw",
+				"updated": "20230627215826"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/pricing.html",
-					"TextMarkTextContent": "Cloud Service"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210808180303-v9awwp0",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Cloud services"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " requires an annual subscription. At present, only users in mainland China are supported to subscribe, and users outside of mainland China are not allowed to subscribe."
+					"Data": " require a paid subscription to use."
 				}
 			]
 		},

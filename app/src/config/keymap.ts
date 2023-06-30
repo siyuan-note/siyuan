@@ -56,7 +56,7 @@ export const keymap = {
         <span class="b3-list-item__toggle b3-list-item__toggle--hl">
             <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
         </span>
-        <span class="b3-list-item__text ft__on-surface">${item.name}</span>
+        <span class="b3-list-item__text ft__on-surface">${item.displayName}</span>
     </div>
     <div class="fn__none b3-list__panel">
         ${commandHTML}

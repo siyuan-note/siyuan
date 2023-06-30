@@ -224,7 +224,7 @@
 
   &-tooltip {
     background-color: var(--b3-tooltips-color);
-    border-radius: 10px;
+    border-radius: var(--b3-border-radius-b);
     color: #fff;
     display: none;
     font-size: 12px;

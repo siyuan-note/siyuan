@@ -1,6 +1,6 @@
 .b3-menu {
   position: fixed;
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius-b);
   box-shadow: var(--b3-dialog-shadow);
   border: 1px solid var(--b3-theme-surface-lighter);
   background-color: var(--b3-menu-background);
@@ -20,7 +20,7 @@
   &__submenu::-webkit-scrollbar-thumb {
     box-sizing: content-box;
     border: 2px solid transparent;
-    border-radius: 5px;
+    border-radius: var(--b3-border-radius);
     box-shadow: inset 0 0 2.5px 2.5px var(--b3-scroll-color);
 
     &:hover {
@@ -116,7 +116,7 @@
         height: 17px;
         width: 17px;
         margin: 0 16px 0 8px;
-        border-radius: 4px;
+        border-radius: var(--b3-border-radius);
 
         &--arrow {
           width: 12px;
@@ -141,7 +141,7 @@
 
   &__item {
     padding: 0 8px;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
     user-select: none;
     display: flex;
     line-height: 30px;
@@ -269,7 +269,7 @@
     display: none;
     max-height: 80vh;
     border: 1px solid var(--b3-theme-surface-lighter);
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius-b);
     background-color: var(--b3-menu-background);
     padding: 8px;
     position: fixed;
@@ -332,7 +332,7 @@
     &--current,
     &:hover {
       background: var(--b3-list-hover);
-      border-radius: 4px;
+      border-radius: var(--b3-border-radius);
     }
   }
 

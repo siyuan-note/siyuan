@@ -5,6 +5,7 @@ import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {popTextCell, showHeaderCellMenu} from "./cell";
 import {getColIconByType} from "./col";
+import {emitOpenMenu} from "../../../plugin/EventBus";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -44,6 +45,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const gutterElement = hasClosestByClassName(event.target, "av__gutters");
+    if (gutterElement) {
+        avContextmenu(protyle, event, gutterElement);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     const checkElement = hasClosestByClassName(event.target, "av__firstcol");
     if (checkElement) {
         // TODO
@@ -71,6 +80,9 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     if (!rowElement) {
         return false;
     }
+    if (rowElement.classList.contains("av__row--header")) {
+        return  false
+    }
     const blockElement = hasClosestBlock(rowElement);
     if (!blockElement) {
         return false;
@@ -82,7 +94,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         item.classList.remove("av__row--select");
     });
     const rowId = rowElement.getAttribute("data-id");
-    const menu = new Menu("av-row");
+    const menu = new Menu();
     if (menu.isOpen) {
         return true;
     }
@@ -100,11 +112,10 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         click() {
             transaction(protyle, [{
                 action: "removeAttrViewBlock",
-                id: blockElement.getAttribute("data-node-id"),
+                srcIDs: [rowElement.querySelector(".av__cell").getAttribute("data-block-id")],
                 parentID: blockElement.getAttribute("data-av-id"),
             }], [{
                 action: "insertAttrViewBlock",
-                id: blockElement.getAttribute("data-node-id"),
                 parentID: blockElement.getAttribute("data-av-id"),
                 previousID: rowElement.previousElementSibling?.getAttribute("data-id") || "",
                 srcIDs: [rowId],
@@ -143,6 +154,17 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         type: "submenu",
         submenu: editAttrSubmenu
     });
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-av",
+            detail: {
+                protyle,
+                element: hasClosestByClassName(target, "av__cell"),
+            },
+            separatorPosition: "top",
+        });
+    }
     menu.open({
         x: event.clientX,
         y: event.clientY,

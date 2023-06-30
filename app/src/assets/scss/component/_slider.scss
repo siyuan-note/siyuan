@@ -1,6 +1,6 @@
 .b3-slider {
   -webkit-appearance: none;
-  border-radius: 2px;
+  border-radius: var(--b3-border-radius);
   height: 16px;
   background-color: transparent;
   padding: 0 4px;
@@ -15,7 +15,7 @@
     -webkit-appearance: none;
     width: 10px;
     height: 10px;
-    border-radius: 8px;
+    border-radius: var(--b3-border-radius-b);
     cursor: pointer;
     background-color: var(--b3-theme-primary);
     margin-top: -4px;

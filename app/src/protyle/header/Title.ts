@@ -36,6 +36,7 @@ import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {viewCards} from "../../card/viewCards";
 import {getNotebookName, pathPosix} from "../../util/pathName";
 import {commonClick} from "../wysiwyg/commonClick";
+import {emitOpenMenu} from "../../plugin/EventBus";
 
 export class Title {
     public element: HTMLElement;
@@ -401,22 +402,16 @@ export class Title {
                 submenu: riffCardMenu,
             }).element);
 
-            const pluginSubMenu = new subMenu();
-            protyle.app?.plugins?.forEach((plugin) => {
-                plugin.eventBus.emit("click-editortitleicon", {
-                    protyle,
-                    menu: pluginSubMenu,
-                    data: response.data,
+            if (protyle?.app?.plugins) {
+                emitOpenMenu({
+                    plugins:protyle.app.plugins,
+                    type: "click-editortitleicon",
+                    detail: {
+                        protyle,
+                        data: response.data,
+                    },
+                    separatorPosition: "top",
                 });
-            });
-            if (pluginSubMenu.menus.length > 0) {
-                window.siyuan.menus.menu.append(new MenuItem({ type: "separator" }).element);
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.plugin,
-                    icon: "iconPlugin",
-                    type: "submenu",
-                    submenu: pluginSubMenu.menus,
-                }).element);
             }
 
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

@@ -42,6 +42,105 @@ import {removeLink} from "../protyle/toolbar/Link";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
+import {emitOpenMenu} from "../plugin/EventBus";
+
+export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement) => {
+    const nodeElement = hasClosestBlock(refElement);
+    if (!nodeElement) {
+        return;
+    }
+    hideElements(["util", "toolbar", "hint"], protyle);
+    const id = nodeElement.getAttribute("data-node-id");
+    const oldHTML = nodeElement.outerHTML;
+    window.siyuan.menus.menu.remove();
+    let anchorElement: HTMLInputElement;
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: `<input style="margin: 4px 0" class="b3-text-field fn__block" value="${refElement.getAttribute("data-id") || ""}" readonly placeholder="ID">`,
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: `<input style="margin: 4px 0" class="b3-text-field fn__block" data-type="anchor" placeholder="${window.siyuan.languages.anchor}">`,
+        bind(menuItemElement) {
+            anchorElement = menuItemElement.querySelector("input");
+            anchorElement.value = refElement.textContent;
+            const inputEvent = () => {
+                if (anchorElement.value) {
+                    refElement.innerHTML = Lute.EscapeHTMLStr(anchorElement.value);
+                } else {
+                    refElement.innerHTML = "*";
+                }
+            }
+            anchorElement.addEventListener("input", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                inputEvent();
+                event.stopPropagation();
+            });
+            anchorElement.addEventListener("compositionend", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                inputEvent();
+                event.stopPropagation();
+            });
+            anchorElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                if (event.key === "Enter" && !event.isComposing) {
+                    window.siyuan.menus.menu.remove();
+                } else if (electronUndo(event)) {
+                    return;
+                }
+            });
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.remove,
+        click() {
+            refElement.outerHTML = refElement.textContent + "<wbr>";
+        }
+    }).element);
+
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-fileannotationref",
+            detail: {
+                protyle,
+                element: refElement,
+            },
+            separatorPosition: "top",
+        });
+    }
+
+    const rect = refElement.getBoundingClientRect();
+    window.siyuan.menus.menu.popup({
+        x: rect.left,
+        y: rect.top + 26,
+        h: 26
+    });
+
+    anchorElement.select();
+    window.siyuan.menus.menu.removeCB = () => {
+        if (nodeElement.outerHTML !== oldHTML) {
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+        }
+
+        const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
+        if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
+            if (refElement.parentElement) {
+                protyle.toolbar.range.selectNodeContents(refElement);
+                protyle.toolbar.range.collapse(false);
+                focusByRange(protyle.toolbar.range);
+            } else {
+                focusByWbr(nodeElement, protyle.toolbar.range);
+            }
+        }
+    };
+};
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     const nodeElement = hasClosestBlock(element);
@@ -70,6 +169,9 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 element.setAttribute("data-subtype", inputElement.value ? "s" : "d");
             });
             inputElement.addEventListener("keydown", (event) => {
+                if (event.isComposing) {
+                    return;
+                }
                 if (event.key === "Enter" && !event.isComposing) {
                     window.siyuan.menus.menu.remove();
                 } else if (electronUndo(event)) {
@@ -271,6 +373,19 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
+
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-blockref",
+            detail: {
+                protyle,
+                element: element,
+            },
+            separatorPosition: "top",
+        });
+    }
+
     const rect = element.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
@@ -428,6 +543,18 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range) as IMenu[]
             }).element);
         }
+    }
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-content",
+            detail: {
+                protyle,
+                range,
+                element: nodeElement,
+            },
+            separatorPosition: "top",
+        });
     }
 };
 
@@ -715,6 +842,18 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         openMenu(protyle.app, imgSrc, false, false);
     }
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-image",
+            detail: {
+                protyle,
+                element: assetElement,
+            },
+            separatorPosition: "top",
+        });
+    }
+
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
     const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
     textElements[0].focus();
@@ -876,6 +1015,18 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
+
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-link",
+            detail: {
+                protyle,
+                element: linkElement,
+            },
+            separatorPosition: "top",
+        });
+    }
     const rect = linkElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
@@ -995,6 +1146,19 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
+
+    if (protyle?.app?.plugins) {
+        emitOpenMenu({
+            plugins: protyle.app.plugins,
+            type: "open-menu-tag",
+            detail: {
+                protyle,
+                element: tagElement,
+            },
+            separatorPosition: "top",
+        });
+    }
+
     const rect = tagElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,

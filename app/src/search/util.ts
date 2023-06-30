@@ -82,7 +82,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
     });
     const data = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-    element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: 4px;overflow: hidden;" : ""}">
+    element.innerHTML = `<div class="fn__flex-column" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}">
     <div class="b3-form__icon search__header">
         <span class="fn__a" id="searchHistoryBtn">
             <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
@@ -536,7 +536,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         }]
                     }).element);
                 });
-                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -554,7 +555,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     config.page = 1;
                     inputEvent(element, config, undefined, edit, app);
                 });
-                window.siyuan.menus.menu.popup({x: event.clientX - 16, y: event.clientY - 16}, true);
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -994,34 +996,28 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, app: Ap
         return;
     }
     loadElement.classList.remove("fn__none");
-    let ids: string[] = [];
-    let rootIds: string[] = [];
-    if (isAll) {
-        searchPanelElement.querySelectorAll('.b3-list-item[data-type="search-item"]').forEach(item => {
-            ids.push(item.getAttribute("data-node-id"));
-            rootIds.push(item.getAttribute("data-root-id"));
-        });
-    } else {
-        ids = [currentList.getAttribute("data-node-id")];
-        rootIds = [currentList.getAttribute("data-root-id")];
-    }
     fetchPost("/api/search/findReplace", {
         k: config.method === 0 ? getKeyByLiElement(currentList) : searchInputElement.value,
         r: replaceInputElement.value,
-        ids,
-        types: config.types,
         method: config.method,
+        types: config.types,
+        paths: config.idPath || [],
+        groupBy: config.group,
+        orderBy: config.sort,
+        page: config.page,
+        ids: isAll ? [] : [currentList.getAttribute("data-node-id")]
     }, (response) => {
         loadElement.classList.add("fn__none");
         if (response.code === 1) {
             showMessage(response.msg);
             return;
         }
-        if (ids.length > 1) {
+        if (isAll) {
             return;
         }
+        const rootId = currentList.getAttribute("data-root-id")
         getAllModels().editor.forEach(item => {
-            if (rootIds[0] === item.editor.protyle.block.rootID) {
+            if (rootId === item.editor.protyle.block.rootID) {
                 reloadProtyle(item.editor.protyle, false);
             }
         });

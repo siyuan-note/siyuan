@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
@@ -37,7 +36,38 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		return
 	}
 
-	// TODO render value
+	// TODO: render value
+	//trees := map[string]*parse.Tree{}
+	//luteEngine := util.NewLute()
+	//for _, r := range ret.Rows {
+	//	blockID := r.Cells[0].Value
+	//
+	//	bt := treenode.GetBlockTree(blockID)
+	//	if nil == bt {
+	//		err = ErrBlockNotFound
+	//		return
+	//	}
+	//
+	//	var tree *parse.Tree
+	//	if tree = trees[bt.RootID]; nil == tree {
+	//		tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	//		if nil == tree {
+	//			err = ErrTreeNotFound
+	//			return
+	//		}
+	//
+	//		trees[bt.RootID] = tree
+	//	}
+	//
+	//	node := treenode.GetNodeInTree(tree, blockID)
+	//	if nil == node {
+	//		err = ErrBlockNotFound
+	//		return
+	//	}
+	//
+	//	r.Cells[0].RenderValue = getNodeRefText(node)
+	//}
+
 	return
 }
 
@@ -80,7 +110,7 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	c.Value = parseCellData(operation.Data, av.ColumnType(operation.Typ))
+	c.Value, c.RenderValue = parseCellData(operation)
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[NodeAttrNamePrefixAvCol+c.ID] = c.Value
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -105,10 +135,11 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 	avID := operation.ParentID
 	var avs []*av.AttributeView
+	previousID := operation.PreviousID
 	for _, id := range operation.SrcIDs {
 		var av *av.AttributeView
 		var avErr error
-		if av, avErr = addAttributeViewBlock(id, avID, tree, tx); nil != avErr {
+		if av, avErr = addAttributeViewBlock(id, previousID, avID, tree, tx); nil != avErr {
 			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: avErr.Error()}
 		}
 
@@ -244,7 +275,7 @@ func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (ret *av.A
 	return
 }
 
-func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (ret *av.AttributeView, err error) {
+func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree, tx *Transaction) (ret *av.AttributeView, err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
 		err = ErrBlockNotFound
@@ -288,17 +319,31 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 		}
 	}
 
-	ret.Rows = append(ret.Rows, row)
+	if "" == previousRowID {
+		ret.Rows = append([]*av.Row{row}, ret.Rows...)
+	} else {
+		for i, r := range ret.Rows {
+			if r.ID == previousRowID {
+				ret.Rows = append(ret.Rows[:i+1], append([]*av.Row{row}, ret.Rows[i+1:]...)...)
+				break
+			}
+		}
+	}
+
 	err = av.SaveAttributeView(ret)
 	return
 }
 
-func parseCellData(data interface{}, colType av.ColumnType) string {
+func parseCellData(operation *Operation) (val, renderVal string) {
+	data := operation.Data
+	colType := av.ColumnType(operation.Typ)
 	switch colType {
 	case av.ColumnTypeText:
-		return data.(string)
+		val = data.(string)
+		renderVal = val
+		return
 	}
-	return ""
+	return
 }
 
 const NodeAttrNamePrefixAvCol = "av-col-"

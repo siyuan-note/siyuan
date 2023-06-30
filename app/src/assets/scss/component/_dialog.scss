@@ -33,7 +33,7 @@
   }
 
   &__container {
-    border-radius: 12px;
+    border-radius: var(--b3-border-radius-b);
     background-color: var(--b3-theme-surface);
     position: relative;
     box-shadow: var(--b3-dialog-shadow);

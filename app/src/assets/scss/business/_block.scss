@@ -6,7 +6,7 @@
     z-index: 205;
     width: 60vw;
     word-break: break-word;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius-b);
     opacity: 0;
     transition: opacity 75ms linear;
     top: -100px;
@@ -24,7 +24,7 @@
     }
 
     & > .block__icons {
-      border-radius: 4px 4px 0 0;
+      border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
 
       & > .resize__move {
         height: 42px;
@@ -36,7 +36,7 @@
     overflow: auto;
     display: flex;
     flex-direction: column;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
     flex: 1;
   }
 
@@ -84,7 +84,7 @@
     padding: 5px;
     display: flex;
     align-items: center;
-    border-radius: 2px;
+    border-radius: var(--b3-border-radius);
     transition: var(--b3-transition), opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
 
     &:hover:not([disabled]):not(.ft__primary),

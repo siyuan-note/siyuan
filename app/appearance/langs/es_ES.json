@@ -5,8 +5,8 @@
   "cloudRegionChina": "LianDi (Centro de datos de China continental)",
   "currentKernel": "Núcleo actual",
   "otherOnlineKernels": "Otros núcleos en línea",
-  "syncPerception": "⚗\uFE0F Percepción de sincronización",
-  "syncPerceptionTip": "Después de habilitarlo, automáticamente recibirá y enviará señales de sincronización de datos, de modo que la sincronización de datos se pueda realizar para todos los dispositivos en línea tanto como sea posible en tiempo real (esta función se encuentra actualmente en etapa experimental)",
+  "syncPerception": "Percepción de sincronización",
+  "syncPerceptionTip": "Después de habilitarlo, automáticamente recibirá y enviará señales de sincronización de datos, de modo que la sincronización de datos se pueda realizar para todos los dispositivos en línea tanto como sea posible en tiempo real",
   "hide": "Ocultar",
   "wrap": "Columna de ajuste",
   "edit": "Editar",
@@ -518,6 +518,7 @@
   "customSort": "Clasificación personalizada",
   "collapse": "Colapsar",
   "blockEmbed": "Integrar Bloque",
+  "rowTip": "Haz clic para abrir el menú<br>Arrastra para ordenar",
   "gutterTip": "Haga clic para abrir el menú<br>⌘Haga clic para enfocar<br>⌥Haga clic para plegar/expandir<br>⇧Haga clic para actualizar attr<br>Arrastre para mover<br>⌃Arrastre para duplicar<br>⌥ Arrastra para ref<br> ⇧Arrastra para incrustar<br>",
   "gutterTip2": "Haga clic para abrir el menú<br>⇧Haga clic en Actualizar atributo",
   "linkDistance": "Distancia de enlace",
@@ -1171,6 +1172,8 @@
     "202": "Limpiando repositorio de datos...",
     "203": "El repositorio de datos se purgó, [%d] instantáneas y [%d] objetos de datos se eliminaron y se liberó un total de [%s] espacio en disco",
     "204": "La documentación en la guía del usuario no permite compartir con la comunidad",
-    "205": "El complemento no es compatible con el entorno actual"
+    "205": "El complemento no es compatible con el entorno actual",
+    "206": "Ejecutando reemplazo de contenido [%d/%d]",
+    "207": "Ejecutando reemplazo de ruta [%d/%d]"
   }
 }

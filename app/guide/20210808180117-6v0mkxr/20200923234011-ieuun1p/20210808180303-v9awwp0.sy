@@ -5,17 +5,244 @@
 	"Properties": {
 		"icon": "1f308",
 		"id": "20210808180303-v9awwp0",
-		"title": "Cloud",
-		"updated": "20210808180303"
+		"title": "Cloud Services",
+		"updated": "20230627215230"
 	},
 	"Children": [
 		{
-			"ID": "20210808180303-zdwqjbv",
+			"ID": "20230627215131-2ct8b6b",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210808180303-zdwqjbv",
-				"updated": "20210808180303"
-			}
+				"id": "20230627215131-2ct8b6b",
+				"updated": "20230627215141"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cloud services include:"
+				}
+			]
+		},
+		{
+			"ID": "20230627215141-57hf66s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230627215141-57hf66s",
+				"updated": "20230627215143"
+			},
+			"Children": [
+				{
+					"ID": "20230627215143-rk0fvgy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230627215143-rk0fvgy",
+						"updated": "20230627215143"
+					},
+					"Children": [
+						{
+							"ID": "20230627215143-vgkhonz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230627215143-vgkhonz",
+								"updated": "20230627215203"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210721112206-mhr9wxi",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Data sync"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230627215152-my19kfr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230627215152-my19kfr"
+					},
+					"Children": [
+						{
+							"ID": "20230627215152-ps6hh1v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230627215152-ps6hh1v",
+								"updated": "20230627215201"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220708103401-mgydrfg",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Data backup"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230627215154-orvtmhs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230627215154-orvtmhs"
+					},
+					"Children": [
+						{
+							"ID": "20230627215154-a5gj5qo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230627215154-a5gj5qo",
+								"updated": "20230627215159"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210721160238-yvhbh0h",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Assets hosting"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230627215213-4em36k6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230627215213-4em36k6",
+				"updated": "20230627215230"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: Cloud service related "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220105101227-n5zpr1a",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "limitations"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20230627215126-rgxazmg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230627215126-rgxazmg",
+				"updated": "20230627215126"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cloud services require a paid subscription to use:"
+				}
+			]
+		},
+		{
+			"ID": "20230627215126-d2einq3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230627215126-d2einq3",
+				"updated": "20230627215126"
+			},
+			"Children": [
+				{
+					"ID": "20230627215126-bfsffng",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230627215126-bfsffng",
+						"updated": "20230627215126"
+					},
+					"Children": [
+						{
+							"ID": "20230627215126-u7krjlc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230627215126-u7krjlc",
+								"updated": "20230627215126"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/subscribe/siyuan",
+									"TextMarkTextContent": "Mainland China"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230627215126-dfoapk1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230627215126-dfoapk1",
+						"updated": "20230627215126"
+					},
+					"Children": [
+						{
+							"ID": "20230627215126-f2a4f7i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230627215126-f2a4f7i",
+								"updated": "20230627215126"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/subscribe/siyuan",
+									"TextMarkTextContent": "Non-Mainland China"
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	]
 }

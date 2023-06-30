@@ -172,7 +172,7 @@
     padding: 4px;
     line-height: 16px;
     height: 16px;
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
     margin: 3px 0;
     color: var(--b3-theme-on-surface);
     max-width: 70%;
@@ -224,10 +224,6 @@
   padding-bottom: 40px;
 
   &--enable {
-    .protyle-background__tags .item:hover svg {
-      opacity: 1;
-    }
-
     .protyle-background__img:hover .protyle-icons,
     &:hover > .protyle-background__iconw > .protyle-icons,
     .protyle-background__icon:hover {
@@ -238,8 +234,7 @@
 
   &--mobileshow {
     .protyle-background__iconw > .protyle-icons,
-    .protyle-background__img .protyle-icons,
-    .protyle-background__tags .item svg {
+    .protyle-background__img .protyle-icons {
       opacity: .86;
     }
   }
@@ -259,7 +254,7 @@
       height: 80px;
       width: 80px;
       float: left;
-      border-radius: 4px;
+      border-radius: var(--b3-border-radius);
     }
 
     &:not(.fn__none) + .protyle-icons {
@@ -297,65 +292,6 @@
     }
   }
 
-  &__tags {
-    padding: 4px 16px;
-    display: flex;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
-
-    .item {
-      margin: 4px 16px 4px 0;
-      position: relative;
-      padding: 0 4px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: inline-block;
-      font-size: 14px;
-      line-height: 20px;
-      color: var(--b3-card-success-color);
-      background-color: var(--b3-card-success-background);
-
-      &:hover {
-        color: var(--b3-theme-on-background);
-      }
-
-      &--1 {
-        color: var(--b3-card-info-color);
-        background-color: var(--b3-card-info-background);
-      }
-
-      &--2 {
-        color: var(--b3-card-warning-color);
-        background-color: var(--b3-card-warning-background);
-      }
-
-      &--3 {
-        color: var(--b3-card-error-color);
-        background-color: var(--b3-card-error-background);
-      }
-
-      svg {
-        opacity: 0;
-        position: absolute;
-        height: 8px;
-        width: 8px;
-        padding: 4px;
-        border-radius: 10px;
-        color: var(--b3-theme-on-surface);
-        background-color: var(--b3-theme-surface);
-        transition: var(--b3-transition);
-        top: -6px;
-        right: -10px;
-
-        &:hover {
-          color: var(--b3-theme-on-background);
-          background-color: var(--b3-theme-background-light);
-        }
-      }
-    }
-  }
-
   &__iconw {
     bottom: 0;
     display: flex;
@@ -371,7 +307,7 @@
   margin: 34px 16px 0 24px;
   position: relative;
   font-size: 16px;
-  border-radius: 4px;
+  border-radius: var(--b3-border-radius);
 
   &:hover .protyle-title__icon {
     opacity: 1;

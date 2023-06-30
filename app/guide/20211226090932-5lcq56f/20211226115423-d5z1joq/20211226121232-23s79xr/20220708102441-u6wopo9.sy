@@ -40,7 +40,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20220615120134-cdqs2gt",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "數據快照"
+					"TextMarkTextContent": "資料快照"
 				},
 				{
 					"Type": "NodeText",
@@ -101,7 +101,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20220615120134-y8wnvbq",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "初始化數據倉庫密鑰"
+									"TextMarkTextContent": "初始化資料倉庫密鑰"
 								},
 								{
 									"Type": "NodeText",
@@ -140,7 +140,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "數據歷史"
+									"TextMarkTextContent": "資料歷史"
 								},
 								{
 									"Type": "NodeText",
@@ -149,11 +149,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "數據快照"
+									"TextMarkTextContent": "資料快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 頁簽，選擇需要備份的快照點擊 "
+									"Data": " 分頁，選擇需要備份的快照點擊 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -278,11 +278,11 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20220615120134-7prrwzx",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "回滾數據快照"
+									"TextMarkTextContent": "回復資料快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "恢復數據"
+									"Data": "恢復資料"
 								}
 							]
 						}
@@ -366,7 +366,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "雲端最多支持保存 12 個數據快照"
+									"Data": "雲端最多支持保存 12 個資料快照"
 								}
 							]
 						}

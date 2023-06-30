@@ -77,7 +77,7 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://golang.org/pkg/text/template/",
-					"TextMarkTextContent": "Go 編程語言的文本範本"
+					"TextMarkTextContent": "Go 編程語言的文字範本"
 				},
 				{
 					"Type": "NodeText",

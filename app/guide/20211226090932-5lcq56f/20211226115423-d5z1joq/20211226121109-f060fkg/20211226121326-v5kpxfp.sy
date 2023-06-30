@@ -4,8 +4,8 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226121326-v5kpxfp",
-		"title": "主题",
-		"updated": "20230418094752"
+		"title": "主題",
+		"updated": "20230630110309"
 	},
 	"Children": [
 		{
@@ -181,7 +181,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，選中 CSS 頁簽"
+									"Data": "​，選中 CSS 分頁"
 								}
 							]
 						}

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
-		"updated": "20230518100713"
+		"updated": "20230630093355"
 	},
 	"Children": [
 		{
@@ -28,7 +28,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220623200737-sx458du",
-				"updated": "20220623200738"
+				"updated": "20230630093355"
 			},
 			"Children": [
 				{
@@ -42,12 +42,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後回車就可以完成內容塊的引用了。建立好內容塊引用後，鼠標懸浮在錨文本上後將彈出預覽浮層，展現被引用的內容塊（定義塊）。"
+					"Data": "​ 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後Enter就可以完成內容塊的引用了。建立好內容塊引用後，鼠標懸浮在錨文字上後將彈出預覽浮層，展現被引用的內容塊（定義塊）。"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "內容塊/引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -57,7 +61,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-nfx8mlg",
-				"updated": "20211226153611"
+				"updated": "20230630092034"
 			},
 			"Children": [
 				{
@@ -234,12 +238,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220623200754-u00gfsg",
-				"updated": "20220623200754"
+				"updated": "20230630092343"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "錨文本"
+					"Data": "錨文字"
 				}
 			]
 		},
@@ -253,7 +257,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "錨文本即渲染引用時看到的文本，分為靜態錨文本和動態錨文本："
+					"Data": "錨文字即渲染引用時看到的文字，分為靜態錨文字和動態錨文字："
 				}
 			]
 		},
@@ -288,7 +292,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "靜態錨文本：不會跟隨定義塊內容變化，即固定展現指定的內容"
+									"Data": "靜態錨文字：不會跟隨定義塊內容變化，即固定展現指定的內容"
 								}
 							]
 						}
@@ -316,7 +320,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "動態錨文本：跟隨定義塊內容變化，最大長度可在 "
+									"Data": "動態錨文字：跟隨定義塊內容變化，最大長度可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -339,7 +343,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "塊引動態錨文本最大長度"
+									"TextMarkTextContent": "塊引動態錨文字最大長度"
 								},
 								{
 									"Type": "NodeText",
@@ -370,7 +374,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "修改錨文本的方式如下："
+					"Data": "修改錨文字的方式如下："
 				}
 			]
 		},
@@ -405,7 +409,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "將光標插入符移入"
+									"Data": "將游標插入符移入"
 								},
 								{
 									"Type": "NodeText",
@@ -421,7 +425,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "的錨文本設置為靜態錨文本"
+									"Data": "的錨文字設置為靜態錨文字"
 								}
 							]
 						}
@@ -457,7 +461,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "元素後在彈出的菜單中修改錨文本，這樣得到的錨文本也是靜態錨文本"
+									"Data": "元素後在彈出的菜單中修改錨文字，這樣得到的錨文字也是靜態錨文字"
 								}
 							]
 						}
@@ -493,7 +497,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "元素後在彈出的菜單中清空錨文本，這樣將使用動態錨文本"
+									"Data": "元素後在彈出的菜單中清空錨文字，這樣將使用動態錨文字"
 								}
 							]
 						}
@@ -573,7 +577,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 將使用動態錨文本"
+									"Data": "​ 將使用動態錨文字"
 								}
 							]
 						}
@@ -619,7 +623,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 將使用靜態錨文本"
+									"Data": "​ 將使用靜態錨文字"
 								}
 							]
 						}
@@ -807,7 +811,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "((id \"錨文本\"))"
+					"TextMarkTextContent": "((id \"錨文字\"))"
 				},
 				{
 					"Type": "NodeText",
@@ -855,7 +859,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 包裹錨文為靜態錨文本"
+									"Data": " 包裹錨文為靜態錨文字"
 								}
 							]
 						}
@@ -892,7 +896,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 包裹錨文本為動態錨文本，會在重建索引時自動重寫"
+									"Data": " 包裹錨文字為動態錨文字，會在重建索引時自動重寫"
 								}
 							]
 						}

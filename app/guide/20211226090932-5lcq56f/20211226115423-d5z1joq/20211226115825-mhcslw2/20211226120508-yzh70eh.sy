@@ -358,7 +358,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "核心概念"
+					"TextMarkTextContent": "Kernel概念"
 				},
 				{
 					"Type": "NodeText",

@@ -71,7 +71,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在編輯器中可以直接粘貼系統剪切板中復制好的圖片或文件（Linux 端不支持），或者通過拖拽圖片或文件到編輯器中也可以實現插入。插入時有兩個選擇："
+					"Data": "在編輯器中可以直接貼上系統剪切板中復制好的圖片或文件（Linux 端不支持），或者通過拖拽圖片或文件到編輯器中也可以實現插入。插入時有兩個選擇："
 				}
 			]
 		},
@@ -145,11 +145,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "使用 file:// 絕對路徑並鏈接"
+									"TextMarkTextContent": "使用 file:// 絕對路徑並連結"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：將圖片或文件以本地絕對路徑方式插入超鏈接，快捷鍵 "
+									"Data": "：將圖片或文件以本地絕對路徑方式插入超連結，快捷鍵 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -261,7 +261,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：插入圖片不會進行壓縮處理，所有圖片和文件都以原始數據進行保存。"
+					"Data": "​：插入圖片不會進行壓縮處理，所有圖片和文件都以原始資料進行保存。"
 				}
 			]
 		},
@@ -466,7 +466,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226122720-u1qd8zw",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "回滾（Rollback）"
+					"TextMarkTextContent": "回復（Rollback）"
 				},
 				{
 					"Type": "NodeText",
@@ -540,7 +540,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​中可以查看丟失的資源，複製路徑後可以在全局搜索中找到引用處。"
+					"Data": "​中可以查看丟失的資源，複製路徑後可以在全域搜索中找到引用處。"
 				}
 			]
 		},
@@ -628,7 +628,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果需要默認將插入的資料文件放置在文檔同級 assets 文件夾下，則需要先手動創建名為 assets 的文件夾，這樣思源會優先選擇該 assets 文件夾來存放資料文件。"
+					"Data": "如果需要預設將插入的資料文件放置在文檔同級 assets 文件夾下，則需要先手動建立名為 assets 的文件夾，這樣思源會優先選擇該 assets 文件夾來存放資料文件。"
 				}
 			]
 		},
@@ -677,7 +677,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "刪除該筆記本時，為保證跨筆記本資料文件引用正常工作，該筆記本下的資料文件會被批量複製到全局 "
+									"Data": "刪除該筆記本時，為保證跨筆記本資料文件引用正常工作，該筆記本下的資料文件會被批量複製到全域 "
 								},
 								{
 									"Type": "NodeText",
@@ -717,7 +717,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "數據歷史"
+									"Data": "資料歷史"
 								},
 								{
 									"Type": "NodeText",
@@ -805,7 +805,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "圖片 OCR 提取文本"
+					"Data": "圖片 OCR 提取文字"
 				}
 			]
 		},
@@ -905,7 +905,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 命令進行圖片 OCR 提取文本。如果安裝正常的話，在內核啟動日誌中可以搜索到 "
+									"Data": "​ 命令進行圖片 OCR 提取文字。如果安裝正常的話，在Kernel啟動日誌中可以搜索到 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -942,7 +942,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "思源並不會啟用所有已安裝的語言包，因為語言包太多的話會導致 OCR 緩慢甚至超時返回空結果，並且佔用過多的系統資源，所以默認最多只會啟用 "
+									"Data": "思源並不會啟用所有已安裝的語言包，因為語言包太多的話會導致 OCR 緩慢甚至超時返回空結果，並且佔用過多的系統資源，所以預設最多只會啟用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1078,7 +1078,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "默認只對 2MB 以下的圖片進行處理，如果需要調整，可以通過環境變量 "
+									"Data": "預設只對 2MB 以下的圖片進行處理，如果需要調整，可以通過環境變量 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1087,7 +1087,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 設置，值的單位是字節，比如："
+									"Data": "​ 設置，值的單位是位元組，比如："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1114,7 +1114,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "圖片 OCR 提取文本過程是自動在後台進行的，目前僅支持 PNG、JPG 圖片。提取的文本會被用於搜索功能，這樣就能通過文本關鍵字來定位圖片。"
+					"Data": "圖片 OCR 提取文字過程是自動在後台進行的，目前僅支持 PNG、JPG 圖片。提取的文字會被用於搜索功能，這樣就能通過文字關鍵字來定位圖片。"
 				}
 			]
 		},

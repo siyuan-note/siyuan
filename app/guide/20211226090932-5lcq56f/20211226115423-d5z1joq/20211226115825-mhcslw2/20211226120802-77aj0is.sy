@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120802-77aj0is",
 		"title": "内容塊屬性",
-		"updated": "20211228141553"
+		"updated": "20230630095210"
 	},
 	"Children": [
 		{
@@ -60,8 +60,9 @@
 				0
 			],
 			"Properties": {
+				"colgroup": "|",
 				"id": "20211226120833-5n4ui6o",
-				"updated": "20211226020123"
+				"updated": "20230630095210"
 			},
 			"Children": [
 				{
@@ -172,7 +173,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊的備注"
+									"Data": "內容塊的備註"
 								}
 							]
 						}

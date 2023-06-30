@@ -537,7 +537,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "用於指定監聽端口，不指定時："
+					"Data": "用於指定偵聽埠，不指定時："
 				}
 			]
 		},
@@ -572,7 +572,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "桌面端使用隨機端口"
+									"Data": "桌面端使用隨機埠"
 								}
 							]
 						}

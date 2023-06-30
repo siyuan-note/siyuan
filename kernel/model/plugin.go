@@ -32,6 +32,7 @@ import (
 // Petal represents a plugin's management status.
 type Petal struct {
 	Name         string `json:"name"`         // Plugin name
+	DisplayName  string `json:"displayName"`  // Plugin display name
 	Enabled      bool   `json:"enabled"`      // Whether enabled
 	Incompatible bool   `json:"incompatible"` // Whether incompatible
 
@@ -43,7 +44,7 @@ type Petal struct {
 func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, err error) {
 	petals := getPetals()
 
-	found, incompatible := bazaar.IsIncompatibleInstalledPlugin(name, frontend)
+	found, displayName, incompatible := bazaar.ParseInstalledPlugin(name, frontend)
 	if !found {
 		logging.LogErrorf("plugin [%s] not found", name)
 		return
@@ -56,6 +57,7 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 		}
 		petals = append(petals, ret)
 	}
+	ret.DisplayName = displayName
 	ret.Enabled = enabled
 	ret.Incompatible = incompatible
 
@@ -78,7 +80,7 @@ func LoadPetals(frontend string) (ret []*Petal) {
 
 	petals := getPetals()
 	for _, petal := range petals {
-		_, petal.Incompatible = bazaar.IsIncompatibleInstalledPlugin(petal.Name, frontend)
+		_, petal.DisplayName, petal.Incompatible = bazaar.ParseInstalledPlugin(petal.Name, frontend)
 		if !petal.Enabled || petal.Incompatible {
 			continue
 		}

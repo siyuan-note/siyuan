@@ -42,18 +42,21 @@ type DisplayName struct {
 	Default string `json:"default"`
 	ZhCN    string `json:"zh_CN"`
 	EnUS    string `json:"en_US"`
+	ZhCHT   string `json:"zh_CHT"`
 }
 
 type Description struct {
 	Default string `json:"default"`
 	ZhCN    string `json:"zh_CN"`
 	EnUS    string `json:"en_US"`
+	ZhCHT   string `json:"zh_CHT"`
 }
 
 type Readme struct {
 	Default string `json:"default"`
 	ZhCN    string `json:"zh_CN"`
 	EnUS    string `json:"en_US"`
+	ZhCHT   string `json:"zh_CHT"`
 }
 
 type Funding struct {
@@ -140,7 +143,9 @@ func getPreferredReadme(readme *Readme) string {
 			ret = readme.ZhCN
 		}
 	case "zh_CHT":
-		if "" != readme.ZhCN {
+		if "" != readme.ZhCHT {
+			ret = readme.ZhCHT
+		} else if "" != readme.ZhCN {
 			ret = readme.ZhCN
 		}
 	case "en_US":
@@ -167,7 +172,9 @@ func getPreferredName(pkg *Package) string {
 			ret = pkg.DisplayName.ZhCN
 		}
 	case "zh_CHT":
-		if "" != pkg.DisplayName.ZhCN {
+		if "" != pkg.DisplayName.ZhCHT {
+			ret = pkg.DisplayName.ZhCHT
+		} else if "" != pkg.DisplayName.ZhCN {
 			ret = pkg.DisplayName.ZhCN
 		}
 	case "en_US":
@@ -194,7 +201,9 @@ func getPreferredDesc(desc *Description) string {
 			ret = desc.ZhCN
 		}
 	case "zh_CHT":
-		if "" != desc.ZhCN {
+		if "" != desc.ZhCHT {
+			ret = desc.ZhCHT
+		} else if "" != desc.ZhCN {
 			ret = desc.ZhCN
 		}
 	case "en_US":

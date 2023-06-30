@@ -104,10 +104,11 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 	avID := operation.ParentID
 	var avs []*av.AttributeView
+	previousID := operation.PreviousID
 	for _, id := range operation.SrcIDs {
 		var av *av.AttributeView
 		var avErr error
-		if av, avErr = addAttributeViewBlock(id, avID, tree, tx); nil != avErr {
+		if av, avErr = addAttributeViewBlock(id, previousID, avID, tree, tx); nil != avErr {
 			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: avErr.Error()}
 		}
 
@@ -243,7 +244,7 @@ func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (ret *av.A
 	return
 }
 
-func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transaction) (ret *av.AttributeView, err error) {
+func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree, tx *Transaction) (ret *av.AttributeView, err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
 		err = ErrBlockNotFound
@@ -287,7 +288,17 @@ func addAttributeViewBlock(blockID, avID string, tree *parse.Tree, tx *Transacti
 		}
 	}
 
-	ret.Rows = append(ret.Rows, row)
+	if "" == previousRowID {
+		ret.Rows = append([]*av.Row{row}, ret.Rows...)
+	} else {
+		for i, r := range ret.Rows {
+			if r.ID == previousRowID {
+				ret.Rows = append(ret.Rows[:i+1], append([]*av.Row{row}, ret.Rows[i+1:]...)...)
+				break
+			}
+		}
+	}
+
 	err = av.SaveAttributeView(ret)
 	return
 }

@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"

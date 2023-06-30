@@ -17,6 +17,7 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
         inputElement.select();
+        inputElement.focus();
         inputElement.addEventListener("blur", () => {
             updateCellValue(protyle, cellElement, type);
         });

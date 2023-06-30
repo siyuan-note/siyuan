@@ -101,11 +101,10 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         click() {
             transaction(protyle, [{
                 action: "removeAttrViewBlock",
-                id: blockElement.getAttribute("data-node-id"),
+                srcIDs: [rowId],
                 parentID: blockElement.getAttribute("data-av-id"),
             }], [{
                 action: "insertAttrViewBlock",
-                id: blockElement.getAttribute("data-node-id"),
                 parentID: blockElement.getAttribute("data-av-id"),
                 previousID: rowElement.previousElementSibling?.getAttribute("data-id") || "",
                 srcIDs: [rowId],

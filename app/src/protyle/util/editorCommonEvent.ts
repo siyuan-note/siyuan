@@ -804,13 +804,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
-                            id: blockElement.getAttribute("data-node-id"),
                             parentID: blockElement.getAttribute("data-av-id"),
                             previousID,
                             srcIDs: sourceIds,
                         }], [{
                             action: "removeAttrViewBlock",
-                            id: targetElement.getAttribute("data-node-id"),
+                            srcIDs: sourceIds,
                             parentID: targetElement.getAttribute("data-av-id"),
                         }]);
                     }

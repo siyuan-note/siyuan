@@ -926,7 +926,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過思源核心提供的服務能力以便"
+					"Data": "通過思源Kernel提供的服務能力以便"
 				},
 				{
 					"Type": "NodeTextMark",

@@ -851,7 +851,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://github.com/siyuan-note/siyuan",
-									"TextMarkTextContent": "界面和核心"
+									"TextMarkTextContent": "界面和Kernel"
 								}
 							]
 						}

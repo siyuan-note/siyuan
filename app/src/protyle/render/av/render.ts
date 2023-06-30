@@ -43,12 +43,12 @@ export const avRender = (element: Element, cb?: () => void) => {
                 // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__gutters">
+<div class="av__gutters" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
     <button><svg><use xlink:href="#iconLine"></use></svg></button>
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
-                        tableHTML += `<div class="av__cell" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${cell.renderValue?.content || ""}</div>`;
+                        tableHTML += `<div class="av__cell" data-block-id="${cell.renderValue?.id || ""}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${cell.renderValue?.content || ""}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });

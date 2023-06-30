@@ -837,5 +837,6 @@ interface IAVCell {
     value: string,
     renderValue: {
         content: string,
+        id: string,
     }
 }

@@ -518,6 +518,7 @@
   "customSort": "Custom Sorting",
   "collapse": "Collapse",
   "blockEmbed": "Embed Block",
+  "rowTip": "Click to open menu<br>Drag to sort",
   "gutterTip": "Click to open menu<br>⌘Click to focus<br>⌥Click to fold/expand<br>⇧Click to update attr<br>Drag to move<br>⌃Drag to duplicate<br>⌥Drag to ref<br> ⇧Drag to embed<br>",
   "gutterTip2": "Click to open the menu<br>⇧Click Update attribute",
   "linkDistance": "Link distance",

@@ -518,6 +518,7 @@
   "customSort": "自定义排序",
   "collapse": "折叠",
   "blockEmbed": "嵌入块",
+  "rowTip": "点击 打开菜单<br>拖拽 排序",
   "gutterTip": "点击 打开菜单<br>⌘Click 聚焦<br>⌥Click 折叠/展开<br>⇧Click 修改属性<br>拖拽 移动位置<br>⌃拖拽 重复<br>⌥拖拽 生成块引用<br>⇧拖拽 生成嵌入块<br>",
   "gutterTip2": "点击 打开菜单<br>⇧Click 修改属性",
   "linkDistance": "链接距离",

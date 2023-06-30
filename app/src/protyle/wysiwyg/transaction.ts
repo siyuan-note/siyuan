@@ -289,8 +289,6 @@ const promiseTransaction = () => {
                 // });
                 // 更新引用块
                 updateRef(protyle, operation.id);
-            } else if (["addAttrViewCol", "insertAttrViewBlock"].includes(operation.action)) {
-                refreshAV(protyle, operation);
             }
         });
     });

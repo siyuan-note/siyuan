@@ -4,7 +4,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
 import {popTextCell, showHeaderCellMenu} from "./cell";
-import {getColIconByType} from "./col";
+import {getColIconByType, updateHeader} from "./col";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
@@ -55,7 +55,31 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const checkElement = hasClosestByClassName(event.target, "av__firstcol");
     if (checkElement) {
-        // TODO
+        window.siyuan.menus.menu.remove();
+        const rowElement = checkElement.parentElement;
+        const useElement = checkElement.querySelector("use")
+        if (rowElement.classList.contains("av__row--header")) {
+            if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
+                rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
+                    item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
+                    item.parentElement.classList.remove("av__row--select");
+                })
+            } else {
+                rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
+                    item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
+                    item.parentElement.classList.add("av__row--select");
+                })
+            }
+        } else {
+            if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
+                checkElement.parentElement.classList.add("av__row--select");
+                useElement.setAttribute("xlink:href", "#iconCheck");
+            } else {
+                checkElement.parentElement.classList.remove("av__row--select");
+                useElement.setAttribute("xlink:href", "#iconUncheck");
+            }
+        }
+        updateHeader(rowElement);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -81,7 +105,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         return false;
     }
     if (rowElement.classList.contains("av__row--header")) {
-        return  false
+        return false
     }
     const blockElement = hasClosestBlock(rowElement);
     if (!blockElement) {
@@ -90,15 +114,45 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     event.preventDefault();
     event.stopPropagation();
 
-    blockElement.querySelectorAll(".av__row--select").forEach(item => {
-        item.classList.remove("av__row--select");
-    });
-    const rowId = rowElement.getAttribute("data-id");
-    const menu = new Menu();
+    if (!rowElement.classList.contains("av__row--select")) {
+        blockElement.querySelectorAll(".av__row--select").forEach(item => {
+            item.classList.remove("av__row--select");
+        });
+        blockElement.querySelectorAll(".av__firstcol use").forEach(item => {
+            item.setAttribute("xlink:href", "#iconUncheck");
+        });
+    }
+
+    const menu = new Menu("av-row-menu");
     if (menu.isOpen) {
         return true;
     }
     rowElement.classList.add("av__row--select");
+    rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
+    const rowIds: string[] = [];
+    const blockIds: string[] = [];
+    blockElement.querySelectorAll(".av__row--select:not(.av__row--header )").forEach(item => {
+        rowIds.push(item.getAttribute("data-id"));
+        blockIds.push(item.querySelector(".av__cell").getAttribute("data-block-id"));
+    });
+    updateHeader(rowElement);
+    menu.addItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.delete,
+        click() {
+            transaction(protyle, [{
+                action: "removeAttrViewBlock",
+                srcIDs: blockIds,
+                parentID: blockElement.getAttribute("data-av-id"),
+            }], [{
+                action: "insertAttrViewBlock",
+                parentID: blockElement.getAttribute("data-av-id"),
+                previousID: rowElement.previousElementSibling?.getAttribute("data-id") || "",
+                srcIDs: rowIds,
+            }]);
+            rowElement.remove();
+        }
+    });
     menu.addItem({
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
@@ -106,39 +160,26 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
 
         }
     });
-    menu.addItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.delete,
-        click() {
-            transaction(protyle, [{
-                action: "removeAttrViewBlock",
-                srcIDs: [rowElement.querySelector(".av__cell").getAttribute("data-block-id")],
-                parentID: blockElement.getAttribute("data-av-id"),
-            }], [{
-                action: "insertAttrViewBlock",
-                parentID: blockElement.getAttribute("data-av-id"),
-                previousID: rowElement.previousElementSibling?.getAttribute("data-id") || "",
-                srcIDs: [rowId],
-            }]);
-            rowElement.remove();
-        }
-    });
+    if (rowIds.length === 1) {
+        menu.addSeparator();
+        openEditorTab(protyle.app, rowIds[0]);
+        menu.addItem({
+            label: window.siyuan.languages.copy,
+            icon: "iconCopy",
+            type: "submenu",
+            submenu: copySubMenu(rowIds[0])
+        });
+    }
     menu.addSeparator();
-    openEditorTab(protyle.app, rowId);
-    menu.addItem({
-        label: window.siyuan.languages.copy,
-        icon: "iconCopy",
-        type: "submenu",
-        submenu: copySubMenu(rowId)
-    });
-    menu.addSeparator();
-    menu.addItem({
-        icon: "iconEdit",
-        label: window.siyuan.languages.edit,
-        click() {
+    if (rowIds.length === 1) {
+        menu.addItem({
+            icon: "iconEdit",
+            label: window.siyuan.languages.edit,
+            click() {
 
-        }
-    });
+            }
+        });
+    }
     const editAttrSubmenu: IMenu[] = [];
     rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement) => {
         editAttrSubmenu.push({
@@ -153,6 +194,13 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         label: window.siyuan.languages.attr,
         type: "submenu",
         submenu: editAttrSubmenu
+    });
+    menu.addItem({
+        icon: "iconMove",
+        label: window.siyuan.languages.move,
+        click() {
+
+        }
     });
     if (protyle?.app?.plugins) {
         emitOpenMenu({

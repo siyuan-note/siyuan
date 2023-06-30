@@ -69,13 +69,14 @@ export const avRender = (element: Element, cb?: () => void) => {
                 e.style.width = e.parentElement.clientWidth + "px";
                 e.style.alignSelf = "center";
                 e.firstElementChild.outerHTML = `<div>
-    <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
-        <div>
-            <div>tab1</div>
+    <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
+        <div class="layout-tab-bar fn__flex">
+            <div class="item item--focus">tab1</div>
         </div>
-        <div contenteditable="true">
+        <div contenteditable="true" class="av__title">
             ${data.title}
         </div>
+        <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
         <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};float: left;">

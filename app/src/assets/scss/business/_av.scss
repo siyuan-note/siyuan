@@ -2,6 +2,22 @@
   user-select: none;
   box-sizing: border-box;
 
+  &__header {
+    top: -43px;
+    z-index: 2;
+  }
+
+  &__title {
+    height: 30px;
+  }
+
+  &__counter {
+    position: absolute;
+    bottom: 0;
+    height: 30px;
+    background-color: var(--b3-theme-background);
+  }
+
   &__gutters {
     @extend .protyle-gutters;
     position: absolute;

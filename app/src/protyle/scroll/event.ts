@@ -26,7 +26,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
 
         protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
             if (item.parentElement.classList.contains("protyle-wysiwyg")) {
-                const headerTop = item.offsetTop - 30 + 56; // 30 - 面包屑, 56 - tab+title
+                const headerTop = item.offsetTop + 48;
                 const headerElement = item.querySelector(".av__row--header") as HTMLElement;
                 if (headerElement) {
                     if (headerTop < element.scrollTop && headerTop + headerElement.parentElement.clientHeight > element.scrollTop) {

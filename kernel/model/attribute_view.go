@@ -36,7 +36,38 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		return
 	}
 
-	// TODO render value
+	// TODO: render value
+	//trees := map[string]*parse.Tree{}
+	//luteEngine := util.NewLute()
+	//for _, r := range ret.Rows {
+	//	blockID := r.Cells[0].Value
+	//
+	//	bt := treenode.GetBlockTree(blockID)
+	//	if nil == bt {
+	//		err = ErrBlockNotFound
+	//		return
+	//	}
+	//
+	//	var tree *parse.Tree
+	//	if tree = trees[bt.RootID]; nil == tree {
+	//		tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	//		if nil == tree {
+	//			err = ErrTreeNotFound
+	//			return
+	//		}
+	//
+	//		trees[bt.RootID] = tree
+	//	}
+	//
+	//	node := treenode.GetNodeInTree(tree, blockID)
+	//	if nil == node {
+	//		err = ErrBlockNotFound
+	//		return
+	//	}
+	//
+	//	r.Cells[0].RenderValue = getNodeRefText(node)
+	//}
+
 	return
 }
 

@@ -19,6 +19,9 @@ package model
 import (
 	"errors"
 	"fmt"
+	"strings"
+
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
@@ -112,7 +115,7 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 
 	c.Value, c.RenderValue = parseCellData(operation)
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvCol+c.ID] = c.Value
+	attrs[NodeAttrNamePrefixAvCol+avID+"-"+c.ID] = c.Value
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
 		return
 	}
@@ -310,8 +313,17 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 	if 1 < len(ret.Columns) {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 		for _, col := range ret.Columns[1:] {
-			attrs[NodeAttrNamePrefixAvCol+col.ID] = "" // 将列作为属性添加到块中
+			attrs[NodeAttrNamePrefixAvCol+avID+"-"+col.ID] = "" // 将列作为属性添加到块中
 			row.Cells = append(row.Cells, av.NewCell(col.Type))
+		}
+
+		if "" == attrs[NodeAttrNameAVs] {
+			attrs[NodeAttrNameAVs] = avID
+		} else {
+			avIDs := strings.Split(attrs[NodeAttrNameAVs], ",")
+			avIDs = append(avIDs, avID)
+			avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+			attrs[NodeAttrNameAVs] = strings.Join(avIDs, ",")
 		}
 
 		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -346,4 +358,7 @@ func parseCellData(operation *Operation) (val, renderVal string) {
 	return
 }
 
-const NodeAttrNamePrefixAvCol = "av-col-"
+const (
+	NodeAttrNameAVs         = "avs"
+	NodeAttrNamePrefixAvCol = "av-col-"
+)

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120055-9mityht",
 		"title": "什麼是內容塊",
-		"updated": "20230419153659"
+		"updated": "20230630091613"
 	},
 	"Children": [
 		{
@@ -358,7 +358,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230419153659-uh8hdye",
-				"updated": "20230419153659"
+				"updated": "20230630091613"
 			},
 			"Children": [
 				{
@@ -435,7 +435,7 @@
 					},
 					"Properties": {
 						"id": "20230419153659-xjdb4u5",
-						"updated": "20230419153659"
+						"updated": "20230630091613"
 					},
 					"Children": [
 						{
@@ -443,12 +443,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230419153659-0whksmd",
-								"updated": "20230419153659"
+								"updated": "20230630091613"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "備註僅支持純文本"
+									"Data": "備註僅支持純文字"
 								}
 							]
 						}

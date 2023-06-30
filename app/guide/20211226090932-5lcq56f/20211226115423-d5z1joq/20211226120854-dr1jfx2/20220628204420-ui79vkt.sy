@@ -4,8 +4,8 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20220628204420-ui79vkt",
-		"title": "優化排版",
-		"updated": "20220916195825"
+		"title": "最佳化排版",
+		"updated": "20230630104730"
 	},
 	"Children": [
 		{
@@ -90,7 +90,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "優化排版"
+					"TextMarkTextContent": "最佳化排版"
 				},
 				{
 					"Type": "NodeText",
@@ -294,7 +294,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "超鏈接錨文本"
+									"Data": "超連結錨文字"
 								}
 							]
 						}
@@ -322,7 +322,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "普通文本"
+									"Data": "普通文字"
 								}
 							]
 						}
@@ -411,20 +411,27 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在實際執行優化排版之前，思源會自動備份一次原有的文檔，這樣如果優化結果不滿意也能夠通過"
+					"Data": "在實際執行最佳化排版之前，思源會自動備份一次原有的文檔，這樣如果最佳化結果不滿意也能夠通過"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226122707-8cr09co",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "數據歷史"
+					"TextMarkTextContent": "資料歷史"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "進行回滾。"
+					"Data": "進行回復。"
 				}
 			]
+		},
+		{
+			"ID": "20230630104730-wherqx2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230630104730-wherqx2"
+			}
 		}
 	]
 }

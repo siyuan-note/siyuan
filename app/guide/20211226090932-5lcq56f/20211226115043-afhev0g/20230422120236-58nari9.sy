@@ -4,8 +4,8 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230422120236-58nari9",
-		"title": "數據可用性保障",
-		"updated": "20230422120445"
+		"title": "資料可用性保障",
+		"updated": "20230630141949"
 	},
 	"Children": [
 		{
@@ -33,7 +33,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在提升本地設備上的數據可用性方面我們做了大量努力："
+					"Data": "在提升本地設備上的資料可用性方面我們做了大量努力："
 				}
 			]
 		},
@@ -68,7 +68,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "編輯器中的內容變更會自動保存到磁盤上，實際寫入磁盤時間會根據文檔大小有所不同，通常情況下 1 秒以內會完成最終保存"
+									"Data": "編輯器中的內容變更會自動保存到磁碟上，實際寫入磁碟時間會根據文檔大小有所不同，通常情況下 1 秒以內會完成最終保存"
 								}
 							]
 						}
@@ -138,7 +138,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20220615120134-cdqs2gt",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "數據快照"
+									"TextMarkTextContent": "資料快照"
 								}
 							]
 						}
@@ -166,7 +166,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "支持完整導出和導入 Data 壓縮包"
+									"Data": "支持完整導出和導入 Data 壓縮檔"
 								}
 							]
 						}
@@ -194,7 +194,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "禁止通過第三方同步盤軟件同步數據以避免造成文件損壞"
+									"Data": "禁止通過第三方同步硬碟軟體同步資料以避免造成文件損壞"
 								}
 							]
 						}
@@ -212,7 +212,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過這些努力，我們已經盡量保障了本地設備上的數據可用性。但請注意的是，這些保障落實的前提是設備磁盤不發生故障和意外。"
+					"Data": "通過這些努力，我們已經盡量保障了本地設備上的資料可用性。但請注意的是，這些保障落實的前提是設備磁碟不發生故障和意外。"
 				}
 			]
 		},
@@ -241,18 +241,18 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "僅僅提升本地設備上的數據可用性是不夠的，因為雲端"
+					"Data": "僅僅提升本地設備上的資料可用性是不夠的，因為雲端"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226121438-xaafdo8",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "數據同步"
+					"TextMarkTextContent": "資料同步"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "是剛性需求之一。數據同步會影響本地設備數據，所以我們也要盡量保障同步後數據的可用性："
+					"Data": "是剛性需求之一。資料同步會影響本地設備資料，所以我們也要盡量保障同步後資料的可用性："
 				}
 			]
 		},
@@ -287,7 +287,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "同步前生成數據快照，如果出現非預期的同步結果則可以通過該快照回滾"
+									"Data": "同步前生成資料快照，如果出現非預期的同步結果則可以通過該快照回復"
 								}
 							]
 						}
@@ -350,7 +350,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "自動生成文件歷史，可以通過文件歷史回滾"
+													"Data": "自動生成文件歷史，可以通過文件歷史回復"
 												}
 											]
 										}
@@ -442,7 +442,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "數據歷史"
+									"TextMarkTextContent": "資料歷史"
 								},
 								{
 									"Type": "NodeText",
@@ -451,7 +451,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "數據快照"
+									"TextMarkTextContent": "資料快照"
 								},
 								{
 									"Type": "NodeText",
@@ -497,7 +497,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過以上保障措施，希望你不再對數據可用性方面產生太多顧慮，請放心使用。"
+					"Data": "通過以上保障措施，希望你不再對資料可用性方面產生太多顧慮，請放心使用。"
 				}
 			]
 		},
@@ -511,7 +511,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "儘管如此，我們依然建議你參考 321 備份原則（至少 3 個副本、2 種介質和 1 個異地存儲）進行定期數據備份。"
+					"Data": "儘管如此，我們依然建議你參考 321 備份原則（至少 3 個副本、2 種介質和 1 個異地存儲）進行定期資料備份。"
 				}
 			]
 		},
@@ -525,7 +525,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "歡迎給我們反饋更多建議，數據可用性是重中之重，期待在大家的努力下不斷提高它。"
+					"Data": "歡迎給我們反饋更多建議，資料可用性是重中之重，期待在大家的努力下不斷提高它。"
 				}
 			]
 		}

@@ -17,6 +17,7 @@
 package model
 
 import (
+	"image/color"
 	"net/http"
 	"net/url"
 	"os"
@@ -118,6 +119,7 @@ func GetCaptcha(c *gin.Context) {
 		options.CharPreset = "ABCDEFGHKLMNPQRSTUVWXYZ23456789"
 		options.Noise = 0.5
 		options.CurveNumber = 0
+		options.BackgroundColor = color.White
 	})
 	if nil != err {
 		logging.LogErrorf("generates captcha failed: " + err.Error())

@@ -341,6 +341,7 @@ interface ICommand {
 }
 
 interface IPluginData {
+    displayName: string,
     name: string,
     js: string,
     css: string,

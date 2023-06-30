@@ -54,6 +54,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     }
     const plugin = new pluginClass({
         app,
+        displayName: item.displayName,
         name: item.name,
         i18n: item.i18n
     });

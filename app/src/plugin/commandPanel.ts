@@ -23,7 +23,7 @@ export const commandPanel = (app: App) => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");
             liElement.classList.add("b3-list-item");
-            liElement.innerHTML = `<span class="b3-list-item__text">${command.langText || plugin.i18n[command.langKey]}</span>
+            liElement.innerHTML = `<span class="b3-list-item__text">${plugin.displayName}: ${command.langText || plugin.i18n[command.langKey]}</span>
 <span class="b3-list-item__meta">${updateHotkeyTip(command.customHotkey)}</span>`;
             liElement.addEventListener("click", () => {
                 command.callback();

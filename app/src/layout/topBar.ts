@@ -375,7 +375,7 @@ const openPlugin = (app: App, target: Element) => {
             hasPlugin = true;
             menu.addItem({
                 icon: "iconSettings",
-                label: plugin.name,
+                label: plugin.displayName,
                 click() {
                     plugin.openSetting();
                 }

@@ -833,6 +833,7 @@ interface IAVRow {
 }
 
 interface IAVCell {
+    id: string,
     color: string,
     bgColor: string,
     value: string,

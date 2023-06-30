@@ -1,5 +1,5 @@
 import {transaction} from "../../wysiwyg/transaction";
-import {hasClosestBlock} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
 import {getColIconByType} from "./col";
 
@@ -40,16 +40,22 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
 
 
 const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVCol) => {
-    const avMaskElement = document.querySelector(".av__mask");
-    const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-    const blockElement = hasClosestBlock(cellElement);
+    const rowElement = hasClosestByClassName(cellElement, "av__row");
+    if (!rowElement) {
+        return;
+    }
+    const blockElement = hasClosestBlock(rowElement);
     if (!blockElement) {
         return;
     }
+    const avMaskElement = document.querySelector(".av__mask");
+    const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
+
     transaction(protyle, [{
         action: "updateAttrViewCell",
-        id: blockElement.getAttribute("data-node-id"),
-        rowID: blockElement.getAttribute("data-av-id"),
+        id: cellElement.getAttribute("data-id"),
+        rowID: rowElement.getAttribute("data-id"),
+        parentID: blockElement.getAttribute("data-av-id"),
         type,
         data: inputElement.value,
     }], [{

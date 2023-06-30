@@ -48,7 +48,7 @@ export const avRender = (element: Element, cb?: () => void) => {
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
-                        tableHTML += `<div class="av__cell" data-block-id="${cell.renderValue?.id || ""}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${cell.renderValue?.content || ""}</div>`;
+                        tableHTML += `<div class="av__cell" ${index === 0 ? 'data-block-id="' + (cell.renderValue?.id || "") + '"' : ""} data-id="${cell.id}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${cell.renderValue?.content || ""}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });
@@ -95,7 +95,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         });
     } else if (operation.action === "insertAttrViewBlock") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             avRender(item);
         });

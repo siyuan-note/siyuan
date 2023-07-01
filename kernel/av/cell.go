@@ -17,8 +17,6 @@
 package av
 
 import (
-	"time"
-
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 )
@@ -77,7 +75,7 @@ type ValueNumber struct {
 }
 
 type ValueDate struct {
-	Content time.Time `json:"content"`
+	Content int64 `json:"content"`
 }
 
 type ValueSelect struct {

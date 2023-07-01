@@ -49,4 +49,4 @@ export const emitOpenMenu = (options: {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         }
     }
-}
+};

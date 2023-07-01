@@ -1015,7 +1015,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, app: Ap
         if (isAll) {
             return;
         }
-        const rootId = currentList.getAttribute("data-root-id")
+        const rootId = currentList.getAttribute("data-root-id");
         getAllModels().editor.forEach(item => {
             if (rootId === item.editor.protyle.block.rootID) {
                 reloadProtyle(item.editor.protyle, false);

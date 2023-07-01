@@ -68,7 +68,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
                 } else {
                     refElement.innerHTML = "*";
                 }
-            }
+            };
             anchorElement.addEventListener("input", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;

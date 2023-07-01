@@ -15,7 +15,7 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {getEventName, openByMobile, setStorageVal} from "../util/compatibility";
+import {openByMobile, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";

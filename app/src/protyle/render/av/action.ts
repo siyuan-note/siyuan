@@ -133,18 +133,18 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (checkElement) {
         window.siyuan.menus.menu.remove();
         const rowElement = checkElement.parentElement;
-        const useElement = checkElement.querySelector("use")
+        const useElement = checkElement.querySelector("use");
         if (rowElement.classList.contains("av__row--header")) {
             if ("#iconCheck" === useElement.getAttribute("xlink:href")) {
                 rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                     item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                     item.parentElement.classList.remove("av__row--select");
-                })
+                });
             } else {
                 rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                     item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                     item.parentElement.classList.add("av__row--select");
-                })
+                });
             }
         } else {
             if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
@@ -181,7 +181,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         return false;
     }
     if (rowElement.classList.contains("av__row--header")) {
-        return false
+        return false;
     }
     const blockElement = hasClosestBlock(rowElement);
     if (!blockElement) {

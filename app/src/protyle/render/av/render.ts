@@ -48,19 +48,19 @@ export const avRender = (element: Element, cb?: () => void) => {
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
-                        let text: string
+                        let text: string;
                         if (cell.valueType === "text") {
-                            text = cell.value?.text.content || ""
+                            text = cell.value?.text.content || "";
                         } else if (cell.valueType === "block") {
-                            text = cell.value?.block.content || ""
+                            text = cell.value?.block.content || "";
                         } else if (cell.valueType === "number") {
-                            text = cell.value?.number.content || ""
+                            text = cell.value?.number.content || "";
                         } else if (cell.valueType === "select") {
-                            text = cell.value?.select.content || ""
+                            text = cell.value?.select.content || "";
                         } else if (cell.valueType === "mSelect") {
-                            text = cell.value?.mSelect.content || ""
+                            text = cell.value?.mSelect.content || "";
                         } else if (cell.valueType === "date") {
-                            text = cell.value?.date.content || ""
+                            text = cell.value?.date.content || "";
                         }
                         tableHTML += `<div class="av__cell" ${index === 0 ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} data-id="${cell.id}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });

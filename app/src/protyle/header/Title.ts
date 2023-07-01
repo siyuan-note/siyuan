@@ -5,7 +5,7 @@ import {
 } from "../util/selection";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
-import {MenuItem, subMenu} from "../../menus/Menu";
+import {MenuItem} from "../../menus/Menu";
 import {
     copySubMenu,
     movePathToMenu,

@@ -651,7 +651,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
         updateRef(protyle, operation.id);
     } else if (operation.action === "append") {
         reloadProtyle(protyle, false);
-    } else if (["addAttrViewCol", "insertAttrViewBlock"].includes(operation.action)) {
+    } else if (["addAttrViewCol", "insertAttrViewBlock", "updateAttrViewCol", "updateAttrViewCell"].includes(operation.action)) {
         refreshAV(protyle, operation);
     }
 };

@@ -71,7 +71,6 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
             [type]: {content: cellElement.textContent.trim()}
         }
     }]);
-    cellElement.textContent = inputElement.value;
     setTimeout(() => {
         avMaskElement.remove();
     });
@@ -108,7 +107,6 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
             name: cellElement.textContent.trim(),
             type,
         }]);
-        cellElement.textContent = newValue;
     });
     menu.addItem({
         icon: getColIconByType(type),

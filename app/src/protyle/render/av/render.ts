@@ -109,7 +109,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 showHeaderCellMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
             });
         });
-    } else if (operation.action === "insertAttrViewBlock") {
+    } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             avRender(item);

@@ -108,6 +108,7 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
             name: cellElement.textContent.trim(),
             type,
         }]);
+        cellElement.textContent = newValue;
     });
     menu.addItem({
         icon: getColIconByType(type),

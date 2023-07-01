@@ -1180,7 +1180,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		}
 	}
 
-	// 2. 更新属性视图主键内容
+	// TODO 2. 更新属性视图主键内容
 
 	// 3. 保存变更
 	for _, tree := range changedRefTree {

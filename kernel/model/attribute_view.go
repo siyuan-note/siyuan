@@ -317,7 +317,6 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 		if column.ID == columnID {
 			col = column
 			index = i
-			break
 		}
 		if column.ID == previousColumnID {
 			previousIndex = i
@@ -352,7 +351,6 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 		if r.ID == rowID {
 			row = r
 			index = i
-			break
 		}
 		if r.ID == previousRowID {
 			previousIndex = i

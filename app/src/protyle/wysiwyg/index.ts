@@ -333,7 +333,7 @@ export class WYSIWYG {
                 hideElements(["select"], protyle);
             }
             const target = event.target as HTMLElement;
-            if (hasClosestByClassName(target, "protyle-action")) {
+            if (hasClosestByClassName(target, "protyle-action") || hasClosestByClassName(target, "av__gutters")) {
                 return;
             }
             const documentSelf = document;

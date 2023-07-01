@@ -708,17 +708,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 window.siyuan.dragElement = undefined;
                 event.preventDefault();
             } else if (target.classList.contains("protyle-action")) {
-                if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
-                    window.siyuan.dragElement = undefined;
-                    event.preventDefault();
-                } else {
-                    window.siyuan.dragElement = protyle.wysiwyg.element;
-                    event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
-                        protyle.wysiwyg.element.innerHTML);
-                }
+                window.siyuan.dragElement = protyle.wysiwyg.element;
+                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
+                    protyle.wysiwyg.element.innerHTML);
+                return;
+            } else if (target.classList.contains("av__cell")) {
+                window.siyuan.dragElement = target;
+                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.getAttribute("data-id")]}`,
+                    target.innerHTML);
                 return;
             } else if (target.classList.contains("av__gutters")) {
-
                 const blockElement = hasClosestBlock(target);
                 if (!blockElement) {
                     return;
@@ -977,7 +976,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
-        const targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target) as Element;
+        let targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target);
+        if (gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}`.toLowerCase())) {
+            // 表头只能拖拽到当前 av 的表头中
+            targetElement = hasClosestByClassName(event.target, "av__cell");
+            if (targetElement && !targetElement.parentElement.isSameNode(window.siyuan.dragElement.parentElement)) {
+                targetElement = false;
+            }
+        } else if (targetElement && targetElement.classList.contains("av__row--header")) {
+            // 除表头外任何元素都不能拖拽到表头中
+            targetElement = false;
+        } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Row${Constants.ZWSP}`.toLowerCase())) {
+            // 行只能拖拽当前 av 中
+            if (!targetElement.classList.contains("av__row") || !targetElement.parentElement.isSameNode(window.siyuan.dragElement.parentElement)) {
+                targetElement = false;
+            }
+        }
         if (!targetElement || targetElement?.classList.contains("av")) {
             return;
         }
@@ -999,6 +1013,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
 
+            if (targetElement.classList.contains("av__cell")) {
+                if (event.clientX < nodeRect.left + nodeRect.width / 2 && event.clientX > nodeRect.left &&
+                    !targetElement.classList.contains("av__row")) {
+                    targetElement.classList.add("dragover__left", "protyle-wysiwyg--select");
+                } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX < nodeRect.right &&
+                    !targetElement.classList.contains("av__row")) {
+                    targetElement.classList.add("dragover__right", "protyle-wysiwyg--select");
+                }
+                return;
+            }
             if (event.clientX < nodeRect.left + 32 && event.clientX > nodeRect.left &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__left", "protyle-wysiwyg--select");
@@ -1027,8 +1051,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // gutter 文档内拖拽限制
             // 排除自己及子孙
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
+            if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "col" && targetElement.getAttribute("data-id") === gutterTypes[2]) {
+                // 表头不能拖到自己上
+                return;
+            }
             const isSelf = gutterTypes[2].split(",").find((item: string) => {
-                if (item && hasClosestByAttribute(targetElement, "data-node-id", item)) {
+                if (item && hasClosestByAttribute(targetElement as HTMLElement, "data-node-id", item)) {
                     return true;
                 }
             });
@@ -1058,15 +1086,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 列表项不能拖入列表上方块的下面
                 disabledPosition = "bottom";
             }
-            if (targetElement?.classList.contains("av__row--header")) {
-                // 表头之前不能插入
-                disabledPosition = "top";
-            }
             dragoverElement = targetElement;
         }
     });
     editorElement.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
-        const nodeElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target);
+        let nodeElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target);
         if (nodeElement && !nodeElement.classList.contains("av")) {
             let gutterType = "";
             for (const item of event.dataTransfer.items) {
@@ -1074,16 +1098,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     gutterType = item.type;
                 }
             }
-            if (gutterType.indexOf(nodeElement.getAttribute("data-node-id")) === -1) {
+            if (nodeElement.classList.contains("av__row")) {
+                if (nodeElement.classList.contains("av__row--header")) {
+                    nodeElement = hasClosestByClassName(event.target, "av__cell");
+                    if (!nodeElement) {
+                        return
+                    }
+                }
+                nodeElement.classList.remove("protyle-wysiwyg--select");
+            } else if (gutterType.indexOf(nodeElement.getAttribute("data-node-id")) === -1) {
                 // 选中的元素不应移除，否则拖拽 gutter 经过选中的元素，该元素就会被取消选中
                 nodeElement.classList.remove("protyle-wysiwyg--select");
                 nodeElement.removeAttribute("select-start");
                 nodeElement.removeAttribute("select-end");
             }
             nodeElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
-            if (nodeElement.classList.contains("av__row")) {
-                nodeElement.classList.remove("protyle-wysiwyg--select");
-            }
         }
     });
 };

@@ -1,6 +1,7 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {showHeaderCellMenu} from "./cell";
+import {Constants} from "../../../constants";
 
 export const avRender = (element: Element, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -101,12 +102,14 @@ export const avRender = (element: Element, cb?: () => void) => {
     }
 };
 
-let lastparentID:string
+let lastParentID: string
+let lastElement: HTMLElement
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
-    if (lastparentID === operation.parentID) {
+    if (lastParentID === operation.parentID && protyle.contentElement.isSameNode(lastElement)) {
         return
     }
-    lastparentID = operation.parentID;
+    lastElement = protyle.contentElement;
+    lastParentID = operation.parentID;
     if (operation.action === "addAttrViewCol") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
@@ -120,4 +123,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             avRender(item);
         });
     }
+    setTimeout(() => {
+        lastParentID = null;
+    }, Constants.TIMEOUT_TRANSITION);
 };

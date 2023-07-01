@@ -27,7 +27,7 @@ export const avRender = (element: Element, cb?: () => void) => {
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
+                    tableHTML += `<div draggable="true" class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
     <svg><use xlink:href="#${column.icon || getColIconByType(column.type)}"></use></svg>
     <span>${column.name}</span>
 </div>`;
@@ -43,7 +43,7 @@ export const avRender = (element: Element, cb?: () => void) => {
                 // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__gutters" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
+<div class="av__gutters" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
     <button><svg><use xlink:href="#iconLine"></use></svg></button>
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;

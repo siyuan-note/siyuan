@@ -703,16 +703,43 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
-        if (target.classList && target.classList.contains("protyle-action")) {
+        if (target.classList) {
             if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
                 window.siyuan.dragElement = undefined;
                 event.preventDefault();
-            } else {
-                window.siyuan.dragElement = protyle.wysiwyg.element;
-                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
-                    protyle.wysiwyg.element.innerHTML);
+            } else if (target.classList.contains("protyle-action")) {
+                if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
+                    window.siyuan.dragElement = undefined;
+                    event.preventDefault();
+                } else {
+                    window.siyuan.dragElement = protyle.wysiwyg.element;
+                    event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
+                        protyle.wysiwyg.element.innerHTML);
+                }
+                return;
+            } else if (target.classList.contains("av__gutters")) {
+
+                const blockElement = hasClosestBlock(target);
+                if (!blockElement) {
+                    return;
+                }
+                const rowElement = target.parentElement;
+                const selectIds = []
+                if (rowElement.classList.contains("av__row--select")) {
+                    rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach((item) => {
+                        selectIds.push(item.getAttribute("data-id"))
+                    })
+                } else {
+                    selectIds.push(rowElement.getAttribute("data-id"))
+                }
+                if (selectIds.length === 1) {
+                    event.dataTransfer.setDragImage(rowElement, 0, 0);
+                }
+                window.siyuan.dragElement = rowElement;
+                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Row${Constants.ZWSP}${selectIds}`,
+                    rowElement.innerHTML);
+                return;
             }
-            return;
         }
         // 选中编辑器中的文字进行拖拽
         event.dataTransfer.setData(Constants.SIYUAN_DROP_EDITOR, Constants.SIYUAN_DROP_EDITOR);
@@ -795,22 +822,46 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (targetElement.classList.contains("av__row")) {
                     // 拖拽到属性视图内
                     const blockElement = hasClosestBlock(targetElement);
-                    if (blockElement) {
-                        let previousID = "";
-                        if (targetElement.classList.contains("dragover__bottom")) {
-                            previousID = targetElement.getAttribute("data-id") || "";
-                        } else {
-                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
-                        }
+                    if (!blockElement) {
+                        return;
+                    }
+                    let previousID = "";
+                    if (targetElement.classList.contains("dragover__bottom")) {
+                        previousID = targetElement.getAttribute("data-id") || "";
+                    } else {
+                        previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                    }
+                    const avId = blockElement.getAttribute("data-av-id")
+                    if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "row") {
+                        // 行内拖拽
+                        const doOperations: IOperation[] = [];
+                        const undoOperations: IOperation[] = [];
+                        const undoPreviousId = blockElement.querySelector(`[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                        selectedIds.reverse().forEach(item => {
+                            doOperations.push({
+                                action: "sortAttrViewRow",
+                                parentID: avId,
+                                previousID,
+                                id: item,
+                            })
+                            undoOperations.push({
+                                action: "sortAttrViewRow",
+                                parentID: avId,
+                                previousID: undoPreviousId,
+                                id: item,
+                            })
+                        });
+                        transaction(protyle, doOperations, undoOperations);
+                    } else {
                         transaction(protyle, [{
                             action: "insertAttrViewBlock",
-                            parentID: blockElement.getAttribute("data-av-id"),
+                            parentID: avId,
                             previousID,
                             srcIDs: sourceIds,
                         }], [{
                             action: "removeAttrViewBlock",
                             srcIDs: sourceIds,
-                            parentID: targetElement.getAttribute("data-av-id"),
+                            parentID: avId,
                         }]);
                     }
                     return;
@@ -1007,16 +1058,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 列表项不能拖入列表上方块的下面
                 disabledPosition = "bottom";
             }
-            const avRowElement = hasClosestByClassName(event.target, "av__row");
-            if (targetElement.classList.contains("av") && avRowElement) {
-                if (avRowElement.classList.contains("av__row--header")) {
-                    // 表头之前不能插入
-                    disabledPosition = "top";
-                }
-                dragoverElement = avRowElement;
-            } else {
-                dragoverElement = targetElement;
+            if (targetElement?.classList.contains("av__row--header")) {
+                // 表头之前不能插入
+                disabledPosition = "top";
             }
+            dragoverElement = targetElement;
         }
     });
     editorElement.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {

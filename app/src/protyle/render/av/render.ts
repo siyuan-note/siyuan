@@ -101,7 +101,12 @@ export const avRender = (element: Element, cb?: () => void) => {
     }
 };
 
+let lastparentID:string
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    if (lastparentID === operation.parentID) {
+        return
+    }
+    lastparentID = operation.parentID;
     if (operation.action === "addAttrViewCol") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");

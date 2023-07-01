@@ -100,13 +100,13 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
             id: cellElement.getAttribute("data-id"),
             parentID: blockElement.getAttribute("data-av-id"),
             name: newValue,
-            type: cellElement.getAttribute("data-dtype") as TAVCol,
+            type,
         }], [{
             action: "updateAttrViewCol",
             id: cellElement.getAttribute("data-id"),
             parentID: blockElement.getAttribute("data-av-id"),
             name: cellElement.textContent.trim(),
-            type: cellElement.getAttribute("data-dtype") as TAVCol,
+            type,
         }]);
     });
     menu.addItem({

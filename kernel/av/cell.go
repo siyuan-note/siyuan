@@ -16,32 +16,43 @@
 
 package av
 
-import "github.com/88250/lute/ast"
+import (
+	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
+)
 
 type Cell struct {
 	ID          string      `json:"id"`
-	Value       string      `json:"value"`
+	Value       *Value      `json:"value"`
 	ValueType   ColumnType  `json:"valueType"`
 	RenderValue interface{} `json:"renderValue"`
 	Color       string      `json:"color"`
 	BgColor     string      `json:"bgColor"`
 }
 
+type Value struct {
+	Block   string   `json:"block"`
+	Text    string   `json:"text"`
+	Number  float64  `json:"number"`
+	Date    string   `json:"date"`
+	Select  string   `json:"select"`
+	MSelect []string `json:"mSelect"`
+}
+
+func (value *Value) ToJSONString() string {
+	data, err := gulu.JSON.MarshalJSON(value)
+	if nil != err {
+		return ""
+	}
+	return string(data)
+}
+
 func NewCellBlock(blockID, blockContent string) *Cell {
 	return &Cell{
 		ID:          ast.NewNodeID(),
-		Value:       blockID,
+		Value:       &Value{Block: blockID},
 		ValueType:   ColumnTypeBlock,
 		RenderValue: &RenderValueBlock{ID: blockID, Content: blockContent},
-	}
-}
-
-func NewCellText(text string) *Cell {
-	return &Cell{
-		ID:          ast.NewNodeID(),
-		Value:       text,
-		ValueType:   ColumnTypeText,
-		RenderValue: &RenderValueText{Content: text},
 	}
 }
 
@@ -54,9 +65,5 @@ func NewCell(valueType ColumnType) *Cell {
 
 type RenderValueBlock struct {
 	ID      string `json:"id"`
-	Content string `json:"content"`
-}
-
-type RenderValueText struct {
 	Content string `json:"content"`
 }

@@ -27,6 +27,7 @@ const (
 	ColumnTypeRelation ColumnType = "relation"
 	ColumnTypeRollup   ColumnType = "rollup"
 	ColumnTypeSelect   ColumnType = "select"
+	ColumnTypeMSelect  ColumnType = "mSelect"
 	ColumnTypeText     ColumnType = "text"
 )
 

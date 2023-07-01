@@ -89,7 +89,7 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		blockID = row.Cells[0].Value
+		blockID = row.Cells[0].Value.Block
 		for _, cell := range row.Cells[1:] {
 			if cell.ID == operation.ID {
 				c = cell
@@ -113,9 +113,17 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	c.Value, c.RenderValue = parseCellData(operation)
+	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &c.Value); nil != err {
+		return
+	}
+
+	c.RenderValue = operation.Data
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvCol+avID+"-"+c.ID] = c.Value
+	attrs[NodeAttrNamePrefixAvCol+avID+"-"+c.ID] = c.Value.ToJSONString()
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
 		return
 	}
@@ -197,6 +205,14 @@ func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewColumn(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColumn(operation.ID, operation.Name, operation.Typ, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
 func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := removeAttributeViewColumn(operation.ID, operation.ParentID)
 	if nil != err {
@@ -218,6 +234,33 @@ func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 		attrView.Columns = append(attrView.Columns, col)
 		for _, row := range attrView.Rows {
 			row.Cells = append(row.Cells, av.NewCell(colType))
+		}
+	default:
+		msg := fmt.Sprintf("invalid column type [%s]", typ)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func updateAttributeViewColumn(id, name string, typ string, avID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	colType := av.ColumnType(typ)
+	switch colType {
+	case av.ColumnTypeText:
+		for _, col := range attrView.Columns {
+			if col.ID == id {
+				col.Name = name
+				col.Type = colType
+				break
+			}
 		}
 	default:
 		msg := fmt.Sprintf("invalid column type [%s]", typ)
@@ -267,7 +310,7 @@ func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (ret *av.A
 	}
 
 	for i, row := range ret.Rows {
-		if row.Cells[0].Value == blockID {
+		if row.Cells[0].Value.Block == blockID {
 			// 从行中移除，但是不移除属性
 			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
 			break
@@ -303,7 +346,7 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 
 	// 不允许重复添加相同的块到属性视图中
 	for _, row := range ret.Rows {
-		if row.Cells[0].Value == blockID {
+		if row.Cells[0].Value.Block == blockID {
 			return
 		}
 	}
@@ -343,18 +386,6 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 	}
 
 	err = av.SaveAttributeView(ret)
-	return
-}
-
-func parseCellData(operation *Operation) (val, renderVal string) {
-	data := operation.Data
-	colType := av.ColumnType(operation.Typ)
-	switch colType {
-	case av.ColumnTypeText:
-		val = data.(string)
-		renderVal = val
-		return
-	}
 	return
 }
 

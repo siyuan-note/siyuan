@@ -30,12 +30,12 @@ type Cell struct {
 }
 
 type Value struct {
-	Block   *ValueBlock    `json:"block"`
-	Text    *ValueText     `json:"text"`
-	Number  *ValueNumber   `json:"number"`
-	Date    *ValueDate     `json:"date"`
-	Select  *ValueSelect   `json:"select"`
-	MSelect []*ValueSelect `json:"mSelect"`
+	Block   *ValueBlock    `json:"block,omitempty"`
+	Text    *ValueText     `json:"text,omitempty"`
+	Number  *ValueNumber   `json:"number,omitempty"`
+	Date    *ValueDate     `json:"date,omitempty"`
+	Select  *ValueSelect   `json:"select,omitempty"`
+	MSelect []*ValueSelect `json:"mSelect,omitempty"`
 }
 
 func (value *Value) ToJSONString() string {

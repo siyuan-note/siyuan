@@ -51,20 +51,25 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     }
     const avMaskElement = document.querySelector(".av__mask");
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
-
+    const cellId = cellElement.getAttribute("data-id")
+    const avId = blockElement.getAttribute("data-av-id")
+    const rowId = rowElement.getAttribute("data-id")
     transaction(protyle, [{
         action: "updateAttrViewCell",
-        id: cellElement.getAttribute("data-id"),
-        rowID: rowElement.getAttribute("data-id"),
-        parentID: blockElement.getAttribute("data-av-id"),
-        type,
-        data: inputElement.value,
+        id: cellId,
+        rowID: rowId,
+        parentID: avId,
+        data: {
+            [type]: {content: inputElement.value}
+        }
     }], [{
         action: "updateAttrViewCell",
-        id: blockElement.getAttribute("data-node-id"),
-        rowID: blockElement.getAttribute("data-av-id"),
-        type,
-        data: cellElement.textContent.trim(),
+        id: cellId,
+        rowID: rowId,
+        parentID: avId,
+        data: {
+            [type]: {content: cellElement.textContent.trim()}
+        }
     }]);
     cellElement.textContent = inputElement.value;
     setTimeout(() => {
@@ -85,13 +90,28 @@ const removeCol = (cellElement: HTMLElement) => {
 
 export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
-    const menu = new Menu("av-header-cell");
+    const menu = new Menu("av-header-cell", () => {
+        const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
+        if (newValue === cellElement.textContent.trim()) {
+            return;
+        }
+        transaction(protyle, [{
+            action: "updateAttrViewCol",
+            id: cellElement.getAttribute("data-id"),
+            parentID: blockElement.getAttribute("data-av-id"),
+            name: newValue,
+            type: cellElement.getAttribute("data-dtype") as TAVCol,
+        }], [{
+            action: "updateAttrViewCol",
+            id: cellElement.getAttribute("data-id"),
+            parentID: blockElement.getAttribute("data-av-id"),
+            name: cellElement.textContent.trim(),
+            type: cellElement.getAttribute("data-dtype") as TAVCol,
+        }]);
+    });
     menu.addItem({
         icon: getColIconByType(type),
         label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
-        bind() {
-
-        }
     });
     if (type !== "block") {
         menu.addItem({

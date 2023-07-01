@@ -23,6 +23,7 @@ type TOperation =
     | "addFlashcards"
     | "removeFlashcards"
     | "updateAttrViewCell"
+    | "updateAttrViewCol"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" |
@@ -31,7 +32,7 @@ type TEventBus = "ws-main" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" |
     "loaded-protyle"
-type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block"
+type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block"| "mSelect"
 
 declare module "blueimp-md5"
 
@@ -280,7 +281,7 @@ interface IScrollAttr {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
-    data?: string, // updateAttr 时为  { old: IObject, new: IObject }
+    data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}
     parentID?: string   // 为 insertAttrViewBlock 传 avid
     previousID?: string
     retData?: any
@@ -836,10 +837,6 @@ interface IAVCell {
     id: string,
     color: string,
     bgColor: string,
-    value: string,
+    value: any,
     valueType: TAVCol,
-    renderValue: {
-        content: string,
-        id: string,
-    } | string
 }

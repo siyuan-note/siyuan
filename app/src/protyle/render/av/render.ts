@@ -50,17 +50,19 @@ export const avRender = (element: Element, cb?: () => void) => {
                     row.cells.forEach((cell, index) => {
                         let text: string
                         if (cell.valueType === "text") {
-                            text = cell.renderValue as string || ""
+                            text = cell.value?.content || ""
                         } else if (cell.valueType === "block") {
-                            text = (cell.renderValue as {
-                                content: string,
-                                id: string,
-                            }).content as string || ""
+                            text = cell.value.block.content || ""
+                        } else if (cell.valueType === "number") {
+                            text = cell.value.number.content || ""
+                        } else if (cell.valueType === "select") {
+                            text = cell.value.select.content || ""
+                        } else if (cell.valueType === "mSelect") {
+                            text = cell.value.mSelect.content || ""
+                        } else if (cell.valueType === "date") {
+                            text = cell.value.date.content || ""
                         }
-                        tableHTML += `<div class="av__cell" ${index === 0 ? 'data-block-id="' + ((cell.renderValue as {
-                            content: string,
-                            id: string
-                        }).id || "") + '"' : ""} data-id="${cell.id}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
+                        tableHTML += `<div class="av__cell" ${index === 0 ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} data-id="${cell.id}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });

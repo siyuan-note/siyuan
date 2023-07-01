@@ -9,6 +9,13 @@
 
   &__title {
     height: 30px;
+    outline: none;
+    font-size: 18px;
+    font-weight: bold;
+    &:empty::after {
+      color: var(--b3-theme-on-surface);
+      content: attr(data-tip);
+    }
   }
 
   &__counter {
@@ -101,4 +108,14 @@
       opacity: 1;
     }
   }
+
+  &.protyle-wysiwyg--select {
+    .layout-tab-bar,
+    .av__row--header,
+    .av__row--footer {
+      background-color: transparent;
+    }
+  }
 }
+
+

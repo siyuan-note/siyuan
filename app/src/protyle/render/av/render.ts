@@ -74,11 +74,12 @@ export const avRender = (element: Element, cb?: () => void) => {
                 e.firstElementChild.outerHTML = `<div>
     <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
         <div class="layout-tab-bar fn__flex">
-            <div class="item item--focus">tab1</div>
+            <div class="item item--focus">
+                <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
+                <span class="item__text">Table</span>
+            </div>
         </div>
-        <div contenteditable="true" class="av__title">
-            ${data.title}
-        </div>
+        <div contenteditable="true" class="av__title" data-tip="${window.siyuan.languages.title}">${data.title||""}</div>
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">

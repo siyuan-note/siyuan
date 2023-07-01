@@ -753,13 +753,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        const targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target);
         let gutterType = "";
         for (const item of event.dataTransfer.items) {
             if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
                 gutterType = item.type;
             }
         }
+        const targetElement = (gutterType.startsWith(`application/siyuan-gutternodeattributeview${Constants.ZWSP}col`) ? hasClosestByClassName(event.target, "av__cell") : hasClosestByClassName(event.target, "av__row")) ||
+            hasClosestBlock(event.target);
         if (gutterType) {
             // gutter 或反链面板拖拽
             const sourceElements: Element[] = [];
@@ -817,7 +818,25 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
 
                 hideElements(["gutter"], protyle);
-                const targetClass = targetElement.className.split(" ");
+                if (targetElement.classList.contains("av__cell")) {
+                    const blockElement = hasClosestBlock(targetElement);
+                    if (!blockElement) {
+                        return;
+                    }
+                    const avId = blockElement.getAttribute("data-av-id")
+                    transaction(protyle, [{
+                        action: "sortAttrViewCol",
+                        parentID: avId,
+                        previousID: (targetElement.classList.contains("dragover__left") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "",
+                        id: gutterTypes[2],
+                    }], [{
+                        action: "sortAttrViewCol",
+                        parentID: avId,
+                        previousID: targetElement.parentElement.querySelector(`[data-id="${gutterTypes[2]}"`).previousElementSibling?.getAttribute("data-id") || "",
+                        id: gutterTypes[2],
+                    }]);
+                    return;
+                }
                 if (targetElement.classList.contains("av__row")) {
                     // 拖拽到属性视图内
                     const blockElement = hasClosestBlock(targetElement);
@@ -865,6 +884,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     return;
                 }
+                const targetClass = targetElement.className.split(" ");
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
                 if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                     targetElement.parentElement.getAttribute("data-sb-layout") === "col") {

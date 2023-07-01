@@ -1,4 +1,8 @@
 {
+  "numéro": "Numéro",
+  "date": "Date",
+  "select": "Sélectionner",
+  "multiSelect": "Multi-sélection",
   "commandEmpty": "Aucune commande pour le moment, cliquez pour aller sur le marché pour télécharger plus de plugins",
   "commandPanel": "Palette de commandes",
   "cloudRegionNorthAmerica": "LiuYun (Centre de données d'Amérique du Nord)",

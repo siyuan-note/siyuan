@@ -1,4 +1,8 @@
 {
+  "number": "數字",
+  "date": "日期",
+  "select": "單選",
+  "multiSelect": "多選",
   "commandEmpty": "暫無命令，點擊前往集市下載更多插件",
   "commandPanel": "命令面板",
   "cloudRegionNorthAmerica": "流雲（北美資料中心）",

@@ -19,24 +19,24 @@ package av
 import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"time"
 )
 
 type Cell struct {
-	ID          string      `json:"id"`
-	Value       *Value      `json:"value"`
-	ValueType   ColumnType  `json:"valueType"`
-	RenderValue interface{} `json:"renderValue"`
-	Color       string      `json:"color"`
-	BgColor     string      `json:"bgColor"`
+	ID        string     `json:"id"`
+	Value     *Value     `json:"value"`
+	ValueType ColumnType `json:"valueType"`
+	Color     string     `json:"color"`
+	BgColor   string     `json:"bgColor"`
 }
 
 type Value struct {
-	Block   string   `json:"block"`
-	Text    string   `json:"text"`
-	Number  float64  `json:"number"`
-	Date    string   `json:"date"`
-	Select  string   `json:"select"`
-	MSelect []string `json:"mSelect"`
+	Block   *ValueBlock    `json:"block"`
+	Text    *ValueText     `json:"text"`
+	Number  *ValueNumber   `json:"number"`
+	Date    *ValueDate     `json:"date"`
+	Select  *ValueSelect   `json:"select"`
+	MSelect []*ValueSelect `json:"mSelect"`
 }
 
 func (value *Value) ToJSONString() string {
@@ -49,10 +49,9 @@ func (value *Value) ToJSONString() string {
 
 func NewCellBlock(blockID, blockContent string) *Cell {
 	return &Cell{
-		ID:          ast.NewNodeID(),
-		Value:       &Value{Block: blockID},
-		ValueType:   ColumnTypeBlock,
-		RenderValue: &RenderValueBlock{ID: blockID, Content: blockContent},
+		ID:        ast.NewNodeID(),
+		Value:     &Value{Block: &ValueBlock{ID: blockID, Content: blockContent}},
+		ValueType: ColumnTypeBlock,
 	}
 }
 
@@ -63,7 +62,23 @@ func NewCell(valueType ColumnType) *Cell {
 	}
 }
 
-type RenderValueBlock struct {
+type ValueBlock struct {
 	ID      string `json:"id"`
+	Content string `json:"content"`
+}
+
+type ValueText struct {
+	Content string `json:"content"`
+}
+
+type ValueNumber struct {
+	Content float64 `json:"content"`
+}
+
+type ValueDate struct {
+	Content time.Time `json:"content"`
+}
+
+type ValueSelect struct {
 	Content string `json:"content"`
 }

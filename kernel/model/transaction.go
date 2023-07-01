@@ -230,6 +230,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSortAttrViewColumn(op)
 		case "updateAttrViewCell":
 			ret = tx.doUpdateAttrViewCell(op)
+		case "sortAttrViewRow":
+			ret = tx.doSortAttrViewRow(op)
 		}
 
 		if nil != ret {

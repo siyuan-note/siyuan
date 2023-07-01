@@ -89,7 +89,7 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		blockID = row.Cells[0].Value.Block
+		blockID = row.Cells[0].Value.Block.ID
 		for _, cell := range row.Cells[1:] {
 			if cell.ID == operation.ID {
 				c = cell
@@ -121,7 +121,6 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	c.RenderValue = operation.Data
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[NodeAttrNamePrefixAvCol+avID+"-"+c.ID] = c.Value.ToJSONString()
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -223,6 +222,14 @@ func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr)
 
 func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := sortAttributeViewColumn(operation.ID, operation.PreviousID, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
+	err := sortAttributeViewRow(operation.ID, operation.PreviousID, operation.ParentID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
 	}
@@ -340,6 +347,35 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 	return
 }
 
+func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	var row *av.Row
+	var index, previousIndex int
+	for i, r := range attrView.Rows {
+		if r.ID == rowID {
+			row = r
+			index = i
+			break
+		}
+		if r.ID == previousRowID {
+			previousIndex = i
+		}
+	}
+	if nil == row {
+		return
+	}
+
+	attrView.Rows = append(attrView.Rows[:index], attrView.Rows[index+1:]...)
+	attrView.Rows = append(attrView.Rows[:previousIndex], append([]*av.Row{row}, attrView.Rows[previousIndex:]...)...)
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (ret *av.AttributeView, err error) {
 	node := treenode.GetNodeInTree(tree, blockID)
 	if nil == node {
@@ -353,7 +389,7 @@ func removeAttributeViewBlock(blockID, avID string, tree *parse.Tree) (ret *av.A
 	}
 
 	for i, row := range ret.Rows {
-		if row.Cells[0].Value.Block == blockID {
+		if row.Cells[0].Value.Block.ID == blockID {
 			// 从行中移除，但是不移除属性
 			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
 			break
@@ -389,7 +425,7 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 
 	// 不允许重复添加相同的块到属性视图中
 	for _, row := range ret.Rows {
-		if row.Cells[0].Value.Block == blockID {
+		if row.Cells[0].Value.Block.ID == blockID {
 			return
 		}
 	}

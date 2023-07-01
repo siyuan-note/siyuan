@@ -8,7 +8,7 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const cellRect = cellElement.getBoundingClientRect();
     let html = "";
     if (type === "block" || type === "text") {
-        html = `<textarea style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px" class="b3-text-field">${cellElement.textContent}</textarea>`;
+        html = `<textarea style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px" class="b3-text-field">${cellElement.textContent}</textarea>`;
     }
     document.body.insertAdjacentHTML("beforeend", `<div class="av__mask">
     ${html}

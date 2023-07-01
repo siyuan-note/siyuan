@@ -1,5 +1,11 @@
 document.body.insertAdjacentHTML('afterbegin', `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
 <defs>
+  <symbol id="iconNumber" viewBox="0 0 32 32">
+    <path d="M31 12.25v-3.75h-7.5v-7.5h-3.75v7.5h-7.5v-7.5h-3.75v7.5h-7.5v3.75h7.5v7.5h-7.5v3.75h7.5v7.5h3.75v-7.5h7.5v7.5h3.75v-7.5h7.5v-3.75h-7.5v-7.5h7.5zM19.75 19.75h-7.5v-7.5h7.5v7.5z"></path>
+  </symbol>
+  <symbol id="iconCalendar" viewBox="0 0 32 32">
+    <path d="M26.5 4h-1.5v-3h-3v3h-12v-3h-3v3h-1.5c-1.665 0-2.985 1.35-2.985 3l-0.015 21c0 1.65 1.335 3 3 3h21c1.65 0 3-1.35 3-3v-21c0-1.65-1.35-3-3-3zM26.5 28h-21v-15h21v15zM26.5 10h-21v-3h21v3zM11.5 19h-3v-3h3v3zM17.5 19h-3v-3h3v3zM23.5 19h-3v-3h3v3zM11.5 25h-3v-3h3v3zM17.5 25h-3v-3h3v3zM23.5 25h-3v-3h3v3z"></path>
+  </symbol>
   <symbol id="iconIndeterminateCheck" viewBox="0 0 32 32">
     <path d="M27.667 1h-23.333c-1.833 0-3.333 1.5-3.333 3.333v23.333c0 1.833 1.5 3.333 3.333 3.333h23.333c1.833 0 3.333-1.5 3.333-3.333v-23.333c0-1.833-1.5-3.333-3.333-3.333zM27.667 27.667h-23.333v-23.333h23.333v23.333zM7.667 14.333h16.667v3.333h-16.667z"></path>
   </symbol>

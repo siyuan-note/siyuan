@@ -91,6 +91,7 @@
   &__cell {
     padding: 5px;
     flex-shrink: 0;
+    overflow: hidden;
     border-right: 1px solid var(--b3-theme-surface-lighter)
   }
 
@@ -116,6 +117,7 @@
 
     .b3-menu {
       width: 300px;
+      max-height: 70vh;
 
       .block__icon {
         line-height: 20px;

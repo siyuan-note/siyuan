@@ -28,7 +28,9 @@ export const avRender = (element: Element, cb?: () => void) => {
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div draggable="true" class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}" data-wrap="${column.wrap}" style="width: ${column.width || 200}px;">
+                    tableHTML += `<div draggable="true" class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}"  
+style="width: ${column.width || 200}px;
+${column.wrap ? "" : "white-space: nowrap;"}">
     <svg><use xlink:href="#${column.icon || getColIconByType(column.type)}"></use></svg>
     <span>${column.name}</span>
 </div>`;
@@ -66,7 +68,12 @@ export const avRender = (element: Element, cb?: () => void) => {
                         } else if (cell.valueType === "date") {
                             text = cell.value?.date.content || "";
                         }
-                        tableHTML += `<div class="av__cell" ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} data-id="${cell.id}" data-index="${index}" style="width: ${data.columns[index].width || 200}px;${cell.bgColor ? `background-color:${cell.bgColor};` : ""}${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
+                        tableHTML += `<div class="av__cell" data-id="${cell.id}" data-index="${index}" 
+${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
+style="width: ${data.columns[index].width || 200}px;
+${data.columns[index].wrap ? "" : "white-space: nowrap;"}
+${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
+${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });

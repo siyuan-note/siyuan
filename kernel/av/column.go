@@ -39,6 +39,7 @@ type Column struct {
 	Icon   string     `json:"icon"`   // 列图标
 	Wrap   bool       `json:"wrap"`   // 是否换行
 	Hidden bool       `json:"hidden"` // 是否隐藏
+	Width  string     `json:"width"`  // 列宽度
 
 	// 以下是某些列类型的特有属性
 

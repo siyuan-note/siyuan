@@ -229,6 +229,30 @@ func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewColumnHidden(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColHidden(operation.Data.(bool), operation.ID, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnWrap(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColWrap(operation.Data.(bool), operation.ID, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnWidth(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColWidth(operation.Data.(string), operation.ID, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
 func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
@@ -362,6 +386,57 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 
 	attrView.Rows = append(attrView.Rows[:index], attrView.Rows[index+1:]...)
 	attrView.Rows = append(attrView.Rows[:previousIndex], append([]*av.Row{row}, attrView.Rows[previousIndex:]...)...)
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttributeViewColHidden(hidden bool, columnID, avID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	for _, column := range attrView.Columns {
+		if column.ID == columnID {
+			column.Hidden = hidden
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttributeViewColWrap(wrap bool, columnID, avID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	for _, column := range attrView.Columns {
+		if column.ID == columnID {
+			column.Wrap = wrap
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttributeViewColWidth(width, columnID, avID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	for _, column := range attrView.Columns {
+		if column.ID == columnID {
+			column.Width = width
+			break
+		}
+	}
 
 	err = av.SaveAttributeView(attrView)
 	return

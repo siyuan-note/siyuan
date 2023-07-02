@@ -3,6 +3,7 @@ import {genUUID} from "../util/genID";
 import {moveResize} from "./moveResize";
 /// #endif
 import {isMobile} from "../util/functions";
+import {isCtrl} from "../protyle/util/compatibility";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;
@@ -92,7 +93,7 @@ export class Dialog {
                 event.stopPropagation();
                 return;
             }
-            if (event.key === "Enter" && enterEvent) {
+            if (!event.shiftKey && !isCtrl(event) && event.key === "Enter" && enterEvent) {
                 enterEvent();
                 event.preventDefault();
             }

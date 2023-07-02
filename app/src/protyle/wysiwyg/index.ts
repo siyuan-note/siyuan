@@ -1395,6 +1395,9 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("compositionend", (event: InputEvent) => {
+            if ((event.target as HTMLElement).classList.contains("av__title")) {
+                return;
+            }
             event.stopPropagation();
             isComposition = false;
             const range = getEditorRange(this.element);
@@ -1421,7 +1424,8 @@ export class WYSIWYG {
 
         this.element.addEventListener("input", (event: InputEvent) => {
             const target = event.target as HTMLElement;
-            if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {
+            if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo" ||
+                target.classList.contains("av__title")) {
                 return;
             }
             if (event.inputType === "historyUndo") {

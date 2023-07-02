@@ -38,39 +38,6 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
-
-	// TODO: render value
-	//trees := map[string]*parse.Tree{}
-	//luteEngine := util.NewLute()
-	//for _, r := range ret.Rows {
-	//	blockID := r.Cells[0].Value
-	//
-	//	bt := treenode.GetBlockTree(blockID)
-	//	if nil == bt {
-	//		err = ErrBlockNotFound
-	//		return
-	//	}
-	//
-	//	var tree *parse.Tree
-	//	if tree = trees[bt.RootID]; nil == tree {
-	//		tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-	//		if nil == tree {
-	//			err = ErrTreeNotFound
-	//			return
-	//		}
-	//
-	//		trees[bt.RootID] = tree
-	//	}
-	//
-	//	node := treenode.GetNodeInTree(tree, blockID)
-	//	if nil == node {
-	//		err = ErrBlockNotFound
-	//		return
-	//	}
-	//
-	//	r.Cells[0].RenderValue = getNodeRefText(node)
-	//}
-
 	return
 }
 
@@ -89,8 +56,13 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		blockID = row.Cells[0].Value.Block.ID
-		for _, cell := range row.Cells[1:] {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
+			continue
+		}
+
+		blockID = blockCell.Value.Block.ID
+		for _, cell := range row.Cells {
 			if cell.ID == operation.ID {
 				c = cell
 				break
@@ -341,9 +313,7 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 		if column.ID == columnID {
 			col = column
 			index = i
-		}
-		if column.ID == previousColumnID {
-			previousIndex = i
+			break
 		}
 	}
 	if nil == col {
@@ -351,12 +321,18 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 	}
 
 	attrView.Columns = append(attrView.Columns[:index], attrView.Columns[index+1:]...)
-	attrView.Columns = append(attrView.Columns[:previousIndex], append([]*av.Column{col}, attrView.Columns[previousIndex:]...)...)
+	for i, column := range attrView.Columns {
+		if column.ID == previousColumnID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	attrView.Columns = insertElement(attrView.Columns, previousIndex, col)
 
 	for _, row := range attrView.Rows {
 		cel := row.Cells[index]
 		row.Cells = append(row.Cells[:index], row.Cells[index+1:]...)
-		row.Cells = append(row.Cells[:previousIndex], append([]*av.Cell{cel}, row.Cells[previousIndex:]...)...)
+		row.Cells = insertElement(row.Cells, previousIndex, cel)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -375,9 +351,7 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 		if r.ID == rowID {
 			row = r
 			index = i
-		}
-		if r.ID == previousRowID {
-			previousIndex = i
+			break
 		}
 	}
 	if nil == row {
@@ -385,10 +359,26 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 	}
 
 	attrView.Rows = append(attrView.Rows[:index], attrView.Rows[index+1:]...)
-	attrView.Rows = append(attrView.Rows[:previousIndex], append([]*av.Row{row}, attrView.Rows[previousIndex:]...)...)
+	for i, r := range attrView.Rows {
+		if r.ID == previousRowID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	attrView.Rows = insertElement(attrView.Rows, previousIndex, row)
 
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+// 0 <= index <= len(a)
+func insertElement[T any](rows []T, index int, value T) []T {
+	if len(rows) == index { // nil or empty slice or after last element
+		return append(rows, value)
+	}
+	rows = append(rows[:index+1], rows[index:]...) // index < len(a)
+	rows[index] = value
+	return rows
 }
 
 func setAttributeViewColHidden(hidden bool, columnID, avID string) (err error) {
@@ -449,7 +439,12 @@ func removeAttributeViewBlock(blockID, avID string) (ret *av.AttributeView, err 
 	}
 
 	for i, row := range ret.Rows {
-		if row.Cells[0].Value.Block.ID == blockID {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
+			continue
+		}
+
+		if blockCell.Value.Block.ID == blockID {
 			// 从行中移除，但是不移除属性
 			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
 			break
@@ -485,7 +480,12 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 
 	// 不允许重复添加相同的块到属性视图中
 	for _, row := range ret.Rows {
-		if row.Cells[0].Value.Block.ID == blockID {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
+			continue
+		}
+
+		if blockCell.Value.Block.ID == blockID {
 			return
 		}
 	}

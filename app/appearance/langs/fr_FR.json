@@ -1,4 +1,8 @@
 {
+  "hideCol": "Masquer la colonne",
+  "hideAll": "Masquer tout",
+  "showAll": "Afficher tout",
+  "showCol": "Afficher la colonne",
   "numéro": "Numéro",
   "date": "Date",
   "select": "Sélectionner",

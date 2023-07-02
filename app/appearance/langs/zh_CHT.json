@@ -1,4 +1,8 @@
 {
+  "hideCol": "隱藏列",
+  "hideAll": "隱藏全部",
+  "showAll": "顯示全部",
+  "showCol": "顯示列",
   "number": "數字",
   "date": "日期",
   "select": "單選",

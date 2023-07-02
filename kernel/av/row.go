@@ -26,3 +26,12 @@ type Row struct {
 func NewRow() *Row {
 	return &Row{ID: ast.NewNodeID()}
 }
+
+func (row *Row) GetBlockCell() *Cell {
+	for _, cell := range row.Cells {
+		if ColumnTypeBlock == cell.ValueType {
+			return cell
+		}
+	}
+	return nil
+}

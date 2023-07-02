@@ -341,9 +341,7 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 		if column.ID == columnID {
 			col = column
 			index = i
-		}
-		if column.ID == previousColumnID {
-			previousIndex = i
+			break
 		}
 	}
 	if nil == col {
@@ -351,12 +349,18 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 	}
 
 	attrView.Columns = append(attrView.Columns[:index], attrView.Columns[index+1:]...)
-	attrView.Columns = append(attrView.Columns[:previousIndex], append([]*av.Column{col}, attrView.Columns[previousIndex:]...)...)
+	for i, column := range attrView.Columns {
+		if column.ID == previousColumnID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	attrView.Columns = insertElement(attrView.Columns, previousIndex, col)
 
 	for _, row := range attrView.Rows {
 		cel := row.Cells[index]
 		row.Cells = append(row.Cells[:index], row.Cells[index+1:]...)
-		row.Cells = append(row.Cells[:previousIndex], append([]*av.Cell{cel}, row.Cells[previousIndex:]...)...)
+		row.Cells = insertElement(row.Cells, previousIndex, cel)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -375,9 +379,7 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 		if r.ID == rowID {
 			row = r
 			index = i
-		}
-		if r.ID == previousRowID {
-			previousIndex = i
+			break
 		}
 	}
 	if nil == row {
@@ -385,10 +387,26 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 	}
 
 	attrView.Rows = append(attrView.Rows[:index], attrView.Rows[index+1:]...)
-	attrView.Rows = append(attrView.Rows[:previousIndex], append([]*av.Row{row}, attrView.Rows[previousIndex:]...)...)
+	for i, r := range attrView.Rows {
+		if r.ID == previousRowID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	attrView.Rows = insertElement(attrView.Rows, previousIndex, row)
 
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+// 0 <= index <= len(a)
+func insertElement[T any](rows []T, index int, value T) []T {
+	if len(rows) == index { // nil or empty slice or after last element
+		return append(rows, value)
+	}
+	rows = append(rows[:index+1], rows[index:]...) // index < len(a)
+	rows[index] = value
+	return rows
 }
 
 func setAttributeViewColHidden(hidden bool, columnID, avID string) (err error) {

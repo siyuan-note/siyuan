@@ -1657,8 +1657,8 @@ func subscribeRepoEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	eventbus.Subscribe(eventbus.EvtCloudBeforeFixObjects, func(context map[string]interface{}) {
-		msg := fmt.Sprintf(Conf.Language(210))
+	eventbus.Subscribe(eventbus.EvtCloudBeforeFixObjects, func(context map[string]interface{}, count, total int) {
+		msg := fmt.Sprintf(Conf.Language(210), count, total)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})

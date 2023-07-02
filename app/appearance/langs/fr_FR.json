@@ -1181,7 +1181,7 @@
     "207": "Exécution du remplacement de chemin [%d/%d]",
     "208": "Téléchargement de la liste d'index...",
     "209": "Téléchargement de l'index de vérification...",
-    "210": "Vérification des données cloud...",
+    "210": "Vérification des données cloud %v/%v",
     "211": "Vérification des données cloud terminée"
   }
 }

@@ -1181,7 +1181,7 @@
     "207": "Ejecutando reemplazo de ruta [%d/%d]",
     "208": "Cargando lista de índice...",
     "209": "Cargando índice de verificación...",
-    "210": "Verificando datos en la nube...",
+    "210": "Verificando datos en la nube %v/%v",
     "211": "Verificaci\u00f3n de datos en la nube completada"
   }
 }

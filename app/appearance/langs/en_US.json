@@ -1181,7 +1181,7 @@
     "207": "Executing path replacement [%d/%d]",
     "208": "Uploading index list...",
     "209": "Uploading check index...",
-    "210": "Verifying cloud data...",
+    "210": "Verifying cloud data %v/%v",
     "211": "Cloud data verification complete"
   }
 }

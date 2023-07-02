@@ -723,13 +723,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return;
                 }
                 const rowElement = target.parentElement;
-                const selectIds = []
+                const selectIds = [];
                 if (rowElement.classList.contains("av__row--select")) {
                     rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach((item) => {
-                        selectIds.push(item.getAttribute("data-id"))
-                    })
+                        selectIds.push(item.getAttribute("data-id"));
+                    });
                 } else {
-                    selectIds.push(rowElement.getAttribute("data-id"))
+                    selectIds.push(rowElement.getAttribute("data-id"));
                 }
                 if (selectIds.length === 1) {
                     event.dataTransfer.setDragImage(rowElement, 0, 0);
@@ -823,7 +823,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (!blockElement) {
                         return;
                     }
-                    const avId = blockElement.getAttribute("data-av-id")
+                    const avId = blockElement.getAttribute("data-av-id");
                     transaction(protyle, [{
                         action: "sortAttrViewCol",
                         parentID: avId,
@@ -849,7 +849,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     } else {
                         previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
                     }
-                    const avId = blockElement.getAttribute("data-av-id")
+                    const avId = blockElement.getAttribute("data-av-id");
                     if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "row") {
                         // 行内拖拽
                         const doOperations: IOperation[] = [];
@@ -861,13 +861,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 parentID: avId,
                                 previousID,
                                 id: item,
-                            })
+                            });
                             undoOperations.push({
                                 action: "sortAttrViewRow",
                                 parentID: avId,
                                 previousID: undoPreviousId,
                                 id: item,
-                            })
+                            });
                         });
                         transaction(protyle, doOperations, undoOperations);
                     } else {

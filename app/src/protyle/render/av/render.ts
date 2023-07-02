@@ -129,11 +129,11 @@ ${cell.color ? `color:${cell.color};` : ""}"><span class="av__celltext">${text}<
     }
 };
 
-let lastParentID: string
-let lastElement: HTMLElement
+let lastParentID: string;
+let lastElement: HTMLElement;
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (lastParentID === operation.parentID && protyle.contentElement.isSameNode(lastElement)) {
-        return
+        return;
     }
     lastElement = protyle.contentElement;
     lastParentID = operation.parentID;
@@ -148,12 +148,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
             const cellElement = item.querySelector(`.av__cell[data-id="${operation.id}"]`) as HTMLElement;
             if (!cellElement || cellElement.style.width === operation.data) {
-                return
+                return;
             }
             const index = cellElement.dataset.index;
             item.querySelectorAll(".av__row").forEach(rowItem => {
                 (rowItem.querySelector(`[data-index="${index}"]`) as HTMLElement).style.width = operation.data;
-            })
+            });
         });
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {

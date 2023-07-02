@@ -10,11 +10,11 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
         return;
     }
     window.siyuan.menus.menu.remove();
-    const avId = blockElement.getAttribute("data-av-id")
+    const avId = blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
         const data = response.data.av as IAV;
-        const tabRect = blockElement.querySelector(".layout-tab-bar").getBoundingClientRect()
-        let html
+        const tabRect = blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
+        let html;
         if (type === "config") {
             html = getConfigHTML(data, tabRect);
         } else if (type === "properties") {
@@ -51,8 +51,8 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "showAllCol") {
-                    const doOperations: IOperation[] = []
-                    const undoOperations: IOperation[] = []
+                    const doOperations: IOperation[] = [];
+                    const undoOperations: IOperation[] = [];
                     data.columns.forEach((item: IAVColumn) => {
                         if (item.hidden) {
                             doOperations.push({
@@ -60,16 +60,16 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                                 id: item.id,
                                 parentID: avId,
                                 data: false
-                            })
+                            });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 parentID: avId,
                                 data: true
-                            })
-                            item.hidden = false
+                            });
+                            item.hidden = false;
                         }
-                    })
+                    });
                     if (doOperations.length > 0) {
                         transaction(protyle, doOperations, undoOperations);
                         avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
@@ -77,8 +77,8 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "hideAllCol") {
-                    const doOperations: IOperation[] = []
-                    const undoOperations: IOperation[] = []
+                    const doOperations: IOperation[] = [];
+                    const undoOperations: IOperation[] = [];
                     data.columns.forEach((item: IAVColumn) => {
                         if (!item.hidden && item.type !== "block") {
                             doOperations.push({
@@ -86,16 +86,16 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                                 id: item.id,
                                 parentID: avId,
                                 data: true
-                            })
+                            });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 parentID: avId,
                                 data: false
-                            })
-                            item.hidden = true
+                            });
+                            item.hidden = true;
                         }
-                    })
+                    });
                     if (doOperations.length > 0) {
                         transaction(protyle, doOperations, undoOperations);
                         avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
@@ -141,7 +141,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
             }
         });
     });
-}
+};
 
 const getConfigHTML = (data: IAV, tabRect: DOMRect) => {
     return `<div class="b3-dialog__scrim" data-type="close"></div>
@@ -175,8 +175,8 @@ const getConfigHTML = (data: IAV, tabRect: DOMRect) => {
         <span class="b3-menu__accelerator">50</span>
         <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
     </button>
-</div>`
-}
+</div>`;
+};
 
 const getPropertiesHTML = (data: IAV, tabRect: DOMRect) => {
     let showHTML = "";
@@ -187,13 +187,13 @@ const getPropertiesHTML = (data: IAV, tabRect: DOMRect) => {
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
     <span class="b3-menu__label">${item.name}</span>
     <svg class="b3-menu__action" data-type="showCol" data-id="${item.id}"><use xlink:href="#iconEyeoff"></use></svg>
-</button>`
+</button>`;
         } else {
             showHTML += `<button class="b3-menu__item">
     <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
     <span class="b3-menu__label">${item.name}</span>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol" data-id="${item.id}"><use xlink:href="#iconEye"></use></svg>
-</button>`
+</button>`;
         }
     });
     if (hideHTML) {
@@ -235,5 +235,5 @@ ${hideHTML}`;
         <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.new}</span>
     </button>
-</div>`
-}
+</div>`;
+};

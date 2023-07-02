@@ -99,4 +99,4 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
         }
     });
     return menu;
-}
+};

@@ -217,7 +217,7 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
         y: cellRect.bottom,
         h: cellRect.height
     });
-    const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement
+    const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
         inputElement.select();
         inputElement.focus();

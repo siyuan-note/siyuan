@@ -17,7 +17,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const addElement = hasClosestByAttribute(event.target, "data-type", "av-header-add");
     if (addElement) {
         const addMenu = addCol(protyle, blockElement);
-        const addRect = addElement.getBoundingClientRect()
+        const addRect = addElement.getBoundingClientRect();
         addMenu.open({
             x: addRect.left,
             y: addRect.bottom,

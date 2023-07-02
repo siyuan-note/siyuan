@@ -356,12 +356,12 @@ export class WYSIWYG {
                 const dragElement = target.parentElement;
                 const oldWidth = dragElement.clientWidth;
                 const dragIndex = dragElement.getAttribute("data-index");
-                let newWidth: string
+                let newWidth: string;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     newWidth = oldWidth + (moveEvent.clientX - event.clientX) + "px";
                     dragElement.parentElement.parentElement.querySelectorAll(".av__row").forEach(item => {
                         (item.querySelector(`[data-index="${dragIndex}"]`) as HTMLElement).style.width = newWidth;
-                    })
+                    });
                 };
 
                 documentSelf.onmouseup = () => {

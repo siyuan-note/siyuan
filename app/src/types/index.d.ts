@@ -26,6 +26,9 @@ type TOperation =
     | "updateAttrViewCol"
     | "sortAttrViewRow"
     | "sortAttrViewCol"
+    | "setAttrViewColHidden"
+    | "setAttrViewColWrap"
+    | "setAttrViewColWidth"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" |

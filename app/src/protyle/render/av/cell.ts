@@ -149,7 +149,13 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
             icon: "iconEyeoff",
             label: window.siyuan.languages.hide,
             click() {
-
+                transaction(protyle, [{
+                    action:"setAttrViewColHidden",
+                    data: true
+                }], [{
+                    action:"setAttrViewColHidden",
+                    data: false
+                }]);
             }
         });
         menu.addItem({

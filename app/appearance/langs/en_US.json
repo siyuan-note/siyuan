@@ -1178,6 +1178,10 @@
     "204": "The doc in the user guide does not support sharing to the community",
     "205": "The plugin is not supported in the current environment",
     "206": "Executing content replacement [%d/%d]",
-    "207": "Executing path replacement [%d/%d]"
+    "207": "Executing path replacement [%d/%d]",
+    "208": "Uploading index list...",
+    "209": "Uploading check index...",
+    "210": "Verifying cloud data...",
+    "211": "Cloud data verification complete"
   }
 }

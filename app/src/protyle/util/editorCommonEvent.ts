@@ -712,9 +712,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
                     protyle.wysiwyg.element.innerHTML);
                 return;
-            } else if (target.classList.contains("av__cell")) {
-                window.siyuan.dragElement = target;
-                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.getAttribute("data-id")]}`,
+            } else if (target.classList.contains("av__cellheader")) {
+                window.siyuan.dragElement = target.parentElement;
+                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.parentElement.getAttribute("data-id")]}`,
                     target.innerHTML);
                 return;
             } else if (target.classList.contains("av__gutters")) {

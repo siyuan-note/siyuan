@@ -68,7 +68,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const headerMoreElement = hasClosestByAttribute(event.target, "data-type","av-header-more");
+    const headerMoreElement = hasClosestByAttribute(event.target, "data-type", "av-header-more");
     if (headerMoreElement) {
         openMenuPanel(protyle, blockElement, "properties");
         event.preventDefault();
@@ -76,22 +76,25 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const moreElement = hasClosestByAttribute(event.target, "data-type","av-more");
+    const moreElement = hasClosestByAttribute(event.target, "data-type", "av-more");
     if (moreElement) {
         openMenuPanel(protyle, blockElement, "config");
         event.preventDefault();
         event.stopPropagation();
         return true;
     }
+    const cellHeaderElement = hasClosestByClassName(event.target, "av__cellheader");
+    if (cellHeaderElement) {
+        showHeaderCellMenu(protyle, blockElement, cellHeaderElement.parentElement);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
     const cellElement = hasClosestByClassName(event.target, "av__cell");
-    if (cellElement) {
-        if (cellElement.parentElement.classList.contains("av__row--header")) {
-            showHeaderCellMenu(protyle, blockElement, cellElement);
-            event.preventDefault();
-            event.stopPropagation();
-        } else {
-            popTextCell(protyle, cellElement);
-        }
+    if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
+        popTextCell(protyle, cellElement);
+        event.preventDefault();
+        event.stopPropagation();
         return true;
     }
     return false;

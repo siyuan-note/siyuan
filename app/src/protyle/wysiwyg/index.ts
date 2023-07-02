@@ -333,7 +333,9 @@ export class WYSIWYG {
                 hideElements(["select"], protyle);
             }
             const target = event.target as HTMLElement;
-            if (hasClosestByClassName(target, "protyle-action") || hasClosestByClassName(target, "av__gutters")) {
+            if (hasClosestByClassName(target, "protyle-action") ||
+                hasClosestByClassName(target, "av__gutters") ||
+                hasClosestByClassName(target, "av__cellheader")) {
                 return;
             }
             const documentSelf = document;
@@ -343,6 +345,47 @@ export class WYSIWYG {
             const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight)) - 1;
             const mostBottom = rect.bottom;
             const y = event.clientY;
+
+            // av col resize
+            if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
+                const nodeElement = hasClosestBlock(target);
+                if (!nodeElement) {
+                    return;
+                }
+                const avId = nodeElement.getAttribute("data-av-id");
+                const dragElement = target.parentElement;
+                const oldWidth = dragElement.clientWidth;
+                const dragIndex = dragElement.getAttribute("data-index");
+                let newWidth: string
+                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    newWidth = oldWidth + (moveEvent.clientX - event.clientX) + "px";
+                    dragElement.parentElement.parentElement.querySelectorAll(".av__row").forEach(item => {
+                        (item.querySelector(`[data-index="${dragIndex}"]`) as HTMLElement).style.width = newWidth;
+                    })
+                };
+
+                documentSelf.onmouseup = () => {
+                    documentSelf.onmousemove = null;
+                    documentSelf.onmouseup = null;
+                    documentSelf.ondragstart = null;
+                    documentSelf.onselectstart = null;
+                    documentSelf.onselect = null;
+                    transaction(protyle, [{
+                        action: "setAttrViewColWidth",
+                        id: dragElement.getAttribute("data-id"),
+                        parentID: avId,
+                        data: newWidth
+                    }], [{
+                        action: "setAttrViewColWidth",
+                        id: dragElement.getAttribute("data-id"),
+                        parentID: avId,
+                        data: oldWidth + "px"
+                    }]);
+                };
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             // 图片、iframe、video 缩放
             if (!protyle.disabled && target.classList.contains("protyle-action__drag")) {
                 const nodeElement = hasClosestBlock(target);

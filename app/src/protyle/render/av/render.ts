@@ -28,11 +28,14 @@ export const avRender = (element: Element, cb?: () => void) => {
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div draggable="true" class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}"  
-style="width: ${column.width || 200}px;
+                    tableHTML += `<div class="av__cell" data-index="${index}" data-id="${column.id}" data-dtype="${column.type}"  
+style="width: ${column.width || "200px"};
 ${column.wrap ? "" : "white-space: nowrap;"}">
-    <svg><use xlink:href="#${column.icon || getColIconByType(column.type)}"></use></svg>
-    <span>${column.name}</span>
+    <div draggable="true" class="av__cellheader">
+        <svg><use xlink:href="#${column.icon || getColIconByType(column.type)}"></use></svg>
+        <span class="av__celltext">${column.name}</span>
+    </div>
+    <div class="av__widthdrag"></div>
 </div>`;
                     index++;
                 });
@@ -70,10 +73,10 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-index="${index}" 
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  
-style="width: ${data.columns[index].width || 200}px;
-${data.columns[index].wrap ? "" : "white-space: nowrap;"}
+style="width: ${data.columns[index].width || "200px"};
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
+${data.columns[index].wrap ? "" : "white-space: nowrap;"}
+${cell.color ? `color:${cell.color};` : ""}"><span class="av__celltext">${text}</span></div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });
@@ -140,6 +143,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             avRender(item, () => {
                 showHeaderCellMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
             });
+        });
+    } else if (operation.action === "setAttrViewColWidth") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
+            const cellElement = item.querySelector(`.av__cell[data-id="${operation.id}"]`) as HTMLElement;
+            if (!cellElement || cellElement.style.width === operation.data) {
+                return
+            }
+            const index = cellElement.dataset.index;
+            item.querySelectorAll(".av__row").forEach(rowItem => {
+                (rowItem.querySelector(`[data-index="${index}"]`) as HTMLElement).style.width = operation.data;
+            })
         });
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {

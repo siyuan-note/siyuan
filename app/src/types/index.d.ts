@@ -823,6 +823,12 @@ interface IBazaarItem {
     preferredFunding: string
 }
 
+interface IAV {
+    columns: IAVColumn[],
+    filters: [],
+    sorts: [],
+}
+
 interface IAVColumn {
     width: number,
     icon: string,

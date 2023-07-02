@@ -1,7 +1,7 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 
-export const addCol = (protyle:IProtyle, blockElement:HTMLElement, addElement:HTMLElement) => {
+export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
     const menu = new Menu("av-header-add");
     menu.addItem({
         icon: "iconAlignLeft",
@@ -98,10 +98,5 @@ export const addCol = (protyle:IProtyle, blockElement:HTMLElement, addElement:HT
             }]);
         }
     });
-    const addRect = addElement.getBoundingClientRect();
-    menu.open({
-        x: addRect.left,
-        y: addRect.bottom,
-        h: addRect.height
-    });
+    return menu;
 }

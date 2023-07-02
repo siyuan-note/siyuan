@@ -6,6 +6,14 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconAlignLeft";
         case "block":
             return "iconParagraph";
+        case "number":
+            return "iconNumber";
+        case "select":
+            return "iconListItem";
+        case "mSelect":
+            return "iconList";
+        case "date":
+            return "iconCalendar";
     }
 };
 

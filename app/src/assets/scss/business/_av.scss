@@ -114,8 +114,16 @@
     z-index: 504;
     position: relative;
 
+    .b3-menu {
+      width: 300px;
+    }
+
     .b3-menu__item:not([data-type="title"]):hover {
       background-color: var(--b3-list-hover);
+
+      .b3-menu__action {
+        opacity: 1;
+      }
     }
   }
 

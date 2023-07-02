@@ -12,6 +12,7 @@
     outline: none;
     font-size: 18px;
     font-weight: bold;
+
     &:empty::after {
       color: var(--b3-theme-on-surface);
       content: attr(data-tip);
@@ -106,6 +107,15 @@
 
     &:hover svg {
       opacity: 1;
+    }
+  }
+
+  &__panel {
+    z-index: 504;
+    position: relative;
+
+    .b3-menu__item:not([data-type="title"]):hover {
+      background-color: var(--b3-list-hover);
     }
   }
 

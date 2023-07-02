@@ -49,6 +49,9 @@ export const avRender = (element: Element, cb?: () => void) => {
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;
                     row.cells.forEach((cell, index) => {
+                        if (data.columns[index].hidden) {
+                            return;
+                        }
                         let text: string;
                         if (cell.valueType === "text") {
                             text = cell.value?.text.content || "";
@@ -78,8 +81,21 @@ export const avRender = (element: Element, cb?: () => void) => {
                 <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
                 <span class="item__text">Table</span>
             </div>
+            <div class="fn__flex-1"></div>
+            <span data-type="av-filter" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.filter}">
+                <svg><use xlink:href="#iconFilter"></use></svg>
+            </span>
+            <div class="fn__space"></div>
+            <span data-type="av-sort" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.sort}">
+                <svg><use xlink:href="#iconSort"></use></svg>
+            </span>
+            <div class="fn__space"></div>
+            <span data-type="av-more" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}">
+                <svg><use xlink:href="#iconMore"></use></svg>
+            </span>
+            <div class="fn__space"></div>
         </div>
-        <div contenteditable="true" class="av__title" data-tip="${window.siyuan.languages.title}">${data.title||""}</div>
+        <div contenteditable="true" class="av__title" data-tip="${window.siyuan.languages.title}">${data.title || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">

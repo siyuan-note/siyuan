@@ -6,6 +6,8 @@ import {copySubMenu} from "../../../menus/commonMenuItem";
 import {popTextCell, showHeaderCellMenu} from "./cell";
 import {getColIconByType, updateHeader} from "./col";
 import {emitOpenMenu} from "../../../plugin/EventBus";
+import {addCol} from "./addCol";
+import {openMenuPanel} from "./openMenuPanel";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -14,108 +16,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
     const addElement = hasClosestByAttribute(event.target, "data-type", "av-header-add");
     if (addElement) {
-        const menu = new Menu("av-header-add");
-        menu.addItem({
-            icon: "iconAlignLeft",
-            label: window.siyuan.languages.text,
-            click() {
-                const id = Lute.NewNodeID();
-                const type = "text";
-                transaction(protyle, [{
-                    action: "addAttrViewCol",
-                    name: "Text",
-                    parentID: blockElement.getAttribute("data-av-id"),
-                    type,
-                    id
-                }], [{
-                    action: "removeAttrViewCol",
-                    id,
-                    parentID: blockElement.getAttribute("data-av-id"),
-                }]);
-            }
-        });
-        menu.addItem({
-            icon: "iconNumber",
-            label: window.siyuan.languages.number,
-            click() {
-                const id = Lute.NewNodeID();
-                const type = "text";
-                transaction(protyle, [{
-                    action: "addAttrViewCol",
-                    name: "Text",
-                    parentID: blockElement.getAttribute("data-av-id"),
-                    type,
-                    id
-                }], [{
-                    action: "removeAttrViewCol",
-                    id,
-                    parentID: blockElement.getAttribute("data-av-id"),
-                }]);
-            }
-        });
-        menu.addItem({
-            icon: "iconListItem",
-            label: window.siyuan.languages.select,
-            click() {
-                const id = Lute.NewNodeID();
-                const type = "text";
-                transaction(protyle, [{
-                    action: "addAttrViewCol",
-                    name: "Text",
-                    parentID: blockElement.getAttribute("data-av-id"),
-                    type,
-                    id
-                }], [{
-                    action: "removeAttrViewCol",
-                    id,
-                    parentID: blockElement.getAttribute("data-av-id"),
-                }]);
-            }
-        });
-        menu.addItem({
-            icon: "iconList",
-            label: window.siyuan.languages.multiSelect,
-            click() {
-                const id = Lute.NewNodeID();
-                const type = "text";
-                transaction(protyle, [{
-                    action: "addAttrViewCol",
-                    name: "Text",
-                    parentID: blockElement.getAttribute("data-av-id"),
-                    type,
-                    id
-                }], [{
-                    action: "removeAttrViewCol",
-                    id,
-                    parentID: blockElement.getAttribute("data-av-id"),
-                }]);
-            }
-        });
-        menu.addItem({
-            icon: "iconCalendar",
-            label: window.siyuan.languages.date,
-            click() {
-                const id = Lute.NewNodeID();
-                const type = "text";
-                transaction(protyle, [{
-                    action: "addAttrViewCol",
-                    name: "Text",
-                    parentID: blockElement.getAttribute("data-av-id"),
-                    type,
-                    id
-                }], [{
-                    action: "removeAttrViewCol",
-                    id,
-                    parentID: blockElement.getAttribute("data-av-id"),
-                }]);
-            }
-        });
-        const addRect = addElement.getBoundingClientRect();
-        menu.open({
-            x: addRect.left,
-            y: addRect.bottom,
-            h: addRect.height
-        });
+        addCol(protyle, blockElement, addElement);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -161,6 +62,21 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const headerMoreElement = hasClosestByAttribute(event.target, "data-type","av-header-more");
+    if (headerMoreElement) {
+        openMenuPanel(protyle, blockElement, "properties");
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const moreElement = hasClosestByAttribute(event.target, "data-type","av-more");
+    if (moreElement) {
+        openMenuPanel(protyle, blockElement, "config");
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement) {
         if (cellElement.parentElement.classList.contains("av__row--header")) {

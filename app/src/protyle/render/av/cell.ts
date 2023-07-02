@@ -89,6 +89,8 @@ const removeCol = (cellElement: HTMLElement) => {
 
 export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
+    const colId = cellElement.getAttribute("data-id");
+    const avId = blockElement.getAttribute("data-av-id");
     const menu = new Menu("av-header-cell", () => {
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === cellElement.textContent.trim()) {
@@ -96,14 +98,14 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
         }
         transaction(protyle, [{
             action: "updateAttrViewCol",
-            id: cellElement.getAttribute("data-id"),
-            parentID: blockElement.getAttribute("data-av-id"),
+            id: colId,
+            parentID: avId,
             name: newValue,
             type,
         }], [{
             action: "updateAttrViewCol",
-            id: cellElement.getAttribute("data-id"),
-            parentID: blockElement.getAttribute("data-av-id"),
+            id: colId,
+            parentID: avId,
             name: cellElement.textContent.trim(),
             type,
         }]);
@@ -150,10 +152,14 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
             label: window.siyuan.languages.hide,
             click() {
                 transaction(protyle, [{
-                    action:"setAttrViewColHidden",
+                    action: "setAttrViewColHidden",
+                    id: colId,
+                    parentID: avId,
                     data: true
                 }], [{
-                    action:"setAttrViewColHidden",
+                    action: "setAttrViewColHidden",
+                    id: colId,
+                    parentID: avId,
                     data: false
                 }]);
             }
@@ -169,17 +175,16 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             click() {
-                const id = cellElement.getAttribute("data-id");
                 transaction(protyle, [{
                     action: "removeAttrViewCol",
-                    id,
-                    parentID: blockElement.getAttribute("data-av-id"),
+                    id: colId,
+                    parentID: avId,
                 }], [{
                     action: "addAttrViewCol",
                     name: cellElement.textContent.trim(),
-                    parentID: blockElement.getAttribute("data-av-id"),
+                    parentID: avId,
                     type: type,
-                    id
+                    id: colId
                 }]);
                 removeCol(cellElement);
             }
@@ -199,5 +204,9 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
         y: cellRect.bottom,
         h: cellRect.height
     });
-    (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement)?.select();
+    const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement
+    if (inputElement) {
+        inputElement.select();
+        inputElement.focus();
+    }
 };

@@ -116,9 +116,17 @@
 
     .b3-menu {
       width: 300px;
+
+      .block__icon {
+        line-height: 20px;
+        padding: 0 4px;
+        font-size: 12px;
+        align-self: center;
+        opacity: 1;
+      }
     }
 
-    .b3-menu__item:not([data-type="title"]):hover {
+    .b3-menu__item:not([data-type="nobg"]):hover {
       background-color: var(--b3-list-hover);
 
       .b3-menu__action {

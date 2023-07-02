@@ -51,12 +51,55 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "showAllCol") {
-// showAllCol(data);
-                    avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                    const doOperations: IOperation[] = []
+                    const undoOperations: IOperation[] = []
+                    data.columns.forEach((item: IAVColumn) => {
+                        if (item.hidden) {
+                            doOperations.push({
+                                action: "setAttrViewColHidden",
+                                id: item.id,
+                                parentID: avId,
+                                data: false
+                            })
+                            undoOperations.push({
+                                action: "setAttrViewColHidden",
+                                id: item.id,
+                                parentID: avId,
+                                data: true
+                            })
+                            item.hidden = false
+                        }
+                    })
+                    if (doOperations.length > 0) {
+                        transaction(protyle, doOperations, undoOperations);
+                        avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                    }
                     event.stopPropagation();
                     break;
                 } else if (type === "hideAllCol") {
-
+                    const doOperations: IOperation[] = []
+                    const undoOperations: IOperation[] = []
+                    data.columns.forEach((item: IAVColumn) => {
+                        if (!item.hidden && item.type !== "block") {
+                            doOperations.push({
+                                action: "setAttrViewColHidden",
+                                id: item.id,
+                                parentID: avId,
+                                data: true
+                            })
+                            undoOperations.push({
+                                action: "setAttrViewColHidden",
+                                id: item.id,
+                                parentID: avId,
+                                data: false
+                            })
+                            item.hidden = true
+                        }
+                    })
+                    if (doOperations.length > 0) {
+                        transaction(protyle, doOperations, undoOperations);
+                        avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                    }
                     event.stopPropagation();
                     break;
                 } else if (type === "hideCol") {
@@ -103,7 +146,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
 const getConfigHTML = (data: IAV, tabRect: DOMRect) => {
     return `<div class="b3-dialog__scrim" data-type="close"></div>
  <div class="b3-menu" style="right:${window.innerWidth - tabRect.right}px;top:${tabRect.bottom}px">
-    <button class="b3-menu__item" data-type="title">
+    <button class="b3-menu__item" data-type="nobg">
         <span class="b3-menu__label">${window.siyuan.languages.config}</span>
         <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
     </button>
@@ -155,10 +198,15 @@ const getPropertiesHTML = (data: IAV, tabRect: DOMRect) => {
     });
     if (hideHTML) {
         hideHTML = `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="hideAllCol">
-    <svg class="b3-menu__icon"><use xlink:href="#iconEyeoff"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.hideAll}</span>
-    <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => item.hidden).length}</span>
+<button class="b3-menu__item" data-type="nobg">
+    <span class="b3-menu__label">
+        ${window.siyuan.languages.hideCol} 
+    </span>
+    <span class="block__icon" data-type="showAllCol">
+        ${window.siyuan.languages.showAll}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEye"></use></svg>
+    </span>
 </button>
 ${hideHTML}`;
     }
@@ -170,10 +218,15 @@ ${hideHTML}`;
         <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
     </button>
     <button class="b3-menu__separator"></button>
-    <button class="b3-menu__item" data-type="showAllCol">
-        <svg class="b3-menu__icon"><use xlink:href="#iconEye"></use></svg>
-        <span class="b3-menu__label">${window.siyuan.languages.showAll}</span>
-        <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => !item.hidden).length}</span>
+    <button class="b3-menu__item" data-type="nobg">
+        <span class="b3-menu__label">
+            ${window.siyuan.languages.showCol} 
+        </span>
+        <span class="block__icon" data-type="hideAllCol">
+            ${window.siyuan.languages.hideAll}
+            <span class="fn__space"></span>
+            <svg><use xlink:href="#iconEyeoff"></use></svg>
+        </span>
     </button>
     ${showHTML}
     ${hideHTML}

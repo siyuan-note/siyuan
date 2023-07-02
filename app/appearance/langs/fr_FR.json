@@ -1178,6 +1178,10 @@
     "204": "La documentation du guide de l'utilisateur ne prend pas en charge le partage avec la communauté",
     "205": "Le plugin n'est pas pris en charge dans l'environnement actuel",
     "206": "Exécution du remplacement de contenu [%d/%d]",
-    "207": "Exécution du remplacement de chemin [%d/%d]"
+    "207": "Exécution du remplacement de chemin [%d/%d]",
+    "208": "Téléchargement de la liste d'index...",
+    "209": "Téléchargement de l'index de vérification...",
+    "210": "Vérification des données cloud %v/%v",
+    "211": "Vérification des données cloud terminée"
   }
 }

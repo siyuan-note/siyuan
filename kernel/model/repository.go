@@ -1647,6 +1647,26 @@ func subscribeRepoEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
+	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadIndexes, func(context map[string]interface{}) {
+		msg := fmt.Sprintf(Conf.Language(208))
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadCheckIndex, func(context map[string]interface{}) {
+		msg := fmt.Sprintf(Conf.Language(209))
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtCloudBeforeFixObjects, func(context map[string]interface{}, count, total int) {
+		msg := fmt.Sprintf(Conf.Language(210), count, total)
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
+	eventbus.Subscribe(eventbus.EvtCloudAfterFixObjects, func(context map[string]interface{}) {
+		msg := fmt.Sprintf(Conf.Language(211))
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
 }
 
 func buildCloudConf() (ret *cloud.Conf, err error) {

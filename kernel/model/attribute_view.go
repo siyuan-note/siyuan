@@ -38,39 +38,6 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
-
-	// TODO: render value
-	//trees := map[string]*parse.Tree{}
-	//luteEngine := util.NewLute()
-	//for _, r := range ret.Rows {
-	//	blockID := r.Cells[0].Value
-	//
-	//	bt := treenode.GetBlockTree(blockID)
-	//	if nil == bt {
-	//		err = ErrBlockNotFound
-	//		return
-	//	}
-	//
-	//	var tree *parse.Tree
-	//	if tree = trees[bt.RootID]; nil == tree {
-	//		tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-	//		if nil == tree {
-	//			err = ErrTreeNotFound
-	//			return
-	//		}
-	//
-	//		trees[bt.RootID] = tree
-	//	}
-	//
-	//	node := treenode.GetNodeInTree(tree, blockID)
-	//	if nil == node {
-	//		err = ErrBlockNotFound
-	//		return
-	//	}
-	//
-	//	r.Cells[0].RenderValue = getNodeRefText(node)
-	//}
-
 	return
 }
 
@@ -89,8 +56,13 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		blockID = row.Cells[0].Value.Block.ID
-		for _, cell := range row.Cells[1:] {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
+			continue
+		}
+
+		blockID = blockCell.Value.Block.ID
+		for _, cell := range row.Cells {
 			if cell.ID == operation.ID {
 				c = cell
 				break
@@ -467,7 +439,12 @@ func removeAttributeViewBlock(blockID, avID string) (ret *av.AttributeView, err 
 	}
 
 	for i, row := range ret.Rows {
-		if row.Cells[0].Value.Block.ID == blockID {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
+			continue
+		}
+
+		if blockCell.Value.Block.ID == blockID {
 			// 从行中移除，但是不移除属性
 			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
 			break
@@ -503,7 +480,12 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 
 	// 不允许重复添加相同的块到属性视图中
 	for _, row := range ret.Rows {
-		if row.Cells[0].Value.Block.ID == blockID {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
+			continue
+		}
+
+		if blockCell.Value.Block.ID == blockID {
 			return
 		}
 	}

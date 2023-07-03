@@ -236,12 +236,13 @@ const getSortsHTML = (data: IAV) => {
     data.sorts.forEach((item: IAVSort) => {
         html += `<button class="b3-menu__item">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
-    <select>
+    <select class="b3-select" style="width: 106px;margin: 4px 0">
         ${genSortItem(item.column)}
     </select>
-    <select>
-        <option value="ASC" ${item.order === "ASC" ? "checked" : ""}>${window.siyuan.languages.fileNameASC}</option>
-        <option value="DESC" ${item.order === "DESC" ? "checked" : ""}>${window.siyuan.languages.fileNameDESC}</option>
+    <span class="fn__space"></span>
+    <select class="b3-select" style="width: 106px;margin: 4px 0">
+        <option value="ASC" ${item.order === "ASC" ? "checked" : ""}>${window.siyuan.languages.fileNameNatASC}</option>
+        <option value="DESC" ${item.order === "DESC" ? "checked" : ""}>${window.siyuan.languages.fileNameNatDESC}</option>
     </select>
     <svg class="b3-menu__action" data-type="removeSort"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;

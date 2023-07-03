@@ -247,6 +247,7 @@
     line-height: 14px;
     margin-right: 8px;
     color: var(--b3-theme-on-surface);
+    flex-shrink: 0;
 
     &--arrow {
       margin: 0 0 0 8px;

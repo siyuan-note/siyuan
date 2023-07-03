@@ -219,6 +219,14 @@ const getSortsHTML = (data: IAV, tabRect: DOMRect) => {
     });
     return `<div class="b3-dialog__scrim" data-type="close"></div>
  <div class="b3-menu" style="right:${window.innerWidth - tabRect.right}px;top:${tabRect.bottom}px">
+    <button class="b3-menu__item" data-type="nobg">
+        <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+        </span>
+        <span class="b3-menu__label ft__center">${window.siyuan.languages.sort}</span>
+        <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
+    </button>
+    <button class="b3-menu__separator"></button>
     ${html}
     <button class="b3-menu__item" data-type="addSort">
         <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>

@@ -156,13 +156,17 @@
         align-self: center;
         opacity: 1;
       }
-    }
 
-    .b3-menu__item:not([data-type="nobg"]):hover {
-      background-color: var(--b3-list-hover);
+      &__label {
+        overflow: hidden;
+      }
 
-      .b3-menu__action {
-        opacity: 1;
+      &__item:not([data-type="nobg"]):hover {
+        background-color: var(--b3-list-hover);
+
+        .b3-menu__action {
+          opacity: 1;
+        }
       }
     }
   }

@@ -231,6 +231,7 @@ const getSortsHTML = (data: IAV) => {
         data.columns.forEach((item) => {
             sortHTML += `<option value="${item.id}" ${item.id === id ? "checked" : ""}>${item.name}</option>`
         })
+        return sortHTML;
     }
     data.sorts.forEach((item: IAVSort) => {
         html += `<button class="b3-menu__item">

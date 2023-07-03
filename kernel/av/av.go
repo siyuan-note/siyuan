@@ -39,10 +39,9 @@ type AttributeView struct {
 	Columns []*Column `json:"columns"` // 表格列名
 	Rows    []*Row    `json:"rows"`    // 表格行记录
 
-	Type        AttributeViewType      `json:"type"`        // 属性视图类型
-	Projections []string               `json:"projections"` // 显示的列名
-	Filters     []*AttributeViewFilter `json:"filters"`     // 过滤规则
-	Sorts       []*AttributeViewSort   `json:"sorts"`       // 排序规则
+	Type    AttributeViewType      `json:"type"`    // 属性视图类型
+	Filters []*AttributeViewFilter `json:"filters"` // 过滤规则
+	Sorts   []*AttributeViewSort   `json:"sorts"`   // 排序规则
 }
 
 // AttributeViewType 描述了属性视图的类型。
@@ -54,15 +53,14 @@ const (
 
 func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
-		Spec:        0,
-		ID:          id,
-		Name:        "Table",
-		Columns:     []*Column{{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
-		Rows:        []*Row{},
-		Type:        AttributeViewTypeTable,
-		Projections: []string{},
-		Filters:     []*AttributeViewFilter{},
-		Sorts:       []*AttributeViewSort{},
+		Spec:    0,
+		ID:      id,
+		Name:    "Table",
+		Columns: []*Column{{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
+		Rows:    []*Row{},
+		Type:    AttributeViewTypeTable,
+		Filters: []*AttributeViewFilter{},
+		Sorts:   []*AttributeViewSort{},
 	}
 }
 

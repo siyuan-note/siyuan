@@ -3,6 +3,7 @@ import {fetchPost} from "../../../util/fetch";
 import {addCol} from "./addCol";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
+import {Menu} from "../../../plugin/Menu";
 
 export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" | "sorts" = "config") => {
     let avPanelElement = document.querySelector(".av__panel");
@@ -57,11 +58,26 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSorts") {
-                    // TODO
+                    transaction(protyle, [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            sorts: []
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            sorts: data.sorts
+                        }
+                    }]);
+                    data.sorts = [];
+                    menuElement.innerHTML = getSortsHTML(data);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "addSort") {
-                    // TODO
+                    addSort({data, rect: target.getBoundingClientRect(), menuElement, tabRect, avId, protyle});
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSort") {
@@ -306,3 +322,56 @@ ${hideHTML}
     <span class="b3-menu__label">${window.siyuan.languages.new}</span>
 </button>`;
 };
+
+const addSort = (options: {
+    data: IAV,
+    rect: DOMRect,
+    menuElement: HTMLElement,
+    tabRect: DOMRect,
+    avId: string,
+    protyle: IProtyle
+}) => {
+    const menu = new Menu("av-add-sort");
+    options.data.columns.forEach((column) => {
+        let hasSort = false;
+        options.data.sorts.find((sort) => {
+            if (sort.column === column.id) {
+                hasSort = true;
+                return true;
+            }
+        });
+        if (!hasSort) {
+            menu.addItem({
+                label: column.name,
+                icon: getColIconByType(column.type),
+                click: () => {
+                    const oldSorts = Object.assign([], options.data.sorts);
+                    options.data.sorts.push({
+                        column: column.id,
+                        order: "ASC",
+                    });
+                    transaction(options.protyle, [{
+                        action: "setAttrView",
+                        id: options.avId,
+                        data: {
+                            sorts: options.data.sorts
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: options.avId,
+                        data: {
+                            sorts: oldSorts
+                        }
+                    }]);
+                    options.menuElement.innerHTML = getSortsHTML(options.data);
+                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
+                }
+            });
+        }
+    });
+    menu.open({
+        x: options.rect.left,
+        y: options.rect.bottom,
+        h: options.rect.height,
+    })
+}

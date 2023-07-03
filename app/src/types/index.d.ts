@@ -29,6 +29,7 @@ type TOperation =
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"
     | "setAttrViewColWidth"
+    | "setAttrView"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" |
@@ -827,6 +828,9 @@ interface IAV {
     columns: IAVColumn[],
     filters: [],
     sorts: IAVSort[],
+    name: string,
+    type: "table"
+    rows: IAVRow[],
 }
 
 interface IAVSort {

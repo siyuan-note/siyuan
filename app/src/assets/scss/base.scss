@@ -53,6 +53,9 @@ ctrl+p 搜索: 202
 .block__popover: 205
 .block__popover--top: 206
 
+// 需小于 .b3-menu
+.av__panel: 209
+
 // 需大于 .block__popover
 .b3-menu: 210
 
@@ -78,8 +81,6 @@ progressLoading: 400
 #windowControls: 502
 
 .b3-snackbar: 503
-
-.av__panel: 504
 */
 
 html {

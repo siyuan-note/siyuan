@@ -20,7 +20,7 @@ export const avRender = (element: Element, cb?: () => void) => {
                 return;
             }
             fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id")}, (response) => {
-                const data = response.data.av;
+                const data = response.data.av as IAV;
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 42px"><use xlink:href="#iconUncheck"></use></svg></div>';
                 let index = 0;
@@ -89,7 +89,7 @@ ${cell.color ? `color:${cell.color};` : ""}"><span class="av__celltext">${text}<
         <div class="layout-tab-bar fn__flex">
             <div class="item item--focus">
                 <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
-                <span class="item__text">Table</span>
+                <span class="item__text">${data.type}</span>
             </div>
             <div class="fn__flex-1"></div>
             <span data-type="av-filter" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.filter}">
@@ -105,7 +105,7 @@ ${cell.color ? `color:${cell.color};` : ""}"><span class="av__celltext">${text}<
             </span>
             <div class="fn__space"></div>
         </div>
-        <div contenteditable="true" class="av__title" data-tip="${window.siyuan.languages.title}">${data.title || ""}</div>
+        <div contenteditable="true" class="av__title" data-tip="${window.siyuan.languages.title}">${data.name || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">

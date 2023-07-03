@@ -24,10 +24,12 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
@@ -225,6 +227,14 @@ func (tx *Transaction) doSetAttrViewColumnWidth(operation *Operation) (ret *TxEr
 	return
 }
 
+func (tx *Transaction) doSetAttrView(operation *Operation) (ret *TxErr) {
+	err := setAttributeView(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
 func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
@@ -327,12 +337,12 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 			break
 		}
 	}
-	attrView.Columns = insertElement(attrView.Columns, previousIndex, col)
+	attrView.Columns = util.InsertElement(attrView.Columns, previousIndex, col)
 
 	for _, row := range attrView.Rows {
 		cel := row.Cells[index]
 		row.Cells = append(row.Cells[:index], row.Cells[index+1:]...)
-		row.Cells = insertElement(row.Cells, previousIndex, cel)
+		row.Cells = util.InsertElement(row.Cells, previousIndex, cel)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -365,20 +375,10 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 			break
 		}
 	}
-	attrView.Rows = insertElement(attrView.Rows, previousIndex, row)
+	attrView.Rows = util.InsertElement(attrView.Rows, previousIndex, row)
 
 	err = av.SaveAttributeView(attrView)
 	return
-}
-
-// 0 <= index <= len(a)
-func insertElement[T any](rows []T, index int, value T) []T {
-	if len(rows) == index { // nil or empty slice or after last element
-		return append(rows, value)
-	}
-	rows = append(rows[:index+1], rows[index:]...) // index < len(a)
-	rows[index] = value
-	return rows
 }
 
 func setAttributeViewColHidden(hidden bool, columnID, avID string) (err error) {
@@ -426,6 +426,31 @@ func setAttributeViewColWidth(width, columnID, avID string) (err error) {
 			column.Width = width
 			break
 		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttributeView(operation *Operation) (err error) {
+	avID := operation.ID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		return
+	}
+
+	newAttrView := &av.AttributeView{}
+	if err = gulu.JSON.UnmarshalJSON(data, newAttrView); nil != err {
+		return
+	}
+
+	if err = copier.Copy(attrView, newAttrView); nil != err {
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)

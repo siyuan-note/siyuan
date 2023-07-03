@@ -24,6 +24,18 @@ import (
 	"github.com/88250/lute/html"
 )
 
+// InsertElement inserts a new element value at the specified index position.
+// 0 <= index <= len(a)
+func InsertElement[T any](ret []T, index int, value T) []T {
+	if len(ret) == index { // nil or empty slice or after last element
+		return append(ret, value)
+	}
+
+	ret = append(ret[:index+1], ret[index:]...) // index < len(a)
+	ret[index] = value
+	return ret
+}
+
 func EscapeHTML(s string) string {
 	if strings.Contains(s, "&amp;") {
 		return s

@@ -58,7 +58,6 @@ func filterRows(ret *av.AttributeView) {
 				}
 			}
 		}
-		colIndexes = util.RemoveDuplicatedElem(colIndexes)
 
 		var rows []*av.Row
 		for _, row := range ret.Rows {
@@ -84,32 +83,37 @@ func filterRows(ret *av.AttributeView) {
 
 func sortRows(ret *av.AttributeView) {
 	if 0 < len(ret.Sorts) {
-		var colIndexes []int
+		type ColIndexSort struct {
+			Index int
+			Order av.SortOrder
+		}
+
+		var colIndexSorts []*ColIndexSort
 		for _, s := range ret.Sorts {
 			for i, c := range ret.Columns {
 				if c.ID == s.Column {
-					colIndexes = append(colIndexes, i)
+					colIndexSorts = append(colIndexSorts, &ColIndexSort{Index: i, Order: s.Order})
 					break
 				}
 			}
 		}
-		colIndexes = util.RemoveDuplicatedElem(colIndexes)
 
 		sort.Slice(ret.Rows, func(i, j int) bool {
-			for _, index := range colIndexes {
-				c := ret.Columns[index]
+			for _, colIndexSort := range colIndexSorts {
+				c := ret.Columns[colIndexSort.Index]
 				if c.Type == av.ColumnTypeBlock {
 					continue
 				}
 
-				result := ret.Rows[i].Cells[index].Value.Compare(ret.Rows[j].Cells[index].Value)
+				result := ret.Rows[i].Cells[colIndexSort.Index].Value.Compare(ret.Rows[j].Cells[colIndexSort.Index].Value)
 				if 0 == result {
 					continue
 				}
 
-				if 0 > result {
-					return true
+				if colIndexSort.Order == av.SortOrderAsc {
+					return 0 > result
 				}
+				return 0 < result
 			}
 			return false
 		})

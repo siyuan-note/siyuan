@@ -110,33 +110,33 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 	}
 	if nil != value.Number && nil != other.Number {
 		switch operator {
-		case FilterOperatorEq:
+		case FilterOperatorIsEqual:
 			return value.Number.Content == other.Number.Content
-		case FilterOperatorNe:
+		case FilterOperatorIsNotEqual:
 			return value.Number.Content != other.Number.Content
-		case FilterOperatorGt:
+		case FilterOperatorIsGreater:
 			return value.Number.Content > other.Number.Content
-		case FilterOperatorGe:
+		case FilterOperatorIsGreaterOrEqual:
 			return value.Number.Content >= other.Number.Content
-		case FilterOperatorLt:
+		case FilterOperatorIsLess:
 			return value.Number.Content < other.Number.Content
-		case FilterOperatorLe:
+		case FilterOperatorIsLessOrEqual:
 			return value.Number.Content <= other.Number.Content
 		}
 	}
 	if nil != value.Date && nil != other.Date {
 		switch operator {
-		case FilterOperatorEq:
+		case FilterOperatorIsEqual:
 			return value.Date.Content == other.Date.Content
-		case FilterOperatorNe:
+		case FilterOperatorIsNotEqual:
 			return value.Date.Content != other.Date.Content
-		case FilterOperatorGt:
+		case FilterOperatorIsGreater:
 			return value.Date.Content > other.Date.Content
-		case FilterOperatorGe:
+		case FilterOperatorIsGreaterOrEqual:
 			return value.Date.Content >= other.Date.Content
-		case FilterOperatorLt:
+		case FilterOperatorIsLess:
 			return value.Date.Content < other.Date.Content
-		case FilterOperatorLe:
+		case FilterOperatorIsLessOrEqual:
 			return value.Date.Content <= other.Date.Content
 		}
 	}

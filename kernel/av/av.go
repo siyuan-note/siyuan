@@ -81,16 +81,20 @@ type AttributeViewFilter struct {
 type FilterOperator string
 
 const (
-	FilterOperatorEq          FilterOperator = "="
-	FilterOperatorNe          FilterOperator = "!="
-	FilterOperatorGt          FilterOperator = ">"
-	FilterOperatorGe          FilterOperator = ">="
-	FilterOperatorLt          FilterOperator = "<"
-	FilterOperatorLe          FilterOperator = "<="
-	FilterOperatorContains    FilterOperator = "CONTAINS"
-	FilterOperatorNotContains FilterOperator = "NOT CONTAINS"
-	FilterOperatorIsEmpty     FilterOperator = "IS EMPTY"
-	FilterOperatorIsNotEmpty  FilterOperator = "IS NOT EMPTY"
+	FilterOperatorIsEqual           FilterOperator = "="
+	FilterOperatorIsNotEqual        FilterOperator = "!="
+	FilterOperatorIsGreater         FilterOperator = ">"
+	FilterOperatorIsGreaterOrEqual  FilterOperator = ">="
+	FilterOperatorIsLess            FilterOperator = "<"
+	FilterOperatorIsLessOrEqual     FilterOperator = "<="
+	FilterOperatorContains          FilterOperator = "Contains"
+	FilterOperatorDoesNotContain    FilterOperator = "Does not contains"
+	FilterOperatorIsEmpty           FilterOperator = "Is empty"
+	FilterOperatorIsNotEmpty        FilterOperator = "Is not empty"
+	FilterOperatorStartsWith        FilterOperator = "Starts with"
+	FilterOperatorEndsWith          FilterOperator = "Ends with"
+	FilterOperatorIsBetween         FilterOperator = "Is between"
+	FilterOperatorIsRelativeToToday FilterOperator = "Is relative to today"
 )
 
 type AttributeViewSort struct {

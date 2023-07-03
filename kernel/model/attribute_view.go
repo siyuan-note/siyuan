@@ -94,7 +94,6 @@ func sortRows(ret *av.AttributeView) {
 		}
 
 		sort.Slice(ret.Rows, func(i, j int) bool {
-			less := false
 			for _, index := range colIndexes {
 				c := ret.Columns[index]
 				if c.Type == av.ColumnTypeBlock {
@@ -104,11 +103,13 @@ func sortRows(ret *av.AttributeView) {
 				result := ret.Rows[i].Cells[index].Value.Compare(ret.Rows[j].Cells[index].Value)
 				if 0 == result {
 					continue
-				} else if 0 > result {
-					less = true
+				}
+
+				if 0 > result {
+					return true
 				}
 			}
-			return less
+			return false
 		})
 	}
 }

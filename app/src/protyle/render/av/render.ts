@@ -105,7 +105,7 @@ ${cell.color ? `color:${cell.color};` : ""}"><span class="av__celltext">${text}<
             </span>
             <div class="fn__space"></div>
         </div>
-        <div contenteditable="true" class="av__title" data-tip="${window.siyuan.languages.title}">${data.name || ""}</div>
+        <div contenteditable="true" class="av__title" data-title="${data.name || ""}" data-tip="${window.siyuan.languages.title}">${data.name || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
@@ -137,7 +137,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     lastElement = protyle.contentElement;
     lastParentID = operation.parentID;
-    const avId = operation.action === "setAttrView"?operation.id: operation.parentID
+    const avId = operation.action === "setAttrView" ? operation.id : operation.parentID
     if (operation.action === "addAttrViewCol") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
@@ -155,6 +155,15 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             item.querySelectorAll(".av__row").forEach(rowItem => {
                 (rowItem.querySelector(`[data-index="${index}"]`) as HTMLElement).style.width = operation.data;
             });
+        });
+    } else if (operation.action === "setAttrView" && typeof operation.data.name === "string") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
+            const titleElement = item.querySelector(".av__title") as HTMLElement;
+            if (!titleElement || titleElement.textContent.trim() === operation.data.name) {
+                return;
+            }
+            titleElement.textContent =  operation.data.name;
+            titleElement.dataset.title = operation.data.name;
         });
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {

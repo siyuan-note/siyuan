@@ -230,3 +230,25 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     });
     return true;
 };
+
+export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
+    const avId = blockElement.getAttribute("data-av-id");
+    const nameElement = blockElement.querySelector(".av__title") as HTMLElement;
+    if (nameElement.textContent.trim() === nameElement.dataset.title.trim()) {
+        return;
+    }
+    transaction(protyle, [{
+        action: "setAttrView",
+        id: avId,
+        data: {
+            name: nameElement.textContent.trim(),
+        }
+    }], [{
+        action: "setAttrView",
+        id: avId,
+        data: {
+            name: nameElement.dataset.title,
+        }
+    }])
+    nameElement.dataset.title = nameElement.textContent.trim();
+}

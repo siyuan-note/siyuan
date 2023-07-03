@@ -75,7 +75,7 @@ import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 import {removeSearchMark} from "../toolbar/util";
 import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
-import {avClick, avContextmenu} from "../render/av/action";
+import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1037,8 +1037,6 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            event.stopPropagation();
-            event.preventDefault();
 
             if (protyle.options.render.breadcrumb) {
                 protyle.breadcrumb.hide();
@@ -1046,8 +1044,18 @@ export class WYSIWYG {
             const range = getEditorRange(protyle.wysiwyg.element);
             let nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
+                event.stopPropagation();
+                event.preventDefault();
                 return;
             }
+            if (nodeElement.classList.contains("av")) {
+                updateAVName(protyle, nodeElement);
+                event.stopPropagation();
+                return;
+            }
+
+            event.stopPropagation();
+            event.preventDefault();
             const selectImgElement = nodeElement.querySelector(".img--select");
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
@@ -1309,7 +1317,7 @@ export class WYSIWYG {
             if (!isNotEditBlock(nodeElement) && !nodeElement.classList.contains("protyle-wysiwyg--select") &&
                 (isMobile() || event.detail.target || (beforeContextmenuRange && nodeElement.contains(beforeContextmenuRange.startContainer)))
             ) {
-                if (!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) {
+                if ((!isMobile() || protyle.toolbar?.element.classList.contains("fn__none")) && !nodeElement.classList.contains("av")) {
                     contentMenu(protyle, nodeElement);
                     window.siyuan.menus.menu.popup({x, y: y + 13, h: 26});
                     protyle.toolbar?.element.classList.add("fn__none");
@@ -1438,9 +1446,6 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("compositionend", (event: InputEvent) => {
-            if ((event.target as HTMLElement).classList.contains("av__title")) {
-                return;
-            }
             event.stopPropagation();
             isComposition = false;
             const range = getEditorRange(this.element);
@@ -1467,8 +1472,7 @@ export class WYSIWYG {
 
         this.element.addEventListener("input", (event: InputEvent) => {
             const target = event.target as HTMLElement;
-            if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo" ||
-                target.classList.contains("av__title")) {
+            if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {
                 return;
             }
             if (event.inputType === "historyUndo") {

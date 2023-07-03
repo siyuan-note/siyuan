@@ -12,10 +12,15 @@ import {hideElements} from "../ui/hideElements";
 import {hasClosestByAttribute} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
+import {updateAVName} from "../render/av/action";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true) => {
     if (!blockElement.parentElement) {
         // 不同 windows 版本下输入法会多次触发 input，导致 outerhtml 赋值的块丢失
+        return;
+    }
+    if (blockElement.classList.contains("av")) {
+        updateAVName(protyle, blockElement);
         return;
     }
     const editElement = getContenteditableElement(blockElement) as HTMLElement;

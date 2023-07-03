@@ -7,6 +7,8 @@ import {mathRender} from "../render/mathRender";
 import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
+import {updateAVName} from "../render/av/action";
+import {readText} from "./compatibility";
 
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值
@@ -29,6 +31,22 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     }
     if (!blockElement) {
+        return;
+    }
+    if (blockElement.classList.contains("av")) {
+        range.deleteContents();
+        const text = readText();
+        if (typeof text === "string") {
+            range.insertNode(document.createTextNode(text));
+            range.collapse(false);
+            updateAVName(protyle, blockElement);
+        } else {
+            text.then((t) => {
+                range.insertNode(document.createTextNode(t));
+                range.collapse(false);
+                updateAVName(protyle, blockElement);
+            });
+        }
         return;
     }
     let id = blockElement.getAttribute("data-node-id");

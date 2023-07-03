@@ -40,9 +40,9 @@ type AttributeView struct {
 	Rows    []*Row    `json:"rows"`    // 表格行记录
 
 	Type        AttributeViewType      `json:"type"`        // 属性视图类型
-	Projections []string               `json:"projections"` // 显示的列名，SELECT *
-	Filters     []*AttributeViewFilter `json:"filters"`     // 过滤规则，WHERE ...
-	Sorts       []*AttributeViewSort   `json:"sorts"`       // 排序规则，ORDER BY ...
+	Projections []string               `json:"projections"` // 显示的列名
+	Filters     []*AttributeViewFilter `json:"filters"`     // 过滤规则
+	Sorts       []*AttributeViewSort   `json:"sorts"`       // 排序规则
 }
 
 // AttributeViewType 描述了属性视图的类型。

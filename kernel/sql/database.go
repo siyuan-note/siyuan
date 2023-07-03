@@ -710,7 +710,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		markdown = treenode.ExportNodeStdMd(n, luteEngine)
 		content = treenode.NodeStaticContent(n, nil, true, indexAssetPath)
 		fc := treenode.FirstLeafBlock(n)
-		fcontent = treenode.NodeStaticContent(fc, nil, false, false)
+		fcontent = treenode.NodeStaticContent(fc, nil, true, false)
 		parentID = n.Parent.ID
 		// 将标题块作为父节点
 		if h := heading(n); nil != h {

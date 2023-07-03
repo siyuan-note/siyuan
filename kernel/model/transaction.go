@@ -238,6 +238,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewColumnWrap(op)
 		case "setAttrViewColWidth":
 			ret = tx.doSetAttrViewColumnWidth(op)
+		case "setAttrView":
+			ret = tx.doSetAttrView(op)
 		}
 
 		if nil != ret {

@@ -42,6 +42,46 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		return
 	}
 
+	filterRows(ret)
+	sortRows(ret)
+	return
+}
+
+func filterRows(ret *av.AttributeView) {
+	if 0 < len(ret.Filters) {
+		var colIndexes []int
+		for _, f := range ret.Filters {
+			for i, c := range ret.Columns {
+				if c.ID == f.Column {
+					colIndexes = append(colIndexes, i)
+					break
+				}
+			}
+		}
+
+		var rows []*av.Row
+		for _, row := range ret.Rows {
+			pass := true
+			for j, index := range colIndexes {
+				c := ret.Columns[index]
+				if c.Type == av.ColumnTypeBlock {
+					continue
+				}
+
+				if !row.Cells[index].Value.CompareOperator(ret.Filters[j].Value, ret.Filters[j].Operator) {
+					pass = false
+					break
+				}
+			}
+			if pass {
+				rows = append(rows, row)
+			}
+		}
+		ret.Rows = rows
+	}
+}
+
+func sortRows(ret *av.AttributeView) {
 	if 0 < len(ret.Sorts) {
 		var colIndexes []int
 		for _, s := range ret.Sorts {
@@ -71,7 +111,6 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 			return less
 		})
 	}
-	return
 }
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {

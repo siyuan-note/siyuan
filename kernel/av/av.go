@@ -75,22 +75,22 @@ func (av *AttributeView) GetColumnNames() (ret []string) {
 type AttributeViewFilter struct {
 	Column   string         `json:"column"`
 	Operator FilterOperator `json:"operator"`
-	Value    string         `json:"value"`
+	Value    *Value         `json:"value"`
 }
 
 type FilterOperator string
 
 const (
-	FilterOperatorEq      FilterOperator = "="
-	FilterOperatorNe      FilterOperator = "!="
-	FilterOperatorGt      FilterOperator = ">"
-	FilterOperatorGe      FilterOperator = ">="
-	FilterOperatorLt      FilterOperator = "<"
-	FilterOperatorLe      FilterOperator = "<="
-	FilterOperatorIn      FilterOperator = "IN"
-	FilterOperatorNotIn   FilterOperator = "NOT IN"
-	FilterOperatorLike    FilterOperator = "LIKE"
-	FilterOperatorNotLike FilterOperator = "NOT LIKE"
+	FilterOperatorEq          FilterOperator = "="
+	FilterOperatorNe          FilterOperator = "!="
+	FilterOperatorGt          FilterOperator = ">"
+	FilterOperatorGe          FilterOperator = ">="
+	FilterOperatorLt          FilterOperator = "<"
+	FilterOperatorLe          FilterOperator = "<="
+	FilterOperatorContains    FilterOperator = "CONTAINS"
+	FilterOperatorNotContains FilterOperator = "NOT CONTAINS"
+	FilterOperatorIsEmpty     FilterOperator = "IS EMPTY"
+	FilterOperatorIsNotEmpty  FilterOperator = "IS NOT EMPTY"
 )
 
 type AttributeViewSort struct {

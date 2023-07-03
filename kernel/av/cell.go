@@ -95,6 +95,68 @@ func (value *Value) Compare(other *Value) int {
 	return 0
 }
 
+func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool {
+	if nil == value {
+		return false
+	}
+	if nil == other {
+		return false
+	}
+	if nil != value.Block && nil != other.Block {
+		return strings.Contains(value.Block.Content, other.Block.Content)
+	}
+	if nil != value.Text && nil != other.Text {
+		return strings.Contains(value.Text.Content, other.Text.Content)
+	}
+	if nil != value.Number && nil != other.Number {
+		switch operator {
+		case FilterOperatorEq:
+			return value.Number.Content == other.Number.Content
+		case FilterOperatorNe:
+			return value.Number.Content != other.Number.Content
+		case FilterOperatorGt:
+			return value.Number.Content > other.Number.Content
+		case FilterOperatorGe:
+			return value.Number.Content >= other.Number.Content
+		case FilterOperatorLt:
+			return value.Number.Content < other.Number.Content
+		case FilterOperatorLe:
+			return value.Number.Content <= other.Number.Content
+		}
+	}
+	if nil != value.Date && nil != other.Date {
+		switch operator {
+		case FilterOperatorEq:
+			return value.Date.Content == other.Date.Content
+		case FilterOperatorNe:
+			return value.Date.Content != other.Date.Content
+		case FilterOperatorGt:
+			return value.Date.Content > other.Date.Content
+		case FilterOperatorGe:
+			return value.Date.Content >= other.Date.Content
+		case FilterOperatorLt:
+			return value.Date.Content < other.Date.Content
+		case FilterOperatorLe:
+			return value.Date.Content <= other.Date.Content
+		}
+	}
+	if nil != value.Select && nil != other.Select {
+		return strings.Contains(value.Select.Content, other.Select.Content)
+	}
+	if nil != value.MSelect && nil != other.MSelect {
+		var v1 string
+		for _, v := range value.MSelect {
+			v1 += v.Content
+		}
+		var v2 string
+		for _, v := range other.MSelect {
+			v2 += v.Content
+		}
+		return strings.Contains(v1, v2)
+	}
+	return false
+}
+
 func NewCellBlock(blockID, blockContent string) *Cell {
 	return &Cell{
 		ID:        ast.NewNodeID(),

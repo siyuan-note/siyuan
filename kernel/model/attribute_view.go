@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -40,7 +41,76 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+
+	filterRows(ret)
+	sortRows(ret)
 	return
+}
+
+func filterRows(ret *av.AttributeView) {
+	if 0 < len(ret.Filters) {
+		var colIndexes []int
+		for _, f := range ret.Filters {
+			for i, c := range ret.Columns {
+				if c.ID == f.Column {
+					colIndexes = append(colIndexes, i)
+					break
+				}
+			}
+		}
+
+		var rows []*av.Row
+		for _, row := range ret.Rows {
+			pass := true
+			for j, index := range colIndexes {
+				c := ret.Columns[index]
+				if c.Type == av.ColumnTypeBlock {
+					continue
+				}
+
+				if !row.Cells[index].Value.CompareOperator(ret.Filters[j].Value, ret.Filters[j].Operator) {
+					pass = false
+					break
+				}
+			}
+			if pass {
+				rows = append(rows, row)
+			}
+		}
+		ret.Rows = rows
+	}
+}
+
+func sortRows(ret *av.AttributeView) {
+	if 0 < len(ret.Sorts) {
+		var colIndexes []int
+		for _, s := range ret.Sorts {
+			for i, c := range ret.Columns {
+				if c.ID == s.Column {
+					colIndexes = append(colIndexes, i)
+					break
+				}
+			}
+		}
+
+		sort.Slice(ret.Rows, func(i, j int) bool {
+			less := false
+			for _, index := range colIndexes {
+				c := ret.Columns[index]
+				if c.Type == av.ColumnTypeBlock {
+					continue
+				}
+
+				result := ret.Rows[i].Cells[index].Value.Compare(ret.Rows[j].Cells[index].Value)
+				if 0 == result {
+					continue
+				} else if 0 > result {
+					less = true
+				}
+			}
+			return less
+		})
+	}
 }
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {

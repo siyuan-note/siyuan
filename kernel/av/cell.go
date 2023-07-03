@@ -19,6 +19,7 @@ package av
 import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"strings"
 )
 
 type Cell struct {
@@ -44,6 +45,116 @@ func (value *Value) ToJSONString() string {
 		return ""
 	}
 	return string(data)
+}
+
+func (value *Value) Compare(other *Value) int {
+	if nil == value {
+		return -1
+	}
+	if nil == other {
+		return 1
+	}
+	if nil != value.Block && nil != other.Block {
+		return strings.Compare(value.Block.Content, other.Block.Content)
+	}
+	if nil != value.Text && nil != other.Text {
+		return strings.Compare(value.Text.Content, other.Text.Content)
+	}
+	if nil != value.Number && nil != other.Number {
+		if value.Number.Content > other.Number.Content {
+			return 1
+		} else if value.Number.Content < other.Number.Content {
+			return -1
+		} else {
+			return 0
+		}
+	}
+	if nil != value.Date && nil != other.Date {
+		if value.Date.Content > other.Date.Content {
+			return 1
+		} else if value.Date.Content < other.Date.Content {
+			return -1
+		} else {
+			return 0
+		}
+	}
+	if nil != value.Select && nil != other.Select {
+		return strings.Compare(value.Select.Content, other.Select.Content)
+	}
+	if nil != value.MSelect && nil != other.MSelect {
+		var v1 string
+		for _, v := range value.MSelect {
+			v1 += v.Content
+		}
+		var v2 string
+		for _, v := range other.MSelect {
+			v2 += v.Content
+		}
+		return strings.Compare(v1, v2)
+	}
+	return 0
+}
+
+func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool {
+	if nil == value {
+		return false
+	}
+	if nil == other {
+		return false
+	}
+	if nil != value.Block && nil != other.Block {
+		return strings.Contains(value.Block.Content, other.Block.Content)
+	}
+	if nil != value.Text && nil != other.Text {
+		return strings.Contains(value.Text.Content, other.Text.Content)
+	}
+	if nil != value.Number && nil != other.Number {
+		switch operator {
+		case FilterOperatorEq:
+			return value.Number.Content == other.Number.Content
+		case FilterOperatorNe:
+			return value.Number.Content != other.Number.Content
+		case FilterOperatorGt:
+			return value.Number.Content > other.Number.Content
+		case FilterOperatorGe:
+			return value.Number.Content >= other.Number.Content
+		case FilterOperatorLt:
+			return value.Number.Content < other.Number.Content
+		case FilterOperatorLe:
+			return value.Number.Content <= other.Number.Content
+		}
+	}
+	if nil != value.Date && nil != other.Date {
+		switch operator {
+		case FilterOperatorEq:
+			return value.Date.Content == other.Date.Content
+		case FilterOperatorNe:
+			return value.Date.Content != other.Date.Content
+		case FilterOperatorGt:
+			return value.Date.Content > other.Date.Content
+		case FilterOperatorGe:
+			return value.Date.Content >= other.Date.Content
+		case FilterOperatorLt:
+			return value.Date.Content < other.Date.Content
+		case FilterOperatorLe:
+			return value.Date.Content <= other.Date.Content
+		}
+	}
+	if nil != value.Select && nil != other.Select {
+		return strings.Contains(value.Select.Content, other.Select.Content)
+	}
+	if nil != value.MSelect && nil != other.MSelect {
+		var v1 string
+		for _, v := range value.MSelect {
+			v1 += v.Content
+		}
+		var v2 string
+		for _, v := range other.MSelect {
+			v2 += v.Content
+		}
+		return strings.Contains(v1, v2)
+	}
+	return false
 }
 
 func NewCellBlock(blockID, blockContent string) *Cell {

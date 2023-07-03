@@ -58,6 +58,7 @@ func filterRows(ret *av.AttributeView) {
 				}
 			}
 		}
+		colIndexes = util.RemoveDuplicatedElem(colIndexes)
 
 		var rows []*av.Row
 		for _, row := range ret.Rows {
@@ -92,6 +93,7 @@ func sortRows(ret *av.AttributeView) {
 				}
 			}
 		}
+		colIndexes = util.RemoveDuplicatedElem(colIndexes)
 
 		sort.Slice(ret.Rows, func(i, j int) bool {
 			for _, index := range colIndexes {
@@ -408,12 +410,12 @@ func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error
 			break
 		}
 	}
-	attrView.Columns = util.InsertElement(attrView.Columns, previousIndex, col)
+	attrView.Columns = util.InsertElem(attrView.Columns, previousIndex, col)
 
 	for _, row := range attrView.Rows {
 		cel := row.Cells[index]
 		row.Cells = append(row.Cells[:index], row.Cells[index+1:]...)
-		row.Cells = util.InsertElement(row.Cells, previousIndex, cel)
+		row.Cells = util.InsertElem(row.Cells, previousIndex, cel)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -446,7 +448,7 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 			break
 		}
 	}
-	attrView.Rows = util.InsertElement(attrView.Rows, previousIndex, row)
+	attrView.Rows = util.InsertElem(attrView.Rows, previousIndex, row)
 
 	err = av.SaveAttributeView(attrView)
 	return

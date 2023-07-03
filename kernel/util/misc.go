@@ -24,9 +24,21 @@ import (
 	"github.com/88250/lute/html"
 )
 
-// InsertElement inserts a new element value at the specified index position.
+// RemoveDuplicatedElem removes the duplicated elements from the slice.
+func RemoveDuplicatedElem(slice []int) (ret []int) {
+	allKeys := make(map[int]bool)
+	for _, item := range slice {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			ret = append(ret, item)
+		}
+	}
+	return
+}
+
+// InsertElem inserts a new element value at the specified index position.
 // 0 <= index <= len(a)
-func InsertElement[T any](ret []T, index int, value T) []T {
+func InsertElem[T any](ret []T, index int, value T) []T {
 	if len(ret) == index { // nil or empty slice or after last element
 		return append(ret, value)
 	}

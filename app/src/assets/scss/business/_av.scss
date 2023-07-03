@@ -167,7 +167,8 @@
     }
   }
 
-  &.protyle-wysiwyg--select {
+  &.protyle-wysiwyg--select,
+  &.protyle-wysiwyg--hl {
     .layout-tab-bar,
     .av__row--header,
     .av__row--footer {

@@ -479,13 +479,14 @@
 
   &-icon {
     font-size: 85%;
-    line-height: 22px;
+    line-height: 24px;
     cursor: pointer;
-    padding: 0 4px;
+    padding: 5px;
     transition: var(--b3-transition);
     background-color: var(--b3-theme-on-surface);
-    height: 22px;
+    height: 24px;
     color: var(--b3-theme-surface);
+    box-sizing: border-box;
 
     &--only {
       border-radius: var(--b3-border-radius);
@@ -517,7 +518,8 @@
     }
 
     & > svg {
-      height: 22px;
+      height: 14px;
+      float: left;
       width: 14px;
       fill: currentColor;
     }

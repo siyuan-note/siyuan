@@ -110,19 +110,21 @@ export const openSetting = (app: App) => {
     <li data-name="repos" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconCloud"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.cloud}</span></li>
     <li data-name="about" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconInfo"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.about}</span></li>
   </ul>
-  <div class="config__tab-container" data-name="editor">${editor.genHTML()}</div>
-  <div class="config__tab-container fn__none" data-name="filetree"></div>
-  <div class="config__tab-container fn__none" data-name="card"></div>
-  <div class="config__tab-container fn__none" data-name="AI"></div>
-  <div class="config__tab-container fn__none" data-name="image"></div>
-  <div class="config__tab-container fn__none" data-name="export"></div>
-  <div class="config__tab-container fn__none" data-name="appearance"></div>
-  <div class="config__tab-container fn__none" data-name="bazaar"></div>
-  <div class="config__tab-container fn__none" data-name="search"></div>
-  <div class="config__tab-container fn__none" style="overflow: scroll" data-name="keymap"></div>
-  <div class="config__tab-container fn__none" data-name="account"></div>
-  <div class="config__tab-container fn__none" data-name="repos"></div>
-  <div class="config__tab-container fn__none" data-name="about"></div>
+  <div class="config__tab-wrap"> 
+      <div class="config__tab-container" data-name="editor">${editor.genHTML()}</div>
+      <div class="config__tab-container fn__none" data-name="filetree"></div>
+      <div class="config__tab-container fn__none" data-name="card"></div>
+      <div class="config__tab-container config__tab-container--top fn__none" data-name="AI"></div>
+      <div class="config__tab-container config__tab-container--top fn__none" data-name="image"></div>
+      <div class="config__tab-container fn__none" data-name="export"></div>
+      <div class="config__tab-container fn__none" data-name="appearance"></div>
+      <div class="config__tab-container config__tab-container--top fn__none" data-name="bazaar"></div>
+      <div class="config__tab-container fn__none" data-name="search"></div>
+      <div class="config__tab-container fn__none" style="overflow: scroll" data-name="keymap"></div>
+      <div class="config__tab-container config__tab-container--full fn__none" data-name="account"></div>
+      <div class="config__tab-container fn__none" data-name="repos"></div>
+      <div class="config__tab-container fn__none" data-name="about"></div>
+  </div>
 </div>`,
         width: "90vw",
         height: "90vh",

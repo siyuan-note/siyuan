@@ -1,14 +1,32 @@
 .config {
+  &__tab-wrap {
+    overflow: hidden;
+    box-sizing: border-box;
+    background-color: var(--b3-theme-background);
+    border-radius: 0 var(--b3-border-radius-b) var(--b3-border-radius-b) 0;
+    width: 100%;
+    height: 100%;
+    padding: 16px 0;
+  }
+
   &__tab-container {
     overflow: auto;
     box-sizing: border-box;
-    flex: 1;
-    background-color: var(--b3-theme-background);
-    border-radius: 0 var(--b3-border-radius-b) var(--b3-border-radius-b) 0;
+    height: 100%;
 
     .b3-label {
       padding: 16px 0;
       margin: 0 24px;
+    }
+
+    &--full {
+      margin-top: -16px;
+      height: calc(100% + 32px);
+    }
+
+    &--top {
+      margin-top: -16px;
+      height: calc(100% + 16px);
     }
   }
 

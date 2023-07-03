@@ -39,7 +39,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
             ${renderViewItem(response.data.blocks, title, deckType)}
         </ul>
-        <div id="cardPreview" class="fn__flex-1 fn__none"></div>
+        <div id="cardPreview" style="border-bottom-right-radius:var(--b3-border-radius-b);" class="fn__flex-1 fn__none"></div>
         <div class="fn__flex-1 card__empty">${window.siyuan.languages.emptyContent}</div>
     </div>
 </div>`,

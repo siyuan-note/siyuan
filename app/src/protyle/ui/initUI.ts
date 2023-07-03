@@ -141,12 +141,11 @@ export const setPadding = (protyle: IProtyle) => {
             min24 = 96;
         }
     }
-    if (protyle.options.render.background && protyle.options.render.title) {
+    if (protyle.options.render.background) {
         protyle.background.element.lastElementChild.setAttribute("style", `left:${min16}px`);
-        protyle.title.element.style.margin = `16px ${min16}px 0 ${min24}px`;
-    } else if (protyle.options.render.background && !protyle.options.render.title) {
-        protyle.background.element.lastElementChild.setAttribute("style", `left:${min16}px`);
-    } else if (!protyle.options.render.background && protyle.options.render.title) {
+        protyle.background.element.querySelector(".protyle-background__img .protyle-icons").setAttribute("style", `right:${min16}px`);
+    }
+    if (protyle.options.render.title) {
         protyle.title.element.style.margin = `16px ${min16}px 0 ${min24}px`;
     }
     let bottomHeight = "16px";

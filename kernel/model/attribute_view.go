@@ -19,13 +19,13 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/jinzhu/copier"
 	"sort"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
-	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -504,22 +504,23 @@ func setAttributeViewColWidth(width, columnID, avID string) (err error) {
 
 func setAttributeView(operation *Operation) (err error) {
 	avID := operation.ID
-	attrView, err := av.ParseAttributeView(avID)
+	attrViewMap, err := av.ParseAttributeViewMap(avID)
 	if nil != err {
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	operationData := operation.Data.(map[string]interface{})
+	if err = copier.Copy(&attrViewMap, operationData); nil != err {
+		return
+	}
+
+	data, err := gulu.JSON.MarshalJSON(attrViewMap)
 	if nil != err {
 		return
 	}
 
-	newAttrView := &av.AttributeView{}
-	if err = gulu.JSON.UnmarshalJSON(data, newAttrView); nil != err {
-		return
-	}
-
-	if err = copier.Copy(attrView, newAttrView); nil != err {
+	attrView := &av.AttributeView{}
+	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
 		return
 	}
 

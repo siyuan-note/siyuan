@@ -126,6 +126,34 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	return
 }
 
+func ParseAttributeViewMap(avID string) (ret map[string]interface{}, err error) {
+	ret = map[string]interface{}{}
+	avJSONPath := getAttributeViewDataPath(avID)
+	if !gulu.File.IsExist(avJSONPath) {
+		av := NewAttributeView(avID)
+		var data []byte
+		data, err = gulu.JSON.MarshalJSON(av)
+		if nil == err {
+			return
+		}
+
+		err = gulu.JSON.UnmarshalJSON(data, &ret)
+		return
+	}
+
+	data, err := filelock.ReadFile(avJSONPath)
+	if nil != err {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	return
+}
+
 func SaveAttributeView(av *AttributeView) (err error) {
 	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t")
 	if nil != err {

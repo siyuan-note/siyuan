@@ -83,6 +83,15 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
+
+    const sortsElement = hasClosestByAttribute(event.target, "data-type", "av-sort");
+    if (sortsElement) {
+        openMenuPanel(protyle, blockElement, "sorts");
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     const cellHeaderElement = hasClosestByClassName(event.target, "av__cellheader");
     if (cellHeaderElement) {
         showHeaderCellMenu(protyle, blockElement, cellHeaderElement.parentElement);
@@ -90,6 +99,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
+
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
         popTextCell(protyle, cellElement);

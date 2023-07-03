@@ -37,7 +37,7 @@ type TEventBus = "ws-main" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" |
     "loaded-protyle"
-type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block"| "mSelect"
+type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block" | "mSelect"
 
 declare module "blueimp-md5"
 
@@ -826,7 +826,12 @@ interface IBazaarItem {
 interface IAV {
     columns: IAVColumn[],
     filters: [],
-    sorts: [],
+    sorts: IAVSort[],
+}
+
+interface IAVSort {
+    column: string,
+    order: "ASC" | "DESC"
 }
 
 interface IAVColumn {

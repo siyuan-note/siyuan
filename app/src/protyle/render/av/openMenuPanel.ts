@@ -3,7 +3,7 @@ import {fetchPost} from "../../../util/fetch";
 import {addCol} from "./addCol";
 import {getColIconByType} from "./col";
 
-export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" = "config") => {
+export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" | "sorts" = "config") => {
     let avMenuPanel = document.querySelector(".av__panel");
     if (avMenuPanel) {
         avMenuPanel.remove();
@@ -19,6 +19,8 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
             html = getConfigHTML(data, tabRect);
         } else if (type === "properties") {
             html = getPropertiesHTML(data, tabRect);
+        } else if (type === "sorts") {
+            html = getSortsHTML(data, tabRect);
         }
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel">${html}</div>`);
         avMenuPanel = document.querySelector(".av__panel");
@@ -37,6 +39,22 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     break;
                 } else if (type === "goProperties") {
                     avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goSorts") {
+                    avMenuPanel.innerHTML = getSortsHTML(data, tabRect);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "removeSorts") {
+                    // TODO
+                    event.stopPropagation();
+                    break;
+                } else if (type === "addSort") {
+                    // TODO
+                    event.stopPropagation();
+                    break;
+                } else if (type === "removeSort") {
+                    // TODO
                     event.stopPropagation();
                     break;
                 } else if (type === "newCol") {
@@ -163,7 +181,7 @@ const getConfigHTML = (data: IAV, tabRect: DOMRect) => {
         <span class="b3-menu__accelerator">${data.filters.length}</span>
         <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
     </button>
-    <button class="b3-menu__item">
+    <button class="b3-menu__item" data-type="goSorts">
         <svg class="b3-menu__icon"><use xlink:href="#iconSort"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
         <span class="b3-menu__accelerator">${data.sorts.length}</span>
@@ -177,6 +195,41 @@ const getConfigHTML = (data: IAV, tabRect: DOMRect) => {
     </button>
 </div>`;
 };
+
+const getSortsHTML = (data: IAV, tabRect: DOMRect) => {
+    let html = "";
+    const genSortItem = (id: string) => {
+        let sortHTML = ''
+        data.columns.forEach((item) => {
+            sortHTML += `<option value="${item.id}" ${item.id === id ? "checked" : ""}>${item.name}</option>`
+        })
+    }
+    data.sorts.forEach((item: IAVSort) => {
+        html += `<button class="b3-menu__item">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <select>
+        ${genSortItem(item.column)}
+    </select>
+    <select>
+        <option value="ASC" ${item.order === "ASC" ? "checked" : ""}>${window.siyuan.languages.fileNameASC}</option>
+        <option value="DESC" ${item.order === "DESC" ? "checked" : ""}>${window.siyuan.languages.fileNameDESC}</option>
+    </select>
+    <svg class="b3-menu__action" data-type="removeSort"><use xlink:href="#iconTrashcan"></use></svg>
+</button>`;
+    });
+    return `<div class="b3-dialog__scrim" data-type="close"></div>
+ <div class="b3-menu" style="right:${window.innerWidth - tabRect.right}px;top:${tabRect.bottom}px">
+    ${html}
+    <button class="b3-menu__item" data-type="addSort">
+        <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
+        <span class="b3-menu__label">${window.siyuan.languages.new}</span>
+    </button>
+    <button class="b3-menu__item${html ? "" : " fn__none"}" data-type="removeSorts">
+        <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
+        <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+    </button>
+</div>`;
+}
 
 const getPropertiesHTML = (data: IAV, tabRect: DOMRect) => {
     let showHTML = "";
@@ -212,9 +265,11 @@ ${hideHTML}`;
     }
     return `<div class="b3-dialog__scrim" data-type="close"></div>
  <div class="b3-menu" style="right:${window.innerWidth - tabRect.right}px;top:${tabRect.bottom}px">
-    <button class="b3-menu__item" data-type="goConfig">
-        <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
-        <span class="b3-menu__label">${window.siyuan.languages.back}</span>
+    <button class="b3-menu__item" data-type="nobg">
+        <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+        </span>
+        <span class="b3-menu__label ft__center">${window.siyuan.languages.attr}</span>
         <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
     </button>
     <button class="b3-menu__separator"></button>

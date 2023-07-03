@@ -441,10 +441,12 @@ func ImportRepoKey(base64Key string) (err error) {
 func ResetRepo() (err error) {
 	msgId := util.PushMsg(Conf.Language(144), 1000*60)
 
-	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+	repo, err := newRepository()
+	if nil != err {
 		return
 	}
-	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+
+	if err = repo.Reset(); nil != err {
 		return
 	}
 

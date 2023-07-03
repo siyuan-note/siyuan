@@ -33,6 +33,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
         const tabRect = blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
         setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
 
+        bindSortsEvent(protyle, menuElement, data);
         avPanelElement.addEventListener("click", (event) => {
             event.preventDefault();
             let target = event.target as HTMLElement;
@@ -40,6 +41,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                 const type = target.dataset.type;
                 if (type === "close") {
                     avPanelElement.remove();
+                    window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
                 } else if (type === "goConfig") {
@@ -54,6 +56,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     break;
                 } else if (type === "goSorts") {
                     menuElement.innerHTML = getSortsHTML(data);
+                    bindSortsEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
@@ -73,6 +76,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     }]);
                     data.sorts = [];
                     menuElement.innerHTML = getSortsHTML(data);
+                    bindSortsEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
@@ -81,7 +85,29 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSort") {
-                    // TODO
+                    const oldSorts = Object.assign([], data.sorts);
+                    data.sorts.find((item: IAVSort, index: number) => {
+                        if (item.column === target.parentElement.dataset.id) {
+                            data.sorts.splice(index, 1);
+                            return true;
+                        }
+                    });
+                    transaction(protyle, [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            sorts: data.sorts
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            sorts: oldSorts
+                        }
+                    }]);
+                    menuElement.innerHTML = getSortsHTML(data);
+                    bindSortsEvent(protyle, menuElement, data);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "newCol") {
@@ -224,25 +250,58 @@ const getConfigHTML = (data: IAV) => {
 </button>`;
 };
 
+const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
+    menuElement.querySelectorAll("select").forEach((item: HTMLSelectElement) => {
+        item.addEventListener("change", (event) => {
+            const colId = item.parentElement.getAttribute("data-id");
+            const oldSort = JSON.parse(JSON.stringify(data.sorts));
+            if (item.previousElementSibling.classList.contains("b3-menu__icon")) {
+                data.sorts.find((sort: IAVSort) => {
+                    if (sort.column === colId) {
+                        sort.column = item.value
+                        item.parentElement.setAttribute("data-id", item.value);
+                        return true
+                    }
+                });
+            } else {
+                data.sorts.find((sort: IAVSort) => sort.column === colId).order = item.value as "ASC" | "DESC";
+            }
+            transaction(protyle, [{
+                action: "setAttrView",
+                id: data.id,
+                data: {
+                    sorts: data.sorts
+                }
+            }], [{
+                action: "setAttrView",
+                id: data.id,
+                data: {
+                    sorts: oldSort
+                }
+            }]);
+        });
+    });
+}
+
 const getSortsHTML = (data: IAV) => {
     let html = "";
     const genSortItem = (id: string) => {
         let sortHTML = ''
         data.columns.forEach((item) => {
-            sortHTML += `<option value="${item.id}" ${item.id === id ? "checked" : ""}>${item.name}</option>`
+            sortHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.name}</option>`
         })
         return sortHTML;
     }
     data.sorts.forEach((item: IAVSort) => {
-        html += `<button class="b3-menu__item">
+        html += `<button class="b3-menu__item" data-id="${item.column}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <select class="b3-select" style="width: 106px;margin: 4px 0">
         ${genSortItem(item.column)}
     </select>
     <span class="fn__space"></span>
     <select class="b3-select" style="width: 106px;margin: 4px 0">
-        <option value="ASC" ${item.order === "ASC" ? "checked" : ""}>${window.siyuan.languages.fileNameNatASC}</option>
-        <option value="DESC" ${item.order === "DESC" ? "checked" : ""}>${window.siyuan.languages.fileNameNatDESC}</option>
+        <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.fileNameNatASC}</option>
+        <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.fileNameNatDESC}</option>
     </select>
     <svg class="b3-menu__action" data-type="removeSort"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;
@@ -256,7 +315,7 @@ const getSortsHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 ${html}
-<button class="b3-menu__item" data-type="addSort">
+<button class="b3-menu__item${data.sorts.length === data.columns.length ? " fn__none" : ""}" data-type="addSort">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.new}</span>
 </button>
@@ -366,6 +425,7 @@ const addSort = (options: {
                         }
                     }]);
                     options.menuElement.innerHTML = getSortsHTML(options.data);
+                    bindSortsEvent(options.protyle, options.menuElement, options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                 }
             });

@@ -2,6 +2,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
 import {getColIconByType} from "./col";
+import {fetchPost} from "../../../util/fetch";
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.children[parseInt(cellElement.getAttribute("data-index")) + 1].getAttribute("data-dtype") as TAVCol;
@@ -38,7 +39,6 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
         }
     });
 };
-
 
 const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVCol) => {
     const rowElement = hasClosestByClassName(cellElement, "av__row");
@@ -128,14 +128,48 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
         icon: "iconUp",
         label: window.siyuan.languages.fileNameNatASC,
         click() {
-
+            fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
+                transaction(protyle, [{
+                    action: "setAttrView",
+                    id: avId,
+                    data: {
+                        sorts: [{
+                            column: colId,
+                            order: "ASC"
+                        }]
+                    }
+                }], [{
+                    action: "setAttrView",
+                    id: avId,
+                    data: {
+                        sorts: response.data.av.sorts
+                    }
+                }]);
+            });
         }
     });
     menu.addItem({
         icon: "iconDown",
         label: window.siyuan.languages.fileNameNatDESC,
         click() {
-
+            fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
+                transaction(protyle, [{
+                    action: "setAttrView",
+                    id: avId,
+                    data: {
+                        sorts: [{
+                            column: colId,
+                            order: "DESC"
+                        }]
+                    }
+                }], [{
+                    action: "setAttrView",
+                    id: avId,
+                    data: {
+                        sorts: response.data.av.sorts
+                    }
+                }]);
+            });
         }
     });
     menu.addItem({

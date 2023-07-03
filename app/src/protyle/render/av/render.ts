@@ -92,11 +92,11 @@ ${cell.color ? `color:${cell.color};` : ""}"><span class="av__celltext">${text}<
                 <span class="item__text">${data.type}</span>
             </div>
             <div class="fn__flex-1"></div>
-            <span data-type="av-filter" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.filter}">
+            <span data-type="av-filter" class="block__icon block__icon--show b3-tooltips b3-tooltips__w${data.filters.length > 0 ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.filter}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-sort" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.sort}">
+            <span data-type="av-sort" class="block__icon block__icon--show b3-tooltips b3-tooltips__w${data.sorts.length > 0 ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.sort}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
@@ -137,15 +137,16 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     lastElement = protyle.contentElement;
     lastParentID = operation.parentID;
+    const avId = operation.action === "setAttrView"?operation.id: operation.parentID
     if (operation.action === "addAttrViewCol") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             avRender(item, () => {
                 showHeaderCellMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
             });
         });
     } else if (operation.action === "setAttrViewColWidth") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             const cellElement = item.querySelector(`.av__cell[data-id="${operation.id}"]`) as HTMLElement;
             if (!cellElement || cellElement.style.width === operation.data) {
                 return;
@@ -156,7 +157,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         });
     } else {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.parentID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             avRender(item);
         });

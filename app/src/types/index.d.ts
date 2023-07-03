@@ -831,6 +831,7 @@ interface IAV {
     name: string,
     type: "table"
     rows: IAVRow[],
+    id: string
 }
 
 interface IAVSort {

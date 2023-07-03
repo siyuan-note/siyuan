@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -39,6 +40,36 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 	if nil != err {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
+	}
+
+	if 0 < len(ret.Sorts) {
+		var colIndexes []int
+		for _, s := range ret.Sorts {
+			for i, c := range ret.Columns {
+				if c.ID == s.Column {
+					colIndexes = append(colIndexes, i)
+					break
+				}
+			}
+		}
+
+		sort.Slice(ret.Rows, func(i, j int) bool {
+			less := false
+			for _, index := range colIndexes {
+				c := ret.Columns[index]
+				if c.Type == av.ColumnTypeBlock {
+					continue
+				}
+
+				result := ret.Rows[i].Cells[index].Value.Compare(ret.Rows[j].Cells[index].Value)
+				if 0 == result {
+					continue
+				} else if 0 > result {
+					less = true
+				}
+			}
+			return less
+		})
 	}
 	return
 }

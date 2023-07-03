@@ -94,8 +94,8 @@ const (
 )
 
 type AttributeViewSort struct {
-	Column string    `json:"column"`
-	Order  SortOrder `json:"order"`
+	Column string    `json:"column"` // 列 ID
+	Order  SortOrder `json:"order"`  // 排序顺序
 }
 
 type SortOrder string

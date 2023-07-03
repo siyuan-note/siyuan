@@ -2,6 +2,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {addCol} from "./addCol";
 import {getColIconByType} from "./col";
+import {setPosition} from "../../../util/setPosition";
 
 export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" | "sorts" = "config") => {
     let avMenuPanel = document.querySelector(".av__panel");
@@ -13,17 +14,20 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
     const avId = blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
         const data = response.data.av as IAV;
-        const tabRect = blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
         let html;
         if (type === "config") {
-            html = getConfigHTML(data, tabRect);
+            html = getConfigHTML(data);
         } else if (type === "properties") {
-            html = getPropertiesHTML(data, tabRect);
+            html = getPropertiesHTML(data);
         } else if (type === "sorts") {
-            html = getSortsHTML(data, tabRect);
+            html = getSortsHTML(data);
         }
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel">${html}</div>`);
+
         avMenuPanel = document.querySelector(".av__panel");
+        const tabRect = blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
+        setPosition(avMenuPanel.lastElementChild as HTMLElement, tabRect.right - avMenuPanel.lastElementChild.clientWidth, tabRect.bottom, tabRect.height);
+
         avMenuPanel.addEventListener("click", (event) => {
             event.preventDefault();
             let target = event.target as HTMLElement;
@@ -34,15 +38,15 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "goConfig") {
-                    avMenuPanel.innerHTML = getConfigHTML(data, tabRect);
+                    avMenuPanel.innerHTML = getConfigHTML(data);
                     event.stopPropagation();
                     break;
                 } else if (type === "goProperties") {
-                    avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                    avMenuPanel.innerHTML = getPropertiesHTML(data);
                     event.stopPropagation();
                     break;
                 } else if (type === "goSorts") {
-                    avMenuPanel.innerHTML = getSortsHTML(data, tabRect);
+                    avMenuPanel.innerHTML = getSortsHTML(data);
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSorts") {
@@ -90,7 +94,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     });
                     if (doOperations.length > 0) {
                         transaction(protyle, doOperations, undoOperations);
-                        avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                        avMenuPanel.innerHTML = getPropertiesHTML(data);
                     }
                     event.stopPropagation();
                     break;
@@ -116,7 +120,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     });
                     if (doOperations.length > 0) {
                         transaction(protyle, doOperations, undoOperations);
-                        avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                        avMenuPanel.innerHTML = getPropertiesHTML(data);
                     }
                     event.stopPropagation();
                     break;
@@ -134,7 +138,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                         data: false
                     }]);
                     data.columns.find((item: IAVColumn) => item.id === colId).hidden = true;
-                    avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                    avMenuPanel.innerHTML = getPropertiesHTML(data);
                     event.stopPropagation();
                     break;
                 } else if (type === "showCol") {
@@ -151,7 +155,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                         data: true
                     }]);
                     data.columns.find((item: IAVColumn) => item.id === colId).hidden = false;
-                    avMenuPanel.innerHTML = getPropertiesHTML(data, tabRect);
+                    avMenuPanel.innerHTML = getPropertiesHTML(data);
                     event.stopPropagation();
                     break;
                 }
@@ -161,9 +165,9 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
     });
 };
 
-const getConfigHTML = (data: IAV, tabRect: DOMRect) => {
+const getConfigHTML = (data: IAV) => {
     return `<div class="b3-dialog__scrim" data-type="close"></div>
- <div class="b3-menu" style="right:${window.innerWidth - tabRect.right}px;top:${tabRect.bottom}px">
+ <div class="b3-menu">
     <button class="b3-menu__item" data-type="nobg">
         <span class="b3-menu__label">${window.siyuan.languages.config}</span>
         <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
@@ -196,7 +200,7 @@ const getConfigHTML = (data: IAV, tabRect: DOMRect) => {
 </div>`;
 };
 
-const getSortsHTML = (data: IAV, tabRect: DOMRect) => {
+const getSortsHTML = (data: IAV) => {
     let html = "";
     const genSortItem = (id: string) => {
         let sortHTML = ''
@@ -218,7 +222,7 @@ const getSortsHTML = (data: IAV, tabRect: DOMRect) => {
 </button>`;
     });
     return `<div class="b3-dialog__scrim" data-type="close"></div>
- <div class="b3-menu" style="right:${window.innerWidth - tabRect.right}px;top:${tabRect.bottom}px">
+ <div class="b3-menu">
     <button class="b3-menu__item" data-type="nobg">
         <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
             <svg><use xlink:href="#iconLeft"></use></svg>
@@ -239,7 +243,7 @@ const getSortsHTML = (data: IAV, tabRect: DOMRect) => {
 </div>`;
 }
 
-const getPropertiesHTML = (data: IAV, tabRect: DOMRect) => {
+const getPropertiesHTML = (data: IAV) => {
     let showHTML = "";
     let hideHTML = "";
     data.columns.forEach((item: IAVColumn) => {
@@ -272,7 +276,7 @@ const getPropertiesHTML = (data: IAV, tabRect: DOMRect) => {
 ${hideHTML}`;
     }
     return `<div class="b3-dialog__scrim" data-type="close"></div>
- <div class="b3-menu" style="right:${window.innerWidth - tabRect.right}px;top:${tabRect.bottom}px">
+ <div class="b3-menu">
     <button class="b3-menu__item" data-type="nobg">
         <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
             <svg><use xlink:href="#iconLeft"></use></svg>

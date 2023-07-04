@@ -1186,6 +1186,8 @@
     "208": "Uploading index list...",
     "209": "Uploading check index...",
     "210": "Verifying cloud data %v/%v",
-    "211": "Cloud data verification complete"
+    "211": "Cloud data verification complete",
+    "212": "There are some defects in the current version of cloud data sync, please upgrade to the latest version. Sorry for the inconvenience",
+    "213": "Cloud verification failed, please try to upgrade to the latest version and log in again before syncing"
   }
 }

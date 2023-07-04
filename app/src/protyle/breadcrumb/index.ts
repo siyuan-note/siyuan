@@ -3,7 +3,7 @@ import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {fullscreen, netImg2LocalAssets} from "./action";
-import {exportMd} from "../../menus/commonMenuItem";
+import {exportMd, openFileAttr} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
@@ -28,6 +28,7 @@ import {reloadProtyle} from "../util/reload";
 import {deleteFile} from "../../editor/deleteFile";
 import {Menu} from "../../plugin/Menu";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
+import {openTitleMenu} from "../header/openTitleMenu";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -38,12 +39,16 @@ export class Breadcrumb {
     constructor(protyle: IProtyle) {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
-        const isFocus = protyle.options.action.includes(Constants.CB_GET_ALL);
-        element.innerHTML = `<div class="protyle-breadcrumb__bar"></div>
+        element.innerHTML = `${isMobile() ?
+            `<button class="protyle-breadcrumb__icon" data-type="mobile-menu">${window.siyuan.languages.breadcrumb}</button>` :
+            '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
-<button class="block__icon block__icon--show ft__smaller fn__flex-center${isFocus ? "" : " fn__none"}" style="line-height: 14px" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
-<span class="fn__space${isFocus ? "" : " fn__none"}"></span>
-<button class="b3-tooltips b3-tooltips__w block__icon block__icon--show fn__flex-center" data-menu="true" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
+<button class="protyle-breadcrumb__icon fn__none" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
+<button class="block__icon block__icon--show fn__flex-center" data-type="a" data-position="right" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
+<span class="fn__space"></span>
+<button class="block__icon block__icon--show fn__flex-center" data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center fn__none" style="margin-left: 8px" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
+
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {
             /// #if !MOBILE
@@ -54,10 +59,9 @@ export class Breadcrumb {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(element)) {
                 const id = target.getAttribute("data-node-id");
+                const type = target.getAttribute("data-type");
                 if (id) {
-                    /// #if MOBILE
-                    this.genMobileMenu(protyle);
-                    /// #else
+                    /// #if !MOBILE
                     if (protyle.options.render.breadcrumbDocName && window.siyuan.ctrlIsPressed) {
                         openFileById({
                             app: protyle.app,
@@ -70,18 +74,41 @@ export class Breadcrumb {
                     /// #endif
                     event.preventDefault();
                     break;
-                } else if (target.getAttribute("data-menu") === "true") {
+                } else if (type === "mobile-menu") {
+                    this.genMobileMenu(protyle);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "a") {
+                    if (window.siyuan.shiftIsPressed) {
+                        fetchPost("/api/block/getDocInfo", {
+                            id: protyle.block.rootID
+                        }, (response) => {
+                            openFileAttr(response.data.ial, protyle.block.rootID);
+                        });
+                    } else {
+                        const targetRect = target.getBoundingClientRect();
+                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, isLeft: true});
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "more") {
+                    const targetRect = target.getBoundingClientRect();
                     this.showMenu(protyle, {
-                        x: event.clientX,
-                        y: event.clientY
+                        x: targetRect.right,
+                        y: targetRect.bottom,
                     });
+                    event.stopPropagation();
                     event.preventDefault();
                     break;
-                } else if (target.getAttribute("data-type") === "exit-focus") {
+                } else if (type === "exit-focus") {
                     zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id});
+                    event.stopPropagation();
                     event.preventDefault();
                     break;
-                } else if (target.getAttribute("data-type") === "context") {
+                } else if (type === "context") {
+                    event.stopPropagation();
                     event.preventDefault();
                     if (target.classList.contains("block__icon--active")) {
                         zoomOut({protyle, id: protyle.options.blockId});
@@ -101,6 +128,7 @@ export class Breadcrumb {
                 target = target.parentElement;
             }
         });
+        /// if !MOBILE
         element.addEventListener("mouseleave", () => {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl");
@@ -125,6 +153,7 @@ export class Breadcrumb {
         this.element.addEventListener("mousewheel", (event: WheelEvent) => {
             this.element.scrollLeft = this.element.scrollLeft + event.deltaY;
         }, {passive: true});
+        /// #endif
         /// #if !BROWSER
         if ("windows" !== window.siyuan.config.system.os && "linux" !== window.siyuan.config.system.os) {
             const currentWindow = getCurrentWindow();
@@ -191,24 +220,21 @@ export class Breadcrumb {
         });
     }
 
-    public genMobileIcon(rootId: string) {
-        this.element.innerHTML = `<button class="protyle-breadcrumb__item" data-node-id="${rootId}">
-    <svg class="popover__block" data-id="${rootId}"><use xlink:href="#iconFile"></use></svg>
-</button>`;
-    }
-
     public toggleExit(hide: boolean) {
         const exitFocusElement = this.element.parentElement.querySelector('[data-type="exit-focus"]');
         if (hide) {
             exitFocusElement.classList.add("fn__none");
-            exitFocusElement.nextElementSibling.classList.add("fn__none");
         } else {
             exitFocusElement.classList.remove("fn__none");
-            exitFocusElement.nextElementSibling.classList.remove("fn__none");
         }
     }
 
     public showMenu(protyle: IProtyle, position: { x: number, y: number }) {
+        if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+            window.siyuan.menus.menu.element.getAttribute("data-name") === "breadcrumbMore") {
+            window.siyuan.menus.menu.remove();
+            return;
+        }
         let id;
         const cursorNodeElement = hasClosestBlock(getEditorRange(protyle.element).startContainer);
         if (cursorNodeElement) {
@@ -216,6 +242,7 @@ export class Breadcrumb {
         }
         fetchPost("/api/block/getTreeStat", {id: id || (protyle.block.showAll ? protyle.block.id : protyle.block.rootID)}, (response) => {
             window.siyuan.menus.menu.remove();
+            window.siyuan.menus.menu.element.setAttribute("data-name", "breadcrumbMore")
             if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                 let uploadHTML = "";
                 uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';
@@ -409,11 +436,11 @@ export class Breadcrumb {
 <div class="fn__flex">${window.siyuan.languages.imgCount}<span class="fn__space fn__flex-1"></span>${response.data.imageCount}</div>
 <div class="fn__flex">${window.siyuan.languages.refCount}<span class="fn__space fn__flex-1"></span>${response.data.refCount}</div>`,
             }).element);
-            if (isMobile()) {
-                window.siyuan.menus.menu.fullscreen();
-            } else {
-                window.siyuan.menus.menu.popup(position);
-            }
+            /// #if MOBILE
+            window.siyuan.menus.menu.fullscreen();
+            /// #else
+            window.siyuan.menus.menu.popup(position, true);
+            /// #endif
         });
     }
 

@@ -7,36 +7,27 @@ import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";
 import {
-    copySubMenu,
-    movePathToMenu,
     openFileAttr,
-    openFileWechatNotify,
 } from "../../menus/commonMenuItem";
 /// #if !BROWSER
 import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
-import {readText, updateHotkeyTip, writeText} from "../util/compatibility";
+import {readText, writeText} from "../util/compatibility";
 import * as dayjs from "dayjs";
 import {setPanelFocus} from "../../layout/util";
 import {openFileById, updatePanelByEditor} from "../../editor/util";
-import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import {setTitle} from "../../dialog/processSystem";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {code160to32} from "../util/code160to32";
-import {deleteFile} from "../../editor/deleteFile";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
-import {transferBlockRef} from "../../menus/block";
-import {openCardByData} from "../../card/openCard";
-import {makeCard, quickMakeCard} from "../../card/makeCard";
-import {viewCards} from "../../card/viewCards";
-import {getNotebookName, pathPosix} from "../../util/pathName";
+import {quickMakeCard} from "../../card/makeCard";
 import {commonClick} from "../wysiwyg/commonClick";
-import {emitOpenMenu} from "../../plugin/EventBus";
+import {openTitleMenu} from "./openTitleMenu";
 
 export class Title {
     public element: HTMLElement;
@@ -192,12 +183,12 @@ export class Title {
                 });
             } else {
                 const iconRect = iconElement.getBoundingClientRect();
-                this.renderMenu(protyle, {x: iconRect.left, y: iconRect.top + 14});
+                openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom});
             }
         });
         this.element.addEventListener("contextmenu", (event) => {
             if (getSelection().rangeCount === 0) {
-                this.renderMenu(protyle, {x: event.clientX, y: event.clientY});
+                openTitleMenu(protyle, {x: event.clientX, y: event.clientY});
                 return;
             }
             protyle.toolbar?.element.classList.add("fn__none");
@@ -293,137 +284,6 @@ export class Title {
         }, Constants.TIMEOUT_INPUT);
     }
 
-    private renderMenu(protyle: IProtyle, position: { x: number, y: number }) {
-        fetchPost("/api/block/getDocInfo", {
-            id: protyle.block.rootID
-        }, (response) => {
-            window.siyuan.menus.menu.remove();
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.copy,
-                icon: "iconCopy",
-                type: "submenu",
-                submenu: copySubMenu(protyle.block.rootID)
-            }).element);
-            if (!protyle.disabled) {
-                window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
-                window.siyuan.menus.menu.append(new MenuItem({
-                    icon: "iconTrashcan",
-                    label: window.siyuan.languages.delete,
-                    click: () => {
-                        deleteFile(protyle.notebookId, protyle.path);
-                    }
-                }).element);
-                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-                const countElement = this.element.lastElementChild.querySelector(".protyle-attr--refcount");
-                if (countElement && countElement.textContent) {
-                    transferBlockRef(protyle.block.rootID);
-                }
-                window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.attr,
-                    accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
-                    click() {
-                        openFileAttr(response.data.ial, protyle.block.rootID);
-                    }
-                }).element);
-            }
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconAlignCenter",
-                label: window.siyuan.languages.outline,
-                accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
-                click: () => {
-                    openOutline(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconLink",
-                label: window.siyuan.languages.backlinks,
-                accelerator: window.siyuan.config.keymap.editor.general.backlinks.custom,
-                click: () => {
-                    openBacklink(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconGraph",
-                label: window.siyuan.languages.graphView,
-                accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
-                click: () => {
-                    openGraph(protyle);
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.wechatReminder,
-                icon: "iconMp",
-                click() {
-                    openFileWechatNotify(protyle);
-                }
-            }).element);
-            const riffCardMenu = [{
-                iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.spaceRepetition,
-                accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
-                click: () => {
-                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, this.editElement.textContent || "Untitled");
-                    });
-                }
-            }, {
-                iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.mgmt,
-                click: () => {
-                    fetchPost("/api/filetree/getHPathByID", {
-                        id: protyle.block.rootID
-                    }, (response) => {
-                        viewCards(protyle.app, protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
-                    });
-                }
-            }, {
-                iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.quickMakeCard,
-                accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-                click: () => {
-                    quickMakeCard(protyle, [this.element]);
-                }
-            }];
-            if (window.siyuan.config.flashcard.deck) {
-                riffCardMenu.push({
-                    iconHTML: Constants.ZWSP,
-                    label: window.siyuan.languages.addToDeck,
-                    click: () => {
-                        makeCard(protyle.app, [protyle.block.rootID]);
-                    }
-                });
-            }
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.riffCard,
-                type: "submenu",
-                icon: "iconRiffCard",
-                submenu: riffCardMenu,
-            }).element);
-
-            if (protyle?.app?.plugins) {
-                emitOpenMenu({
-                    plugins:protyle.app.plugins,
-                    type: "click-editortitleicon",
-                    detail: {
-                        protyle,
-                        data: response.data,
-                    },
-                    separatorPosition: "top",
-                });
-            }
-
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                iconHTML: Constants.ZWSP,
-                type: "readonly",
-                label: `${window.siyuan.languages.modifiedAt} ${dayjs(response.data.ial.updated).format("YYYY-MM-DD HH:mm:ss")}<br>
-${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`
-            }).element);
-            window.siyuan.menus.menu.popup(position);
-        });
-    }
 
     public setTitle(title: string) {
         if (code160to32(title) !== code160to32(this.editElement.textContent)) {

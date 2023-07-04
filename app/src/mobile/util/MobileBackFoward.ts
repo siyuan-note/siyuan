@@ -97,7 +97,6 @@ const focusStack = (backStack: IBackStack) => {
             }
         }
         protyle.contentElement.scrollTop = backStack.scrollTop;
-        protyle.breadcrumb?.genMobileIcon(protyle.block.rootID);
     });
 };
 

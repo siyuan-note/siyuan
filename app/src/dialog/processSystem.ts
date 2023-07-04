@@ -21,6 +21,7 @@ import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {hideElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 const updateTitle = (rootID: string, tab: Tab) => {
     fetchPost("/api/block/getDocInfo", {
@@ -168,6 +169,9 @@ export const kernelError = () => {
 };
 
 export const exitSiYuan = () => {
+    /// #if MOBILE
+    saveScroll(window.siyuan.mobile.editor.protyle);
+    /// #endif
     fetchPost("/api/system/exit", {force: false}, (response) => {
         if (response.code === 1) { // 同步执行失败
             const msgId = showMessage(response.msg, response.data.closeTimeout, "error");

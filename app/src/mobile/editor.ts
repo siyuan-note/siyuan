@@ -12,7 +12,6 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {pushBack} from "./util/MobileBackFoward";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
-import {saveScroll} from "../protyle/scroll/saveScroll";
 import {App} from "../index";
 
 export const getCurrentEditor = () => {

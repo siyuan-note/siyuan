@@ -198,7 +198,7 @@ export class Breadcrumb {
         if (!blockElement) {
             blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
         }
-        const id = blockElement.getAttribute("data-node-id")
+        const id = blockElement.getAttribute("data-node-id");
         fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes: []}, (response) => {
             response.data.forEach((item: IBreadcrumb) => {
                 let isCurrent = false;
@@ -214,7 +214,7 @@ export class Breadcrumb {
                     click() {
                         zoomOut({protyle, id: item.id, focusId: id});
                     }
-                })
+                });
             });
             menu.fullscreen();
         });
@@ -242,7 +242,7 @@ export class Breadcrumb {
         }
         fetchPost("/api/block/getTreeStat", {id: id || (protyle.block.showAll ? protyle.block.id : protyle.block.rootID)}, (response) => {
             window.siyuan.menus.menu.remove();
-            window.siyuan.menus.menu.element.setAttribute("data-name", "breadcrumbMore")
+            window.siyuan.menus.menu.element.setAttribute("data-name", "breadcrumbMore");
             if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                 let uploadHTML = "";
                 uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';

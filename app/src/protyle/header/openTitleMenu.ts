@@ -161,4 +161,4 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         window.siyuan.menus.menu.popup(position, position.isLeft);
     });
 
-}
+};

@@ -19,7 +19,6 @@ const focusStack = (backStack: IBackStack) => {
     const protyle = getCurrentEditor().protyle;
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
         id: backStack.id,
-        action: backStack.callback,
     };
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     hideElements(["toolbar", "hint", "util"], protyle);

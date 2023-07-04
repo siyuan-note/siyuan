@@ -183,7 +183,6 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_DOCINFO] = {
             id: "",
-            action: []
         };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {

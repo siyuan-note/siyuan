@@ -151,7 +151,7 @@ export const initFramework = (app: App) => {
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
         fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
             if (existResponse.data) {
-                openMobileFileById(app, localDoc.id, localDoc.action);
+                openMobileFileById(app, localDoc.id, [Constants.CB_GET_SCROLL]);
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                     if (response.data.length !== 0) {

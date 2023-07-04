@@ -20,7 +20,7 @@ export const getCurrentEditor = () => {
 };
 
 export const openMobileFileById = (app: App, id: string, action = [Constants.CB_GET_HL]) => {
-    window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id, action};
+    window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     if (window.siyuan.mobile.editor) {
         hideElements(["toolbar", "hint", "util"], window.siyuan.mobile.editor.protyle);
@@ -48,9 +48,6 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
             return;
         }
         if (window.siyuan.mobile.editor) {
-            if (document.getElementById("empty").classList.contains("fn__none")) {
-                saveScroll(window.siyuan.mobile.editor.protyle);
-            }
             pushBack();
             addLoading(window.siyuan.mobile.editor.protyle);
             fetchPost("/api/filetree/getDoc", {

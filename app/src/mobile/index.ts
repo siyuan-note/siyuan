@@ -22,6 +22,7 @@ import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
 import {afterLoadPlugin, loadPlugins} from "../plugin/loader";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -59,6 +60,12 @@ class App {
                 window.siyuan.menus.menu.remove();
             }
         });
+        window.addEventListener("beforeunload", () => {
+           saveScroll(window.siyuan.mobile.editor.protyle);
+        }, false);
+        window.addEventListener("pagehide", () => {
+            saveScroll(window.siyuan.mobile.editor.protyle);
+        }, false);
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             confResponse.data.conf.keymap = Constants.SIYUAN_KEYMAP;
             window.siyuan.config = confResponse.data.conf;

@@ -590,7 +590,6 @@ export const zoomOut = (options: {
     if (window.siyuan.mobile?.editor) {
         window.siyuan.storage[Constants.LOCAL_DOCINFO] = {
             id: options.id,
-            action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT] : [Constants.CB_GET_ALL]
         };
         setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
         if (options.isPushBack) {

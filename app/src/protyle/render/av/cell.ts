@@ -126,7 +126,7 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
     menu.addSeparator();
     menu.addItem({
         icon: "iconUp",
-        label: window.siyuan.languages.fileNameNatASC,
+        label: window.siyuan.languages.asc,
         click() {
             fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
                 transaction(protyle, [{
@@ -150,7 +150,7 @@ export const showHeaderCellMenu = (protyle: IProtyle, blockElement: HTMLElement,
     });
     menu.addItem({
         icon: "iconDown",
-        label: window.siyuan.languages.fileNameNatDESC,
+        label: window.siyuan.languages.desc,
         click() {
             fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
                 transaction(protyle, [{

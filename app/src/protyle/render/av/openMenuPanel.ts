@@ -300,8 +300,8 @@ const getSortsHTML = (data: IAV) => {
     </select>
     <span class="fn__space"></span>
     <select class="b3-select" style="width: 106px;margin: 4px 0">
-        <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.fileNameNatASC}</option>
-        <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.fileNameNatDESC}</option>
+        <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>
+        <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.desc}</option>
     </select>
     <svg class="b3-menu__action" data-type="removeSort"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;

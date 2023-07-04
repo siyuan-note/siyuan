@@ -37,9 +37,10 @@ func InsertElem[T any](ret []T, index int, value T) []T {
 }
 
 func EscapeHTML(s string) string {
-	if strings.Contains(s, "&amp;") {
+	if strings.Contains(s, "&amp;") || strings.Contains(s, "&quot;") || strings.Contains(s, "&lt;") || strings.Contains(s, "&gt;") || strings.Contains(s, "&#39;") || strings.Contains(s, "&apos;") {
 		return s
 	}
+
 	if strings.ContainsAny(s, "<>\"'") {
 		return html.EscapeString(s)
 	}

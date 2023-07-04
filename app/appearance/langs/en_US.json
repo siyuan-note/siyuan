@@ -1,4 +1,6 @@
 {
+  "asc": "Ascending",
+  "desc": "Descending",
   "hideCol": "Hide column",
   "hideAll": "Hide all",
   "showAll": "Show all",

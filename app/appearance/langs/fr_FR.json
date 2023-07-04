@@ -1186,6 +1186,8 @@
     "208": "Téléchargement de la liste d'index...",
     "209": "Téléchargement de l'index de vérification...",
     "210": "Vérification des données cloud %v/%v",
-    "211": "Vérification des données cloud terminée"
+    "211": "Vérification des données cloud terminée",
+    "212": "Il y a quelques défauts dans la version actuelle de la synchronisation des données cloud, veuillez mettre à niveau vers la dernière version. Désolé pour le désagrément",
+    "213": "Échec de la vérification cloud, veuillez essayer de mettre à niveau vers la dernière version et de vous reconnecter avant de synchroniser"
   }
 }

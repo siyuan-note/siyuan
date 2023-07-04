@@ -410,8 +410,8 @@ export class Backlink extends Model {
     }
 
     private toggleItem(liElement: HTMLElement, isMention: boolean) {
-        const svgElement = liElement.firstElementChild.firstElementChild;
-        if (svgElement.getAttribute("disabled")) {
+        const svgElement = liElement.firstElementChild?.firstElementChild;
+        if (!svgElement || svgElement.getAttribute("disabled")) {
             return;
         }
         svgElement.setAttribute("disabled", "disabled");

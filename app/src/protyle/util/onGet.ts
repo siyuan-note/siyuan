@@ -267,6 +267,7 @@ const setHTML = (options: {
         return;
     }
     if (protyle.options.render.breadcrumb) {
+        protyle.breadcrumb.toggleExit(!options.action.includes(Constants.CB_GET_ALL));
         protyle.breadcrumb.render(protyle);
     }
     protyle.app.plugins.forEach(item => {

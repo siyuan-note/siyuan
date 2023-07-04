@@ -972,7 +972,6 @@ const getArticle = (options: {
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
             }
-            options.edit.protyle.breadcrumb.toggleExit(!foldResponse.data);
         });
     });
 };

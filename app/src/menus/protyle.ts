@@ -596,11 +596,6 @@ export const zoomOut = (options: {
             pushBack();
         }
     }
-    /// #if !MOBILE
-    if (options.protyle.breadcrumb) {
-        options.protyle.breadcrumb.toggleExit(options.id === options.protyle.block.rootID);
-    }
-    /// #endif
     fetchPost("/api/filetree/getDoc", {
         id: options.id,
         size: options.id === options.protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,

@@ -39,7 +39,6 @@ export const reloadSync = (app: App, data: { upsertRootIDs: string[], removeRoot
             hideElements(["dialog"]);
         } else {
             reloadProtyle(window.siyuan.mobile.popEditor.protyle, false);
-            window.siyuan.mobile.popEditor.protyle.breadcrumb.render(window.siyuan.mobile.popEditor.protyle, true);
         }
     }
     if (window.siyuan.mobile.editor) {

@@ -56,7 +56,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                 mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
             }, getResponse => {
                 onGet({data: getResponse, protyle: window.siyuan.mobile.editor.protyle, action});
-                window.siyuan.mobile.editor.protyle.breadcrumb?.render(window.siyuan.mobile.editor.protyle);
+                window.siyuan.mobile.editor.protyle.breadcrumb?.genMobileIcon(window.siyuan.mobile.editor.protyle.block.rootID);
             });
             window.siyuan.mobile.editor.protyle.undo.clear();
         } else {
@@ -77,6 +77,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                     if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
                         disabledProtyle(editor.protyle);
                     }
+                    editor.protyle.breadcrumb?.genMobileIcon(editor.protyle.block.rootID);
                 }
             });
         }

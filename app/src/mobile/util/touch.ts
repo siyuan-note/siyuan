@@ -25,12 +25,6 @@ const popSide = (render = true) => {
 
 export const handleTouchEnd = (event: TouchEvent) => {
     const editor = getCurrentEditor();
-    if (editor) {
-        document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
-            item.classList.remove("protyle-breadcrumb__bar--hide");
-        });
-        window.siyuan.hideBreadcrumb = false;
-    }
     const target = event.target as HTMLElement;
     if (editor && typeof yDiff === "undefined" && new Date().getTime() - time > 900 &&
         target.tagName === "SPAN" && window.webkit?.messageHandlers &&

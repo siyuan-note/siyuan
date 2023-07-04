@@ -176,6 +176,8 @@
     margin: 3px 0;
     color: var(--b3-theme-on-surface);
     max-width: 70%;
+    border: 0;
+    background-color: transparent;
 
     &.b3-tooltips svg {
       margin-right: 0;

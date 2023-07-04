@@ -26,6 +26,8 @@ import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
 import {deleteFile} from "../../editor/deleteFile";
+import {Menu} from "../../plugin/Menu";
+import {getNoContainerElement} from "../wysiwyg/getBlock";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -36,7 +38,7 @@ export class Breadcrumb {
     constructor(protyle: IProtyle) {
         const element = document.createElement("div");
         element.className = "protyle-breadcrumb";
-        const isFocus = protyle.options.action.includes(Constants.CB_GET_ALL) && !isMobile();
+        const isFocus = protyle.options.action.includes(Constants.CB_GET_ALL);
         element.innerHTML = `<div class="protyle-breadcrumb__bar"></div>
 <span class="protyle-breadcrumb__space"></span>
 <button class="block__icon block__icon--show ft__smaller fn__flex-center${isFocus ? "" : " fn__none"}" style="line-height: 14px" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
@@ -53,17 +55,19 @@ export class Breadcrumb {
             while (target && !target.isEqualNode(element)) {
                 const id = target.getAttribute("data-node-id");
                 if (id) {
+                    /// #if MOBILE
+                    this.genMobileMenu(protyle);
+                    /// #else
                     if (protyle.options.render.breadcrumbDocName && window.siyuan.ctrlIsPressed) {
-                        /// #if !MOBILE
                         openFileById({
-                            app:protyle.app,
+                            app: protyle.app,
                             id,
                             action: id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
                         });
-                        /// #endif
                     } else {
-                        zoomOut({protyle, id});
+                        zoomOut({protyle, id, focusId: protyle.block.id});
                     }
+                    /// #endif
                     event.preventDefault();
                     break;
                 } else if (target.getAttribute("data-menu") === "true") {
@@ -89,7 +93,6 @@ export class Breadcrumb {
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
                         }, getResponse => {
                             onGet({data: getResponse, protyle, action: [Constants.CB_GET_HL]});
-                            this.toggleExit(true);
                         });
                         target.classList.add("block__icon--active");
                     }
@@ -150,6 +153,48 @@ export class Breadcrumb {
             uploadFiles(protyle, [file]);
         });
         this.mediaRecorder.startRecordingNewWavFile();
+    }
+
+    private genMobileMenu(protyle: IProtyle) {
+        const menu = new Menu("breadcrumb-mobile-path");
+        let blockElement: Element;
+        if (getSelection().rangeCount > 0) {
+            const range = getSelection().getRangeAt(0);
+            if (!protyle.wysiwyg.element.isEqualNode(range.startContainer) && !protyle.wysiwyg.element.contains(range.startContainer)) {
+                blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
+            } else {
+                blockElement = hasClosestBlock(range.startContainer) as Element;
+            }
+        }
+        if (!blockElement) {
+            blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
+        }
+        const id = blockElement.getAttribute("data-node-id")
+        fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes: []}, (response) => {
+            response.data.forEach((item: IBreadcrumb) => {
+                let isCurrent = false;
+                if (!protyle.block.showAll && item.id === protyle.block.parentID) {
+                    isCurrent = true;
+                } else if (protyle.block.showAll && item.id === protyle.block.id) {
+                    isCurrent = true;
+                }
+                menu.addItem({
+                    current: isCurrent,
+                    icon: getIconByType(item.type, item.subType),
+                    label: item.name,
+                    click() {
+                        zoomOut({protyle, id: item.id, focusId: id});
+                    }
+                })
+            });
+            menu.fullscreen();
+        });
+    }
+
+    public genMobileIcon(rootId: string) {
+        this.element.innerHTML = `<button class="protyle-breadcrumb__item" data-node-id="${rootId}">
+    <svg class="popover__block" data-id="${rootId}"><use xlink:href="#iconFile"></use></svg>
+</button>`;
     }
 
     public toggleExit(hide: boolean) {
@@ -373,18 +418,21 @@ export class Breadcrumb {
     }
 
     public render(protyle: IProtyle, update = false) {
+        if (isMobile()) {
+            return;
+        }
         let range: Range;
         let blockElement: Element;
         if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
             if (!protyle.wysiwyg.element.isEqualNode(range.startContainer) && !protyle.wysiwyg.element.contains(range.startContainer)) {
-                blockElement = protyle.wysiwyg.element.firstElementChild;
+                blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
             } else {
                 blockElement = hasClosestBlock(range.startContainer) as Element;
             }
         }
         if (!blockElement) {
-            blockElement = protyle.wysiwyg.element.firstElementChild;
+            blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
         }
         const id = blockElement.getAttribute("data-node-id");
         if (id === this.id && !update) {
@@ -454,6 +502,9 @@ export class Breadcrumb {
     }
 
     public hide() {
+        if (isMobile()) {
+            return;
+        }
         this.element.classList.add("protyle-breadcrumb__bar--hide");
         window.siyuan.hideBreadcrumb = true;
     }

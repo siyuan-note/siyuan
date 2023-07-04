@@ -11,13 +11,14 @@
     padding: 0 16px 8px;
     background-color: var(--b3-theme-background);
     position: absolute;
-    top: 30px;
+    top: 42px;
     right: -200px;
     bottom: 0;
     overflow: auto;
     box-sizing: border-box;
     z-index: 1;
     opacity: 0.9;
+    border-left: 1px solid var(--b3-border-color);
 
     label {
       display: flex;

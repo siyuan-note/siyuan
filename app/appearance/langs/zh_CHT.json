@@ -1,4 +1,6 @@
 {
+  "asc": "升序",
+  "desc": "降序",
   "hideCol": "隱藏列",
   "hideAll": "隱藏全部",
   "showAll": "顯示全部",

@@ -4,7 +4,9 @@ import {copySubMenu, movePathToMenu, openFileAttr, openFileWechatNotify} from ".
 import {deleteFile} from "../../editor/deleteFile";
 import {transferBlockRef} from "../../menus/block";
 import {updateHotkeyTip} from "../util/compatibility";
+/// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
+/// #endif
 import {Constants} from "../../constants";
 import {openCardByData} from "../../card/openCard";
 import {viewCards} from "../../card/viewCards";
@@ -57,6 +59,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                 }
             }).element);
         }
+        /// #if !MOBILE
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignCenter",
@@ -82,6 +85,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                 openGraph(protyle);
             }
         }).element);
+        /// #endif
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.wechatReminder,
@@ -160,5 +164,4 @@ ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14))
         }).element);
         window.siyuan.menus.menu.popup(position, position.isLeft);
     });
-
 };

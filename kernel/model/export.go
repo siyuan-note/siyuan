@@ -255,6 +255,12 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 		return
 	}
 	name = filepath.Base(zipPath)
+	name, err = url.PathUnescape(name)
+	if nil != err {
+		logging.LogErrorf("url unescape [%s] failed: %s", name, err)
+		return
+	}
+
 	targetZipPath := filepath.Join(exportFolder, name)
 	zipAbsPath := filepath.Join(util.TempDir, "export", name)
 	err = filelock.Copy(zipAbsPath, targetZipPath)

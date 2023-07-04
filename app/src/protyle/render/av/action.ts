@@ -249,6 +249,6 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
         data: {
             name: nameElement.dataset.title,
         }
-    }])
+    }]);
     nameElement.dataset.title = nameElement.textContent.trim();
-}
+};

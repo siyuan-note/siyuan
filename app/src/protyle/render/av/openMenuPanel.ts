@@ -252,15 +252,15 @@ const getConfigHTML = (data: IAV) => {
 
 const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
     menuElement.querySelectorAll("select").forEach((item: HTMLSelectElement) => {
-        item.addEventListener("change", (event) => {
+        item.addEventListener("change", () => {
             const colId = item.parentElement.getAttribute("data-id");
             const oldSort = JSON.parse(JSON.stringify(data.sorts));
             if (item.previousElementSibling.classList.contains("b3-menu__icon")) {
                 data.sorts.find((sort: IAVSort) => {
                     if (sort.column === colId) {
-                        sort.column = item.value
+                        sort.column = item.value;
                         item.parentElement.setAttribute("data-id", item.value);
-                        return true
+                        return true;
                     }
                 });
             } else {
@@ -281,17 +281,17 @@ const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) 
             }]);
         });
     });
-}
+};
 
 const getSortsHTML = (data: IAV) => {
     let html = "";
     const genSortItem = (id: string) => {
-        let sortHTML = ''
+        let sortHTML = "";
         data.columns.forEach((item) => {
-            sortHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.name}</option>`
-        })
+            sortHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.name}</option>`;
+        });
         return sortHTML;
-    }
+    };
     data.sorts.forEach((item: IAVSort) => {
         html += `<button class="b3-menu__item" data-id="${item.column}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
@@ -323,7 +323,7 @@ ${html}
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>`;
-}
+};
 
 const getPropertiesHTML = (data: IAV) => {
     let showHTML = "";
@@ -435,5 +435,5 @@ const addSort = (options: {
         x: options.rect.left,
         y: options.rect.bottom,
         h: options.rect.height,
-    })
-}
+    });
+};

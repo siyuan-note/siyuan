@@ -107,7 +107,6 @@
   z-index: 1;
 
   &__space {
-    flex: 1;
     min-width: 8px;
     transition: var(--b3-transition);
     color: var(--b3-theme-on-surface);
@@ -122,6 +121,7 @@
     display: flex;
     transition: var(--b3-transition);
     overflow: auto;
+    flex: 1;
     min-height: 30px;
 
     &::-webkit-scrollbar {
@@ -154,6 +154,7 @@
     align-self: center;
     padding: 0 4px;
     font-size: 12px;
+    white-space: nowrap;
 
     &:hover {
       color: var(--b3-theme-on-background);

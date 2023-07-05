@@ -70,7 +70,7 @@ export class Breadcrumb {
                             action: id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
                         });
                     } else {
-                        zoomOut({protyle, id, focusId: protyle.block.id});
+                        zoomOut({protyle, id});
                     }
                     /// #endif
                     event.preventDefault();

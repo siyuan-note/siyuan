@@ -50,7 +50,8 @@
     --b3-menu-background: var(--b3-theme-surface);
 
     /* 提示 */
-    --b3-tooltips-color: rgba(0, 0, 0, .9);
+    --b3-tooltips-background: rgba(0, 0, 0, .9);
+    --b3-tooltips-color: #fff;
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .1);
 
     /* 遮罩 */

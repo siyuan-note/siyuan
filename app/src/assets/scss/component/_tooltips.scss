@@ -6,9 +6,9 @@
   font-size: 12px;
   font-weight: normal;
   -webkit-font-smoothing: subpixel-antialiased;
-  color: #fff;
+  color: var(--b3-tooltips-color);
   word-wrap: break-word;
-  background: var(--b3-tooltips-color);
+  background: var(--b3-tooltips-background);
   border-radius: var(--b3-border-radius);
   line-height: 17px;
   max-width: 320px;

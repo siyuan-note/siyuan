@@ -117,7 +117,7 @@ export class Outline extends Model {
                     } else {
                         openFileById({
                             app: options.app,
-                            id:  this.blockId,
+                            id: this.blockId,
                             mode: "preview",
                         });
                     }
@@ -194,12 +194,14 @@ export class Outline extends Model {
         });
 
         if (this.isPreview) {
-            fetchPost("/api/export/preview", {
-                id: this.blockId,
-            }, response => {
-                response.data = response.data.outline;
-                this.update(response);
-            });
+            if (this.blockId) {
+                fetchPost("/api/export/preview", {
+                    id: this.blockId,
+                }, response => {
+                    response.data = response.data.outline;
+                    this.update(response);
+                });
+            }
         } else {
             fetchPost("/api/outline/getDocOutline", {
                 id: this.blockId,

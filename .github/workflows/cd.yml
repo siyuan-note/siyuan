@@ -55,15 +55,14 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          release_name: ${{ steps.release_info.outputs.release_version }}
-          tag_name: ${{ github.ref }}
+          name: ${{ steps.release_info.outputs.release_version }}
+          tag: ${{ github.ref }}
           body: ${{ env.release_body }}
           draft: false
           prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ${{ matrix.config.os }}

@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
-	"sort"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -42,82 +41,9 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 		return
 	}
 
-	filterRows(ret)
-	sortRows(ret)
+	ret.FilterRows()
+	ret.SortRows()
 	return
-}
-
-func filterRows(ret *av.AttributeView) {
-	if 0 < len(ret.Filters) {
-		var colIndexes []int
-		for _, f := range ret.Filters {
-			for i, c := range ret.Columns {
-				if c.ID == f.Column {
-					colIndexes = append(colIndexes, i)
-					break
-				}
-			}
-		}
-
-		var rows []*av.Row
-		for _, row := range ret.Rows {
-			pass := true
-			for j, index := range colIndexes {
-				c := ret.Columns[index]
-				if c.Type == av.ColumnTypeBlock {
-					continue
-				}
-
-				if !row.Cells[index].Value.CompareOperator(ret.Filters[j].Value, ret.Filters[j].Operator) {
-					pass = false
-					break
-				}
-			}
-			if pass {
-				rows = append(rows, row)
-			}
-		}
-		ret.Rows = rows
-	}
-}
-
-func sortRows(ret *av.AttributeView) {
-	if 0 < len(ret.Sorts) {
-		type ColIndexSort struct {
-			Index int
-			Order av.SortOrder
-		}
-
-		var colIndexSorts []*ColIndexSort
-		for _, s := range ret.Sorts {
-			for i, c := range ret.Columns {
-				if c.ID == s.Column {
-					colIndexSorts = append(colIndexSorts, &ColIndexSort{Index: i, Order: s.Order})
-					break
-				}
-			}
-		}
-
-		sort.Slice(ret.Rows, func(i, j int) bool {
-			for _, colIndexSort := range colIndexSorts {
-				c := ret.Columns[colIndexSort.Index]
-				if c.Type == av.ColumnTypeBlock {
-					continue
-				}
-
-				result := ret.Rows[i].Cells[colIndexSort.Index].Value.Compare(ret.Rows[j].Cells[colIndexSort.Index].Value)
-				if 0 == result {
-					continue
-				}
-
-				if colIndexSort.Order == av.SortOrderAsc {
-					return 0 > result
-				}
-				return 0 < result
-			}
-			return false
-		})
-	}
 }
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {

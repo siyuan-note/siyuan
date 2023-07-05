@@ -22,6 +22,7 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -225,4 +226,77 @@ func RebuildAttributeViewTable(tx *sql.Tx, av *AttributeView) (err error) {
 		}
 	}
 	return
+}
+
+func (av *AttributeView) SortRows() {
+	if 0 < len(av.Sorts) {
+		type ColIndexSort struct {
+			Index int
+			Order SortOrder
+		}
+
+		var colIndexSorts []*ColIndexSort
+		for _, s := range av.Sorts {
+			for i, c := range av.Columns {
+				if c.ID == s.Column {
+					colIndexSorts = append(colIndexSorts, &ColIndexSort{Index: i, Order: s.Order})
+					break
+				}
+			}
+		}
+
+		sort.Slice(av.Rows, func(i, j int) bool {
+			for _, colIndexSort := range colIndexSorts {
+				c := av.Columns[colIndexSort.Index]
+				if c.Type == ColumnTypeBlock {
+					continue
+				}
+
+				result := av.Rows[i].Cells[colIndexSort.Index].Value.Compare(av.Rows[j].Cells[colIndexSort.Index].Value)
+				if 0 == result {
+					continue
+				}
+
+				if colIndexSort.Order == SortOrderAsc {
+					return 0 > result
+				}
+				return 0 < result
+			}
+			return false
+		})
+	}
+}
+
+func (av *AttributeView) FilterRows() {
+	if 0 < len(av.Filters) {
+		var colIndexes []int
+		for _, f := range av.Filters {
+			for i, c := range av.Columns {
+				if c.ID == f.Column {
+					colIndexes = append(colIndexes, i)
+					break
+				}
+			}
+		}
+
+		var rows []*Row
+		for _, row := range av.Rows {
+			pass := true
+			for j, index := range colIndexes {
+				c := av.Columns[index]
+				if c.Type == ColumnTypeBlock {
+					continue
+				}
+
+				if !row.Cells[index].Value.CompareOperator(av.Filters[j].Value, av.Filters[j].Operator) {
+					pass = false
+					break
+				}
+			}
+			if pass {
+				rows = append(rows, row)
+			}
+		}
+		av.Rows = rows
+	}
 }

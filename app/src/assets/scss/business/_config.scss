@@ -30,27 +30,38 @@
     }
   }
 
-  &__panel {
-    & > .b3-tab-bar {
-      user-select: none;
-      width: 200px;
-      overflow: auto;
-      padding: 8px 0;
-      box-sizing: border-box;
+  &__panel > .b3-tab-bar {
+    user-select: none;
+    width: 240px;
+    overflow: auto;
+    padding: 8px 0;
+    box-sizing: border-box;
 
-      .b3-form__icon {
-        margin: 0 8px 8px;
-      }
+    .config__tab-hr {
+      margin: 16px 0;
+      background: var(--b3-border-color);
+      height: 1px;
+    }
 
-      .b3-list-item {
-        line-height: 38px;
+    .config__tab-title {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      padding: 0 12px;
+    }
 
-        &__graphic {
-          margin-right: 0;
-          padding: 0 10px 0 5px;
-          height: 16px;
-          width: 16px;
-        }
+    .b3-form__icon {
+      margin: 0 8px 8px;
+    }
+
+    .b3-list-item {
+      line-height: 38px;
+
+      &__graphic {
+        margin-right: 0;
+        padding: 0 10px 0 5px;
+        height: 16px;
+        width: 16px;
       }
     }
   }

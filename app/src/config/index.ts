@@ -95,7 +95,12 @@ export const openSetting = (app: App) => {
     const dialog = new Dialog({
         content: `<div class="fn__flex-1 fn__flex config__panel" style="overflow: hidden;position: relative">
   <ul class="b3-tab-bar b3-list b3-list--background">
+    <div class="config__tab-title">
+        <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>
+        <span class="b3-list-item__text">${window.siyuan.languages.config}</span>
+    </div>
     <div class="b3-form__icon"><svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg><input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__block b3-form__icon-input"></div>
+    <div class="config__tab-hr"></div>
     <li data-name="editor" class="b3-list-item--focus b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconEdit"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.editor}</span></li>
     <li data-name="filetree" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconFiles"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.fileTree}</span></li>
     <li data-name="card" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span></li>

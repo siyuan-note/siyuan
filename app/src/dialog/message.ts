@@ -83,6 +83,9 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
 
 export const hideMessage = (id?: string) => {
     const messagesElement = document.getElementById("message").firstElementChild;
+    if (!messagesElement) {
+        return;
+    }
     if (id) {
         const messageElement = messagesElement.querySelector(`[data-id="${id}"]`);
         if (messageElement) {

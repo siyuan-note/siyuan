@@ -32,8 +32,13 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 	rhyResultLock.Lock()
 	defer rhyResultLock.Unlock()
 
+	cacheDuration := int64(3600)
+	if ContainerDocker == Container {
+		cacheDuration = int64(3600 * 24)
+	}
+
 	now := time.Now().Unix()
-	if 3600 >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
+	if cacheDuration >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
 		return cachedRhyResult, nil
 	}
 

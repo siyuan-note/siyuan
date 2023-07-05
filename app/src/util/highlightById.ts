@@ -67,15 +67,21 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         offsetTop += (parentNodeElement as HTMLElement).offsetTop;
         parentNodeElement = parentNodeElement.parentElement;
     }
+    let contentTop = 0;
+    let topElement = protyle.element.firstElementChild
+    while (topElement && !topElement.classList.contains("protyle-content")) {
+        contentTop += topElement.clientHeight
+        topElement = topElement.nextElementSibling;
+    }
     if (top) {
-        protyle.contentElement.scroll({top: offsetTop - 32, behavior});
+        protyle.contentElement.scroll({top: offsetTop - contentTop, behavior});
         return;
     }
     if (protyle.contentElement.scrollTop > offsetTop - 32) {
-        protyle.contentElement.scroll({top: offsetTop - 32, behavior});
-    } else if (protyle.contentElement.scrollTop + protyle.contentElement.clientHeight < offsetTop + nodeElement.clientHeight - 32) {
+        protyle.contentElement.scroll({top: offsetTop - contentTop, behavior});
+    } else if (protyle.contentElement.scrollTop + protyle.contentElement.clientHeight < offsetTop + nodeElement.clientHeight - contentTop) {
         protyle.contentElement.scroll({
-            top: offsetTop + nodeElement.clientHeight - 32 - protyle.contentElement.clientHeight,
+            top: offsetTop + nodeElement.clientHeight - contentTop - protyle.contentElement.clientHeight,
             behavior
         });
     }

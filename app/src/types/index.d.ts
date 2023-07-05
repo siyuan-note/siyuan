@@ -36,7 +36,7 @@ type TEventBus = "ws-main" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
-    "open-menu-av" | "open-menu-content" |
+    "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
     "loaded-protyle"
 type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block" | "mSelect"
 

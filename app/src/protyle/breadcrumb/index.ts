@@ -29,6 +29,7 @@ import {deleteFile} from "../../editor/deleteFile";
 import {Menu} from "../../plugin/Menu";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
+import {emitOpenMenu} from "../../plugin/EventBus";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -426,6 +427,19 @@ export class Breadcrumb {
                 submenu: editSubmenu
             }).element);
             window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
+
+            if (protyle?.app?.plugins) {
+                emitOpenMenu({
+                    plugins: protyle.app.plugins,
+                    type: "open-menu-breadcrumbmore",
+                    detail: {
+                        protyle,
+                        data: response.data,
+                    },
+                    separatorPosition: "top",
+                });
+            }
+
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 iconHTML: Constants.ZWSP,

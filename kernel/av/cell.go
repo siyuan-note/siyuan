@@ -96,18 +96,35 @@ func (value *Value) Compare(other *Value) int {
 }
 
 func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool {
-	if nil == value {
+	if nil == value || nil == other {
 		return false
 	}
-	if nil == other {
-		return false
-	}
+
 	if nil != value.Block && nil != other.Block {
 		return strings.Contains(value.Block.Content, other.Block.Content)
 	}
+
 	if nil != value.Text && nil != other.Text {
-		return strings.Contains(value.Text.Content, other.Text.Content)
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Text.Content == other.Text.Content
+		case FilterOperatorIsNotEqual:
+			return value.Text.Content != other.Text.Content
+		case FilterOperatorContains:
+			return strings.Contains(value.Text.Content, other.Text.Content)
+		case FilterOperatorDoesNotContain:
+			return !strings.Contains(value.Text.Content, other.Text.Content)
+		case FilterOperatorStartsWith:
+			return strings.HasPrefix(value.Text.Content, other.Text.Content)
+		case FilterOperatorEndsWith:
+			return strings.HasSuffix(value.Text.Content, other.Text.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Text.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Text.Content)
+		}
 	}
+
 	if nil != value.Number && nil != other.Number {
 		switch operator {
 		case FilterOperatorIsEqual:
@@ -122,8 +139,11 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return value.Number.Content < other.Number.Content
 		case FilterOperatorIsLessOrEqual:
 			return value.Number.Content <= other.Number.Content
+		case FilterOperatorIsEmpty:
+			return 0 == value.Number.Content
 		}
 	}
+
 	if nil != value.Date && nil != other.Date {
 		switch operator {
 		case FilterOperatorIsEqual:
@@ -138,21 +158,51 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return value.Date.Content < other.Date.Content
 		case FilterOperatorIsLessOrEqual:
 			return value.Date.Content <= other.Date.Content
+		case FilterOperatorIsBetween:
+			return value.Date.Content >= other.Date.Content && value.Date.Content <= other.Date.Content2
+		case FilterOperatorIsEmpty:
+			return 0 == value.Date.Content
+		case FilterOperatorIsNotEmpty:
+			return 0 != value.Date.Content
+		case FilterOperatorIsRelativeToToday:
+			// TODO: date filter (relative to today)
+			return value.Date.Content >= other.Date.Content && value.Date.Content <= other.Date.Content2
 		}
 	}
+
 	if nil != value.Select && nil != other.Select {
-		return strings.Contains(value.Select.Content, other.Select.Content)
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Select.Content == other.Select.Content
+		case FilterOperatorIsNotEqual:
+			return value.Select.Content != other.Select.Content
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Select.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Select.Content)
+		}
 	}
+
 	if nil != value.MSelect && nil != other.MSelect {
-		var v1 string
-		for _, v := range value.MSelect {
-			v1 += v.Content
+		switch operator {
+		case FilterOperatorContains:
+			for _, v := range value.MSelect {
+				if v.Content == other.MSelect[0].Content {
+					return true
+				}
+			}
+		case FilterOperatorDoesNotContain:
+			for _, v := range value.MSelect {
+				if v.Content == other.MSelect[0].Content {
+					return false
+				}
+			}
+			return true
+		case FilterOperatorIsEmpty:
+			return 0 == len(value.MSelect)
+		case FilterOperatorIsNotEmpty:
+			return 0 != len(value.MSelect)
 		}
-		var v2 string
-		for _, v := range other.MSelect {
-			v2 += v.Content
-		}
-		return strings.Contains(v1, v2)
 	}
 	return false
 }
@@ -186,7 +236,8 @@ type ValueNumber struct {
 }
 
 type ValueDate struct {
-	Content int64 `json:"content"`
+	Content  int64 `json:"content"`
+	Content2 int64 `json:"content2"`
 }
 
 type ValueSelect struct {

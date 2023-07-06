@@ -826,12 +826,18 @@ interface IBazaarItem {
 
 interface IAV {
     columns: IAVColumn[],
-    filters: [],
+    filters: IAVFilter[],
     sorts: IAVSort[],
     name: string,
     type: "table"
     rows: IAVRow[],
     id: string
+}
+
+interface IAVFilter {
+    column: string,
+    operator: "=" | "!=" | ">" | ">=" | "<" | "<=" | "Contains" | "Does not contains" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is relative to today"
+    value: string
 }
 
 interface IAVSort {

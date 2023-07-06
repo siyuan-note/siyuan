@@ -5,7 +5,7 @@ import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {Menu} from "../../../plugin/Menu";
 
-export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" | "sorts" = "config") => {
+export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" | "sorts" | "filters" = "config") => {
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
         avPanelElement.remove();
@@ -22,6 +22,8 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
             html = getPropertiesHTML(data);
         } else if (type === "sorts") {
             html = getSortsHTML(data);
+        } else if (type === "filters") {
+            html = getFiltersHTML(data);
         }
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel">
     <div class="b3-dialog__scrim" data-type="close"></div>
@@ -107,6 +109,62 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     }]);
                     menuElement.innerHTML = getSortsHTML(data);
                     bindSortsEvent(protyle, menuElement, data);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goFilters") {
+                    menuElement.innerHTML = getFiltersHTML(data);
+                    bindFiltersEvent(protyle, menuElement, data);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "removeFilters") {
+                    transaction(protyle, [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            Filters: []
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            Filters: data.filters
+                        }
+                    }]);
+                    data.filters = [];
+                    menuElement.innerHTML = getFiltersHTML(data);
+                    bindFiltersEvent(protyle, menuElement, data);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "addFilter") {
+                    addFilter({data, rect: target.getBoundingClientRect(), menuElement, tabRect, avId, protyle});
+                    event.stopPropagation();
+                    break;
+                } else if (type === "removeFilter") {
+                    const oldFilters = Object.assign([], data.filters);
+                    data.filters.find((item: IAVFilter, index: number) => {
+                        if (item.column === target.parentElement.dataset.id) {
+                            data.filters.splice(index, 1);
+                            return true;
+                        }
+                    });
+                    transaction(protyle, [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            Filters: data.filters
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            Filters: oldFilters
+                        }
+                    }]);
+                    menuElement.innerHTML = getFiltersHTML(data);
+                    bindFiltersEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
@@ -218,36 +276,58 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
     });
 };
 
-const getConfigHTML = (data: IAV) => {
-    return `<button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__label">${window.siyuan.languages.config}</span>
-    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
-</button>
-<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="goProperties">
-    <svg class="b3-menu__icon"></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
-    <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => !item.hidden).length}/${data.columns.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>
-<button class="b3-menu__item">
-    <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
-    <span class="b3-menu__accelerator">${data.filters.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>
-<button class="b3-menu__item" data-type="goSorts">
-    <svg class="b3-menu__icon"><use xlink:href="#iconSort"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
-    <span class="b3-menu__accelerator">${data.sorts.length}</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>
-<button class="b3-menu__item">
-    <svg class="b3-menu__icon"></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
-    <span class="b3-menu__accelerator">50</span>
-    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>`;
+const addSort = (options: {
+    data: IAV,
+    rect: DOMRect,
+    menuElement: HTMLElement,
+    tabRect: DOMRect,
+    avId: string,
+    protyle: IProtyle
+}) => {
+    const menu = new Menu("av-add-sort");
+    options.data.columns.forEach((column) => {
+        let hasSort = false;
+        options.data.sorts.find((sort) => {
+            if (sort.column === column.id) {
+                hasSort = true;
+                return true;
+            }
+        });
+        if (!hasSort) {
+            menu.addItem({
+                label: column.name,
+                icon: getColIconByType(column.type),
+                click: () => {
+                    const oldSorts = Object.assign([], options.data.sorts);
+                    options.data.sorts.push({
+                        column: column.id,
+                        order: "ASC",
+                    });
+                    transaction(options.protyle, [{
+                        action: "setAttrView",
+                        id: options.avId,
+                        data: {
+                            sorts: options.data.sorts
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: options.avId,
+                        data: {
+                            sorts: oldSorts
+                        }
+                    }]);
+                    options.menuElement.innerHTML = getSortsHTML(options.data);
+                    bindSortsEvent(options.protyle, options.menuElement, options.data);
+                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
+                }
+            });
+        }
+    });
+    menu.open({
+        x: options.rect.left,
+        y: options.rect.bottom,
+        h: options.rect.height,
+    });
 };
 
 const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
@@ -325,6 +405,63 @@ ${html}
 </button>`;
 };
 
+const addFilter = (options: {
+    data: IAV,
+    rect: DOMRect,
+    menuElement: HTMLElement,
+    tabRect: DOMRect,
+    avId: string,
+    protyle: IProtyle
+}) => {
+
+}
+
+const bindFiltersEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
+
+}
+
+const getFiltersHTML = (data: IAV) => {
+    let html = "";
+    const genFilterItem = (id: string) => {
+        let filterHTML = "";
+        data.columns.forEach((item) => {
+            filterHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.name}</option>`;
+        });
+        return filterHTML;
+    };
+    data.filters.forEach((item: IAVFilter) => {
+        html += `<button class="b3-menu__item" data-id="${item.column}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <select class="b3-select" style="width: 106px;margin: 4px 0">
+        ${genFilterItem(item.column)}
+    </select>
+    <span class="fn__space"></span>
+    <select class="b3-select" style="width: 106px;margin: 4px 0">
+        <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>
+        <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.desc}</option>
+    </select>
+    <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>
+</button>`;
+    });
+    return `<button class="b3-menu__item" data-type="nobg">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
+        <svg><use xlink:href="#iconLeft"></use></svg>
+    </span>
+    <span class="b3-menu__label ft__center">${window.siyuan.languages.filter}</span>
+    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
+</button>
+<button class="b3-menu__separator"></button>
+${html}
+<button class="b3-menu__item${data.filters.length === data.columns.length ? " fn__none" : ""}" data-type="addFilter">
+    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.new}</span>
+</button>
+<button class="b3-menu__item${html ? "" : " fn__none"}" data-type="removeFilters">
+    <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+</button>`;
+};
+
 const getPropertiesHTML = (data: IAV) => {
     let showHTML = "";
     let hideHTML = "";
@@ -384,56 +521,34 @@ ${hideHTML}
 </button>`;
 };
 
-const addSort = (options: {
-    data: IAV,
-    rect: DOMRect,
-    menuElement: HTMLElement,
-    tabRect: DOMRect,
-    avId: string,
-    protyle: IProtyle
-}) => {
-    const menu = new Menu("av-add-sort");
-    options.data.columns.forEach((column) => {
-        let hasSort = false;
-        options.data.sorts.find((sort) => {
-            if (sort.column === column.id) {
-                hasSort = true;
-                return true;
-            }
-        });
-        if (!hasSort) {
-            menu.addItem({
-                label: column.name,
-                icon: getColIconByType(column.type),
-                click: () => {
-                    const oldSorts = Object.assign([], options.data.sorts);
-                    options.data.sorts.push({
-                        column: column.id,
-                        order: "ASC",
-                    });
-                    transaction(options.protyle, [{
-                        action: "setAttrView",
-                        id: options.avId,
-                        data: {
-                            sorts: options.data.sorts
-                        }
-                    }], [{
-                        action: "setAttrView",
-                        id: options.avId,
-                        data: {
-                            sorts: oldSorts
-                        }
-                    }]);
-                    options.menuElement.innerHTML = getSortsHTML(options.data);
-                    bindSortsEvent(options.protyle, options.menuElement, options.data);
-                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
-                }
-            });
-        }
-    });
-    menu.open({
-        x: options.rect.left,
-        y: options.rect.bottom,
-        h: options.rect.height,
-    });
+const getConfigHTML = (data: IAV) => {
+    return `<button class="b3-menu__item" data-type="nobg">
+    <span class="b3-menu__label">${window.siyuan.languages.config}</span>
+    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
+</button>
+<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="goProperties">
+    <svg class="b3-menu__icon"></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
+    <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => !item.hidden).length}/${data.columns.length}</span>
+    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
+    <span class="b3-menu__accelerator">${data.filters.length}</span>
+    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item" data-type="goSorts">
+    <svg class="b3-menu__icon"><use xlink:href="#iconSort"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
+    <span class="b3-menu__accelerator">${data.sorts.length}</span>
+    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item">
+    <svg class="b3-menu__icon"></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
+    <span class="b3-menu__accelerator">50</span>
+    <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
+</button>`;
 };

@@ -92,6 +92,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const filtersElement = hasClosestByAttribute(event.target, "data-type", "av-filter");
+    if (filtersElement) {
+        openMenuPanel(protyle, blockElement, "filters");
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     const cellHeaderElement = hasClosestByClassName(event.target, "av__cellheader");
     if (cellHeaderElement) {
         showHeaderCellMenu(protyle, blockElement, cellHeaderElement.parentElement);

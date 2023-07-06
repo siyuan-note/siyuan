@@ -882,8 +882,11 @@ interface IAVCell {
     valueType: TAVCol,
 }
 
-interface IAVCellValue {
-    content: string,
-    content2?: string,
-    color?: string,
+type IAVCellValue = {
+    [key in TAVCol]?: {
+        content: string
+        content2?: string
+        color?: string
+        id?: string
+    }
 }

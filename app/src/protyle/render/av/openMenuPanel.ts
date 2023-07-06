@@ -407,12 +407,13 @@ ${html}
 };
 
 const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
+    const colType = target.getAttribute("data-coltype") as TAVCol;
     const menu = new Menu(undefined, () => {
         const colId = target.parentElement.parentElement.getAttribute("data-id");
         const oldFilters = JSON.parse(JSON.stringify(data.filters));
         data.filters.find((filter) => {
             if (filter.column === colId) {
-                filter.value = {
+                filter.value[colType] = {
                     content: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
                 };
                 filter.operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
@@ -434,7 +435,7 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
         }]);
     });
     let selectHTML = "";
-    switch (target.getAttribute("data-coltype")) {
+    switch (colType) {
         case "text":
             selectHTML = `<option value="=">=</option>
 <option value="!=">!=</option>
@@ -482,13 +483,15 @@ const addFilter = (options: {
                 icon: getColIconByType(column.type),
                 click: () => {
                     const oldFilters = Object.assign([], options.data.filters);
-                    const value: IAVCellValue = {
-                        content: ""
-                    }
+
                     options.data.filters.push({
                         column: column.id,
                         operator: "Contains",
-                        value,
+                        value: {
+                            [column.type]: {
+                                content: ""
+                            }
+                        },
                     });
                     transaction(options.protyle, [{
                         action: "setAttrView",
@@ -522,9 +525,10 @@ const getFiltersHTML = (data: IAV) => {
         let filterHTML = "";
         data.columns.find((item) => {
             if (item.id === filter.column) {
-                filterHTML += `<span data-type="setFilter" data-coltype="${item.type}" class="b3-chip${filter.value?.content ? " b3-chip--primary" : ""}">
+                const filterValue = (filter.value && filter.value[item.type] && filter.value[item.type].content) ? ":" + filter.value[item.type].content : "";
+                filterHTML += `<span data-type="setFilter" data-coltype="${item.type}" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
     <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
-    <span class="fn__ellipsis">${item.name}${filter.value?.content ? ":" + filter.value?.content : ""}</span>
+    <span class="fn__ellipsis">${item.name}${filterValue}</span>
 </span>`;
                 return true
             }

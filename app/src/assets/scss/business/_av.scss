@@ -149,6 +149,18 @@
       width: 300px;
       max-height: 70vh;
 
+      .b3-chip {
+        max-width: 220px;
+        margin: 1px 0;
+        padding: 6px 12px 6px 14px;
+        float: left;
+
+        svg {
+          width: 12px;
+          flex-shrink: 0;
+        }
+      }
+
       .block__icon {
         line-height: 20px;
         padding: 0 4px;
@@ -161,12 +173,12 @@
         overflow: hidden;
       }
 
+      &__item:hover .b3-menu__action {
+        opacity: 1;
+      }
+
       &__item:not([data-type="nobg"]):hover {
         background-color: var(--b3-list-hover);
-
-        .b3-menu__action {
-          opacity: 1;
-        }
       }
     }
   }

@@ -39,7 +39,21 @@ type TEventBus = "ws-main" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
     "loaded-protyle"
 type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block" | "mSelect"
-
+type TAVFilterOperator =
+    "="
+    | "!="
+    | ">"
+    | ">="
+    | "<"
+    | "<="
+    | "Contains"
+    | "Does not contains"
+    | "Is empty"
+    | "Is not empty"
+    | "Starts with"
+    | "Ends with"
+    | "Is between"
+    | "Is relative to today"
 declare module "blueimp-md5"
 
 interface Window {
@@ -836,7 +850,7 @@ interface IAV {
 
 interface IAVFilter {
     column: string,
-    operator: "=" | "!=" | ">" | ">=" | "<" | "<=" | "Contains" | "Does not contains" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is relative to today"
+    operator: TAVFilterOperator,
     value: IAVCellValue
 }
 

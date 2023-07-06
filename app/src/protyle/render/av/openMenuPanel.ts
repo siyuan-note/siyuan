@@ -114,7 +114,6 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     break;
                 } else if (type === "goFilters") {
                     menuElement.innerHTML = getFiltersHTML(data);
-                    bindFiltersEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
@@ -123,18 +122,17 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                         action: "setAttrView",
                         id: avId,
                         data: {
-                            Filters: []
+                            filters: []
                         }
                     }], [{
                         action: "setAttrView",
                         id: avId,
                         data: {
-                            Filters: data.filters
+                            filters: data.filters
                         }
                     }]);
                     data.filters = [];
                     menuElement.innerHTML = getFiltersHTML(data);
-                    bindFiltersEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
@@ -154,18 +152,21 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                         action: "setAttrView",
                         id: avId,
                         data: {
-                            Filters: data.filters
+                            filter: data.filters
                         }
                     }], [{
                         action: "setAttrView",
                         id: avId,
                         data: {
-                            Filters: oldFilters
+                            filter: oldFilters
                         }
                     }]);
                     menuElement.innerHTML = getFiltersHTML(data);
-                    bindFiltersEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "setFilter") {
+                    setFilter(protyle, data, target);
                     event.stopPropagation();
                     break;
                 } else if (type === "newCol") {
@@ -405,6 +406,59 @@ ${html}
 </button>`;
 };
 
+const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
+    const menu = new Menu(undefined, () => {
+        const colId = target.parentElement.parentElement.getAttribute("data-id");
+        const oldFilters = JSON.parse(JSON.stringify(data.filters));
+        data.filters.find((filter) => {
+            if (filter.column === colId) {
+                filter.value = {
+                    content: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
+                };
+                filter.operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
+                return true;
+            }
+        });
+        transaction(protyle, [{
+            action: "setAttrView",
+            id: data.id,
+            data: {
+                filters: data.filters
+            }
+        }], [{
+            action: "setAttrView",
+            id: data.id,
+            data: {
+                filters: oldFilters
+            }
+        }]);
+    });
+    let selectHTML = "";
+    switch (target.getAttribute("data-coltype")) {
+        case "text":
+            selectHTML = `<option value="=">=</option>
+<option value="!=">!=</option>
+<option value="Contains">Contains</option>
+<option value="Does not contains">Does not contains</option>
+<option value="Starts with">Starts with</option>
+<option value="Ends with">Ends with</option>
+<option value="Is empty">Is empty</option>
+<option value="Is not empty">Is not empty</option>
+`;
+            break;
+    }
+    menu.addItem({
+        iconHTML: "",
+        label: `<select class="b3-select fn__size200">${selectHTML}</select>`
+    })
+    menu.addItem({
+        iconHTML: "",
+        label: `<input class="b3-text-field fn__size200">`
+    })
+    const rectTarget = target.getBoundingClientRect();
+    menu.open({x: rectTarget.left, y: rectTarget.bottom})
+}
+
 const addFilter = (options: {
     data: IAV,
     rect: DOMRect,
@@ -450,7 +504,6 @@ const addFilter = (options: {
                         }
                     }]);
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
-                    bindFiltersEvent(options.protyle, options.menuElement, options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                 }
             });
@@ -463,25 +516,25 @@ const addFilter = (options: {
     });
 }
 
-const bindFiltersEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
-
-}
-
 const getFiltersHTML = (data: IAV) => {
     let html = "";
-    const genFilterItem = (id: string) => {
+    const genFilterItem = (filter: IAVFilter) => {
         let filterHTML = "";
-        data.columns.forEach((item) => {
-            filterHTML += `<option value="${item.id}" ${item.id === id ? "selected" : ""}>${item.name}</option>`;
+        data.columns.find((item) => {
+            if (item.id === filter.column) {
+                filterHTML += `<span data-type="setFilter" data-coltype="${item.type}" class="b3-chip${filter.value?.content ? " b3-chip--primary" : ""}">
+    <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
+    <span class="fn__ellipsis">${item.name}${filter.value?.content ? ":" + filter.value?.content : ""}</span>
+</span>`;
+                return true
+            }
         });
         return filterHTML;
     };
     data.filters.forEach((item: IAVFilter) => {
-        html += `<button class="b3-menu__item" data-id="${item.column}">
+        html += `<button class="b3-menu__item" data-type="nobg" data-id="${item.column}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
-    <select class="b3-select" style="flex: 1;margin: 4px 0">
-        ${genFilterItem(item.column)}
-    </select>
+    <div class="fn__flex-1">${genFilterItem(item)}</div>
     <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;
     });

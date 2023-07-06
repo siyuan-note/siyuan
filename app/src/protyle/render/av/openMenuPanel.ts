@@ -4,6 +4,7 @@ import {addCol} from "./addCol";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {Menu} from "../../../plugin/Menu";
+import {hasClosestByClassName} from "../../util/hasClosest";
 
 export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" | "sorts" | "filters" = "config") => {
     let avPanelElement = document.querySelector(".av__panel");
@@ -152,13 +153,13 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                         action: "setAttrView",
                         id: avId,
                         data: {
-                            filter: data.filters
+                            filters: data.filters
                         }
                     }], [{
                         action: "setAttrView",
                         id: avId,
                         data: {
-                            filter: oldFilters
+                            filters: oldFilters
                         }
                     }]);
                     menuElement.innerHTML = getFiltersHTML(data);
@@ -414,7 +415,7 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
         data.filters.find((filter) => {
             if (filter.column === colId) {
                 filter.value[colType] = {
-                    content: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
+                    content: textElement.value
                 };
                 filter.operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
                 return true;
@@ -433,18 +434,23 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
                 filters: oldFilters
             }
         }]);
+        const menuElement = hasClosestByClassName(target, "b3-menu")
+        if (menuElement) {
+            menuElement.innerHTML = getFiltersHTML(data);
+        }
     });
     let selectHTML = "";
+    const filterOperation = target.getAttribute("data-op")
     switch (colType) {
         case "text":
-            selectHTML = `<option value="=">=</option>
-<option value="!=">!=</option>
-<option value="Contains">Contains</option>
-<option value="Does not contains">Does not contains</option>
-<option value="Starts with">Starts with</option>
-<option value="Ends with">Ends with</option>
-<option value="Is empty">Is empty</option>
-<option value="Is not empty">Is not empty</option>
+            selectHTML = `<option ${"=" === filterOperation ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+<option ${"!=" === filterOperation ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
+<option ${"Contains" === filterOperation ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
+<option ${"Does not contains" === filterOperation ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
+<option ${"Starts with" === filterOperation ? "selected" : ""} value="Starts with">${window.siyuan.languages.filterOperatorStartsWith}</option>
+<option ${"Ends with" === filterOperation ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
+<option ${"Is empty" === filterOperation ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
+<option ${"Is not empty" === filterOperation ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
 `;
             break;
     }
@@ -454,10 +460,22 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
     })
     menu.addItem({
         iconHTML: "",
-        label: `<input class="b3-text-field fn__size200">`
+        label: `<input value="${target.getAttribute("data-value")}" class="b3-text-field fn__size200">`
+    })
+    const textElement = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement)
+    textElement.addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            event.preventDefault();
+            return;
+        }
+        if (event.key === "Enter") {
+            menu.close();
+            event.preventDefault();
+        }
     })
     const rectTarget = target.getBoundingClientRect();
-    menu.open({x: rectTarget.left, y: rectTarget.bottom})
+    menu.open({x: rectTarget.left, y: rectTarget.bottom});
+    textElement.select();
 }
 
 const addFilter = (options: {
@@ -483,7 +501,6 @@ const addFilter = (options: {
                 icon: getColIconByType(column.type),
                 click: () => {
                     const oldFilters = Object.assign([], options.data.filters);
-
                     options.data.filters.push({
                         column: column.id,
                         operator: "Contains",
@@ -508,6 +525,7 @@ const addFilter = (options: {
                     }]);
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
+                    setFilter(options.protyle, options.data, options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`));
                 }
             });
         }
@@ -525,10 +543,10 @@ const getFiltersHTML = (data: IAV) => {
         let filterHTML = "";
         data.columns.find((item) => {
             if (item.id === filter.column) {
-                const filterValue = (filter.value && filter.value[item.type] && filter.value[item.type].content) ? ":" + filter.value[item.type].content : "";
-                filterHTML += `<span data-type="setFilter" data-coltype="${item.type}" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
+                const filterValue = (filter.value && filter.value[item.type] && filter.value[item.type].content) ? filter.value[item.type].content : "";
+                filterHTML += `<span data-type="setFilter" data-coltype="${item.type}" data-op="${filter.operator}" data-value="${filterValue}" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
     <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
-    <span class="fn__ellipsis">${item.name}${filterValue}</span>
+    <span class="fn__ellipsis">${item.name}${filterValue ? ": " + filterValue : ""}</span>
 </span>`;
                 return true
             }

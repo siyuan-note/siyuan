@@ -136,7 +136,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }, {
             iconHTML: Constants.ZWSP,
-            label: window.siyuan.languages.mgmt,
+            label: window.siyuan.languages.manage,
             click: () => {
                 viewCards(app, notebookId, name, "Notebook");
                 /// #if MOBILE
@@ -387,7 +387,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 }
             }, {
                 iconHTML: Constants.ZWSP,
-                label: window.siyuan.languages.mgmt,
+                label: window.siyuan.languages.manage,
                 click: () => {
                     fetchPost("/api/filetree/getHPathByID", {
                         id

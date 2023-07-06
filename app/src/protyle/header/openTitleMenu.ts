@@ -105,7 +105,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
             }
         }, {
             iconHTML: Constants.ZWSP,
-            label: window.siyuan.languages.mgmt,
+            label: window.siyuan.languages.manage,
             click: () => {
                 fetchPost("/api/filetree/getHPathByID", {
                     id: protyle.block.rootID

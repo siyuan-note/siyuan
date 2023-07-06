@@ -246,7 +246,7 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
                     }
                 }, {
                     iconHTML: Constants.ZWSP,
-                    label: window.siyuan.languages.mgmt,
+                    label: window.siyuan.languages.manage,
                     click: () => {
                         viewCards(app, "", window.siyuan.languages.all, "");
                     }

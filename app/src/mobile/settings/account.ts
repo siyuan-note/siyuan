@@ -20,7 +20,7 @@ export const showAccountInfo = () => {
         userTitlesHTML += "</div>";
     }
     openModel({
-        title: window.siyuan.languages.accountManage,
+        title: window.siyuan.languages.manage,
         icon: "iconAccount",
         html: `<div class="fn__flex-column">
 <div class="config-account__bg">
@@ -34,7 +34,7 @@ export const showAccountInfo = () => {
 </div>
 <div class="config-account__info">
     <div class="fn__flex">
-        <a class="b3-button b3-button--text" href="${getCloudURL("settings")}" target="_blank">${window.siyuan.languages.accountManage}</a>
+        <a class="b3-button b3-button--text" href="${getCloudURL("settings")}" target="_blank">${window.siyuan.languages.manage}</a>
         <span class="fn__space"></span>
         <button class="b3-button b3-button--cancel" id="logout">
             ${window.siyuan.languages.logout}

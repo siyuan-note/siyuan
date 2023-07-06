@@ -68,9 +68,9 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         parentNodeElement = parentNodeElement.parentElement;
     }
     let contentTop = 0;
-    let topElement = protyle.element.firstElementChild
+    let topElement = protyle.element.firstElementChild;
     while (topElement && !topElement.classList.contains("protyle-content")) {
-        contentTop += topElement.clientHeight
+        contentTop += topElement.clientHeight;
         topElement = topElement.nextElementSibling;
     }
     if (top) {

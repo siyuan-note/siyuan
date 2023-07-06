@@ -434,13 +434,13 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
                 filters: oldFilters
             }
         }]);
-        const menuElement = hasClosestByClassName(target, "b3-menu")
+        const menuElement = hasClosestByClassName(target, "b3-menu");
         if (menuElement) {
             menuElement.innerHTML = getFiltersHTML(data);
         }
     });
     let selectHTML = "";
-    const filterOperation = target.getAttribute("data-op")
+    const filterOperation = target.getAttribute("data-op");
     switch (colType) {
         case "text":
             selectHTML = `<option ${"=" === filterOperation ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
@@ -457,12 +457,12 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
     menu.addItem({
         iconHTML: "",
         label: `<select class="b3-select fn__size200">${selectHTML}</select>`
-    })
+    });
     menu.addItem({
         iconHTML: "",
         label: `<input value="${target.getAttribute("data-value")}" class="b3-text-field fn__size200">`
-    })
-    const textElement = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement)
+    });
+    const textElement = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement);
     textElement.addEventListener("keydown", (event) => {
         if (event.isComposing) {
             event.preventDefault();
@@ -472,11 +472,11 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
             menu.close();
             event.preventDefault();
         }
-    })
+    });
     const rectTarget = target.getBoundingClientRect();
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     textElement.select();
-}
+};
 
 const addFilter = (options: {
     data: IAV,
@@ -535,7 +535,7 @@ const addFilter = (options: {
         y: options.rect.bottom,
         h: options.rect.height,
     });
-}
+};
 
 const getFiltersHTML = (data: IAV) => {
     let html = "";
@@ -548,7 +548,7 @@ const getFiltersHTML = (data: IAV) => {
     <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
     <span class="fn__ellipsis">${item.name}${filterValue ? ": " + filterValue : ""}</span>
 </span>`;
-                return true
+                return true;
             }
         });
         return filterHTML;

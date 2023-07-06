@@ -151,7 +151,7 @@ const getLoginHTML = (deactivate = false) => {
     </div>
     <div class="fn__hr--b"></div>
     <button id="login2" class="b3-button fn__block">${deactivate ? window.siyuan.languages.deactivateUser : window.siyuan.languages.login}</button>
-</div>`
+</div>`;
 };
 
 const afterLogin = (response: IWebSocketData, deactive = false) => {
@@ -176,7 +176,7 @@ const afterLogin = (response: IWebSocketData, deactive = false) => {
             processSync();
         });
     }
-}
+};
 
 const bindLoginEvent = (modelMainElement: HTMLElement, deactive = false) => {
     const agreeLoginElement = modelMainElement.querySelector("#agreeLogin") as HTMLInputElement;
@@ -252,7 +252,7 @@ const bindLoginEvent = (modelMainElement: HTMLElement, deactive = false) => {
             afterLogin(faResponse, deactive);
         });
     });
-}
+};
 
 export const login = () => {
     openModel({

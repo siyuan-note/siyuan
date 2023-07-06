@@ -8,7 +8,7 @@
   -webkit-font-smoothing: subpixel-antialiased;
   color: var(--b3-tooltips-color);
   word-wrap: break-word;
-  background: var(--b3-tooltips-background);
+  background-color: var(--b3-tooltips-background);
   border-radius: var(--b3-border-radius);
   line-height: 17px;
   max-width: 320px;
@@ -40,11 +40,11 @@
     font-size: 12px;
     font-weight: normal;
     -webkit-font-smoothing: subpixel-antialiased;
-    color: #fff;
+    color: var(--b3-tooltips-color);
     word-wrap: break-word;
     white-space: pre;
     content: attr(aria-label);
-    background: var(--b3-tooltips-color);
+    background-color: var(--b3-tooltips-background);
     border-radius: var(--b3-border-radius);
     line-height: 17px;
     transform: scale(0.8);
@@ -59,7 +59,6 @@
     z-index: 1000001;
     width: 0;
     height: 0;
-    color: var(--b3-tooltips-color);
     content: "";
     border: 5px solid transparent;
     transform: scale(1.54);
@@ -100,7 +99,7 @@
     right: 50%;
     bottom: -5px;
     margin-right: -5px;
-    border-bottom-color: var(--b3-tooltips-color)
+    border-bottom-color: var(--b3-tooltips-background)
   }
 
   &__se::after {
@@ -128,7 +127,7 @@
     right: 50%;
     bottom: auto;
     margin-right: -5px;
-    border-top-color: var(--b3-tooltips-color)
+    border-top-color: var(--b3-tooltips-background)
   }
 
   &__ne::after {
@@ -163,7 +162,7 @@
     bottom: 50%;
     left: -5px;
     margin-top: -5px;
-    border-left-color: var(--b3-tooltips-color);
+    border-left-color: var(--b3-tooltips-background);
   }
 
   &__e::after {
@@ -184,7 +183,7 @@
     right: -5px;
     bottom: 50%;
     margin-top: -5px;
-    border-right-color: var(--b3-tooltips-color);
+    border-right-color: var(--b3-tooltips-background);
   }
 }
 

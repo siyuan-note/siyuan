@@ -16,7 +16,7 @@
     svg {
       height: 24px;
       width: 12px;
-      color: rgba(255, 255, 255, .78);
+      color: var(--b3-tooltips-color);
     }
   }
 
@@ -165,7 +165,7 @@
       padding: 6px 3px;
 
       & > li {
-        background-color: var(--b3-tooltips-color);
+        background-color: var(--b3-tooltips-background);
         border-radius: 50%;
         cursor: pointer;
         float: left;
@@ -223,9 +223,9 @@
   }
 
   &-tooltip {
-    background-color: var(--b3-tooltips-color);
+    background-color: var(--b3-tooltips-background);
     border-radius: var(--b3-border-radius-b);
-    color: #fff;
+    color: var(--b3-tooltips-color);
     display: none;
     font-size: 12px;
     height: 20px;
@@ -240,21 +240,15 @@
   }
 
   &-title {
-    color: var(--b3-theme-on-secondary);
+    color: var(--b3-theme-on-background);
     display: inline-block;
     font-size: 12px;
     line-height: 1.2;
     margin: 0 5% 5px;
     max-width: 90%;
-    opacity: 0.8;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: opacity 0.15s;
     white-space: nowrap;
-
-    &:hover {
-      opacity: 1;
-    }
   }
 
   &-button {

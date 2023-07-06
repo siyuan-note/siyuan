@@ -837,7 +837,7 @@ interface IAV {
 interface IAVFilter {
     column: string,
     operator: "=" | "!=" | ">" | ">=" | "<" | "<=" | "Contains" | "Does not contains" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is relative to today"
-    value: string
+    value: IAVCellValue
 }
 
 interface IAVSort {
@@ -864,6 +864,12 @@ interface IAVCell {
     id: string,
     color: string,
     bgColor: string,
-    value: any,
+    value: IAVCellValue,
     valueType: TAVCol,
+}
+
+interface IAVCellValue {
+    content: string,
+    content2?: string,
+    color?: string,
 }

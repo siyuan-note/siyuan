@@ -413,7 +413,54 @@ const addFilter = (options: {
     avId: string,
     protyle: IProtyle
 }) => {
-
+    const menu = new Menu("av-add-filter");
+    options.data.columns.forEach((column) => {
+        let hasFilter = false;
+        options.data.filters.find((filter) => {
+            if (filter.column === column.id) {
+                hasFilter = true;
+                return true;
+            }
+        });
+        if (!hasFilter) {
+            menu.addItem({
+                label: column.name,
+                icon: getColIconByType(column.type),
+                click: () => {
+                    const oldFilters = Object.assign([], options.data.filters);
+                    const value: IAVCellValue = {
+                        content: ""
+                    }
+                    options.data.filters.push({
+                        column: column.id,
+                        operator: "Contains",
+                        value,
+                    });
+                    transaction(options.protyle, [{
+                        action: "setAttrView",
+                        id: options.avId,
+                        data: {
+                            filters: options.data.filters
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: options.avId,
+                        data: {
+                            filters: oldFilters
+                        }
+                    }]);
+                    options.menuElement.innerHTML = getFiltersHTML(options.data);
+                    bindFiltersEvent(options.protyle, options.menuElement, options.data);
+                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
+                }
+            });
+        }
+    });
+    menu.open({
+        x: options.rect.left,
+        y: options.rect.bottom,
+        h: options.rect.height,
+    });
 }
 
 const bindFiltersEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
@@ -432,13 +479,8 @@ const getFiltersHTML = (data: IAV) => {
     data.filters.forEach((item: IAVFilter) => {
         html += `<button class="b3-menu__item" data-id="${item.column}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
-    <select class="b3-select" style="width: 106px;margin: 4px 0">
+    <select class="b3-select" style="flex: 1;margin: 4px 0">
         ${genFilterItem(item.column)}
-    </select>
-    <span class="fn__space"></span>
-    <select class="b3-select" style="width: 106px;margin: 4px 0">
-        <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>
-        <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.desc}</option>
     </select>
     <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;
@@ -533,7 +575,7 @@ const getConfigHTML = (data: IAV) => {
     <span class="b3-menu__accelerator">${data.columns.filter((item: IAVColumn) => !item.hidden).length}/${data.columns.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="goFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
     <span class="b3-menu__accelerator">${data.filters.length}</span>

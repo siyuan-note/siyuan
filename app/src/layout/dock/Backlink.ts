@@ -419,13 +419,13 @@ export class Backlink extends Model {
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
             this.editors.find((item, index) => {
-                if (item.protyle.block.rootID === docId) {
+                if (item.protyle.block.rootID === docId && liElement.nextElementSibling && item.protyle.element.isSameNode(liElement.nextElementSibling)) {
                     item.destroy();
                     this.editors.splice(index, 1);
+                    liElement.nextElementSibling.remove();
                     return true;
                 }
             });
-            liElement.nextElementSibling?.remove();
             svgElement.removeAttribute("disabled");
         } else {
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {

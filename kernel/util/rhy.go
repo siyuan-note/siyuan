@@ -32,7 +32,7 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 	rhyResultLock.Lock()
 	defer rhyResultLock.Unlock()
 
-	cacheDuration := int64(3600)
+	cacheDuration := int64(3600 * 6)
 	if ContainerDocker == Container {
 		cacheDuration = int64(3600 * 24)
 	}

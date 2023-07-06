@@ -242,4 +242,5 @@ type ValueDate struct {
 
 type ValueSelect struct {
 	Content string `json:"content"`
+	Color   string `json:"color"`
 }

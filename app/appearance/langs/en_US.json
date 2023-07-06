@@ -1,4 +1,12 @@
 {
+  "filterOperatorIs": "Is",
+  "filterOperatorIsNot": "Is not",
+  "filterOperatorContains": "Contains",
+  "filterOperatorDoesNotContain": "Does not contain",
+  "filterOperatorStartsWith": "Starts with",
+  "filterOperatorEndsWith": "Ends with",
+  "filterOperatorIsEmpty": "Is empty",
+  "filterOperatorIsNotEmpty": "Is not empty",
   "asc": "Ascending",
   "desc": "Descending",
   "hideCol": "Hide column",

@@ -18,7 +18,6 @@ package model
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -260,7 +259,6 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 
 	headingLevel := 16
 	maxNameLen := 1024
-	boxName := box.Name
 	var hPath string
 	baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
 	if nil != baseBlock {
@@ -278,7 +276,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 
 		name := util.EscapeHTML(parent.IALAttr("name"))
 		if ast.NodeDocument == parent.Type {
-			name = util.EscapeHTML(path.Join(boxName, hPath))
+			name = util.EscapeHTML(box.Name) + util.EscapeHTML(hPath)
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type {

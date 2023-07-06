@@ -279,7 +279,7 @@ func (av *AttributeView) FilterRows() {
 			}
 		}
 
-		var rows []*Row
+		rows := []*Row{}
 		for _, row := range av.Rows {
 			pass := true
 			for j, index := range colIndexes {

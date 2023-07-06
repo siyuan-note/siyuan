@@ -1,4 +1,12 @@
 {
+  "filterOperatorIs": "等于",
+  "filterOperatorIsNot": "不等于",
+  "filterOperatorContains": "包含",
+  "filterOperatorDoesNotContain": "不包含",
+  "filterOperatorStartsWith": "开头为",
+  "filterOperatorEndsWith": "结尾为",
+  "filterOperatorIsEmpty": "为空",
+  "filterOperatorIsNotEmpty": "不为空",
   "asc": "升序",
   "desc": "降序",
   "hideCol": "隐藏列",

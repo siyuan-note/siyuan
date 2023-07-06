@@ -402,9 +402,9 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 	}
 
 	WaitForWritingFiles()
-	if 1 < len(ids) {
+	if 0 < len(ids) {
 		go func() {
-			time.Sleep(time.Second)
+			time.Sleep(time.Millisecond * 500)
 			util.ReloadUI()
 		}()
 	}

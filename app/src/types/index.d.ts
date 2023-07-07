@@ -851,7 +851,9 @@ interface IAV {
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
-    value: IAVCellValue
+    value: {
+        [key in TAVCol]?: IAVCellValue
+    },
 }
 
 interface IAVSort {
@@ -878,15 +880,16 @@ interface IAVCell {
     id: string,
     color: string,
     bgColor: string,
-    value: IAVCellValue,
+    value: {
+        [key in TAVCol]?: IAVCellValue
+    },
     valueType: TAVCol,
 }
 
-type IAVCellValue = {
-    [key in TAVCol]?: {
-        content: string
-        content2?: string
-        color?: string
-        id?: string
-    }
+interface IAVCellValue {
+    content?: any
+    content2?: string
+    color?: string
+    id?: string
+    isNotEmpty?: boolean
 }

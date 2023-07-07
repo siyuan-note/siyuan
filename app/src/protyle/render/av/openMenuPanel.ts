@@ -564,9 +564,22 @@ export const setFilter = (options: {
         const oldFilters = JSON.parse(JSON.stringify(options.data.filters));
         options.data.filters.find((filter) => {
             if (filter.column === options.filter.column) {
-                filter.value[colType] = {
-                    content: textElement.value
-                };
+                let cellValue: IAVCellValue;
+                if (colType === "number") {
+                    if (textElement.value) {
+                        cellValue = {
+                            content: parseFloat(textElement.value),
+                            isNotEmpty: true
+                        }
+                    } else {
+                        cellValue = {}
+                    }
+                } else {
+                    cellValue = {
+                        content: textElement.value
+                    }
+                }
+                filter.value[colType] = cellValue;
                 filter.operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
                 return true;
             }
@@ -663,13 +676,15 @@ const addFilter = (options: {
                 icon: getColIconByType(column.type),
                 click: () => {
                     const oldFilters = Object.assign([], options.data.filters);
+                    let cellValue = {}
+                    if (column.type !== "number") {
+                        cellValue = {content: ""}
+                    }
                     options.data.filters.push({
                         column: column.id,
                         operator: "Contains",
                         value: {
-                            [column.type]: {
-                                content: ""
-                            }
+                            [column.type]: cellValue
                         },
                     });
                     transaction(options.protyle, [{

@@ -107,7 +107,8 @@ type AttributeViewCalc struct {
 type CalcOperator string
 
 const (
-	CalcOperatorIsEqual FilterOperator = "="
+	CalcOperatorNone     FilterOperator = ""
+	CalcOperatorCountAll FilterOperator = "Count all"
 )
 
 type AttributeViewSort struct {
@@ -311,4 +312,8 @@ func (av *AttributeView) FilterRows() {
 		}
 		av.Rows = rows
 	}
+}
+
+func (av *AttributeView) CalcCols() {
+
 }

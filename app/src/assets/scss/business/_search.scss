@@ -73,26 +73,9 @@
   }
 
   &__label {
-    cursor: pointer;
-    flex: 1;
-
-    &:hover {
-      color: var(--b3-theme-on-background);
-    }
-
-    .b3-form__icon-input {
-      width: 0;
-      transition: var(--b3-transition);
-      border-color: transparent;
-      box-sizing: border-box;
-      padding-right: 0;
-
-      &:focus,
-      &.search__input--block {
-        width: 100%;
-        border-color: var(--b3-theme-primary);
-      }
-    }
+    position: absolute;
+    right: 8px;
+    z-index: 1;
   }
 
   &__preview {

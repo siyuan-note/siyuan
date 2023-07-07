@@ -83,12 +83,11 @@ export class Backlink extends Model {
         <svg><use xlink:href="#iconLink"></use></svg>
         ${window.siyuan.languages.backlinks}
     </div>
-    <span class="counter listCount"></span>
+    <span class="counter listCount" style="margin-left: 0"></span>
+    <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
-    <label class="b3-form__icon b3-form__icon--small search__label">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconFilter"></use></svg>
-        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    </label>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
+    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
@@ -110,12 +109,11 @@ export class Backlink extends Model {
         <svg><use xlink:href="#iconLink"></use></svg>
         ${window.siyuan.languages.mentions}
     </div>
-    <span class="counter listMCount"></span>
+    <span class="counter listMCount" style="margin-left: 0;"></span>
+    <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
-    <label class="b3-form__icon b3-form__icon--small search__label">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconFilter"></use></svg>
-        <input class="b3-text-field b3-text-field--small b3-form__icon-input" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    </label>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
+    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="mSort" data-sort="3" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
     <span class="fn__space"></span>
@@ -135,6 +133,10 @@ export class Backlink extends Model {
 
         this.inputsElement = this.element.querySelectorAll("input");
         this.inputsElement.forEach((item) => {
+            item.addEventListener("blur", (event: KeyboardEvent) => {
+                const inputElement = event.target as HTMLInputElement;
+                inputElement.classList.add("fn__none");
+            });
             item.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (!event.isComposing && event.key === "Enter") {
                     this.searchBacklinks();
@@ -291,6 +293,10 @@ export class Backlink extends Model {
                             break;
                         case "min":
                             getDockByType("backlink").toggleModel("backlink");
+                            break;
+                        case "search":
+                            target.previousElementSibling.classList.remove("fn__none");
+                            (target.previousElementSibling as HTMLInputElement).select();
                             break;
                         case "sort":
                         case "mSort":

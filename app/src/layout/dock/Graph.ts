@@ -259,10 +259,10 @@ export class Graph extends Model {
         <svg><use xlink:href="#icon${this.type === "global" ? "GlobalGraph" : "Graph"}"></use></svg>
         ${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}
     </div>
-    <label class="b3-form__icon b3-form__icon--small search__label">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input class="b3-form__icon-input b3-text-field b3-text-field--small" placeholder="${window.siyuan.languages.search}" />
-    </label>
+    <span class="fn__flex-1"></span>
+    <span class="fn__space"></span>
+    <input class="b3-text-field search__label fn__size200 fn__none" placeholder="${window.siyuan.languages.search}" />
+    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <div class="fn__space"></div>
@@ -314,6 +314,9 @@ export class Graph extends Model {
                             target.classList.add("ft__primary");
                             this.panelElement.style.right = "0";
                         }
+                    } else if (dataType === "search") {
+                        target.previousElementSibling.classList.remove("fn__none");
+                        (target.previousElementSibling as HTMLInputElement).select();
                     } else if (dataType === "refresh") {
                         this.searchGraph(false);
                     } else if (dataType === "fullscreen") {
@@ -333,6 +336,10 @@ export class Graph extends Model {
         this.inputElement.addEventListener("compositionend", () => {
             this.searchGraph(false);
             this.inputElement.classList.add("search__input--block");
+        });
+        this.inputElement.addEventListener("blur", (event: InputEvent) => {
+            const inputElement = event.target as HTMLInputElement;
+            inputElement.classList.add("fn__none");
         });
         this.inputElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {

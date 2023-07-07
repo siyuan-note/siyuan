@@ -35,7 +35,7 @@ const togglePinDock = (dock: Dock, icon: string) => {
     };
 };
 
-export const workspaceMenu = (app:App, rect: DOMRect) => {
+export const workspaceMenu = (app: App, rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === "barWorkspace") {
         window.siyuan.menus.menu.remove();
@@ -80,8 +80,8 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
         /// #if !BROWSER
         if (!window.siyuan.config.readonly) {
             const workspaceSubMenu: IMenu[] = [{
-                label: window.siyuan.languages.openBy + "...",
-                iconHTML: Constants.ZWSP,
+                label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,
+                iconHTML: "",
                 click: async () => {
                     const localPath = await dialog.showOpenDialog({
                         defaultPath: window.siyuan.config.system.homeDir,
@@ -90,7 +90,15 @@ export const workspaceMenu = (app:App, rect: DOMRect) => {
                     if (localPath.filePaths.length === 0) {
                         return;
                     }
-                    openWorkspace(localPath.filePaths[0]);
+                    fetchPost("/api/system/checkWorkspaceDir", {path: localPath.filePaths[0]}, (response) => {
+                        if (response.data.isWorkspace) {
+                            openWorkspace(localPath.filePaths[0]);
+                        } else {
+                            confirmDialog(window.siyuan.languages.new, `TODO: ${localPath.filePaths[0]}`, () => {
+                                openWorkspace(localPath.filePaths[0]);
+                            })
+                        }
+                    })
                 }
             }];
             workspaceSubMenu.push({type: "separator"});

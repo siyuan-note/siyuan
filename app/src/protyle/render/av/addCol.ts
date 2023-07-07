@@ -8,12 +8,11 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
         label: window.siyuan.languages.text,
         click() {
             const id = Lute.NewNodeID();
-            const type = "text";
             transaction(protyle, [{
                 action: "addAttrViewCol",
                 name: "Text",
                 parentID: blockElement.getAttribute("data-av-id"),
-                type,
+                type: "text",
                 id
             }], [{
                 action: "removeAttrViewCol",
@@ -27,12 +26,11 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
         label: window.siyuan.languages.number,
         click() {
             const id = Lute.NewNodeID();
-            const type = "text";
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Text",
+                name: "Number",
                 parentID: blockElement.getAttribute("data-av-id"),
-                type,
+                type: "number",
                 id
             }], [{
                 action: "removeAttrViewCol",
@@ -46,12 +44,11 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
         label: window.siyuan.languages.select,
         click() {
             const id = Lute.NewNodeID();
-            const type = "text";
             transaction(protyle, [{
                 action: "addAttrViewCol",
                 name: "Text",
                 parentID: blockElement.getAttribute("data-av-id"),
-                type,
+                type: "select",
                 id
             }], [{
                 action: "removeAttrViewCol",
@@ -65,12 +62,11 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
         label: window.siyuan.languages.multiSelect,
         click() {
             const id = Lute.NewNodeID();
-            const type = "text";
             transaction(protyle, [{
                 action: "addAttrViewCol",
                 name: "Text",
                 parentID: blockElement.getAttribute("data-av-id"),
-                type,
+                type: "mSelect",
                 id
             }], [{
                 action: "removeAttrViewCol",
@@ -84,12 +80,11 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
         label: window.siyuan.languages.date,
         click() {
             const id = Lute.NewNodeID();
-            const type = "text";
             transaction(protyle, [{
                 action: "addAttrViewCol",
                 name: "Text",
                 parentID: blockElement.getAttribute("data-av-id"),
-                type,
+                type: "date",
                 id
             }], [{
                 action: "removeAttrViewCol",

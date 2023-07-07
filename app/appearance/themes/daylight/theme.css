@@ -51,7 +51,7 @@
 
     /* 提示 */
     --b3-tooltips-background: rgba(0, 0, 0, .9);
-    --b3-tooltips-color: #bababa;
+    --b3-tooltips-color: var(--b3-theme-background-light);
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .1);
 
     /* 遮罩 */

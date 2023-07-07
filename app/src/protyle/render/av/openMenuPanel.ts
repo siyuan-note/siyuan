@@ -142,6 +142,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "removeFilter") {
+                    window.siyuan.menus.menu.remove();
                     const oldFilters = Object.assign([], data.filters);
                     data.filters.find((item: IAVFilter, index: number) => {
                         if (item.column === target.parentElement.dataset.id) {
@@ -167,7 +168,19 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "setFilter") {
-                    setFilter(protyle, data, target);
+                    const colType = target.getAttribute("data-coltype") as TAVCol;
+                    setFilter({
+                        filter: {
+                            operator: target.dataset.op as TAVFilterOperator,
+                            column: target.parentElement.parentElement.dataset.id,
+                            value: {
+                                [colType]: {content: target.dataset.value}
+                            }
+                        },
+                        protyle,
+                        data,
+                        target
+                    });
                     event.stopPropagation();
                     break;
                 } else if (type === "newCol") {
@@ -407,13 +420,18 @@ ${html}
 </button>`;
 };
 
-const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
-    const colType = target.getAttribute("data-coltype") as TAVCol;
-    const menu = new Menu(undefined, () => {
-        const colId = target.parentElement.parentElement.getAttribute("data-id");
-        const oldFilters = JSON.parse(JSON.stringify(data.filters));
-        data.filters.find((filter) => {
-            if (filter.column === colId) {
+export const setFilter = (options: {
+    filter: IAVFilter,
+    protyle: IProtyle,
+    data: IAV,
+    target: HTMLElement,
+}) => {
+    const colType = Object.keys(options.filter.value)[0] as TAVCol;
+    const rectTarget = options.target.getBoundingClientRect();
+    const menu = new Menu("set-filter-" + options.filter.column, () => {
+        const oldFilters = JSON.parse(JSON.stringify(options.data.filters));
+        options.data.filters.find((filter) => {
+            if (filter.column === options.filter.column) {
                 filter.value[colType] = {
                     content: textElement.value
                 };
@@ -421,36 +439,38 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
                 return true;
             }
         });
-        transaction(protyle, [{
+        transaction(options.protyle, [{
             action: "setAttrView",
-            id: data.id,
+            id: options.data.id,
             data: {
-                filters: data.filters
+                filters: options.data.filters
             }
         }], [{
             action: "setAttrView",
-            id: data.id,
+            id: options.data.id,
             data: {
                 filters: oldFilters
             }
         }]);
-        const menuElement = hasClosestByClassName(target, "b3-menu");
+        const menuElement = hasClosestByClassName(options.target, "b3-menu");
         if (menuElement) {
-            menuElement.innerHTML = getFiltersHTML(data);
+            menuElement.innerHTML = getFiltersHTML(options.data);
         }
     });
+    if (menu.isOpen) {
+        return;
+    }
     let selectHTML = "";
-    const filterOperation = target.getAttribute("data-op");
     switch (colType) {
         case "text":
-            selectHTML = `<option ${"=" === filterOperation ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
-<option ${"!=" === filterOperation ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
-<option ${"Contains" === filterOperation ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
-<option ${"Does not contains" === filterOperation ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
-<option ${"Starts with" === filterOperation ? "selected" : ""} value="Starts with">${window.siyuan.languages.filterOperatorStartsWith}</option>
-<option ${"Ends with" === filterOperation ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
-<option ${"Is empty" === filterOperation ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
-<option ${"Is not empty" === filterOperation ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
+            selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+<option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
+<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
+<option ${"Does not contains" === options.filter.operator ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
+<option ${"Starts with" === options.filter.operator ? "selected" : ""} value="Starts with">${window.siyuan.languages.filterOperatorStartsWith}</option>
+<option ${"Ends with" === options.filter.operator ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
+<option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
 `;
             break;
     }
@@ -460,7 +480,7 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
     });
     menu.addItem({
         iconHTML: "",
-        label: `<input value="${target.getAttribute("data-value")}" class="b3-text-field fn__size200">`
+        label: `<input value="${options.filter.value[colType].content}" class="b3-text-field fn__size200">`
     });
     const textElement = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement);
     textElement.addEventListener("keydown", (event) => {
@@ -473,7 +493,6 @@ const setFilter = (protyle: IProtyle, data: IAV, target: HTMLElement) => {
             event.preventDefault();
         }
     });
-    const rectTarget = target.getBoundingClientRect();
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     textElement.select();
 };
@@ -525,7 +544,20 @@ const addFilter = (options: {
                     }]);
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
-                    setFilter(options.protyle, options.data, options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`));
+                    const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
+                    const colType = filterElement.getAttribute("data-coltype") as TAVCol;
+                    setFilter({
+                        filter: {
+                            operator: filterElement.dataset.op as TAVFilterOperator,
+                            column: filterElement.parentElement.parentElement.dataset.id,
+                            value: {
+                                [colType]: {content: filterElement.dataset.value}
+                            }
+                        },
+                        protyle: options.protyle,
+                        data: options.data,
+                        target: filterElement
+                    });
                 }
             });
         }

@@ -3,8 +3,8 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {popTextCell, showHeaderCellMenu} from "./cell";
-import {getColIconByType, updateHeader} from "./col";
+import {popTextCell} from "./cell";
+import {getColIconByType, showColMenu, updateHeader} from "./col";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./addCol";
 import {openMenuPanel} from "./openMenuPanel";
@@ -102,7 +102,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const cellHeaderElement = hasClosestByClassName(event.target, "av__cellheader");
     if (cellHeaderElement) {
-        showHeaderCellMenu(protyle, blockElement, cellHeaderElement.parentElement);
+        showColMenu(protyle, blockElement, cellHeaderElement.parentElement);
         event.preventDefault();
         event.stopPropagation();
         return true;

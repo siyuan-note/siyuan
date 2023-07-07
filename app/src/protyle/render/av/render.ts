@@ -1,6 +1,5 @@
 import {fetchPost} from "../../../util/fetch";
-import {getColIconByType} from "./col";
-import {showHeaderCellMenu} from "./cell";
+import {getColIconByType, showColMenu} from "./col";
 import {Constants} from "../../../constants";
 
 export const avRender = (element: Element, cb?: () => void) => {
@@ -142,7 +141,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             avRender(item, () => {
-                showHeaderCellMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
+                showColMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
             });
         });
     } else if (operation.action === "setAttrViewColWidth") {

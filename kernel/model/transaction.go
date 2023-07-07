@@ -1222,11 +1222,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			if changedAv {
 				av.SaveAttributeView(attrView)
 
-				evt := util.NewCmdResult("refreshAttributeView", 0, util.PushModeBroadcast)
-				evt.Data = map[string]interface{}{
-					"id": avID,
-				}
-				util.PushEvent(evt)
+				util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
 			}
 		}
 	}

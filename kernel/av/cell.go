@@ -140,7 +140,9 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		case FilterOperatorIsLessOrEqual:
 			return value.Number.Content <= other.Number.Content
 		case FilterOperatorIsEmpty:
-			return 0 == value.Number.Content
+			return !value.Number.IsNotEmpty
+		case FilterOperatorIsNotEmpty:
+			return value.Number.IsNotEmpty
 		}
 	}
 
@@ -232,7 +234,8 @@ type ValueText struct {
 }
 
 type ValueNumber struct {
-	Content float64 `json:"content"`
+	Content    float64 `json:"content"`
+	IsNotEmpty bool    `json:"isNotEmpty"`
 }
 
 type ValueDate struct {

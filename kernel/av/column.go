@@ -67,14 +67,9 @@ func NewColumn(name string, columnType ColumnType) *Column {
 }
 
 type ColumnCalc struct {
-	Column   string            `json:"column"`
-	Operator CalcOperator      `json:"operator"`
-	Result   *ColumnCalcResult `json:"result"`
-}
-
-type ColumnCalcResult struct {
-	Number *ValueNumber `json:"number"`
-	Date   *ValueDate   `json:"date"`
+	Column   string       `json:"column"`
+	Operator CalcOperator `json:"operator"`
+	Result   *Value       `json:"result"`
 }
 
 type CalcOperator string
@@ -126,7 +121,7 @@ func (av *AttributeView) CalcCols() {
 func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(av.Rows))}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range av.Rows {
@@ -134,7 +129,7 @@ func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
 				countValues += len(row.Cells[colIndex].Value.MSelect)
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
@@ -148,7 +143,7 @@ func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -156,7 +151,7 @@ func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -164,7 +159,7 @@ func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -172,7 +167,7 @@ func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -180,14 +175,14 @@ func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
 	}
 }
 
 func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(av.Rows))}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range av.Rows {
@@ -195,7 +190,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
@@ -205,7 +200,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 				countUniqueValues++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -213,7 +208,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -221,7 +216,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -229,7 +224,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -237,14 +232,14 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
 	}
 }
 
 func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(av.Rows))}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range av.Rows {
@@ -252,7 +247,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[int64]bool{}
@@ -264,7 +259,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -272,7 +267,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -280,7 +275,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -288,7 +283,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -296,7 +291,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
 		for _, row := range av.Rows {
@@ -307,7 +302,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 			}
 		}
 		if 0 != earliest {
-			col.Calc.Result = &ColumnCalcResult{Date: &ValueDate{Content: earliest}}
+			col.Calc.Result = &Value{Date: &ValueDate{Content: earliest}}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -319,7 +314,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 			}
 		}
 		if 0 != latest {
-			col.Calc.Result = &ColumnCalcResult{Date: &ValueDate{Content: latest}}
+			col.Calc.Result = &Value{Date: &ValueDate{Content: latest}}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
@@ -335,7 +330,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 			}
 		}
 		if 0 != earliest && 0 != latest {
-			col.Calc.Result = &ColumnCalcResult{Date: &ValueDate{Content: latest - earliest}}
+			col.Calc.Result = &Value{Date: &ValueDate{Content: latest - earliest}}
 		}
 	}
 }
@@ -343,7 +338,7 @@ func (av *AttributeView) calcColDate(col *Column, colIndex int) {
 func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(av.Rows))}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range av.Rows {
@@ -351,7 +346,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[float64]bool{}
@@ -363,7 +358,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -371,7 +366,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -379,7 +374,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -387,7 +382,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -395,7 +390,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, row := range av.Rows {
@@ -403,7 +398,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				sum += row.Cells[colIndex].Value.Number.Content
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: sum}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: sum}}
 	case CalcOperatorAverage:
 		sum := 0.0
 		count := 0
@@ -413,7 +408,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 				count++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: sum / float64(count)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: sum / float64(count)}}
 	case CalcOperatorMedian:
 		values := []float64{}
 		for _, row := range av.Rows {
@@ -424,12 +419,12 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 		sort.Float64s(values)
 		if len(values) > 0 {
 			if len(values)%2 == 0 {
-				col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: (values[len(values)/2-1] + values[len(values)/2]) / 2}}
+				col.Calc.Result = &Value{Number: &ValueNumber{Content: (values[len(values)/2-1] + values[len(values)/2]) / 2}}
 			} else {
-				col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: values[len(values)/2]}}
+				col.Calc.Result = &Value{Number: &ValueNumber{Content: values[len(values)/2]}}
 			}
 		} else {
-			col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{IsNotEmpty: false}}
+			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
 		}
 	case CalcOperatorMin:
 		min := math.MaxFloat64
@@ -441,9 +436,9 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 			}
 		}
 		if math.MaxFloat64 != min {
-			col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: min}}
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: min}}
 		} else {
-			col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{IsNotEmpty: false}}
+			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
 		}
 	case CalcOperatorMax:
 		max := -math.MaxFloat64
@@ -455,9 +450,9 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 			}
 		}
 		if -math.MaxFloat64 != max {
-			col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: max}}
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: max}}
 		} else {
-			col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{IsNotEmpty: false}}
+			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
 		}
 	case CalcOperatorRange:
 		min := math.MaxFloat64
@@ -473,9 +468,9 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 			}
 		}
 		if math.MaxFloat64 != min && -math.MaxFloat64 != max {
-			col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: max - min}}
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: max - min}}
 		} else {
-			col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{IsNotEmpty: false}}
+			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
 		}
 	}
 }
@@ -483,7 +478,7 @@ func (av *AttributeView) calcColNumber(col *Column, colIndex int) {
 func (av *AttributeView) calcColText(col *Column, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(av.Rows))}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range av.Rows {
@@ -491,7 +486,7 @@ func (av *AttributeView) calcColText(col *Column, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
@@ -503,7 +498,7 @@ func (av *AttributeView) calcColText(col *Column, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -511,7 +506,7 @@ func (av *AttributeView) calcColText(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -519,7 +514,7 @@ func (av *AttributeView) calcColText(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
@@ -527,7 +522,7 @@ func (av *AttributeView) calcColText(col *Column, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
@@ -535,6 +530,6 @@ func (av *AttributeView) calcColText(col *Column, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
 	}
 }

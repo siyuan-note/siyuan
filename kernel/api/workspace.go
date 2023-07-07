@@ -64,8 +64,16 @@ func checkWorkspaceDir(c *gin.Context) {
 
 	var existsConf, existsData bool
 	for _, entry := range entries {
-		existsConf = "conf" == entry.Name() && entry.IsDir()
-		existsData = "data" == entry.Name() && entry.IsDir()
+		if !existsConf {
+			existsConf = "conf" == entry.Name() && entry.IsDir()
+		}
+		if !existsData {
+			existsData = "data" == entry.Name() && entry.IsDir()
+		}
+
+		if existsConf && existsData {
+			break
+		}
 	}
 
 	if existsConf {

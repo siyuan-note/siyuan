@@ -627,16 +627,28 @@ const getPropertiesHTML = (data: IAV) => {
     let hideHTML = "";
     data.columns.forEach((item: IAVColumn) => {
         if (item.hidden) {
-            hideHTML += `<button class="b3-menu__item">
-    <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
-    <span class="b3-menu__label">${item.name}</span>
+            hideHTML += `<button class="b3-menu__item" data-type="nobg">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <div class="fn__flex-1">
+        <span class="b3-chip">
+            <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
+            <span class="fn__ellipsis">${item.name}</span>
+        </span>
+    </div>
     <svg class="b3-menu__action" data-type="showCol" data-id="${item.id}"><use xlink:href="#iconEyeoff"></use></svg>
+    <svg class="b3-menu__action"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         } else {
-            showHTML += `<button class="b3-menu__item">
-    <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
-    <span class="b3-menu__label">${item.name}</span>
+            showHTML += `<button class="b3-menu__item" data-type="nobg">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <div class="fn__flex-1">
+        <span class="b3-chip">
+            <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>
+            <span class="fn__ellipsis">${item.name}</span>
+        </span>
+    </div>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol" data-id="${item.id}"><use xlink:href="#iconEye"></use></svg>
+    <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         }
     });

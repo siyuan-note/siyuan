@@ -40,9 +40,10 @@ type AttributeView struct {
 	Columns []*Column `json:"columns"` // 表格列名
 	Rows    []*Row    `json:"rows"`    // 表格行记录
 
-	Type    AttributeViewType      `json:"type"`    // 属性视图类型
-	Filters []*AttributeViewFilter `json:"filters"` // 过滤规则
-	Sorts   []*AttributeViewSort   `json:"sorts"`   // 排序规则
+	Type       AttributeViewType      `json:"type"`       // 属性视图类型
+	Filters    []*AttributeViewFilter `json:"filters"`    // 过滤规则
+	Sorts      []*AttributeViewSort   `json:"sorts"`      // 排序规则
+	Calculates []*AttributeViewCalc   `json:"calculates"` // 计算规则
 }
 
 // AttributeViewType 描述了属性视图的类型。
@@ -96,6 +97,18 @@ const (
 	FilterOperatorEndsWith          FilterOperator = "Ends with"
 	FilterOperatorIsBetween         FilterOperator = "Is between"
 	FilterOperatorIsRelativeToToday FilterOperator = "Is relative to today"
+)
+
+type AttributeViewCalc struct {
+	Column   string       `json:"column"`
+	Operator CalcOperator `json:"operator"`
+}
+
+type CalcOperator string
+
+const (
+	CalcOperatorNone     FilterOperator = ""
+	CalcOperatorCountAll FilterOperator = "Count all"
 )
 
 type AttributeViewSort struct {
@@ -299,4 +312,8 @@ func (av *AttributeView) FilterRows() {
 		}
 		av.Rows = rows
 	}
+}
+
+func (av *AttributeView) CalcCols() {
+
 }

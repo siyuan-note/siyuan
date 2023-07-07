@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -1188,7 +1189,47 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		}
 	}
 
-	// TODO 2. 更新属性视图主键内容
+	// 2. 更新属性视图主键内容
+	for _, updatedDefNode := range updatedDefNodes {
+		avs := updatedDefNode.IALAttr(NodeAttrNameAVs)
+		if "" == avs {
+			continue
+		}
+
+		avIDs := strings.Split(avs, ",")
+		for _, avID := range avIDs {
+			attrView, parseErr := av.ParseAttributeView(avID)
+			if nil != parseErr {
+				continue
+			}
+
+			changedAv := false
+			for _, row := range attrView.Rows {
+				blockCell := row.GetBlockCell()
+				if nil == blockCell || nil == blockCell.Value || nil == blockCell.Value.Block {
+					continue
+				}
+
+				if blockCell.Value.Block.ID == updatedDefNode.ID {
+					newContent := getNodeRefText(updatedDefNode)
+					if newContent != blockCell.Value.Block.Content {
+						blockCell.Value.Block.Content = newContent
+						changedAv = true
+					}
+					break
+				}
+			}
+			if changedAv {
+				av.SaveAttributeView(attrView)
+
+				evt := util.NewCmdResult("refreshAttributeView", 0, util.PushModeBroadcast)
+				evt.Data = map[string]interface{}{
+					"id": avID,
+				}
+				util.PushEvent(evt)
+			}
+		}
+	}
 
 	// 3. 保存变更
 	for _, tree := range changedRefTree {

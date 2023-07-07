@@ -558,6 +558,6 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 }
 
 const (
-	NodeAttrNameAVs         = "avs"
-	NodeAttrNamePrefixAvCol = "av-col-"
+	NodeAttrNameAVs         = "custom-avs"
+	NodeAttrNamePrefixAvCol = "custom-av-col-"
 )

@@ -245,15 +245,15 @@ const renderKeyboardToolbar = () => {
             }
             const nodeElement = hasClosestBlock(range.startContainer);
             if (nodeElement) {
-                const indentElement = dynamicElements[0].querySelector('[data-type="indent"]');
+                const outdentElement = dynamicElements[0].querySelector('[data-type="outdent"]');
                 if (nodeElement.parentElement.classList.contains("li")) {
-                    indentElement.classList.remove("fn__none");
-                    indentElement.nextElementSibling.classList.remove("fn__none");
-                    indentElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
+                    outdentElement.classList.remove("fn__none");
+                    outdentElement.nextElementSibling.classList.remove("fn__none");
+                    outdentElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
                 } else {
-                    indentElement.classList.add("fn__none");
-                    indentElement.nextElementSibling.classList.add("fn__none");
-                    indentElement.nextElementSibling.nextElementSibling.classList.add("fn__none");
+                    outdentElement.classList.add("fn__none");
+                    outdentElement.nextElementSibling.classList.add("fn__none");
+                    outdentElement.nextElementSibling.nextElementSibling.classList.add("fn__none");
                 }
             }
         }
@@ -344,8 +344,8 @@ export const initKeyboardToolbar = () => {
     toolbarElement.innerHTML = `<div class="fn__flex keyboard__bar">
     <div class="fn__flex-1">
         <div class="fn__none keyboard__dynamic">
-            <button class="keyboard__action" data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
             <button class="keyboard__action" data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+            <button class="keyboard__action" data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
             <span class="keyboard__split"></span>
             <button class="keyboard__action" data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
             <button class="keyboard__action" data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>

@@ -43,6 +43,7 @@ func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
 
 	ret.FilterRows()
 	ret.SortRows()
+	ret.CalcCols()
 	return
 }
 

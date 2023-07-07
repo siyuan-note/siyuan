@@ -74,55 +74,6 @@ func (av *AttributeView) GetColumnNames() (ret []string) {
 	return
 }
 
-type AttributeViewFilter struct {
-	Column   string         `json:"column"`
-	Operator FilterOperator `json:"operator"`
-	Value    *Value         `json:"value"`
-}
-
-type FilterOperator string
-
-const (
-	FilterOperatorIsEqual           FilterOperator = "="
-	FilterOperatorIsNotEqual        FilterOperator = "!="
-	FilterOperatorIsGreater         FilterOperator = ">"
-	FilterOperatorIsGreaterOrEqual  FilterOperator = ">="
-	FilterOperatorIsLess            FilterOperator = "<"
-	FilterOperatorIsLessOrEqual     FilterOperator = "<="
-	FilterOperatorContains          FilterOperator = "Contains"
-	FilterOperatorDoesNotContain    FilterOperator = "Does not contains"
-	FilterOperatorIsEmpty           FilterOperator = "Is empty"
-	FilterOperatorIsNotEmpty        FilterOperator = "Is not empty"
-	FilterOperatorStartsWith        FilterOperator = "Starts with"
-	FilterOperatorEndsWith          FilterOperator = "Ends with"
-	FilterOperatorIsBetween         FilterOperator = "Is between"
-	FilterOperatorIsRelativeToToday FilterOperator = "Is relative to today"
-)
-
-type AttributeViewCalc struct {
-	Column   string       `json:"column"`
-	Operator CalcOperator `json:"operator"`
-}
-
-type CalcOperator string
-
-const (
-	CalcOperatorNone     FilterOperator = ""
-	CalcOperatorCountAll FilterOperator = "Count all"
-)
-
-type AttributeViewSort struct {
-	Column string    `json:"column"` // 列 ID
-	Order  SortOrder `json:"order"`  // 排序顺序
-}
-
-type SortOrder string
-
-const (
-	SortOrderAsc  SortOrder = "ASC"
-	SortOrderDesc SortOrder = "DESC"
-)
-
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := getAttributeViewDataPath(avID)
 	if !gulu.File.IsExist(avJSONPath) {
@@ -241,79 +192,204 @@ func RebuildAttributeViewTable(tx *sql.Tx, av *AttributeView) (err error) {
 	return
 }
 
-func (av *AttributeView) SortRows() {
-	if 0 < len(av.Sorts) {
-		type ColIndexSort struct {
-			Index int
-			Order SortOrder
-		}
-
-		var colIndexSorts []*ColIndexSort
-		for _, s := range av.Sorts {
-			for i, c := range av.Columns {
-				if c.ID == s.Column {
-					colIndexSorts = append(colIndexSorts, &ColIndexSort{Index: i, Order: s.Order})
-					break
-				}
-			}
-		}
-
-		sort.Slice(av.Rows, func(i, j int) bool {
-			for _, colIndexSort := range colIndexSorts {
-				c := av.Columns[colIndexSort.Index]
-				if c.Type == ColumnTypeBlock {
-					continue
-				}
-
-				result := av.Rows[i].Cells[colIndexSort.Index].Value.Compare(av.Rows[j].Cells[colIndexSort.Index].Value)
-				if 0 == result {
-					continue
-				}
-
-				if colIndexSort.Order == SortOrderAsc {
-					return 0 > result
-				}
-				return 0 < result
-			}
-			return false
-		})
-	}
+type AttributeViewSort struct {
+	Column string    `json:"column"` // 列 ID
+	Order  SortOrder `json:"order"`  // 排序顺序
 }
+
+type SortOrder string
+
+const (
+	SortOrderAsc  SortOrder = "ASC"
+	SortOrderDesc SortOrder = "DESC"
+)
+
+func (av *AttributeView) SortRows() {
+	if 1 > len(av.Sorts) {
+		return
+	}
+
+	type ColIndexSort struct {
+		Index int
+		Order SortOrder
+	}
+
+	var colIndexSorts []*ColIndexSort
+	for _, s := range av.Sorts {
+		for i, c := range av.Columns {
+			if c.ID == s.Column {
+				colIndexSorts = append(colIndexSorts, &ColIndexSort{Index: i, Order: s.Order})
+				break
+			}
+		}
+	}
+
+	sort.Slice(av.Rows, func(i, j int) bool {
+		for _, colIndexSort := range colIndexSorts {
+			c := av.Columns[colIndexSort.Index]
+			if c.Type == ColumnTypeBlock {
+				continue
+			}
+
+			result := av.Rows[i].Cells[colIndexSort.Index].Value.Compare(av.Rows[j].Cells[colIndexSort.Index].Value)
+			if 0 == result {
+				continue
+			}
+
+			if colIndexSort.Order == SortOrderAsc {
+				return 0 > result
+			}
+			return 0 < result
+		}
+		return false
+	})
+}
+
+type AttributeViewFilter struct {
+	Column   string         `json:"column"`
+	Operator FilterOperator `json:"operator"`
+	Value    *Value         `json:"value"`
+}
+
+type FilterOperator string
+
+const (
+	FilterOperatorIsEqual           FilterOperator = "="
+	FilterOperatorIsNotEqual        FilterOperator = "!="
+	FilterOperatorIsGreater         FilterOperator = ">"
+	FilterOperatorIsGreaterOrEqual  FilterOperator = ">="
+	FilterOperatorIsLess            FilterOperator = "<"
+	FilterOperatorIsLessOrEqual     FilterOperator = "<="
+	FilterOperatorContains          FilterOperator = "Contains"
+	FilterOperatorDoesNotContain    FilterOperator = "Does not contains"
+	FilterOperatorIsEmpty           FilterOperator = "Is empty"
+	FilterOperatorIsNotEmpty        FilterOperator = "Is not empty"
+	FilterOperatorStartsWith        FilterOperator = "Starts with"
+	FilterOperatorEndsWith          FilterOperator = "Ends with"
+	FilterOperatorIsBetween         FilterOperator = "Is between"
+	FilterOperatorIsRelativeToToday FilterOperator = "Is relative to today"
+)
 
 func (av *AttributeView) FilterRows() {
-	if 0 < len(av.Filters) {
-		var colIndexes []int
-		for _, f := range av.Filters {
-			for i, c := range av.Columns {
-				if c.ID == f.Column {
-					colIndexes = append(colIndexes, i)
-					break
-				}
-			}
-		}
-
-		rows := []*Row{}
-		for _, row := range av.Rows {
-			pass := true
-			for j, index := range colIndexes {
-				c := av.Columns[index]
-				if c.Type == ColumnTypeBlock {
-					continue
-				}
-
-				if !row.Cells[index].Value.CompareOperator(av.Filters[j].Value, av.Filters[j].Operator) {
-					pass = false
-					break
-				}
-			}
-			if pass {
-				rows = append(rows, row)
-			}
-		}
-		av.Rows = rows
+	if 1 > len(av.Filters) {
+		return
 	}
+
+	var colIndexes []int
+	for _, f := range av.Filters {
+		for i, c := range av.Columns {
+			if c.ID == f.Column {
+				colIndexes = append(colIndexes, i)
+				break
+			}
+		}
+	}
+
+	rows := []*Row{}
+	for _, row := range av.Rows {
+		pass := true
+		for j, index := range colIndexes {
+			c := av.Columns[index]
+			if c.Type == ColumnTypeBlock {
+				continue
+			}
+
+			if !row.Cells[index].Value.CompareOperator(av.Filters[j].Value, av.Filters[j].Operator) {
+				pass = false
+				break
+			}
+		}
+		if pass {
+			rows = append(rows, row)
+		}
+	}
+	av.Rows = rows
 }
 
-func (av *AttributeView) CalcCols() {
+type AttributeViewCalc struct {
+	Column   string       `json:"column"`
+	Operator CalcOperator `json:"operator"`
+	Value    *Value       `json:"value"`
+}
 
+type CalcOperator string
+
+const (
+	CalcOperatorNone              CalcOperator = ""
+	CalcOperatorCountAll          CalcOperator = "Count all"
+	CalcOperatorCountValues       CalcOperator = "Count values"
+	CalcOperatorCountUniqueValues CalcOperator = "Count unique values"
+	CalcOperatorCountEmpty        CalcOperator = "Count empty"
+	CalcOperatorCountNotEmpty     CalcOperator = "Count not empty"
+	CalcOperatorPercentEmpty      CalcOperator = "Percent empty"
+	CalcOperatorPercentNotEmpty   CalcOperator = "Percent not empty"
+	CalcOperatorSum               CalcOperator = "Sum"
+	CalcOperatorAverage           CalcOperator = "Average"
+	CalcOperatorMedian            CalcOperator = "Median"
+	CalcOperatorMin               CalcOperator = "Min"
+	CalcOperatorMax               CalcOperator = "Max"
+	CalcOperatorRange             CalcOperator = "Range"
+	CalcOperatorEarliest          CalcOperator = "Earliest"
+	CalcOperatorLatest            CalcOperator = "Latest"
+)
+
+func (av *AttributeView) CalcCols() {
+	if 1 > len(av.Calculates) {
+		return
+	}
+
+	var colIndexes []int
+	for _, c := range av.Calculates {
+		for i, col := range av.Columns {
+			if col.ID == c.Column {
+				colIndexes = append(colIndexes, i)
+				break
+			}
+		}
+	}
+
+	var colValues []*Value
+	for _, row := range av.Rows {
+		for _, index := range colIndexes {
+			colValues = append(colValues, row.Cells[index].Value)
+		}
+	}
+
+	for i, c := range av.Calculates {
+		switch c.Operator {
+		case CalcOperatorCountAll:
+			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(len(colValues))}}
+		case CalcOperatorCountValues:
+			var countValues int
+			for _, v := range colValues {
+				if v.Number.IsNotEmpty {
+					countValues++
+				}
+			}
+
+			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(countValues)}}
+		case CalcOperatorCountUniqueValues:
+			var countUniqueValues int
+			uniqueValues := map[float64]bool{}
+			for _, v := range colValues {
+				if v.Number.IsNotEmpty {
+					if !uniqueValues[v.Number.Content] {
+						countUniqueValues++
+						uniqueValues[v.Number.Content] = true
+					}
+				}
+			}
+
+			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		case CalcOperatorCountEmpty:
+			var countEmpty int
+			for _, v := range colValues {
+				if !v.Number.IsNotEmpty {
+					countEmpty++
+				}
+			}
+
+			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
+		}
+	}
 }

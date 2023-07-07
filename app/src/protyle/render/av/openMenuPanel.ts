@@ -4,7 +4,7 @@ import {addCol} from "./addCol";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {Menu} from "../../../plugin/Menu";
-import {hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 
 export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type: "properties" | "config" | "sorts" | "filters" = "config") => {
     let avPanelElement = document.querySelector(".av__panel");
@@ -37,6 +37,138 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
         setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
 
         bindSortsEvent(protyle, menuElement, data);
+        avPanelElement.addEventListener("dragstart", (event) => {
+            window.siyuan.dragElement = event.target as HTMLElement;
+            window.siyuan.dragElement.style.opacity = ".1";
+            return;
+        });
+        avPanelElement.addEventListener("drop", (event) => {
+            window.siyuan.dragElement.style.opacity = "";
+            const sourceElement = window.siyuan.dragElement;
+            window.siyuan.dragElement = undefined;
+            if (protyle.disabled) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            const target = event.target as HTMLElement;
+            const targetElement = hasClosestByAttribute(target, "data-id", null);
+            if (!targetElement ||
+                (!targetElement.classList.contains("dragover__top") && !targetElement.classList.contains("dragover__bottom"))) {
+                return;
+            }
+            let type = "columns";
+            if (targetElement.querySelector('[data-type="removeSort"]')) {
+                type = "sorts";
+            } else if (targetElement.querySelector('[data-type="removeFilter"]')) {
+                type = "filters";
+            }
+            const sourceId = sourceElement.dataset.id;
+            const targetId = targetElement.dataset.id;
+            const isTop = targetElement.classList.contains("dragover__top")
+            if (type !== "columns") {
+                const changeData = (type === "sorts" ? data.sorts : data.filters) as IAVFilter[]
+                const oldData = Object.assign([], changeData);
+                let targetFilter: IAVFilter
+                changeData.find((filter, index: number) => {
+                    if (filter.column === sourceId) {
+                        targetFilter = changeData.splice(index, 1)[0];
+                        return true;
+                    }
+                })
+                changeData.find((filter, index: number) => {
+                    if (filter.column === targetId) {
+                        if (isTop) {
+                            changeData.splice(index, 0, targetFilter);
+                        } else {
+                            changeData.splice(index + 1, 0, targetFilter);
+                        }
+                        return true;
+                    }
+                })
+
+                transaction(protyle, [{
+                    action: "setAttrView",
+                    id: avId,
+                    data: {
+                        [type]: changeData
+                    }
+                }], [{
+                    action: "setAttrView",
+                    id: avId,
+                    data: {
+                        [type]: oldData
+                    }
+                }]);
+                menuElement.innerHTML = (type === "sorts" ? getSortsHTML(data) : getFiltersHTML(data));
+                if (type === "sorts") {
+                    bindSortsEvent(protyle, menuElement, data);
+                }
+                return;
+            }
+            transaction(protyle, [{
+                action: "sortAttrViewCol",
+                parentID: avId,
+                previousID: (targetElement.classList.contains("dragover__top") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "",
+                id: sourceId,
+            }], [{
+                action: "sortAttrViewCol",
+                parentID: avId,
+                previousID: sourceElement.previousElementSibling?.getAttribute("data-id") || "",
+                id: sourceId,
+            }]);
+            let column: IAVColumn
+            data.columns.find((item, index: number) => {
+                if (item.id === sourceId) {
+                    column = data.columns.splice(index, 1)[0];
+                    return true;
+                }
+            })
+            data.columns.find((item, index: number) => {
+                if (item.id === targetId) {
+                    if (isTop) {
+                        data.columns.splice(index, 0, column);
+                    } else {
+                        data.columns.splice(index + 1, 0, column);
+                    }
+                    return true;
+                }
+            })
+            menuElement.innerHTML = getPropertiesHTML(data)
+        });
+        let dragoverElement: HTMLElement
+        avPanelElement.addEventListener("dragover", (event: DragEvent) => {
+            const target = event.target as HTMLElement;
+            const targetElement = hasClosestByAttribute(target, "data-id", null);
+            if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement)) {
+                return;
+            }
+            event.preventDefault();
+            if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
+                const nodeRect = targetElement.getBoundingClientRect();
+                if (event.clientY > nodeRect.top + nodeRect.height / 2) {
+                    targetElement.classList.add("dragover__bottom");
+                } else {
+                    targetElement.classList.add("dragover__top");
+                }
+                return;
+            }
+            dragoverElement = targetElement;
+        });
+
+        avPanelElement.addEventListener("dragleave", (event) => {
+            const target = event.target as HTMLElement;
+            const targetElement = hasClosestByAttribute(target, "data-id", null);
+            if (targetElement) {
+                targetElement.classList.remove("dragover__top", "dragover__bottom");
+            }
+        });
+        avPanelElement.addEventListener("dragend", (event) => {
+            if (window.siyuan.dragElement) {
+                window.siyuan.dragElement.style.opacity = ""
+                window.siyuan.dragElement = undefined;
+            }
+        });
         avPanelElement.addEventListener("click", (event) => {
             event.preventDefault();
             let target = event.target as HTMLElement;
@@ -249,7 +381,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "hideCol") {
-                    const colId = target.getAttribute("data-id");
+                    const colId = target.parentElement.getAttribute("data-id");
                     transaction(protyle, [{
                         action: "setAttrViewColHidden",
                         id: colId,
@@ -267,7 +399,7 @@ export const openMenuPanel = (protyle: IProtyle, blockElement: HTMLElement, type
                     event.stopPropagation();
                     break;
                 } else if (type === "showCol") {
-                    const colId = target.getAttribute("data-id");
+                    const colId = target.parentElement.getAttribute("data-id");
                     transaction(protyle, [{
                         action: "setAttrViewColHidden",
                         id: colId,
@@ -388,7 +520,7 @@ const getSortsHTML = (data: IAV) => {
         return sortHTML;
     };
     data.sorts.forEach((item: IAVSort) => {
-        html += `<button class="b3-menu__item" data-id="${item.column}">
+        html += `<button draggable="true" class="b3-menu__item" data-id="${item.column}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <select class="b3-select" style="width: 106px;margin: 4px 0">
         ${genSortItem(item.column)}
@@ -473,7 +605,7 @@ export const setFilter = (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
 `;
             break;
-            case "number":
+        case "number":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">=</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">!=</option>
 <option ${">" === options.filter.operator ? "selected" : ""} value=">">&gt;</option>
@@ -597,7 +729,7 @@ const getFiltersHTML = (data: IAV) => {
         return filterHTML;
     };
     data.filters.forEach((item: IAVFilter) => {
-        html += `<button class="b3-menu__item" data-type="nobg" data-id="${item.column}">
+        html += `<button class="b3-menu__item" draggable="true" data-type="nobg" data-id="${item.column}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">${genFilterItem(item)}</div>
     <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>
@@ -627,7 +759,7 @@ const getPropertiesHTML = (data: IAV) => {
     let hideHTML = "";
     data.columns.forEach((item: IAVColumn) => {
         if (item.hidden) {
-            hideHTML += `<button class="b3-menu__item" data-type="nobg">
+            hideHTML += `<button class="b3-menu__item" draggable="true" data-type="nobg" data-id="${item.id}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
@@ -635,11 +767,11 @@ const getPropertiesHTML = (data: IAV) => {
             <span class="fn__ellipsis">${item.name}</span>
         </span>
     </div>
-    <svg class="b3-menu__action" data-type="showCol" data-id="${item.id}"><use xlink:href="#iconEyeoff"></use></svg>
+    <svg class="b3-menu__action" data-type="showCol"><use xlink:href="#iconEyeoff"></use></svg>
     <svg class="b3-menu__action"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         } else {
-            showHTML += `<button class="b3-menu__item" data-type="nobg">
+            showHTML += `<button class="b3-menu__item" draggable="true" data-type="nobg" data-id="${item.id}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip">
@@ -647,7 +779,7 @@ const getPropertiesHTML = (data: IAV) => {
             <span class="fn__ellipsis">${item.name}</span>
         </span>
     </div>
-    <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol" data-id="${item.id}"><use xlink:href="#iconEye"></use></svg>
+    <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEye"></use></svg>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
         }

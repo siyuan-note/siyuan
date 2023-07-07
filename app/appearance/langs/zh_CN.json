@@ -1,4 +1,6 @@
 {
+  "createWorkspace": "创建工作空间",
+  "createWorkspaceTip": "确定使用该路径创建工作空间吗？",
   "calcOperatorNone": "无",
   "calcOperatorCountAll": "行计数",
   "calcOperatorCountValues": "值计数",

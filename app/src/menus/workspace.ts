@@ -94,7 +94,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         if (response.data.isWorkspace) {
                             openWorkspace(localPath.filePaths[0]);
                         } else {
-                            confirmDialog(window.siyuan.languages.new, `TODO: ${localPath.filePaths[0]}`, () => {
+                            confirmDialog(window.siyuan.languages.createWorkspace, window.siyuan.languages.createWorkspaceTip + `<br><br><code class="fn__code">${localPath.filePaths[0]}</code>`, () => {
                                 openWorkspace(localPath.filePaths[0]);
                             });
                         }

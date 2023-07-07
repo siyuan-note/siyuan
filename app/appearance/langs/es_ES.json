@@ -1,4 +1,6 @@
 {
+  "createWorkspace": "Crear espacio de trabajo",
+  "createWorkspaceTip": "¿Estás seguro de usar esta ruta para crear un espacio de trabajo?",
   "calcOperatorNone": "Ninguno",
   "calcOperatorCountAll": "Contar todo",
   "calcOperatorCountValues": "Valores de conteo",

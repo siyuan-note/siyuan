@@ -1,4 +1,6 @@
 {
+  "createWorkspace": "Create Workspace",
+  "createWorkspaceTip": "Are you sure to use this path to create a workspace?",
   "calcOperatorNone": "None",
   "calcOperatorCountAll": "Count all",
   "calcOperatorCountValues": "Count Values",

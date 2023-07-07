@@ -1,6 +1,7 @@
 .av {
   user-select: none;
   box-sizing: border-box;
+  font-size: 14px;
 
   &__header {
     top: -43px;
@@ -10,8 +11,8 @@
   &__title {
     height: 30px;
     outline: none;
-    font-size: 18px;
-    font-weight: bold;
+    line-height: 30px;
+    font-size: 16px;
 
     &:empty::after {
       color: var(--b3-theme-on-surface);
@@ -71,6 +72,10 @@
 
       .av__cell {
         padding: 0;
+
+        &:hover {
+          background-color: var(--b3-list-hover);
+        }
       }
     }
 
@@ -90,8 +95,8 @@
     align-items: center;
 
     svg {
-      height: 14px;
-      width: 14px;
+      height: 12px;
+      width: 12px;
       color: var(--b3-theme-on-surface);
       margin-right: 5px;
       flex-shrink: 0;

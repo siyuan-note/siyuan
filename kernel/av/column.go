@@ -117,8 +117,70 @@ func (av *AttributeView) CalcCols() {
 			av.calcColDate(col, i)
 		case ColumnTypeSelect:
 			av.calcColSelect(col, i)
+		case ColumnTypeMSelect:
+			av.calcColMSelect(col, i)
 		}
+	}
+}
 
+func (av *AttributeView) calcColMSelect(col *Column, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(len(av.Rows))}}
+	case CalcOperatorCountValues:
+		countValues := 0
+		for _, row := range av.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) {
+				countValues += len(row.Cells[colIndex].Value.MSelect)
+			}
+		}
+		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countValues)}}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range av.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) {
+				for _, sel := range row.Cells[colIndex].Value.MSelect {
+					if _, ok := uniqueValues[sel.Content]; !ok {
+						uniqueValues[sel.Content] = true
+						countUniqueValues++
+					}
+				}
+			}
+		}
+		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, row := range av.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.MSelect || 0 == len(row.Cells[colIndex].Value.MSelect) {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty)}}
+	case CalcOperatorCountNotEmpty:
+		countNotEmpty := 0
+		for _, row := range av.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, row := range av.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.MSelect || 0 == len(row.Cells[colIndex].Value.MSelect) {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(av.Rows))}}
+	case CalcOperatorPercentNotEmpty:
+		countNotEmpty := 0
+		for _, row := range av.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &ColumnCalcResult{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(av.Rows))}}
 	}
 }
 

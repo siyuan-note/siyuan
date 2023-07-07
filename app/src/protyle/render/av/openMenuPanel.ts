@@ -473,14 +473,25 @@ export const setFilter = (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
 `;
             break;
+            case "number":
+            selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">=</option>
+<option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">!=</option>
+<option ${">" === options.filter.operator ? "selected" : ""} value=">">&gt;</option>
+<option ${"<" === options.filter.operator ? "selected" : ""} value="<">&lt;</option>
+<option ${">=" === options.filter.operator ? "selected" : ""} value=">=">&GreaterEqual;</option>
+<option ${"<=" === options.filter.operator ? "selected" : ""} value="<=">&le;</option>
+<option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
+`;
+            break;
     }
     menu.addItem({
         iconHTML: "",
-        label: `<select class="b3-select fn__size200">${selectHTML}</select>`
+        label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
     menu.addItem({
         iconHTML: "",
-        label: `<input value="${options.filter.value[colType].content}" class="b3-text-field fn__size200">`
+        label: `<input style="margin: 4px 0" value="${options.filter.value[colType].content}" class="b3-text-field fn__size200">`
     });
     const textElement = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement);
     textElement.addEventListener("keydown", (event) => {

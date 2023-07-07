@@ -751,6 +751,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         ) {
             /// #if !MOBILE
             submenu.push({
+                icon: "iconLayoutRight",
                 label: window.siyuan.languages.insertRight,
                 accelerator: showAccelerator ? "Click" : "",
                 click() {
@@ -780,6 +781,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         }
         /// #if !BROWSER
         submenu.push({
+            icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             accelerator: showAccelerator ? "⌘Click" : "",
             click: () => {

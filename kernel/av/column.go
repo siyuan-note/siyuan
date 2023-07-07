@@ -22,13 +22,13 @@ type ColumnType string
 
 const (
 	ColumnTypeBlock    ColumnType = "block"
-	ColumnTypeDate     ColumnType = "date"
+	ColumnTypeText     ColumnType = "text"
 	ColumnTypeNumber   ColumnType = "number"
-	ColumnTypeRelation ColumnType = "relation"
-	ColumnTypeRollup   ColumnType = "rollup"
+	ColumnTypeDate     ColumnType = "date"
 	ColumnTypeSelect   ColumnType = "select"
 	ColumnTypeMSelect  ColumnType = "mSelect"
-	ColumnTypeText     ColumnType = "text"
+	ColumnTypeRelation ColumnType = "relation"
+	ColumnTypeRollup   ColumnType = "rollup"
 )
 
 // Column 描述了属性视图的基础结构。

@@ -40,10 +40,9 @@ type AttributeView struct {
 	Columns []*Column `json:"columns"` // 表格列名
 	Rows    []*Row    `json:"rows"`    // 表格行记录
 
-	Type       AttributeViewType      `json:"type"`       // 属性视图类型
-	Filters    []*AttributeViewFilter `json:"filters"`    // 过滤规则
-	Sorts      []*AttributeViewSort   `json:"sorts"`      // 排序规则
-	Calculates []*AttributeViewCalc   `json:"calculates"` // 计算规则
+	Type    AttributeViewType      `json:"type"`    // 属性视图类型
+	Filters []*AttributeViewFilter `json:"filters"` // 过滤规则
+	Sorts   []*AttributeViewSort   `json:"sorts"`   // 排序规则
 }
 
 // AttributeViewType 描述了属性视图的类型。
@@ -304,92 +303,4 @@ func (av *AttributeView) FilterRows() {
 		}
 	}
 	av.Rows = rows
-}
-
-type AttributeViewCalc struct {
-	Column   string       `json:"column"`
-	Operator CalcOperator `json:"operator"`
-	Value    *Value       `json:"value"`
-}
-
-type CalcOperator string
-
-const (
-	CalcOperatorNone              CalcOperator = ""
-	CalcOperatorCountAll          CalcOperator = "Count all"
-	CalcOperatorCountValues       CalcOperator = "Count values"
-	CalcOperatorCountUniqueValues CalcOperator = "Count unique values"
-	CalcOperatorCountEmpty        CalcOperator = "Count empty"
-	CalcOperatorCountNotEmpty     CalcOperator = "Count not empty"
-	CalcOperatorPercentEmpty      CalcOperator = "Percent empty"
-	CalcOperatorPercentNotEmpty   CalcOperator = "Percent not empty"
-	CalcOperatorSum               CalcOperator = "Sum"
-	CalcOperatorAverage           CalcOperator = "Average"
-	CalcOperatorMedian            CalcOperator = "Median"
-	CalcOperatorMin               CalcOperator = "Min"
-	CalcOperatorMax               CalcOperator = "Max"
-	CalcOperatorRange             CalcOperator = "Range"
-	CalcOperatorEarliest          CalcOperator = "Earliest"
-	CalcOperatorLatest            CalcOperator = "Latest"
-)
-
-func (av *AttributeView) CalcCols() {
-	if 1 > len(av.Calculates) {
-		return
-	}
-
-	var colIndexes []int
-	for _, c := range av.Calculates {
-		for i, col := range av.Columns {
-			if col.ID == c.Column {
-				colIndexes = append(colIndexes, i)
-				break
-			}
-		}
-	}
-
-	var colValues []*Value
-	for _, row := range av.Rows {
-		for _, index := range colIndexes {
-			colValues = append(colValues, row.Cells[index].Value)
-		}
-	}
-
-	for i, c := range av.Calculates {
-		switch c.Operator {
-		case CalcOperatorCountAll:
-			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(len(colValues))}}
-		case CalcOperatorCountValues:
-			var countValues int
-			for _, v := range colValues {
-				if v.Number.IsNotEmpty {
-					countValues++
-				}
-			}
-
-			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(countValues)}}
-		case CalcOperatorCountUniqueValues:
-			var countUniqueValues int
-			uniqueValues := map[float64]bool{}
-			for _, v := range colValues {
-				if v.Number.IsNotEmpty {
-					if !uniqueValues[v.Number.Content] {
-						countUniqueValues++
-						uniqueValues[v.Number.Content] = true
-					}
-				}
-			}
-
-			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
-		case CalcOperatorCountEmpty:
-			var countEmpty int
-			for _, v := range colValues {
-				if !v.Number.IsNotEmpty {
-					countEmpty++
-				}
-			}
-
-			av.Calculates[i].Value = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
-		}
-	}
 }

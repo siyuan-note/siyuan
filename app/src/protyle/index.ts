@@ -30,6 +30,8 @@ import {resize} from "./util/resize";
 import {getDocByScroll} from "./scroll/saveScroll";
 import {App} from "../index";
 import {insertHTML} from "./util/insertHTML";
+import {showColMenu} from "./render/av/col";
+import {avRender} from "./render/av/render";
 
 export class Protyle {
 
@@ -98,6 +100,14 @@ export class Protyle {
                             if (data.data === this.protyle.block.rootID) {
                                 reloadProtyle(this.protyle, false);
                             }
+                            break;
+                        case "refreshAttributeView":
+                            Array.from(this.protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${data.data.id}"]`)).forEach((item: HTMLElement) => {
+                                item.removeAttribute("data-render");
+                                avRender(item, () => {
+                                    showColMenu(this.protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
+                                });
+                            });
                             break;
                         case "addLoading":
                             if (data.data === this.protyle.block.rootID) {

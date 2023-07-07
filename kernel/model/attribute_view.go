@@ -246,7 +246,7 @@ func addAttributeViewColumn(name string, typ string, avID string) (err error) {
 
 	colType := av.ColumnType(typ)
 	switch colType {
-	case av.ColumnTypeText:
+	case av.ColumnTypeText, av.ColumnTypeNumber, av.ColumnTypeDate, av.ColumnTypeSelect, av.ColumnTypeMSelect:
 		col := &av.Column{ID: ast.NewNodeID(), Name: name, Type: colType}
 		attrView.Columns = append(attrView.Columns, col)
 		for _, row := range attrView.Rows {
@@ -271,7 +271,7 @@ func updateAttributeViewColumn(id, name string, typ string, avID string) (err er
 
 	colType := av.ColumnType(typ)
 	switch colType {
-	case av.ColumnTypeText:
+	case av.ColumnTypeText, av.ColumnTypeNumber, av.ColumnTypeDate, av.ColumnTypeSelect, av.ColumnTypeMSelect:
 		for _, col := range attrView.Columns {
 			if col.ID == id {
 				col.Name = name

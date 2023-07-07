@@ -151,11 +151,11 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         label: window.siyuan.languages.filter,
         click() {
             fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
-                const avData = response.data.av as IAV
-                let filter: IAVFilter
+                const avData = response.data.av as IAV;
+                let filter: IAVFilter;
                 avData.filters.find((item) => {
                     if (item.column === colId) {
-                        filter = item
+                        filter = item;
                         return true;
                     }
                 });
@@ -168,7 +168,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                                 content: ""
                             }
                         }
-                    }
+                    };
                 }
                 setFilter({
                     filter,

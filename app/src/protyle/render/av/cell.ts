@@ -1,8 +1,5 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
-import {Menu} from "../../../plugin/Menu";
-import {getColIconByType} from "./col";
-import {fetchPost} from "../../../util/fetch";
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.children[parseInt(cellElement.getAttribute("data-index")) + 1].getAttribute("data-dtype") as TAVCol;

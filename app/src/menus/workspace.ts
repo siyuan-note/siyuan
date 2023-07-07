@@ -96,9 +96,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         } else {
                             confirmDialog(window.siyuan.languages.new, `TODO: ${localPath.filePaths[0]}`, () => {
                                 openWorkspace(localPath.filePaths[0]);
-                            })
+                            });
                         }
-                    })
+                    });
                 }
             }];
             workspaceSubMenu.push({type: "separator"});

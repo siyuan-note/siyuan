@@ -5,8 +5,11 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.children[parseInt(cellElement.getAttribute("data-index")) + 1].getAttribute("data-dtype") as TAVCol;
     const cellRect = cellElement.getBoundingClientRect();
     let html = "";
+    const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`
     if (type === "block" || type === "text") {
-        html = `<textarea style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px" class="b3-text-field">${cellElement.textContent}</textarea>`;
+        html = `<textarea ${style} class="b3-text-field">${cellElement.textContent}</textarea>`;
+    } else if (type === "number") {
+        html = `<input type="number" value="${cellElement.textContent}" ${style} class="b3-text-field">`;
     }
     document.body.insertAdjacentHTML("beforeend", `<div class="av__mask">
     ${html}
@@ -47,17 +50,22 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
         return;
     }
     const avMaskElement = document.querySelector(".av__mask");
-    const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     const cellId = cellElement.getAttribute("data-id");
     const avId = blockElement.getAttribute("data-av-id");
     const rowId = rowElement.getAttribute("data-id");
+    let inputValue: string | number = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
+    let oldValue: string | number = cellElement.textContent.trim()
+    if (type === "number") {
+        inputValue = parseFloat(inputValue);
+        oldValue = parseFloat(oldValue);
+    }
     transaction(protyle, [{
         action: "updateAttrViewCell",
         id: cellId,
         rowID: rowId,
         parentID: avId,
         data: {
-            [type]: {content: inputElement.value}
+            [type]: {content: inputValue}
         }
     }], [{
         action: "updateAttrViewCell",
@@ -65,7 +73,7 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
         rowID: rowId,
         parentID: avId,
         data: {
-            [type]: {content: cellElement.textContent.trim()}
+            [type]: {content: oldValue}
         }
     }]);
     setTimeout(() => {

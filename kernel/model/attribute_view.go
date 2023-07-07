@@ -19,12 +19,12 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/jinzhu/copier"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -521,26 +521,27 @@ func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree
 	}
 
 	row := av.NewRow()
-	row.Cells = append(row.Cells, av.NewCellBlock(blockID, getNodeRefText(node)))
-	if 1 < len(ret.Columns) {
-		attrs := parse.IAL2Map(node.KramdownIAL)
-		for _, col := range ret.Columns[1:] {
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	for _, col := range ret.Columns {
+		if av.ColumnTypeBlock != col.Type {
 			attrs[NodeAttrNamePrefixAvCol+avID+"-"+col.ID] = "" // 将列作为属性添加到块中
 			row.Cells = append(row.Cells, av.NewCell(col.Type))
-		}
-
-		if "" == attrs[NodeAttrNameAVs] {
-			attrs[NodeAttrNameAVs] = avID
 		} else {
-			avIDs := strings.Split(attrs[NodeAttrNameAVs], ",")
-			avIDs = append(avIDs, avID)
-			avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-			attrs[NodeAttrNameAVs] = strings.Join(avIDs, ",")
+			row.Cells = append(row.Cells, av.NewCellBlock(blockID, getNodeRefText(node)))
 		}
+	}
 
-		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
-			return
-		}
+	if "" == attrs[NodeAttrNameAVs] {
+		attrs[NodeAttrNameAVs] = avID
+	} else {
+		avIDs := strings.Split(attrs[NodeAttrNameAVs], ",")
+		avIDs = append(avIDs, avID)
+		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+		attrs[NodeAttrNameAVs] = strings.Join(avIDs, ",")
+	}
+
+	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+		return
 	}
 
 	if "" == previousRowID {

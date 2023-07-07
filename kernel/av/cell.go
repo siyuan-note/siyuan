@@ -232,7 +232,8 @@ type ValueText struct {
 }
 
 type ValueNumber struct {
-	Content float64 `json:"content"`
+	Content    float64 `json:"content"`
+	IsNotEmpty bool    `json:"isNotEmpty"`
 }
 
 type ValueDate struct {

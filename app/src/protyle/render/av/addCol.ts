@@ -46,7 +46,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Text",
+                name: "Select",
                 parentID: blockElement.getAttribute("data-av-id"),
                 type: "select",
                 id
@@ -64,7 +64,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Text",
+                name: "Multi-select",
                 parentID: blockElement.getAttribute("data-av-id"),
                 type: "mSelect",
                 id
@@ -82,7 +82,7 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Text",
+                name: "Date",
                 parentID: blockElement.getAttribute("data-av-id"),
                 type: "date",
                 id

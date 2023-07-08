@@ -37,12 +37,7 @@ export const fixTableRange = (range: Range) => {
             } else if (startCellElement &&
                 // 不能包含自身元素，否则对 cell 中的部分文字两次高亮后就会选中整个 cell。 https://github.com/siyuan-note/siyuan/issues/3649 第二点
                 !startCellElement.contains(range.endContainer)) {
-                const cloneRange = range.cloneRange();
-                range.setEnd(startCellElement.lastChild, startCellElement.lastChild.textContent.length);
-                if (range.toString() === "" && endCellElement) {
-                    range.setStart(endCellElement.firstChild, 0);
-                    range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
-                }
+                setLastNodeRange(startCellElement, range, false);
             }
         }
     }

@@ -4,7 +4,7 @@ import {addCol} from "./addCol";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute} from "../../util/hasClosest";
-import {bindSelectEvent, getSelectHTML, setSelectOption} from "./select";
+import {bindSelectEvent, getSelectHTML, setOptionCell, setSelectOption} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 
@@ -433,6 +433,10 @@ export const openMenuPanel = (protyle: IProtyle,
                     break;
                 } else if (type === "editOption") {
                     setSelectOption(protyle, data, options, target);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "setOptionCell") {
+                    setOptionCell(protyle, data, options, target, menuElement);
                     event.stopPropagation();
                     break;
                 }

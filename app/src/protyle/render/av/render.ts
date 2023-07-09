@@ -54,7 +54,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                         if (data.columns[index].hidden) {
                             return;
                         }
-                        let text: string;
+                        let text = "";
                         if (cell.valueType === "text") {
                             text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
                         } else if (cell.valueType === "block") {
@@ -68,7 +68,9 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                                 text = "<span class=\"av__celltext\"></span>";
                             }
                         } else if (cell.valueType === "mSelect") {
-                            text = `<span class="av__celltext">${cell.value?.mSelect.content || ""}</span>`;
+                            (cell.value?.mSelect as [])?.forEach((item: { content: string, color: string }) => {
+                                text += `<span class="av__celltext"><span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span></span>`;
+                            });
                         } else if (cell.valueType === "date") {
                             text = `<span class="av__celltext">${cell.value?.date.content || ""}</span>`;
                         }
@@ -162,7 +164,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             if (!titleElement || titleElement.textContent.trim() === operation.data.name) {
                 return;
             }
-            titleElement.textContent =  operation.data.name;
+            titleElement.textContent = operation.data.name;
             titleElement.dataset.title = operation.data.name;
         });
     } else {

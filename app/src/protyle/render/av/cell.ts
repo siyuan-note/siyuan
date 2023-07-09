@@ -1,15 +1,20 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {openMenuPanel} from "./openMenuPanel";
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
-    const type = cellElement.parentElement.parentElement.firstElementChild.children[parseInt(cellElement.getAttribute("data-index")) + 1].getAttribute("data-dtype") as TAVCol;
+    const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
     const cellRect = cellElement.getBoundingClientRect();
     let html = "";
     const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`
+    const blockElement = hasClosestBlock(cellElement);
     if (type === "block" || type === "text") {
         html = `<textarea ${style} class="b3-text-field">${cellElement.textContent}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElement.textContent}" ${style} class="b3-text-field">`;
+    } else if (type === "select" && blockElement) {
+        openMenuPanel(protyle, blockElement, "select", {cellElement});
+        return;
     }
     document.body.insertAdjacentHTML("beforeend", `<div class="av__mask">
     ${html}

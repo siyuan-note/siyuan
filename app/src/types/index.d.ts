@@ -29,6 +29,9 @@ type TOperation =
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"
     | "setAttrViewColWidth"
+    | "updateAttrViewColOptions"
+    | "removeAttrViewColOption"
+    | "updateAttrViewColOption"
     | "setAttrView"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
@@ -869,6 +872,11 @@ interface IAVColumn {
     wrap: boolean,
     hidden: boolean,
     type: TAVCol,
+    // 选项列表
+    options?: {
+        name: string,
+        color: string,
+    }[]
 }
 
 interface IAVRow {
@@ -888,7 +896,7 @@ interface IAVCell {
 
 interface IAVCellValue {
     content?: any
-    content2?: string
+    content2?: string   // 用于日期
     color?: string
     id?: string
     isNotEmpty?: boolean

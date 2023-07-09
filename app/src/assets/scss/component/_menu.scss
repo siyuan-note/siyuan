@@ -154,6 +154,7 @@
     color: var(--b3-theme-on-background);
     position: relative;
     box-sizing: border-box;
+    margin: 1px 0;
 
     &[disabled="disabled"] {
       cursor: not-allowed;

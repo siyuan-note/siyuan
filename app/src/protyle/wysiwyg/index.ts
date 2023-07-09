@@ -355,12 +355,12 @@ export class WYSIWYG {
                 const avId = nodeElement.getAttribute("data-av-id");
                 const dragElement = target.parentElement;
                 const oldWidth = dragElement.clientWidth;
-                const dragIndex = dragElement.getAttribute("data-index");
+                const dragColId = dragElement.getAttribute("data-col-id");
                 let newWidth: string;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     newWidth = oldWidth + (moveEvent.clientX - event.clientX) + "px";
                     dragElement.parentElement.parentElement.querySelectorAll(".av__row").forEach(item => {
-                        (item.querySelector(`[data-index="${dragIndex}"]`) as HTMLElement).style.width = newWidth;
+                        (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth;
                     });
                 };
 
@@ -372,12 +372,12 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     transaction(protyle, [{
                         action: "setAttrViewColWidth",
-                        id: dragElement.getAttribute("data-id"),
+                        id: dragColId,
                         parentID: avId,
                         data: newWidth
                     }], [{
                         action: "setAttrViewColWidth",
-                        id: dragElement.getAttribute("data-id"),
+                        id: dragColId,
                         parentID: avId,
                         data: oldWidth + "px"
                     }]);

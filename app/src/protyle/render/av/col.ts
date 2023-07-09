@@ -50,20 +50,21 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
-const removeCol = (cellElement: HTMLElement) => {
-    const index = cellElement.getAttribute("data-index");
+const removeCol = (cellElement:HTMLElement) => {
     const blockElement = hasClosestBlock(cellElement);
     if (!blockElement) {
         return false;
     }
+    const colId = cellElement.getAttribute("data-col-id");
     blockElement.querySelectorAll(".av__row").forEach((item) => {
-        item.querySelector(`[data-index="${index}"]`).remove();
+        item.querySelector(`[data-col-id="${colId}"]`).remove();
     });
+    cellElement.remove();
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
-    const colId = cellElement.getAttribute("data-id");
+    const colId = cellElement.getAttribute("data-col-id");
     const avId = blockElement.getAttribute("data-av-id");
     const menu = new Menu("av-header-cell", () => {
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;

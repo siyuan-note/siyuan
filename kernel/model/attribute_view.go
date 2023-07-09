@@ -167,6 +167,14 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColumnOptions(operation.Data, operation.ID, operation.ParentID)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
 func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := addAttributeViewColumn(operation.Name, operation.Typ, operation.ParentID)
 	if nil != err {
@@ -288,6 +296,32 @@ func updateAttributeViewColumn(id, name string, typ string, avID string) (err er
 	}
 
 	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func updateAttributeViewColumnOptions(data interface{}, id, avID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	jsonData, err := gulu.JSON.MarshalJSON(data)
+	if nil != err {
+		return
+	}
+
+	options := []*av.ColumnSelectOption{}
+	if err = gulu.JSON.UnmarshalJSON(jsonData, &options); nil != err {
+		return
+	}
+
+	for _, col := range attrView.Columns {
+		if col.ID == id {
+			col.Options = options
+			err = av.SaveAttributeView(attrView)
+			return
+		}
+	}
 	return
 }
 

@@ -313,6 +313,8 @@ func setFiletree(c *gin.Context) {
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
 
+	util.UseSingleLineSave = model.Conf.FileTree.UseSingleLineSave
+
 	ret.Data = model.Conf.FileTree
 }
 

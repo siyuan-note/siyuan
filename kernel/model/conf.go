@@ -185,6 +185,7 @@ func InitConf() {
 		Conf.FileTree.DocCreateSavePath = strings.TrimSuffix(Conf.FileTree.DocCreateSavePath, "/")
 		Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
 	}
+	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 

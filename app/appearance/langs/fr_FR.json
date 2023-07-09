@@ -785,6 +785,8 @@
   "fileTree17": "S'il y a trop de sous-documents, cette restriction peut être utilisée pour améliorer les performances.",
   "fileTree18": "Permet la création de sous-documents de plus de 7 niveaux",
   "fileTree19": "Certains systèmes d'exploitation ont des limitations techniques qui peuvent empêcher la copie manuelle des données de l'espace de travail après la création de sous-documents supérieurs à 7 niveaux",
+  "fileTree20": "Enregistrer avec une seule ligne",
+  "fileTree21": "Après l'activation, un format JSON à une seule ligne sera utilisé lors de l'enregistrement des fichiers .sy, ce qui peut réduire la taille du fichier d'environ 30 % et améliorer l'efficacité de lecture et d'écriture de 50 %",
   "export11": "Traitement du contenu des blocs de référence lors de l'exportation",
   "export12": "Gestion du contenu des blocs intégrés lors de l'exportation",
   "export13": "Symbole d'enveloppement du texte d'ancrage",

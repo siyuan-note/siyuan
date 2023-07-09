@@ -509,6 +509,7 @@ interface IFileTree {
     alwaysSelectOpenedFile: boolean
     openFilesUseCurrentTab: boolean
     removeDocWithoutConfirm: boolean
+    useSingleLineSave: boolean
     allowCreateDeeper: boolean
     refCreateSavePath: string
     docCreateSavePath: string

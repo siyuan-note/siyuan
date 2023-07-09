@@ -165,13 +165,14 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 	data = renderer.Render()
 
-	// .sy 文档数据使用格式化好的 JSON 而非单行 JSON
-	buf := bytes.Buffer{}
-	buf.Grow(4096)
-	if err = json.Indent(&buf, data, "", "\t"); nil != err {
-		return
+	if !util.UseSingleLineSave {
+		buf := bytes.Buffer{}
+		buf.Grow(1024 * 1024 * 2)
+		if err = json.Indent(&buf, data, "", "\t"); nil != err {
+			return
+		}
+		data = buf.Bytes()
 	}
-	data = buf.Bytes()
 
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 		return
@@ -205,19 +206,21 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	}
 	if needFix {
 		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions)
-		output := renderer.Render()
+		data := renderer.Render()
 
-		buf := bytes.Buffer{}
-		buf.Grow(4096)
-		if err = json.Indent(&buf, output, "", "\t"); nil != err {
-			return
+		if !util.UseSingleLineSave {
+			buf := bytes.Buffer{}
+			buf.Grow(1024 * 1024 * 2)
+			if err = json.Indent(&buf, data, "", "\t"); nil != err {
+				return
+			}
+			data = buf.Bytes()
 		}
-		output = buf.Bytes()
 
 		if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
 			return
 		}
-		if err = filelock.WriteFile(filePath, output); nil != err {
+		if err = filelock.WriteFile(filePath, data); nil != err {
 			msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 			logging.LogErrorf(msg)
 		}

@@ -43,6 +43,14 @@ export const fileTree = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="removeDocWithoutConfirm" type="checkbox"${window.siyuan.config.fileTree.removeDocWithoutConfirm ? " checked" : ""}/>
 </label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.fileTree20}
+        <div class="b3-label__text">${window.siyuan.languages.fileTree21}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="useSingleLineSave" type="checkbox"${window.siyuan.config.fileTree.useSingleLineSave ? " checked" : ""}/>
+</label>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree12}
@@ -97,6 +105,7 @@ export const fileTree = {
             closeTabsOnStart: (fileTree.element.querySelector("#closeTabsOnStart") as HTMLInputElement).checked,
             allowCreateDeeper: (fileTree.element.querySelector("#allowCreateDeeper") as HTMLInputElement).checked,
             removeDocWithoutConfirm: (fileTree.element.querySelector("#removeDocWithoutConfirm") as HTMLInputElement).checked,
+            useSingleLineSave: (fileTree.element.querySelector("#useSingleLineSave") as HTMLInputElement).checked,
             maxListCount: parseInt((fileTree.element.querySelector("#maxListCount") as HTMLInputElement).value),
             maxOpenTabCount: inputMaxOpenTabCount,
         }, response => {

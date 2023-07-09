@@ -190,12 +190,14 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
 		data := renderer.Render()
 
-		buf := bytes.Buffer{}
-		buf.Grow(4096)
-		if err = json.Indent(&buf, data, "", "\t"); nil != err {
-			return
+		if !util.UseSingleLineSave {
+			buf := bytes.Buffer{}
+			buf.Grow(1024 * 1024 * 2)
+			if err = json.Indent(&buf, data, "", "\t"); nil != err {
+				return
+			}
+			data = buf.Bytes()
 		}
-		data = buf.Bytes()
 
 		if err = os.WriteFile(syPath, data, 0644); nil != err {
 			logging.LogErrorf("write .sy [%s] failed: %s", syPath, err)

@@ -785,6 +785,8 @@
   "fileTree17": "If there are too many sub-documents, this restriction can be used to improve performance",
   "fileTree18": "Allows creation of sub-documents deeper than 7 levels",
   "fileTree19": "Some operating systems have technical limitations that may prevent manual copying of workspace data after creating sub-documents greater than 7 levels",
+  "fileTree20": "Save with a single line",
+  "fileTree21": "After enabling, the single-line JSON format will be used when saving .sy files, which can reduce the file size by about 30% and improve read and write efficiency by 50%",
   "export11": "Content handling method of content ref block when exporting",
   "export12": "Content handling method of content embed block when exporting",
   "export13": "Anchor text wrapping symbol",

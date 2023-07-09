@@ -6,7 +6,7 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
     const cellRect = cellElement.getBoundingClientRect();
     let html = "";
-    const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`
+    const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`;
     const blockElement = hasClosestBlock(cellElement);
     if (type === "block" || type === "text") {
         html = `<textarea ${style} class="b3-text-field">${cellElement.textContent}</textarea>`;
@@ -58,8 +58,8 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     const cellId = cellElement.getAttribute("data-id");
     const avId = blockElement.getAttribute("data-av-id");
     const rowId = rowElement.getAttribute("data-id");
-    let inputValue: string | number = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
-    let oldValue: string | number = cellElement.textContent.trim()
+    let inputValue: string | number = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value;
+    let oldValue: string | number = cellElement.textContent.trim();
     if (type === "number") {
         inputValue = parseFloat(inputValue);
         oldValue = parseFloat(oldValue);

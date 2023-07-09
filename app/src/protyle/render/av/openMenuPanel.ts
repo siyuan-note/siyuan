@@ -5,7 +5,7 @@ import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute} from "../../util/hasClosest";
 import {bindSelectEvent, getSelectHTML, setSelectOption} from "./select";
-import {addFilter, getFiltersHTML} from "./filter";
+import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 
 export const openMenuPanel = (protyle: IProtyle,
@@ -80,17 +80,17 @@ export const openMenuPanel = (protyle: IProtyle,
             }
             const sourceId = sourceElement.dataset.id;
             const targetId = targetElement.dataset.id;
-            const isTop = targetElement.classList.contains("dragover__top")
+            const isTop = targetElement.classList.contains("dragover__top");
             if (type !== "columns") {
-                const changeData = (type === "sorts" ? data.sorts : data.filters) as IAVFilter[]
+                const changeData = (type === "sorts" ? data.sorts : data.filters) as IAVFilter[];
                 const oldData = Object.assign([], changeData);
-                let targetFilter: IAVFilter
+                let targetFilter: IAVFilter;
                 changeData.find((filter, index: number) => {
                     if (filter.column === sourceId) {
                         targetFilter = changeData.splice(index, 1)[0];
                         return true;
                     }
-                })
+                });
                 changeData.find((filter, index: number) => {
                     if (filter.column === targetId) {
                         if (isTop) {
@@ -100,7 +100,7 @@ export const openMenuPanel = (protyle: IProtyle,
                         }
                         return true;
                     }
-                })
+                });
 
                 transaction(protyle, [{
                     action: "setAttrView",
@@ -132,13 +132,13 @@ export const openMenuPanel = (protyle: IProtyle,
                 previousID: sourceElement.previousElementSibling?.getAttribute("data-id") || "",
                 id: sourceId,
             }]);
-            let column: IAVColumn
+            let column: IAVColumn;
             data.columns.find((item, index: number) => {
                 if (item.id === sourceId) {
                     column = data.columns.splice(index, 1)[0];
                     return true;
                 }
-            })
+            });
             data.columns.find((item, index: number) => {
                 if (item.id === targetId) {
                     if (isTop) {
@@ -148,10 +148,10 @@ export const openMenuPanel = (protyle: IProtyle,
                     }
                     return true;
                 }
-            })
-            menuElement.innerHTML = getPropertiesHTML(data)
+            });
+            menuElement.innerHTML = getPropertiesHTML(data);
         });
-        let dragoverElement: HTMLElement
+        let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
             const target = event.target as HTMLElement;
             const targetElement = hasClosestByAttribute(target, "data-id", null);
@@ -177,9 +177,9 @@ export const openMenuPanel = (protyle: IProtyle,
                 targetElement.classList.remove("dragover__top", "dragover__bottom");
             }
         });
-        avPanelElement.addEventListener("dragend", (event) => {
+        avPanelElement.addEventListener("dragend", () => {
             if (window.siyuan.dragElement) {
-                window.siyuan.dragElement.style.opacity = ""
+                window.siyuan.dragElement.style.opacity = "";
                 window.siyuan.dragElement = undefined;
             }
         });
@@ -432,7 +432,7 @@ export const openMenuPanel = (protyle: IProtyle,
                     event.stopPropagation();
                     break;
                 } else if (type === "editOption") {
-                    setSelectOption(protyle, data, options, target)
+                    setSelectOption(protyle, data, options, target);
                     event.stopPropagation();
                     break;
                 }

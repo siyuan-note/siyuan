@@ -22,14 +22,14 @@ export const setFilter = (options: {
                         cellValue = {
                             content: parseFloat(textElement.value),
                             isNotEmpty: true
-                        }
+                        };
                     } else {
-                        cellValue = {}
+                        cellValue = {};
                     }
                 } else {
                     cellValue = {
                         content: textElement.value
-                    }
+                    };
                 }
                 filter.value[colType] = cellValue;
                 filter.operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
@@ -128,9 +128,9 @@ export const addFilter = (options: {
                 icon: getColIconByType(column.type),
                 click: () => {
                     const oldFilters = Object.assign([], options.data.filters);
-                    let cellValue = {}
+                    let cellValue = {};
                     if (column.type !== "number") {
-                        cellValue = {content: ""}
+                        cellValue = {content: ""};
                     }
                     options.data.filters.push({
                         column: column.id,

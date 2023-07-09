@@ -26,7 +26,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
             if (key === item.name) {
                 hasMatch = true;
             }
-        })
+        });
     }
     if (!hasMatch && key) {
         const colorIndex = (options?.length || 0) % 13 + 1;
@@ -37,10 +37,10 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     </span>
 </div>
 <span class="b3-menu__accelerator">Enter</span>
-</button>`
+</button>`;
     }
     return html;
-}
+};
 
 export const setSelectOption = (protyle: IProtyle, data: IAV, options: {
     cellElement: HTMLElement;
@@ -64,33 +64,33 @@ export const setSelectOption = (protyle: IProtyle, data: IAV, options: {
                 newName: name
             },
         }]);
-    })
+    });
     if (menu.isOpen) {
         return;
     }
     const menuElement = hasClosestByClassName(target, "b3-menu");
     if (!menuElement) {
-        return
+        return;
     }
     const color = target.parentElement.dataset.color;
     const colId = options.cellElement.dataset.colId;
     menu.addItem({
         iconHTML: "",
         label: `<input class="b3-text-field" style="margin: 4px 0" value="${name}">`
-    })
+    });
     menu.addItem({
         label: window.siyuan.languages.delete,
         icon: "iconTrashcan",
         click() {
             confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
-                let colOptions: { name: string, color: string }[] = []
+                let colOptions: { name: string, color: string }[] = [];
                 data.columns.find(column => {
                     if (column.id === colId) {
                         colOptions = column.options;
                         return true;
                     }
-                })
-                const newName = target.parentElement.dataset.name
+                });
+                const newName = target.parentElement.dataset.name;
                 transaction(protyle, [{
                     action: "removeAttrViewColOption",
                     id: colId,
@@ -107,15 +107,15 @@ export const setSelectOption = (protyle: IProtyle, data: IAV, options: {
                         colOptions.splice(index, 1);
                         return true;
                     }
-                })
+                });
                 menuElement.innerHTML = getSelectHTML(data, options);
                 const cellRect = options.cellElement.getBoundingClientRect();
                 setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
                 bindSelectEvent(protyle, data, menuElement, options);
-            })
+            });
         }
-    })
-    menu.addSeparator()
+    });
+    menu.addSeparator();
     Array.from(Array(13).keys()).forEach(index => {
         menu.addItem({
             current: parseInt(color) === index + 1,
@@ -140,87 +140,87 @@ export const setSelectOption = (protyle: IProtyle, data: IAV, options: {
                     },
                 }]);
             }
-        })
-    })
+        });
+    });
     const rect = target.getBoundingClientRect();
     menu.open({
         x: rect.left,
         y: rect.bottom,
         h: rect.height,
-    })
+    });
     const inputElement = window.siyuan.menus.menu.element.querySelector("input");
     inputElement.select();
-}
+};
 
 export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, options: {
     cellElement: HTMLElement
 }) => {
     const inputElement = menuElement.querySelector("input");
-    const rowId = options.cellElement.parentElement.dataset.id
+    const rowId = options.cellElement.parentElement.dataset.id;
     const colId = options.cellElement.dataset.colId;
-    const cellId = options.cellElement.dataset.id
+    const cellId = options.cellElement.dataset.id;
     let colData: IAVColumn;
     data.columns.find((item: IAVColumn) => {
         if (item.id === colId) {
             colData = item;
             return;
         }
-    })
+    });
     if (!colData.options) {
         colData.options = [];
     }
-    let cellData: IAVCell
+    let cellData: IAVCell;
     data.rows.find(row => {
         if (row.id === rowId) {
             row.cells.find(cell => {
                 if (cell.id === cellId) {
-                    cellData = cell
+                    cellData = cell;
                     return true;
                 }
-            })
+            });
             return true;
         }
-    })
+    });
     inputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
-            return
+            return;
         }
         menuElement.lastElementChild.innerHTML = filterSelectHTML(inputElement.value, colData.options);
-    })
+    });
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event.isComposing) {
-            return
+            return;
         }
         menuElement.lastElementChild.innerHTML = filterSelectHTML(inputElement.value, colData.options);
-    })
+    });
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
-            return
+            return;
         }
         let currentElement = upDownHint(menuElement.lastElementChild, event, "b3-menu__item--current");
         if (event.key === "Enter") {
             if (!currentElement) {
                 currentElement = menuElement.querySelector(".b3-menu__item--current");
             }
-            let oldValue
+            let oldValue;
             if (colData.type !== "select") {
                 oldValue = Object.assign([], cellData.value.mSelect.content);
                 cellData.value.mSelect.content.push({
                     color: currentElement.dataset.color,
                     content: currentElement.dataset.name
-                })
+                });
             } else {
                 oldValue = Object.assign({}, cellData.value.select);
                 cellData.value.select = {
                     color: currentElement.dataset.color,
                     content: currentElement.dataset.name
-                }
+                };
             }
             if (currentElement.querySelector(".b3-menu__accelerator")) {
                 colData.options.push({
                     color: currentElement.dataset.color,
                     name: currentElement.dataset.name
-                })
+                });
                 transaction(protyle, [{
                     action: "updateAttrViewColOptions",
                     id: colId,
@@ -261,44 +261,44 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
                 menuElement.parentElement.remove();
             }
         }
-    })
-}
+    });
+};
 
 export const getSelectHTML = (data: IAV, options: { cellElement: HTMLElement }) => {
-    const cellId = options.cellElement.dataset.id
-    const colId = options.cellElement.dataset["colId"]
+    const cellId = options.cellElement.dataset.id;
+    const colId = options.cellElement.dataset["colId"];
     const colData = data.columns.find(item => {
         if (item.id === colId) {
-            return item
+            return item;
         }
-    })
-    let selectedHTML = ""
+    });
+    let selectedHTML = "";
     data.rows.find(row => {
         if (options.cellElement.parentElement.dataset.id === row.id) {
             row.cells.find(cell => {
                 if (cell.id === cellId && cell.value) {
                     if (colData.type === "mSelect") {
                         cell.value.mSelect?.content.forEach((value: string) => {
-                            let colorIndex = ""
+                            let colorIndex = "";
                             colData.options.find(option => {
                                 if (option.name === value) {
-                                    colorIndex = option.color
+                                    colorIndex = option.color;
                                 }
-                            })
-                            selectedHTML += `<div class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">${value}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`
-                        })
+                            });
+                            selectedHTML += `<div class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">${value}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                        });
                     } else {
-                        selectedHTML += `<div class="b3-chip" style="background-color:var(--b3-font-background${cell.value.select.color})";color:var(--b3-font-color${cell.value.select.color})>${options.cellElement.textContent.trim()}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`
+                        selectedHTML += `<div class="b3-chip" style="background-color:var(--b3-font-background${cell.value.select.color})";color:var(--b3-font-color${cell.value.select.color})>${options.cellElement.textContent.trim()}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
                     }
                     return true;
                 }
-            })
-            return true
+            });
+            return true;
         }
-    })
+    });
     return `<div class="b3-chips">
     ${selectedHTML}
     <input class="b3-text-field fn__block">
 </div>
-<div>${filterSelectHTML("", colData.options)}</div>`
-}
+<div>${filterSelectHTML("", colData.options)}</div>`;
+};

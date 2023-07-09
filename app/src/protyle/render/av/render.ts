@@ -65,7 +65,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                             if (cell.value?.select.content) {
                                 text = `<span class="av__celltext"><span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${cell.value.select.color});color:var(--b3-font-color${cell.value.select.color})">${cell.value.select.content}</span></span>`;
                             } else {
-                                text = `<span class="av__celltext"></span>`;
+                                text = "<span class=\"av__celltext\"></span>";
                             }
                         } else if (cell.valueType === "mSelect") {
                             text = `<span class="av__celltext">${cell.value?.mSelect.content || ""}</span>`;

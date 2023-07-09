@@ -30,7 +30,6 @@ import {resize} from "./util/resize";
 import {getDocByScroll} from "./scroll/saveScroll";
 import {App} from "../index";
 import {insertHTML} from "./util/insertHTML";
-import {showColMenu} from "./render/av/col";
 import {avRender} from "./render/av/render";
 
 export class Protyle {

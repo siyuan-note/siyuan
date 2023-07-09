@@ -2,7 +2,7 @@ import {hasClosestBlock} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {setFilter} from "./openMenuPanel";
+import {setFilter} from "./filter";
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {

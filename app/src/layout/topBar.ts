@@ -241,11 +241,11 @@ export const initBar = (app: App) => {
                 html = response.data.stat;
             } else {
                 html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "<br>";
-                html += "&nbsp;&nbsp;" + response.data.stat;
+                html += "&emsp;" + response.data.stat;
                 if (response.data.kernels.length > 0) {
                     html += "<br>";
                     html += window.siyuan.languages.currentKernel + "<br>";
-                    html += "&nbsp;&nbsp;" + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")<br>";
+                    html += "&emsp;" + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")<br>";
                     html += window.siyuan.languages.otherOnlineKernels + "<br>";
                     response.data.kernels.forEach((item: {
                         os: string;
@@ -253,7 +253,7 @@ export const initBar = (app: App) => {
                         hostname: string;
                         id: string;
                     }) => {
-                        html += `&nbsp;&nbsp;${item.id}/${item.ver} (${item.os}/${item.hostname}) <br>`;
+                        html += `&emsp;${item.id}/${item.ver} (${item.os}/${item.hostname}) <br>`;
                     });
                 }
             }

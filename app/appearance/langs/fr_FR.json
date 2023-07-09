@@ -1152,7 +1152,7 @@
     "147": "Créé un nouvel instantané de données, a pris %.2fs",
     "148": "Vérifié l'instantané des données et n'a trouvé aucun changement, a pris %.2fs",
     "149": "L'instantané des données a été synchronisé, a pris %.2fs",
-    "150": "fichiers chargés/téléchargés %d/%d<br>&nbsp;&nbsp;morceaux chargés/téléchargés %d/%d<br>&nbsp;&nbsp;octets envoyés/reçus %s/%s",
+    "150": "fichiers chargés/téléchargés %d/%d<br>&emsp;morceaux chargés/téléchargés %d/%d<br>&emsp;octets envoyés/reçus %s/%s",
     "151": "Ne pas inclure les symboles \\ / : * ? &quot; &#039; &lt; &gt; |",
     "152": "Fichiers téléchargés %d, morceaux %d, octets envoyés %s",
     "153": "Fichiers chargés %d, morceaux %d, octets reçus %s",

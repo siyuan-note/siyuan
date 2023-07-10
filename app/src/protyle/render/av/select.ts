@@ -317,7 +317,7 @@ export const getSelectHTML = (data: IAV, options: { cellElement: HTMLElement }) 
     });
     return `<div class="b3-chips">
     ${selectedHTML}
-    <input class="b3-text-field fn__block">
+    <input>
 </div>
 <div>${filterSelectHTML("", colData.options)}</div>`;
 };

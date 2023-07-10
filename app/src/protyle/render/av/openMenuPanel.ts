@@ -73,14 +73,48 @@ export const openMenuPanel = (protyle: IProtyle,
                 return;
             }
             let type = "columns";
+            const isTop = targetElement.classList.contains("dragover__top");
             if (targetElement.querySelector('[data-type="removeSort"]')) {
                 type = "sorts";
             } else if (targetElement.querySelector('[data-type="removeFilter"]')) {
                 type = "filters";
+            } else if (targetElement.querySelector('[data-type="setSelectCol"]')) {
+                const changeData = data.columns.find((column) => column.id === options.cellElement.dataset.colId).options;
+                const oldData = Object.assign([], changeData);
+                let targetOption: { name: string, color: string };
+                changeData.find((option, index: number) => {
+                    if (option.name === sourceElement.dataset.name) {
+                        targetOption = changeData.splice(index, 1)[0];
+                        return true;
+                    }
+                });
+                changeData.find((option, index: number) => {
+                    if (option.name === targetElement.dataset.name) {
+                        if (isTop) {
+                            changeData.splice(index, 0, targetOption);
+                        } else {
+                            changeData.splice(index + 1, 0, targetOption);
+                        }
+                        return true;
+                    }
+                });
+                transaction(protyle, [{
+                    action: "updateAttrViewColOptions",
+                    id: options.cellElement.dataset.colId,
+                    parentID: data.id,
+                    data: changeData,
+                }], [{
+                    action: "updateAttrViewColOptions",
+                    id: options.cellElement.dataset.colId,
+                    parentID: data.id,
+                    data: oldData,
+                }]);
+                menuElement.innerHTML = getSelectHTML(data, options);
+                bindSelectEvent(protyle, data, menuElement, options);
+                return;
             }
             const sourceId = sourceElement.dataset.id;
             const targetId = targetElement.dataset.id;
-            const isTop = targetElement.classList.contains("dragover__top");
             if (type !== "columns") {
                 const changeData = (type === "sorts" ? data.sorts : data.filters) as IAVFilter[];
                 const oldData = Object.assign([], changeData);

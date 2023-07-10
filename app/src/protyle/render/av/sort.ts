@@ -102,11 +102,11 @@ export const getSortsHTML = (data: IAV) => {
     data.sorts.forEach((item: IAVSort) => {
         html += `<button draggable="true" class="b3-menu__item" data-id="${item.column}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
-    <select class="b3-select" style="width: 106px;margin: 4px 0">
+    <select class="b3-select" style="margin: 4px 0">
         ${genSortItem(item.column)}
     </select>
     <span class="fn__space"></span>
-    <select class="b3-select" style="width: 106px;margin: 4px 0">
+    <select class="b3-select" style="margin: 4px 0">
         <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>
         <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.desc}</option>
     </select>

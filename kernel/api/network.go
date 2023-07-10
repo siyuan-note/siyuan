@@ -46,10 +46,12 @@ func forwardProxy(c *gin.Context) {
 		return
 	}
 
-	method := strings.ToUpper(arg["method"].(string))
-	timeoutArg := arg["timeout"]
+	method := "POST"
+	if methodArg := arg["method"]; nil != methodArg {
+		method = strings.ToUpper(methodArg.(string))
+	}
 	timeout := 7 * 1000
-	if nil != timeoutArg {
+	if timeoutArg := arg["timeout"]; nil != timeoutArg {
 		timeout = int(timeoutArg.(float64))
 		if 1 > timeout {
 			timeout = 7 * 1000
@@ -66,14 +68,13 @@ func forwardProxy(c *gin.Context) {
 		}
 	}
 
-	contentType := arg["contentType"]
-	if nil != contentType && "" != contentType {
-		request.SetHeader("Content-Type", contentType.(string))
+	contentType := "application/json"
+	if contentTypeArg := arg["contentType"]; nil != contentTypeArg {
+		contentType = contentTypeArg.(string)
 	}
+	request.SetHeader("Content-Type", contentType)
 
-	if "POST" == method {
-		request.SetBody(arg["payload"])
-	}
+	request.SetBody(arg["payload"])
 
 	started := time.Now()
 	resp, err := request.Send(method, destURL)

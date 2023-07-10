@@ -52,6 +52,8 @@
 * [通知](#通知)
     * [推送消息](#推送消息)
     * [推送报错消息](#推送报错消息)
+* [网络](#网络)
+    * [正向代理](#正向代理)
 * [系统](#系统)
     * [获取启动进度](#获取启动进度)
     * [获取系统版本](#获取系统版本)
@@ -1196,6 +1198,52 @@
   }
   ```
     * `id`：消息 ID
+
+## 网络
+
+### 正向代理
+
+* `/api/network/forkProxy`
+* 参数
+
+  ```json
+  {
+    "url": "https://b3log.org/siyuan/",
+    "method": "GET",
+    "timeout": 7000,
+    "contentType": "text/html",
+    "headers": [
+        {
+            "Cookie": ""
+        }
+    ],
+    "payload": {}
+  }
+  ```
+
+    * `url`：转发的 URL
+    * `method`：HTTP 方法，默认为 `GET`
+    * `timeout`：超时时间，单位为毫秒，默认为 `7000` 毫秒
+    * `contentType`：HTTP Content-Type，默认为 `application/json`
+    * `headers`：HTTP 请求标头
+    * `payload`：HTTP 请求体，对象或者是字符串
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "body": "",
+      "contentType": "text/html",
+      "elapsed": 1976,
+      "headers": {
+      },
+      "status": 200,
+      "url": "https://b3log.org/siyuan"
+    }
+  }
+  ```
 
 ## 系统
 

@@ -478,10 +478,10 @@ export const getSelectHTML = (data: IAV, options: { cellElement: HTMLElement }) 
                 if (cell.id === cellId && cell.value) {
                     if (colData.type === "mSelect") {
                         cell.value.mSelect?.forEach((item: { content: string, color: string }) => {
-                            selectedHTML += `<div class="b3-chip" data-type="removeSelectCell" data-content="${item.content}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                            selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${item.content}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeSelectCell"><use xlink:href="#iconCloseRound"></use></svg></div>`;
                         });
                     } else if (cell.value.select.content) {
-                        selectedHTML += `<div class="b3-chip" data-type="removeSelectCell" data-content="${cell.value.select.content}" style="background-color:var(--b3-font-background${cell.value.select.color});color:var(--b3-font-color${cell.value.select.color})">${cell.value.select.content}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${cell.value.select.content}" style="background-color:var(--b3-font-background${cell.value.select.color});color:var(--b3-font-color${cell.value.select.color})">${cell.value.select.content}<svg class="b3-chip__close" data-type="removeSelectCell"><use xlink:href="#iconCloseRound"></use></svg></div>`;
                     }
                     return true;
                 }

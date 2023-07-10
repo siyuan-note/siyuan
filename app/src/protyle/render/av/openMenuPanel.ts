@@ -349,19 +349,17 @@ export const openMenuPanel = (protyle: IProtyle,
                     event.stopPropagation();
                     break;
                 } else if (type === "setFilter") {
-                    const colType = target.getAttribute("data-coltype") as TAVCol;
-                    setFilter({
-                        filter: {
-                            operator: target.dataset.op as TAVFilterOperator,
-                            column: target.parentElement.parentElement.dataset.id,
-                            value: {
-                                [colType]: {content: target.dataset.value}
-                            }
-                        },
-                        protyle,
-                        data,
-                        target
-                    });
+                    data.filters.find((item: IAVFilter) => {
+                        if (item.column === target.parentElement.parentElement.dataset.id) {
+                            setFilter({
+                                filter: item,
+                                protyle,
+                                data,
+                                target
+                            });
+                            return true;
+                        }
+                    })
                     event.stopPropagation();
                     break;
                 } else if (type === "newCol") {
@@ -475,7 +473,7 @@ export const openMenuPanel = (protyle: IProtyle,
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSelectCell") {
-                    removeSelectCell(protyle, data, options, target);
+                    removeSelectCell(protyle, data, options, target.parentElement);
                     event.stopPropagation();
                     break;
                 }

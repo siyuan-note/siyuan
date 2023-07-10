@@ -857,6 +857,8 @@ interface IAVFilter {
     operator: TAVFilterOperator,
     value: {
         [key in TAVCol]?: IAVCellValue
+    } & {
+        mSelect?: { content: string, color: string }[]
     },
 }
 

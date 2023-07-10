@@ -2,7 +2,7 @@ import {hasClosestBlock} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {setFilter} from "./filter";
+import {getCellValue, setFilter} from "./filter";
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {
@@ -50,7 +50,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
-const removeCol = (cellElement:HTMLElement) => {
+const removeCol = (cellElement: HTMLElement) => {
     const blockElement = hasClosestBlock(cellElement);
     if (!blockElement) {
         return false;
@@ -164,11 +164,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     filter = {
                         column: colId,
                         operator: "Contains",
-                        value: {
-                            [type]: {
-                                content: ""
-                            }
-                        }
+                        value: getCellValue(type, "")
                     };
                     avData.filters.push(filter);
                     transaction(protyle, [{

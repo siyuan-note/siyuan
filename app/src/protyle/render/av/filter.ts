@@ -5,6 +5,40 @@ import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {objEquals} from "../../../util/functions";
 
+export const getCellValue = (colType: TAVCol, value: string) => {
+    let cellValue: IAVCellValue;
+    if (colType === "number") {
+        if (value) {
+            cellValue = {
+                number: {
+                    content: parseFloat(value),
+                    isNotEmpty: true
+                }
+            };
+        } else {
+            cellValue = {
+                number: {
+                    isNotEmpty: false
+                }
+            };
+        }
+    } else if (colType === "text") {
+        cellValue = {
+            text: {
+                content: value
+            }
+        };
+    } else if (colType === "mSelect" || colType === "select") {
+        cellValue = {
+            mSelect: [{
+                content: value,
+                color: ""
+            }]
+        };
+    }
+    return cellValue;
+}
+
 export const setFilter = (options: {
     filter: IAVFilter,
     protyle: IProtyle,
@@ -16,36 +50,7 @@ export const setFilter = (options: {
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.filters));
         let hasMatch = false;
-
-        let cellValue: IAVCellValue;
-        if (colType === "number") {
-            if (textElement.value) {
-                cellValue = {
-                    number: {
-                        content: parseFloat(textElement.value),
-                        isNotEmpty: true
-                    }
-                };
-            } else {
-                cellValue = {
-                    number: {
-                        isNotEmpty: false
-                    }
-                };
-            }
-        } else if (colType === "text") {
-            cellValue = {
-                text: {
-                    content: textElement.value
-                }
-            };
-        } else if (colType === "select") {
-            cellValue = {
-                text: {
-                    content: textElement.value
-                }
-            };
-        }
+        const cellValue = getCellValue(colType, textElement?.value || "");
         const newFilter: IAVFilter = {
             column: options.filter.column,
             value: cellValue,
@@ -112,36 +117,42 @@ export const setFilter = (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
 `;
             break;
-        case "select":
-            selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+        case "mSelect":
+            options.data.columns.find((column) => {
+                if (column.id === options.filter.column) {
+                    if (column.type === "select") {
+                        selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
 `;
-            break;
-        case "mSelect":
-            selectHTML = `<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
+                    } else {
+                        selectHTML = `<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
 <option ${"Does not contains" === options.filter.operator ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
 `;
+                    }
+                    return true;
+                }
+            });
             break;
     }
     menu.addItem({
         iconHTML: "",
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
-    if (colType === "select" || colType === "mSelect") {
+    if (colType === "mSelect") {
 
     } else if (colType === "text") {
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value[colType].content}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${options.filter.value.text.content}" class="b3-text-field fn__size200">`
         });
     } else if (colType === "number") {
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value[colType].isNotEmpty ? options.filter.value[colType].content : ""}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${options.filter.value.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`
         });
     }
     menu.addItem({
@@ -229,16 +240,11 @@ export const addFilter = (options: {
                 icon: getColIconByType(column.type),
                 click: () => {
                     const oldFilters = Object.assign([], options.data.filters);
-                    let cellValue = {};
-                    if (column.type !== "number") {
-                        cellValue = {content: ""};
-                    }
+                    const cellValue = getCellValue(column.type, "");
                     options.data.filters.push({
                         column: column.id,
                         operator: "Contains",
-                        value: {
-                            [column.type]: cellValue
-                        },
+                        value: cellValue,
                     });
                     transaction(options.protyle, [{
                         action: "setAttrView",
@@ -260,9 +266,7 @@ export const addFilter = (options: {
                         filter: {
                             operator: "Contains",
                             column: column.id,
-                            value: {
-                                [column.type]: cellValue
-                            }
+                            value: cellValue
                         },
                         protyle: options.protyle,
                         data: options.data,

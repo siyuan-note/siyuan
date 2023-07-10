@@ -368,6 +368,9 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             row.cells.find(cell => {
                 if (cell.id === cellId) {
                     cellData = cell;
+                    if (!cellData.value.mSelect) {
+                        cellData.value.mSelect = [];
+                    }
                     return true;
                 }
             });
@@ -376,10 +379,17 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
     });
 
     const oldValue = Object.assign([], cellData.value.mSelect);
-    cellData.value.mSelect?.push({
-        color: currentElement.dataset.color,
-        content: currentElement.dataset.name
-    });
+    if (colData.type === "mSelect") {
+        cellData.value.mSelect.push({
+            color: currentElement.dataset.color,
+            content: currentElement.dataset.name
+        });
+    } else {
+        cellData.value.mSelect = [{
+            color: currentElement.dataset.color,
+            content: currentElement.dataset.name
+        }];
+    }
 
     if (currentElement.querySelector(".b3-menu__accelerator")) {
         colData.options.push({

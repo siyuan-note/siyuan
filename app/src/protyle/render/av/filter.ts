@@ -94,6 +94,7 @@ export const setFilter = (options: {
         return;
     }
     let selectHTML = "";
+    let colData: IAVColumn
     switch (colType) {
         case "text":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
@@ -120,6 +121,7 @@ export const setFilter = (options: {
         case "mSelect":
             options.data.columns.find((column) => {
                 if (column.id === options.filter.column) {
+                    colData = column;
                     if (column.type === "select") {
                         selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
@@ -143,7 +145,15 @@ export const setFilter = (options: {
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
     if (colType === "mSelect") {
+        // TODO
+        colData.options.forEach((option) => {
+            menu.addItem({
+                label: `<input style="margin: 4px 0" value="${options.filter.value.text.content}" class="b3-text-field fn__size200">`,
+                click() {
 
+                }
+            });
+        });
     } else if (colType === "text") {
         menu.addItem({
             iconHTML: "",
@@ -205,11 +215,11 @@ export const setFilter = (options: {
                 event.preventDefault();
             }
         });
-        if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
-            selectElement.parentElement.parentElement.nextElementSibling.classList.add("fn__none");
-        } else {
-            selectElement.parentElement.parentElement.nextElementSibling.classList.remove("fn__none");
-        }
+    }
+    if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
+        selectElement.parentElement.parentElement.nextElementSibling.classList.add("fn__none");
+    } else {
+        selectElement.parentElement.parentElement.nextElementSibling.classList.remove("fn__none");
     }
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElement) {

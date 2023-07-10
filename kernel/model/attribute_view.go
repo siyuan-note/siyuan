@@ -325,11 +325,9 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	colID := operation.ID
 	data := operation.Data.(map[string]interface{})
 
-	var oldName, newName string
-	if nil == data["newName"] {
-		oldName = data["oldName"].(string)
-		newName = data["newName"].(string)
-	}
+	oldName := data["oldName"].(string)
+	newName := data["newName"].(string)
+	newColor := data["newColor"].(string)
 
 	var colIndex int
 	for i, col := range attrView.Columns {
@@ -345,6 +343,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 			}
 
 			opt.Name = newName
+			opt.Color = newColor
 			break
 		}
 		break
@@ -352,22 +351,22 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 
 	for _, row := range attrView.Rows {
 		for k, cell := range row.Cells {
-			if colIndex != k {
+			if colIndex != k || nil == cell.Value {
 				continue
 			}
 
-			if nil != cell.Value {
-				if nil != cell.Value.Select {
-					if oldName == cell.Value.Select.Content {
-						cell.Value.Select.Content = newName
+			if nil != cell.Value.Select {
+				if oldName == cell.Value.Select.Content {
+					cell.Value.Select.Content = newName
+					cell.Value.Select.Color = newColor
+					break
+				}
+			} else if nil != cell.Value.MSelect {
+				for j, opt := range cell.Value.MSelect {
+					if oldName == opt.Content {
+						cell.Value.MSelect[j].Content = newName
+						cell.Value.MSelect[j].Color = newColor
 						break
-					}
-				} else if nil != cell.Value.MSelect {
-					for j, opt := range cell.Value.MSelect {
-						if oldName == opt.Content {
-							cell.Value.MSelect[j].Content = newName
-							break
-						}
 					}
 				}
 			}

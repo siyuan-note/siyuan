@@ -299,6 +299,9 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             content: currentElement.dataset.name
         });
     } else {
+        if (!cellData.value) {
+            cellData.value = {select: {}};
+        }
         oldValue = Object.assign({}, cellData.value.select);
         cellData.value.select = {
             color: currentElement.dataset.color,

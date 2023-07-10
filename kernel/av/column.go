@@ -186,7 +186,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range av.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Select && "" != row.Cells[colIndex].Value.Select.Content {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) && nil != row.Cells[colIndex].Value.MSelect[0] && "" != row.Cells[colIndex].Value.MSelect[0].Content {
 				countValues++
 			}
 		}
@@ -195,8 +195,8 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
 		for _, row := range av.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Select && "" != row.Cells[colIndex].Value.Select.Content {
-				uniqueValues[row.Cells[colIndex].Value.Select.Content] = true
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) && nil != row.Cells[colIndex].Value.MSelect[0] && "" != row.Cells[colIndex].Value.MSelect[0].Content {
+				uniqueValues[row.Cells[colIndex].Value.MSelect[0].Content] = true
 				countUniqueValues++
 			}
 		}
@@ -204,7 +204,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
-			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Select || "" == row.Cells[colIndex].Value.Select.Content {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.MSelect || 1 > len(row.Cells[colIndex].Value.MSelect) || nil == row.Cells[colIndex].Value.MSelect[0] || "" == row.Cells[colIndex].Value.MSelect[0].Content {
 				countEmpty++
 			}
 		}
@@ -212,7 +212,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Select && "" != row.Cells[colIndex].Value.Select.Content {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) && nil != row.Cells[colIndex].Value.MSelect[0] && "" != row.Cells[colIndex].Value.MSelect[0].Content {
 				countNotEmpty++
 			}
 		}
@@ -220,7 +220,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range av.Rows {
-			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Select || "" == row.Cells[colIndex].Value.Select.Content {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.MSelect || 1 > len(row.Cells[colIndex].Value.MSelect) || nil == row.Cells[colIndex].Value.MSelect[0] || "" == row.Cells[colIndex].Value.MSelect[0].Content {
 				countEmpty++
 			}
 		}
@@ -228,7 +228,7 @@ func (av *AttributeView) calcColSelect(col *Column, colIndex int) {
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range av.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Select && "" != row.Cells[colIndex].Value.Select.Content {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) && nil != row.Cells[colIndex].Value.MSelect[0] && "" != row.Cells[colIndex].Value.MSelect[0].Content {
 				countNotEmpty++
 			}
 		}

@@ -364,10 +364,10 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 				continue
 			}
 
-			if nil != cell.Value.Select {
-				if oldName == cell.Value.Select.Content {
-					cell.Value.Select.Content = newName
-					cell.Value.Select.Color = newColor
+			if nil != cell.Value.MSelect && 0 < len(cell.Value.MSelect) && nil != cell.Value.MSelect[0] {
+				if oldName == cell.Value.MSelect[0].Content {
+					cell.Value.MSelect[0].Content = newName
+					cell.Value.MSelect[0].Color = newColor
 					break
 				}
 			} else if nil != cell.Value.MSelect {
@@ -433,8 +433,8 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 			}
 
 			if nil != cell.Value {
-				if nil != cell.Value.Select {
-					if optName == cell.Value.Select.Content {
+				if nil != cell.Value.MSelect && 0 < len(cell.Value.MSelect) && nil != cell.Value.MSelect[0] {
+					if optName == cell.Value.MSelect[0].Content {
 						cell.Value = nil
 						break
 					}

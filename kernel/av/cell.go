@@ -35,7 +35,6 @@ type Value struct {
 	Text    *ValueText     `json:"text,omitempty"`
 	Number  *ValueNumber   `json:"number,omitempty"`
 	Date    *ValueDate     `json:"date,omitempty"`
-	Select  *ValueSelect   `json:"select,omitempty"`
 	MSelect []*ValueSelect `json:"mSelect,omitempty"`
 }
 
@@ -78,9 +77,7 @@ func (value *Value) Compare(other *Value) int {
 			return 0
 		}
 	}
-	if nil != value.Select && nil != other.Select {
-		return strings.Compare(value.Select.Content, other.Select.Content)
-	}
+
 	if nil != value.MSelect && nil != other.MSelect {
 		var v1 string
 		for _, v := range value.MSelect {
@@ -172,21 +169,12 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		}
 	}
 
-	if nil != value.Select && nil != other.Select {
+	if nil != value.MSelect && nil != other.MSelect && 0 < len(value.MSelect) && 0 < len(other.MSelect) {
 		switch operator {
 		case FilterOperatorIsEqual:
-			return value.Select.Content == other.Select.Content
+			return value.MSelect[0].Content == other.MSelect[0].Content
 		case FilterOperatorIsNotEqual:
-			return value.Select.Content != other.Select.Content
-		case FilterOperatorIsEmpty:
-			return "" == strings.TrimSpace(value.Select.Content)
-		case FilterOperatorIsNotEmpty:
-			return "" != strings.TrimSpace(value.Select.Content)
-		}
-	}
-
-	if nil != value.MSelect && nil != other.MSelect {
-		switch operator {
+			return value.MSelect[0].Content != other.MSelect[0].Content
 		case FilterOperatorContains:
 			for _, v := range value.MSelect {
 				if v.Content == other.MSelect[0].Content {

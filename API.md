@@ -52,6 +52,8 @@
 * [Notification](#Notification)
     * [Push message](#Push-message)
     * [Push error message](#Push-error-message)
+* [Network](#Network)
+    * [Forward proxy](#Forward-proxy)
 * [System](#System)
     * [Get boot progress](#Get-boot-progress)
     * [Get system version](#Get-system-version)
@@ -1206,6 +1208,52 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   }
   ```
     * `id`: Message ID
+
+## Network
+
+### Forward proxy
+
+* `/api/network/forkProxy`
+* Parameters
+
+  ```json
+  {
+    "url": "https://b3log.org/siyuan/",
+    "method": "GET",
+    "timeout": 7000,
+    "contentType": "text/html",
+    "headers": [
+        {
+            "Cookie": ""
+        }
+    ],
+    "payload": {}
+  }
+  ```
+
+    * `url`: URL to forward
+    * `method`: HTTP method, default is `POST`
+    * `timeout`: timeout in milliseconds, default is `7000`
+    * `contentType`: Content-Type, default is `application/json`
+    * `headers`: HTTP headers
+    * `payload`: HTTP payload, object or string
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "body": "",
+      "contentType": "text/html",
+      "elapsed": 1976,
+      "headers": {
+      },
+      "status": 200,
+      "url": "https://b3log.org/siyuan"
+    }
+  }
+  ```
 
 ## System
 

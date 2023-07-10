@@ -113,12 +113,14 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     cellElement: HTMLElement;
 }, target: HTMLElement,) => {
     const name = target.parentElement.dataset.name;
+    const color = target.parentElement.dataset.color;
     const menu = new Menu("av-select-option", () => {
         transaction(protyle, [{
             action: "updateAttrViewColOption",
             id: colId,
             parentID: data.id,
             data: {
+                newColor: color,
                 oldName: name,
                 newName: inputElement.value
             },
@@ -127,6 +129,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
             id: colId,
             parentID: data.id,
             data: {
+                newColor: color,
                 oldName: inputElement.value,
                 newName: name
             },
@@ -139,7 +142,6 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     if (!menuElement) {
         return;
     }
-    const color = target.parentElement.dataset.color;
     const colId = options.cellElement.dataset.colId;
     menu.addItem({
         iconHTML: "",
@@ -194,6 +196,8 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                     id: colId,
                     parentID: data.id,
                     data: {
+                        oldName: name,
+                        newName: inputElement.value,
                         oldColor: color,
                         newColor: (index + 1).toString()
                     },
@@ -202,6 +206,8 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                     id: colId,
                     parentID: data.id,
                     data: {
+                        oldName: inputElement.value,
+                        newName: name,
                         oldColor: (index + 1).toString(),
                         newColor: color
                     },
@@ -213,6 +219,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     menu.open({
         x: rect.left,
         y: rect.bottom,
+        w: rect.width,
         h: rect.height,
     });
     const inputElement = window.siyuan.menus.menu.element.querySelector("input");

@@ -329,6 +329,8 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	newName := data["newName"].(string)
 	newColor := data["newColor"].(string)
 
+	// TODO 如果 newName 已经存在
+
 	var colIndex int
 	for i, col := range attrView.Columns {
 		if col.ID != colID {
@@ -336,15 +338,23 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 		}
 
 		colIndex = i
-
+		existOpt := false
 		for _, opt := range col.Options {
-			if opt.Name != oldName {
-				continue
+			if opt.Name == newName {
+				existOpt = true
+				break
 			}
+		}
+		if !existOpt {
+			for _, opt := range col.Options {
+				if opt.Name != oldName {
+					continue
+				}
 
-			opt.Name = newName
-			opt.Color = newColor
-			break
+				opt.Name = newName
+				opt.Color = newColor
+				break
+			}
 		}
 		break
 	}
@@ -362,11 +372,20 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 					break
 				}
 			} else if nil != cell.Value.MSelect {
-				for j, opt := range cell.Value.MSelect {
-					if oldName == opt.Content {
-						cell.Value.MSelect[j].Content = newName
-						cell.Value.MSelect[j].Color = newColor
+				existInMSelect := false
+				for _, opt := range cell.Value.MSelect {
+					if opt.Content == newName {
+						existInMSelect = true
 						break
+					}
+				}
+				if !existInMSelect {
+					for j, opt := range cell.Value.MSelect {
+						if oldName == opt.Content {
+							cell.Value.MSelect[j].Content = newName
+							cell.Value.MSelect[j].Color = newColor
+							break
+						}
 					}
 				}
 			}

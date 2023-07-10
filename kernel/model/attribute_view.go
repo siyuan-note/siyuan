@@ -167,6 +167,14 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 	return
 }
 
+func (tx *Transaction) doRemoveAttrViewColOption(operation *Operation) (ret *TxErr) {
+	err := removeAttributeViewColumnOption(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColumnOptions(operation.Data, operation.ID, operation.ParentID)
 	if nil != err {
@@ -293,6 +301,64 @@ func updateAttributeViewColumn(id, name string, typ string, avID string) (err er
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 		return
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func removeAttributeViewColumnOption(operation *Operation) (err error) {
+	avID := operation.ParentID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	colID := operation.ID
+	optName := operation.Data.(string)
+
+	var colIndex int
+	for i, col := range attrView.Columns {
+		if col.ID != colID {
+			continue
+		}
+
+		colIndex = i
+
+		for _, opt := range col.Options {
+			if opt.Name != optName {
+				continue
+			}
+
+			col.Options = append(col.Options[:i], col.Options[i+1:]...)
+			break
+		}
+		break
+	}
+
+	for _, row := range attrView.Rows {
+		for k, cell := range row.Cells {
+			if colIndex != k {
+				continue
+			}
+
+			if nil != cell.Value {
+				if nil != cell.Value.Select {
+					if optName == cell.Value.Select.Content {
+						cell.Value = nil
+						break
+					}
+				} else if nil != cell.Value.MSelect {
+					for j, opt := range cell.Value.MSelect {
+						if optName == opt.Content {
+							cell.Value.MSelect = append(cell.Value.MSelect[:j], cell.Value.MSelect[j+1:]...)
+							break
+						}
+					}
+				}
+			}
+			break
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

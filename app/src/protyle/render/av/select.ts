@@ -74,22 +74,13 @@ export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
             return true;
         }
     });
-    let oldValue;
-    if (colData.type !== "select") {
-        oldValue = Object.assign([], cellData.value.mSelect);
-        cellData.value.mSelect?.find((item: { content: string }, index: number) => {
-            if (item.content === target.dataset.content) {
-                cellData.value.mSelect.splice(index, 1);
-                return true;
-            }
-        });
-    } else {
-        oldValue = Object.assign({}, cellData.value.select);
-        cellData.value.select = {
-            color: "",
-            content: ""
-        };
-    }
+    const oldValue = Object.assign([], cellData.value.mSelect);
+    cellData.value.mSelect?.find((item: { content: string }, index: number) => {
+        if (item.content === target.dataset.content) {
+            cellData.value.mSelect.splice(index, 1);
+            return true;
+        }
+    });
     target.remove();
 
     transaction(protyle, [{
@@ -156,16 +147,12 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
             if (row.id === options.cellElement.parentElement.dataset.id) {
                 row.cells.find(cell => {
                     if (cell.id === options.cellElement.dataset.id) {
-                        if (cell.valueType === "select") {
-                            cell.value.select.content = inputElement.value;
-                        } else {
-                            cell.value.mSelect.find((item) => {
-                                if (item.content === name) {
-                                    item.content = inputElement.value;
-                                    return true;
-                                }
-                            });
-                        }
+                        cell.value.mSelect.find((item) => {
+                            if (item.content === name) {
+                                item.content = inputElement.value;
+                                return true;
+                            }
+                        });
                         return true;
                     }
                 });
@@ -217,19 +204,12 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                     if (row.id === options.cellElement.parentElement.dataset.id) {
                         row.cells.find(cell => {
                             if (cell.id === options.cellElement.dataset.id) {
-                                if (cell.valueType === "select") {
-                                    cell.value.select = {
-                                        color: "",
-                                        content: ""
-                                    };
-                                } else {
-                                    cell.value.mSelect.find((item, index) => {
-                                        if (item.content === newName) {
-                                            cell.value.mSelect.splice(index, 1);
-                                            return true;
-                                        }
-                                    });
-                                }
+                                cell.value.mSelect.find((item, index) => {
+                                    if (item.content === newName) {
+                                        cell.value.mSelect.splice(index, 1);
+                                        return true;
+                                    }
+                                });
                                 return true;
                             }
                         });
@@ -291,20 +271,13 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                     if (row.id === options.cellElement.parentElement.dataset.id) {
                         row.cells.find(cell => {
                             if (cell.id === options.cellElement.dataset.id) {
-                                if (cell.valueType === "select") {
-                                    cell.value.select = {
-                                        content: inputElement.value,
-                                        color: (index + 1).toString()
+                                cell.value.mSelect.find((item) => {
+                                    if (item.content === name) {
+                                        item.content = inputElement.value;
+                                        item.color = (index + 1).toString();
+                                        return true;
                                     }
-                                } else {
-                                    cell.value.mSelect.find((item) => {
-                                        if (item.content === name) {
-                                            item.content = inputElement.value;
-                                            item.color = (index + 1).toString();
-                                            return true;
-                                        }
-                                    });
-                                }
+                                });
                                 return true;
                             }
                         });
@@ -402,23 +375,12 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
         }
     });
 
-    let oldValue;
-    if (colData.type !== "select") {
-        oldValue = Object.assign([], cellData.value.mSelect);
-        cellData.value.mSelect?.push({
-            color: currentElement.dataset.color,
-            content: currentElement.dataset.name
-        });
-    } else {
-        if (!cellData.value) {
-            cellData.value = {select: {}};
-        }
-        oldValue = Object.assign({}, cellData.value.select);
-        cellData.value.select = {
-            color: currentElement.dataset.color,
-            content: currentElement.dataset.name
-        };
-    }
+    const oldValue = Object.assign([], cellData.value.mSelect);
+    cellData.value.mSelect?.push({
+        color: currentElement.dataset.color,
+        content: currentElement.dataset.name
+    });
+
     if (currentElement.querySelector(".b3-menu__accelerator")) {
         colData.options.push({
             color: currentElement.dataset.color,
@@ -476,13 +438,9 @@ export const getSelectHTML = (data: IAV, options: { cellElement: HTMLElement }) 
         if (options.cellElement.parentElement.dataset.id === row.id) {
             row.cells.find(cell => {
                 if (cell.id === cellId && cell.value) {
-                    if (colData.type === "mSelect") {
-                        cell.value.mSelect?.forEach((item: { content: string, color: string }) => {
-                            selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${item.content}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeSelectCell"><use xlink:href="#iconCloseRound"></use></svg></div>`;
-                        });
-                    } else if (cell.value.select.content) {
-                        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${cell.value.select.content}" style="background-color:var(--b3-font-background${cell.value.select.color});color:var(--b3-font-color${cell.value.select.color})">${cell.value.select.content}<svg class="b3-chip__close" data-type="removeSelectCell"><use xlink:href="#iconCloseRound"></use></svg></div>`;
-                    }
+                    cell.value.mSelect?.forEach((item: { content: string, color: string }) => {
+                        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${item.content}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeSelectCell"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                    });
                     return true;
                 }
             });

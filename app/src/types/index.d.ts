@@ -855,11 +855,7 @@ interface IAV {
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
-    value: {
-        [key in TAVCol]?: IAVCellValue
-    } & {
-        mSelect?: { content: string, color: string }[]
-    },
+    value: IAVCellValue
 }
 
 interface IAVSort {
@@ -891,18 +887,14 @@ interface IAVCell {
     id: string,
     color: string,
     bgColor: string,
-    value: {
-        [key in TAVCol]?: IAVCellValue
-    } & {
-        mSelect?: { content: string, color: string }[]
-    },
+    value: IAVCellValue,
     valueType: TAVCol,
 }
 
 interface IAVCellValue {
-    content?: any
-    content2?: string   // 用于日期
-    color?: string
-    id?: string
-    isNotEmpty?: boolean
+    text?: { content: string },
+    number?: { content?: number, isNotEmpty: boolean },
+    mSelect?: { content: string, color: string }[]
+    block?: { content: string, id: string }
+    date?: { content: string, content2?: string }
 }

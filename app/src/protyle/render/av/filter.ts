@@ -17,7 +17,7 @@ export const setFilter = (options: {
         const oldFilters = JSON.parse(JSON.stringify(options.data.filters));
         let hasMatch = false;
 
-        let cellValue;
+        let cellValue: IAVCellValue;
         if (colType === "number") {
             if (textElement.value) {
                 cellValue = {
@@ -46,7 +46,7 @@ export const setFilter = (options: {
                 }
             };
         }
-        const newFilter = {
+        const newFilter: IAVFilter = {
             column: options.filter.column,
             value: cellValue,
             operator: (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator
@@ -156,21 +156,23 @@ export const setFilter = (options: {
             textElement.parentElement.parentElement.classList.remove("fn__none");
         }
     });
-    const textElement = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement);
-    textElement.addEventListener("keydown", (event) => {
-        if (event.isComposing) {
-            event.preventDefault();
-            return;
+    const textElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
+    if (textElement) {
+        textElement.addEventListener("keydown", (event) => {
+            if (event.isComposing) {
+                event.preventDefault();
+                return;
+            }
+            if (event.key === "Enter") {
+                menu.close();
+                event.preventDefault();
+            }
+        });
+        if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
+            textElement.parentElement.parentElement.classList.add("fn__none");
+        } else {
+            textElement.parentElement.parentElement.classList.remove("fn__none");
         }
-        if (event.key === "Enter") {
-            menu.close();
-            event.preventDefault();
-        }
-    });
-    if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
-        textElement.parentElement.parentElement.classList.add("fn__none");
-    } else {
-        textElement.parentElement.parentElement.classList.remove("fn__none");
     }
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     textElement.select();

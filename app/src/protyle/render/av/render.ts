@@ -54,23 +54,20 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                         if (data.columns[index].hidden) {
                             return;
                         }
-                        let text = "";
+                        let text = '';
                         if (cell.valueType === "text") {
                             text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
                         } else if (cell.valueType === "block") {
                             text = `<span class="av__celltext">${cell.value?.block.content || ""}</span>`;
                         } else if (cell.valueType === "number") {
                             text = `<span class="av__celltext">${cell.value?.number.content || ""}</span>`;
-                        } else if (cell.valueType === "select") {
-                            if (cell.value?.select.content) {
-                                text = `<span class="av__celltext"><span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${cell.value.select.color});color:var(--b3-font-color${cell.value.select.color})">${cell.value.select.content}</span></span>`;
-                            } else {
-                                text = "<span class=\"av__celltext\"></span>";
-                            }
-                        } else if (cell.valueType === "mSelect") {
+                        } else if (cell.valueType === "mSelect" || cell.valueType === "select") {
                             cell.value?.mSelect.forEach((item: { content: string, color: string }) => {
                                 text += `<span class="av__celltext"><span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span></span>`;
                             });
+                            if (!text) {
+                                text = '<span class="av__celltext"></span>'
+                            }
                         } else if (cell.valueType === "date") {
                             text = `<span class="av__celltext">${cell.value?.date.content || ""}</span>`;
                         }

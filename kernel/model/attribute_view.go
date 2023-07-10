@@ -337,9 +337,10 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 
 		colIndex = i
 		existOpt := false
-		for _, opt := range col.Options {
+		for j, opt := range col.Options {
 			if opt.Name == newName {
 				existOpt = true
+				col.Options = append(col.Options[:j], col.Options[j+1:]...)
 				break
 			}
 		}
@@ -358,8 +359,8 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	}
 
 	for _, row := range attrView.Rows {
-		for k, cell := range row.Cells {
-			if colIndex != k || nil == cell.Value {
+		for i, cell := range row.Cells {
+			if colIndex != i || nil == cell.Value {
 				continue
 			}
 
@@ -371,9 +372,10 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 				}
 			} else if nil != cell.Value.MSelect {
 				existInMSelect := false
-				for _, opt := range cell.Value.MSelect {
+				for j, opt := range cell.Value.MSelect {
 					if opt.Content == newName {
 						existInMSelect = true
+						cell.Value.MSelect = append(cell.Value.MSelect[:j], cell.Value.MSelect[j+1:]...)
 						break
 					}
 				}

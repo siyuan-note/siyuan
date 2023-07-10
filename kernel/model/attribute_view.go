@@ -167,6 +167,14 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewColOption(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColumnOption(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
 func (tx *Transaction) doRemoveAttrViewColOption(operation *Operation) (ret *TxErr) {
 	err := removeAttributeViewColumnOption(operation)
 	if nil != err {
@@ -301,6 +309,70 @@ func updateAttributeViewColumn(id, name string, typ string, avID string) (err er
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 		return
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func updateAttributeViewColumnOption(operation *Operation) (err error) {
+	avID := operation.ParentID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	colID := operation.ID
+	data := operation.Data.(map[string]interface{})
+
+	var oldName, newName string
+	if nil == data["newName"] {
+		oldName = data["oldName"].(string)
+		newName = data["newName"].(string)
+	}
+
+	var colIndex int
+	for i, col := range attrView.Columns {
+		if col.ID != colID {
+			continue
+		}
+
+		colIndex = i
+
+		for _, opt := range col.Options {
+			if opt.Name != oldName {
+				continue
+			}
+
+			opt.Name = newName
+			break
+		}
+		break
+	}
+
+	for _, row := range attrView.Rows {
+		for k, cell := range row.Cells {
+			if colIndex != k {
+				continue
+			}
+
+			if nil != cell.Value {
+				if nil != cell.Value.Select {
+					if oldName == cell.Value.Select.Content {
+						cell.Value.Select.Content = newName
+						break
+					}
+				} else if nil != cell.Value.MSelect {
+					for j, opt := range cell.Value.MSelect {
+						if oldName == opt.Content {
+							cell.Value.MSelect[j].Content = newName
+							break
+						}
+					}
+				}
+			}
+			break
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

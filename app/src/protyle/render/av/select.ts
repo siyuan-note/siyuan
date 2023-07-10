@@ -185,7 +185,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     menu.addSeparator();
     Array.from(Array(13).keys()).forEach(index => {
         menu.addItem({
-            current: parseInt(color) === index + 1,
+            accelerator: parseInt(color) === index + 1 ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : undefined,
             iconHTML: "",
             label: `<span class="color__square"  style="padding: 5px;margin: 2px;color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</span>`,
             click() {

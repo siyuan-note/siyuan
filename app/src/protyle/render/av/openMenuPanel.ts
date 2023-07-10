@@ -67,7 +67,7 @@ export const openMenuPanel = (protyle: IProtyle,
                 return;
             }
             const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "data-id", null);
+            const targetElement = hasClosestByAttribute(target, "draggable", "true");
             if (!targetElement ||
                 (!targetElement.classList.contains("dragover__top") && !targetElement.classList.contains("dragover__bottom"))) {
                 return;
@@ -154,7 +154,7 @@ export const openMenuPanel = (protyle: IProtyle,
         let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
             const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "data-id", null);
+            const targetElement = hasClosestByAttribute(target, "draggable", "true");
             if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement)) {
                 return;
             }
@@ -172,7 +172,7 @@ export const openMenuPanel = (protyle: IProtyle,
         });
         avPanelElement.addEventListener("dragleave", (event) => {
             const target = event.target as HTMLElement;
-            const targetElement = hasClosestByAttribute(target, "data-id", null);
+            const targetElement = hasClosestByAttribute(target, "draggable", "true");
             if (targetElement) {
                 targetElement.classList.remove("dragover__top", "dragover__bottom");
             }

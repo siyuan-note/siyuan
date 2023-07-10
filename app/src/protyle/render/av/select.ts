@@ -13,14 +13,14 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-                html += `<button data-type="setOptionCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
+                html += `<button data-type="addSelectColAndCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color)${item.color}">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${item.name}</span>
         </span>
     </div>
-    <svg class="b3-menu__action" data-type="editOption"><use xlink:href="#iconEdit"></use></svg>
+    <svg class="b3-menu__action" data-type="setSelectCol"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
             }
             if (key === item.name) {
@@ -30,7 +30,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     }
     if (!hasMatch && key) {
         const colorIndex = (options?.length || 0) % 13 + 1;
-        html = `<button data-type="setOptionCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" data-name="${key}" data-color="${colorIndex}">
+        html = `<button data-type="addSelectColAndCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
 <div class="fn__flex-1">
     <span class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">
@@ -43,7 +43,73 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     return html;
 };
 
-export const setSelectOption = (protyle: IProtyle, data: IAV, options: {
+export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
+    cellElement: HTMLElement
+}, target: HTMLElement) => {
+    if (!target) {
+        return;
+    }
+    const rowId = options.cellElement.parentElement.dataset.id;
+    const colId = options.cellElement.dataset.colId;
+    const cellId = options.cellElement.dataset.id;
+    let colData: IAVColumn;
+    data.columns.find((item: IAVColumn) => {
+        if (item.id === colId) {
+            colData = item;
+            return;
+        }
+    });
+    if (!colData.options) {
+        colData.options = [];
+    }
+    let cellData: IAVCell;
+    data.rows.find(row => {
+        if (row.id === rowId) {
+            row.cells.find(cell => {
+                if (cell.id === cellId) {
+                    cellData = cell;
+                    return true;
+                }
+            });
+            return true;
+        }
+    });
+    let oldValue;
+    if (colData.type !== "select") {
+        oldValue = Object.assign([], cellData.value.mSelect);
+        cellData.value.mSelect?.find((item: { content: string }, index: number) => {
+            if (item.content === target.dataset.content) {
+                cellData.value.mSelect.splice(index, 1);
+                return true;
+            }
+        });
+    } else {
+        oldValue = Object.assign({}, cellData.value.select);
+        cellData.value.select = {
+            color: "",
+            content: ""
+        };
+    }
+    target.remove();
+
+    transaction(protyle, [{
+        action: "updateAttrViewCell",
+        id: cellId,
+        rowID: rowId,
+        parentID: data.id,
+        data: cellData.value
+    }], [{
+        action: "updateAttrViewCell",
+        id: cellId,
+        rowID: rowId,
+        parentID: data.id,
+        data: {
+            [colData.type]: oldValue
+        }
+    }]);
+}
+
+export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     cellElement: HTMLElement;
 }, target: HTMLElement,) => {
     const name = target.parentElement.dataset.name;
@@ -189,14 +255,16 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
             if (!currentElement) {
                 currentElement = menuElement.querySelector(".b3-menu__item--current");
             }
-            setOptionCell(protyle, data, options, currentElement, menuElement);
+            addSelectColAndCell(protyle, data, options, currentElement, menuElement);
+        } else if (event.key === "Backspace" && inputElement.value === "") {
+            removeSelectCell(protyle, data, options, inputElement.previousElementSibling as HTMLElement);
         }
     });
 };
 
-export const setOptionCell = (protyle: IProtyle, data: IAV, options: {
+export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
     cellElement: HTMLElement
-}, currentElement: HTMLElement, menuElement:HTMLElement) => {
+}, currentElement: HTMLElement, menuElement: HTMLElement) => {
     const rowId = options.cellElement.parentElement.dataset.id;
     const colId = options.cellElement.dataset.colId;
     const cellId = options.cellElement.dataset.id;
@@ -225,8 +293,8 @@ export const setOptionCell = (protyle: IProtyle, data: IAV, options: {
 
     let oldValue;
     if (colData.type !== "select") {
-        oldValue = Object.assign([], cellData.value.mSelect.content);
-        cellData.value.mSelect.content.push({
+        oldValue = Object.assign([], cellData.value.mSelect);
+        cellData.value.mSelect?.push({
             color: currentElement.dataset.color,
             content: currentElement.dataset.name
         });
@@ -297,17 +365,11 @@ export const getSelectHTML = (data: IAV, options: { cellElement: HTMLElement }) 
             row.cells.find(cell => {
                 if (cell.id === cellId && cell.value) {
                     if (colData.type === "mSelect") {
-                        cell.value.mSelect?.content.forEach((value: string) => {
-                            let colorIndex = "";
-                            colData.options.find(option => {
-                                if (option.name === value) {
-                                    colorIndex = option.color;
-                                }
-                            });
-                            selectedHTML += `<div class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">${value}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                        cell.value.mSelect?.forEach((item: { content: string, color: string }) => {
+                            selectedHTML += `<div class="b3-chip" data-type="removeSelectCell" data-content="${item.content}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
                         });
-                    } else {
-                        selectedHTML += `<div class="b3-chip" style="background-color:var(--b3-font-background${cell.value.select.color})";color:var(--b3-font-color${cell.value.select.color})>${options.cellElement.textContent.trim()}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                    } else if (cell.value.select.content) {
+                        selectedHTML += `<div class="b3-chip" data-type="removeSelectCell" data-content="${cell.value.select.content}" style="background-color:var(--b3-font-background${cell.value.select.color})";color:var(--b3-font-color${cell.value.select.color})>${cell.value.select.content}<svg class="b3-chip__close" data-type="remove-option"><use xlink:href="#iconCloseRound"></use></svg></div>`;
                     }
                     return true;
                 }

@@ -4,7 +4,7 @@ import {addCol} from "./addCol";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute} from "../../util/hasClosest";
-import {bindSelectEvent, getSelectHTML, setOptionCell, setSelectOption} from "./select";
+import {bindSelectEvent, getSelectHTML, addSelectColAndCell, setSelectCol, removeSelectCell} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 
@@ -431,12 +431,16 @@ export const openMenuPanel = (protyle: IProtyle,
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
-                } else if (type === "editOption") {
-                    setSelectOption(protyle, data, options, target);
+                } else if (type === "setSelectCol") {
+                    setSelectCol(protyle, data, options, target);
                     event.stopPropagation();
                     break;
-                } else if (type === "setOptionCell") {
-                    setOptionCell(protyle, data, options, target, menuElement);
+                } else if (type === "addSelectColAndCell") {
+                    addSelectColAndCell(protyle, data, options, target, menuElement);
+                    event.stopPropagation();
+                    break;
+                } else if (type === "removeSelectCell") {
+                    removeSelectCell(protyle, data, options, target);
                     event.stopPropagation();
                     break;
                 }

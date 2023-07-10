@@ -891,6 +891,8 @@ interface IAVCell {
     bgColor: string,
     value: {
         [key in TAVCol]?: IAVCellValue
+    } & {
+        mSelect?: {content: string, color: string}[]
     },
     valueType: TAVCol,
 }

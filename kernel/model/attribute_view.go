@@ -396,20 +396,20 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 
 		colIndex = i
 
-		for _, opt := range col.Options {
+		for j, opt := range col.Options {
 			if opt.Name != optName {
 				continue
 			}
 
-			col.Options = append(col.Options[:i], col.Options[i+1:]...)
+			col.Options = append(col.Options[:j], col.Options[j+1:]...)
 			break
 		}
 		break
 	}
 
 	for _, row := range attrView.Rows {
-		for k, cell := range row.Cells {
-			if colIndex != k {
+		for i, cell := range row.Cells {
+			if colIndex != i {
 				continue
 			}
 

@@ -64,13 +64,9 @@ export const setFilter = (options: {
                 return true;
             }
         });
-        if (isSame) {
+        if (isSame || !hasMatch) {
             return;
         }
-        if (!hasMatch) {
-            options.data.filters.push(newFilter)
-        }
-
         transaction(options.protyle, [{
             action: "setAttrView",
             id: options.data.id,
@@ -148,12 +144,42 @@ export const setFilter = (options: {
             label: `<input style="margin: 4px 0" value="${options.filter.value[colType].isNotEmpty ? options.filter.value[colType].content : ""}" class="b3-text-field fn__size200">`
         });
     }
+    menu.addItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.delete,
+        click() {
+            const oldFilters = Object.assign([], options.data.filters);
+            options.data.filters.find((item: IAVFilter, index: number) => {
+                if (item.column === options.filter.column) {
+                    options.data.filters.splice(index, 1);
+                    return true;
+                }
+            });
+            transaction(options.protyle, [{
+                action: "setAttrView",
+                id: options.data.id,
+                data: {
+                    filters: options.data.filters
+                }
+            }], [{
+                action: "setAttrView",
+                id: options.data.id,
+                data: {
+                    filters: oldFilters
+                }
+            }]);
+            const menuElement = hasClosestByClassName(options.target, "b3-menu");
+            if (menuElement) {
+                menuElement.innerHTML = getFiltersHTML(options.data);
+            }
+        }
+    });
     const selectElement = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement);
     selectElement.addEventListener("change", () => {
         if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
-            textElement.parentElement.parentElement.classList.add("fn__none");
+            selectElement.parentElement.parentElement.nextElementSibling.classList.add("fn__none");
         } else {
-            textElement.parentElement.parentElement.classList.remove("fn__none");
+            selectElement.parentElement.parentElement.nextElementSibling.classList.remove("fn__none");
         }
     });
     const textElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
@@ -169,13 +195,15 @@ export const setFilter = (options: {
             }
         });
         if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
-            textElement.parentElement.parentElement.classList.add("fn__none");
+            selectElement.parentElement.parentElement.nextElementSibling.classList.add("fn__none");
         } else {
-            textElement.parentElement.parentElement.classList.remove("fn__none");
+            selectElement.parentElement.parentElement.nextElementSibling.classList.remove("fn__none");
         }
     }
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
-    textElement.select();
+    if (textElement) {
+        textElement.select();
+    }
 };
 
 export const addFilter = (options: {
@@ -228,13 +256,12 @@ export const addFilter = (options: {
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
-                    const colType = filterElement.getAttribute("data-coltype") as TAVCol;
                     setFilter({
                         filter: {
-                            operator: filterElement.dataset.op as TAVFilterOperator,
-                            column: filterElement.parentElement.parentElement.dataset.id,
+                            operator: "Contains",
+                            column: column.id,
                             value: {
-                                [colType]: {content: filterElement.dataset.value}
+                                [column.type]: cellValue
                             }
                         },
                         protyle: options.protyle,

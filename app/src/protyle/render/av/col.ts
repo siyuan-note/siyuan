@@ -170,6 +170,20 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                             }
                         }
                     };
+                    avData.filters.push(filter);
+                    transaction(protyle, [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            filters: [filter]
+                        }
+                    }], [{
+                        action: "setAttrView",
+                        id: avId,
+                        data: {
+                            filters: []
+                        }
+                    }]);
                 }
                 setFilter({
                     filter,

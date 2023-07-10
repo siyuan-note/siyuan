@@ -797,7 +797,7 @@ interface IModels {
 
 interface IMenu {
     label?: string,
-    click?: (element: HTMLElement) => void,
+    click?: (element: HTMLElement) => boolean | void | Promise<boolean | void>
     type?: "separator" | "submenu" | "readonly",
     accelerator?: string,
     action?: string,
@@ -892,7 +892,7 @@ interface IAVCell {
     value: {
         [key in TAVCol]?: IAVCellValue
     } & {
-        mSelect?: {content: string, color: string}[]
+        mSelect?: { content: string, color: string }[]
     },
     valueType: TAVCol,
 }

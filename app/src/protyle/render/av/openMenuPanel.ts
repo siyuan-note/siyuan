@@ -437,6 +437,7 @@ export const openMenuPanel = (protyle: IProtyle,
                     break;
                 } else if (type === "addSelectColAndCell") {
                     addSelectColAndCell(protyle, data, options, target, menuElement);
+                    window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSelectCell") {

@@ -68,7 +68,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                                 text = "<span class=\"av__celltext\"></span>";
                             }
                         } else if (cell.valueType === "mSelect") {
-                            cell.value.mSelect.forEach((item: { content: string, color: string }) => {
+                            cell.value?.mSelect.forEach((item: { content: string, color: string }) => {
                                 text += `<span class="av__celltext"><span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span></span>`;
                             });
                         } else if (cell.valueType === "date") {

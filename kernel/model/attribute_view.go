@@ -329,8 +329,6 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	newName := data["newName"].(string)
 	newColor := data["newColor"].(string)
 
-	// TODO 如果 newName 已经存在
-
 	var colIndex int
 	for i, col := range attrView.Columns {
 		if col.ID != colID {

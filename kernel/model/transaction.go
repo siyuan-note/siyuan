@@ -243,6 +243,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrView(op)
 		case "updateAttrViewColOptions":
 			ret = tx.doUpdateAttrViewColOptions(op)
+		case "removeAttrViewColOption":
+			ret = tx.doRemoveAttrViewColOption(op)
 		}
 
 		if nil != ret {

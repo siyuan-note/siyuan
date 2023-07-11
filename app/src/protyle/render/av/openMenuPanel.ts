@@ -404,13 +404,15 @@ export const openMenuPanel = (protyle: IProtyle,
                             doOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
-                                parentID: avId,
+                                avID: avId,
+                                viewID: data.viewID,
                                 data: false
                             });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
-                                parentID: avId,
+                                avID: avId,
+                                viewID: data.viewID,
                                 data: true
                             });
                             item.hidden = false;
@@ -431,13 +433,15 @@ export const openMenuPanel = (protyle: IProtyle,
                             doOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
-                                parentID: avId,
+                                avID: avId,
+                                viewID: data.viewID,
                                 data: true
                             });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
-                                parentID: avId,
+                                avID: avId,
+                                viewID: data.viewID,
                                 data: false
                             });
                             item.hidden = true;
@@ -455,12 +459,14 @@ export const openMenuPanel = (protyle: IProtyle,
                     transaction(protyle, [{
                         action: "setAttrViewColHidden",
                         id: colId,
-                        parentID: avId,
+                        avID: avId,
+                        viewID: data.viewID,
                         data: true
                     }], [{
                         action: "setAttrViewColHidden",
                         id: colId,
-                        parentID: avId,
+                        avID: avId,
+                        viewID: data.viewID,
                         data: false
                     }]);
                     data.view.columns.find((item: IAVColumn) => item.id === colId).hidden = true;
@@ -473,12 +479,14 @@ export const openMenuPanel = (protyle: IProtyle,
                     transaction(protyle, [{
                         action: "setAttrViewColHidden",
                         id: colId,
-                        parentID: avId,
+                        avID: avId,
+                        viewID: data.viewID,
                         data: false
                     }], [{
                         action: "setAttrViewColHidden",
                         id: colId,
-                        parentID: avId,
+                        avID: avId,
+                        viewID: data.viewID,
                         data: true
                     }]);
                     data.view.columns.find((item: IAVColumn) => item.id === colId).hidden = false;

@@ -66,6 +66,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avId = blockElement.getAttribute("data-av-id");
+    const viewId = blockElement.querySelector(".item--focus").getAttribute("data-id");
     const menu = new Menu("av-header-cell", () => {
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === cellElement.textContent.trim()) {
@@ -193,12 +194,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "setAttrViewColHidden",
                     id: colId,
-                    parentID: avId,
+                    avID: avId,
+                    viewID: viewId,
                     data: true
                 }], [{
                     action: "setAttrViewColHidden",
                     id: colId,
-                    parentID: avId,
+                    avID: avId,
+                    viewID: viewId,
                     data: false
                 }]);
             }
@@ -239,12 +242,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "setAttrViewColWrap",
                     id: colId,
-                    parentID: avId,
+                    avID: avId,
+                    viewID: viewId,
                     data: inputElement.checked
                 }], [{
                     action: "setAttrViewColWrap",
                     id: colId,
-                    parentID: avId,
+                    avID: avId,
+                    viewID: viewId,
                     data: !inputElement.checked
                 }]);
             });

@@ -69,24 +69,21 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	return
 }
 
+func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
+	ret = &av.Table{
+		Spec:    attrView.Spec,
+		ID:      view.ID,
+		Name:    view.Name,
+		Columns: attrView.Columns,
+		Rows:    attrView.Rows,
+		Filters: view.Filters,
+		Sorts:   view.Sorts,
+	}
+	return
+}
+
 func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 	err := setAttributeViewName(operation)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-	return
-}
-
-func (tx *Transaction) doSetAttrViewFilters(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewFilters(operation)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-	return
-}
-
-func (tx *Transaction) doSetAttrViewSorts(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewSorts(operation)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -112,6 +109,14 @@ func setAttributeViewName(operation *Operation) (err error) {
 	}
 
 	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewFilters(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewFilters(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	return
 }
 
@@ -142,6 +147,14 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewSorts(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewSorts(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
 func setAttributeViewSorts(operation *Operation) (err error) {
 	avID := operation.ID
 	attrView, err := av.ParseAttributeView(avID)
@@ -169,20 +182,117 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 	return
 }
 
-// TODO 下面的方法要重写
+func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	firstSrcID := operation.SrcIDs[0]
+	tree, err := tx.loadTree(firstSrcID)
+	if nil != err {
+		logging.LogErrorf("load tree [%s] failed: %s", firstSrcID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID, msg: err.Error()}
+	}
 
-func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
-	ret = &av.Table{
-		Spec:    attrView.Spec,
-		ID:      view.ID,
-		Name:    view.Name,
-		Columns: attrView.Columns,
-		Rows:    attrView.Rows,
-		Filters: view.Filters,
-		Sorts:   view.Sorts,
+	for _, id := range operation.SrcIDs {
+		var avErr error
+		if avErr = addAttributeViewBlock(id, operation, tree, tx); nil != avErr {
+			return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: avErr.Error()}
+		}
 	}
 	return
 }
+
+func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tree, tx *Transaction) (err error) {
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	if ast.NodeAttributeView == node.Type {
+		// 不能将一个属性视图拖拽到另一个属性视图中
+		return
+	}
+
+	block := sql.BuildBlockFromNode(node, tree)
+	if nil == block {
+		err = ErrBlockNotFound
+		return
+	}
+
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	// 不允许重复添加相同的块到属性视图中
+	for _, row := range attrView.Rows {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
+			continue
+		}
+
+		if blockCell.Value.Block.ID == blockID {
+			return
+		}
+	}
+
+	row := av.NewRow()
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	for _, col := range attrView.Columns {
+		if av.ColumnTypeBlock != col.Type {
+			attrs[NodeAttrNamePrefixAvCol+operation.AvID+"-"+col.ID] = "" // 将列作为属性添加到块中
+			row.Cells = append(row.Cells, av.NewCell(col.Type))
+		} else {
+			row.Cells = append(row.Cells, av.NewCellBlock(blockID, getNodeRefText(node)))
+		}
+	}
+
+	if "" == attrs[NodeAttrNameAVs] {
+		attrs[NodeAttrNameAVs] = operation.AvID
+	} else {
+		avIDs := strings.Split(attrs[NodeAttrNameAVs], ",")
+		avIDs = append(avIDs, operation.AvID)
+		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+		attrs[NodeAttrNameAVs] = strings.Join(avIDs, ",")
+	}
+
+	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+		return
+	}
+
+	if "" == operation.PreviousRowID {
+		attrView.Rows = append([]*av.Row{row}, attrView.Rows...)
+	} else {
+		for i, r := range attrView.Rows {
+			if r.ID == operation.PreviousRowID {
+				attrView.Rows = append(attrView.Rows[:i+1], append([]*av.Row{row}, attrView.Rows[i+1:]...)...)
+				break
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
+	var avs []*av.AttributeView
+	avID := operation.ParentID
+	for _, id := range operation.SrcIDs {
+		var av *av.AttributeView
+		var avErr error
+		if av, avErr = removeAttributeViewBlock(id, avID); nil != avErr {
+			return &TxErr{code: TxErrWriteAttributeView, id: avID}
+		}
+
+		if nil == av {
+			continue
+		}
+
+		avs = append(avs, av)
+	}
+	return
+}
+
+// TODO 下面的方法要重写
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 	avID := operation.ParentID
@@ -246,52 +356,6 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	return
-}
-
-func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	firstSrcID := operation.SrcIDs[0]
-	tree, err := tx.loadTree(firstSrcID)
-	if nil != err {
-		logging.LogErrorf("load tree [%s] failed: %s", firstSrcID, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID, msg: err.Error()}
-	}
-
-	avID := operation.ParentID
-	var avs []*av.AttributeView
-	previousID := operation.PreviousID
-	for _, id := range operation.SrcIDs {
-		var av *av.AttributeView
-		var avErr error
-		if av, avErr = addAttributeViewBlock(id, previousID, avID, tree, tx); nil != avErr {
-			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: avErr.Error()}
-		}
-
-		if nil == av {
-			continue
-		}
-
-		avs = append(avs, av)
-	}
-	return
-}
-
-func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
-	var avs []*av.AttributeView
-	avID := operation.ParentID
-	for _, id := range operation.SrcIDs {
-		var av *av.AttributeView
-		var avErr error
-		if av, avErr = removeAttributeViewBlock(id, avID); nil != avErr {
-			return &TxErr{code: TxErrWriteAttributeView, id: avID}
-		}
-
-		if nil == av {
-			continue
-		}
-
-		avs = append(avs, av)
-	}
 	return
 }
 
@@ -796,80 +860,6 @@ func removeAttributeViewBlock(blockID, avID string) (ret *av.AttributeView, err 
 			// 从行中移除，但是不移除属性
 			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
 			break
-		}
-	}
-
-	err = av.SaveAttributeView(ret)
-	return
-}
-
-func addAttributeViewBlock(blockID, previousRowID, avID string, tree *parse.Tree, tx *Transaction) (ret *av.AttributeView, err error) {
-	node := treenode.GetNodeInTree(tree, blockID)
-	if nil == node {
-		err = ErrBlockNotFound
-		return
-	}
-
-	if ast.NodeAttributeView == node.Type {
-		// 不能将一个属性视图拖拽到另一个属性视图中
-		return
-	}
-
-	block := sql.BuildBlockFromNode(node, tree)
-	if nil == block {
-		err = ErrBlockNotFound
-		return
-	}
-
-	ret, err = av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	// 不允许重复添加相同的块到属性视图中
-	for _, row := range ret.Rows {
-		blockCell := row.GetBlockCell()
-		if nil == blockCell {
-			continue
-		}
-
-		if blockCell.Value.Block.ID == blockID {
-			return
-		}
-	}
-
-	row := av.NewRow()
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	for _, col := range ret.Columns {
-		if av.ColumnTypeBlock != col.Type {
-			attrs[NodeAttrNamePrefixAvCol+avID+"-"+col.ID] = "" // 将列作为属性添加到块中
-			row.Cells = append(row.Cells, av.NewCell(col.Type))
-		} else {
-			row.Cells = append(row.Cells, av.NewCellBlock(blockID, getNodeRefText(node)))
-		}
-	}
-
-	if "" == attrs[NodeAttrNameAVs] {
-		attrs[NodeAttrNameAVs] = avID
-	} else {
-		avIDs := strings.Split(attrs[NodeAttrNameAVs], ",")
-		avIDs = append(avIDs, avID)
-		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-		attrs[NodeAttrNameAVs] = strings.Join(avIDs, ",")
-	}
-
-	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
-		return
-	}
-
-	if "" == previousRowID {
-		ret.Rows = append([]*av.Row{row}, ret.Rows...)
-	} else {
-		for i, r := range ret.Rows {
-			if r.ID == previousRowID {
-				ret.Rows = append(ret.Rows[:i+1], append([]*av.Row{row}, ret.Rows[i+1:]...)...)
-				break
-			}
 		}
 	}
 

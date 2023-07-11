@@ -81,8 +81,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     tableHTML += "<div></div></div>";
                 });
                 let tabHTML = ""
-                response.data.views.forEach((item:IAVView) => {
-                    tabHTML +=`<div class="item${item.id === response.data.viewID ? " item--focus" : ""}">
+                response.data.views.forEach((item: IAVView) => {
+                    tabHTML += `<div data-id="${response.data.viewID}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
     <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
     <span class="item__text">${item.name}</span>
 </div>`
@@ -141,7 +141,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     lastElement = protyle.contentElement;
     lastParentID = operation.parentID;
-    const avId =  operation.avID;
+    const avId = operation.avID;
     if (operation.action === "addAttrViewCol") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");

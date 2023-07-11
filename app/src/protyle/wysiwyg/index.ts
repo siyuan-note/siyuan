@@ -353,6 +353,7 @@ export class WYSIWYG {
                     return;
                 }
                 const avId = nodeElement.getAttribute("data-av-id");
+                const viewId = (nodeElement.querySelector(".item--focus") as HTMLElement).dataset.id;
                 const dragElement = target.parentElement;
                 const oldWidth = dragElement.clientWidth;
                 const dragColId = dragElement.getAttribute("data-col-id");
@@ -373,12 +374,14 @@ export class WYSIWYG {
                     transaction(protyle, [{
                         action: "setAttrViewColWidth",
                         id: dragColId,
-                        parentID: avId,
+                        avID: avId,
+                        viewID: viewId,
                         data: newWidth
                     }], [{
                         action: "setAttrViewColWidth",
                         id: dragColId,
-                        parentID: avId,
+                        avID: avId,
+                        viewID: viewId,
                         data: oldWidth + "px"
                     }]);
                 };

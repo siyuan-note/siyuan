@@ -258,11 +258,11 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		return
 	}
 
-	if "" == operation.PreviousRowID {
+	if "" == operation.PreviousID {
 		attrView.Rows = append([]*av.Row{row}, attrView.Rows...)
 	} else {
 		for i, r := range attrView.Rows {
-			if r.ID == operation.PreviousRowID {
+			if r.ID == operation.PreviousID {
 				attrView.Rows = append(attrView.Rows[:i+1], append([]*av.Row{row}, attrView.Rows[i+1:]...)...)
 				break
 			}
@@ -298,6 +298,81 @@ func removeAttributeViewBlock(blockID string, operation *Operation) (err error) 
 		if blockCell.Value.Block.ID == blockID {
 			// 从行中移除，但是不移除属性
 			attrView.Rows = append(attrView.Rows[:i], attrView.Rows[i+1:]...)
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnWidth(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColWidth(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColWidth(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for _, column := range attrView.Columns {
+		if column.ID == operation.ID {
+			column.Width = operation.Data.(string)
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnWrap(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColWrap(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColWrap(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for _, column := range attrView.Columns {
+		if column.ID == operation.ID {
+			column.Wrap = operation.Data.(bool)
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnHidden(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColHidden(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColHidden(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for _, column := range attrView.Columns {
+		if column.ID == operation.ID {
+			column.Hidden = operation.Data.(bool)
 			break
 		}
 	}
@@ -431,30 +506,6 @@ func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
 
 func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
 	err := sortAttributeViewRow(operation.ID, operation.PreviousID, operation.ParentID)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-	}
-	return
-}
-
-func (tx *Transaction) doSetAttrViewColumnHidden(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewColHidden(operation.Data.(bool), operation.ID, operation.ParentID)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-	}
-	return
-}
-
-func (tx *Transaction) doSetAttrViewColumnWrap(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewColWrap(operation.Data.(bool), operation.ID, operation.ParentID)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-	}
-	return
-}
-
-func (tx *Transaction) doSetAttrViewColumnWidth(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewColWidth(operation.Data.(string), operation.ID, operation.ParentID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
 	}
@@ -776,57 +827,6 @@ func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
 		}
 	}
 	attrView.Rows = util.InsertElem(attrView.Rows, previousIndex, row)
-
-	err = av.SaveAttributeView(attrView)
-	return
-}
-
-func setAttributeViewColHidden(hidden bool, columnID, avID string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	for _, column := range attrView.Columns {
-		if column.ID == columnID {
-			column.Hidden = hidden
-			break
-		}
-	}
-
-	err = av.SaveAttributeView(attrView)
-	return
-}
-
-func setAttributeViewColWrap(wrap bool, columnID, avID string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	for _, column := range attrView.Columns {
-		if column.ID == columnID {
-			column.Wrap = wrap
-			break
-		}
-	}
-
-	err = av.SaveAttributeView(attrView)
-	return
-}
-
-func setAttributeViewColWidth(width, columnID, avID string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	for _, column := range attrView.Columns {
-		if column.ID == columnID {
-			column.Width = width
-			break
-		}
-	}
 
 	err = av.SaveAttributeView(attrView)
 	return

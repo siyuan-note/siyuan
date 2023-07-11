@@ -237,13 +237,13 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doAddAttrViewColumn(op)
 		case "updateAttrViewCol":
 			ret = tx.doUpdateAttrViewColumn(op)
+		case "removeAttrViewCol":
+			ret = tx.doRemoveAttrViewColumn(op)
 		case "sortAttrViewRow":
 			ret = tx.doSortAttrViewRow(op)
 		case "sortAttrViewCol":
 			ret = tx.doSortAttrViewColumn(op)
 		// TODO 下面的方法要重写
-		case "removeAttrViewCol":
-			ret = tx.doRemoveAttrViewColumn(op)
 		case "updateAttrViewCell":
 			ret = tx.doUpdateAttrViewCell(op)
 		case "setAttrView":

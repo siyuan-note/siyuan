@@ -33,43 +33,60 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	Spec    int       `json:"spec"`
+	Spec    int       `json:"spec"`    // 格式版本
 	ID      string    `json:"id"`      // 属性视图 ID
 	Name    string    `json:"name"`    // 属性视图名称
-	Columns []*Column `json:"columns"` // 表格列名
-	Rows    []*Row    `json:"rows"`    // 表格行记录
+	Columns []*Column `json:"columns"` // 列
+	Rows    []*Row    `json:"rows"`    // 行
 
-	Type    AttributeViewType      `json:"type"`    // 属性视图类型
-	Filters []*AttributeViewFilter `json:"filters"` // 过滤规则
-	Sorts   []*AttributeViewSort   `json:"sorts"`   // 排序规则
+	CurrentViewID string  `json:"currentViewId"` // 当前视图 ID
+	Views         []*View `json:"views"`         // 视图
 }
 
-// AttributeViewType 描述了属性视图的类型。
-type AttributeViewType string
+// View 描述了视图的结构。
+type View struct {
+	ID   string   `json:"id"`   // 视图 ID
+	Name string   `json:"name"` // 视图名称
+	Type ViewType `json:"type"` // 视图类型
+
+	Filters []*ViewFilter `json:"filters"` // 过滤规则
+	Sorts   []*ViewSort   `json:"sorts"`   // 排序规则
+}
+
+// ViewType 描述了视图的类型。
+type ViewType string
 
 const (
-	AttributeViewTypeTable AttributeViewType = "table" // 属性视图类型 - 表格
+	ViewTypeTable  ViewType = "table"  // 属性视图类型 - 表格
+	ViewTypeKanban ViewType = "kanban" // 属性视图类型 - 看板
 )
 
-func NewAttributeView(id string) *AttributeView {
-	return &AttributeView{
-		Spec:    0,
-		ID:      id,
-		Name:    "Table",
-		Columns: []*Column{{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
-		Rows:    []*Row{},
-		Type:    AttributeViewTypeTable,
-		Filters: []*AttributeViewFilter{},
-		Sorts:   []*AttributeViewSort{},
-	}
+// Viewable 描述了视图的接口。
+type Viewable interface {
+	Filterable
+	Sortable
+	Calculable
+
+	Type() ViewType
 }
 
-func (av *AttributeView) GetColumnNames() (ret []string) {
-	ret = []string{}
-	for _, column := range av.Columns {
-		ret = append(ret, column.Name)
+func NewAttributeView(id string) *AttributeView {
+	view := &View{
+		ID:      ast.NewNodeID(),
+		Name:    "Table",
+		Type:    ViewTypeTable,
+		Filters: []*ViewFilter{},
+		Sorts:   []*ViewSort{},
 	}
-	return
+
+	return &AttributeView{
+		Spec:          0,
+		ID:            id,
+		Columns:       []*Column{{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
+		Rows:          []*Row{},
+		CurrentViewID: view.ID,
+		Views:         []*View{view},
+	}
 }
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
@@ -89,6 +106,19 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
 		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 		return
+	}
+
+	if 1 > len(ret.Views) {
+		view := &View{
+			ID:      ast.NewNodeID(),
+			Name:    "Table",
+			Type:    ViewTypeTable,
+			Filters: []*ViewFilter{},
+			Sorts:   []*ViewSort{},
+		}
+
+		ret.CurrentViewID = view.ID
+		ret.Views = []*View{view}
 	}
 	return
 }

@@ -16,7 +16,11 @@
 
 package av
 
-type AttributeViewFilter struct {
+type Filterable interface {
+	FilterRows()
+}
+
+type ViewFilter struct {
 	Column   string         `json:"column"`
 	Operator FilterOperator `json:"operator"`
 	Value    *Value         `json:"value"`
@@ -40,39 +44,3 @@ const (
 	FilterOperatorIsBetween         FilterOperator = "Is between"
 	FilterOperatorIsRelativeToToday FilterOperator = "Is relative to today"
 )
-
-func (av *AttributeView) FilterRows() {
-	if 1 > len(av.Filters) {
-		return
-	}
-
-	var colIndexes []int
-	for _, f := range av.Filters {
-		for i, c := range av.Columns {
-			if c.ID == f.Column {
-				colIndexes = append(colIndexes, i)
-				break
-			}
-		}
-	}
-
-	rows := []*Row{}
-	for _, row := range av.Rows {
-		pass := true
-		for j, index := range colIndexes {
-			c := av.Columns[index]
-			if c.Type == ColumnTypeBlock {
-				continue
-			}
-
-			if !row.Cells[index].Value.CompareOperator(av.Filters[j].Value, av.Filters[j].Operator) {
-				pass = false
-				break
-			}
-		}
-		if pass {
-			rows = append(rows, row)
-		}
-	}
-	av.Rows = rows
-}

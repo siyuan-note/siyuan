@@ -1016,15 +1016,12 @@ export class WYSIWYG {
 
     private bindEvent(protyle: IProtyle) {
         this.element.addEventListener("focusout", () => {
-            if (getSelection().rangeCount > 0 && !this.element.contains(getSelection().getRangeAt(0).startContainer)) {
-                // 对 ctrl+tab 切换后 range 已经在新页面中才会触发的 focusout 进行忽略，因为在切换之前已经 dispatchEvent 了。
-                if (!protyle.toolbar.range) {
-                    protyle.toolbar.range = this.element.ownerDocument.createRange();
-                    protyle.toolbar.range.setStart(getContenteditableElement(this.element) || this.element, 0);
-                    protyle.toolbar.range.collapse(true);
-                }
-            } else {
-                protyle.toolbar.range = getEditorRange(this.element);
+            if (getSelection().rangeCount === 0) {
+                return;
+            }
+            const range = getSelection().getRangeAt(0);
+            if (this.element.isSameNode(range.startContainer) || this.element.contains(range.startContainer)) {
+                protyle.toolbar.range = range;
             }
         });
 

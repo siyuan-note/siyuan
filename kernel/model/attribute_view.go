@@ -42,7 +42,7 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	}
 
 	if 1 > len(attrView.Views) {
-		err = errors.New("no view")
+		err = av.ErrViewNotFound
 		return
 	}
 
@@ -68,6 +68,108 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	viewable.CalcCols()
 	return
 }
+
+func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewName(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewFilters(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewFilters(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewSorts(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewSorts(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewName(operation *Operation) (err error) {
+	avID := operation.ID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	attrView.Name = operation.Data.(string)
+
+	data, err := gulu.JSON.MarshalJSON(attrView)
+	if nil != err {
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+		return
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttributeViewFilters(operation *Operation) (err error) {
+	avID := operation.ID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	view := attrView.GetView(operation.ViewID)
+	if nil == view {
+		err = av.ErrViewNotFound
+		return
+	}
+
+	operationData := operation.Data.([]interface{})
+	data, err := gulu.JSON.MarshalJSON(operationData)
+	if nil != err {
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &view.Filters); nil != err {
+		return
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttributeViewSorts(operation *Operation) (err error) {
+	avID := operation.ID
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return
+	}
+
+	view := attrView.GetView(operation.ViewID)
+	if nil == view {
+		err = av.ErrViewNotFound
+		return
+	}
+
+	operationData := operation.Data.([]interface{})
+	data, err := gulu.JSON.MarshalJSON(operationData)
+	if nil != err {
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &view.Sorts); nil != err {
+		return
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+// TODO 下面的方法要重写
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
@@ -144,7 +246,6 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	sql.RebuildAttributeViewQueue(view)
 	return
 }
 
@@ -172,10 +273,6 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 		avs = append(avs, av)
 	}
-
-	for _, av := range avs {
-		sql.RebuildAttributeViewQueue(av)
-	}
 	return
 }
 
@@ -194,10 +291,6 @@ func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) 
 		}
 
 		avs = append(avs, av)
-	}
-
-	for _, av := range avs {
-		sql.RebuildAttributeViewQueue(av)
 	}
 	return
 }

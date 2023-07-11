@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/av"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -34,6 +33,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -217,6 +217,13 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doAddFlashcards(op)
 		case "removeFlashcards":
 			ret = tx.doRemoveFlashcards(op)
+		case "setAttrViewName":
+			ret = tx.doSetAttrViewName(op)
+		case "setAttrViewFilters":
+			ret = tx.doSetAttrViewFilters(op)
+		case "setAttrViewSorts":
+			ret = tx.doSetAttrViewSorts(op)
+		// TODO 下面的方法要重写
 		case "insertAttrViewBlock":
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
@@ -1046,6 +1053,8 @@ type Operation struct {
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
+	AvID   string   `json:"avID"`   // 属性视图 ID
+	ViewID string   `json:"viewID"` // 属性视图的视图 ID
 	SrcIDs []string `json:"srcIDs"` // 用于将块拖拽到属性视图中
 	Name   string   `json:"name"`   // 用于属性视图列名
 	Typ    string   `json:"type"`   // 用于属性视图列类型

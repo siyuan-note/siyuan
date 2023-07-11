@@ -168,13 +168,14 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func (av *AttributeView) GetView(viewID string) (ret *View) {
+func (av *AttributeView) GetView(viewID string) (ret *View, err error) {
 	for _, v := range av.Views {
 		if v.ID == viewID {
 			ret = v
 			return
 		}
 	}
+	err = ErrViewNotFound
 	return
 }
 

@@ -561,6 +561,48 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	return
 }
 
+
+func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
+	err := removeAttributeViewColumn(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func removeAttributeViewColumn(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for i, column := range attrView.Columns {
+		if column.ID == operation.ID {
+			attrView.Columns = append(attrView.Columns[:i], attrView.Columns[i+1:]...)
+			for _, row := range attrView.Rows {
+				if len(row.Cells) <= i {
+					continue
+				}
+
+				row.Cells = append(row.Cells[:i], row.Cells[i+1:]...)
+			}
+			break
+		}
+	}
+
+	for _, view := range attrView.Views {
+		for i, column := range view.Table.Columns {
+			if column.ID == operation.ID {
+				view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+				break
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 // TODO 下面的方法要重写
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
@@ -652,13 +694,6 @@ func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *Tx
 	return
 }
 
-func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := removeAttributeViewColumn(operation.ID, operation.ParentID)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-	}
-	return
-}
 
 func (tx *Transaction) doSetAttrView(operation *Operation) (ret *TxErr) {
 	err := setAttributeView(operation)
@@ -831,30 +866,6 @@ func updateAttributeViewColumnOptions(data interface{}, id, avID string) (err er
 			return
 		}
 	}
-	return
-}
-
-func removeAttributeViewColumn(columnID string, avID string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	for i, column := range attrView.Columns {
-		if column.ID == columnID {
-			attrView.Columns = append(attrView.Columns[:i], attrView.Columns[i+1:]...)
-			for _, row := range attrView.Rows {
-				if len(row.Cells) <= i {
-					continue
-				}
-
-				row.Cells = append(row.Cells[:i], row.Cells[i+1:]...)
-			}
-			break
-		}
-	}
-
-	err = av.SaveAttributeView(attrView)
 	return
 }
 

@@ -117,7 +117,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     action: "setAttrView",
                     id: avId,
                     data: {
-                        sorts: response.data.av.sorts
+                        sorts: response.data.view.sorts
                     }
                 }]);
             });
@@ -141,7 +141,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     action: "setAttrView",
                     id: avId,
                     data: {
-                        sorts: response.data.av.sorts
+                        sorts: response.data.view.sorts
                     }
                 }]);
             });
@@ -152,7 +152,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         label: window.siyuan.languages.filter,
         click() {
             fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
-                const avData = response.data.av as IAV;
+                const avData = response.data.view as IAVTable;
                 let filter: IAVFilter;
                 avData.filters.find((item) => {
                     if (item.column === colId) {

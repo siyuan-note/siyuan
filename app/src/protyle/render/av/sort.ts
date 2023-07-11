@@ -4,7 +4,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {setPosition} from "../../../util/setPosition";
 
 export const addSort = (options: {
-    data: IAV,
+    data: IAVTable,
     rect: DOMRect,
     menuElement: HTMLElement,
     tabRect: DOMRect,
@@ -57,7 +57,7 @@ export const addSort = (options: {
     });
 };
 
-export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV) => {
+export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAVTable) => {
     menuElement.querySelectorAll("select").forEach((item: HTMLSelectElement) => {
         item.addEventListener("change", () => {
             const colId = item.parentElement.getAttribute("data-id");
@@ -90,7 +90,7 @@ export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data
     });
 };
 
-export const getSortsHTML = (data: IAV) => {
+export const getSortsHTML = (data: IAVTable) => {
     let html = "";
     const genSortItem = (id: string) => {
         let sortHTML = "";

@@ -19,7 +19,7 @@ export const avRender = (element: Element, cb?: () => void) => {
                 return;
             }
             fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id")}, (response) => {
-                const data = response.data.av as IAV;
+                const data = response.data.view as IAVTable;
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 42px"><use xlink:href="#iconUncheck"></use></svg></div>';
                 data.columns.forEach((column: IAVColumn) => {
@@ -80,6 +80,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });
+                let tabHTML = ""
+                response.data.views.forEach((item:IAVView) => {
+                    tabHTML +=`<div class="item${item.id === response.data.viewID ? " item--focus" : ""}">
+    <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
+    <span class="item__text">${item.name}</span>
+</div>`
+                })
                 const paddingLeft = e.parentElement.style.paddingLeft;
                 const paddingRight = e.parentElement.style.paddingRight;
                 e.style.width = e.parentElement.clientWidth + "px";
@@ -87,10 +94,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 e.firstElementChild.outerHTML = `<div>
     <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
         <div class="layout-tab-bar fn__flex">
-            <div class="item item--focus">
-                <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
-                <span class="item__text">${data.type}</span>
-            </div>
+            ${tabHTML}
             <div class="fn__flex-1"></div>
             <span data-type="av-filter" class="block__icon block__icon--show b3-tooltips b3-tooltips__w${data.filters.length > 0 ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.filter}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
@@ -105,7 +109,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
             </span>
             <div class="fn__space"></div>
         </div>
-        <div contenteditable="true" class="av__title" data-title="${data.name || ""}" data-tip="${window.siyuan.languages.title}">${data.name || ""}</div>
+        <div contenteditable="true" class="av__title" data-title="${data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">

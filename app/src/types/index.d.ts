@@ -842,7 +842,13 @@ interface IBazaarItem {
     preferredFunding: string
 }
 
-interface IAV {
+interface IAVView {
+    name: string
+    id: string
+    type: string
+}
+
+interface IAVTable {
     columns: IAVColumn[],
     filters: IAVFilter[],
     sorts: IAVSort[],

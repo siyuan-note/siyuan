@@ -42,7 +42,7 @@ export const getCellValue = (colType: TAVCol, value: string) => {
 export const setFilter = (options: {
     filter: IAVFilter,
     protyle: IProtyle,
-    data: IAV,
+    data: IAVTable,
     target: HTMLElement,
 }) => {
     const colType = Object.keys(options.filter.value)[0] as TAVCol;
@@ -228,7 +228,7 @@ export const setFilter = (options: {
 };
 
 export const addFilter = (options: {
-    data: IAV,
+    data: IAVTable,
     rect: DOMRect,
     menuElement: HTMLElement,
     tabRect: DOMRect,
@@ -293,7 +293,7 @@ export const addFilter = (options: {
     });
 };
 
-export const getFiltersHTML = (data: IAV) => {
+export const getFiltersHTML = (data: IAVTable) => {
     let html = "";
     const genFilterItem = (filter: IAVFilter) => {
         let filterHTML = "";

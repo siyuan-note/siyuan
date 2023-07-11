@@ -20,7 +20,7 @@ export const openMenuPanel = (protyle: IProtyle,
     window.siyuan.menus.menu.remove();
     const avId = blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
-        const data = response.data.av as IAV;
+        const data = response.data.view as IAVTable;
         let html;
         if (type === "config") {
             html = getConfigHTML(data);
@@ -483,7 +483,7 @@ export const openMenuPanel = (protyle: IProtyle,
     });
 };
 
-const getPropertiesHTML = (data: IAV) => {
+const getPropertiesHTML = (data: IAVTable) => {
     let showHTML = "";
     let hideHTML = "";
     data.columns.forEach((item: IAVColumn) => {
@@ -554,7 +554,7 @@ ${hideHTML}
 </button>`;
 };
 
-const getConfigHTML = (data: IAV) => {
+const getConfigHTML = (data: IAVTable) => {
     return `<button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.config}</span>
     <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>

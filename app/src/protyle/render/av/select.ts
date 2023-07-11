@@ -43,7 +43,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     return html;
 };
 
-export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
+export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
     cellElement: HTMLElement
 }, target: HTMLElement) => {
     if (!target) {
@@ -100,7 +100,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
     }]);
 }
 
-export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
+export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
     cellElement: HTMLElement;
 }, target: HTMLElement,) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
@@ -303,7 +303,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     inputElement.select();
 };
 
-export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, options: {
+export const bindSelectEvent = (protyle: IProtyle, data: IAVTable, menuElement: HTMLElement, options: {
     cellElement: HTMLElement
 }) => {
     const inputElement = menuElement.querySelector("input");
@@ -346,7 +346,7 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
     });
 };
 
-export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
+export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: {
     cellElement: HTMLElement
 }, currentElement: HTMLElement, menuElement: HTMLElement) => {
     const rowId = options.cellElement.parentElement.dataset.id;
@@ -435,7 +435,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
     }
 }
 
-export const getSelectHTML = (data: IAV, options: { cellElement: HTMLElement }) => {
+export const getSelectHTML = (data: IAVTable, options: { cellElement: HTMLElement }) => {
     const cellId = options.cellElement.dataset.id;
     const colId = options.cellElement.dataset["colId"];
     const colData = data.columns.find(item => {

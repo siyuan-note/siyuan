@@ -2,7 +2,6 @@ import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
-import {setPosition} from "../../../util/setPosition";
 import {upDownHint} from "../../../util/upDownHint";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
@@ -98,7 +97,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
             [colData.type]: oldValue
         }
     }]);
-}
+};
 
 export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
     cellElement: HTMLElement;
@@ -215,7 +214,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                         });
                         return true;
                     }
-                })
+                });
                 menuElement.innerHTML = getSelectHTML(data, options);
                 bindSelectEvent(protyle, data, menuElement, options);
             });
@@ -229,7 +228,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
             label: `<span class="color__square"  style="padding: 5px;margin: 2px;color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</span>`,
             click(element) {
                 if (element.lastElementChild.classList.contains("b3-menu__accelerator")) {
-                    return
+                    return;
                 }
                 element.parentElement.querySelector(".b3-menu__accelerator")?.remove();
                 element.insertAdjacentHTML("beforeend", '<span class="b3-menu__accelerator"><svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg></span>');
@@ -433,7 +432,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
     if (colData.type === "select") {
         menuElement.parentElement.remove();
     }
-}
+};
 
 export const getSelectHTML = (data: IAVTable, options: { cellElement: HTMLElement }) => {
     const cellId = options.cellElement.dataset.id;

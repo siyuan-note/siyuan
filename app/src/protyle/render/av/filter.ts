@@ -37,7 +37,7 @@ export const getCellValue = (colType: TAVCol, value: string) => {
         };
     }
     return cellValue;
-}
+};
 
 export const setFilter = (options: {
     filter: IAVFilter,
@@ -55,7 +55,7 @@ export const setFilter = (options: {
             column: options.filter.column,
             value: cellValue,
             operator: (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator
-        }
+        };
 
         let isSame = false;
         options.data.view.filters.find((filter, index) => {
@@ -92,7 +92,7 @@ export const setFilter = (options: {
         return;
     }
     let selectHTML = "";
-    let colData: IAVColumn
+    let colData: IAVColumn;
     switch (colType) {
         case "text":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
@@ -293,21 +293,21 @@ export const getFiltersHTML = (data: IAVTable) => {
         let filterHTML = "";
         data.columns.find((item) => {
             if (item.id === filter.column) {
-                let filterValue = ""
+                let filterValue = "";
                 if (filter.operator === "Is empty") {
-                    filterValue = ": " + window.siyuan.languages.filterOperatorIsEmpty
+                    filterValue = ": " + window.siyuan.languages.filterOperatorIsEmpty;
                 } else if (filter.operator === "Is not empty") {
-                    filterValue = ": " + window.siyuan.languages.filterOperatorIsNotEmpty
+                    filterValue = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
                 } else if (filter.value?.number?.content && ["=", "!=", ">", "<", ">=", "<="].includes(filter.operator)) {
-                    filterValue = ` ${filter.operator} ${filter.value.number.content}`
+                    filterValue = ` ${filter.operator} ${filter.value.number.content}`;
                 } else if (filter.value?.text?.content && ["=", "Contains"].includes(filter.operator)) {
-                    filterValue = `: ${filter.value.text.content}`
+                    filterValue = `: ${filter.value.text.content}`;
                 } else if (filter.value?.text?.content && ["!=", "Does not contains"].includes(filter.operator)) {
-                    filterValue = `Not ${filter.value.text.content}`
+                    filterValue = `Not ${filter.value.text.content}`;
                 } else if (filter.value?.text?.content && "Starts with" === filter.operator) {
-                    filterValue = `: ${window.siyuan.languages.filterOperatorStartsWith} ${filter.value.text.content}`
+                    filterValue = `: ${window.siyuan.languages.filterOperatorStartsWith} ${filter.value.text.content}`;
                 } else if (filter.value?.text?.content && "Ends with" === filter.operator) {
-                    filterValue = `: ${window.siyuan.languages.filterOperatorEndsWith} ${filter.value.text.content}`
+                    filterValue = `: ${window.siyuan.languages.filterOperatorEndsWith} ${filter.value.text.content}`;
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
     <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>

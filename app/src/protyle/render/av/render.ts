@@ -54,7 +54,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                         if (data.columns[index].hidden) {
                             return;
                         }
-                        let text = '';
+                        let text = "";
                         if (cell.valueType === "text") {
                             text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
                         } else if (cell.valueType === "block") {
@@ -66,7 +66,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                                 text += `<span class="av__celltext"><span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span></span>`;
                             });
                             if (!text) {
-                                text = '<span class="av__celltext"></span>'
+                                text = '<span class="av__celltext"></span>';
                             }
                         } else if (cell.valueType === "date") {
                             text = `<span class="av__celltext">${cell.value?.date.content || ""}</span>`;
@@ -80,13 +80,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                     });
                     tableHTML += "<div></div></div>";
                 });
-                let tabHTML = ""
+                let tabHTML = "";
                 response.data.views.forEach((item: IAVView) => {
                     tabHTML += `<div data-id="${response.data.viewID}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
     <svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>
     <span class="item__text">${item.name}</span>
-</div>`
-                })
+</div>`;
+                });
                 const paddingLeft = e.parentElement.style.paddingLeft;
                 const paddingRight = e.parentElement.style.paddingRight;
                 e.style.width = e.parentElement.clientWidth + "px";

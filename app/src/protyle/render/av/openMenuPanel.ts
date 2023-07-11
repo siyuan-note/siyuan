@@ -384,7 +384,7 @@ export const openMenuPanel = (protyle: IProtyle,
                             });
                             return true;
                         }
-                    })
+                    });
                     event.stopPropagation();
                     break;
                 } else if (type === "newCol") {

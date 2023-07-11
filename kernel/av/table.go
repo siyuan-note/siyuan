@@ -23,14 +23,30 @@ import (
 
 // Table 描述了表格视图的结构。
 type Table struct {
-	Spec int `json:"spec"` // 视图格式版本
+	Spec int    `json:"spec"` // 视图格式版本
+	ID   string `json:"id"`   // 视图 ID
 
-	ID      string        `json:"id"`      // 表格 ID
-	Name    string        `json:"name"`    // 表格名称
-	Columns []*Column     `json:"columns"` // 表格列
-	Rows    []*Row        `json:"rows"`    // 表格行
-	Filters []*ViewFilter `json:"filters"` // 过滤规则
-	Sorts   []*ViewSort   `json:"sorts"`   // 排序规则
+	Columns []*TableColumn `json:"columns"` // 表格列
+	Rows    []*TableRow    `json:"rows"`    // 表格行
+	Filters []*ViewFilter  `json:"filters"` // 过滤规则
+	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则
+}
+
+type TableColumn struct {
+	ID   string     `json:"id"`   // 列 ID
+	Name string     `json:"name"` // 列名
+	Type ColumnType `json:"type"` // 列类型
+	Icon string     `json:"icon"` // 列图标
+
+	Wrap   bool        `json:"wrap"`   // 是否换行
+	Hidden bool        `json:"hidden"` // 是否隐藏
+	Width  string      `json:"width"`  // 列宽度
+	Calc   *ColumnCalc `json:"calc"`   // 计算
+}
+
+type TableRow struct {
+	ID    string  `json:"id"`
+	Cells []*Cell `json:"cells"`
 }
 
 func (table *Table) GetType() ViewType {
@@ -97,7 +113,7 @@ func (table *Table) FilterRows() {
 		}
 	}
 
-	rows := []*Row{}
+	rows := []*TableRow{}
 	for _, row := range table.Rows {
 		pass := true
 		for j, index := range colIndexes {
@@ -143,7 +159,7 @@ func (table *Table) CalcCols() {
 	}
 }
 
-func (table *Table) calcColMSelect(col *Column, colIndex int) {
+func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
 		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
@@ -204,7 +220,7 @@ func (table *Table) calcColMSelect(col *Column, colIndex int) {
 	}
 }
 
-func (table *Table) calcColSelect(col *Column, colIndex int) {
+func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
 		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
@@ -261,7 +277,7 @@ func (table *Table) calcColSelect(col *Column, colIndex int) {
 	}
 }
 
-func (table *Table) calcColDate(col *Column, colIndex int) {
+func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
 		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
@@ -360,7 +376,7 @@ func (table *Table) calcColDate(col *Column, colIndex int) {
 	}
 }
 
-func (table *Table) calcColNumber(col *Column, colIndex int) {
+func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
 		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
@@ -500,7 +516,7 @@ func (table *Table) calcColNumber(col *Column, colIndex int) {
 	}
 }
 
-func (table *Table) calcColText(col *Column, colIndex int) {
+func (table *Table) calcColText(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
 		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}

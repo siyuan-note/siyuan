@@ -47,8 +47,8 @@ type View struct {
 	Name string   `json:"name"` // 视图名称
 	Type ViewType `json:"type"` // 视图类型
 
-	Filters []*ViewFilter `json:"filters"` // 过滤规则
-	Sorts   []*ViewSort   `json:"sorts"`   // 排序规则
+	Table *Table `json:"table,omitempty"` // 表格视图
+	// TODO Kanban *Kanban `json:"kanban,omitempty"` // 看板视图
 }
 
 // ViewType 描述了视图的类型。
@@ -58,6 +58,22 @@ const (
 	ViewTypeTable  ViewType = "table"  // 属性视图类型 - 表格
 	ViewTypeKanban ViewType = "kanban" // 属性视图类型 - 看板
 )
+
+func NewView() *View {
+	id := ast.NewNodeID()
+	name := "Table"
+	return &View{
+		ID:   id,
+		Name: name,
+		Type: ViewTypeTable,
+		Table: &Table{
+			Spec:    0,
+			ID:      id,
+			Filters: []*ViewFilter{},
+			Sorts:   []*ViewSort{},
+		},
+	}
+}
 
 // Viewable 描述了视图的接口。
 type Viewable interface {
@@ -70,13 +86,7 @@ type Viewable interface {
 }
 
 func NewAttributeView(id string) *AttributeView {
-	view := &View{
-		ID:      ast.NewNodeID(),
-		Name:    "Table",
-		Type:    ViewTypeTable,
-		Filters: []*ViewFilter{},
-		Sorts:   []*ViewSort{},
-	}
+	view := NewView()
 
 	return &AttributeView{
 		Spec:          0,
@@ -108,14 +118,7 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	}
 
 	if 1 > len(ret.Views) {
-		view := &View{
-			ID:      ast.NewNodeID(),
-			Name:    "Table",
-			Type:    ViewTypeTable,
-			Filters: []*ViewFilter{},
-			Sorts:   []*ViewSort{},
-		}
-
+		view := NewView()
 		ret.CurrentViewID = view.ID
 		ret.Views = []*View{view}
 	}

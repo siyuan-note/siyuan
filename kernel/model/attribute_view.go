@@ -70,14 +70,10 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 }
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
-	ret = &av.Table{
-		Spec:    attrView.Spec,
-		ID:      view.ID,
-		Name:    view.Name,
-		Columns: attrView.Columns,
-		Rows:    attrView.Rows,
-		Filters: view.Filters,
-		Sorts:   view.Sorts,
+	ret = view.Table
+	for _, avRow := range attrView.Rows {
+		row := &av.TableRow{ID: avRow.ID, Cells: avRow.Cells}
+		ret.Rows = append(ret.Rows, row)
 	}
 	return
 }
@@ -139,7 +135,7 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &view.Filters); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Filters); nil != err {
 		return
 	}
 
@@ -174,7 +170,7 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &view.Sorts); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Sorts); nil != err {
 		return
 	}
 
@@ -320,7 +316,13 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 		return
 	}
 
-	for _, column := range attrView.Columns {
+	view := attrView.GetView(operation.ViewID)
+	if nil == view {
+		err = av.ErrViewNotFound
+		return
+	}
+
+	for _, column := range view.Table.Columns {
 		if column.ID == operation.ID {
 			column.Width = operation.Data.(string)
 			break
@@ -345,7 +347,13 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 		return
 	}
 
-	for _, column := range attrView.Columns {
+	view := attrView.GetView(operation.ViewID)
+	if nil == view {
+		err = av.ErrViewNotFound
+		return
+	}
+
+	for _, column := range view.Table.Columns {
 		if column.ID == operation.ID {
 			column.Wrap = operation.Data.(bool)
 			break
@@ -370,7 +378,13 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 		return
 	}
 
-	for _, column := range attrView.Columns {
+	view := attrView.GetView(operation.ViewID)
+	if nil == view {
+		err = av.ErrViewNotFound
+		return
+	}
+
+	for _, column := range view.Table.Columns {
 		if column.ID == operation.ID {
 			column.Hidden = operation.Data.(bool)
 			break
@@ -461,6 +475,47 @@ func sortAttributeViewColumn(operation *Operation) (err error) {
 		cel := row.Cells[index]
 		row.Cells = append(row.Cells[:index], row.Cells[index+1:]...)
 		row.Cells = util.InsertElem(row.Cells, previousIndex, cel)
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
+	err := addAttributeViewColumn(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func addAttributeViewColumn(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	view := attrView.GetView(operation.ViewID)
+	if nil == view {
+		err = av.ErrViewNotFound
+		return
+	}
+
+	colType := av.ColumnType(operation.Typ)
+	switch colType {
+	case av.ColumnTypeText, av.ColumnTypeNumber, av.ColumnTypeDate, av.ColumnTypeSelect, av.ColumnTypeMSelect:
+		col := &av.Column{ID: ast.NewNodeID(), Name: operation.Name, Type: colType}
+		attrView.Columns = append(attrView.Columns, col)
+		view.Table.Columns = append(view.Table.Columns, &av.TableColumn{ID: col.ID, Name: col.Name, Type: col.Type})
+
+		for _, row := range attrView.Rows {
+			row.Cells = append(row.Cells, av.NewCell(colType))
+		}
+	default:
+		msg := fmt.Sprintf("invalid column type [%s]", operation.Typ)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -558,14 +613,6 @@ func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *Tx
 	return
 }
 
-func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := addAttributeViewColumn(operation.Name, operation.Typ, operation.ParentID)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-	}
-	return
-}
-
 func (tx *Transaction) doUpdateAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColumn(operation.ID, operation.Name, operation.Typ, operation.ParentID)
 	if nil != err {
@@ -587,31 +634,6 @@ func (tx *Transaction) doSetAttrView(operation *Operation) (ret *TxErr) {
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
 	}
-	return
-}
-
-func addAttributeViewColumn(name string, typ string, avID string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	colType := av.ColumnType(typ)
-	switch colType {
-	case av.ColumnTypeText, av.ColumnTypeNumber, av.ColumnTypeDate, av.ColumnTypeSelect, av.ColumnTypeMSelect:
-		col := &av.Column{ID: ast.NewNodeID(), Name: name, Type: colType}
-		attrView.Columns = append(attrView.Columns, col)
-		for _, row := range attrView.Rows {
-			row.Cells = append(row.Cells, av.NewCell(colType))
-		}
-	default:
-		msg := fmt.Sprintf("invalid column type [%s]", typ)
-		logging.LogErrorf(msg)
-		err = errors.New(msg)
-		return
-	}
-
-	err = av.SaveAttributeView(attrView)
 	return
 }
 

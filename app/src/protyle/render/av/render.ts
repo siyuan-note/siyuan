@@ -141,7 +141,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     lastElement = protyle.contentElement;
     lastParentID = operation.parentID;
-    const avId = operation.action === "setAttrView" ? operation.id : operation.parentID;
+    const avId =  operation.avID;
     if (operation.action === "addAttrViewCol") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
@@ -159,14 +159,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
             });
         });
-    } else if (operation.action === "setAttrView" && typeof operation.data.name === "string") {
+    } else if (operation.action === "setAttrViewName") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
-            if (!titleElement || titleElement.textContent.trim() === operation.data.name) {
+            if (!titleElement || titleElement.textContent.trim() === operation.data) {
                 return;
             }
-            titleElement.textContent = operation.data.name;
-            titleElement.dataset.title = operation.data.name;
+            titleElement.textContent = operation.data;
+            titleElement.dataset.title = operation.data;
         });
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {

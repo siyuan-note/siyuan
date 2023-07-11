@@ -32,7 +32,9 @@ type TOperation =
     | "updateAttrViewColOptions"
     | "removeAttrViewColOption"
     | "updateAttrViewColOption"
-    | "setAttrView"
+    | "setAttrViewName"
+    | "setAttrViewFilters"
+    | "setAttrViewSorts"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" |
@@ -304,6 +306,8 @@ interface IScrollAttr {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
+    avID?: string,  // av
+    viewID?: string,    // av
     data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}
     parentID?: string   // 为 insertAttrViewBlock 传 avid
     previousID?: string
@@ -840,6 +844,15 @@ interface IBazaarItem {
     hInstallDate: string
     hUpdated: string
     preferredFunding: string
+}
+
+interface IAV {
+    id: string
+    name: string
+    view: IAVTable
+    viewID: string
+    viewType: string
+    views: IAVView[],
 }
 
 interface IAVView {

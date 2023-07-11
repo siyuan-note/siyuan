@@ -105,20 +105,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         click() {
             fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
                 transaction(protyle, [{
-                    action: "setAttrView",
-                    id: avId,
-                    data: {
-                        sorts: [{
+                    action: "setAttrViewSorts",
+                    avID: response.data.id,
+                    viewID: response.data.viewID,
+                    data: [{
                             column: colId,
                             order: "ASC"
                         }]
-                    }
                 }], [{
-                    action: "setAttrView",
-                    id: avId,
-                    data: {
-                        sorts: response.data.view.sorts
-                    }
+                    action: "setAttrViewSorts",
+                    avID: response.data.id,
+                    viewID: response.data.viewID,
+                    data:  response.data.view.sorts
                 }]);
             });
         }
@@ -129,20 +127,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         click() {
             fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
                 transaction(protyle, [{
-                    action: "setAttrView",
-                    id: avId,
-                    data: {
-                        sorts: [{
+                    action: "setAttrViewSorts",
+                    avID: response.data.id,
+                    viewID: response.data.viewID,
+                    data:  [{
                             column: colId,
                             order: "DESC"
                         }]
-                    }
                 }], [{
-                    action: "setAttrView",
-                    id: avId,
-                    data: {
-                        sorts: response.data.view.sorts
-                    }
+                    action: "setAttrViewSorts",
+                    avID: response.data.id,
+                    viewID: response.data.viewID,
+                    data: response.data.view.sorts
                 }]);
             });
         }
@@ -152,9 +148,9 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         label: window.siyuan.languages.filter,
         click() {
             fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
-                const avData = response.data.view as IAVTable;
+                const avData = response.data as IAV;
                 let filter: IAVFilter;
-                avData.filters.find((item) => {
+                avData.view.filters.find((item) => {
                     if (item.column === colId) {
                         filter = item;
                         return true;
@@ -166,19 +162,17 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                         operator: "Contains",
                         value: getCellValue(type, "")
                     };
-                    avData.filters.push(filter);
+                    avData.view.filters.push(filter);
                     transaction(protyle, [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            filters: [filter]
-                        }
+                        action: "setAttrViewFilters",
+                        avID: avId,
+                        viewID: avData.viewID,
+                        data:  [filter]
                     }], [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            filters: []
-                        }
+                        action: "setAttrViewFilters",
+                        avID: avId,
+                        viewID: avData.viewID,
+                        data: []
                     }]);
                 }
                 setFilter({

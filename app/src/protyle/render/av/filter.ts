@@ -42,13 +42,13 @@ export const getCellValue = (colType: TAVCol, value: string) => {
 export const setFilter = (options: {
     filter: IAVFilter,
     protyle: IProtyle,
-    data: IAVTable,
+    data: IAV,
     target: HTMLElement,
 }) => {
     const colType = Object.keys(options.filter.value)[0] as TAVCol;
     const rectTarget = options.target.getBoundingClientRect();
     const menu = new Menu("set-filter-" + options.filter.column, () => {
-        const oldFilters = JSON.parse(JSON.stringify(options.data.filters));
+        const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         let hasMatch = false;
         const cellValue = getCellValue(colType, textElement?.value || "");
         const newFilter: IAVFilter = {
@@ -58,13 +58,13 @@ export const setFilter = (options: {
         }
 
         let isSame = false;
-        options.data.filters.find((filter, index) => {
+        options.data.view.filters.find((filter, index) => {
             if (filter.column === options.filter.column) {
                 if (objEquals(filter, newFilter)) {
                     isSame = true;
                     return true;
                 }
-                options.data.filters[index] = newFilter;
+                options.data.view.filters[index] = newFilter;
                 hasMatch = true;
                 return true;
             }
@@ -73,21 +73,19 @@ export const setFilter = (options: {
             return;
         }
         transaction(options.protyle, [{
-            action: "setAttrView",
-            id: options.data.id,
-            data: {
-                filters: options.data.filters
-            }
+            action: "setAttrViewFilters",
+            avID: options.data.id,
+            viewID: options.data.viewID,
+            data: options.data.view.filters
         }], [{
-            action: "setAttrView",
-            id: options.data.id,
-            data: {
-                filters: oldFilters
-            }
+            action: "setAttrViewFilters",
+            avID: options.data.id,
+            viewID: options.data.viewID,
+            data: oldFilters
         }]);
         const menuElement = hasClosestByClassName(options.target, "b3-menu");
         if (menuElement) {
-            menuElement.innerHTML = getFiltersHTML(options.data);
+            menuElement.innerHTML = getFiltersHTML(options.data.view);
         }
     });
     if (menu.isOpen) {
@@ -119,7 +117,7 @@ export const setFilter = (options: {
 `;
             break;
         case "mSelect":
-            options.data.columns.find((column) => {
+            options.data.view.columns.find((column) => {
                 if (column.id === options.filter.column) {
                     colData = column;
                     if (column.type === "select") {
@@ -169,29 +167,27 @@ export const setFilter = (options: {
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-            const oldFilters = Object.assign([], options.data.filters);
-            options.data.filters.find((item: IAVFilter, index: number) => {
+            const oldFilters = Object.assign([], options.data.view.filters);
+            options.data.view.filters.find((item: IAVFilter, index: number) => {
                 if (item.column === options.filter.column) {
-                    options.data.filters.splice(index, 1);
+                    options.data.view.filters.splice(index, 1);
                     return true;
                 }
             });
             transaction(options.protyle, [{
-                action: "setAttrView",
-                id: options.data.id,
-                data: {
-                    filters: options.data.filters
-                }
+                action: "setAttrViewFilters",
+                avID: options.data.id,
+                viewID: options.data.viewID,
+                data: options.data.view.filters
             }], [{
-                action: "setAttrView",
-                id: options.data.id,
-                data: {
-                    filters: oldFilters
-                }
+                action: "setAttrViewFilters",
+                avID: options.data.id,
+                viewID: options.data.viewID,
+                data: oldFilters
             }]);
             const menuElement = hasClosestByClassName(options.target, "b3-menu");
             if (menuElement) {
-                menuElement.innerHTML = getFiltersHTML(options.data);
+                menuElement.innerHTML = getFiltersHTML(options.data.view);
             }
         }
     });
@@ -228,7 +224,7 @@ export const setFilter = (options: {
 };
 
 export const addFilter = (options: {
-    data: IAVTable,
+    data: IAV,
     rect: DOMRect,
     menuElement: HTMLElement,
     tabRect: DOMRect,
@@ -236,9 +232,9 @@ export const addFilter = (options: {
     protyle: IProtyle
 }) => {
     const menu = new Menu("av-add-filter");
-    options.data.columns.forEach((column) => {
+    options.data.view.columns.forEach((column) => {
         let hasFilter = false;
-        options.data.filters.find((filter) => {
+        options.data.view.filters.find((filter) => {
             if (filter.column === column.id) {
                 hasFilter = true;
                 return true;
@@ -249,27 +245,25 @@ export const addFilter = (options: {
                 label: column.name,
                 icon: getColIconByType(column.type),
                 click: () => {
-                    const oldFilters = Object.assign([], options.data.filters);
+                    const oldFilters = Object.assign([], options.data.view.filters);
                     const cellValue = getCellValue(column.type, "");
-                    options.data.filters.push({
+                    options.data.view.filters.push({
                         column: column.id,
                         operator: "Contains",
                         value: cellValue,
                     });
                     transaction(options.protyle, [{
-                        action: "setAttrView",
-                        id: options.avId,
-                        data: {
-                            filters: options.data.filters
-                        }
+                        action: "setAttrViewFilters",
+                        avID: options.data.id,
+                        viewID: options.data.viewID,
+                        data: options.data.view.filters
                     }], [{
-                        action: "setAttrView",
-                        id: options.avId,
-                        data: {
-                            filters: oldFilters
-                        }
+                        action: "setAttrViewFilters",
+                        avID: options.data.id,
+                        viewID: options.data.viewID,
+                        data: oldFilters
                     }]);
-                    options.menuElement.innerHTML = getFiltersHTML(options.data);
+                    options.menuElement.innerHTML = getFiltersHTML(options.data.view);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
                     setFilter({

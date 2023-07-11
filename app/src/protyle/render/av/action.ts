@@ -246,17 +246,13 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
         return;
     }
     transaction(protyle, [{
-        action: "setAttrView",
+        action: "setAttrViewName",
         id: avId,
-        data: {
-            name: nameElement.textContent.trim(),
-        }
+        data:  nameElement.textContent.trim(),
     }], [{
-        action: "setAttrView",
+        action: "setAttrViewName",
         id: avId,
-        data: {
-            name: nameElement.dataset.title,
-        }
+        name: nameElement.dataset.title,
     }]);
     nameElement.dataset.title = nameElement.textContent.trim();
 };

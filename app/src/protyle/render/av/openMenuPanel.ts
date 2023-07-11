@@ -20,18 +20,18 @@ export const openMenuPanel = (protyle: IProtyle,
     window.siyuan.menus.menu.remove();
     const avId = blockElement.getAttribute("data-av-id");
     fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
-        const data = response.data.view as IAVTable;
+        const data = response.data as IAV;
         let html;
         if (type === "config") {
-            html = getConfigHTML(data);
+            html = getConfigHTML(data.view);
         } else if (type === "properties") {
-            html = getPropertiesHTML(data);
+            html = getPropertiesHTML(data.view);
         } else if (type === "sorts") {
-            html = getSortsHTML(data);
+            html = getSortsHTML(data.view.columns, data.view.sorts);
         } else if (type === "filters") {
-            html = getFiltersHTML(data);
+            html = getFiltersHTML(data.view);
         } else if (type === "select") {
-            html = getSelectHTML(data, options);
+            html = getSelectHTML(data.view, options);
         }
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel">
@@ -44,7 +44,7 @@ export const openMenuPanel = (protyle: IProtyle,
         if (options && options.cellElement) {
             const cellRect = options.cellElement.getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-            bindSelectEvent(protyle, data, menuElement, options);
+            bindSelectEvent(protyle, data.view, menuElement, options);
             menuElement.querySelector("input").select();
             menuElement.querySelector("input").focus();
         } else {
@@ -79,7 +79,7 @@ export const openMenuPanel = (protyle: IProtyle,
             } else if (targetElement.querySelector('[data-type="removeFilter"]')) {
                 type = "filters";
             } else if (targetElement.querySelector('[data-type="setSelectCol"]')) {
-                const changeData = data.columns.find((column) => column.id === options.cellElement.dataset.colId).options;
+                const changeData = data.view.columns.find((column) => column.id === options.cellElement.dataset.colId).options;
                 const oldData = Object.assign([], changeData);
                 let targetOption: { name: string, color: string };
                 changeData.find((option, index: number) => {
@@ -109,14 +109,50 @@ export const openMenuPanel = (protyle: IProtyle,
                     parentID: data.id,
                     data: oldData,
                 }]);
-                menuElement.innerHTML = getSelectHTML(data, options);
-                bindSelectEvent(protyle, data, menuElement, options);
+                menuElement.innerHTML = getSelectHTML(data.view, options);
+                bindSelectEvent(protyle, data.view, menuElement, options);
                 return;
             }
             const sourceId = sourceElement.dataset.id;
             const targetId = targetElement.dataset.id;
-            if (type !== "columns") {
-                const changeData = (type === "sorts" ? data.sorts : data.filters) as IAVFilter[];
+            if (type === "sorts") {
+                const changeData = data.view.sorts;
+                const oldData = Object.assign([], changeData);
+                let sortFilter: IAVSort;
+                changeData.find((sort, index: number) => {
+                    if (sort.column === sourceId) {
+                        sortFilter = changeData.splice(index, 1)[0];
+                        return true;
+                    }
+                });
+                changeData.find((sort, index: number) => {
+                    if (sort.column === targetId) {
+                        if (isTop) {
+                            changeData.splice(index, 0, sortFilter);
+                        } else {
+                            changeData.splice(index + 1, 0, sortFilter);
+                        }
+                        return true;
+                    }
+                });
+
+                transaction(protyle, [{
+                    action: "setAttrViewSorts",
+                    avID: avId,
+                    viewID: data.viewID,
+                    data: changeData
+                }], [{
+                    action: "setAttrViewSorts",
+                    avID: avId,
+                    viewID: data.viewID,
+                    data: oldData
+                }]);
+                menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
+                bindSortsEvent(protyle, menuElement, data);
+                return;
+            }
+            if (type === "filters") {
+                const changeData = data.view.filters;
                 const oldData = Object.assign([], changeData);
                 let targetFilter: IAVFilter;
                 changeData.find((filter, index: number) => {
@@ -137,22 +173,17 @@ export const openMenuPanel = (protyle: IProtyle,
                 });
 
                 transaction(protyle, [{
-                    action: "setAttrView",
-                    id: avId,
-                    data: {
-                        [type]: changeData
-                    }
+                    action: "setAttrViewFilters",
+                    avID: avId,
+                    viewID: data.viewID,
+                    data: changeData
                 }], [{
-                    action: "setAttrView",
-                    id: avId,
-                    data: {
-                        [type]: oldData
-                    }
+                    action: "setAttrViewFilters",
+                    avID: avId,
+                    viewID: data.viewID,
+                    data: oldData
                 }]);
-                menuElement.innerHTML = (type === "sorts" ? getSortsHTML(data) : getFiltersHTML(data));
-                if (type === "sorts") {
-                    bindSortsEvent(protyle, menuElement, data);
-                }
+                menuElement.innerHTML = getFiltersHTML(data.view);
                 return;
             }
             transaction(protyle, [{
@@ -167,23 +198,23 @@ export const openMenuPanel = (protyle: IProtyle,
                 id: sourceId,
             }]);
             let column: IAVColumn;
-            data.columns.find((item, index: number) => {
+            data.view.columns.find((item, index: number) => {
                 if (item.id === sourceId) {
-                    column = data.columns.splice(index, 1)[0];
+                    column = data.view.columns.splice(index, 1)[0];
                     return true;
                 }
             });
-            data.columns.find((item, index: number) => {
+            data.view.columns.find((item, index: number) => {
                 if (item.id === targetId) {
                     if (isTop) {
-                        data.columns.splice(index, 0, column);
+                        data.view.columns.splice(index, 0, column);
                     } else {
-                        data.columns.splice(index + 1, 0, column);
+                        data.view.columns.splice(index + 1, 0, column);
                     }
                     return true;
                 }
             });
-            menuElement.innerHTML = getPropertiesHTML(data);
+            menuElement.innerHTML = getPropertiesHTML(data.view);
         });
         let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
@@ -229,37 +260,35 @@ export const openMenuPanel = (protyle: IProtyle,
                     event.stopPropagation();
                     break;
                 } else if (type === "goConfig") {
-                    menuElement.innerHTML = getConfigHTML(data);
+                    menuElement.innerHTML = getConfigHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "goProperties") {
-                    menuElement.innerHTML = getPropertiesHTML(data);
+                    menuElement.innerHTML = getPropertiesHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "goSorts") {
-                    menuElement.innerHTML = getSortsHTML(data);
+                    menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
                     bindSortsEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSorts") {
                     transaction(protyle, [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            sorts: []
-                        }
+                        action: "setAttrViewSorts",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: []
                     }], [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            sorts: data.sorts
-                        }
+                        action: "setAttrViewSorts",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: data.view.sorts
                     }]);
-                    data.sorts = [];
-                    menuElement.innerHTML = getSortsHTML(data);
+                    data.view.sorts = [];
+                    menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
                     bindSortsEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
@@ -269,52 +298,48 @@ export const openMenuPanel = (protyle: IProtyle,
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSort") {
-                    const oldSorts = Object.assign([], data.sorts);
-                    data.sorts.find((item: IAVSort, index: number) => {
+                    const oldSorts = Object.assign([], data.view.sorts);
+                    data.view.sorts.find((item: IAVSort, index: number) => {
                         if (item.column === target.parentElement.dataset.id) {
-                            data.sorts.splice(index, 1);
+                            data.view.sorts.splice(index, 1);
                             return true;
                         }
                     });
                     transaction(protyle, [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            sorts: data.sorts
-                        }
+                        action: "setAttrViewSorts",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: data.view.sorts
                     }], [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            sorts: oldSorts
-                        }
+                        action: "setAttrViewSorts",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: oldSorts
                     }]);
-                    menuElement.innerHTML = getSortsHTML(data);
+                    menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
                     bindSortsEvent(protyle, menuElement, data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "goFilters") {
-                    menuElement.innerHTML = getFiltersHTML(data);
+                    menuElement.innerHTML = getFiltersHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "removeFilters") {
                     transaction(protyle, [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            filters: []
-                        }
+                        action: "setAttrViewFilters",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: []
                     }], [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            filters: data.filters
-                        }
+                        action: "setAttrViewFilters",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: data.view.filters
                     }]);
-                    data.filters = [];
-                    menuElement.innerHTML = getFiltersHTML(data);
+                    data.view.filters = [];
+                    menuElement.innerHTML = getFiltersHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
@@ -324,32 +349,30 @@ export const openMenuPanel = (protyle: IProtyle,
                     break;
                 } else if (type === "removeFilter") {
                     window.siyuan.menus.menu.remove();
-                    const oldFilters = Object.assign([], data.filters);
-                    data.filters.find((item: IAVFilter, index: number) => {
+                    const oldFilters = Object.assign([], data.view.filters);
+                    data.view.filters.find((item: IAVFilter, index: number) => {
                         if (item.column === target.parentElement.dataset.id) {
-                            data.filters.splice(index, 1);
+                            data.view.filters.splice(index, 1);
                             return true;
                         }
                     });
                     transaction(protyle, [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            filters: data.filters
-                        }
+                        action: "setAttrViewFilters",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: data.view.filters
                     }], [{
-                        action: "setAttrView",
-                        id: avId,
-                        data: {
-                            filters: oldFilters
-                        }
+                        action: "setAttrViewFilters",
+                        avID: avId,
+                        viewID: data.viewID,
+                        data: oldFilters
                     }]);
-                    menuElement.innerHTML = getFiltersHTML(data);
+                    menuElement.innerHTML = getFiltersHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "setFilter") {
-                    data.filters.find((item: IAVFilter) => {
+                    data.view.filters.find((item: IAVFilter) => {
                         if (item.column === target.parentElement.parentElement.dataset.id) {
                             setFilter({
                                 filter: item,
@@ -376,7 +399,7 @@ export const openMenuPanel = (protyle: IProtyle,
                 } else if (type === "showAllCol") {
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
-                    data.columns.forEach((item: IAVColumn) => {
+                    data.view.columns.forEach((item: IAVColumn) => {
                         if (item.hidden) {
                             doOperations.push({
                                 action: "setAttrViewColHidden",
@@ -395,7 +418,7 @@ export const openMenuPanel = (protyle: IProtyle,
                     });
                     if (doOperations.length > 0) {
                         transaction(protyle, doOperations, undoOperations);
-                        menuElement.innerHTML = getPropertiesHTML(data);
+                        menuElement.innerHTML = getPropertiesHTML(data.view);
                         setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     }
                     event.stopPropagation();
@@ -403,7 +426,7 @@ export const openMenuPanel = (protyle: IProtyle,
                 } else if (type === "hideAllCol") {
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
-                    data.columns.forEach((item: IAVColumn) => {
+                    data.view.columns.forEach((item: IAVColumn) => {
                         if (!item.hidden && item.type !== "block") {
                             doOperations.push({
                                 action: "setAttrViewColHidden",
@@ -422,7 +445,7 @@ export const openMenuPanel = (protyle: IProtyle,
                     });
                     if (doOperations.length > 0) {
                         transaction(protyle, doOperations, undoOperations);
-                        menuElement.innerHTML = getPropertiesHTML(data);
+                        menuElement.innerHTML = getPropertiesHTML(data.view);
                         setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     }
                     event.stopPropagation();
@@ -440,8 +463,8 @@ export const openMenuPanel = (protyle: IProtyle,
                         parentID: avId,
                         data: false
                     }]);
-                    data.columns.find((item: IAVColumn) => item.id === colId).hidden = true;
-                    menuElement.innerHTML = getPropertiesHTML(data);
+                    data.view.columns.find((item: IAVColumn) => item.id === colId).hidden = true;
+                    menuElement.innerHTML = getPropertiesHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
@@ -458,22 +481,22 @@ export const openMenuPanel = (protyle: IProtyle,
                         parentID: avId,
                         data: true
                     }]);
-                    data.columns.find((item: IAVColumn) => item.id === colId).hidden = false;
-                    menuElement.innerHTML = getPropertiesHTML(data);
+                    data.view.columns.find((item: IAVColumn) => item.id === colId).hidden = false;
+                    menuElement.innerHTML = getPropertiesHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.stopPropagation();
                     break;
                 } else if (type === "setSelectCol") {
-                    setSelectCol(protyle, data, options, target);
+                    setSelectCol(protyle, data.view, options, target);
                     event.stopPropagation();
                     break;
                 } else if (type === "addSelectColAndCell") {
-                    addSelectColAndCell(protyle, data, options, target, menuElement);
+                    addSelectColAndCell(protyle, data.view, options, target, menuElement);
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSelectCell") {
-                    removeSelectCell(protyle, data, options, target.parentElement);
+                    removeSelectCell(protyle, data.view, options, target.parentElement);
                     event.stopPropagation();
                     break;
                 }

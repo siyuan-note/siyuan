@@ -18,11 +18,9 @@
 package av
 
 import (
-	"bytes"
-	"database/sql"
+	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -167,6 +165,16 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
+func (av *AttributeView) GetView(viewID string) (ret *View) {
+	for _, v := range av.Views {
+		if v.ID == viewID {
+			ret = v
+			return
+		}
+	}
+	return
+}
+
 func getAttributeViewDataPath(avID string) (ret string) {
 	av := filepath.Join(util.DataDir, "storage", "av")
 	ret = filepath.Join(av, avID+".json")
@@ -179,44 +187,6 @@ func getAttributeViewDataPath(avID string) (ret string) {
 	return
 }
 
-func RebuildAttributeViewTable(tx *sql.Tx, av *AttributeView) (err error) {
-	avID := av.ID
-	var columns []string
-	for _, c := range av.Columns {
-		columns = append(columns, "`"+c.ID+"`")
-	}
-
-	_, err = tx.Exec("DROP TABLE IF EXISTS `av_" + avID + "`")
-	if nil != err {
-		logging.LogErrorf("drop table [%s] failed: %s", avID, err)
-		return
-	}
-
-	_, err = tx.Exec("CREATE TABLE IF NOT EXISTS `av_" + avID + "` (" + strings.Join(columns, ", ") + ")")
-	if nil != err {
-		logging.LogErrorf("create table [%s] failed: %s", avID, err)
-		return
-	}
-
-	for _, r := range av.Rows {
-		buf := bytes.Buffer{}
-		for i, _ := range r.Cells {
-			buf.WriteString("?")
-			if i < len(r.Cells)-1 {
-				buf.WriteString(", ")
-			}
-		}
-
-		var values []interface{}
-		for _, c := range r.Cells {
-			values = append(values, c.Value)
-		}
-
-		_, err = tx.Exec("INSERT INTO `av_"+avID+"` VALUES ("+buf.String()+")", values...)
-		if nil != err {
-			logging.LogErrorf("insert row [%s] failed: %s", r.ID, err)
-			return
-		}
-	}
-	return
-}
+var (
+	ErrViewNotFound = errors.New("view not found")
+)

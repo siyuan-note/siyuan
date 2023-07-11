@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/av"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -34,6 +33,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -217,28 +217,36 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doAddFlashcards(op)
 		case "removeFlashcards":
 			ret = tx.doRemoveFlashcards(op)
+		case "setAttrViewName":
+			ret = tx.doSetAttrViewName(op)
+		case "setAttrViewFilters":
+			ret = tx.doSetAttrViewFilters(op)
+		case "setAttrViewSorts":
+			ret = tx.doSetAttrViewSorts(op)
+		case "setAttrViewColWidth":
+			ret = tx.doSetAttrViewColumnWidth(op)
+		case "setAttrViewColWrap":
+			ret = tx.doSetAttrViewColumnWrap(op)
+		case "setAttrViewColHidden":
+			ret = tx.doSetAttrViewColumnHidden(op)
+		case "sortAttrViewRow":
+			ret = tx.doSortAttrViewRow(op)
+		case "sortAttrViewCol":
+			ret = tx.doSortAttrViewColumn(op)
 		case "insertAttrViewBlock":
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
 			ret = tx.doRemoveAttrViewBlock(op)
+		// TODO 下面的方法要重写
+
 		case "addAttrViewCol":
 			ret = tx.doAddAttrViewColumn(op)
 		case "updateAttrViewCol":
 			ret = tx.doUpdateAttrViewColumn(op)
 		case "removeAttrViewCol":
 			ret = tx.doRemoveAttrViewColumn(op)
-		case "sortAttrViewCol":
-			ret = tx.doSortAttrViewColumn(op)
 		case "updateAttrViewCell":
 			ret = tx.doUpdateAttrViewCell(op)
-		case "sortAttrViewRow":
-			ret = tx.doSortAttrViewRow(op)
-		case "setAttrViewColHidden":
-			ret = tx.doSetAttrViewColumnHidden(op)
-		case "setAttrViewColWrap":
-			ret = tx.doSetAttrViewColumnWrap(op)
-		case "setAttrViewColWidth":
-			ret = tx.doSetAttrViewColumnWidth(op)
 		case "setAttrView":
 			ret = tx.doSetAttrView(op)
 		case "updateAttrViewColOptions":
@@ -1046,10 +1054,12 @@ type Operation struct {
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
+	AvID   string   `json:"avID"`   // 属性视图 ID
+	ViewID string   `json:"viewID"` // 属性视图的视图 ID
 	SrcIDs []string `json:"srcIDs"` // 用于将块拖拽到属性视图中
-	Name   string   `json:"name"`   // 用于属性视图列名
-	Typ    string   `json:"type"`   // 用于属性视图列类型
-	RowID  string   `json:"rowID"`  // 用于属性视图行 ID
+	Name   string   `json:"name"`   // 属性视图列名
+	Typ    string   `json:"type"`   // 属性视图列类型
+	RowID  string   `json:"rowID"`  // 属性视图行 ID
 
 	discard bool // 用于标识是否在事务合并中丢弃
 }

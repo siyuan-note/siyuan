@@ -67,7 +67,8 @@ type Viewable interface {
 	Sortable
 	Calculable
 
-	Type() ViewType
+	GetType() ViewType
+	GetID() string
 }
 
 func NewAttributeView(id string) *AttributeView {

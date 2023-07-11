@@ -33,8 +33,12 @@ type Table struct {
 	Sorts   []*ViewSort   `json:"sorts"`   // 排序规则
 }
 
-func (table *Table) Type() ViewType {
+func (table *Table) GetType() ViewType {
 	return ViewTypeTable
+}
+
+func (table *Table) GetID() string {
+	return table.ID
 }
 
 func (table *Table) SortRows() {

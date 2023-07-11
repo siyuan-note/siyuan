@@ -47,6 +47,7 @@ func renderAttributeView(c *gin.Context) {
 		view := map[string]interface{}{
 			"id":   v.ID,
 			"name": v.Name,
+			"type": v.Type,
 		}
 
 		views = append(views, view)
@@ -54,8 +55,10 @@ func renderAttributeView(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"name":     attrView.Name,
+		"id":       attrView.ID,
+		"viewType": view.GetType(),
+		"viewID":   view.GetID(),
 		"views":    views,
-		"viewType": view.Type(),
 		"view":     view,
 	}
 }

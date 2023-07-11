@@ -32,18 +32,53 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeView(avID string) (ret *av.AttributeView, err error) {
+func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
-	ret, err = av.ParseAttributeView(avID)
+	attrView, err = av.ParseAttributeView(avID)
 	if nil != err {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
 
-	ret.FilterRows()
-	ret.SortRows()
-	ret.CalcCols()
+	if 1 > len(attrView.Views) {
+		err = errors.New("no view")
+		return
+	}
+
+	var view *av.View
+	if "" != attrView.CurrentViewID {
+		for _, v := range attrView.Views {
+			if v.ID == attrView.CurrentViewID {
+				view = v
+				break
+			}
+		}
+	} else {
+		view = attrView.Views[0]
+	}
+
+	switch view.Type {
+	case av.ViewTypeTable:
+		viewable, err = renderAttributeViewTable(attrView, view)
+	}
+
+	viewable.FilterRows()
+	viewable.SortRows()
+	viewable.CalcCols()
+	return
+}
+
+func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
+	ret = &av.Table{
+		Spec:    attrView.Spec,
+		ID:      view.ID,
+		Name:    view.Name,
+		Columns: attrView.Columns,
+		Rows:    attrView.Rows,
+		Filters: view.Filters,
+		Sorts:   view.Sorts,
+	}
 	return
 }
 

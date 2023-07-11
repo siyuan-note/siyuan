@@ -35,13 +35,27 @@ func renderAttributeView(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	av, err := model.RenderAttributeView(id)
+	view, attrView, err := model.RenderAttributeView(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+
+	var views []map[string]interface{}
+	for _, v := range attrView.Views {
+		view := map[string]interface{}{
+			"id":   v.ID,
+			"name": v.Name,
+		}
+
+		views = append(views, view)
+	}
+
 	ret.Data = map[string]interface{}{
-		"av": av,
+		"name":     attrView.Name,
+		"views":    views,
+		"viewType": view.Type(),
+		"view":     view,
 	}
 }

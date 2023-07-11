@@ -229,10 +229,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewColumnWrap(op)
 		case "setAttrViewColHidden":
 			ret = tx.doSetAttrViewColumnHidden(op)
-		case "sortAttrViewRow":
-			ret = tx.doSortAttrViewRow(op)
-		case "sortAttrViewCol":
-			ret = tx.doSortAttrViewColumn(op)
 		case "insertAttrViewBlock":
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
@@ -241,6 +237,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doAddAttrViewColumn(op)
 		case "updateAttrViewCol":
 			ret = tx.doUpdateAttrViewColumn(op)
+		case "sortAttrViewRow":
+			ret = tx.doSortAttrViewRow(op)
+		case "sortAttrViewCol":
+			ret = tx.doSortAttrViewColumn(op)
 		// TODO 下面的方法要重写
 		case "removeAttrViewCol":
 			ret = tx.doRemoveAttrViewColumn(op)

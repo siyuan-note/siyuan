@@ -381,6 +381,92 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
+	err := sortAttributeViewRow(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func sortAttributeViewRow(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	var row *av.Row
+	var index, previousIndex int
+	for i, r := range attrView.Rows {
+		if r.ID == operation.ID {
+			row = r
+			index = i
+			break
+		}
+	}
+	if nil == row {
+		return
+	}
+
+	attrView.Rows = append(attrView.Rows[:index], attrView.Rows[index+1:]...)
+	for i, r := range attrView.Rows {
+		if r.ID == operation.PreviousID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	attrView.Rows = util.InsertElem(attrView.Rows, previousIndex, row)
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
+	err := sortAttributeViewColumn(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func sortAttributeViewColumn(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	var col *av.Column
+	var index, previousIndex int
+	for i, column := range attrView.Columns {
+		if column.ID == operation.ID {
+			col = column
+			index = i
+			break
+		}
+	}
+	if nil == col {
+		return
+	}
+
+	attrView.Columns = append(attrView.Columns[:index], attrView.Columns[index+1:]...)
+	for i, column := range attrView.Columns {
+		if column.ID == operation.PreviousID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	attrView.Columns = util.InsertElem(attrView.Columns, previousIndex, col)
+
+	for _, row := range attrView.Rows {
+		cel := row.Cells[index]
+		row.Cells = append(row.Cells[:index], row.Cells[index+1:]...)
+		row.Cells = util.InsertElem(row.Cells, previousIndex, cel)
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 // TODO 下面的方法要重写
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
@@ -490,22 +576,6 @@ func (tx *Transaction) doUpdateAttrViewColumn(operation *Operation) (ret *TxErr)
 
 func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := removeAttributeViewColumn(operation.ID, operation.ParentID)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-	}
-	return
-}
-
-func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := sortAttributeViewColumn(operation.ID, operation.PreviousID, operation.ParentID)
-	if nil != err {
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-	}
-	return
-}
-
-func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
-	err := sortAttributeViewRow(operation.ID, operation.PreviousID, operation.ParentID)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
 	}
@@ -757,76 +827,6 @@ func removeAttributeViewColumn(columnID string, avID string) (err error) {
 			break
 		}
 	}
-
-	err = av.SaveAttributeView(attrView)
-	return
-}
-
-func sortAttributeViewColumn(columnID, previousColumnID, avID string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	var col *av.Column
-	var index, previousIndex int
-	for i, column := range attrView.Columns {
-		if column.ID == columnID {
-			col = column
-			index = i
-			break
-		}
-	}
-	if nil == col {
-		return
-	}
-
-	attrView.Columns = append(attrView.Columns[:index], attrView.Columns[index+1:]...)
-	for i, column := range attrView.Columns {
-		if column.ID == previousColumnID {
-			previousIndex = i + 1
-			break
-		}
-	}
-	attrView.Columns = util.InsertElem(attrView.Columns, previousIndex, col)
-
-	for _, row := range attrView.Rows {
-		cel := row.Cells[index]
-		row.Cells = append(row.Cells[:index], row.Cells[index+1:]...)
-		row.Cells = util.InsertElem(row.Cells, previousIndex, cel)
-	}
-
-	err = av.SaveAttributeView(attrView)
-	return
-}
-
-func sortAttributeViewRow(rowID, previousRowID, avID string) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	var row *av.Row
-	var index, previousIndex int
-	for i, r := range attrView.Rows {
-		if r.ID == rowID {
-			row = r
-			index = i
-			break
-		}
-	}
-	if nil == row {
-		return
-	}
-
-	attrView.Rows = append(attrView.Rows[:index], attrView.Rows[index+1:]...)
-	for i, r := range attrView.Rows {
-		if r.ID == previousRowID {
-			previousIndex = i + 1
-			break
-		}
-	}
-	attrView.Rows = util.InsertElem(attrView.Rows, previousIndex, row)
 
 	err = av.SaveAttributeView(attrView)
 	return

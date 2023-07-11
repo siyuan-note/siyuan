@@ -75,13 +75,15 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         transaction(protyle, [{
             action: "updateAttrViewCol",
             id: colId,
-            parentID: avId,
+            avID: avId,
+            viewID: viewId,
             name: newValue,
             type,
         }], [{
             action: "updateAttrViewCol",
             id: colId,
-            parentID: avId,
+            avID: avId,
+            viewID: viewId,
             name: cellElement.textContent.trim(),
             type,
         }]);
@@ -110,14 +112,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     avID: response.data.id,
                     viewID: response.data.viewID,
                     data: [{
-                            column: colId,
-                            order: "ASC"
-                        }]
+                        column: colId,
+                        order: "ASC"
+                    }]
                 }], [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
                     viewID: response.data.viewID,
-                    data:  response.data.view.sorts
+                    data: response.data.view.sorts
                 }]);
             });
         }
@@ -131,10 +133,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     action: "setAttrViewSorts",
                     avID: response.data.id,
                     viewID: response.data.viewID,
-                    data:  [{
-                            column: colId,
-                            order: "DESC"
-                        }]
+                    data: [{
+                        column: colId,
+                        order: "DESC"
+                    }]
                 }], [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
@@ -168,7 +170,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                         action: "setAttrViewFilters",
                         avID: avId,
                         viewID: avData.viewID,
-                        data:  [filter]
+                        data: [filter]
                     }], [{
                         action: "setAttrViewFilters",
                         avID: avId,
@@ -220,11 +222,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "removeAttrViewCol",
                     id: colId,
-                    parentID: avId,
+                    avID: avId,
+                    viewID: viewId,
                 }], [{
                     action: "addAttrViewCol",
                     name: cellElement.textContent.trim(),
-                    parentID: avId,
+                    avID: avId,
+                    viewID: viewId,
                     type: type,
                     id: colId
                 }]);

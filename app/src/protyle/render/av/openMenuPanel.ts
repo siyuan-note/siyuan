@@ -188,12 +188,14 @@ export const openMenuPanel = (protyle: IProtyle,
             }
             transaction(protyle, [{
                 action: "sortAttrViewCol",
-                parentID: avId,
+                avID: avId,
+                viewID: data.viewID,
                 previousID: (targetElement.classList.contains("dragover__top") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "",
                 id: sourceId,
             }], [{
                 action: "sortAttrViewCol",
-                parentID: avId,
+                avID: avId,
+                viewID: data.viewID,
                 previousID: sourceElement.previousElementSibling?.getAttribute("data-id") || "",
                 id: sourceId,
             }]);

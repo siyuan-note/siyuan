@@ -274,21 +274,35 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 }
 
 func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
-	var avs []*av.AttributeView
-	avID := operation.ParentID
 	for _, id := range operation.SrcIDs {
-		var av *av.AttributeView
 		var avErr error
-		if av, avErr = removeAttributeViewBlock(id, avID); nil != avErr {
-			return &TxErr{code: TxErrWriteAttributeView, id: avID}
+		if avErr = removeAttributeViewBlock(id, operation); nil != avErr {
+			return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
 		}
+	}
+	return
+}
 
-		if nil == av {
+func removeAttributeViewBlock(blockID string, operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	for i, row := range attrView.Rows {
+		blockCell := row.GetBlockCell()
+		if nil == blockCell {
 			continue
 		}
 
-		avs = append(avs, av)
+		if blockCell.Value.Block.ID == blockID {
+			// 从行中移除，但是不移除属性
+			attrView.Rows = append(attrView.Rows[:i], attrView.Rows[i+1:]...)
+			break
+		}
 	}
+
+	err = av.SaveAttributeView(attrView)
 	return
 }
 
@@ -841,29 +855,6 @@ func setAttributeView(operation *Operation) (err error) {
 	}
 
 	err = av.SaveAttributeView(attrView)
-	return
-}
-
-func removeAttributeViewBlock(blockID, avID string) (ret *av.AttributeView, err error) {
-	ret, err = av.ParseAttributeView(avID)
-	if nil != err {
-		return
-	}
-
-	for i, row := range ret.Rows {
-		blockCell := row.GetBlockCell()
-		if nil == blockCell {
-			continue
-		}
-
-		if blockCell.Value.Block.ID == blockID {
-			// 从行中移除，但是不移除属性
-			ret.Rows = append(ret.Rows[:i], ret.Rows[i+1:]...)
-			break
-		}
-	}
-
-	err = av.SaveAttributeView(ret)
 	return
 }
 

@@ -1213,7 +1213,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
 ### Forward proxy
 
-* `/api/network/forkProxy`
+* `/api/network/forwardProxy`
 * Parameters
 
   ```json

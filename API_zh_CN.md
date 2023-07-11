@@ -1203,7 +1203,7 @@
 
 ### 正向代理
 
-* `/api/network/forkProxy`
+* `/api/network/forwardProxy`
 * 参数
 
   ```json

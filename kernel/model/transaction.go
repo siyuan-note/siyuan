@@ -237,12 +237,11 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
 			ret = tx.doRemoveAttrViewBlock(op)
-		// TODO 下面的方法要重写
-
 		case "addAttrViewCol":
 			ret = tx.doAddAttrViewColumn(op)
 		case "updateAttrViewCol":
 			ret = tx.doUpdateAttrViewColumn(op)
+		// TODO 下面的方法要重写
 		case "removeAttrViewCol":
 			ret = tx.doRemoveAttrViewColumn(op)
 		case "updateAttrViewCell":

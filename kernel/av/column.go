@@ -23,32 +23,24 @@ import (
 type ColumnType string
 
 const (
-	ColumnTypeBlock    ColumnType = "block"
-	ColumnTypeText     ColumnType = "text"
-	ColumnTypeNumber   ColumnType = "number"
-	ColumnTypeDate     ColumnType = "date"
-	ColumnTypeSelect   ColumnType = "select"
-	ColumnTypeMSelect  ColumnType = "mSelect"
-	ColumnTypeRelation ColumnType = "relation"
-	ColumnTypeRollup   ColumnType = "rollup"
+	ColumnTypeBlock   ColumnType = "block"
+	ColumnTypeText    ColumnType = "text"
+	ColumnTypeNumber  ColumnType = "number"
+	ColumnTypeDate    ColumnType = "date"
+	ColumnTypeSelect  ColumnType = "select"
+	ColumnTypeMSelect ColumnType = "mSelect"
 )
 
 // Column 描述了属性视图的基础结构。
 type Column struct {
-	ID     string      `json:"id"`     // 列 ID
-	Name   string      `json:"name"`   // 列名
-	Type   ColumnType  `json:"type"`   // 列类型
-	Icon   string      `json:"icon"`   // 列图标
-	Wrap   bool        `json:"wrap"`   // 是否换行
-	Hidden bool        `json:"hidden"` // 是否隐藏
-	Width  string      `json:"width"`  // 列宽度
-	Calc   *ColumnCalc `json:"calc"`   // 计算
+	ID   string     `json:"id"`   // 列 ID
+	Name string     `json:"name"` // 列名
+	Type ColumnType `json:"type"` // 列类型
+	Icon string     `json:"icon"` // 列图标
 
 	// 以下是某些列类型的特有属性
 
-	AttributeViewID  string                `json:"attributeViewId"`  // 关联的属性视图 ID
-	RelationColumnID string                `json:"relationColumnId"` // 目标关联列 ID
-	Options          []*ColumnSelectOption `json:"options"`          // 选项列表
+	Options []*ColumnSelectOption `json:"options"` // 选项列表
 }
 
 type ColumnSelectOption struct {

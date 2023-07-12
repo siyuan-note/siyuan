@@ -18,6 +18,7 @@
     justify-content: center;
     color: var(--b3-theme-on-surface);
     align-items: center;
+    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
 
     &--space {
       padding: 16px;

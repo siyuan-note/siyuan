@@ -301,6 +301,11 @@
     font-family: var(--b3-font-family-code);
     min-height: 22px !important;
     overflow-x: overlay;
+
+    &.protyle-linenumber {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
   }
 
   [data-subtype="echarts"],

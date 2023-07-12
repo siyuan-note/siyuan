@@ -70,6 +70,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 	ret = &av.Table{
 		ID:      view.Table.ID,
 		Name:    view.Name,
+		Columns: []*av.TableColumn{},
+		Rows:    []*av.TableRow{},
 		Filters: view.Table.Filters,
 		Sorts:   view.Table.Sorts,
 	}

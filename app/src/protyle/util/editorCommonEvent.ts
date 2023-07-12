@@ -714,7 +714,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             } else if (target.classList.contains("av__cellheader")) {
                 window.siyuan.dragElement = target.parentElement;
-                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.parentElement.getAttribute("data-id")]}`,
+                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.parentElement.getAttribute("data-col-id")]}`,
                     target.innerHTML);
                 return;
             } else if (target.classList.contains("av__gutters")) {
@@ -827,12 +827,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     transaction(protyle, [{
                         action: "sortAttrViewCol",
                         avID,
-                        previousID: (targetElement.classList.contains("dragover__left") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "",
+                        previousID: (targetElement.classList.contains("dragover__left") ? targetElement.previousElementSibling?.getAttribute("data-col-id") : targetElement.getAttribute("data-col-id")) || "",
                         id: gutterTypes[2],
                     }], [{
                         action: "sortAttrViewCol",
                         avID,
-                        previousID: targetElement.parentElement.querySelector(`[data-id="${gutterTypes[2]}"`).previousElementSibling?.getAttribute("data-id") || "",
+                        previousID: targetElement.parentElement.querySelector(`[data-col-id="${gutterTypes[2]}"`).previousElementSibling?.getAttribute("data-col-id") || "",
                         id: gutterTypes[2],
                     }]);
                     return;

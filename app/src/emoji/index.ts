@@ -51,7 +51,7 @@ export const lazyLoadEmoji = (element: HTMLElement) => {
             if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && index) {
                 let html = "";
                 window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
+                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                 });
                 entrie.target.innerHTML = html;
@@ -119,7 +119,7 @@ export const filterEmoji = (key = "", max?: number) => {
                     if (category.id === "custom") {
                         customStore.push(emoji);
                     } else {
-                        keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
+                        keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
 ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                     }
                     maxCount++;
@@ -129,7 +129,7 @@ ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                     recentEmojis.push(emoji);
                 }
                 if (index < 2) {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
+                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
 ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                 }
             }
@@ -154,7 +154,7 @@ ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
             }
             return 0;
         }).forEach(item => {
-            html += `<button data-unicode="${item.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? item.description_zh_cn : item.description}">
+            html += `<button data-unicode="${item.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? item.description_zh_cn : item.description}">
 ${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
         });
         html = html + keyHTML + "</div>";
@@ -165,7 +165,7 @@ ${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
         window.siyuan.config.editor.emoji.forEach(emojiUnicode => {
             const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
             if (emoji[0]) {
-                recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji[0].description_zh_cn : emoji[0].description}">
+                recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji[0].description_zh_cn : emoji[0].description}">
 ${unicode2Emoji(emoji[0].unicode, undefined, false, true)}
 </button>`;
             }
@@ -206,16 +206,16 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
 </div>
 <div class="emojis__panel">${filterEmoji()}</div>
 <div class="fn__flex">
-    <div data-type="0" class="emojis__type" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50")}</div>
-    <div data-type="1" class="emojis__type" aria-label="${window.siyuan.emojis[0][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f527")}</div>
-    <div data-type="2" class="emojis__type" aria-label="${window.siyuan.emojis[1][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f60d")}</div>
-    <div data-type="3" class="emojis__type" aria-label="${window.siyuan.emojis[2][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f433")}</div>
-    <div data-type="4" class="emojis__type" aria-label="${window.siyuan.emojis[3][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f96a")}</div>
-    <div data-type="5" class="emojis__type" aria-label="${window.siyuan.emojis[4][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3a8")}</div>
-    <div data-type="6" class="emojis__type" aria-label="${window.siyuan.emojis[5][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3dd")}</div>
-    <div data-type="7" class="emojis__type" aria-label="${window.siyuan.emojis[6][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f52e")}</div>
-    <div data-type="8" class="emojis__type" aria-label="${window.siyuan.emojis[7][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("267e")}</div>
-    <div data-type="9" class="emojis__type" aria-label="${window.siyuan.emojis[8][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f6a9")}</div>
+    <div data-type="0" class="emojis__type ariaLabel" aria-label="${window.siyuan.languages.recentEmoji}">${unicode2Emoji("2b50")}</div>
+    <div data-type="1" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[0][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f527")}</div>
+    <div data-type="2" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[1][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f60d")}</div>
+    <div data-type="3" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[2][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f433")}</div>
+    <div data-type="4" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[3][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f96a")}</div>
+    <div data-type="5" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[4][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3a8")}</div>
+    <div data-type="6" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[5][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f3dd")}</div>
+    <div data-type="7" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[6][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f52e")}</div>
+    <div data-type="8" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[7][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("267e")}</div>
+    <div data-type="9" class="emojis__type ariaLabel" aria-label="${window.siyuan.emojis[8][window.siyuan.config.lang === "zh_CN" ? "title_zh_cn" : "title"]}">${unicode2Emoji("1f6a9")}</div>
 </div>
 </div>`;
     window.siyuan.menus.menu.element.querySelector(".emojis__item").classList.add("emojis__item--current");
@@ -343,7 +343,7 @@ export const openEmojiPanel = (id: string, target: HTMLElement, isNotebook = fal
                 if (index) {
                     let html = "";
                     window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                        html += `<button data-unicode="${emoji.unicode}" class="emojis__item" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
+                        html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${window.siyuan.config.lang === "zh_CN" ? emoji.description_zh_cn : emoji.description}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                     });
                     titleElement.nextElementSibling.innerHTML = html;

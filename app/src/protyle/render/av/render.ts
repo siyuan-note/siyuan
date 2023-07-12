@@ -46,7 +46,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                 // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">
-<div class="av__gutters" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
+<div class="av__gutters ariaLabel" draggable="true" data-position="right" aria-label="${window.siyuan.languages.rowTip}">
     <button><svg><use xlink:href="#iconLine"></use></svg></button>
 </div>
 <div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>`;

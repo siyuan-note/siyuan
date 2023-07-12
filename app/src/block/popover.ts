@@ -16,9 +16,7 @@ export const initBlockPopover = (app: App) => {
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
-            hasClosestByClassName(event.target, "av__gutters") ||
-            hasClosestByClassName(event.target, "emojis__item") ||
-            hasClosestByClassName(event.target, "emojis__type") ||
+            hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo");
         if (aElement) {
             let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");

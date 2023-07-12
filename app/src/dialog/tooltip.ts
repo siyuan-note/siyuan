@@ -17,6 +17,10 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     } else {
         messageElement.innerHTML = message;
     }
+    if (target.getAttribute("data-type") === "navigation-file") {
+        setPosition(messageElement, targetRect.right, targetRect.top);
+        return;
+    }
     if (error) {
         messageElement.classList.add("tooltip--error");
     } else {

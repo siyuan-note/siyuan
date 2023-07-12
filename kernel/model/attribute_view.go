@@ -68,7 +68,7 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
-		ID:      view.Table.ID,
+		ID:      view.ID,
 		Name:    view.Name,
 		Columns: []*av.TableColumn{},
 		Rows:    []*av.TableRow{},

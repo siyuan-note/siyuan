@@ -130,7 +130,7 @@ type View struct {
 	ID   string `json:"id"`   // 视图 ID
 	Name string `json:"name"` // 视图名称
 
-	CurrentLayoutID   string       `json:"CurrentLayoutID"` // 当前布局 ID
+	CurrentLayoutID   string       `json:"currentLayoutID"` // 当前布局 ID
 	CurrentLayoutType LayoutType   `json:"type"`            // 当前布局类型
 	Table             *LayoutTable `json:"table,omitempty"` // 表格布局
 }

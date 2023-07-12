@@ -37,10 +37,10 @@ type LayoutTable struct {
 type ViewTableColumn struct {
 	ID string `json:"id"` // 列 ID
 
-	Wrap   bool        `json:"wrap"`   // 是否换行
-	Hidden bool        `json:"hidden"` // 是否隐藏
-	Width  string      `json:"width"`  // 列宽度
-	Calc   *ColumnCalc `json:"calc"`   // 计算
+	Wrap   bool        `json:"wrap"`           // 是否换行
+	Hidden bool        `json:"hidden"`         // 是否隐藏
+	Width  string      `json:"width"`          // 列宽度
+	Calc   *ColumnCalc `json:"calc,omitempty"` // 计算
 }
 
 type Calculable interface {

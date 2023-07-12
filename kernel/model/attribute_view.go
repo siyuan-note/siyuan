@@ -44,9 +44,9 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 	}
 
 	var view *av.View
-	if "" != attrView.CurrentViewID {
+	if "" != attrView.ViewID {
 		for _, v := range attrView.Views {
-			if v.ID == attrView.CurrentViewID {
+			if v.ID == attrView.ViewID {
 				view = v
 				break
 			}
@@ -55,7 +55,7 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		view = attrView.Views[0]
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		viewable, err = renderAttributeViewTable(attrView, view)
 	}
@@ -68,7 +68,7 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
 	ret = &av.Table{
-		ID:      view.Table.ID,
+		ID:      view.ID,
 		Name:    view.Name,
 		Columns: []*av.TableColumn{},
 		Rows:    []*av.TableRow{},
@@ -173,7 +173,7 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -184,7 +184,7 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Filters); nil != err {
 			return
@@ -210,7 +210,7 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -221,7 +221,7 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Sorts); nil != err {
 			return
@@ -272,7 +272,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -311,7 +311,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		if "" != operation.PreviousID {
 			for i, id := range view.Table.RowIDs {
@@ -370,12 +370,12 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		for _, column := range view.Table.Columns {
 			if column.ID == operation.ID {
@@ -403,12 +403,12 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		for _, column := range view.Table.Columns {
 			if column.ID == operation.ID {
@@ -436,12 +436,12 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		for _, column := range view.Table.Columns {
 			if column.ID == operation.ID {
@@ -469,7 +469,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -487,7 +487,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		view.Table.RowIDs = append(view.Table.RowIDs[:index], view.Table.RowIDs[index+1:]...)
 		for i, r := range view.Table.RowIDs {
@@ -517,12 +517,12 @@ func sortAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
 
-	switch view.CurrentLayoutType {
+	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		var col *av.ViewTableColumn
 		var index, previousIndex int
@@ -565,7 +565,7 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -576,7 +576,7 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		key := av.NewKey(operation.Name, keyType)
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
-		switch view.CurrentLayoutType {
+		switch view.LayoutType {
 		case av.LayoutTypeTable:
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
 		}
@@ -638,7 +638,7 @@ func removeAttributeViewColumn(operation *Operation) (err error) {
 	}
 
 	for _, view := range attrView.Views {
-		switch view.CurrentLayoutType {
+		switch view.LayoutType {
 		case av.LayoutTypeTable:
 			for i, column := range view.Table.Columns {
 				if column.ID == operation.ID {

@@ -31,18 +31,18 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	Spec          int          `json:"spec"`          // 格式版本
-	ID            string       `json:"id"`            // 属性视图 ID
-	Name          string       `json:"name"`          // 属性视图名称
-	KeyValues     []*KeyValues `json:"keyValues"`     // 属性视图属性列值
-	CurrentViewID string       `json:"currentViewID"` // 当前视图 ID
-	Views         []*View      `json:"views"`         // 视图
+	Spec      int          `json:"spec"`      // 格式版本
+	ID        string       `json:"id"`        // 属性视图 ID
+	Name      string       `json:"name"`      // 属性视图名称
+	KeyValues []*KeyValues `json:"keyValues"` // 属性视图属性列值
+	ViewID    string       `json:"viewID"`    // 当前视图 ID
+	Views     []*View      `json:"views"`     // 视图
 }
 
 // KeyValues 描述了属性视图属性列值的结构。
 type KeyValues struct {
-	Key    *Key     `json:"key"`    // 属性视图属性列
-	Values []*Value `json:"values"` // 属性视图属性列值
+	Key    *Key     `json:"key"`              // 属性视图属性列
+	Values []*Value `json:"values,omitempty"` // 属性视图属性列值
 }
 
 type KeyType string
@@ -65,7 +65,7 @@ type Key struct {
 
 	// 以下是某些列类型的特有属性
 
-	Options []*KeySelectOption `json:"options"` // 选项列表
+	Options []*KeySelectOption `json:"options,omitempty"` // 选项列表
 }
 
 func NewKey(name string, keyType KeyType) *Key {
@@ -130,9 +130,8 @@ type View struct {
 	ID   string `json:"id"`   // 视图 ID
 	Name string `json:"name"` // 视图名称
 
-	CurrentLayoutID   string       `json:"CurrentLayoutID"` // 当前布局 ID
-	CurrentLayoutType LayoutType   `json:"type"`            // 当前布局类型
-	Table             *LayoutTable `json:"table,omitempty"` // 表格布局
+	LayoutType LayoutType   `json:"type"`            // 当前布局类型
+	Table      *LayoutTable `json:"table,omitempty"` // 表格布局
 }
 
 // LayoutType 描述了视图布局的类型。
@@ -144,15 +143,13 @@ const (
 
 func NewView() *View {
 	name := "Table"
-	layoutID := ast.NewNodeID()
 	return &View{
-		ID:                ast.NewNodeID(),
-		Name:              name,
-		CurrentLayoutID:   layoutID,
-		CurrentLayoutType: LayoutTypeTable,
+		ID:         ast.NewNodeID(),
+		Name:       name,
+		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
 			Spec:    0,
-			ID:      layoutID,
+			ID:      ast.NewNodeID(),
 			Filters: []*ViewFilter{},
 			Sorts:   []*ViewSort{},
 		},
@@ -173,11 +170,11 @@ func NewAttributeView(id string) (ret *AttributeView) {
 	view := NewView()
 	key := NewKey("Block", KeyTypeBlock)
 	ret = &AttributeView{
-		Spec:          0,
-		ID:            id,
-		KeyValues:     []*KeyValues{{Key: key}},
-		CurrentViewID: view.ID,
-		Views:         []*View{view},
+		Spec:      0,
+		ID:        id,
+		KeyValues: []*KeyValues{{Key: key}},
+		ViewID:    view.ID,
+		Views:     []*View{view},
 	}
 	view.Table.Columns = []*ViewTableColumn{{ID: key.ID}}
 	return
@@ -185,21 +182,29 @@ func NewAttributeView(id string) (ret *AttributeView) {
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := getAttributeViewDataPath(avID)
+	toCreate := false
 	if !gulu.File.IsExist(avJSONPath) {
 		ret = NewAttributeView(avID)
-		return
+		toCreate = true
 	}
 
-	data, err := filelock.ReadFile(avJSONPath)
-	if nil != err {
-		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
-		return
-	}
+	if !toCreate {
+		data, readErr := filelock.ReadFile(avJSONPath)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
 
-	ret = &AttributeView{}
-	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
+		ret = &AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	} else {
+		if err = SaveAttributeView(ret); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+			return
+		}
 	}
 	return
 }
@@ -219,9 +224,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func (av *AttributeView) GetView(viewID string) (ret *View, err error) {
+func (av *AttributeView) GetView() (ret *View, err error) {
 	for _, v := range av.Views {
-		if v.ID == viewID {
+		if v.ID == av.ViewID {
 			ret = v
 			return
 		}

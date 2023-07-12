@@ -162,8 +162,10 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             }
         }
     });
+    /// #if !MOBILE
     // 文档树上引用数悬浮层不被遮挡，搜索指定路径不被搜索遮挡
     dialog.element.style.zIndex = "203";
+    /// #endif
     if (paths && paths.length > 0) {
         fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
             dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(" "));

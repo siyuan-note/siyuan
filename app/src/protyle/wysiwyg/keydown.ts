@@ -971,6 +971,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return true;
         }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyText.custom, event)) {
+            // 用于标识复制文本 *
+            nodeElement.setAttribute("data-reftext", "true");
+            focusByRange(getEditorRange(nodeElement));
+            document.execCommand("copy");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
             event.preventDefault();
             event.stopPropagation();

@@ -899,6 +899,7 @@
   "column": "Colonne",
   "copied": "Copié",
   "copy": "Copie",
+  "copyText": "Copier le texte *",
   "delete-column": "Supprimer une Colonne",
   "delete-row": "Supprimer la rangée",
   "down": "En bas",

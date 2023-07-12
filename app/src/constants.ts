@@ -253,6 +253,7 @@ export abstract class Constants {
                 hLayout: {default: "", custom: ""},
                 vLayout: {default: "", custom: ""},
                 refPopover: {default: "", custom: ""},
+                copyText: {default: "", custom: ""},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},

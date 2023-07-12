@@ -729,7 +729,7 @@ export class Gutter {
 
         if (protyle?.app?.plugins) {
             emitOpenMenu({
-                plugins:protyle.app.plugins,
+                plugins: protyle.app.plugins,
                 type: "click-blockicon",
                 detail: {
                     protyle,
@@ -1545,7 +1545,7 @@ export class Gutter {
 
         if (protyle?.app?.plugins) {
             emitOpenMenu({
-                plugins:protyle.app.plugins,
+                plugins: protyle.app.plugins,
                 type: "click-blockicon",
                 detail: {
                     protyle,
@@ -1749,7 +1749,8 @@ export class Gutter {
             return false;
         }
         return {
-            label: `${window.siyuan.languages.copy} ${window.siyuan.languages.text} *`,
+            accelerator: window.siyuan.config.keymap.editor.general.copyText.custom,
+            label: window.siyuan.languages.copyText,
             click() {
                 // 用于标识复制文本 *
                 selectsElement[0].setAttribute("data-reftext", "true");

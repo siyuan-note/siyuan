@@ -899,6 +899,7 @@
   "column": "行",
   "copied": "已複製",
   "copy": "複製",
+  "copyText": "複製 文本 *",
   "delete-column": "刪除行",
   "delete-row": "刪除列",
   "down": "下",

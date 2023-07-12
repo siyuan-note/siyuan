@@ -113,6 +113,7 @@
     text-align: center;
     padding: 6px 0;
     line-height: 18px;
+    flex: 1;
   }
 
   &__bar {
@@ -121,7 +122,6 @@
     display: flex;
     transition: var(--b3-transition);
     overflow: auto;
-    flex: 1;
     min-height: 30px;
 
     &::-webkit-scrollbar {
@@ -194,7 +194,6 @@
     border-radius: var(--b3-border-radius);
     margin: 3px 0;
     color: var(--b3-theme-on-surface);
-    max-width: 70%;
     border: 0;
     background-color: transparent;
     box-sizing: inherit;

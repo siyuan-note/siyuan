@@ -42,6 +42,7 @@ type TEventBus = "ws-main" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
+    "input-search" |
     "loaded-protyle"
 type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block" | "mSelect"
 type TAVFilterOperator =

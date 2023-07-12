@@ -47,7 +47,7 @@ func renderAttributeView(c *gin.Context) {
 		view := map[string]interface{}{
 			"id":   v.ID,
 			"name": v.Name,
-			"type": v.Type,
+			"type": v.CurrentLayoutType,
 		}
 
 		views = append(views, view)

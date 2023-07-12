@@ -1052,7 +1052,6 @@ type Operation struct {
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
 	AvID   string   `json:"avID"`   // 属性视图 ID
-	ViewID string   `json:"viewID"` // 属性视图的视图 ID
 	SrcIDs []string `json:"srcIDs"` // 用于将块拖拽到属性视图中
 	Name   string   `json:"name"`   // 属性视图列名
 	Typ    string   `json:"type"`   // 属性视图列类型

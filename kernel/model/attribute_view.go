@@ -173,7 +173,7 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -210,7 +210,7 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -272,7 +272,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -370,7 +370,7 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -403,7 +403,7 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -436,7 +436,7 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -469,7 +469,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -517,7 +517,7 @@ func sortAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}
@@ -565,7 +565,7 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := attrView.GetView(operation.ViewID)
+	view, err := attrView.GetView()
 	if nil != err {
 		return
 	}

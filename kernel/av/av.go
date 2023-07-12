@@ -41,8 +41,8 @@ type AttributeView struct {
 
 // KeyValues 描述了属性视图属性列值的结构。
 type KeyValues struct {
-	Key    *Key     `json:"key"`    // 属性视图属性列
-	Values []*Value `json:"values"` // 属性视图属性列值
+	Key    *Key     `json:"key"`              // 属性视图属性列
+	Values []*Value `json:"values,omitempty"` // 属性视图属性列值
 }
 
 type KeyType string
@@ -65,7 +65,7 @@ type Key struct {
 
 	// 以下是某些列类型的特有属性
 
-	Options []*KeySelectOption `json:"options"` // 选项列表
+	Options []*KeySelectOption `json:"options,omitempty"` // 选项列表
 }
 
 func NewKey(name string, keyType KeyType) *Key {
@@ -182,21 +182,29 @@ func NewAttributeView(id string) (ret *AttributeView) {
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := getAttributeViewDataPath(avID)
+	toCreate := false
 	if !gulu.File.IsExist(avJSONPath) {
 		ret = NewAttributeView(avID)
-		return
+		toCreate = true
 	}
 
-	data, err := filelock.ReadFile(avJSONPath)
-	if nil != err {
-		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
-		return
-	}
+	if !toCreate {
+		data, readErr := filelock.ReadFile(avJSONPath)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
 
-	ret = &AttributeView{}
-	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
+		ret = &AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	} else {
+		if err = SaveAttributeView(ret); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+			return
+		}
 	}
 	return
 }
@@ -216,9 +224,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	return
 }
 
-func (av *AttributeView) GetView(viewID string) (ret *View, err error) {
+func (av *AttributeView) GetView() (ret *View, err error) {
 	for _, v := range av.Views {
-		if v.ID == viewID {
+		if v.ID == av.ViewID {
 			ret = v
 			return
 		}

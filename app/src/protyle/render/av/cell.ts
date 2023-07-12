@@ -54,6 +54,7 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     if (!blockElement) {
         return;
     }
+    const rowID = rowElement.getAttribute("data-id");
     const avMaskElement = document.querySelector(".av__mask");
     const cellId = cellElement.getAttribute("data-id");
     const colId = cellElement.getAttribute("data-col-id");
@@ -69,6 +70,7 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
         id: cellId,
         avID,
         keyID: colId,
+        rowID,
         data: {
             [type]: {content: inputValue}
         }
@@ -77,6 +79,7 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
         id: cellId,
         avID,
         keyID: colId,
+        rowID,
         data: {
             [type]: {content: oldValue}
         }

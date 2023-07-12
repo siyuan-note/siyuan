@@ -48,7 +48,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
     if (!target) {
         return;
     }
-    const rowId = options.cellElement.parentElement.dataset.id;
+    const rowID = options.cellElement.parentElement.dataset.id;
     const colId = options.cellElement.dataset.colId;
     const cellId = options.cellElement.dataset.id;
     let colData: IAVColumn;
@@ -63,7 +63,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
     }
     let cellData: IAVCell;
     data.rows.find(row => {
-        if (row.id === rowId) {
+        if (row.id === rowID) {
             row.cells.find(cell => {
                 if (cell.id === cellId) {
                     cellData = cell;
@@ -86,12 +86,14 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
         action: "updateAttrViewCell",
         id: cellId,
         keyID: colId,
+        rowID,
         parentID: data.id,
         data: cellData.value
     }], [{
         action: "updateAttrViewCell",
         id: cellId,
         keyID: colId,
+        rowID,
         parentID: data.id,
         data: {
             [colData.type]: oldValue
@@ -348,7 +350,7 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAVTable, menuElement: 
 export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: {
     cellElement: HTMLElement
 }, currentElement: HTMLElement, menuElement: HTMLElement) => {
-    const rowId = options.cellElement.parentElement.dataset.id;
+    const rowID = options.cellElement.parentElement.dataset.id;
     const colId = options.cellElement.dataset.colId;
     const cellId = options.cellElement.dataset.id;
     let colData: IAVColumn;
@@ -363,7 +365,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
     }
     let cellData: IAVCell;
     data.rows.find(row => {
-        if (row.id === rowId) {
+        if (row.id === rowID) {
             row.cells.find(cell => {
                 if (cell.id === cellId) {
                     cellData = cell;
@@ -404,6 +406,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
             action: "updateAttrViewCell",
             id: cellId,
             keyID: colId,
+            rowID,
             parentID: data.id,
             data: cellData.value
         }], [{
@@ -417,12 +420,14 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
             action: "updateAttrViewCell",
             id: cellId,
             keyID: colId,
+            rowID,
             parentID: data.id,
             data: cellData.value
         }], [{
             action: "updateAttrViewCell",
             id: cellId,
             keyID: colId,
+            rowID,
             parentID: data.id,
             data: {
                 [colData.type]: oldValue

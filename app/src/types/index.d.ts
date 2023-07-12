@@ -309,6 +309,7 @@ interface IOperation {
     id?: string,
     avID?: string,  // av
     keyID?: string // updateAttrViewCell 专享
+    rowID?: string // updateAttrViewCell 专享
     data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}
     parentID?: string
     previousID?: string

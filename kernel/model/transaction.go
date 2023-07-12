@@ -245,11 +245,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSortAttrViewColumn(op)
 		case "updateAttrViewCell":
 			ret = tx.doUpdateAttrViewCell(op)
-			// TODO 下面的方法要重写
-			//case "updateAttrViewColOptions":
-			//	ret = tx.doUpdateAttrViewColOptions(op)
-			//case "removeAttrViewColOption":
-			//	ret = tx.doRemoveAttrViewColOption(op)
+		case "updateAttrViewColOptions":
+			ret = tx.doUpdateAttrViewColOptions(op)
+		//case "removeAttrViewColOption":
+			//ret = tx.doRemoveAttrViewColOption(op)
 			//case "updateAttrViewColOption":
 			//	ret = tx.doUpdateAttrViewColOption(op)
 		}

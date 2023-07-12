@@ -17,7 +17,6 @@
 package av
 
 import (
-	"github.com/88250/lute/ast"
 	"math"
 	"sort"
 	"strings"
@@ -257,13 +256,6 @@ type TableColumn struct {
 type TableRow struct {
 	ID    string       `json:"id"`
 	Cells []*TableCell `json:"cells"`
-}
-
-func NewTableRow() *TableRow {
-	return &TableRow{
-		ID:    ast.NewNodeID(),
-		Cells: []*TableCell{},
-	}
 }
 
 func (table *Table) GetType() LayoutType {

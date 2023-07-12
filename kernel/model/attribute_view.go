@@ -101,7 +101,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 	}
 
-	for _, row := range rows {
+	for rowID, row := range rows {
 		var tableRow av.TableRow
 		for _, col := range ret.Columns {
 			var tableCell *av.TableCell
@@ -121,6 +121,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 					ValueType: col.Type,
 				}
 			}
+			tableRow.ID = rowID
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)
@@ -715,6 +716,89 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColumnOptions(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+	}
+	return
+}
+
+func updateAttributeViewColumnOptions(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	jsonData, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		return
+	}
+
+	options := []*av.KeySelectOption{}
+	if err = gulu.JSON.UnmarshalJSON(jsonData, &options); nil != err {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if keyValues.Key.ID == operation.ID {
+			keyValues.Key.Options = options
+			err = av.SaveAttributeView(attrView)
+			return
+		}
+	}
+	return
+}
+
+//func (tx *Transaction) doRemoveAttrViewColOption(operation *Operation) (ret *TxErr) {
+//	err := removeAttributeViewColumnOption(operation)
+//	if nil != err {
+//		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
+//	}
+//	return
+//}
+//
+//func removeAttributeViewColumnOption(operation *Operation) (err error) {
+//	avID := operation.ParentID
+//	attrView, err := av.ParseAttributeView(avID)
+//	if nil != err {
+//		return
+//	}
+//
+//	optName := operation.Data.(string)
+//
+//	key := attrView.GetKey(operation.ID)
+//	key.
+//
+//	for _, row := range attrView.Rows {
+//		for i, cell := range row.Cells {
+//			if colIndex != i {
+//				continue
+//			}
+//
+//			if nil != cell.Value {
+//				if nil != cell.Value.MSelect && 0 < len(cell.Value.MSelect) && nil != cell.Value.MSelect[0] {
+//					if optName == cell.Value.MSelect[0].Content {
+//						cell.Value = nil
+//						break
+//					}
+//				} else if nil != cell.Value.MSelect {
+//					for j, opt := range cell.Value.MSelect {
+//						if optName == opt.Content {
+//							cell.Value.MSelect = append(cell.Value.MSelect[:j], cell.Value.MSelect[j+1:]...)
+//							break
+//						}
+//					}
+//				}
+//			}
+//			break
+//		}
+//	}
+//
+//	err = av.SaveAttributeView(attrView)
+//	return
+//}
+
 // TODO 下面的方法要重写
 
 //func (tx *Transaction) doUpdateAttrViewColOption(operation *Operation) (ret *TxErr) {
@@ -725,21 +809,7 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 //	return
 //}
 //
-//func (tx *Transaction) doRemoveAttrViewColOption(operation *Operation) (ret *TxErr) {
-//	err := removeAttributeViewColumnOption(operation)
-//	if nil != err {
-//		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-//	}
-//	return
-//}
-//
-//func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *TxErr) {
-//	err := updateAttributeViewColumnOptions(operation.Data, operation.ID, operation.ParentID)
-//	if nil != err {
-//		return &TxErr{code: TxErrWriteAttributeView, id: operation.ParentID, msg: err.Error()}
-//	}
-//	return
-//}
+
 //
 //func updateAttributeViewColumnOption(operation *Operation) (err error) {
 //	avID := operation.ParentID
@@ -823,89 +893,6 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 //	return
 //}
 //
-//func removeAttributeViewColumnOption(operation *Operation) (err error) {
-//	avID := operation.ParentID
-//	attrView, err := av.ParseAttributeView(avID)
-//	if nil != err {
-//		return
-//	}
-//
-//	colID := operation.ID
-//	optName := operation.Data.(string)
-//
-//	var colIndex int
-//	for i, col := range attrView.Columns {
-//		if col.ID != colID {
-//			continue
-//		}
-//
-//		colIndex = i
-//
-//		for j, opt := range col.Options {
-//			if opt.Name != optName {
-//				continue
-//			}
-//
-//			col.Options = append(col.Options[:j], col.Options[j+1:]...)
-//			break
-//		}
-//		break
-//	}
-//
-//	for _, row := range attrView.Rows {
-//		for i, cell := range row.Cells {
-//			if colIndex != i {
-//				continue
-//			}
-//
-//			if nil != cell.Value {
-//				if nil != cell.Value.MSelect && 0 < len(cell.Value.MSelect) && nil != cell.Value.MSelect[0] {
-//					if optName == cell.Value.MSelect[0].Content {
-//						cell.Value = nil
-//						break
-//					}
-//				} else if nil != cell.Value.MSelect {
-//					for j, opt := range cell.Value.MSelect {
-//						if optName == opt.Content {
-//							cell.Value.MSelect = append(cell.Value.MSelect[:j], cell.Value.MSelect[j+1:]...)
-//							break
-//						}
-//					}
-//				}
-//			}
-//			break
-//		}
-//	}
-//
-//	err = av.SaveAttributeView(attrView)
-//	return
-//}
-//
-//func updateAttributeViewColumnOptions(data interface{}, id, avID string) (err error) {
-//	attrView, err := av.ParseAttributeView(avID)
-//	if nil != err {
-//		return
-//	}
-//
-//	jsonData, err := gulu.JSON.MarshalJSON(data)
-//	if nil != err {
-//		return
-//	}
-//
-//	options := []*av.ColumnSelectOption{}
-//	if err = gulu.JSON.UnmarshalJSON(jsonData, &options); nil != err {
-//		return
-//	}
-//
-//	for _, col := range attrView.Columns {
-//		if col.ID == id {
-//			col.Options = options
-//			err = av.SaveAttributeView(attrView)
-//			return
-//		}
-//	}
-//	return
-//}
 
 const (
 	NodeAttrNameAVs         = "custom-avs"

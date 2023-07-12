@@ -243,17 +243,15 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSortAttrViewRow(op)
 		case "sortAttrViewCol":
 			ret = tx.doSortAttrViewColumn(op)
-		// TODO 下面的方法要重写
 		case "updateAttrViewCell":
 			ret = tx.doUpdateAttrViewCell(op)
-		case "setAttrView":
-			ret = tx.doSetAttrView(op)
-		case "updateAttrViewColOptions":
-			ret = tx.doUpdateAttrViewColOptions(op)
-		case "removeAttrViewColOption":
-			ret = tx.doRemoveAttrViewColOption(op)
-		case "updateAttrViewColOption":
-			ret = tx.doUpdateAttrViewColOption(op)
+			// TODO 下面的方法要重写
+			//case "updateAttrViewColOptions":
+			//	ret = tx.doUpdateAttrViewColOptions(op)
+			//case "removeAttrViewColOption":
+			//	ret = tx.doRemoveAttrViewColOption(op)
+			//case "updateAttrViewColOption":
+			//	ret = tx.doUpdateAttrViewColOption(op)
 		}
 
 		if nil != ret {
@@ -1058,7 +1056,8 @@ type Operation struct {
 	SrcIDs []string `json:"srcIDs"` // 用于将块拖拽到属性视图中
 	Name   string   `json:"name"`   // 属性视图列名
 	Typ    string   `json:"type"`   // 属性视图列类型
-	RowID  string   `json:"rowID"`  // 属性视图行 ID
+	KeyID  string   `json:"keyID"`  // 属性视列 ID
+	RowID  string   `json:"rowID"`  // 属性视图行 ID（块 ID）
 
 	discard bool // 用于标识是否在事务合并中丢弃
 }
@@ -1219,16 +1218,12 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			}
 
 			changedAv := false
-			for _, row := range attrView.Rows {
-				blockCell := row.GetBlockCell()
-				if nil == blockCell || nil == blockCell.Value || nil == blockCell.Value.Block {
-					continue
-				}
-
-				if blockCell.Value.Block.ID == updatedDefNode.ID {
+			blockValues := attrView.GetBlockKeyValues()
+			for _, blockValue := range blockValues.Values {
+				if blockValue.Block.ID == updatedDefNode.ID {
 					newContent := getNodeRefText(updatedDefNode)
-					if newContent != blockCell.Value.Block.Content {
-						blockCell.Value.Block.Content = newContent
+					if newContent != blockValue.Block.Content {
+						blockValue.Block.Content = newContent
 						changedAv = true
 					}
 					break
@@ -1236,7 +1231,6 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			}
 			if changedAv {
 				av.SaveAttributeView(attrView)
-
 				util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
 			}
 		}

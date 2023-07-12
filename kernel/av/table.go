@@ -17,8 +17,10 @@
 package av
 
 import (
+	"github.com/88250/lute/ast"
 	"math"
 	"sort"
+	"strings"
 )
 
 // LayoutTable 描述了表格布局的结构。
@@ -26,18 +28,14 @@ type LayoutTable struct {
 	Spec int    `json:"spec"` // 布局格式版本
 	ID   string `json:"id"`   // 布局 ID
 
-	Columns []*TableColumn `json:"columns"` // 表格列
-	ColIDs  []string       `json:"colIds"`  // 列 ID，用于自定义排序
-	RowIDs  []string       `json:"rowIds"`  // 行 ID，用于自定义排序
-	Filters []*ViewFilter  `json:"filters"` // 过滤规则
-	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则
+	Columns []*ViewTableColumn `json:"columns"` // 表格列
+	RowIDs  []string           `json:"rowIds"`  // 行 ID，用于自定义排序
+	Filters []*ViewFilter      `json:"filters"` // 过滤规则
+	Sorts   []*ViewSort        `json:"sorts"`   // 排序规则
 }
 
-type TableColumn struct {
-	ID   string     `json:"id"`   // 列 ID
-	Name string     `json:"name"` // 列名
-	Type ColumnType `json:"type"` // 列类型
-	Icon string     `json:"icon"` // 列图标
+type ViewTableColumn struct {
+	ID string `json:"id"` // 列 ID
 
 	Wrap   bool        `json:"wrap"`   // 是否换行
 	Hidden bool        `json:"hidden"` // 是否隐藏
@@ -45,9 +43,194 @@ type TableColumn struct {
 	Calc   *ColumnCalc `json:"calc"`   // 计算
 }
 
-type TableRow struct {
-	ID    string  `json:"id"`
-	Cells []*Cell `json:"cells"`
+type Calculable interface {
+	CalcCols()
+}
+
+type ColumnCalc struct {
+	Column   string       `json:"column"`
+	Operator CalcOperator `json:"operator"`
+	Result   *Value       `json:"result"`
+}
+
+type CalcOperator string
+
+const (
+	CalcOperatorNone              CalcOperator = ""
+	CalcOperatorCountAll          CalcOperator = "Count all"
+	CalcOperatorCountValues       CalcOperator = "Count values"
+	CalcOperatorCountUniqueValues CalcOperator = "Count unique values"
+	CalcOperatorCountEmpty        CalcOperator = "Count empty"
+	CalcOperatorCountNotEmpty     CalcOperator = "Count not empty"
+	CalcOperatorPercentEmpty      CalcOperator = "Percent empty"
+	CalcOperatorPercentNotEmpty   CalcOperator = "Percent not empty"
+	CalcOperatorSum               CalcOperator = "Sum"
+	CalcOperatorAverage           CalcOperator = "Average"
+	CalcOperatorMedian            CalcOperator = "Median"
+	CalcOperatorMin               CalcOperator = "Min"
+	CalcOperatorMax               CalcOperator = "Max"
+	CalcOperatorRange             CalcOperator = "Range"
+	CalcOperatorEarliest          CalcOperator = "Earliest"
+	CalcOperatorLatest            CalcOperator = "Latest"
+)
+
+type TableCell struct {
+	ID        string  `json:"id"`
+	Value     *Value  `json:"value"`
+	ValueType KeyType `json:"valueType"`
+	Color     string  `json:"color"`
+	BgColor   string  `json:"bgColor"`
+}
+
+func (value *Value) Compare(other *Value) int {
+	if nil == value {
+		return -1
+	}
+	if nil == other {
+		return 1
+	}
+	if nil != value.Block && nil != other.Block {
+		return strings.Compare(value.Block.Content, other.Block.Content)
+	}
+	if nil != value.Text && nil != other.Text {
+		return strings.Compare(value.Text.Content, other.Text.Content)
+	}
+	if nil != value.Number && nil != other.Number {
+		if value.Number.Content > other.Number.Content {
+			return 1
+		} else if value.Number.Content < other.Number.Content {
+			return -1
+		} else {
+			return 0
+		}
+	}
+	if nil != value.Date && nil != other.Date {
+		if value.Date.Content > other.Date.Content {
+			return 1
+		} else if value.Date.Content < other.Date.Content {
+			return -1
+		} else {
+			return 0
+		}
+	}
+
+	if nil != value.MSelect && nil != other.MSelect {
+		var v1 string
+		for _, v := range value.MSelect {
+			v1 += v.Content
+		}
+		var v2 string
+		for _, v := range other.MSelect {
+			v2 += v.Content
+		}
+		return strings.Compare(v1, v2)
+	}
+	return 0
+}
+
+func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool {
+	if nil == value || nil == other {
+		return false
+	}
+
+	if nil != value.Block && nil != other.Block {
+		return strings.Contains(value.Block.Content, other.Block.Content)
+	}
+
+	if nil != value.Text && nil != other.Text {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Text.Content == other.Text.Content
+		case FilterOperatorIsNotEqual:
+			return value.Text.Content != other.Text.Content
+		case FilterOperatorContains:
+			return strings.Contains(value.Text.Content, other.Text.Content)
+		case FilterOperatorDoesNotContain:
+			return !strings.Contains(value.Text.Content, other.Text.Content)
+		case FilterOperatorStartsWith:
+			return strings.HasPrefix(value.Text.Content, other.Text.Content)
+		case FilterOperatorEndsWith:
+			return strings.HasSuffix(value.Text.Content, other.Text.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Text.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Text.Content)
+		}
+	}
+
+	if nil != value.Number && nil != other.Number {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Number.Content == other.Number.Content
+		case FilterOperatorIsNotEqual:
+			return value.Number.Content != other.Number.Content
+		case FilterOperatorIsGreater:
+			return value.Number.Content > other.Number.Content
+		case FilterOperatorIsGreaterOrEqual:
+			return value.Number.Content >= other.Number.Content
+		case FilterOperatorIsLess:
+			return value.Number.Content < other.Number.Content
+		case FilterOperatorIsLessOrEqual:
+			return value.Number.Content <= other.Number.Content
+		case FilterOperatorIsEmpty:
+			return !value.Number.IsNotEmpty
+		case FilterOperatorIsNotEmpty:
+			return value.Number.IsNotEmpty
+		}
+	}
+
+	if nil != value.Date && nil != other.Date {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Date.Content == other.Date.Content
+		case FilterOperatorIsNotEqual:
+			return value.Date.Content != other.Date.Content
+		case FilterOperatorIsGreater:
+			return value.Date.Content > other.Date.Content
+		case FilterOperatorIsGreaterOrEqual:
+			return value.Date.Content >= other.Date.Content
+		case FilterOperatorIsLess:
+			return value.Date.Content < other.Date.Content
+		case FilterOperatorIsLessOrEqual:
+			return value.Date.Content <= other.Date.Content
+		case FilterOperatorIsBetween:
+			return value.Date.Content >= other.Date.Content && value.Date.Content <= other.Date.Content2
+		case FilterOperatorIsEmpty:
+			return 0 == value.Date.Content
+		case FilterOperatorIsNotEmpty:
+			return 0 != value.Date.Content
+		case FilterOperatorIsRelativeToToday:
+			// TODO: date filter (relative to today)
+			return value.Date.Content >= other.Date.Content && value.Date.Content <= other.Date.Content2
+		}
+	}
+
+	if nil != value.MSelect && nil != other.MSelect && 0 < len(value.MSelect) && 0 < len(other.MSelect) {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.MSelect[0].Content == other.MSelect[0].Content
+		case FilterOperatorIsNotEqual:
+			return value.MSelect[0].Content != other.MSelect[0].Content
+		case FilterOperatorContains:
+			for _, v := range value.MSelect {
+				if v.Content == other.MSelect[0].Content {
+					return true
+				}
+			}
+		case FilterOperatorDoesNotContain:
+			for _, v := range value.MSelect {
+				if v.Content == other.MSelect[0].Content {
+					return false
+				}
+			}
+			return true
+		case FilterOperatorIsEmpty:
+			return 0 == len(value.MSelect)
+		case FilterOperatorIsNotEmpty:
+			return 0 != len(value.MSelect)
+		}
+	}
+	return false
 }
 
 // Table 描述了表格实例的结构。
@@ -58,6 +241,29 @@ type Table struct {
 	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则
 	Columns []*TableColumn `json:"columns"` // 表格列
 	Rows    []*TableRow    `json:"rows"`    // 表格行
+}
+
+type TableColumn struct {
+	ID     string      `json:"id"`     // 列 ID
+	Name   string      `json:"name"`   // 列名
+	Type   KeyType     `json:"type"`   // 列类型
+	Icon   string      `json:"icon"`   // 列图标
+	Wrap   bool        `json:"wrap"`   // 是否换行
+	Hidden bool        `json:"hidden"` // 是否隐藏
+	Width  string      `json:"width"`  // 列宽度
+	Calc   *ColumnCalc `json:"calc"`   // 计算
+}
+
+type TableRow struct {
+	ID    string       `json:"id"`
+	Cells []*TableCell `json:"cells"`
+}
+
+func NewTableRow() *TableRow {
+	return &TableRow{
+		ID:    ast.NewNodeID(),
+		Cells: []*TableCell{},
+	}
 }
 
 func (table *Table) GetType() LayoutType {
@@ -91,7 +297,7 @@ func (table *Table) SortRows() {
 	sort.Slice(table.Rows, func(i, j int) bool {
 		for _, colIndexSort := range colIndexSorts {
 			c := table.Columns[colIndexSort.Index]
-			if c.Type == ColumnTypeBlock {
+			if c.Type == KeyTypeBlock {
 				continue
 			}
 
@@ -129,7 +335,7 @@ func (table *Table) FilterRows() {
 		pass := true
 		for j, index := range colIndexes {
 			c := table.Columns[index]
-			if c.Type == ColumnTypeBlock {
+			if c.Type == KeyTypeBlock {
 				continue
 			}
 
@@ -156,15 +362,15 @@ func (table *Table) CalcCols() {
 		}
 
 		switch col.Type {
-		case ColumnTypeText:
+		case KeyTypeText:
 			table.calcColText(col, i)
-		case ColumnTypeNumber:
+		case KeyTypeNumber:
 			table.calcColNumber(col, i)
-		case ColumnTypeDate:
+		case KeyTypeDate:
 			table.calcColDate(col, i)
-		case ColumnTypeSelect:
+		case KeyTypeSelect:
 			table.calcColSelect(col, i)
-		case ColumnTypeMSelect:
+		case KeyTypeMSelect:
 			table.calcColMSelect(col, i)
 		}
 	}

@@ -31,14 +31,98 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	Spec    int       `json:"spec"`    // 格式版本
-	ID      string    `json:"id"`      // 属性视图 ID
-	Name    string    `json:"name"`    // 属性视图名称
-	Columns []*Column `json:"columns"` // 列
-	Rows    []*Row    `json:"rows"`    // 行
+	Spec          int          `json:"spec"`          // 格式版本
+	ID            string       `json:"id"`            // 属性视图 ID
+	Name          string       `json:"name"`          // 属性视图名称
+	KeyValues     []*KeyValues `json:"keyValues"`     // 属性视图属性列值
+	CurrentViewID string       `json:"currentViewID"` // 当前视图 ID
+	Views         []*View      `json:"views"`         // 视图
+}
 
-	CurrentViewID string  `json:"currentViewID"` // 当前视图 ID
-	Views         []*View `json:"views"`         // 视图
+// KeyValues 描述了属性视图属性列值的结构。
+type KeyValues struct {
+	Key    *Key     `json:"key"`    // 属性视图属性列
+	Values []*Value `json:"values"` // 属性视图属性列值
+}
+
+type KeyType string
+
+const (
+	KeyTypeBlock   KeyType = "block"
+	KeyTypeText    KeyType = "text"
+	KeyTypeNumber  KeyType = "number"
+	KeyTypeDate    KeyType = "date"
+	KeyTypeSelect  KeyType = "select"
+	KeyTypeMSelect KeyType = "mSelect"
+)
+
+// Key 描述了属性视图属性列的基础结构。
+type Key struct {
+	ID   string  `json:"id"`   // 列 ID
+	Name string  `json:"name"` // 列名
+	Type KeyType `json:"type"` // 列类型
+	Icon string  `json:"icon"` // 列图标
+
+	// 以下是某些列类型的特有属性
+
+	Options []*KeySelectOption `json:"options"` // 选项列表
+}
+
+func NewKey(name string, keyType KeyType) *Key {
+	return &Key{
+		ID:   ast.NewNodeID(),
+		Name: name,
+		Type: keyType,
+	}
+}
+
+type KeySelectOption struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
+type Value struct {
+	ID      string `json:"id"`
+	KeyID   string `json:"keyID"`
+	BlockID string `json:"blockID"`
+
+	Block   *ValueBlock    `json:"block,omitempty"`
+	Text    *ValueText     `json:"text,omitempty"`
+	Number  *ValueNumber   `json:"number,omitempty"`
+	Date    *ValueDate     `json:"date,omitempty"`
+	MSelect []*ValueSelect `json:"mSelect,omitempty"`
+}
+
+func (value *Value) ToJSONString() string {
+	data, err := gulu.JSON.MarshalJSON(value)
+	if nil != err {
+		return ""
+	}
+	return string(data)
+}
+
+type ValueBlock struct {
+	ID      string `json:"id"`
+	Content string `json:"content"`
+}
+
+type ValueText struct {
+	Content string `json:"content"`
+}
+
+type ValueNumber struct {
+	Content    float64 `json:"content"`
+	IsNotEmpty bool    `json:"isNotEmpty"`
+}
+
+type ValueDate struct {
+	Content  int64 `json:"content"`
+	Content2 int64 `json:"content2"`
+}
+
+type ValueSelect struct {
+	Content string `json:"content"`
+	Color   string `json:"color"`
 }
 
 // View 描述了视图的结构。
@@ -91,8 +175,7 @@ func NewAttributeView(id string) *AttributeView {
 	return &AttributeView{
 		Spec:          0,
 		ID:            id,
-		Columns:       []*Column{{ID: ast.NewNodeID(), Name: "Block", Type: ColumnTypeBlock}},
-		Rows:          []*Row{},
+		KeyValues:     []*KeyValues{{Key: NewKey("Name", KeyTypeBlock)}},
 		CurrentViewID: view.ID,
 		Views:         []*View{view},
 	}
@@ -125,34 +208,6 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	return
 }
 
-func ParseAttributeViewMap(avID string) (ret map[string]interface{}, err error) {
-	ret = map[string]interface{}{}
-	avJSONPath := getAttributeViewDataPath(avID)
-	if !gulu.File.IsExist(avJSONPath) {
-		av := NewAttributeView(avID)
-		var data []byte
-		data, err = gulu.JSON.MarshalJSON(av)
-		if nil == err {
-			return
-		}
-
-		err = gulu.JSON.UnmarshalJSON(data, &ret)
-		return
-	}
-
-	data, err := filelock.ReadFile(avJSONPath)
-	if nil != err {
-		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
-	}
-	return
-}
-
 func SaveAttributeView(av *AttributeView) (err error) {
 	data, err := gulu.JSON.MarshalIndentJSON(av, "", "\t")
 	if nil != err {
@@ -179,6 +234,27 @@ func (av *AttributeView) GetView(viewID string) (ret *View, err error) {
 	return
 }
 
+func (av *AttributeView) GetKey(keyID string) (ret *Key, err error) {
+	for _, kv := range av.KeyValues {
+		if kv.Key.ID == keyID {
+			ret = kv.Key
+			return
+		}
+	}
+	err = ErrKeyNotFound
+	return
+}
+
+func (av *AttributeView) GetBlockKeyValues() (ret *KeyValues) {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type {
+			ret = kv
+			return
+		}
+	}
+	return
+}
+
 func getAttributeViewDataPath(avID string) (ret string) {
 	av := filepath.Join(util.DataDir, "storage", "av")
 	ret = filepath.Join(av, avID+".json")
@@ -193,4 +269,5 @@ func getAttributeViewDataPath(avID string) (ret string) {
 
 var (
 	ErrViewNotFound = errors.New("view not found")
+	ErrKeyNotFound  = errors.New("key not found")
 )

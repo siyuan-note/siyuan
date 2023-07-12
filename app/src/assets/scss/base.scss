@@ -240,6 +240,9 @@ html {
 
     .toolbar__item {
       padding: 14.25px;
+      height: auto;
+      margin: 0;
+      border-radius: 0;
 
       &:not(.toolbar__item--disabled):not(.toolbar__item--close):hover,
       &--active {

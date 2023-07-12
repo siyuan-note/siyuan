@@ -169,16 +169,18 @@ type Viewable interface {
 	GetID() string
 }
 
-func NewAttributeView(id string) *AttributeView {
+func NewAttributeView(id string) (ret *AttributeView) {
 	view := NewView()
-
-	return &AttributeView{
+	key := NewKey("Block", KeyTypeBlock)
+	ret = &AttributeView{
 		Spec:          0,
 		ID:            id,
-		KeyValues:     []*KeyValues{{Key: NewKey("Name", KeyTypeBlock)}},
+		KeyValues:     []*KeyValues{{Key: key}},
 		CurrentViewID: view.ID,
 		Views:         []*View{view},
 	}
+	view.Table.Columns = []*ViewTableColumn{{ID: key.ID}}
+	return
 }
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
@@ -198,12 +200,6 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
 		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 		return
-	}
-
-	if 1 > len(ret.Views) {
-		view := NewView()
-		ret.CurrentViewID = view.ID
-		ret.Views = []*View{view}
 	}
 	return
 }

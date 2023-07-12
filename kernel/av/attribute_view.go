@@ -37,38 +37,38 @@ type AttributeView struct {
 	Columns []*Column `json:"columns"` // 列
 	Rows    []*Row    `json:"rows"`    // 行
 
-	CurrentViewID string  `json:"currentViewId"` // 当前视图 ID
+	CurrentViewID string  `json:"currentViewID"` // 当前视图 ID
 	Views         []*View `json:"views"`         // 视图
 }
 
 // View 描述了视图的结构。
 type View struct {
-	ID   string   `json:"id"`   // 视图 ID
-	Name string   `json:"name"` // 视图名称
-	Type ViewType `json:"type"` // 视图类型
+	ID   string `json:"id"`   // 视图 ID
+	Name string `json:"name"` // 视图名称
 
-	Table *Table `json:"table,omitempty"` // 表格视图
-	// TODO Kanban *Kanban `json:"kanban,omitempty"` // 看板视图
+	CurrentLayoutID   string       `json:"CurrentLayoutID"` // 当前布局 ID
+	CurrentLayoutType LayoutType   `json:"type"`            // 当前布局类型
+	Table             *LayoutTable `json:"table,omitempty"` // 表格布局
 }
 
-// ViewType 描述了视图的类型。
-type ViewType string
+// LayoutType 描述了视图布局的类型。
+type LayoutType string
 
 const (
-	ViewTypeTable  ViewType = "table"  // 属性视图类型 - 表格
-	ViewTypeKanban ViewType = "kanban" // 属性视图类型 - 看板
+	LayoutTypeTable LayoutType = "table" // 属性视图类型 - 表格
 )
 
 func NewView() *View {
-	id := ast.NewNodeID()
 	name := "Table"
+	layoutID := ast.NewNodeID()
 	return &View{
-		ID:   id,
-		Name: name,
-		Type: ViewTypeTable,
-		Table: &Table{
+		ID:                ast.NewNodeID(),
+		Name:              name,
+		CurrentLayoutID:   layoutID,
+		CurrentLayoutType: LayoutTypeTable,
+		Table: &LayoutTable{
 			Spec:    0,
-			ID:      id,
+			ID:      layoutID,
 			Filters: []*ViewFilter{},
 			Sorts:   []*ViewSort{},
 		},
@@ -81,7 +81,7 @@ type Viewable interface {
 	Sortable
 	Calculable
 
-	GetType() ViewType
+	GetType() LayoutType
 	GetID() string
 }
 

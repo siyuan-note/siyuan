@@ -21,13 +21,14 @@ import (
 	"sort"
 )
 
-// Table 描述了表格视图的结构。
-type Table struct {
-	Spec int    `json:"spec"` // 视图格式版本
-	ID   string `json:"id"`   // 视图 ID
+// LayoutTable 描述了表格布局的结构。
+type LayoutTable struct {
+	Spec int    `json:"spec"` // 布局格式版本
+	ID   string `json:"id"`   // 布局 ID
 
 	Columns []*TableColumn `json:"columns"` // 表格列
-	Rows    []*TableRow    `json:"rows"`    // 表格行
+	ColIDs  []string       `json:"colIds"`  // 列 ID，用于自定义排序
+	RowIDs  []string       `json:"rowIds"`  // 行 ID，用于自定义排序
 	Filters []*ViewFilter  `json:"filters"` // 过滤规则
 	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则
 }
@@ -49,8 +50,18 @@ type TableRow struct {
 	Cells []*Cell `json:"cells"`
 }
 
-func (table *Table) GetType() ViewType {
-	return ViewTypeTable
+// Table 描述了表格实例的结构。
+type Table struct {
+	ID      string         `json:"id"`      // 表格布局 ID
+	Name    string         `json:"name"`    // 表格名称
+	Filters []*ViewFilter  `json:"filters"` // 过滤规则
+	Sorts   []*ViewSort    `json:"sorts"`   // 排序规则
+	Columns []*TableColumn `json:"columns"` // 表格列
+	Rows    []*TableRow    `json:"rows"`    // 表格行
+}
+
+func (table *Table) GetType() LayoutType {
+	return LayoutTypeTable
 }
 
 func (table *Table) GetID() string {

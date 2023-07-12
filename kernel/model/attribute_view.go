@@ -58,8 +58,8 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 		view = attrView.Views[0]
 	}
 
-	switch view.Type {
-	case av.ViewTypeTable:
+	switch view.CurrentLayoutType {
+	case av.LayoutTypeTable:
 		viewable, err = renderAttributeViewTable(attrView, view)
 	}
 
@@ -70,7 +70,13 @@ func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.Attrib
 }
 
 func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table, err error) {
-	ret = view.Table
+	ret = &av.Table{
+		ID:      view.Table.ID,
+		Name:    view.Name,
+		Filters: view.Table.Filters,
+		Sorts:   view.Table.Sorts,
+	}
+
 	for _, avRow := range attrView.Rows {
 		row := &av.TableRow{ID: avRow.ID, Cells: avRow.Cells}
 		ret.Rows = append(ret.Rows, row)
@@ -404,27 +410,32 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	var row *av.Row
+	view, err := attrView.GetView(operation.ViewID)
+	if nil != err {
+		return
+	}
+
+	var rowID string
 	var index, previousIndex int
-	for i, r := range attrView.Rows {
-		if r.ID == operation.ID {
-			row = r
+	for i, r := range view.Table.RowIDs {
+		if r == operation.ID {
+			rowID = r
 			index = i
 			break
 		}
 	}
-	if nil == row {
+	if "" == rowID {
 		return
 	}
 
-	attrView.Rows = append(attrView.Rows[:index], attrView.Rows[index+1:]...)
-	for i, r := range attrView.Rows {
-		if r.ID == operation.PreviousID {
+	view.Table.RowIDs = append(view.Table.RowIDs[:index], view.Table.RowIDs[index+1:]...)
+	for i, r := range view.Table.RowIDs {
+		if r == operation.PreviousID {
 			previousIndex = i + 1
 			break
 		}
 	}
-	attrView.Rows = util.InsertElem(attrView.Rows, previousIndex, row)
+	view.Table.RowIDs = util.InsertElem(view.Table.RowIDs, previousIndex, rowID)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -440,6 +451,11 @@ func (tx *Transaction) doSortAttrViewColumn(operation *Operation) (ret *TxErr) {
 
 func sortAttributeViewColumn(operation *Operation) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	view, err := attrView.GetView(operation.ViewID)
 	if nil != err {
 		return
 	}
@@ -560,7 +576,6 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	err = av.SaveAttributeView(attrView)
 	return
 }
-
 
 func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := removeAttributeViewColumn(operation)
@@ -693,7 +708,6 @@ func (tx *Transaction) doUpdateAttrViewColOptions(operation *Operation) (ret *Tx
 	}
 	return
 }
-
 
 func (tx *Transaction) doSetAttrView(operation *Operation) (ret *TxErr) {
 	err := setAttributeView(operation)

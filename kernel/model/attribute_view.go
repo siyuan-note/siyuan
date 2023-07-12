@@ -286,15 +286,8 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		}
 	}
 
-	for _, keyValues := range attrView.KeyValues {
-		value := &av.Value{KeyID: keyValues.Key.ID, BlockID: blockID}
-		blockValues.Values = append(blockValues.Values, value)
-
-		if av.KeyTypeBlock == keyValues.Key.Type {
-			value.Block = &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}
-			break
-		}
-	}
+	value := &av.Value{KeyID: blockValues.Key.ID, BlockID: blockID, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
+	blockValues.Values = append(blockValues.Values, value)
 
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[NodeAttrNamePrefixAvKey+operation.AvID+"-"+blockValues.Key.ID] = "" // 将列作为属性添加到块中
@@ -670,19 +663,22 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 
 	var val *av.Value
 	for _, keyValues := range attrView.KeyValues {
-		if operation.KeyID == keyValues.Key.ID {
-			for _, value := range keyValues.Values {
-				if operation.ID == value.ID {
-					val = value
-					break
-				}
-			}
-			break
+		if operation.KeyID != keyValues.Key.ID {
+			continue
 		}
-	}
 
-	if nil == val {
-		return
+		for _, value := range keyValues.Values {
+			if operation.ID == value.ID {
+				val = value
+				break
+			}
+		}
+
+		if nil == val {
+			val = &av.Value{ID: operation.ID, KeyID: keyValues.Key.ID, BlockID: operation.RowID}
+			keyValues.Values = append(keyValues.Values, val)
+		}
+		break
 	}
 
 	tree, err := tx.loadTree(val.BlockID)

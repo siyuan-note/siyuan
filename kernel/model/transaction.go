@@ -1055,6 +1055,7 @@ type Operation struct {
 	Name   string   `json:"name"`   // 属性视图列名
 	Typ    string   `json:"type"`   // 属性视图列类型
 	KeyID  string   `json:"keyID"`  // 属性视列 ID
+	RowID  string   `json:"rowID"`  // 属性视图行 ID
 
 	discard bool // 用于标识是否在事务合并中丢弃
 }

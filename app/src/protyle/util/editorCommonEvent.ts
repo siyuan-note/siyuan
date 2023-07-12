@@ -824,17 +824,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     }
                     const avID = blockElement.getAttribute("data-av-id");
-                    const viewID = blockElement.querySelector(".item--focus").getAttribute("data-av-id");
                     transaction(protyle, [{
                         action: "sortAttrViewCol",
                         avID,
-                        viewID,
                         previousID: (targetElement.classList.contains("dragover__left") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "",
                         id: gutterTypes[2],
                     }], [{
                         action: "sortAttrViewCol",
                         avID,
-                        viewID,
                         previousID: targetElement.parentElement.querySelector(`[data-id="${gutterTypes[2]}"`).previousElementSibling?.getAttribute("data-id") || "",
                         id: gutterTypes[2],
                     }]);
@@ -853,7 +850,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
                     }
                     const avID = blockElement.getAttribute("data-av-id");
-                    const viewID = blockElement.querySelector(".item--focus").getAttribute("data-id");
                     if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "row") {
                         // 行内拖拽
                         const doOperations: IOperation[] = [];
@@ -863,14 +859,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             doOperations.push({
                                 action: "sortAttrViewRow",
                                 avID,
-                                viewID,
                                 previousID,
                                 id: item,
                             });
                             undoOperations.push({
                                 action: "sortAttrViewRow",
                                 avID,
-                                viewID,
                                 previousID: undoPreviousId,
                                 id: item,
                             });

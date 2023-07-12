@@ -56,8 +56,8 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     }
     const avMaskElement = document.querySelector(".av__mask");
     const cellId = cellElement.getAttribute("data-id");
-    const avId = blockElement.getAttribute("data-av-id");
-    const rowId = rowElement.getAttribute("data-id");
+    const colId = cellElement.getAttribute("data-col-id");
+    const avID = blockElement.getAttribute("data-av-id");
     let inputValue: string | number = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value;
     let oldValue: string | number = cellElement.textContent.trim();
     if (type === "number") {
@@ -67,16 +67,16 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     transaction(protyle, [{
         action: "updateAttrViewCell",
         id: cellId,
-        rowID: rowId,
-        parentID: avId,
+        avID,
+        keyID: colId,
         data: {
             [type]: {content: inputValue}
         }
     }], [{
         action: "updateAttrViewCell",
         id: cellId,
-        rowID: rowId,
-        parentID: avId,
+        avID,
+        keyID: colId,
         data: {
             [type]: {content: oldValue}
         }

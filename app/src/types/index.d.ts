@@ -308,7 +308,7 @@ interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
     avID?: string,  // av
-    viewID?: string,    // av
+    keyID?: string // updateAttrViewCell 专享
     data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}
     parentID?: string
     previousID?: string
@@ -317,7 +317,6 @@ interface IOperation {
     srcIDs?: string[] // insertAttrViewBlock 专享
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享
-    rowID?: string // updateAttrViewCell 专享
     deckID?: string // add/removeFlashcards 专享
     blockIDs?: string[] // add/removeFlashcards 专享
 }

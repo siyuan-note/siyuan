@@ -66,7 +66,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avId = blockElement.getAttribute("data-av-id");
-    const viewId = blockElement.querySelector(".item--focus").getAttribute("data-id");
     const menu = new Menu("av-header-cell", () => {
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === cellElement.textContent.trim()) {
@@ -76,14 +75,12 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
             action: "updateAttrViewCol",
             id: colId,
             avID: avId,
-            viewID: viewId,
             name: newValue,
             type,
         }], [{
             action: "updateAttrViewCol",
             id: colId,
             avID: avId,
-            viewID: viewId,
             name: cellElement.textContent.trim(),
             type,
         }]);
@@ -110,7 +107,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
-                    viewID: response.data.viewID,
                     data: [{
                         column: colId,
                         order: "ASC"
@@ -118,7 +114,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 }], [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
-                    viewID: response.data.viewID,
                     data: response.data.view.sorts
                 }]);
             });
@@ -132,7 +127,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
-                    viewID: response.data.viewID,
                     data: [{
                         column: colId,
                         order: "DESC"
@@ -140,7 +134,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 }], [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
-                    viewID: response.data.viewID,
                     data: response.data.view.sorts
                 }]);
             });
@@ -169,12 +162,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     transaction(protyle, [{
                         action: "setAttrViewFilters",
                         avID: avId,
-                        viewID: avData.viewID,
                         data: [filter]
                     }], [{
                         action: "setAttrViewFilters",
                         avID: avId,
-                        viewID: avData.viewID,
                         data: []
                     }]);
                 }
@@ -197,13 +188,11 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     action: "setAttrViewColHidden",
                     id: colId,
                     avID: avId,
-                    viewID: viewId,
                     data: true
                 }], [{
                     action: "setAttrViewColHidden",
                     id: colId,
                     avID: avId,
-                    viewID: viewId,
                     data: false
                 }]);
             }
@@ -223,12 +212,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     action: "removeAttrViewCol",
                     id: colId,
                     avID: avId,
-                    viewID: viewId,
                 }], [{
                     action: "addAttrViewCol",
                     name: cellElement.textContent.trim(),
                     avID: avId,
-                    viewID: viewId,
                     type: type,
                     id: colId
                 }]);
@@ -247,13 +234,11 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     action: "setAttrViewColWrap",
                     id: colId,
                     avID: avId,
-                    viewID: viewId,
                     data: inputElement.checked
                 }], [{
                     action: "setAttrViewColWrap",
                     id: colId,
                     avID: avId,
-                    viewID: viewId,
                     data: !inputElement.checked
                 }]);
             });

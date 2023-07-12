@@ -139,12 +139,10 @@ export const openMenuPanel = (protyle: IProtyle,
                 transaction(protyle, [{
                     action: "setAttrViewSorts",
                     avID: avId,
-                    viewID: data.viewID,
                     data: changeData
                 }], [{
                     action: "setAttrViewSorts",
                     avID: avId,
-                    viewID: data.viewID,
                     data: oldData
                 }]);
                 menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
@@ -175,12 +173,10 @@ export const openMenuPanel = (protyle: IProtyle,
                 transaction(protyle, [{
                     action: "setAttrViewFilters",
                     avID: avId,
-                    viewID: data.viewID,
                     data: changeData
                 }], [{
                     action: "setAttrViewFilters",
                     avID: avId,
-                    viewID: data.viewID,
                     data: oldData
                 }]);
                 menuElement.innerHTML = getFiltersHTML(data.view);
@@ -189,13 +185,11 @@ export const openMenuPanel = (protyle: IProtyle,
             transaction(protyle, [{
                 action: "sortAttrViewCol",
                 avID: avId,
-                viewID: data.viewID,
                 previousID: (targetElement.classList.contains("dragover__top") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "",
                 id: sourceId,
             }], [{
                 action: "sortAttrViewCol",
                 avID: avId,
-                viewID: data.viewID,
                 previousID: sourceElement.previousElementSibling?.getAttribute("data-id") || "",
                 id: sourceId,
             }]);
@@ -281,12 +275,10 @@ export const openMenuPanel = (protyle: IProtyle,
                     transaction(protyle, [{
                         action: "setAttrViewSorts",
                         avID: avId,
-                        viewID: data.viewID,
                         data: []
                     }], [{
                         action: "setAttrViewSorts",
                         avID: avId,
-                        viewID: data.viewID,
                         data: data.view.sorts
                     }]);
                     data.view.sorts = [];
@@ -310,12 +302,10 @@ export const openMenuPanel = (protyle: IProtyle,
                     transaction(protyle, [{
                         action: "setAttrViewSorts",
                         avID: avId,
-                        viewID: data.viewID,
                         data: data.view.sorts
                     }], [{
                         action: "setAttrViewSorts",
                         avID: avId,
-                        viewID: data.viewID,
                         data: oldSorts
                     }]);
                     menuElement.innerHTML = getSortsHTML(data.view.columns, data.view.sorts);
@@ -332,12 +322,10 @@ export const openMenuPanel = (protyle: IProtyle,
                     transaction(protyle, [{
                         action: "setAttrViewFilters",
                         avID: avId,
-                        viewID: data.viewID,
                         data: []
                     }], [{
                         action: "setAttrViewFilters",
                         avID: avId,
-                        viewID: data.viewID,
                         data: data.view.filters
                     }]);
                     data.view.filters = [];
@@ -361,12 +349,10 @@ export const openMenuPanel = (protyle: IProtyle,
                     transaction(protyle, [{
                         action: "setAttrViewFilters",
                         avID: avId,
-                        viewID: data.viewID,
                         data: data.view.filters
                     }], [{
                         action: "setAttrViewFilters",
                         avID: avId,
-                        viewID: data.viewID,
                         data: oldFilters
                     }]);
                     menuElement.innerHTML = getFiltersHTML(data.view);
@@ -407,14 +393,12 @@ export const openMenuPanel = (protyle: IProtyle,
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 avID: avId,
-                                viewID: data.viewID,
                                 data: false
                             });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 avID: avId,
-                                viewID: data.viewID,
                                 data: true
                             });
                             item.hidden = false;
@@ -436,14 +420,12 @@ export const openMenuPanel = (protyle: IProtyle,
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 avID: avId,
-                                viewID: data.viewID,
                                 data: true
                             });
                             undoOperations.push({
                                 action: "setAttrViewColHidden",
                                 id: item.id,
                                 avID: avId,
-                                viewID: data.viewID,
                                 data: false
                             });
                             item.hidden = true;
@@ -462,13 +444,11 @@ export const openMenuPanel = (protyle: IProtyle,
                         action: "setAttrViewColHidden",
                         id: colId,
                         avID: avId,
-                        viewID: data.viewID,
                         data: true
                     }], [{
                         action: "setAttrViewColHidden",
                         id: colId,
                         avID: avId,
-                        viewID: data.viewID,
                         data: false
                     }]);
                     data.view.columns.find((item: IAVColumn) => item.id === colId).hidden = true;
@@ -482,13 +462,11 @@ export const openMenuPanel = (protyle: IProtyle,
                         action: "setAttrViewColHidden",
                         id: colId,
                         avID: avId,
-                        viewID: data.viewID,
                         data: false
                     }], [{
                         action: "setAttrViewColHidden",
                         id: colId,
                         avID: avId,
-                        viewID: data.viewID,
                         data: true
                     }]);
                     data.view.columns.find((item: IAVColumn) => item.id === colId).hidden = false;

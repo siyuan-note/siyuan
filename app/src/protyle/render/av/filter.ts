@@ -75,12 +75,10 @@ export const setFilter = (options: {
         transaction(options.protyle, [{
             action: "setAttrViewFilters",
             avID: options.data.id,
-            viewID: options.data.viewID,
             data: options.data.view.filters
         }], [{
             action: "setAttrViewFilters",
             avID: options.data.id,
-            viewID: options.data.viewID,
             data: oldFilters
         }]);
         const menuElement = hasClosestByClassName(options.target, "b3-menu");
@@ -177,12 +175,10 @@ export const setFilter = (options: {
             transaction(options.protyle, [{
                 action: "setAttrViewFilters",
                 avID: options.data.id,
-                viewID: options.data.viewID,
                 data: options.data.view.filters
             }], [{
                 action: "setAttrViewFilters",
                 avID: options.data.id,
-                viewID: options.data.viewID,
                 data: oldFilters
             }]);
             const menuElement = hasClosestByClassName(options.target, "b3-menu");
@@ -255,12 +251,10 @@ export const addFilter = (options: {
                     transaction(options.protyle, [{
                         action: "setAttrViewFilters",
                         avID: options.data.id,
-                        viewID: options.data.viewID,
                         data: options.data.view.filters
                     }], [{
                         action: "setAttrViewFilters",
                         avID: options.data.id,
-                        viewID: options.data.viewID,
                         data: oldFilters
                     }]);
                     options.menuElement.innerHTML = getFiltersHTML(options.data.view);

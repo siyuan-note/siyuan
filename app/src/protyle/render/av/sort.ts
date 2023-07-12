@@ -33,12 +33,10 @@ export const addSort = (options: {
                     transaction(options.protyle, [{
                         action: "setAttrViewSorts",
                         avID: options.data.id,
-                        viewID: options.data.viewID,
                         data: options.data.view.sorts
                     }], [{
                         action: "setAttrViewSorts",
                         avID: options.data.id,
-                        viewID: options.data.viewID,
                         data: oldSorts
                     }]);
                     options.menuElement.innerHTML = getSortsHTML(options.data.view.columns, options.data.view.sorts);
@@ -74,12 +72,10 @@ export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data
             transaction(protyle, [{
                 action: "setAttrViewSorts",
                 avID: data.id,
-                viewID: data.viewID,
                 data: data.view.sorts
             }], [{
                 action: "setAttrViewSorts",
                 avID: data.id,
-                viewID: data.viewID,
                 data: oldSort
             }]);
         });

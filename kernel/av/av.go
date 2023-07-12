@@ -130,7 +130,6 @@ type View struct {
 	ID   string `json:"id"`   // 视图 ID
 	Name string `json:"name"` // 视图名称
 
-	LayoutID   string       `json:"layoutID"`        // 当前布局 ID
 	LayoutType LayoutType   `json:"type"`            // 当前布局类型
 	Table      *LayoutTable `json:"table,omitempty"` // 表格布局
 }
@@ -144,15 +143,13 @@ const (
 
 func NewView() *View {
 	name := "Table"
-	layoutID := ast.NewNodeID()
 	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       name,
-		LayoutID:   layoutID,
 		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
 			Spec:    0,
-			ID:      layoutID,
+			ID:      ast.NewNodeID(),
 			Filters: []*ViewFilter{},
 			Sorts:   []*ViewSort{},
 		},

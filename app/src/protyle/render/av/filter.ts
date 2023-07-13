@@ -187,7 +187,7 @@ export const setFilter = (options: {
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
     if (options.filter.value.type === "select" || options.filter.value.type === "mSelect") {
-        colData.options.forEach((option) => {
+        colData.options?.forEach((option) => {
             let icon = "iconUncheck"
             options.filter.value.mSelect.find((optionItem) => {
                 if (optionItem.content === option.name) {

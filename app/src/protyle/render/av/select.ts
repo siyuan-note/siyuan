@@ -118,7 +118,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
         transaction(protyle, [{
             action: "updateAttrViewColOption",
             id: colId,
-            parentID: data.id,
+            avID: data.id,
             data: {
                 newColor: color,
                 oldName: name,
@@ -127,7 +127,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
         }], [{
             action: "updateAttrViewColOption",
             id: colId,
-            parentID: data.id,
+            avID: data.id,
             data: {
                 newColor: color,
                 oldName: inputElement.value,
@@ -238,7 +238,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                 transaction(protyle, [{
                     action: "updateAttrViewColOption",
                     id: colId,
-                    parentID: data.id,
+                    avID: data.id,
                     data: {
                         oldName: name,
                         newName: inputElement.value,
@@ -248,7 +248,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                 }], [{
                     action: "updateAttrViewColOption",
                     id: colId,
-                    parentID: data.id,
+                    avID: data.id,
                     data: {
                         oldName: inputElement.value,
                         newName: name,
@@ -389,6 +389,18 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             value: genCellValue(colData.type, ""),
             valueType: colData.type
         }
+    } else {
+        let hasSelected = false
+        cellData.value.mSelect.find((item) => {
+            if (item.content === currentElement.dataset.name) {
+                hasSelected = true
+                return true;
+            }
+        })
+        if (hasSelected) {
+            menuElement.querySelector("input").focus();
+            return;
+        }
     }
 
     const oldValue = Object.assign([], cellData.value.mSelect);
@@ -448,6 +460,10 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
     }
     if (colData.type === "select") {
         menuElement.parentElement.remove();
+    } else {
+        menuElement.innerHTML = getSelectHTML(data.view, options);
+        bindSelectEvent(protyle, data, menuElement, options);
+        menuElement.querySelector("input").focus();
     }
 };
 

@@ -114,6 +114,10 @@
   &__celltext {
     flex: 1;
     overflow: hidden;
+
+    .b3-chip {
+      margin: 2px;
+    }
   }
 
   &__firstcol {

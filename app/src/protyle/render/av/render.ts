@@ -63,10 +63,12 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
                             text = `<span class="av__celltext">${cell.value?.number.content || ""}</span>`;
                         } else if (cell.valueType === "mSelect" || cell.valueType === "select") {
                             cell.value?.mSelect?.forEach((item: { content: string, color: string }) => {
-                                text += `<span class="av__celltext"><span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span></span>`;
+                                text += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
                             });
                             if (!text) {
                                 text = '<span class="av__celltext"></span>';
+                            } else {
+                                text = `<span class="av__celltext">${text}</span>`;
                             }
                         } else if (cell.valueType === "date") {
                             text = `<span class="av__celltext">${cell.value?.date.content || ""}</span>`;

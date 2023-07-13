@@ -12,7 +12,7 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
         html = `<textarea ${style} class="b3-text-field">${cellElement.textContent}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElement.textContent}" ${style} class="b3-text-field">`;
-    } else if (type === "select" && blockElement) {
+    } else if (["select", "mSelect"].includes(type) && blockElement) {
         openMenuPanel(protyle, blockElement, "select", {cellElement});
         return;
     }

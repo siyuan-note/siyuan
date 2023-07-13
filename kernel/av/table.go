@@ -267,6 +267,10 @@ func (table *Table) GetID() string {
 }
 
 func (table *Table) SortRows() {
+	sort.Slice(table.Rows, func(i, j int) bool { return table.Rows[i].ID < table.Rows[j].ID })
+
+	// sort by row ids
+
 	if 1 > len(table.Sorts) {
 		return
 	}

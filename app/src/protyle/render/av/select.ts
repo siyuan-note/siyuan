@@ -386,6 +386,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             bgColor: "",
             id: Lute.NewNodeID(),
             value: {
+                type: colData.type,
                 mSelect: []
             },
             valueType: colData.type

@@ -192,7 +192,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                 }], [{
                     action: "updateAttrViewColOptions",
                     id: colId,
-                    parentID: data.id,
+                    avID: data.id,
                     data: colOptions
                 }]);
                 colOptions.find((item, index) => {
@@ -411,7 +411,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
         transaction(protyle, [{
             action: "updateAttrViewColOptions",
             id: colId,
-            parentID: data.id,
+            avID: data.id,
             data: colData.options
         }, {
             action: "updateAttrViewCell",

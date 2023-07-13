@@ -101,12 +101,12 @@ export const openMenuPanel = (protyle: IProtyle,
                 transaction(protyle, [{
                     action: "updateAttrViewColOptions",
                     id: options.cellElement.dataset.colId,
-                    parentID: data.id,
+                    avID: data.id,
                     data: changeData,
                 }], [{
                     action: "updateAttrViewColOptions",
                     id: options.cellElement.dataset.colId,
-                    parentID: data.id,
+                    avID: data.id,
                     data: oldData,
                 }]);
                 menuElement.innerHTML = getSelectHTML(data.view, options);

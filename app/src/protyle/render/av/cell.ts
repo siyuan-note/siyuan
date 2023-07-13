@@ -16,6 +16,7 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
         openMenuPanel(protyle, blockElement, "select", {cellElement});
         return;
     }
+    window.siyuan.menus.menu.remove();
     document.body.insertAdjacentHTML("beforeend", `<div class="av__mask">
     ${html}
 </div>`);

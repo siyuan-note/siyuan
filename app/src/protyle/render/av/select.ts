@@ -87,14 +87,14 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
         id: cellId,
         keyID: colId,
         rowID,
-        parentID: data.id,
+        avID: data.id,
         data: cellData.value
     }], [{
         action: "updateAttrViewCell",
         id: cellId,
         keyID: colId,
         rowID,
-        parentID: data.id,
+        avID: data.id,
         data: {
             [colData.type]: oldValue
         }
@@ -418,7 +418,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
             id: cellId,
             keyID: colId,
             rowID,
-            parentID: data.id,
+            avID: data.id,
             data: cellData.value
         }], [{
             action: "removeAttrViewColOption",
@@ -432,14 +432,14 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
             id: cellId,
             keyID: colId,
             rowID,
-            parentID: data.id,
+            avID: data.id,
             data: cellData.value
         }], [{
             action: "updateAttrViewCell",
             id: cellId,
             keyID: colId,
             rowID,
-            parentID: data.id,
+            avID: data.id,
             data: {
                 [colData.type]: oldValue
             }

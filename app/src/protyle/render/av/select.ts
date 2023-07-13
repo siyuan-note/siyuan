@@ -388,15 +388,15 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             id: Lute.NewNodeID(),
             value: genCellValue(colData.type, ""),
             valueType: colData.type
-        }
+        };
     } else {
-        let hasSelected = false
+        let hasSelected = false;
         cellData.value.mSelect.find((item) => {
             if (item.content === currentElement.dataset.name) {
-                hasSelected = true
+                hasSelected = true;
                 return true;
             }
-        })
+        });
         if (hasSelected) {
             menuElement.querySelector("input").focus();
             return;

@@ -55,20 +55,20 @@ export const genCellValue = (colType: TAVCol, value: string | {
 };
 
 const toggleEmpty = (element: HTMLElement, show: boolean) => {
-    const menuElement = hasClosestByClassName(element, "b3-menu")
+    const menuElement = hasClosestByClassName(element, "b3-menu");
     if (menuElement) {
         menuElement.querySelectorAll("input, .b3-chip").forEach(inputElement => {
-            const menuItemElement = hasClosestByClassName(inputElement, "b3-menu__item")
+            const menuItemElement = hasClosestByClassName(inputElement, "b3-menu__item");
             if (menuItemElement) {
                 if (show) {
-                    menuItemElement.classList.remove("fn__none")
+                    menuItemElement.classList.remove("fn__none");
                 } else {
-                    menuItemElement.classList.add("fn__none")
+                    menuItemElement.classList.add("fn__none");
                 }
             }
-        })
+        });
     }
-}
+};
 
 export const setFilter = (options: {
     filter: IAVFilter,
@@ -84,16 +84,16 @@ export const setFilter = (options: {
         if (textElement) {
             cellValue = genCellValue(options.filter.value.type, textElement.value);
         } else {
-            const mSelect: { color: string, content: string }[] = []
-            window.siyuan.menus.menu.element.querySelectorAll('svg').forEach(item => {
+            const mSelect: { color: string, content: string }[] = [];
+            window.siyuan.menus.menu.element.querySelectorAll("svg").forEach(item => {
                 if (item.firstElementChild.getAttribute("xlink:href") === "#iconCheck") {
-                    const chipElement = item.nextElementSibling.firstElementChild as HTMLElement
+                    const chipElement = item.nextElementSibling.firstElementChild as HTMLElement;
                     mSelect.push({
                         color: chipElement.dataset.color,
                         content: chipElement.dataset.name
-                    })
+                    });
                 }
-            })
+            });
             cellValue = genCellValue(options.filter.value.type, mSelect);
         }
         const newFilter: IAVFilter = {
@@ -188,12 +188,12 @@ export const setFilter = (options: {
     });
     if (options.filter.value.type === "select" || options.filter.value.type === "mSelect") {
         colData.options?.forEach((option) => {
-            let icon = "iconUncheck"
+            let icon = "iconUncheck";
             options.filter.value.mSelect.find((optionItem) => {
                 if (optionItem.content === option.name) {
-                    icon = "iconCheck"
+                    icon = "iconCheck";
                 }
-            })
+            });
             menu.addItem({
                 icon,
                 label: `<span class="b3-chip b3-chip--middle" data-name="${option.name}" data-color="${option.color}" style="margin:3px 0;background-color:var(--b3-font-background${option.color});color:var(--b3-font-color${option.color})">
@@ -201,15 +201,15 @@ export const setFilter = (options: {
 </span>`,
                 bind(element) {
                     element.addEventListener("click", () => {
-                        const useElement = element.querySelector("use")
+                        const useElement = element.querySelector("use");
                         if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
                             useElement.setAttribute("xlink:href", "#iconCheck");
                         } else {
                             useElement.setAttribute("xlink:href", "#iconUncheck");
                         }
-                    })
+                    });
                 }
-            })
+            });
         });
     } else if (options.filter.value.type === "text") {
         menu.addItem({
@@ -250,7 +250,7 @@ export const setFilter = (options: {
     });
     const selectElement = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement);
     selectElement.addEventListener("change", () => {
-        toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty")
+        toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty");
     });
     const textElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     if (textElement) {
@@ -265,7 +265,7 @@ export const setFilter = (options: {
             }
         });
     }
-    toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty")
+    toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty");
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElement) {
         textElement.select();

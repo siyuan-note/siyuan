@@ -13,7 +13,7 @@ import {addLoading, setPadding} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {isCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
@@ -294,7 +294,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         paragraph: window.siyuan.config.search.paragraph,
                         embedBlock: window.siyuan.config.search.embedBlock,
                     }
-                }, config, edit, app);
+                }, config, edit);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -323,7 +323,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 config.removed = false;
                 criteriaData.find(item => {
                     if (item.name === target.innerText.trim()) {
-                        updateConfig(element, item, config, edit, app);
+                        updateConfig(element, item, config, edit);
                         return true;
                     }
                 });
@@ -483,7 +483,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             paragraph: window.siyuan.config.search.paragraph,
                             embedBlock: window.siyuan.config.search.embedBlock,
                         }
-                    }, config, edit, app);
+                    }, config, edit);
                 }, () => {
                     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
                     const isPopover = hasClosestByClassName(element, "b3-dialog__container");
@@ -855,7 +855,7 @@ const getQueryTip = (method: number) => {
     return methodTip;
 };
 
-const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle, app: App) => {
+const updateConfig = (element: Element, item: ISearchOption, config: ISearchOption, edit: Protyle) => {
     const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
     if (dialogElement && dialogElement.getAttribute("data-key") === window.siyuan.config.keymap.general.search.custom) {
         // https://github.com/siyuan-note/siyuan/issues/6828

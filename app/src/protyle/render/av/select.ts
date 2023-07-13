@@ -101,7 +101,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
     }]);
 };
 
-export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
+export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     cellElement: HTMLElement;
 }, target: HTMLElement,) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
@@ -133,7 +133,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                 newName: name
             },
         }]);
-        data.columns.find(column => {
+        data.view.columns.find(column => {
             if (column.id === colId) {
                 column.options.find((item) => {
                     if (item.name === name) {
@@ -144,7 +144,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                 return true;
             }
         });
-        data.rows.find(row => {
+        data.view.rows.find(row => {
             if (row.id === options.cellElement.parentElement.dataset.id) {
                 row.cells.find(cell => {
                     if (cell.id === options.cellElement.dataset.id) {
@@ -160,7 +160,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                 return true;
             }
         });
-        menuElement.innerHTML = getSelectHTML(data, options);
+        menuElement.innerHTML = getSelectHTML(data.view, options);
         bindSelectEvent(protyle, data, menuElement, options);
     });
     if (menu.isOpen) {
@@ -177,7 +177,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
         click() {
             confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
                 let colOptions: { name: string, color: string }[] = [];
-                data.columns.find(column => {
+                data.view.columns.find(column => {
                     if (column.id === colId) {
                         colOptions = column.options;
                         return true;
@@ -187,7 +187,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                 transaction(protyle, [{
                     action: "removeAttrViewColOption",
                     id: colId,
-                    parentID: data.id,
+                    avID: data.id,
                     data: newName,
                 }], [{
                     action: "updateAttrViewColOptions",
@@ -201,7 +201,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                         return true;
                     }
                 });
-                data.rows.find(row => {
+                data.view.rows.find(row => {
                     if (row.id === options.cellElement.parentElement.dataset.id) {
                         row.cells.find(cell => {
                             if (cell.id === options.cellElement.dataset.id) {
@@ -217,7 +217,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                         return true;
                     }
                 });
-                menuElement.innerHTML = getSelectHTML(data, options);
+                menuElement.innerHTML = getSelectHTML(data.view, options);
                 bindSelectEvent(protyle, data, menuElement, options);
             });
         }
@@ -256,7 +256,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                     },
                 }]);
 
-                data.columns.find(column => {
+                data.view.columns.find(column => {
                     if (column.id === colId) {
                         column.options.find((item) => {
                             if (item.name === name) {
@@ -268,7 +268,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                         return true;
                     }
                 });
-                data.rows.find(row => {
+                data.view.rows.find(row => {
                     if (row.id === options.cellElement.parentElement.dataset.id) {
                         row.cells.find(cell => {
                             if (cell.id === options.cellElement.dataset.id) {
@@ -287,7 +287,7 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
                 });
                 name = inputElement.value;
                 color = (index + 1).toString();
-                menuElement.innerHTML = getSelectHTML(data, options);
+                menuElement.innerHTML = getSelectHTML(data.view, options);
                 bindSelectEvent(protyle, data, menuElement, options);
                 return true;
             }
@@ -304,13 +304,13 @@ export const setSelectCol = (protyle: IProtyle, data: IAVTable, options: {
     inputElement.select();
 };
 
-export const bindSelectEvent = (protyle: IProtyle, data: IAVTable, menuElement: HTMLElement, options: {
+export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, options: {
     cellElement: HTMLElement
 }) => {
     const inputElement = menuElement.querySelector("input");
     const colId = options.cellElement.dataset.colId;
     let colData: IAVColumn;
-    data.columns.find((item: IAVColumn) => {
+    data.view.columns.find((item: IAVColumn) => {
         if (item.id === colId) {
             colData = item;
             return;
@@ -342,19 +342,19 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAVTable, menuElement: 
             }
             addSelectColAndCell(protyle, data, options, currentElement, menuElement);
         } else if (event.key === "Backspace" && inputElement.value === "") {
-            removeSelectCell(protyle, data, options, inputElement.previousElementSibling as HTMLElement);
+            removeSelectCell(protyle, data.view, options, inputElement.previousElementSibling as HTMLElement);
         }
     });
 };
 
-export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: {
+export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
     cellElement: HTMLElement
 }, currentElement: HTMLElement, menuElement: HTMLElement) => {
     const rowID = options.cellElement.parentElement.dataset.id;
     const colId = options.cellElement.dataset.colId;
     const cellId = options.cellElement.dataset.id;
     let colData: IAVColumn;
-    data.columns.find((item: IAVColumn) => {
+    data.view.columns.find((item: IAVColumn) => {
         if (item.id === colId) {
             colData = item;
             return;
@@ -364,7 +364,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
         colData.options = [];
     }
     let cellData: IAVCell;
-    data.rows.find(row => {
+    data.view.rows.find(row => {
         if (row.id === rowID) {
             row.cells.find(cell => {
                 if (cell.id === cellId) {
@@ -423,7 +423,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
         }], [{
             action: "removeAttrViewColOption",
             id: colId,
-            parentID: data.id,
+            avID: data.id,
             data: currentElement.dataset.name,
         }]);
     } else {

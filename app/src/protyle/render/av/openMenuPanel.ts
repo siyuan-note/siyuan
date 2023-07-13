@@ -44,7 +44,7 @@ export const openMenuPanel = (protyle: IProtyle,
         if (options && options.cellElement) {
             const cellRect = options.cellElement.getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-            bindSelectEvent(protyle, data.view, menuElement, options);
+            bindSelectEvent(protyle, data, menuElement, options);
             menuElement.querySelector("input").select();
             menuElement.querySelector("input").focus();
         } else {
@@ -110,7 +110,7 @@ export const openMenuPanel = (protyle: IProtyle,
                     data: oldData,
                 }]);
                 menuElement.innerHTML = getSelectHTML(data.view, options);
-                bindSelectEvent(protyle, data.view, menuElement, options);
+                bindSelectEvent(protyle, data, menuElement, options);
                 return;
             }
             const sourceId = sourceElement.dataset.id;
@@ -475,11 +475,11 @@ export const openMenuPanel = (protyle: IProtyle,
                     event.stopPropagation();
                     break;
                 } else if (type === "setSelectCol") {
-                    setSelectCol(protyle, data.view, options, target);
+                    setSelectCol(protyle, data, options, target);
                     event.stopPropagation();
                     break;
                 } else if (type === "addSelectColAndCell") {
-                    addSelectColAndCell(protyle, data.view, options, target, menuElement);
+                    addSelectColAndCell(protyle, data, options, target, menuElement);
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     break;

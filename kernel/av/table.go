@@ -206,30 +206,35 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 
 	if nil != value.MSelect && nil != other.MSelect && 0 < len(value.MSelect) && 0 < len(other.MSelect) {
 		switch operator {
-		case FilterOperatorIsEqual:
-			return value.MSelect[0].Content == other.MSelect[0].Content
-		case FilterOperatorIsNotEqual:
-			return value.MSelect[0].Content != other.MSelect[0].Content
-		case FilterOperatorContains:
+		case FilterOperatorIsEqual, FilterOperatorContains:
+			contains := false
 			for _, v := range value.MSelect {
-				if v.Content == other.MSelect[0].Content {
-					return true
+				for _, v2 := range other.MSelect {
+					if v.Content == v2.Content {
+						contains = true
+						break
+					}
 				}
 			}
-		case FilterOperatorDoesNotContain:
+			return contains
+		case FilterOperatorIsNotEqual, FilterOperatorDoesNotContain:
+			contains := false
 			for _, v := range value.MSelect {
-				if v.Content == other.MSelect[0].Content {
-					return false
+				for _, v2 := range other.MSelect {
+					if v.Content == v2.Content {
+						contains = true
+						break
+					}
 				}
 			}
-			return true
+			return !contains
 		case FilterOperatorIsEmpty:
-			return 0 == len(value.MSelect)
+			return 0 == len(value.MSelect) || 1 == len(value.MSelect) && "" == value.MSelect[0].Content
 		case FilterOperatorIsNotEmpty:
-			return 0 != len(value.MSelect)
+			return 0 != len(value.MSelect) && !(1 == len(value.MSelect) && "" == value.MSelect[0].Content)
 		}
 	}
-	return false
+	return true
 }
 
 // Table 描述了表格实例的结构。

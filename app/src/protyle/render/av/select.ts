@@ -378,6 +378,17 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAVTable, options: 
             return true;
         }
     });
+    if (!cellData) {
+        cellData = {
+            color: "",
+            bgColor:"",
+            id: Lute.NewNodeID(),
+            value: {
+                mSelect: []
+            },
+            valueType: colData.type
+        }
+    }
 
     const oldValue = Object.assign([], cellData.value.mSelect);
     if (colData.type === "mSelect") {

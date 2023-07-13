@@ -5,43 +5,70 @@ import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {objEquals} from "../../../util/functions";
 
-export const getCellValue = (colType: TAVCol, value: string) => {
+export const genCellValue = (colType: TAVCol, value: string | {
+    content: string,
+    color: string
+}[]) => {
     let cellValue: IAVCellValue;
-    if (colType === "number") {
-        if (value) {
+    if (typeof value === "string") {
+        if (colType === "number") {
+            if (value) {
+                cellValue = {
+                    type: colType,
+                    number: {
+                        content: parseFloat(value),
+                        isNotEmpty: true
+                    }
+                };
+            } else {
+                cellValue = {
+                    type: colType,
+                    number: {
+                        isNotEmpty: false
+                    }
+                };
+            }
+        } else if (colType === "text") {
             cellValue = {
                 type: colType,
-                number: {
-                    content: parseFloat(value),
-                    isNotEmpty: true
+                text: {
+                    content: value
                 }
             };
-        } else {
-            cellValue = {
+        } else if (colType === "mSelect" || colType === "select") {
+            return cellValue = {
                 type: colType,
-                number: {
-                    isNotEmpty: false
-                }
+                mSelect: [{
+                    content: value,
+                    color: ""
+                }]
             };
         }
-    } else if (colType === "text") {
-        cellValue = {
+        return cellValue;
+    }
+    if (colType === "mSelect" || colType === "select") {
+        return cellValue = {
             type: colType,
-            text: {
-                content: value
-            }
-        };
-    } else if (colType === "mSelect" || colType === "select") {
-        cellValue = {
-            type: colType,
-            mSelect: [{
-                content: value,
-                color: ""
-            }]
+            mSelect: value
         };
     }
-    return cellValue;
 };
+
+const toggleEmpty = (element: HTMLElement, show: boolean) => {
+    const menuElement = hasClosestByClassName(element, "b3-menu")
+    if (menuElement) {
+        menuElement.querySelectorAll("input, .b3-chip").forEach(inputElement => {
+            const menuItemElement = hasClosestByClassName(inputElement, "b3-menu__item")
+            if (menuItemElement) {
+                if (show) {
+                    menuItemElement.classList.remove("fn__none")
+                } else {
+                    menuItemElement.classList.add("fn__none")
+                }
+            }
+        })
+    }
+}
 
 export const setFilter = (options: {
     filter: IAVFilter,
@@ -53,7 +80,22 @@ export const setFilter = (options: {
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         let hasMatch = false;
-        const cellValue = getCellValue(options.filter.value.type, textElement?.value || "");
+        let cellValue: IAVCellValue;
+        if (textElement) {
+            cellValue = genCellValue(options.filter.value.type, textElement.value);
+        } else {
+            const mSelect: { color: string, content: string }[] = []
+            window.siyuan.menus.menu.element.querySelectorAll('svg').forEach(item => {
+                if (item.firstElementChild.getAttribute("xlink:href") === "#iconCheck") {
+                    const chipElement = item.nextElementSibling.firstElementChild as HTMLElement
+                    mSelect.push({
+                        color: chipElement.dataset.color,
+                        content: chipElement.dataset.name
+                    })
+                }
+            })
+            cellValue = genCellValue(options.filter.value.type, mSelect);
+        }
         const newFilter: IAVFilter = {
             column: options.filter.column,
             value: cellValue,
@@ -118,6 +160,7 @@ export const setFilter = (options: {
 `;
             break;
         case "mSelect":
+        case "select":
             options.data.view.columns.find((column) => {
                 if (column.id === options.filter.column) {
                     colData = column;
@@ -143,15 +186,30 @@ export const setFilter = (options: {
         iconHTML: "",
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
-    if (options.filter.value.type === "mSelect") {
-        // TODO
+    if (options.filter.value.type === "select" || options.filter.value.type === "mSelect") {
         colData.options.forEach((option) => {
-            menu.addItem({
-                label: `<input style="margin: 4px 0" value="${options.filter.value.text.content}" class="b3-text-field fn__size200">`,
-                click() {
-
+            let icon = "iconUncheck"
+            options.filter.value.mSelect.find((optionItem) => {
+                if (optionItem.content === option.name) {
+                    icon = "iconCheck"
                 }
-            });
+            })
+            menu.addItem({
+                icon,
+                label: `<span class="b3-chip b3-chip--middle" data-name="${option.name}" data-color="${option.color}" style="margin:3px 0;background-color:var(--b3-font-background${option.color});color:var(--b3-font-color${option.color})">
+    <span class="fn__ellipsis">${option.name}</span>
+</span>`,
+                bind(element) {
+                    element.addEventListener("click", () => {
+                        const useElement = element.querySelector("use")
+                        if (useElement.getAttribute("xlink:href") === "#iconUncheck") {
+                            useElement.setAttribute("xlink:href", "#iconCheck");
+                        } else {
+                            useElement.setAttribute("xlink:href", "#iconUncheck");
+                        }
+                    })
+                }
+            })
         });
     } else if (options.filter.value.type === "text") {
         menu.addItem({
@@ -192,11 +250,7 @@ export const setFilter = (options: {
     });
     const selectElement = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement);
     selectElement.addEventListener("change", () => {
-        if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
-            selectElement.parentElement.parentElement.nextElementSibling.classList.add("fn__none");
-        } else {
-            selectElement.parentElement.parentElement.nextElementSibling.classList.remove("fn__none");
-        }
+        toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty")
     });
     const textElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     if (textElement) {
@@ -211,11 +265,7 @@ export const setFilter = (options: {
             }
         });
     }
-    if (selectElement.value === "Is empty" || selectElement.value === "Is not empty") {
-        selectElement.parentElement.parentElement.nextElementSibling.classList.add("fn__none");
-    } else {
-        selectElement.parentElement.parentElement.nextElementSibling.classList.remove("fn__none");
-    }
+    toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty")
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElement) {
         textElement.select();
@@ -245,7 +295,7 @@ export const addFilter = (options: {
                 icon: getColIconByType(column.type),
                 click: () => {
                     const oldFilters = Object.assign([], options.data.view.filters);
-                    const cellValue = getCellValue(column.type, "");
+                    const cellValue = genCellValue(column.type, "");
                     options.data.view.filters.push({
                         column: column.id,
                         operator: "Contains",

@@ -2,7 +2,7 @@ import {hasClosestBlock} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {getCellValue, setFilter} from "./filter";
+import {genCellValue, setFilter} from "./filter";
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {
@@ -156,7 +156,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     filter = {
                         column: colId,
                         operator: "Contains",
-                        value: getCellValue(type, "")
+                        value: genCellValue(type, "")
                     };
                     avData.view.filters.push(filter);
                     transaction(protyle, [{

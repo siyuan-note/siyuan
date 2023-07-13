@@ -3,6 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
+import {genCellValue} from "./filter";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -385,10 +386,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             color: "",
             bgColor: "",
             id: Lute.NewNodeID(),
-            value: {
-                type: colData.type,
-                mSelect: []
-            },
+            value: genCellValue(colData.type, ""),
             valueType: colData.type
         }
     }

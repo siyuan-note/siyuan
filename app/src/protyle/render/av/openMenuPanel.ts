@@ -484,7 +484,7 @@ export const openMenuPanel = (protyle: IProtyle,
                     event.stopPropagation();
                     break;
                 } else if (type === "removeSelectCell") {
-                    removeSelectCell(protyle, data.view, options, target.parentElement);
+                    removeSelectCell(protyle, data, options, target.parentElement);
                     event.stopPropagation();
                     break;
                 }

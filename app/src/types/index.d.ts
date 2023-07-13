@@ -912,6 +912,7 @@ interface IAVCell {
 }
 
 interface IAVCellValue {
+    type?: TAVCol,
     text?: { content: string },
     number?: { content?: number, isNotEmpty: boolean },
     mSelect?: { content: string, color: string }[]

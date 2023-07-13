@@ -10,6 +10,7 @@ export const getCellValue = (colType: TAVCol, value: string) => {
     if (colType === "number") {
         if (value) {
             cellValue = {
+                type: colType,
                 number: {
                     content: parseFloat(value),
                     isNotEmpty: true
@@ -17,6 +18,7 @@ export const getCellValue = (colType: TAVCol, value: string) => {
             };
         } else {
             cellValue = {
+                type: colType,
                 number: {
                     isNotEmpty: false
                 }
@@ -24,12 +26,14 @@ export const getCellValue = (colType: TAVCol, value: string) => {
         }
     } else if (colType === "text") {
         cellValue = {
+            type: colType,
             text: {
                 content: value
             }
         };
     } else if (colType === "mSelect" || colType === "select") {
         cellValue = {
+            type: colType,
             mSelect: [{
                 content: value,
                 color: ""
@@ -45,12 +49,11 @@ export const setFilter = (options: {
     data: IAV,
     target: HTMLElement,
 }) => {
-    const colType = Object.keys(options.filter.value)[0] as TAVCol;
     const rectTarget = options.target.getBoundingClientRect();
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         let hasMatch = false;
-        const cellValue = getCellValue(colType, textElement?.value || "");
+        const cellValue = getCellValue(options.filter.value.type, textElement?.value || "");
         const newFilter: IAVFilter = {
             column: options.filter.column,
             value: cellValue,
@@ -91,7 +94,7 @@ export const setFilter = (options: {
     }
     let selectHTML = "";
     let colData: IAVColumn;
-    switch (colType) {
+    switch (options.filter.value.type) {
         case "text":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
@@ -140,7 +143,7 @@ export const setFilter = (options: {
         iconHTML: "",
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
-    if (colType === "mSelect") {
+    if (options.filter.value.type === "mSelect") {
         // TODO
         colData.options.forEach((option) => {
             menu.addItem({
@@ -150,12 +153,12 @@ export const setFilter = (options: {
                 }
             });
         });
-    } else if (colType === "text") {
+    } else if (options.filter.value.type === "text") {
         menu.addItem({
             iconHTML: "",
             label: `<input style="margin: 4px 0" value="${options.filter.value.text.content}" class="b3-text-field fn__size200">`
         });
-    } else if (colType === "number") {
+    } else if (options.filter.value.type === "number") {
         menu.addItem({
             iconHTML: "",
             label: `<input style="margin: 4px 0" value="${options.filter.value.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`

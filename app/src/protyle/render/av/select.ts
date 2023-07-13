@@ -42,7 +42,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     return html;
 };
 
-export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
+export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
     cellElement: HTMLElement
 }, target: HTMLElement) => {
     if (!target) {
@@ -52,7 +52,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
     const colId = options.cellElement.dataset.colId;
     const cellId = options.cellElement.dataset.id;
     let colData: IAVColumn;
-    data.columns.find((item: IAVColumn) => {
+    data.view.columns.find((item: IAVColumn) => {
         if (item.id === colId) {
             colData = item;
             return;
@@ -62,7 +62,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAVTable, options: {
         colData.options = [];
     }
     let cellData: IAVCell;
-    data.rows.find(row => {
+    data.view.rows.find(row => {
         if (row.id === rowID) {
             row.cells.find(cell => {
                 if (cell.id === cellId) {
@@ -342,7 +342,9 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
             }
             addSelectColAndCell(protyle, data, options, currentElement, menuElement);
         } else if (event.key === "Backspace" && inputElement.value === "") {
-            removeSelectCell(protyle, data.view, options, inputElement.previousElementSibling as HTMLElement);
+            removeSelectCell(protyle, data, options, inputElement.previousElementSibling as HTMLElement);
+        } else if (event.key === "Escape") {
+            menuElement.parentElement.remove();
         }
     });
 };
@@ -381,7 +383,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
     if (!cellData) {
         cellData = {
             color: "",
-            bgColor:"",
+            bgColor: "",
             id: Lute.NewNodeID(),
             value: {
                 mSelect: []

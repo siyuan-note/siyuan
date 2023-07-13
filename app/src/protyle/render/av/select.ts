@@ -3,7 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
-import {genCellValue} from "./filter";
+import {genCellValue} from "./cell";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";

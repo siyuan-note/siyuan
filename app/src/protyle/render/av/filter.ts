@@ -4,53 +4,14 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {objEquals} from "../../../util/functions";
+import {genCellValue} from "./cell";
 
-export const genCellValue = (colType: TAVCol, value: string | {
-    content: string,
-    color: string
-}[]) => {
-    let cellValue: IAVCellValue;
-    if (typeof value === "string") {
-        if (colType === "number") {
-            if (value) {
-                cellValue = {
-                    type: colType,
-                    number: {
-                        content: parseFloat(value),
-                        isNotEmpty: true
-                    }
-                };
-            } else {
-                cellValue = {
-                    type: colType,
-                    number: {
-                        isNotEmpty: false
-                    }
-                };
-            }
-        } else if (colType === "text") {
-            cellValue = {
-                type: colType,
-                text: {
-                    content: value
-                }
-            };
-        } else if (colType === "mSelect" || colType === "select") {
-            return cellValue = {
-                type: colType,
-                mSelect: [{
-                    content: value,
-                    color: ""
-                }]
-            };
-        }
-        return cellValue;
+export const getDefaultOperatorByType = (type: TAVCol) => {
+    if (type === "number" || type === "select") {
+        return "=";
     }
-    if (colType === "mSelect" || colType === "select") {
-        return cellValue = {
-            type: colType,
-            mSelect: value
-        };
+    if (type === "text" || type === "mSelect") {
+        return "Contains";
     }
 };
 
@@ -94,6 +55,9 @@ export const setFilter = (options: {
                     });
                 }
             });
+            if (mSelect.length === 0) {
+                mSelect.push({color: "", content: ""});
+            }
             cellValue = genCellValue(options.filter.value.type, mSelect);
         }
         const newFilter: IAVFilter = {
@@ -298,7 +262,7 @@ export const addFilter = (options: {
                     const cellValue = genCellValue(column.type, "");
                     options.data.view.filters.push({
                         column: column.id,
-                        operator: "Contains",
+                        operator: getDefaultOperatorByType(column.type),
                         value: cellValue,
                     });
                     transaction(options.protyle, [{
@@ -315,7 +279,7 @@ export const addFilter = (options: {
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
                     setFilter({
                         filter: {
-                            operator: "Contains",
+                            operator:  getDefaultOperatorByType(column.type),
                             column: column.id,
                             value: cellValue
                         },

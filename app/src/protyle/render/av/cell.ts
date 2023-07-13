@@ -2,6 +2,55 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 
+export const genCellValue = (colType: TAVCol, value: string | {
+    content: string,
+    color: string
+}[]) => {
+    let cellValue: IAVCellValue;
+    if (typeof value === "string") {
+        if (colType === "number") {
+            if (value) {
+                cellValue = {
+                    type: colType,
+                    number: {
+                        content: parseFloat(value),
+                        isNotEmpty: true
+                    }
+                };
+            } else {
+                cellValue = {
+                    type: colType,
+                    number: {
+                        isNotEmpty: false
+                    }
+                };
+            }
+        } else if (colType === "text") {
+            cellValue = {
+                type: colType,
+                text: {
+                    content: value
+                }
+            };
+        } else if (colType === "mSelect" || colType === "select") {
+            return cellValue = {
+                type: colType,
+                mSelect: [{
+                    content: value,
+                    color: ""
+                }]
+            };
+        }
+        return cellValue;
+    }
+    if (colType === "mSelect" || colType === "select") {
+        return cellValue = {
+            type: colType,
+            mSelect: value
+        };
+    }
+};
+
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
     const cellRect = cellElement.getBoundingClientRect();

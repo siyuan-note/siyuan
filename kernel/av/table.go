@@ -206,7 +206,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 
 	if nil != value.MSelect && nil != other.MSelect && 0 < len(value.MSelect) && 0 < len(other.MSelect) {
 		switch operator {
-		case FilterOperatorIsEqual:
+		case FilterOperatorIsEqual, FilterOperatorContains:
 			contains := false
 			for _, v := range value.MSelect {
 				for _, v2 := range other.MSelect {
@@ -217,7 +217,7 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 				}
 			}
 			return contains
-		case FilterOperatorIsNotEqual:
+		case FilterOperatorIsNotEqual, FilterOperatorDoesNotContain:
 			contains := false
 			for _, v := range value.MSelect {
 				for _, v2 := range other.MSelect {
@@ -229,9 +229,9 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			}
 			return !contains
 		case FilterOperatorIsEmpty:
-			return 0 == len(value.MSelect)
+			return 0 == len(value.MSelect) || 1 == len(value.MSelect) && "" == value.MSelect[0].Content
 		case FilterOperatorIsNotEmpty:
-			return 0 != len(value.MSelect)
+			return 0 != len(value.MSelect) && !(1 == len(value.MSelect) && "" == value.MSelect[0].Content)
 		}
 	}
 	return true

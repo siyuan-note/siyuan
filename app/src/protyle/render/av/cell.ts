@@ -33,7 +33,7 @@ export const genCellValue = (colType: TAVCol, value: string | {
                 }
             };
         } else if (colType === "mSelect" || colType === "select") {
-            return cellValue = {
+            return {
                 type: colType,
                 mSelect: [{
                     content: value,
@@ -44,7 +44,7 @@ export const genCellValue = (colType: TAVCol, value: string | {
         return cellValue;
     }
     if (colType === "mSelect" || colType === "select") {
-        return cellValue = {
+        return {
             type: colType,
             mSelect: value
         };

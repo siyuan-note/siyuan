@@ -251,6 +251,10 @@ type TableColumn struct {
 	Hidden bool        `json:"hidden"` // 是否隐藏
 	Width  string      `json:"width"`  // 列宽度
 	Calc   *ColumnCalc `json:"calc"`   // 计算
+
+	// 以下是某些列类型的特有属性
+
+	Options []*KeySelectOption `json:"options,omitempty"` // 选项列表
 }
 
 type TableRow struct {

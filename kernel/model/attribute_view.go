@@ -85,13 +85,14 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 
 		ret.Columns = append(ret.Columns, &av.TableColumn{
-			ID:     key.ID,
-			Name:   key.Name,
-			Type:   key.Type,
-			Icon:   key.Icon,
-			Wrap:   col.Wrap,
-			Hidden: col.Hidden,
-			Width:  col.Width,
+			ID:      key.ID,
+			Name:    key.Name,
+			Type:    key.Type,
+			Icon:    key.Icon,
+			Wrap:    col.Wrap,
+			Hidden:  col.Hidden,
+			Width:   col.Width,
+			Options: key.Options,
 		})
 	}
 

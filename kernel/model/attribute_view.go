@@ -208,6 +208,15 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		}
 	}
 
+	for _, filter := range view.Table.Filters {
+		key, err := attrView.GetKey(filter.Column)
+		if nil != err {
+			return
+		}
+
+		filter.Value.Type = key.Type
+	}
+
 	err = av.SaveAttributeView(attrView)
 	return
 }

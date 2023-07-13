@@ -17,6 +17,7 @@
 package model
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -126,6 +127,22 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
+
+	sortRowIDs := map[string]int{}
+	if 0 < len(view.Table.RowIDs) {
+		for i, rowID := range view.Table.RowIDs {
+			sortRowIDs[rowID] = i
+		}
+	}
+
+	sort.Slice(ret.Rows, func(i, j int) bool {
+		iv := sortRowIDs[ret.Rows[i].ID]
+		jv := sortRowIDs[ret.Rows[j].ID]
+		if iv == jv {
+			return ret.Rows[i].ID < ret.Rows[j].ID
+		}
+		return iv < jv
+	})
 	return
 }
 
@@ -314,6 +331,8 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 					break
 				}
 			}
+		} else {
+			view.Table.RowIDs = append(view.Table.RowIDs, blockID)
 		}
 	}
 
@@ -337,6 +356,11 @@ func removeAttributeViewBlock(blockID string, operation *Operation) (err error) 
 		return
 	}
 
+	view, err := attrView.GetView()
+	if nil != err {
+		return
+	}
+
 	for _, keyValues := range attrView.KeyValues {
 		for i, values := range keyValues.Values {
 			if values.BlockID == blockID {
@@ -345,6 +369,8 @@ func removeAttributeViewBlock(blockID string, operation *Operation) (err error) 
 			}
 		}
 	}
+
+	view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
 
 	err = av.SaveAttributeView(attrView)
 	return

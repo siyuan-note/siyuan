@@ -82,9 +82,10 @@ type KeySelectOption struct {
 }
 
 type Value struct {
-	ID      string `json:"id"`
-	KeyID   string `json:"keyID"`
-	BlockID string `json:"blockID"`
+	ID      string  `json:"id"`
+	KeyID   string  `json:"keyID"`
+	BlockID string  `json:"blockID"`
+	Type    KeyType `json:"type"`
 
 	Block   *ValueBlock    `json:"block,omitempty"`
 	Text    *ValueText     `json:"text,omitempty"`

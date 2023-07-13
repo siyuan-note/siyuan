@@ -694,12 +694,13 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 		for _, value := range keyValues.Values {
 			if operation.ID == value.ID {
 				val = value
+				val.Type = keyValues.Key.Type
 				break
 			}
 		}
 
 		if nil == val {
-			val = &av.Value{ID: operation.ID, KeyID: keyValues.Key.ID, BlockID: operation.RowID}
+			val = &av.Value{ID: operation.ID, KeyID: keyValues.Key.ID, BlockID: operation.RowID, Type: keyValues.Key.Type}
 			keyValues.Values = append(keyValues.Values, val)
 		}
 		break

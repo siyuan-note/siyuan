@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
-		"updated": "20230220103712"
+		"updated": "20230713213257"
 	},
 	"Children": [
 		{
@@ -92,7 +92,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220708103812-eil2e26",
-				"updated": "20220708103847"
+				"updated": "20230713213257"
 			},
 			"Children": [
 				{
@@ -155,7 +155,7 @@
 					},
 					"Properties": {
 						"id": "20220708103815-su0ak6i",
-						"updated": "20220708103847"
+						"updated": "20230713213257"
 					},
 					"Children": [
 						{
@@ -163,12 +163,15 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708103815-2rl1hd5",
-								"updated": "20220708103847"
+								"updated": "20230713213257"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "Ignore files"
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210928101257-l27t5uo",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Ignore files"
 								}
 							]
 						}

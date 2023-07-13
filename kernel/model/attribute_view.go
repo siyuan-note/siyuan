@@ -156,7 +156,7 @@ func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 }
 
 func setAttributeViewName(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+	attrView, err := av.ParseAttributeView(operation.ID)
 	if nil != err {
 		return
 	}

@@ -155,8 +155,7 @@ func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 }
 
 func setAttributeViewName(operation *Operation) (err error) {
-	avID := operation.ID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
 	}
@@ -185,8 +184,7 @@ func (tx *Transaction) doSetAttrViewFilters(operation *Operation) (ret *TxErr) {
 }
 
 func setAttributeViewFilters(operation *Operation) (err error) {
-	avID := operation.ID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
 	}
@@ -222,8 +220,7 @@ func (tx *Transaction) doSetAttrViewSorts(operation *Operation) (ret *TxErr) {
 }
 
 func setAttributeViewSorts(operation *Operation) (err error) {
-	avID := operation.ID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
 	}

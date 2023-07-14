@@ -1225,6 +1225,11 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	for _, tree := range trees {
 		var assets []string
 		assets = append(assets, assetsLinkDestsInTree(tree)...)
+		titleImgPath := treenode.GetDocTitleImgPath(tree.Root) // Export .sy.zip doc title image is not exported https://github.com/siyuan-note/siyuan/issues/8748
+		if "" != titleImgPath {
+			assets = append(assets, titleImgPath)
+		}
+
 		for _, asset := range assets {
 			asset = string(html.DecodeDestination([]byte(asset)))
 			if strings.Contains(asset, "?") {

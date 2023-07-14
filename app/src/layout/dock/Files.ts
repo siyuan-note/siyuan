@@ -919,7 +919,12 @@ export class Files extends Model {
         });
         target.classList.add("b3-list-item--focus");
         if (isScroll) {
-            this.element.scrollTop = target.offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
+            let offsetTop = target.offsetTop;
+            // https://github.com/siyuan-note/siyuan/issues/8749
+            if (target.parentElement.classList.contains("file-tree__sliderDown") && target.offsetParent) {
+                offsetTop = (target.offsetParent as HTMLElement).offsetTop;
+            }
+            this.element.scrollTop = offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
         }
     }
 

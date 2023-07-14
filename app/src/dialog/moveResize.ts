@@ -3,6 +3,10 @@ import {Constants} from "../constants";
 
 export const moveResize = (element: HTMLElement, afterCB?: (type: string) => void) => {
     element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+        // https://github.com/siyuan-note/siyuan/issues/8746
+        if (hasClosestByClassName(event.target, "protyle-util") && !element.classList.contains("protyle-util")) {
+            return;
+        }
         let iconsElement = hasClosestByClassName(event.target, "resize__move");
         let x: number;
         let y: number;

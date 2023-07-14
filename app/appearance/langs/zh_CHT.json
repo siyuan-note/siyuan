@@ -1,4 +1,5 @@
 {
+  "calc": "計算",
   "createWorkspace": "創建工作空間",
   "createWorkspaceTip": "確定使用該路徑創建工作空間嗎？",
   "calcOperatorNone": "無",

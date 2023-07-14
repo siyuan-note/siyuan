@@ -3,6 +3,10 @@
   box-sizing: border-box;
   font-size: 14px;
 
+  &:hover .av__row--footer {
+    opacity: 1;
+  }
+
   &__header {
     top: -43px;
     z-index: 2;
@@ -74,7 +78,7 @@
         padding: 0;
 
         &:hover {
-          background-color: var(--b3-list-hover);
+          background-color: var(--b3-list-icon-hover);
         }
       }
     }
@@ -82,6 +86,51 @@
     &--header,
     &--footer {
       background-color: var(--b3-theme-background);
+    }
+
+    &--footer {
+      display: flex;
+      border-top: 1px solid var(--b3-theme-surface-lighter);
+      color: var(--b3-theme-on-surface);
+      opacity: 0;
+
+      & > .av__calc {
+        display: flex;
+        align-items: center;
+        padding: 5px 5px 5px 7px;
+        border-right: 1px;
+        flex-direction: row-reverse;
+        box-sizing: border-box;
+
+        svg {
+          height: 10px;
+          width: 10px;
+          margin-left: 5px;
+        }
+
+        &:hover {
+          background-color: var(--b3-list-icon-hover);
+        }
+      }
+    }
+
+    &--add {
+      color: var(--b3-theme-on-surface);
+      padding: 5px 5px 5px 7px;
+      display: flex;
+      align-items: center;
+
+      svg {
+        height: 12px;
+        width: 12px;
+        color: var(--b3-theme-on-surface);
+        margin-right: 5px;
+        flex-shrink: 0;
+      }
+
+      &:hover {
+        background-color: var(--b3-list-icon-hover);
+      }
     }
   }
 

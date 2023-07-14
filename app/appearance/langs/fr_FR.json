@@ -1,4 +1,5 @@
 {
+  "calc": "Calculer",
   "createWorkspace": "Créer un espace de travail",
   "createWorkspaceTip": "Êtes-vous sûr d'utiliser ce chemin pour créer un espace de travail ?",
   "calcOperatorNone": "Aucun",

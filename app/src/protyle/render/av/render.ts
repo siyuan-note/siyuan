@@ -21,7 +21,8 @@ export const avRender = (element: Element, cb?: () => void) => {
             fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id")}, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 42px"><use xlink:href="#iconUncheck"></use></svg></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg></div>';
+                let calcHTML = '<div style="width: 24px"></div>'
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
                         return;
@@ -35,8 +36,10 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
+                    calcHTML += `<div class="av__calc" data-col-id="${column.id}" data-dtype="${column.type}"  
+style="width: ${column.width || "200px"}"><svg><use xlink:href="#iconDown"></use></svg>${window.siyuan.languages.calc}</div>`
                 });
-                tableHTML += `<div class="block__icons">
+                tableHTML += `<div class="block__icons" style="min-height: auto">
     <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
     <div class="fn__space"></div>
     <div class="block__icon block__icon--show"  data-type="av-header-more"><svg><use xlink:href="#iconMore"></use></svg></div>
@@ -117,12 +120,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <div class="av__scroll">
         <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};float: left;">
             ${tableHTML}
-            <div class="block__icon block__icon--show">
-                <div class="fn__space"></div>
-                <svg><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>
+            <div class="av__row--add">
+                <svg><use xlink:href="#iconAdd"></use></svg>
                 ${window.siyuan.languages.addAttr}
             </div>
-            <div class="av__row--footer">Calculate</div>
+            <div class="av__row--footer">${calcHTML}</div>
         </div>
     </div>
 </div>`;

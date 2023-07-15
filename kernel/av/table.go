@@ -379,7 +379,7 @@ func (table *Table) CalcCols() {
 func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows)), IsNotEmpty: true}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range table.Rows {
@@ -387,7 +387,7 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 				countValues += len(row.Cells[colIndex].Value.MSelect)
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues), IsNotEmpty: true}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
@@ -401,7 +401,7 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues), IsNotEmpty: true}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -409,7 +409,7 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty), IsNotEmpty: true}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -417,7 +417,7 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty), IsNotEmpty: true}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -425,7 +425,9 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -433,14 +435,16 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	}
 }
 
 func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows)), IsNotEmpty: true}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range table.Rows {
@@ -448,7 +452,7 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues), IsNotEmpty: true}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
@@ -458,7 +462,7 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 				countUniqueValues++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues), IsNotEmpty: true}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -466,7 +470,7 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty), IsNotEmpty: true}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -474,7 +478,7 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty), IsNotEmpty: true}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -482,7 +486,9 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: false}}
+		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -490,14 +496,16 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	}
 }
 
 func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows)), IsNotEmpty: true}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range table.Rows {
@@ -505,7 +513,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues), IsNotEmpty: true}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[int64]bool{}
@@ -517,7 +525,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues), IsNotEmpty: true}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -525,7 +533,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty), IsNotEmpty: true}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -533,7 +541,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty), IsNotEmpty: true}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -541,7 +549,9 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -549,7 +559,9 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
 		for _, row := range table.Rows {
@@ -596,7 +608,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows)), IsNotEmpty: true}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range table.Rows {
@@ -604,7 +616,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues), IsNotEmpty: true}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[float64]bool{}
@@ -616,7 +628,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues), IsNotEmpty: true}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -624,7 +636,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty), IsNotEmpty: true}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -632,7 +644,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty), IsNotEmpty: true}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -640,7 +652,9 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -648,7 +662,9 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, row := range table.Rows {
@@ -656,7 +672,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				sum += row.Cells[colIndex].Value.Number.Content
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: sum}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: sum, IsNotEmpty: true}}
 	case CalcOperatorAverage:
 		sum := 0.0
 		count := 0
@@ -667,9 +683,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 != count {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: sum / float64(count)}}
-		} else {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: 0}}
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: sum / float64(count), IsNotEmpty: true}}
 		}
 	case CalcOperatorMedian:
 		values := []float64{}
@@ -681,12 +695,10 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 		sort.Float64s(values)
 		if len(values) > 0 {
 			if len(values)%2 == 0 {
-				col.Calc.Result = &Value{Number: &ValueNumber{Content: (values[len(values)/2-1] + values[len(values)/2]) / 2}}
+				col.Calc.Result = &Value{Number: &ValueNumber{Content: (values[len(values)/2-1] + values[len(values)/2]) / 2, IsNotEmpty: true}}
 			} else {
-				col.Calc.Result = &Value{Number: &ValueNumber{Content: values[len(values)/2]}}
+				col.Calc.Result = &Value{Number: &ValueNumber{Content: values[len(values)/2], IsNotEmpty: true}}
 			}
-		} else {
-			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
 		}
 	case CalcOperatorMin:
 		min := math.MaxFloat64
@@ -698,9 +710,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if math.MaxFloat64 != min {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: min}}
-		} else {
-			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: min, IsNotEmpty: true}}
 		}
 	case CalcOperatorMax:
 		max := -math.MaxFloat64
@@ -712,9 +722,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if -math.MaxFloat64 != max {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: max}}
-		} else {
-			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: max, IsNotEmpty: true}}
 		}
 	case CalcOperatorRange:
 		min := math.MaxFloat64
@@ -730,9 +738,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if math.MaxFloat64 != min && -math.MaxFloat64 != max {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: max - min}}
-		} else {
-			col.Calc.Result = &Value{Number: &ValueNumber{IsNotEmpty: false}}
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: max - min, IsNotEmpty: true}}
 		}
 	}
 }
@@ -740,7 +746,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 func (table *Table) calcColText(col *TableColumn, colIndex int) {
 	switch col.Calc.Operator {
 	case CalcOperatorCountAll:
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows))}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows)), IsNotEmpty: true}}
 	case CalcOperatorCountValues:
 		countValues := 0
 		for _, row := range table.Rows {
@@ -748,7 +754,7 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 				countValues++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues), IsNotEmpty: true}}
 	case CalcOperatorCountUniqueValues:
 		countUniqueValues := 0
 		uniqueValues := map[string]bool{}
@@ -760,7 +766,7 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 				}
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues), IsNotEmpty: true}}
 	case CalcOperatorCountEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -768,7 +774,7 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty), IsNotEmpty: true}}
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -776,7 +782,7 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty)}}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty), IsNotEmpty: true}}
 	case CalcOperatorPercentEmpty:
 		countEmpty := 0
 		for _, row := range table.Rows {
@@ -784,7 +790,9 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 				countEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
@@ -792,6 +800,8 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 				countNotEmpty++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows))}}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+		}
 	}
 }

@@ -47,7 +47,6 @@ type Calculable interface {
 }
 
 type ColumnCalc struct {
-	Column   string       `json:"column"`
 	Operator CalcOperator `json:"operator"`
 	Result   *Value       `json:"result"`
 }

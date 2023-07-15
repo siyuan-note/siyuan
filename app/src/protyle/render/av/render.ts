@@ -36,7 +36,7 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
-                    calcHTML += `<div class="av__calc${calcHTML ? "" : " av__calc--show"}" data-col-id="${column.id}" data-operator="${column.calc?.operator || ""}"  
+                    calcHTML += `<div class="av__calc${(calcHTML || !column.calc) ? "" : " av__calc--show"}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
 style="width: ${column.width || "200px"}"><svg><use xlink:href="#iconDown"></use></svg>${window.siyuan.languages.calc}</div>`;
                 });
                 tableHTML += `<div class="block__icons" style="min-height: auto">

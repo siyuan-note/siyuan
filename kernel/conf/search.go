@@ -76,7 +76,7 @@ func NewSearch() *Search {
 		EmbedBlock: false,
 
 		Limit:         64,
-		CaseSensitive: true,
+		CaseSensitive: false,
 
 		Name:  true,
 		Alias: true,

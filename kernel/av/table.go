@@ -666,7 +666,11 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				count++
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: sum / float64(count)}}
+		if 0 != count {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: sum / float64(count)}}
+		} else {
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: 0}}
+		}
 	case CalcOperatorMedian:
 		values := []float64{}
 		for _, row := range table.Rows {

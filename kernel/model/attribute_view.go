@@ -89,10 +89,11 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			Name:    key.Name,
 			Type:    key.Type,
 			Icon:    key.Icon,
+			Options: key.Options,
 			Wrap:    col.Wrap,
 			Hidden:  col.Hidden,
 			Width:   col.Width,
-			Options: key.Options,
+			Calc:    col.Calc,
 		})
 	}
 

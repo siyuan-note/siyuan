@@ -3,7 +3,6 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
-import {genCellValue} from "./cell";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -361,7 +360,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             cellIndex = index;
             return true;
         }
-    })
+    });
     let colData: IAVColumn;
     data.view.columns.find((item: IAVColumn) => {
         if (item.id === colId) {

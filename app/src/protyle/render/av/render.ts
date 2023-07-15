@@ -23,7 +23,7 @@ export const avRender = (element: Element, cb?: () => void) => {
                 const data = response.data.view as IAVTable;
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg></div>';
-                let calcHTML = ''
+                let calcHTML = "";
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
                         return;

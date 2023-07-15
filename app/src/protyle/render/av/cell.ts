@@ -5,13 +5,13 @@ import {Menu} from "../../../plugin/Menu";
 
 export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
-        return ""
+        return "";
     }
-    const resultCalc = column.calc.result.number
+    const resultCalc = column.calc.result.number;
     let value = "";
     switch (column.calc.operator) {
         case "Count all":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountAll}`
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountAll}`;
             break;
         case "Count values":
             value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountValues}`;
@@ -51,7 +51,7 @@ export const getCalcValue = (column: IAVColumn) => {
             break;
     }
     return value;
-}
+};
 
 export const genCellValue = (colType: TAVCol, value: string | {
     content: string,
@@ -132,7 +132,7 @@ const calcItem = (options: {
             }]);
         }
     });
-}
+};
 export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     const blockElement = hasClosestBlock(calcElement);
     if (!blockElement) {
@@ -279,7 +279,7 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     }
     const calcRect = calcElement.getBoundingClientRect();
     menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
-}
+};
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;

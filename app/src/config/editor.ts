@@ -253,7 +253,7 @@ export const editor = {
         ${window.siyuan.languages.katexMacros}
         <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
         <div class="fn__hr"></div>
-        <textarea class="b3-text-field fn__block" id="katexMacros">${window.siyuan.config.editor.katexMacros}</textarea>
+        <textarea class="b3-text-field fn__block" id="katexMacros" spellcheck="false">${window.siyuan.config.editor.katexMacros}</textarea>
     </div>
 </label>`;
     },

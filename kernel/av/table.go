@@ -362,7 +362,9 @@ func (table *Table) CalcCols() {
 		}
 
 		switch col.Type {
-		case KeyTypeText, KeyTypeBlock:
+		case KeyTypeBlock:
+			table.calcColBlock(col, i)
+		case KeyTypeText:
 			table.calcColText(col, i)
 		case KeyTypeNumber:
 			table.calcColNumber(col, i)
@@ -806,6 +808,71 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 		countNotEmpty := 0
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Text && "" != row.Cells[colIndex].Value.Text.Content {
+				countNotEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			content := RoundUp(float64(countNotEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
+		}
+	}
+}
+
+func (table *Table) calcColBlock(col *TableColumn, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(len(table.Rows)), IsNotEmpty: true}}
+	case CalcOperatorCountValues:
+		countValues := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Block && "" != row.Cells[colIndex].Value.Block.Content {
+				countValues++
+			}
+		}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countValues), IsNotEmpty: true}}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Block && "" != row.Cells[colIndex].Value.Block.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Block.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Block.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countUniqueValues), IsNotEmpty: true}}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Block || "" == row.Cells[colIndex].Value.Block.Content {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty), IsNotEmpty: true}}
+	case CalcOperatorCountNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Block && "" != row.Cells[colIndex].Value.Block.Content {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty), IsNotEmpty: true}}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Block || "" == row.Cells[colIndex].Value.Block.Content {
+				countEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			content := RoundUp(float64(countEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
+		}
+	case CalcOperatorPercentNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Block && "" != row.Cells[colIndex].Value.Block.Content {
 				countNotEmpty++
 			}
 		}

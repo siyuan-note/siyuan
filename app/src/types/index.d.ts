@@ -35,6 +35,7 @@ type TOperation =
     | "setAttrViewName"
     | "setAttrViewFilters"
     | "setAttrViewSorts"
+    | "setAttrViewColCalc"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" |
@@ -853,7 +854,7 @@ interface IAV {
     view: IAVTable
     viewID: string
     viewType: string
-    views: IAVView[],
+    views: IAVView[]
 }
 
 interface IAVView {
@@ -891,6 +892,10 @@ interface IAVColumn {
     wrap: boolean,
     hidden: boolean,
     type: TAVCol,
+    calc: {
+        operator: string,
+        result: IAVCellValue
+    },
     // 选项列表
     options?: {
         name: string,

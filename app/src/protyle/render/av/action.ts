@@ -3,7 +3,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {copySubMenu} from "../../../menus/commonMenuItem";
-import {popTextCell} from "./cell";
+import {openCalcMenu, popTextCell} from "./cell";
 import {getColIconByType, showColMenu, updateHeader} from "./col";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./addCol";
@@ -111,6 +111,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
         popTextCell(protyle, cellElement);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const calcElement = hasClosestByClassName(event.target, "av__calc");
+    if (calcElement) {
+        openCalcMenu(protyle, calcElement);
         event.preventDefault();
         event.stopPropagation();
         return true;

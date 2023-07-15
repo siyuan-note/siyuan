@@ -3,7 +3,7 @@
   box-sizing: border-box;
   font-size: 14px;
 
-  &:hover .av__row--footer {
+  &:hover .av__row--footer > .av__calc--show {
     opacity: 1;
   }
 
@@ -76,6 +76,7 @@
 
       .av__cell {
         padding: 0;
+        transition: background 20ms ease-in 0s;
 
         &:hover {
           background-color: var(--b3-list-icon-hover);
@@ -92,15 +93,21 @@
       display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);
       color: var(--b3-theme-on-surface);
-      opacity: 0;
+
+      &:hover > .av__calc,
+      &.av__row--show > .av__calc {
+        opacity: 1;
+      }
 
       & > .av__calc {
+        transition: opacity 150ms linear, background 20ms ease-in 0s;
         display: flex;
         align-items: center;
         padding: 5px 5px 5px 7px;
         border-right: 1px;
         flex-direction: row-reverse;
         box-sizing: border-box;
+        opacity: 0;
 
         svg {
           height: 10px;
@@ -119,6 +126,7 @@
       padding: 5px 5px 5px 7px;
       display: flex;
       align-items: center;
+      transition: background 20ms ease-in 0s;
 
       svg {
         height: 12px;
@@ -191,7 +199,7 @@
     width: 5px;
     height: 100%;
     right: -2.5px;
-    transition: background 200ms ease-out 0s;
+    transition: background 20ms ease-in 0s;
     z-index: 1;
 
     &:hover {

@@ -22,7 +22,7 @@ export const avRender = (element: Element, cb?: () => void) => {
                 const data = response.data.view as IAVTable;
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg></div>';
-                let calcHTML = '<div style="width: 24px"></div>'
+                let calcHTML = ''
                 data.columns.forEach((column: IAVColumn) => {
                     if (column.hidden) {
                         return;
@@ -36,8 +36,8 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
-                    calcHTML += `<div class="av__calc" data-col-id="${column.id}" data-dtype="${column.type}"  
-style="width: ${column.width || "200px"}"><svg><use xlink:href="#iconDown"></use></svg>${window.siyuan.languages.calc}</div>`
+                    calcHTML += `<div class="av__calc${calcHTML ? "" : " av__calc--show"}" data-col-id="${column.id}" data-operator="${column.calc?.operator || ""}"  
+style="width: ${column.width || "200px"}"><svg><use xlink:href="#iconDown"></use></svg>${window.siyuan.languages.calc}</div>`;
                 });
                 tableHTML += `<div class="block__icons" style="min-height: auto">
     <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
@@ -124,7 +124,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
                 <svg><use xlink:href="#iconAdd"></use></svg>
                 ${window.siyuan.languages.addAttr}
             </div>
-            <div class="av__row--footer">${calcHTML}</div>
+            <div class="av__row--footer"><div style="width: 24px"></div>${calcHTML}</div>
         </div>
     </div>
 </div>`;

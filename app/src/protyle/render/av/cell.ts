@@ -1,6 +1,7 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
+import {Menu} from "../../../plugin/Menu";
 
 export const genCellValue = (colType: TAVCol, value: string | {
     content: string,
@@ -50,6 +51,185 @@ export const genCellValue = (colType: TAVCol, value: string | {
         };
     }
 };
+
+const calcItem = (options: {
+    menu: Menu,
+    protyle: IProtyle,
+    label: string,
+    operator: string,
+    oldOperator: string,
+    colId: string,
+    avId: string
+}) => {
+    options.menu.addItem({
+        iconHTML: "",
+        label: options.label,
+        click() {
+            transaction(options.protyle, [{
+                action: "setAttrViewColCalc",
+                avID: options.avId,
+                id: options.colId,
+                data: {
+                    operator: options.operator
+                }
+            }], [{
+                action: "setAttrViewColCalc",
+                avID: options.avId,
+                id: options.colId,
+                data: {
+                    operator: options.oldOperator
+                }
+            }]);
+        }
+    });
+}
+export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
+    const blockElement = hasClosestBlock(calcElement);
+    if (!blockElement) {
+        return;
+    }
+    calcElement.parentElement.classList.add("av__row--show");
+    const menu = new Menu("av-calc", () => {
+        calcElement.parentElement.classList.remove("av__row--show");
+    });
+    if (menu.isOpen) {
+        return;
+    }
+    const type = calcElement.dataset.dtype as TAVCol;
+    const colId = calcElement.dataset.id;
+    const avId = blockElement.dataset.avId;
+    const oldOperator = calcElement.dataset.operator;
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "",
+        label: window.siyuan.languages.calcOperatorNone
+    });
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "Count all",
+        label: window.siyuan.languages.calcOperatorCountAll
+    });
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "Count values",
+        label: window.siyuan.languages.calcOperatorCountValues
+    });
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "Count unique values",
+        label: window.siyuan.languages.calcOperatorCountUniqueValues
+    });
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "Count empty",
+        label: window.siyuan.languages.calcOperatorCountEmpty
+    });
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "Count not empty",
+        label: window.siyuan.languages.calcOperatorCountNotEmpty
+    });
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "Percent empty",
+        label: window.siyuan.languages.calcOperatorPercentEmpty
+    });
+    calcItem({
+        menu,
+        protyle,
+        colId,
+        avId,
+        oldOperator,
+        operator: "Percent not empty",
+        label: window.siyuan.languages.calcOperatorPercentNotEmpty
+    });
+    if (type === "number") {
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Sum",
+            label: window.siyuan.languages.calcOperatorSum
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Average",
+            label: window.siyuan.languages.calcOperatorAverage
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Median",
+            label: window.siyuan.languages.calcOperatorMedian
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Min",
+            label: window.siyuan.languages.calcOperatorMin
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Max",
+            label: window.siyuan.languages.calcOperatorMax
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Range",
+            label: window.siyuan.languages.calcOperatorRange
+        });
+    }
+    const calcRect = calcElement.getBoundingClientRect();
+    menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
+}
 
 export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;

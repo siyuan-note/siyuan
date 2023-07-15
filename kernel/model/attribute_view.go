@@ -277,7 +277,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 		return
 	}
 
-	operationData := operation.Data.([]interface{})
+	operationData := operation.Data.(interface{})
 	data, err := gulu.JSON.MarshalJSON(operationData)
 	if nil != err {
 		return

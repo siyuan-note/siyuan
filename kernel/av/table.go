@@ -362,7 +362,7 @@ func (table *Table) CalcCols() {
 		}
 
 		switch col.Type {
-		case KeyTypeText:
+		case KeyTypeText, KeyTypeBlock:
 			table.calcColText(col, i)
 		case KeyTypeNumber:
 			table.calcColNumber(col, i)

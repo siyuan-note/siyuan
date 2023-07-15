@@ -258,6 +258,50 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doSetAttrViewColCalc(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColumnCalc(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColumnCalc(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	view, err := attrView.GetView()
+	if nil != err {
+		return
+	}
+
+	operationData := operation.Data.([]interface{})
+	data, err := gulu.JSON.MarshalJSON(operationData)
+	if nil != err {
+		return
+	}
+
+	calc := &av.ColumnCalc{}
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		if err = gulu.JSON.UnmarshalJSON(data, calc); nil != err {
+			return
+		}
+
+		for _, column := range view.Table.Columns {
+			if column.ID == operation.ID {
+				column.Calc = calc
+				break
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
 	firstSrcID := operation.SrcIDs[0]
 	tree, err := tx.loadTree(firstSrcID)

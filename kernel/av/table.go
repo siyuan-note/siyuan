@@ -426,7 +426,8 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
@@ -436,7 +437,8 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countNotEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	}
 }
@@ -487,7 +489,8 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: false}}
+			content := RoundUp(float64(countEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: false}}
 		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
@@ -497,7 +500,8 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countNotEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	}
 }
@@ -550,7 +554,8 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
@@ -560,7 +565,8 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countNotEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
@@ -653,7 +659,8 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
@@ -663,7 +670,8 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countNotEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	case CalcOperatorSum:
 		sum := 0.0
@@ -791,7 +799,8 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
@@ -801,7 +810,23 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 < len(table.Rows) {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: float64(countNotEmpty) / float64(len(table.Rows)), IsNotEmpty: true}}
+			content := RoundUp(float64(countNotEmpty)/float64(len(table.Rows))*100, 2)
+			col.Calc.Result = &Value{Number: &ValueNumber{Content: content, IsNotEmpty: true}}
 		}
 	}
+}
+
+// RoundUp rounds like 12.3416 -> 12.35
+func RoundUp(val float64, precision int) float64 {
+	return math.Ceil(val*(math.Pow10(precision))) / math.Pow10(precision)
+}
+
+// RoundDown rounds like 12.3496 -> 12.34
+func RoundDown(val float64, precision int) float64 {
+	return math.Floor(val*(math.Pow10(precision))) / math.Pow10(precision)
+}
+
+// Round rounds to nearest like 12.3456 -> 12.35
+func Round(val float64, precision int) float64 {
+	return math.Round(val*(math.Pow10(precision))) / math.Pow10(precision)
 }

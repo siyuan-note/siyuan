@@ -3,6 +3,56 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 import {Menu} from "../../../plugin/Menu";
 
+export const getCalcValue = (column: IAVColumn) => {
+    if (!column.calc || !column.calc.result) {
+        return ""
+    }
+    const resultCalc = column.calc.result.number
+    let value = "";
+    switch (column.calc.operator) {
+        case "Count all":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountAll}`
+            break;
+        case "Count values":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountValues}`;
+            break;
+        case "Count unique values":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountUniqueValues}`;
+            break;
+        case "Count empty":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountEmpty}`;
+            break;
+        case "Count not empty":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountNotEmpty}`;
+            break;
+        case "Percent empty":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultPercentEmpty}`;
+            break;
+        case "Percent not empty":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultPercentNotEmpty}`;
+            break;
+        case "Sum":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultSum}`;
+            break;
+        case  "Average":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultAverage}`;
+            break;
+        case  "Median":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultMedian}`;
+            break;
+        case  "Min":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultMin}`;
+            break;
+        case  "Max":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultMax}`;
+            break;
+        case  "Range":
+            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultRange}`;
+            break;
+    }
+    return value;
+}
+
 export const genCellValue = (colType: TAVCol, value: string | {
     content: string,
     color: string

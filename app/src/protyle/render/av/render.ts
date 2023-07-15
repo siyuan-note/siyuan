@@ -1,6 +1,7 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType, showColMenu} from "./col";
 import {Constants} from "../../../constants";
+import {getCalcValue} from "./cell";
 
 export const avRender = (element: Element, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -36,8 +37,9 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
-                    calcHTML += `<div class="av__calc${(calcHTML || !column.calc) ? "" : " av__calc--show"}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
-style="width: ${column.width || "200px"}"><svg><use xlink:href="#iconDown"></use></svg>${window.siyuan.languages.calc}</div>`;
+
+                    calcHTML += `<div class="av__calc${calcHTML ? "" : " av__calc--show"}${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
+style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
                 });
                 tableHTML += `<div class="block__icons" style="min-height: auto">
     <div class="block__icon block__icon--show" data-type="av-header-add"><svg><use xlink:href="#iconAdd"></use></svg></div>
@@ -45,7 +47,6 @@ style="width: ${column.width || "200px"}"><svg><use xlink:href="#iconDown"></use
     <div class="block__icon block__icon--show"  data-type="av-header-more"><svg><use xlink:href="#iconMore"></use></svg></div>
 </div>
 </div>`;
-
                 // body
                 data.rows.forEach((row: IAVRow) => {
                     tableHTML += `<div class="av__row" data-id="${row.id}">

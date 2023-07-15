@@ -104,6 +104,16 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 	}
 
+	notFound := []string{}
+	for blockID, _ := range rows {
+		if treenode.GetBlockTree(blockID) == nil {
+			notFound = append(notFound, blockID)
+		}
+	}
+	for _, blockID := range notFound {
+		delete(rows, blockID)
+	}
+
 	for rowID, row := range rows {
 		var tableRow av.TableRow
 		for _, col := range ret.Columns {

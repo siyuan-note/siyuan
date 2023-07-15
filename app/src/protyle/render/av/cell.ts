@@ -96,7 +96,7 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
         return;
     }
     const type = calcElement.dataset.dtype as TAVCol;
-    const colId = calcElement.dataset.id;
+    const colId = calcElement.dataset.colId;
     const avId = blockElement.dataset.avId;
     const oldOperator = calcElement.dataset.operator;
     calcItem({

@@ -609,7 +609,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 		countUniqueValues := 0
 		uniqueValues := map[float64]bool{}
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				if !uniqueValues[row.Cells[colIndex].Value.Number.Content] {
 					uniqueValues[row.Cells[colIndex].Value.Number.Content] = true
 					countUniqueValues++
@@ -628,7 +628,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	case CalcOperatorCountNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				countNotEmpty++
 			}
 		}
@@ -644,7 +644,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	case CalcOperatorPercentNotEmpty:
 		countNotEmpty := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				countNotEmpty++
 			}
 		}
@@ -652,7 +652,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				sum += row.Cells[colIndex].Value.Number.Content
 			}
 		}
@@ -661,7 +661,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 		sum := 0.0
 		count := 0
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				sum += row.Cells[colIndex].Value.Number.Content
 				count++
 			}
@@ -670,7 +670,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	case CalcOperatorMedian:
 		values := []float64{}
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				values = append(values, row.Cells[colIndex].Value.Number.Content)
 			}
 		}
@@ -687,7 +687,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	case CalcOperatorMin:
 		min := math.MaxFloat64
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				if row.Cells[colIndex].Value.Number.Content < min {
 					min = row.Cells[colIndex].Value.Number.Content
 				}
@@ -701,7 +701,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 	case CalcOperatorMax:
 		max := -math.MaxFloat64
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				if row.Cells[colIndex].Value.Number.Content > max {
 					max = row.Cells[colIndex].Value.Number.Content
 				}
@@ -716,7 +716,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 		min := math.MaxFloat64
 		max := -math.MaxFloat64
 		for _, row := range table.Rows {
-			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && (row.Cells[colIndex].Value.Number.IsNotEmpty || 0 != row.Cells[colIndex].Value.Number.Content) {
 				if row.Cells[colIndex].Value.Number.Content < min {
 					min = row.Cells[colIndex].Value.Number.Content
 				}

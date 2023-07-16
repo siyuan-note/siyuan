@@ -11,43 +11,43 @@ export const getCalcValue = (column: IAVColumn) => {
     let value = "";
     switch (column.calc.operator) {
         case "Count all":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountAll}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultCountAll}`;
             break;
         case "Count values":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountValues}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultCountValues}`;
             break;
         case "Count unique values":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountUniqueValues}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultCountUniqueValues}`;
             break;
         case "Count empty":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountEmpty}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultCountEmpty}`;
             break;
         case "Count not empty":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultCountNotEmpty}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultCountNotEmpty}`;
             break;
         case "Percent empty":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultPercentEmpty}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultPercentEmpty}`;
             break;
         case "Percent not empty":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultPercentNotEmpty}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultPercentNotEmpty}`;
             break;
         case "Sum":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultSum}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultSum}`;
             break;
         case  "Average":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultAverage}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultAverage}`;
             break;
         case  "Median":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultMedian}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultMedian}`;
             break;
         case  "Min":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultMin}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultMin}`;
             break;
         case  "Max":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultMax}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultMax}`;
             break;
         case  "Range":
-            value = `<span>${resultCalc.content}</span>${window.siyuan.languages.calcResultRange}`;
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultRange}`;
             break;
     }
     return value;

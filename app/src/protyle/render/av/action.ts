@@ -180,13 +180,6 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
             rowElement.remove();
         }
     });
-    menu.addItem({
-        icon: "iconCopy",
-        label: window.siyuan.languages.duplicate,
-        click() {
-
-        }
-    });
     if (rowIds.length === 1) {
         menu.addSeparator();
         openEditorTab(protyle.app, rowIds[0]);
@@ -221,13 +214,6 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         label: window.siyuan.languages.attr,
         type: "submenu",
         submenu: editAttrSubmenu
-    });
-    menu.addItem({
-        icon: "iconMove",
-        label: window.siyuan.languages.move,
-        click() {
-
-        }
     });
     if (protyle?.app?.plugins) {
         emitOpenMenu({

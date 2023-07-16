@@ -174,9 +174,19 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
     if (range.getClientRects().length === 0) {
         if (range.startContainer.nodeType === 3) {
             // 空行时，会出现没有 br 的情况，需要根据父元素 <p> 获取位置信息
-            const parent = range.startContainer.parentElement;
-            if (parent && parent.getClientRects().length > 0) {
-                cursorRect = parent.getClientRects()[0];
+            const parentRects = range.startContainer.parentElement?.getClientRects();
+            // 连续粘贴图片时
+            const previousRects = (range.startContainer as Element).previousElementSibling?.getClientRects();
+            if (parentRects.length > 0 || previousRects.length > 0) {
+                if (parentRects.length === 0 || (previousRects &&
+                    previousRects.length > 0 && parentRects[0].top < previousRects[previousRects.length - 1].bottom)) {
+                    cursorRect = {
+                        left: previousRects[previousRects.length - 1].left,
+                        top: previousRects[previousRects.length - 1].bottom,
+                    };
+                } else {
+                    cursorRect = parentRects[0];
+                }
             } else {
                 return {
                     left: 0,

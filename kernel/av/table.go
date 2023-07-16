@@ -674,7 +674,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				sum += row.Cells[colIndex].Value.Number.Content
 			}
 		}
-		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(sum), NumberFormatNone)}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(sum, NumberFormatNone)}
 	case CalcOperatorAverage:
 		sum := 0.0
 		count := 0

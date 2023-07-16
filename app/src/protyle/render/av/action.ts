@@ -201,11 +201,12 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         });
     }
     const editAttrSubmenu: IMenu[] = [];
-    rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement) => {
+    rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
         editAttrSubmenu.push({
             icon: getColIconByType(cellElement.getAttribute("data-dtype") as TAVCol),
             label: cellElement.textContent.trim(),
             click() {
+                popTextCell(protyle, rowElement.querySelector(`.av__cell[data-col-id="${cellElement.dataset.colId}"]`));
             }
         });
     });
@@ -242,7 +243,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     transaction(protyle, [{
         action: "setAttrViewName",
         id: avId,
-        data:  nameElement.textContent.trim(),
+        data: nameElement.textContent.trim(),
     }], [{
         action: "setAttrViewName",
         id: avId,

@@ -66,7 +66,7 @@ const removeCol = (cellElement: HTMLElement) => {
 export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
-    const avId = blockElement.getAttribute("data-av-id");
+    const avID = blockElement.getAttribute("data-av-id");
     const menu = new Menu("av-header-cell", () => {
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === cellElement.textContent.trim()) {
@@ -75,13 +75,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         transaction(protyle, [{
             action: "updateAttrViewCol",
             id: colId,
-            avID: avId,
+            avID,
             name: newValue,
             type,
         }], [{
             action: "updateAttrViewCol",
             id: colId,
-            avID: avId,
+            avID,
             name: cellElement.textContent.trim(),
             type,
         }]);
@@ -104,7 +104,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         icon: "iconUp",
         label: window.siyuan.languages.asc,
         click() {
-            fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
+            fetchPost("/api/av/renderAttributeView", {id: avID}, (response) => {
                 transaction(protyle, [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
@@ -124,7 +124,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         icon: "iconDown",
         label: window.siyuan.languages.desc,
         click() {
-            fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
+            fetchPost("/api/av/renderAttributeView", {id: avID}, (response) => {
                 transaction(protyle, [{
                     action: "setAttrViewSorts",
                     avID: response.data.id,
@@ -144,7 +144,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         icon: "iconFilter",
         label: window.siyuan.languages.filter,
         click() {
-            fetchPost("/api/av/renderAttributeView", {id: avId}, (response) => {
+            fetchPost("/api/av/renderAttributeView", {id: avID}, (response) => {
                 const avData = response.data as IAV;
                 let filter: IAVFilter;
                 avData.view.filters.find((item) => {
@@ -162,11 +162,11 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     avData.view.filters.push(filter);
                     transaction(protyle, [{
                         action: "setAttrViewFilters",
-                        avID: avId,
+                        avID,
                         data: [filter]
                     }], [{
                         action: "setAttrViewFilters",
-                        avID: avId,
+                        avID,
                         data: []
                     }]);
                 }
@@ -188,12 +188,12 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "setAttrViewColHidden",
                     id: colId,
-                    avID: avId,
+                    avID,
                     data: true
                 }], [{
                     action: "setAttrViewColHidden",
                     id: colId,
-                    avID: avId,
+                    avID,
                     data: false
                 }]);
             }
@@ -202,7 +202,59 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
             icon: "iconCopy",
             label: window.siyuan.languages.duplicate,
             click() {
-
+                const id = Lute.NewNodeID();
+                let newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
+                const nameMatch = newValue.match(/^(.*) \((\d+)\)$/);
+                if (nameMatch) {
+                    newValue = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
+                } else {
+                    newValue = `${newValue} (1)`;
+                }
+                if (["select", "mSelect"].includes(type)) {
+                    fetchPost("/api/av/renderAttributeView", {id: avID}, (response) => {
+                        const data = response.data as IAV;
+                        let colOptions;
+                        data.view.columns.find((item) => {
+                            if (item.id === colId) {
+                                colOptions = item.options;
+                                return true;
+                            }
+                        });
+                        transaction(protyle, [{
+                            action: "addAttrViewCol",
+                            name: newValue,
+                            avID,
+                            type,
+                            id
+                        }, {
+                            action: "updateAttrViewColOptions",
+                            id: colId,
+                            avID,
+                            data: colOptions
+                        }], [{
+                            action: "removeAttrViewCol",
+                            id,
+                            avID,
+                        }]);
+                    })
+                } else {
+                    transaction(protyle, [{
+                        action: "addAttrViewCol",
+                        name: newValue,
+                        avID,
+                        type,
+                        id
+                    }, {
+                        action: "sortAttrViewCol",
+                        avID,
+                        previousID: colId,
+                        id
+                    }], [{
+                        action: "removeAttrViewCol",
+                        id,
+                        avID,
+                    }]);
+                }
             }
         });
         menu.addItem({
@@ -212,11 +264,11 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "removeAttrViewCol",
                     id: colId,
-                    avID: avId,
+                    avID,
                 }], [{
                     action: "addAttrViewCol",
                     name: cellElement.textContent.trim(),
-                    avID: avId,
+                    avID,
                     type: type,
                     id: colId
                 }]);
@@ -234,12 +286,12 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                 transaction(protyle, [{
                     action: "setAttrViewColWrap",
                     id: colId,
-                    avID: avId,
+                    avID,
                     data: inputElement.checked
                 }], [{
                     action: "setAttrViewColWrap",
                     id: colId,
-                    avID: avId,
+                    avID,
                     data: !inputElement.checked
                 }]);
             });

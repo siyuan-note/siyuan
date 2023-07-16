@@ -377,8 +377,8 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             cellData = row.cells[cellIndex];
             // 为空时 cellId 每次请求都不一致
             cellData.id = options.cellElement.dataset.id;
-            if (!cellData.value) {
-                cellData.value = {mSelect:[]} as IAVCellValue;
+            if (!cellData.value || !cellData.value.mSelect) {
+                cellData.value = {mSelect: []} as IAVCellValue;
             }
             return true;
         }

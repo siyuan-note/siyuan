@@ -722,7 +722,42 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	if err = tx.writeTree(tree); nil != err {
 		return
 	}
+
+	syncDelete2AttributeView(node)
 	return
+}
+
+func syncDelete2AttributeView(node *ast.Node) {
+	avs := node.IALAttr(NodeAttrNameAVs)
+	if "" == avs {
+		return
+	}
+
+	avIDs := strings.Split(avs, ",")
+	for _, avID := range avIDs {
+		attrView, parseErr := av.ParseAttributeView(avID)
+		if nil != parseErr {
+			continue
+		}
+
+		changedAv := false
+		blockValues := attrView.GetBlockKeyValues()
+		if nil == blockValues {
+			continue
+		}
+
+		for i, blockValue := range blockValues.Values {
+			if blockValue.Block.ID == node.ID {
+				blockValues.Values = append(blockValues.Values[:i], blockValues.Values[i+1:]...)
+				changedAv = true
+				break
+			}
+		}
+		if changedAv {
+			av.SaveAttributeView(attrView)
+			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+		}
+	}
 }
 
 func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {

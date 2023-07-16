@@ -339,11 +339,17 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     const cellId = cellElement.getAttribute("data-id");
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
-    let inputValue: string | number = (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value;
-    let oldValue: string | number = cellElement.textContent.trim();
+    const inputValue: { content: string | number, isNotEmpty?: boolean } = {
+        content: (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
+    };
+    const oldValue: { content: string | number, isNotEmpty?: boolean } = {
+        content: cellElement.textContent.trim()
+    };
     if (type === "number") {
-        inputValue = parseFloat(inputValue);
-        oldValue = parseFloat(oldValue);
+        oldValue.content = parseFloat(oldValue.content as string);
+        oldValue.isNotEmpty = !!oldValue.content
+        inputValue.content = parseFloat(inputValue.content as string);
+        inputValue.isNotEmpty = !!inputValue.content
     }
     transaction(protyle, [{
         action: "updateAttrViewCell",
@@ -352,7 +358,7 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
         keyID: colId,
         rowID,
         data: {
-            [type]: {content: inputValue}
+            [type]: inputValue
         }
     }], [{
         action: "updateAttrViewCell",
@@ -361,7 +367,7 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
         keyID: colId,
         rowID,
         data: {
-            [type]: {content: oldValue}
+            [type]: oldValue
         }
     }]);
     setTimeout(() => {

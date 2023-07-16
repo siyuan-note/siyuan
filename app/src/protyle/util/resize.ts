@@ -3,12 +3,11 @@ import {setPadding} from "../ui/initUI";
 import {hasClosestBlock} from "./hasClosest";
 import {Constants} from "../../constants";
 
-let resizeTimeout: number;
 export const resize = (protyle: IProtyle) => {
     hideElements(["gutter"], protyle);
     setPadding(protyle);
-    clearTimeout(resizeTimeout);
-    resizeTimeout = window.setTimeout(() => {
+    // 不能 clearTimeout，否则 split 时左侧无法 resize
+    window.setTimeout(() => {
         if (typeof echarts !== "undefined") {
             protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
                 const chartInstance = echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"));

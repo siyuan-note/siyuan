@@ -674,7 +674,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 				sum += row.Cells[colIndex].Value.Number.Content
 			}
 		}
-		col.Calc.Result = &Value{Number: &ValueNumber{Content: sum, IsNotEmpty: true}}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(sum), NumberFormatNone)}
 	case CalcOperatorAverage:
 		sum := 0.0
 		count := 0
@@ -685,7 +685,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 != count {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: sum / float64(count), IsNotEmpty: true}}
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(sum/float64(count), NumberFormatNone)}
 		}
 	case CalcOperatorMedian:
 		values := []float64{}
@@ -697,9 +697,9 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 		sort.Float64s(values)
 		if len(values) > 0 {
 			if len(values)%2 == 0 {
-				col.Calc.Result = &Value{Number: &ValueNumber{Content: (values[len(values)/2-1] + values[len(values)/2]) / 2, IsNotEmpty: true}}
+				col.Calc.Result = &Value{Number: NewFormattedValueNumber((values[len(values)/2-1]+values[len(values)/2])/2, NumberFormatNone)}
 			} else {
-				col.Calc.Result = &Value{Number: &ValueNumber{Content: values[len(values)/2], IsNotEmpty: true}}
+				col.Calc.Result = &Value{Number: NewFormattedValueNumber(values[len(values)/2], NumberFormatNone)}
 			}
 		}
 	case CalcOperatorMin:
@@ -712,7 +712,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if math.MaxFloat64 != min {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: min, IsNotEmpty: true}}
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(min, NumberFormatNone)}
 		}
 	case CalcOperatorMax:
 		max := -math.MaxFloat64
@@ -724,7 +724,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if -math.MaxFloat64 != max {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: max, IsNotEmpty: true}}
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(max, NumberFormatNone)}
 		}
 	case CalcOperatorRange:
 		min := math.MaxFloat64
@@ -740,7 +740,7 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 			}
 		}
 		if math.MaxFloat64 != min && -math.MaxFloat64 != max {
-			col.Calc.Result = &Value{Number: &ValueNumber{Content: max - min, IsNotEmpty: true}}
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(max-min, NumberFormatNone)}
 		}
 	}
 }

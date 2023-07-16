@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -148,7 +149,8 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 	case NumberFormatNone:
 		ret.FormattedContent = strconv.FormatFloat(content, 'f', -1, 64)
 	case NumberFormatPercent:
-		ret.FormattedContent = strconv.FormatFloat(content*100, 'f', -1, 64) + "%"
+		s := fmt.Sprintf("%.2f", content*100)
+		ret.FormattedContent = strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
 	}
 	return
 }
@@ -158,7 +160,8 @@ func (number *ValueNumber) FormatNumber() {
 	case NumberFormatNone:
 		number.FormattedContent = strconv.FormatFloat(number.Content, 'f', -1, 64)
 	case NumberFormatPercent:
-		number.FormattedContent = strconv.FormatFloat(number.Content*100, 'f', -1, 64) + "%"
+		s := fmt.Sprintf("%.2f", number.Content*100)
+		number.FormattedContent = strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
 	}
 }
 

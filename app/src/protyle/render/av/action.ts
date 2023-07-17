@@ -110,6 +110,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
+        cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
+            item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+            item.classList.remove("av__row--select");
+        });
         popTextCell(protyle, [cellElement]);
         event.preventDefault();
         event.stopPropagation();

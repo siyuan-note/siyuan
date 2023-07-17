@@ -44,7 +44,7 @@ export const openMenuPanel = (protyle: IProtyle,
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         const tabRect = blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
         if (type === "select") {
-            const cellRect = options.cellElement.getBoundingClientRect();
+            const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
             bindSelectEvent(protyle, data, menuElement, options);
             menuElement.querySelector("input").select();
@@ -82,7 +82,8 @@ export const openMenuPanel = (protyle: IProtyle,
             } else if (targetElement.querySelector('[data-type="removeFilter"]')) {
                 type = "filters";
             } else if (targetElement.querySelector('[data-type="setSelectCol"]')) {
-                const changeData = data.view.columns.find((column) => column.id === options.cellElement.dataset.colId).options;
+                const colId = options.cellElements[0].dataset.colId;
+                const changeData = data.view.columns.find((column) => column.id === colId).options;
                 const oldData = Object.assign([], changeData);
                 let targetOption: { name: string, color: string };
                 changeData.find((option, index: number) => {
@@ -103,12 +104,12 @@ export const openMenuPanel = (protyle: IProtyle,
                 });
                 transaction(protyle, [{
                     action: "updateAttrViewColOptions",
-                    id: options.cellElement.dataset.colId,
+                    id: colId,
                     avID: data.id,
                     data: changeData,
                 }], [{
                     action: "updateAttrViewColOptions",
-                    id: options.cellElement.dataset.colId,
+                    id: colId,
                     avID: data.id,
                     data: oldData,
                 }]);

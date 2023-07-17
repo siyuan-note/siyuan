@@ -292,8 +292,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
     } else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].textContent}" ${style} class="b3-text-field">`;
     } else if (["select", "mSelect"].includes(type) && blockElement) {
-        // TODO
-        openMenuPanel(protyle, blockElement, "select", {cellElement: cellElements[0]});
+        openMenuPanel(protyle, blockElement, "select", {cellElements});
         return;
     }
     window.siyuan.menus.menu.remove();

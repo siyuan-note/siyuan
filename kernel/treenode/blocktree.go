@@ -375,7 +375,7 @@ func InitBlockTree(force bool) {
 	if force {
 		err := os.RemoveAll(util.BlockTreePath)
 		if nil != err {
-			logging.LogErrorf("remove blocktree file failed: %s", err)
+			logging.LogErrorf("remove block tree file failed: %s", err)
 		}
 		blockTrees = &sync.Map{}
 		return
@@ -456,7 +456,11 @@ func SaveBlockTree(force bool) {
 	defer blockTreeLock.Unlock()
 
 	start := time.Now()
-	os.MkdirAll(util.BlockTreePath, 0755)
+	if err := os.MkdirAll(util.BlockTreePath, 0755); nil != err {
+		logging.LogErrorf("create block tree dir [%s] failed: %s", util.BlockTreePath, err)
+		os.Exit(logging.ExitCodeFileSysErr)
+		return
+	}
 
 	size := uint64(0)
 	var count int

@@ -250,6 +250,7 @@ export abstract class Constants {
                 copyPlainText: {default: "", custom: ""},
                 copyID: {default: "", custom: ""},
                 netImg2LocalAsset: {default: "", custom: ""},
+                optimizeTypography: {default: "", custom: ""},
                 hLayout: {default: "", custom: ""},
                 vLayout: {default: "", custom: ""},
                 refPopover: {default: "", custom: ""},

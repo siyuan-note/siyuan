@@ -41,6 +41,15 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent) => {
         return true;
     }
 
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.optimizeTypography.custom, event)) {
+        fetchPost("/api/format/autoSpace", {
+            id: protyle.block.rootID
+        });
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) ||
         matchHotKey(window.siyuan.config.keymap.general.dailyNote.custom, event)) {
         // 阻止输入 https://ld246.com/article/1679618995926

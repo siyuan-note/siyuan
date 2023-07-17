@@ -325,6 +325,7 @@ export class Breadcrumb {
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.optimizeTypography,
+                    accelerator: window.siyuan.config.keymap.editor.general.optimizeTypography.custom,
                     icon: "iconFormat",
                     click: () => {
                         hideElements(["toolbar"], protyle);

@@ -62,7 +62,10 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         if (cell.valueType === "text") {
                             text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
                         } else if (cell.valueType === "block") {
-                            text = `<span class="av__celltext">${cell.value?.block.content || ""}</span>`;
+                            text = `<span class="av__celltext">${cell.value?.block.content || ""}</span>`
+                            if (cell.value?.block.id) {
+                                text += `<span class="b3-chip b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="d">${window.siyuan.languages.openBy}</span>`;
+                            }
                         } else if (cell.valueType === "number") {
                             text = `<span class="av__celltext">${cell.value?.number.content || ""}</span>`;
                         } else if (cell.valueType === "mSelect" || cell.valueType === "select") {

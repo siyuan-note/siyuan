@@ -59,8 +59,14 @@
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
     position: relative;
 
-    &:hover .av__gutters {
-      opacity: 1;
+    &:hover {
+      [data-type="block-ref"] {
+        display: block;
+      }
+
+      .av__gutters {
+        opacity: 1;
+      }
     }
 
     &--select {
@@ -170,6 +176,13 @@
       color: var(--b3-theme-on-surface);
       margin-right: 5px;
       flex-shrink: 0;
+    }
+
+    [data-type="block-ref"] {
+      display: none;
+      position: absolute;
+      right: 5px;
+      font-size: 10px;
     }
   }
 

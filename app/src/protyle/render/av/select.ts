@@ -49,8 +49,8 @@ export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
         return;
     }
     const colId = options.cellElements[0].dataset.colId;
-    const doOperations: IOperation[] = []
-    const undoOperations: IOperation[] = []
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
     options.cellElements.forEach(item => {
         const rowID = item.parentElement.dataset.id;
         const cellId = item.dataset.id;
@@ -81,7 +81,7 @@ export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
             rowID,
             avID: data.id,
             data: cellData.value
-        })
+        });
         undoOperations.push({
             action: "updateAttrViewCell",
             id: cellId,
@@ -91,8 +91,8 @@ export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
             data: {
                 mSelect: oldValue
             }
-        })
-    })
+        });
+    });
     transaction(protyle, doOperations, undoOperations);
     target.remove();
 };
@@ -354,7 +354,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             hasSelected = true;
             return true;
         }
-    })
+    });
     if (hasSelected) {
         menuElement.querySelector("input").focus();
         return;
@@ -379,8 +379,8 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
         }
     });
 
-    const cellDoOperations: IOperation[] = []
-    const cellUndoOperations: IOperation[] = []
+    const cellDoOperations: IOperation[] = [];
+    const cellUndoOperations: IOperation[] = [];
     options.cellElements.forEach(item => {
         let cellData: IAVCell;
         const rowID = item.parentElement.dataset.id;
@@ -401,8 +401,8 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             let hasOption = false;
             cellData.value.mSelect.find((item) => {
                 if (item.content === currentElement.dataset.name) {
-                    hasOption = true
-                    return true
+                    hasOption = true;
+                    return true;
                 }
             });
             if (!hasOption) {
@@ -424,7 +424,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             rowID,
             avID: data.id,
             data: cellData.value
-        })
+        });
         cellUndoOperations.push({
             action: "updateAttrViewCell",
             id: cellData.id,
@@ -434,8 +434,8 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             data: {
                 [colData.type]: oldValue
             }
-        })
-    })
+        });
+    });
 
     if (currentElement.querySelector(".b3-menu__accelerator")) {
         colData.options.push({
@@ -447,7 +447,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
             id: colId,
             avID: data.id,
             data: colData.options
-        })
+        });
         transaction(protyle, cellDoOperations, [{
             action: "removeAttrViewColOption",
             id: colId,
@@ -474,24 +474,24 @@ export const getSelectHTML = (data: IAVTable, options: { cellElements: HTMLEleme
         }
     });
 
-    const commonOptions: { content: string, color: string }[][] = []
-    const allUniqueOptions: { content: string, color: string }[] = []
+    const commonOptions: { content: string, color: string }[][] = [];
+    const allUniqueOptions: { content: string, color: string }[] = [];
     options.cellElements.forEach((cellElement) => {
         data.rows.find(row => {
             if (cellElement.parentElement.dataset.id === row.id) {
-                const commonOption: { content: string, color: string }[] = []
+                const commonOption: { content: string, color: string }[] = [];
                 row.cells.find(cell => {
                     if (cell.id === cellElement.dataset.id) {
                         if (cell.value && cell.value.mSelect) {
                             cell.value.mSelect.forEach((item: { content: string, color: string }) => {
-                                commonOption.push(item)
-                                allUniqueOptions.push(item)
+                                commonOption.push(item);
+                                allUniqueOptions.push(item);
                             });
                         }
                         return true;
                     }
                 });
-                commonOptions.push(commonOption)
+                commonOptions.push(commonOption);
                 return true;
             }
         });
@@ -499,20 +499,20 @@ export const getSelectHTML = (data: IAVTable, options: { cellElements: HTMLEleme
 
     let selectedHTML = "";
     allUniqueOptions.forEach((unique) => {
-        let everyRowHas = true
+        let everyRowHas = true;
         commonOptions.find(item => {
-            let hasContent = false
+            let hasContent = false;
             item.find((option) => {
                 if (option.content === unique.content) {
-                    hasContent = true
+                    hasContent = true;
                     return true;
                 }
-            })
+            });
             if (!hasContent) {
-                everyRowHas = false
-                return true
+                everyRowHas = false;
+                return true;
             }
-        })
+        });
         if (everyRowHas && selectedHTML.indexOf(`data-content="${unique.content}"`) === -1) {
             selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${unique.content}" style="background-color:var(--b3-font-background${unique.color});color:var(--b3-font-color${unique.color})">${unique.content}<svg class="b3-chip__close" data-type="removeSelectCell"><use xlink:href="#iconCloseRound"></use></svg></div>`;
         }

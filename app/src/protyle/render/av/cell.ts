@@ -331,9 +331,9 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
         return;
     }
 
-    const avMaskElement = document.querySelector(".av__mask")
-    const doOperations: IOperation[] = []
-    const undoOperations: IOperation[] = []
+    const avMaskElement = document.querySelector(".av__mask");
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
     const avID = blockElement.getAttribute("data-av-id");
     cellElements.forEach((item) => {
         const rowElement = hasClosestByClassName(item, "av__row");
@@ -364,7 +364,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             data: {
                 [type]: inputValue
             }
-        })
+        });
         undoOperations.push({
             action: "updateAttrViewCell",
             id: cellId,
@@ -374,8 +374,8 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             data: {
                 [type]: oldValue
             }
-        })
-    })
+        });
+    });
     transaction(protyle, doOperations, undoOperations);
     setTimeout(() => {
         avMaskElement.remove();

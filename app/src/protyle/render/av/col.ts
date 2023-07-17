@@ -13,7 +13,7 @@ export const getEditHTML = (options: {
     data: IAV
 }) => {
     // TODO
-}
+};
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {

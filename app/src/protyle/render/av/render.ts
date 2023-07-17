@@ -151,7 +151,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             avRender(item, () => {
-                showColMenu(protyle, item, item.querySelector(".av__row--header").lastElementChild.previousElementSibling as HTMLElement);
+                showColMenu(protyle, item, item.querySelector(`.av__row--header .av__cell[data-col-id="${operation.id}"]`));
             });
         });
     } else if (operation.action === "setAttrViewColWidth") {

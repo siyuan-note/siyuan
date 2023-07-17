@@ -110,19 +110,20 @@
         opacity: 0;
         line-height: 26px;
         overflow: hidden;
+        font-size: 10px;
 
         &.av__calc--ashow {
           opacity: 1;
         }
 
         svg {
-          height: 10px;
-          width: 10px;
+          height: 8px;
+          width: 8px;
           margin-left: 5px;
         }
 
         span {
-          font-size: 16px;
+          font-size: 14px;
           color: var(--b3-theme-on-background);
           margin-left: 5px;
         }

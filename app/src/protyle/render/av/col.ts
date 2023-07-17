@@ -6,6 +6,66 @@ import {getDefaultOperatorByType, setFilter} from "./filter";
 import {genCellValue} from "./cell";
 import {openMenuPanel} from "./openMenuPanel";
 
+export const duplicateCol = (protyle: IProtyle, type: TAVCol, avID: string, colId: string, newValue:string) => {
+    const id = Lute.NewNodeID();
+    const nameMatch = newValue.match(/^(.*) \((\d+)\)$/);
+    if (nameMatch) {
+        newValue = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
+    } else {
+        newValue = `${newValue} (1)`;
+    }
+    if (["select", "mSelect"].includes(type)) {
+        fetchPost("/api/av/renderAttributeView", {id: avID}, (response) => {
+            const data = response.data as IAV;
+            let colOptions;
+            data.view.columns.find((item) => {
+                if (item.id === colId) {
+                    colOptions = item.options;
+                    return true;
+                }
+            });
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: newValue,
+                avID,
+                type,
+                id
+            }, {
+                action: "sortAttrViewCol",
+                avID,
+                previousID: colId,
+                id
+            }, {
+                action: "updateAttrViewColOptions",
+                id,
+                avID,
+                data: colOptions
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+        });
+    } else {
+        transaction(protyle, [{
+            action: "addAttrViewCol",
+            name: newValue,
+            avID,
+            type,
+            id
+        }, {
+            action: "sortAttrViewCol",
+            avID,
+            previousID: colId,
+            id
+        }], [{
+            action: "removeAttrViewCol",
+            id,
+            avID,
+        }]);
+    }
+}
+
 export const getEditHTML = (options: {
     protyle: IProtyle,
     colId: string,
@@ -50,19 +110,23 @@ export const getEditHTML = (options: {
     }
     return `${html}
 <button class="b3-menu__separator"></button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
     <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
     <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
 </button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="duplicateCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
 </button>
-<button class="b3-menu__item">
+<button class="b3-menu__item" data-type="removeCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>`;
 };
+
+export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuElement: HTMLElement }) => {
+    // TODO
+}
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {
@@ -108,18 +172,6 @@ export const updateHeader = (rowElement: HTMLElement) => {
     counterElement.classList.remove("fn__none");
     counterElement.innerHTML = `${selectCount} selected`;
     avHeadElement.style.position = "sticky";
-};
-
-const removeCol = (cellElement: HTMLElement) => {
-    const blockElement = hasClosestBlock(cellElement);
-    if (!blockElement) {
-        return false;
-    }
-    const colId = cellElement.getAttribute("data-col-id");
-    blockElement.querySelectorAll(".av__row").forEach((item) => {
-        item.querySelector(`[data-col-id="${colId}"]`).remove();
-    });
-    cellElement.remove();
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
@@ -261,64 +313,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
             icon: "iconCopy",
             label: window.siyuan.languages.duplicate,
             click() {
-                const id = Lute.NewNodeID();
-                let newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
-                const nameMatch = newValue.match(/^(.*) \((\d+)\)$/);
-                if (nameMatch) {
-                    newValue = `${nameMatch[1]} (${parseInt(nameMatch[2]) + 1})`;
-                } else {
-                    newValue = `${newValue} (1)`;
-                }
-                if (["select", "mSelect"].includes(type)) {
-                    fetchPost("/api/av/renderAttributeView", {id: avID}, (response) => {
-                        const data = response.data as IAV;
-                        let colOptions;
-                        data.view.columns.find((item) => {
-                            if (item.id === colId) {
-                                colOptions = item.options;
-                                return true;
-                            }
-                        });
-                        transaction(protyle, [{
-                            action: "addAttrViewCol",
-                            name: newValue,
-                            avID,
-                            type,
-                            id
-                        }, {
-                            action: "sortAttrViewCol",
-                            avID,
-                            previousID: colId,
-                            id
-                        }, {
-                            action: "updateAttrViewColOptions",
-                            id,
-                            avID,
-                            data: colOptions
-                        }], [{
-                            action: "removeAttrViewCol",
-                            id,
-                            avID,
-                        }]);
-                    });
-                } else {
-                    transaction(protyle, [{
-                        action: "addAttrViewCol",
-                        name: newValue,
-                        avID,
-                        type,
-                        id
-                    }, {
-                        action: "sortAttrViewCol",
-                        avID,
-                        previousID: colId,
-                        id
-                    }], [{
-                        action: "removeAttrViewCol",
-                        id,
-                        avID,
-                    }]);
-                }
+                duplicateCol(protyle, type, avID, colId, (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value);
             }
         });
         menu.addItem({
@@ -336,7 +331,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     type: type,
                     id: colId
                 }]);
-                removeCol(cellElement);
             }
         });
         menu.addSeparator();

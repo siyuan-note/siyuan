@@ -3,7 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
-import {getEditHTML} from "./col";
+import {bindEditEvent, getEditHTML} from "./col";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -140,6 +140,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         });
         if (!cellElements) {
             menuElement.innerHTML = getEditHTML({protyle, data, colId});
+            bindEditEvent({protyle, data, menuElement})
         } else {
             cellElements.forEach((cellElement: HTMLMediaElement) => {
                 data.view.rows.find(row => {
@@ -202,6 +203,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 });
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId});
+                    bindEditEvent({protyle, data, menuElement})
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {
@@ -275,6 +277,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 });
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId});
+                    bindEditEvent({protyle, data, menuElement})
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {

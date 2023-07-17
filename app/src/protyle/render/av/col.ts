@@ -6,7 +6,7 @@ import {getDefaultOperatorByType, setFilter} from "./filter";
 import {genCellValue} from "./cell";
 import {openMenuPanel} from "./openMenuPanel";
 
-export const duplicateCol = (protyle: IProtyle, type: TAVCol, avID: string, colId: string, newValue:string) => {
+export const duplicateCol = (protyle: IProtyle, type: TAVCol, avID: string, colId: string, newValue: string) => {
     const id = Lute.NewNodeID();
     const nameMatch = newValue.match(/^(.*) \((\d+)\)$/);
     if (nameMatch) {
@@ -87,14 +87,14 @@ export const getEditHTML = (options: {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
-    <svg class="b3-menu__icon" style=""><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
-    <span class="b3-menu__label"><input style="margin: 4px 0" class="b3-text-field" type="text" value="${colData.name}"></span>
+    <svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
+    <span class="b3-menu__label"><input data-type="name" style="margin: 4px 0" class="b3-text-field" type="text" value="${colData.name}"></span>
 </button>`;
     if (colData.options && colData.options.length > 0) {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label"><input style="margin: 4px 0" class="b3-text-field" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
+    <span class="b3-menu__label"><input data-type="addOption"  style="margin: 4px 0" class="b3-text-field" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
 </button>`
         colData.options.forEach(item => {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
@@ -125,7 +125,77 @@ export const getEditHTML = (options: {
 };
 
 export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuElement: HTMLElement }) => {
-    // TODO
+    const avID = options.data.id;
+    const colId = options.menuElement.firstElementChild.getAttribute("data-col-id");
+    const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
+    const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
+    nameElement.addEventListener("blur", (event) => {
+        const newValue = nameElement.value;
+        if (newValue === colData.name) {
+            return;
+        }
+        transaction(options.protyle, [{
+            action: "updateAttrViewCol",
+            id: colId,
+            avID,
+            name: newValue,
+            type: colData.type,
+        }], [{
+            action: "updateAttrViewCol",
+            id: colId,
+            avID,
+            name: colData.name,
+            type: colData.type,
+        }]);
+        colData.name = newValue;
+    });
+    nameElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return
+        }
+        if (event.key === "Escape") {
+            options.menuElement.parentElement.remove();
+        }
+    });
+    const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
+    addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (event.key === "Escape") {
+            options.menuElement.parentElement.remove();
+        }
+        if (event.key === "Enter") {
+            let hasSelected = false;
+            colData.options.find((item) => {
+                if (addOptionElement.value === item.name) {
+                    hasSelected = true;
+                    return true;
+                }
+            });
+            if (hasSelected) {
+                return;
+            }
+            colData.options.push({
+                color: (colData.options.length + 1).toString(),
+                name: addOptionElement.value
+            });
+            transaction(options.protyle, [{
+                action: "updateAttrViewColOptions",
+                id: colId,
+                avID,
+                data: colData.options
+            }], [{
+                action: "removeAttrViewColOption",
+                id: colId,
+                avID,
+                data: addOptionElement.value
+            }]);
+            options.menuElement.innerHTML = getEditHTML({protyle: options.protyle, colId, data: options.data});
+            bindEditEvent({protyle: options.protyle, menuElement: options.menuElement, data: options.data});
+            (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
+        }
+    });
 }
 
 export const getColIconByType = (type: TAVCol) => {

@@ -281,18 +281,19 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
 };
 
-export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
-    const type = cellElement.parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
-    const cellRect = cellElement.getBoundingClientRect();
+export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
+    const type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+    const cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
     const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`;
-    const blockElement = hasClosestBlock(cellElement);
+    const blockElement = hasClosestBlock(cellElements[0]);
     if (type === "block" || type === "text") {
-        html = `<textarea ${style} class="b3-text-field">${cellElement.textContent}</textarea>`;
+        html = `<textarea ${style} class="b3-text-field">${cellElements[0].textContent}</textarea>`;
     } else if (type === "number") {
-        html = `<input type="number" value="${cellElement.textContent}" ${style} class="b3-text-field">`;
+        html = `<input type="number" value="${cellElements[0].textContent}" ${style} class="b3-text-field">`;
     } else if (["select", "mSelect"].includes(type) && blockElement) {
-        openMenuPanel(protyle, blockElement, "select", {cellElement});
+        // TODO
+        openMenuPanel(protyle, blockElement, "select", {cellElement: cellElements[0]});
         return;
     }
     window.siyuan.menus.menu.remove();
@@ -305,14 +306,14 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
         inputElement.select();
         inputElement.focus();
         inputElement.addEventListener("blur", () => {
-            updateCellValue(protyle, cellElement, type);
+            updateCellValue(protyle, type, cellElements);
         });
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {
                 return;
             }
             if (event.key === "Escape" || event.key === "Enter") {
-                updateCellValue(protyle, cellElement, type);
+                updateCellValue(protyle, type, cellElements);
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -325,51 +326,58 @@ export const popTextCell = (protyle: IProtyle, cellElement: HTMLElement) => {
     });
 };
 
-const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVCol) => {
-    const rowElement = hasClosestByClassName(cellElement, "av__row");
-    if (!rowElement) {
-        return;
-    }
-    const blockElement = hasClosestBlock(rowElement);
+const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElement[]) => {
+    const blockElement = hasClosestBlock(cellElements[0]);
     if (!blockElement) {
         return;
     }
-    const rowID = rowElement.getAttribute("data-id");
-    const avMaskElement = document.querySelector(".av__mask");
-    const cellId = cellElement.getAttribute("data-id");
-    const colId = cellElement.getAttribute("data-col-id");
+
+    const avMaskElement = document.querySelector(".av__mask")
+    const doOperations: IOperation[] = []
+    const undoOperations: IOperation[] = []
     const avID = blockElement.getAttribute("data-av-id");
-    const inputValue: { content: string | number, isNotEmpty?: boolean } = {
-        content: (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
-    };
-    const oldValue: { content: string | number, isNotEmpty?: boolean } = {
-        content: cellElement.textContent.trim()
-    };
-    if (type === "number") {
-        oldValue.content = parseFloat(oldValue.content as string);
-        oldValue.isNotEmpty = !!oldValue.content;
-        inputValue.content = parseFloat(inputValue.content as string);
-        inputValue.isNotEmpty = !!inputValue.content;
-    }
-    transaction(protyle, [{
-        action: "updateAttrViewCell",
-        id: cellId,
-        avID,
-        keyID: colId,
-        rowID,
-        data: {
-            [type]: inputValue
+    cellElements.forEach((item) => {
+        const rowElement = hasClosestByClassName(item, "av__row");
+        if (!rowElement) {
+            return;
         }
-    }], [{
-        action: "updateAttrViewCell",
-        id: cellId,
-        avID,
-        keyID: colId,
-        rowID,
-        data: {
-            [type]: oldValue
+        const rowID = rowElement.getAttribute("data-id");
+        const cellId = item.getAttribute("data-id");
+        const colId = item.getAttribute("data-col-id");
+        const inputValue: { content: string | number, isNotEmpty?: boolean } = {
+            content: (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
+        };
+        const oldValue: { content: string | number, isNotEmpty?: boolean } = {
+            content: item.textContent.trim()
+        };
+        if (type === "number") {
+            oldValue.content = parseFloat(oldValue.content as string);
+            oldValue.isNotEmpty = !!oldValue.content;
+            inputValue.content = parseFloat(inputValue.content as string);
+            inputValue.isNotEmpty = !!inputValue.content;
         }
-    }]);
+        doOperations.push({
+            action: "updateAttrViewCell",
+            id: cellId,
+            avID,
+            keyID: colId,
+            rowID,
+            data: {
+                [type]: inputValue
+            }
+        })
+        undoOperations.push({
+            action: "updateAttrViewCell",
+            id: cellId,
+            avID,
+            keyID: colId,
+            rowID,
+            data: {
+                [type]: oldValue
+            }
+        })
+    })
+    transaction(protyle, doOperations, undoOperations);
     setTimeout(() => {
         avMaskElement.remove();
     });

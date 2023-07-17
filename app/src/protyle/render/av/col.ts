@@ -4,6 +4,16 @@ import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {getDefaultOperatorByType, setFilter} from "./filter";
 import {genCellValue} from "./cell";
+import {openMenuPanel} from "./openMenuPanel";
+
+export const getEditHTML = (options: {
+    protyle: IProtyle,
+    blockElement: HTMLElement,
+    cellElement: HTMLElement,
+    data: IAV
+}) => {
+    // TODO
+}
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {
@@ -95,7 +105,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
             icon: "iconEdit",
             label: window.siyuan.languages.edit,
             click() {
-
+                openMenuPanel(protyle, blockElement, "edit", {cellElement});
             }
         });
     }

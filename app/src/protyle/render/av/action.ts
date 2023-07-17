@@ -110,7 +110,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
-        popTextCell(protyle, cellElement);
+        popTextCell(protyle, [cellElement]);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -197,7 +197,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
             icon: getColIconByType(cellElement.getAttribute("data-dtype") as TAVCol),
             label: cellElement.textContent.trim(),
             click() {
-                popTextCell(protyle, rowElement.querySelector(`.av__cell[data-col-id="${cellElement.dataset.colId}"]`));
+                popTextCell(protyle, Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`)));
             }
         });
     });

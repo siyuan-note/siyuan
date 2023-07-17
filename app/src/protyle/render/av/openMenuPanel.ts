@@ -1,7 +1,7 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {addCol} from "./addCol";
-import {getColIconByType} from "./col";
+import {getColIconByType, getEditHTML} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute} from "../../util/hasClosest";
 import {bindSelectEvent, getSelectHTML, addSelectColAndCell, setSelectCol, removeSelectCell} from "./select";
@@ -10,7 +10,7 @@ import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 
 export const openMenuPanel = (protyle: IProtyle,
                               blockElement: HTMLElement,
-                              type: "select" | "properties" | "config" | "sorts" | "filters" = "config",
+                              type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" = "config",
                               options?: any) => {
     let avPanelElement = document.querySelector(".av__panel");
     if (avPanelElement) {
@@ -32,6 +32,8 @@ export const openMenuPanel = (protyle: IProtyle,
             html = getFiltersHTML(data.view);
         } else if (type === "select") {
             html = getSelectHTML(data.view, options);
+        } else if (type === "edit") {
+            html = getEditHTML({protyle, data, blockElement, cellElement: options.cellElement});
         }
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel">
@@ -41,7 +43,7 @@ export const openMenuPanel = (protyle: IProtyle,
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         const tabRect = blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
-        if (options && options.cellElement) {
+        if (type === "select") {
             const cellRect = options.cellElement.getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
             bindSelectEvent(protyle, data, menuElement, options);
@@ -49,9 +51,10 @@ export const openMenuPanel = (protyle: IProtyle,
             menuElement.querySelector("input").focus();
         } else {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+            if (type === "sorts") {
+                bindSortsEvent(protyle, menuElement, data);
+            }
         }
-
-        bindSortsEvent(protyle, menuElement, data);
         avPanelElement.addEventListener("dragstart", (event) => {
             window.siyuan.dragElement = event.target as HTMLElement;
             window.siyuan.dragElement.style.opacity = ".1";
@@ -244,7 +247,6 @@ export const openMenuPanel = (protyle: IProtyle,
                 window.siyuan.dragElement = undefined;
             }
         });
-
         avPanelElement.addEventListener("click", (event) => {
             event.preventDefault();
             let target = event.target as HTMLElement;

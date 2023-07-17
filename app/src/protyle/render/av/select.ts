@@ -3,6 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
+import {getEditHTML} from "./col";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -12,14 +13,14 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-                html += `<button data-type="addSelectColAndCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${item.name}</span>
         </span>
     </div>
-    <svg class="b3-menu__action" data-type="setSelectCol"><use xlink:href="#iconEdit"></use></svg>
+    <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
             }
             if (key === item.name) {
@@ -29,7 +30,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     }
     if (!hasMatch && key) {
         const colorIndex = (options?.length || 0) % 13 + 1;
-        html = `<button data-type="addSelectColAndCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" data-name="${key}" data-color="${colorIndex}">
+        html = `<button data-type="addColOptionOrCell" class="b3-menu__item${html ? "" : " b3-menu__item--current"}" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
 <div class="fn__flex-1">
     <span class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">
@@ -42,16 +43,14 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
     return html;
 };
 
-export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
-    cellElements: HTMLElement[]
-}, target: HTMLElement) => {
+export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement) => {
     if (!target) {
         return;
     }
-    const colId = options.cellElements[0].dataset.colId;
+    const colId = cellElements[0].dataset.colId;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    options.cellElements.forEach(item => {
+    cellElements.forEach(item => {
         const rowID = item.parentElement.dataset.id;
         const cellId = item.dataset.id;
         let cellData: IAVCell;
@@ -97,16 +96,15 @@ export const removeSelectCell = (protyle: IProtyle, data: IAV, options: {
     target.remove();
 };
 
-export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
-    cellElements: HTMLElement[];
-}, target: HTMLElement,) => {
+export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, cellElements?: HTMLElement[]) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
     if (!menuElement) {
         return;
     }
+    const colId = cellElements ? cellElements[0].dataset.colId : menuElement.firstElementChild.getAttribute("data-col-id");
     let name = target.parentElement.dataset.name;
     let color = target.parentElement.dataset.color;
-    const menu = new Menu("av-select-option", () => {
+    const menu = new Menu("av-col-option", () => {
         if (name === inputElement.value) {
             return;
         }
@@ -140,29 +138,34 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                 return true;
             }
         });
-        data.view.rows.find(row => {
-            if (row.id === options.cellElements[0].parentElement.dataset.id) {
-                row.cells.find(cell => {
-                    if (cell.id === options.cellElements[0].dataset.id) {
-                        cell.value.mSelect.find((item) => {
-                            if (item.content === name) {
-                                item.content = inputElement.value;
+        if (!cellElements) {
+            menuElement.innerHTML = getEditHTML({protyle, data, colId});
+        } else {
+            cellElements.forEach((cellElement: HTMLMediaElement) => {
+                data.view.rows.find(row => {
+                    if (row.id === cellElement.parentElement.dataset.id) {
+                        row.cells.find(cell => {
+                            if (cell.id === cellElement.dataset.id) {
+                                cell.value.mSelect.find((item) => {
+                                    if (item.content === name) {
+                                        item.content = inputElement.value;
+                                        return true;
+                                    }
+                                });
                                 return true;
                             }
                         });
                         return true;
                     }
                 });
-                return true;
-            }
-        });
-        menuElement.innerHTML = getSelectHTML(data.view, options);
-        bindSelectEvent(protyle, data, menuElement, options);
+            })
+            menuElement.innerHTML = getSelectHTML(data.view, cellElements);
+            bindSelectEvent(protyle, data, menuElement, cellElements);
+        }
     });
     if (menu.isOpen) {
         return;
     }
-    const colId = options.cellElements[0].dataset.colId;
     menu.addItem({
         iconHTML: "",
         label: `<input class="b3-text-field" style="margin: 4px 0" value="${name}">`
@@ -197,24 +200,30 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                         return true;
                     }
                 });
-                data.view.rows.find(row => {
-                    if (row.id === options.cellElements[0].parentElement.dataset.id) {
-                        row.cells.find(cell => {
-                            if (cell.id === options.cellElements[0].dataset.id) {
-                                cell.value.mSelect.find((item, index) => {
-                                    if (item.content === newName) {
-                                        cell.value.mSelect.splice(index, 1);
+                if (!cellElements) {
+                    menuElement.innerHTML = getEditHTML({protyle, data, colId});
+                } else {
+                    cellElements.forEach((cellElement: HTMLElement) => {
+                        data.view.rows.find(row => {
+                            if (row.id === cellElement.parentElement.dataset.id) {
+                                row.cells.find(cell => {
+                                    if (cell.id === cellElement.dataset.id) {
+                                        cell.value.mSelect.find((item, index) => {
+                                            if (item.content === newName) {
+                                                cell.value.mSelect.splice(index, 1);
+                                                return true;
+                                            }
+                                        });
                                         return true;
                                     }
                                 });
                                 return true;
                             }
                         });
-                        return true;
-                    }
-                });
-                menuElement.innerHTML = getSelectHTML(data.view, options);
-                bindSelectEvent(protyle, data, menuElement, options);
+                    })
+                    menuElement.innerHTML = getSelectHTML(data.view, cellElements);
+                    bindSelectEvent(protyle, data, menuElement, cellElements);
+                }
             });
         }
     });
@@ -264,27 +273,33 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
                         return true;
                     }
                 });
-                data.view.rows.find(row => {
-                    if (row.id === options.cellElements[0].parentElement.dataset.id) {
-                        row.cells.find(cell => {
-                            if (cell.id === options.cellElements[0].dataset.id) {
-                                cell.value.mSelect.find((item) => {
-                                    if (item.content === name) {
-                                        item.content = inputElement.value;
-                                        item.color = (index + 1).toString();
+                if (!cellElements) {
+                    menuElement.innerHTML = getEditHTML({protyle, data, colId});
+                } else {
+                    cellElements.forEach((cellElement: HTMLElement) => {
+                        data.view.rows.find(row => {
+                            if (row.id === cellElement.parentElement.dataset.id) {
+                                row.cells.find(cell => {
+                                    if (cell.id === cellElement.dataset.id) {
+                                        cell.value.mSelect.find((item) => {
+                                            if (item.content === name) {
+                                                item.content = inputElement.value;
+                                                item.color = (index + 1).toString();
+                                                return true;
+                                            }
+                                        });
                                         return true;
                                     }
                                 });
                                 return true;
                             }
                         });
-                        return true;
-                    }
-                });
+                    })
+                    menuElement.innerHTML = getSelectHTML(data.view, cellElements);
+                    bindSelectEvent(protyle, data, menuElement, cellElements);
+                }
                 name = inputElement.value;
                 color = (index + 1).toString();
-                menuElement.innerHTML = getSelectHTML(data.view, options);
-                bindSelectEvent(protyle, data, menuElement, options);
                 return true;
             }
         });
@@ -300,11 +315,9 @@ export const setSelectCol = (protyle: IProtyle, data: IAV, options: {
     inputElement.select();
 };
 
-export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, options: {
-    cellElements: HTMLElement[]
-}) => {
+export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement,  cellElements: HTMLElement[]) => {
     const inputElement = menuElement.querySelector("input");
-    const colId = options.cellElements[0].dataset.colId;
+    const colId = cellElements[0].dataset.colId;
     let colData: IAVColumn;
     data.view.columns.find((item: IAVColumn) => {
         if (item.id === colId) {
@@ -336,18 +349,16 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
             if (!currentElement) {
                 currentElement = menuElement.querySelector(".b3-menu__item--current");
             }
-            addSelectColAndCell(protyle, data, options, currentElement, menuElement);
+            addColOptionOrCell(protyle, data, cellElements, currentElement, menuElement);
         } else if (event.key === "Backspace" && inputElement.value === "") {
-            removeSelectCell(protyle, data, options, inputElement.previousElementSibling as HTMLElement);
+            removeCellOption(protyle, data, cellElements, inputElement.previousElementSibling as HTMLElement);
         } else if (event.key === "Escape") {
             menuElement.parentElement.remove();
         }
     });
 };
 
-export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
-    cellElements: HTMLElement[]
-}, currentElement: HTMLElement, menuElement: HTMLElement) => {
+export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], currentElement: HTMLElement, menuElement: HTMLElement) => {
     let hasSelected = false;
     Array.from(menuElement.querySelectorAll(".b3-chips .b3-chip")).find((item: HTMLElement) => {
         if (item.dataset.content === currentElement.dataset.name) {
@@ -360,10 +371,10 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
         return;
     }
 
-    const colId = options.cellElements[0].dataset.colId;
+    const colId = cellElements[0].dataset.colId;
     let cellIndex = 0;
-    Array.from(options.cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
-        if (item.dataset.id === options.cellElements[0].dataset.id) {
+    Array.from(cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
+        if (item.dataset.id === cellElements[0].dataset.id) {
             cellIndex = index;
             return true;
         }
@@ -381,7 +392,7 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
 
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    options.cellElements.forEach(item => {
+    cellElements.forEach(item => {
         let cellData: IAVCell;
         const rowID = item.parentElement.dataset.id;
         data.view.rows.find(row => {
@@ -460,14 +471,14 @@ export const addSelectColAndCell = (protyle: IProtyle, data: IAV, options: {
     if (colData.type === "select") {
         menuElement.parentElement.remove();
     } else {
-        menuElement.innerHTML = getSelectHTML(data.view, options);
-        bindSelectEvent(protyle, data, menuElement, options);
+        menuElement.innerHTML = getSelectHTML(data.view, cellElements);
+        bindSelectEvent(protyle, data, menuElement, cellElements);
         menuElement.querySelector("input").focus();
     }
 };
 
-export const getSelectHTML = (data: IAVTable, options: { cellElements: HTMLElement[] }) => {
-    const colId = options.cellElements[0].dataset["colId"];
+export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
+    const colId = cellElements[0].dataset["colId"];
     const colData = data.columns.find(item => {
         if (item.id === colId) {
             return item;
@@ -476,7 +487,7 @@ export const getSelectHTML = (data: IAVTable, options: { cellElements: HTMLEleme
 
     const commonOptions: { content: string, color: string }[][] = [];
     const allUniqueOptions: { content: string, color: string }[] = [];
-    options.cellElements.forEach((cellElement) => {
+    cellElements.forEach((cellElement) => {
         data.rows.find(row => {
             if (cellElement.parentElement.dataset.id === row.id) {
                 const commonOption: { content: string, color: string }[] = [];
@@ -514,7 +525,7 @@ export const getSelectHTML = (data: IAVTable, options: { cellElements: HTMLEleme
             }
         });
         if (everyRowHas && selectedHTML.indexOf(`data-content="${unique.content}"`) === -1) {
-            selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${unique.content}" style="background-color:var(--b3-font-background${unique.color});color:var(--b3-font-color${unique.color})">${unique.content}<svg class="b3-chip__close" data-type="removeSelectCell"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+            selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${unique.content}" style="background-color:var(--b3-font-background${unique.color});color:var(--b3-font-color${unique.color})">${unique.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
         }
     });
 

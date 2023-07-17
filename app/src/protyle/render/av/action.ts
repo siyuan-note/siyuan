@@ -70,7 +70,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const headerMoreElement = hasClosestByAttribute(event.target, "data-type", "av-header-more");
     if (headerMoreElement) {
-        openMenuPanel(protyle, blockElement, "properties");
+        openMenuPanel({protyle, blockElement, type: "properties"});
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -78,7 +78,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const moreElement = hasClosestByAttribute(event.target, "data-type", "av-more");
     if (moreElement) {
-        openMenuPanel(protyle, blockElement, "config");
+        openMenuPanel({protyle, blockElement, type: "config"});
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -86,7 +86,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const sortsElement = hasClosestByAttribute(event.target, "data-type", "av-sort");
     if (sortsElement) {
-        openMenuPanel(protyle, blockElement, "sorts");
+        openMenuPanel({protyle, blockElement, type: "sorts"});
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -94,7 +94,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const filtersElement = hasClosestByAttribute(event.target, "data-type", "av-filter");
     if (filtersElement) {
-        openMenuPanel(protyle, blockElement, "filters");
+        openMenuPanel({protyle, blockElement, type: "filters"});
         event.preventDefault();
         event.stopPropagation();
         return true;

@@ -8,11 +8,60 @@ import {openMenuPanel} from "./openMenuPanel";
 
 export const getEditHTML = (options: {
     protyle: IProtyle,
-    blockElement: HTMLElement,
-    cellElement: HTMLElement,
+    colId: string,
     data: IAV
 }) => {
-    // TODO
+    let colData: IAVColumn
+    options.data.view.columns.find((item) => {
+        if (item.id === options.colId) {
+            colData = item;
+            return true;
+        }
+    })
+    let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goProperties">
+        <svg><use xlink:href="#iconLeft"></use></svg>
+    </span>
+    <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>
+    <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
+</button>
+<button class="b3-menu__separator"></button>
+<button class="b3-menu__item">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>
+    <span class="b3-menu__label"><input style="margin: 4px 0" class="b3-text-field" type="text" value="${colData.name}"></span>
+</button>`;
+    if (colData.options && colData.options.length > 0) {
+        html += `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
+    <span class="b3-menu__label"><input style="margin: 4px 0" class="b3-text-field" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
+</button>`
+        colData.options.forEach(item => {
+            html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
+    <div class="fn__flex-1">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+            <span class="fn__ellipsis">${item.name}</span>
+        </span>
+    </div>
+    <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
+</button>`;
+        });
+    }
+    return `${html}
+<button class="b3-menu__separator"></button>
+<button class="b3-menu__item">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
+    <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
+</button>
+<button class="b3-menu__item">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
+</button>
+<button class="b3-menu__item">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+</button>`;
 };
 
 export const getColIconByType = (type: TAVCol) => {
@@ -105,7 +154,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
             icon: "iconEdit",
             label: window.siyuan.languages.edit,
             click() {
-                openMenuPanel(protyle, blockElement, "edit", {cellElement});
+                openMenuPanel({protyle, blockElement, type: "edit", colId});
             }
         });
     }

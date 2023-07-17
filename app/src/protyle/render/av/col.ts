@@ -227,6 +227,11 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                             type,
                             id
                         }, {
+                            action: "sortAttrViewCol",
+                            avID,
+                            previousID: colId,
+                            id
+                        }, {
                             action: "updateAttrViewColOptions",
                             id: colId,
                             avID,

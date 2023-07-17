@@ -72,9 +72,9 @@ type Key struct {
 	Options []*KeySelectOption `json:"options,omitempty"` // 选项列表
 }
 
-func NewKey(name string, keyType KeyType) *Key {
+func NewKey(id, name string, keyType KeyType) *Key {
 	return &Key{
-		ID:   ast.NewNodeID(),
+		ID:   id,
 		Name: name,
 		Type: keyType,
 	}
@@ -234,7 +234,7 @@ type Viewable interface {
 
 func NewAttributeView(id string) (ret *AttributeView) {
 	view := NewView()
-	key := NewKey("Block", KeyTypeBlock)
+	key := NewKey(ast.NewNodeID(), "Block", KeyTypeBlock)
 	ret = &AttributeView{
 		Spec:      0,
 		ID:        id,

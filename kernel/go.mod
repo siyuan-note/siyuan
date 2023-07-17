@@ -45,7 +45,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-openai v1.12.0
 	github.com/shirou/gopsutil/v3 v3.23.5
-	github.com/siyuan-note/dejavu v0.0.0-20230704110643-d6a4b98d2d6c
+	github.com/siyuan-note/dejavu v0.0.0-20230717073202-36aa1d8d7b4a
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230702081350-6dde667e7112
 	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524

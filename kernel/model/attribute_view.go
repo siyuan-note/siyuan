@@ -656,7 +656,7 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 	keyType := av.KeyType(operation.Typ)
 	switch keyType {
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect:
-		key := av.NewKey(operation.Name, keyType)
+		key := av.NewKey(operation.ID, operation.Name, keyType)
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
 		switch view.LayoutType {

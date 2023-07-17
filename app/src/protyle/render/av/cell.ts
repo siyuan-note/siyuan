@@ -347,9 +347,9 @@ const updateCellValue = (protyle: IProtyle, cellElement: HTMLElement, type: TAVC
     };
     if (type === "number") {
         oldValue.content = parseFloat(oldValue.content as string);
-        oldValue.isNotEmpty = !!oldValue.content
+        oldValue.isNotEmpty = !!oldValue.content;
         inputValue.content = parseFloat(inputValue.content as string);
-        inputValue.isNotEmpty = !!inputValue.content
+        inputValue.isNotEmpty = !!inputValue.content;
     }
     transaction(protyle, [{
         action: "updateAttrViewCell",

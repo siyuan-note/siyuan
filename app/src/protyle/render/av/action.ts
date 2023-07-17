@@ -191,15 +191,6 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         });
     }
     menu.addSeparator();
-    if (rowIds.length === 1) {
-        menu.addItem({
-            icon: "iconEdit",
-            label: window.siyuan.languages.edit,
-            click() {
-
-            }
-        });
-    }
     const editAttrSubmenu: IMenu[] = [];
     rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
         editAttrSubmenu.push({

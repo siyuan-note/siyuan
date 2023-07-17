@@ -236,7 +236,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                             id,
                             avID,
                         }]);
-                    })
+                    });
                 } else {
                     transaction(protyle, [{
                         action: "addAttrViewCol",

@@ -99,7 +99,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 		}
 	}
 	if gulu.File.IsExist(util.BlockTreePath) {
-		os.RemoveAll(util.BlockTreePath)
+		treenode.InitBlockTree(true)
 	}
 
 	initDBConnection()

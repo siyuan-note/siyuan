@@ -147,7 +147,8 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 	}
 	switch format {
 	case NumberFormatNone:
-		ret.FormattedContent = strconv.FormatFloat(content, 'f', -1, 64)
+		s := fmt.Sprintf("%.5f", content)
+		ret.FormattedContent = strings.TrimRight(strings.TrimRight(s, "0"), ".")
 	case NumberFormatPercent:
 		s := fmt.Sprintf("%.2f", content*100)
 		ret.FormattedContent = strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"

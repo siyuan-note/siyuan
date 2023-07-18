@@ -140,7 +140,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         });
         if (!cellElements) {
             menuElement.innerHTML = getEditHTML({protyle, data, colId});
-            bindEditEvent({protyle, data, menuElement})
+            bindEditEvent({protyle, data, menuElement});
         } else {
             cellElements.forEach((cellElement: HTMLMediaElement) => {
                 data.view.rows.find(row => {
@@ -159,7 +159,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         return true;
                     }
                 });
-            })
+            });
             menuElement.innerHTML = getSelectHTML(data.view, cellElements);
             bindSelectEvent(protyle, data, menuElement, cellElements);
         }
@@ -203,7 +203,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 });
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId});
-                    bindEditEvent({protyle, data, menuElement})
+                    bindEditEvent({protyle, data, menuElement});
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {
@@ -222,7 +222,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 return true;
                             }
                         });
-                    })
+                    });
                     menuElement.innerHTML = getSelectHTML(data.view, cellElements);
                     bindSelectEvent(protyle, data, menuElement, cellElements);
                 }
@@ -277,7 +277,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 });
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId});
-                    bindEditEvent({protyle, data, menuElement})
+                    bindEditEvent({protyle, data, menuElement});
                 } else {
                     cellElements.forEach((cellElement: HTMLElement) => {
                         data.view.rows.find(row => {
@@ -297,7 +297,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 return true;
                             }
                         });
-                    })
+                    });
                     menuElement.innerHTML = getSelectHTML(data.view, cellElements);
                     bindSelectEvent(protyle, data, menuElement, cellElements);
                 }

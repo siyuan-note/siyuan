@@ -57,7 +57,7 @@ export const openMenuPanel = (options: {
             if (options.type === "sorts") {
                 bindSortsEvent(options.protyle, menuElement, data);
             } else if (options.type === "edit") {
-                bindEditEvent({protyle: options.protyle, data, menuElement})
+                bindEditEvent({protyle: options.protyle, data, menuElement});
             }
         }
         avPanelElement.addEventListener("dragstart", (event) => {
@@ -127,7 +127,7 @@ export const openMenuPanel = (options: {
                         data,
                         colId
                     });
-                    bindEditEvent({protyle: options.protyle, data, menuElement})
+                    bindEditEvent({protyle: options.protyle, data, menuElement});
                 }
                 return;
             }
@@ -479,7 +479,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "hideCol") {
-                    const isEdit = menuElement.querySelector('[data-type="goProperties"]')
+                    const isEdit = menuElement.querySelector('[data-type="goProperties"]');
                     const colId = isEdit ? menuElement.firstElementChild.getAttribute("data-col-id") : target.parentElement.getAttribute("data-id");
                     transaction(options.protyle, [{
                         action: "setAttrViewColHidden",
@@ -507,7 +507,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "showCol") {
-                    const isEdit = menuElement.querySelector('[data-type="goProperties"]')
+                    const isEdit = menuElement.querySelector('[data-type="goProperties"]');
                     const colId = isEdit ? menuElement.firstElementChild.getAttribute("data-col-id") : target.parentElement.getAttribute("data-id");
                     transaction(options.protyle, [{
                         action: "setAttrViewColHidden",
@@ -535,15 +535,15 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "duplicateCol") {
-                    const colId = menuElement.firstElementChild.getAttribute("data-col-id")
-                    const colData = data.view.columns.find((item: IAVColumn) => item.id === colId)
+                    const colId = menuElement.firstElementChild.getAttribute("data-col-id");
+                    const colData = data.view.columns.find((item: IAVColumn) => item.id === colId);
                     duplicateCol(options.protyle, colData.type, avID, colId, colData.name);
                     avPanelElement.remove();
                     event.stopPropagation();
                     break;
                 } else if (type === "removeCol") {
-                    const colId = menuElement.firstElementChild.getAttribute("data-col-id")
-                    const colData = data.view.columns.find((item: IAVColumn) => item.id === colId)
+                    const colId = menuElement.firstElementChild.getAttribute("data-col-id");
+                    const colData = data.view.columns.find((item: IAVColumn) => item.id === colId);
                     transaction(options.protyle, [{
                         action: "removeAttrViewCol",
                         id: colId,

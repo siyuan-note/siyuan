@@ -64,20 +64,20 @@ export const duplicateCol = (protyle: IProtyle, type: TAVCol, avID: string, colI
             avID,
         }]);
     }
-}
+};
 
 export const getEditHTML = (options: {
     protyle: IProtyle,
     colId: string,
     data: IAV
 }) => {
-    let colData: IAVColumn
+    let colData: IAVColumn;
     options.data.view.columns.find((item) => {
         if (item.id === options.colId) {
             colData = item;
             return true;
         }
-    })
+    });
     let html = `<button class="b3-menu__item" data-type="nobg" data-col-id="${options.colId}">
     <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goProperties">
         <svg><use xlink:href="#iconLeft"></use></svg>
@@ -95,7 +95,7 @@ export const getEditHTML = (options: {
 <button class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label"><input data-type="addOption"  style="margin: 4px 0" class="b3-text-field" type="text" placeholder="Enter ${window.siyuan.languages.addAttr}"></span>
-</button>`
+</button>`;
         colData.options.forEach(item => {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
     <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
@@ -129,7 +129,7 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
     const colId = options.menuElement.firstElementChild.getAttribute("data-col-id");
     const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
     const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
-    nameElement.addEventListener("blur", (event) => {
+    nameElement.addEventListener("blur", () => {
         const newValue = nameElement.value;
         if (newValue === colData.name) {
             return;
@@ -151,7 +151,7 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
     });
     nameElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
-            return
+            return;
         }
         if (event.key === "Escape") {
             options.menuElement.parentElement.remove();
@@ -196,7 +196,7 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
             (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
         }
     });
-}
+};
 
 export const getColIconByType = (type: TAVCol) => {
     switch (type) {

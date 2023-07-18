@@ -73,7 +73,7 @@ All local features are free, even for commercial use.
 * Android/iOS APP
 * Docker deployment
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
-* Community bazaar
+* Community marketplace
 
 ### Paid subscription
 

@@ -145,7 +145,7 @@ export class BlockPanel {
         this.render();
     }
 
-    private initProtyle(editorElement: HTMLElement) {
+    private initProtyle(editorElement: HTMLElement, afterCB?: () => void) {
         const index = parseInt(editorElement.getAttribute("data-index"));
         fetchPost("/api/block/getBlockInfo", {id: this.nodeIds[index]}, (response) => {
             if (response.code === 3) {
@@ -181,6 +181,9 @@ export class BlockPanel {
                     });
                     if (response.data.rootID !== this.nodeIds[index]) {
                         editor.protyle.breadcrumb.element.parentElement.lastElementChild.classList.remove("fn__none");
+                    }
+                    if (afterCB) {
+                        afterCB();
                     }
                 }
             });
@@ -251,7 +254,40 @@ export class BlockPanel {
         });
         this.element.querySelectorAll(".block__edit").forEach((item: HTMLElement, index) => {
             if (index < 5) {
-                this.initProtyle(item);
+                this.initProtyle(item, index === 0 ? () => {
+                    let targetRect;
+                    if (this.targetElement && this.targetElement.classList.contains("protyle-wysiwyg__embed")) {
+                        targetRect = this.targetElement.getBoundingClientRect();
+                        // 嵌入块过长时，单击弹出的悬浮窗位置居下 https://ld246.com/article/1634292738717
+                        let top = targetRect.top;
+                        const contentElement = hasClosestByClassName(this.targetElement, "protyle-content", true);
+                        if (contentElement) {
+                            const contentRectTop = contentElement.getBoundingClientRect().top;
+                            if (targetRect.top < contentRectTop) {
+                                top = contentRectTop;
+                            }
+                        }
+                        // 单击嵌入块悬浮窗的位置最好是覆盖嵌入块
+                        setPosition(this.element, targetRect.left, Math.max(top - 84, Constants.SIZE_TOOLBAR_HEIGHT), 0, 8);
+                    } else if (this.targetElement) {
+                        if (this.targetElement.classList.contains("pdf__rect")) {
+                            targetRect = this.targetElement.firstElementChild.getBoundingClientRect();
+                        } else {
+                            targetRect = this.targetElement.getBoundingClientRect();
+                        }
+                        // 靠边不宜拖拽 https://github.com/siyuan-note/siyuan/issues/2937
+                        setPosition(this.element, targetRect.left, targetRect.bottom + 4, targetRect.height + 12, 8);
+                    } else if (typeof this.x === "number" && typeof this.y === "number") {
+                        setPosition(this.element, this.x, this.y);
+                    }
+                    const elementRect = this.element.getBoundingClientRect();
+                    if (this.targetElement && elementRect.top < targetRect.top) {
+                        this.element.style.maxHeight = (targetRect.top - elementRect.top - 8) + "px";
+                    } else {
+                        this.element.style.maxHeight = (window.innerHeight - elementRect.top - 8) + "px";
+                    }
+                    this.element.classList.add("block__popover--open");
+                } : undefined);
             } else {
                 observer.observe(item);
             }
@@ -259,32 +295,5 @@ export class BlockPanel {
         if (this.targetElement) {
             this.targetElement.style.cursor = "";
         }
-        this.element.classList.add("block__popover--open");
-        let targetRect;
-        if (this.targetElement && this.targetElement.classList.contains("protyle-wysiwyg__embed")) {
-            targetRect = this.targetElement.getBoundingClientRect();
-            // 嵌入块过长时，单击弹出的悬浮窗位置居下 https://ld246.com/article/1634292738717
-            let top = targetRect.top;
-            const contentElement = hasClosestByClassName(this.targetElement, "protyle-content", true);
-            if (contentElement) {
-                const contentRectTop = contentElement.getBoundingClientRect().top;
-                if (targetRect.top < contentRectTop) {
-                    top = contentRectTop;
-                }
-            }
-            // 单击嵌入块悬浮窗的位置最好是覆盖嵌入块
-            setPosition(this.element, targetRect.left, Math.max(top - 84, Constants.SIZE_TOOLBAR_HEIGHT), 0, 8);
-        } else if (this.targetElement) {
-            if (this.targetElement.classList.contains("pdf__rect")) {
-                targetRect = this.targetElement.firstElementChild.getBoundingClientRect();
-            } else {
-                targetRect = this.targetElement.getBoundingClientRect();
-            }
-            // 靠边不宜拖拽 https://github.com/siyuan-note/siyuan/issues/2937
-            setPosition(this.element, targetRect.left, targetRect.top + targetRect.height + 4, targetRect.height + 12, 8);
-        } else if (typeof this.x === "number" && typeof this.y === "number") {
-            setPosition(this.element, this.x, this.y);
-        }
-        this.element.style.maxHeight = (window.innerHeight - this.element.getBoundingClientRect().top - 8) + "px";
     }
 }

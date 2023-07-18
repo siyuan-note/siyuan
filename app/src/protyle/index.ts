@@ -268,8 +268,14 @@ export class Protyle {
             mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle: this.protyle, action: mergedOptions.action});
-            this.afterOnGet(mergedOptions);
+            onGet({
+                data: getResponse,
+                protyle: this.protyle,
+                action: mergedOptions.action,
+                afterCB: () => {
+                    this.afterOnGet(mergedOptions);
+                }
+            });
         });
     }
 

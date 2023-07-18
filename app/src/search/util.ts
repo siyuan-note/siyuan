@@ -18,6 +18,53 @@ import {newFileByName} from "../util/newFile";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
 import {App} from "../index";
+import {upDownHint} from "../util/upDownHint";
+
+const toggleReplaceHistory = (replaceHistoryElement: Element, historyElement: Element, replaceInputElement: HTMLInputElement) => {
+    if (replaceHistoryElement.classList.contains("fn__none")) {
+        const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+        if (!list.replaceKeys || list.replaceKeys.length === 0) {
+            return;
+        }
+        let html = "";
+        list.replaceKeys.forEach((s: string) => {
+            if (s !== replaceInputElement.value && s) {
+                html += `<div class="b3-list-item${html ? "" : " b3-list-item--focus"}">${escapeHtml(s)}</div>`;
+            }
+        });
+        if (html === "") {
+            return;
+        }
+        replaceHistoryElement.classList.remove("fn__none");
+        replaceHistoryElement.innerHTML = html;
+    } else {
+        replaceHistoryElement.classList.add("fn__none");
+    }
+    historyElement.classList.add("fn__none");
+}
+
+const toggleSearchHistory = (historyElement: Element, replaceHistoryElement: Element, searchInputElement: HTMLInputElement) => {
+    if (historyElement.classList.contains("fn__none")) {
+        const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+        if (!list.keys || list.keys.length === 0) {
+            return;
+        }
+        let html = "";
+        list.keys.forEach((s: string) => {
+            if (s !== searchInputElement.value && s) {
+                html += `<div class="b3-list-item${html ? "" : " b3-list-item--focus"}">${escapeHtml(s)}</div>`;
+            }
+        });
+        if (html === "") {
+            return;
+        }
+        historyElement.classList.remove("fn__none");
+        historyElement.innerHTML = html;
+    } else {
+        historyElement.classList.add("fn__none");
+    }
+    replaceHistoryElement.classList.add("fn__none");
+}
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
@@ -561,50 +608,12 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                if (historyElement.classList.contains("fn__none")) {
-                    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-                    if (!list.keys || list.keys.length === 0) {
-                        return;
-                    }
-                    let html = "";
-                    list.keys.forEach((s: string) => {
-                        if (s !== searchInputElement.value) {
-                            html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
-                        }
-                    });
-                    if (html === "") {
-                        return;
-                    }
-                    historyElement.classList.remove("fn__none");
-                    historyElement.innerHTML = html;
-                } else {
-                    historyElement.classList.add("fn__none");
-                }
-                replaceHistoryElement.classList.add("fn__none");
+                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement)
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                if (replaceHistoryElement.classList.contains("fn__none")) {
-                    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-                    if (!list.replaceKeys || list.replaceKeys.length === 0) {
-                        return;
-                    }
-                    let html = "";
-                    list.replaceKeys.forEach((s: string) => {
-                        if (s !== replaceInputElement.value) {
-                            html += `<div class="b3-list-item">${escapeHtml(s)}</div>`;
-                        }
-                    });
-                    if (html === "") {
-                        return;
-                    }
-                    replaceHistoryElement.classList.remove("fn__none");
-                    replaceHistoryElement.innerHTML = html;
-                } else {
-                    replaceHistoryElement.classList.add("fn__none");
-                }
-                historyElement.classList.add("fn__none");
+                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement)
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -746,27 +755,48 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             return;
         }
         const focusIsNew = currentList.getAttribute("data-type") === "search-new";
+        const isHistory = !historyElement.classList.contains("fn__none")
         if (event.key === "Enter") {
-            if (focusIsNew) {
-                newFileByName(app, searchInputElement.value);
-            } else {
-                const id = currentList.getAttribute("data-node-id");
-                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                    openFileById({
-                        app,
-                        id,
-                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                        zoomIn: foldResponse.data
+            if (!isHistory) {
+                if (focusIsNew) {
+                    newFileByName(app, searchInputElement.value);
+                } else {
+                    const id = currentList.getAttribute("data-node-id");
+                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                        openFileById({
+                            app,
+                            id,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                            zoomIn: foldResponse.data
+                        });
+                        if (closeCB) {
+                            closeCB();
+                        }
                     });
-                    if (closeCB) {
-                        closeCB();
-                    }
-                });
+                }
+            } else {
+                searchInputElement.value = historyElement.querySelector(".b3-list-item--focus").textContent.trim();
+                config.page = 1;
+                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement)
             }
             event.preventDefault();
         }
-
-        if (focusIsNew) {
+        if (event.key === "ArrowDown" && event.altKey) {
+            toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
+            return;
+        }
+        if (isHistory) {
+            if (event.key === "Escape") {
+                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement)
+            } else {
+                upDownHint(historyElement, event);
+            }
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
+        if (focusIsNew && !isHistory) {
             return;
         }
         if (event.key === "ArrowDown") {
@@ -826,11 +856,33 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
     });
     replaceInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing || event.key !== "Enter") {
+        if (event.isComposing) {
             return;
         }
-        replace(element, config, edit, false);
-        event.preventDefault();
+        const isHistory = !replaceHistoryElement.classList.contains("fn__none")
+        if (event.key === "Enter") {
+            if (isHistory) {
+                replaceInputElement.value = replaceHistoryElement.querySelector(".b3-list-item--focus").textContent.trim();
+                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
+            } else {
+                replace(element, config, edit, false);
+            }
+            event.preventDefault();
+        }
+        if (event.key === "ArrowDown" && event.altKey) {
+            toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
+            return;
+        }
+        if (isHistory) {
+            if (event.key === "Escape") {
+                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement)
+            } else {
+                upDownHint(replaceHistoryElement, event);
+            }
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
     });
     inputTimeout = inputEvent(element, config, inputTimeout, edit);
     return edit;
@@ -987,7 +1039,7 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     }
     saveKeyList("replaceKeys", replaceInputElement.value);
     let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
-    if (!currentList) {
+    if (!currentList || currentList.dataset.type === "search-new") {
         return;
     }
     loadElement.classList.remove("fn__none");

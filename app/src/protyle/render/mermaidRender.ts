@@ -66,7 +66,10 @@ const initMermaid = (mermaidElements: Element[]) => {
             return;
         }
         if (!item.firstElementChild.classList.contains("protyle-icons")) {
-            item.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+            item.insertAdjacentHTML("afterbegin", `<div class="protyle-icons">
+    <span aria-label="${window.siyuan.languages.edit}" class="b3-tooltips__sw b3-tooltips protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__sw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
+</div>`);
         }
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
         renderElement.removeAttribute("data-processed");

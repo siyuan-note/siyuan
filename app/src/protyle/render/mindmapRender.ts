@@ -1,6 +1,7 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../util/hasClosest";
+import {genIconHTML} from "./util";
 
 export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let mindmapElements: Element[] = [];
@@ -31,7 +32,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 return;
             }
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
-                e.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+                e.insertAdjacentHTML("afterbegin", genIconHTML());
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {

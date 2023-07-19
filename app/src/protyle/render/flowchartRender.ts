@@ -1,6 +1,7 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute} from "../util/hasClosest";
+import {genIconHTML} from "./util";
 
 declare const flowchart: {
     parse(text: string): { drawSVG: (type: Element) => void };
@@ -42,7 +43,7 @@ const initFlowchart = (flowchartElements: Element[]) => {
         //  preview 不需要进行设置
         if (item.getAttribute("data-node-id")) {
             if (!item.firstElementChild.classList.contains("protyle-icons")) {
-                item.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+                item.insertAdjacentHTML("afterbegin", genIconHTML());
             }
             if (item.childElementCount < 4) {
                 item.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);

@@ -34,6 +34,9 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     addScript(`${cdn}/js/highlight.js/highlight.min.js?v=11.7.0`, "protyleHljsScript").then(() => {
         addScript(`${cdn}/js/highlight.js/third-languages.js?v=1.0.1`, "protyleHljsThirdScript").then(() => {
             codeElements.forEach((block: HTMLElement) => {
+                const iconElements = block.parentElement.querySelectorAll(".protyle-icon");
+                iconElements[0].setAttribute("aria-label", window.siyuan.languages.copy);
+                iconElements[1].setAttribute("aria-label", window.siyuan.languages.more);
                 if (block.getAttribute("data-render") === "true") {
                     return;
                 }

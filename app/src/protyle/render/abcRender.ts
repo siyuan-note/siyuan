@@ -1,5 +1,6 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
+import {genIconHTML} from "./util";
 
 declare const ABCJS: {
     renderAbc(element: Element, text: string, options: { responsive: string }): void;
@@ -23,7 +24,7 @@ export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     return;
                 }
                 if(!e.firstElementChild.classList.contains("protyle-icons")) {
-                    e.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+                    e.insertAdjacentHTML("afterbegin", genIconHTML());
                 }
                 if (e.childElementCount < 4) {
                     e.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);

@@ -1,5 +1,6 @@
 import {App} from "../index";
 import {Constants} from "../constants";
+import {genIconHTML} from "../protyle/render/util";
 
 export const customBlockRender = (app: App, element: Element) => {
     // TODO
@@ -19,7 +20,7 @@ export const customBlockRender = (app: App, element: Element) => {
                 return;
             }
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
-                e.insertAdjacentHTML("afterbegin", '<div class="protyle-icons"><span class="protyle-icon protyle-icon--first protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span><span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span></div>');
+                e.insertAdjacentHTML("afterbegin", genIconHTML());
             }
             if (e.childElementCount < 4) {
                 e.lastElementChild.insertAdjacentHTML("beforebegin", `<span style="position: absolute">${Constants.ZWSP}</span>`);

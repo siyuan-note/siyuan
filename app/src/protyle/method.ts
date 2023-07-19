@@ -5,6 +5,7 @@ import { mermaidRender } from "./render/mermaidRender";
 import { flowchartRender } from "./render/flowchartRender";
 import { chartRender } from "./render/chartRender";
 import { abcRender } from "./render/abcRender";
+import { htmlRender } from "./render/htmlRender";
 import { mindmapRender } from "./render/mindmapRender";
 import { plantumlRender } from "./render/plantumlRender";
 import { avRender } from "./render/av/render";
@@ -31,6 +32,7 @@ class Protyle {
     /** UML 渲染 */
     public static plantumlRender = plantumlRender;
     public static avRender = avRender;
+    public static htmlRender = htmlRender;
 }
 
 // 由于 https://github.com/siyuan-note/siyuan/issues/7800，先临时解决一下

@@ -229,8 +229,19 @@ func checkSync(boot, exit, byHand bool) bool {
 		return false
 	}
 
-	if !IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider {
-		return false
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan:
+		if !IsSubscriber() {
+			return false
+		}
+	case conf.ProviderWebDAV:
+		if !IsThirdPartySyncPaid() {
+			return false
+		}
+	case conf.ProviderS3:
+		if !IsThirdPartySyncPaid() {
+			return false
+		}
 	}
 
 	if util.IsMutexLocked(&syncLock) {

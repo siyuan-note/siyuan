@@ -323,7 +323,8 @@ export const enableProtyle = (protyle: IProtyle) => {
         return;
     }
     protyle.disabled = false;
-    if (navigator && navigator.maxTouchPoints > 1 && ["MacIntel", "iPhone"].includes(navigator.platform)) {
+    if (isMobile()) {
+        // Android 端空块输入法弹出会收起 https://ld246.com/article/1689713888289
         // iPhone，iPad 端 protyle.wysiwyg.element contenteditable 为 true 时，输入会在块中间插入 span 导致保存失败 https://ld246.com/article/1643473862873/comment/1643813765839#comments
     } else {
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");

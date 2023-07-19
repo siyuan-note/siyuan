@@ -354,7 +354,7 @@
   [data-subtype="graphviz"] {
     text-align: center;
 
-    svg {
+    & > [contenteditable="false"] svg {
       border-radius: var(--b3-border-radius);
 
       /* 由于会覆盖颜色，先移除看看有没有副作用 https://github.com/siyuan-note/siyuan/issues/7735

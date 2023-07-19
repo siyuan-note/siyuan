@@ -743,6 +743,9 @@ export class Gutter {
     }
 
     public renderMenu(protyle: IProtyle, buttonElement: Element) {
+        if (!buttonElement) {
+            return
+        }
         hideElements(["util", "toolbar", "hint"], protyle);
         window.siyuan.menus.menu.remove();
         if (isMobile()) {

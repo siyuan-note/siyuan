@@ -25,9 +25,9 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         item.setAttribute("data-render", "true");
         item.style.height = (item.clientHeight - 8) + "px"; // 减少抖动 https://ld246.com/article/1668669380171
         item.innerHTML = `<div class="protyle-icons${hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") ? " fn__none" : ""}">
-    <span class="protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
-    <span class="protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-    <span class="protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.refresh}" class="b3-tooltips__n b3-tooltips protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.update} SQL" class="b3-tooltips__n b3-tooltips protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__n b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div>${item.lastElementChild.outerHTML}`;
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         let breadcrumb: boolean | string = item.getAttribute("breadcrumb");

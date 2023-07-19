@@ -41,7 +41,7 @@ const renderProvider = (provider: number) => {
         const tip = `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderS3Intro}
     <div class="fn__hr"></div>
-    ${window.siyuan.languages.featureBetaStage}
+    <em>${window.siyuan.languages.featureBetaStage}</em>
     <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>`;
@@ -99,7 +99,7 @@ const renderProvider = (provider: number) => {
         const tip = `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderWebDAVIntro}
     <div class="fn__hr"></div>
-    ${window.siyuan.languages.featureBetaStage}
+    <em>${window.siyuan.languages.featureBetaStage}</em>
     <div class="fn__hr"></div>    
     ${window.siyuan.languages.syncThirdPartyProviderTip}
 </div>`;

@@ -53,6 +53,7 @@
     text-overflow: ellipsis;
     box-sizing: border-box;
     box-shadow: var(--b3-tooltips-shadow);
+    font-family: var(--b3-font-family);
   }
 
   &::before {

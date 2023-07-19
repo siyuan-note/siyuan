@@ -569,7 +569,7 @@
   "collapse": "Colapsar",
   "blockEmbed": "Integrar Bloque",
   "rowTip": "Haz clic para abrir el menú<br>Arrastra para ordenar",
-  "gutterTip": "Haga clic para abrir el menú<br>⌘Haga clic para enfocar<br>⌥Haga clic para plegar/expandir<br>⇧Haga clic para actualizar attr<br>Arrastre para mover<br>⌃Arrastre para duplicar<br>⌥ Arrastra para ref<br> ⇧Arrastra para incrustar<br>",
+  "gutterTip": "Haga clic/⌘/ para abrir el menú<br>⌘Haga clic/⌥→ para enfocar<br>⌥Haga clic/⌥⌘A para plegar/expandir<br>⇧Haga clic para actualizar attr<br>Arrastre para mover<br>⌃Arrastre para duplicar<br>⌥ Arrastra para ref<br> ⇧Arrastra para incrustar<br>",
   "gutterTip2": "Haga clic para abrir el menú<br>⇧Haga clic en Actualizar atributo",
   "linkDistance": "Distancia de enlace",
   "collideStrength": "Fuerza de colisión",

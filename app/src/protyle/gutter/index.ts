@@ -52,7 +52,7 @@ export class Gutter {
         if (/Mac/.test(navigator.platform) || navigator.platform === "iPhone") {
             this.element.setAttribute("aria-label", window.siyuan.languages.gutterTip);
         } else {
-            this.element.setAttribute("aria-label", window.siyuan.languages.gutterTip.replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+"));
+            this.element.setAttribute("aria-label", window.siyuan.languages.gutterTip.replace("⌥⌘A", "Ctrl+Alt+A").replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+"));
         }
         this.element.setAttribute("data-type", "a");
         this.element.setAttribute("data-position", "right");

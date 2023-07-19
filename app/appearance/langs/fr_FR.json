@@ -569,7 +569,7 @@
   "collapse": "Collapse",
   "blockEmbed": "incorporer le bloc",
   "rowTip": "Cliquez pour ouvrir le menu<br>Faites glisser pour trier",
-  "gutterTip": "Cliquez pour ouvrir le menu<br>⌘Cliquez pour se concentrer<br>⌥Cliquez pour plier/agrandir<br>⇧Cliquez pour mettre à jour l'attribut<br>Faites glisser pour déplacer<br>⌃Faites glisser pour dupliquer<br>⌥ Faites glisser vers ref<br> ⇧Faites glisser pour incorporer<br>",
+  "gutterTip": "Cliquez/⌘/ pour ouvrir le menu<br>⌘Cliquez/⌥→ pour se concentrer<br>⌥Cliquez/⌥⌘A pour plier/agrandir<br>⇧Cliquez pour mettre à jour l'attribut<br>Faites glisser pour déplacer<br>⌃Faites glisser pour dupliquer<br>⌥ Faites glisser vers ref<br> ⇧Faites glisser pour incorporer<br>",
   "gutterTip2": "Cliquez pour ouvrir le menu<br>⇧Click Modifier les attribut",
   "linkDistance": "Distance du lien",
   "collideStrength": "Force de collision",

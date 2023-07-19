@@ -41,13 +41,13 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
 	var cmd *exec.Cmd
 	if gulu.OS.IsWindows() {
-		cmd = exec.Command("cmd.exe", "/C", "start", newVerInstallPkgPath)
+		cmd = exec.Command(newVerInstallPkgPath)
 	} else if gulu.OS.IsDarwin() {
 		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("open", newVerInstallPkgPath)
 	}
 	gulu.CmdAttr(cmd)
-	cmdErr := cmd.Start()
+	cmdErr := cmd.Run()
 	if nil != cmdErr {
 		logging.LogErrorf("exec install new version failed: %s", cmdErr)
 		return

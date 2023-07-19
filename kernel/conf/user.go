@@ -17,28 +17,29 @@
 package conf
 
 type User struct {
-	UserId                          string       `json:"userId"`
-	UserName                        string       `json:"userName"`
-	UserAvatarURL                   string       `json:"userAvatarURL"`
-	UserHomeBImgURL                 string       `json:"userHomeBImgURL"`
-	UserTitles                      []*UserTitle `json:"userTitles"`
-	UserIntro                       string       `json:"userIntro"`
-	UserNickname                    string       `json:"userNickname"`
-	UserCreateTime                  string       `json:"userCreateTime"`
-	UserSiYuanProExpireTime         float64      `json:"userSiYuanProExpireTime"`
-	UserToken                       string       `json:"userToken"`
-	UserTokenExpireTime             string       `json:"userTokenExpireTime"`
-	UserSiYuanRepoSize              float64      `json:"userSiYuanRepoSize"`
-	UserSiYuanPointExchangeRepoSize float64      `json:"userSiYuanPointExchangeRepoSize"`
-	UserSiYuanAssetSize             float64      `json:"userSiYuanAssetSize"`
-	UserTrafficUpload               float64      `json:"userTrafficUpload"`
-	UserTrafficDownload             float64      `json:"userTrafficDownload"`
-	UserTrafficAPIGet               float64      `json:"userTrafficAPIGet"`
-	UserTrafficAPIPut               float64      `json:"userTrafficAPIPut"`
-	UserTrafficTime                 float64      `json:"userTrafficTime"`
-	UserSiYuanSubscriptionPlan      float64      `json:"userSiYuanSubscriptionPlan"`   // -1：未订阅，0：标准订阅，1：教育订阅，2：试用
-	UserSiYuanSubscriptionStatus    float64      `json:"userSiYuanSubscriptionStatus"` // -1：未订阅，0：订阅可用，1：订阅封禁，2：订阅过期
-	UserSiYuanSubscriptionType      float64      `json:"userSiYuanSubscriptionType"`   // 0 年付；1 终生；2 月付
+	UserId                            string       `json:"userId"`
+	UserName                          string       `json:"userName"`
+	UserAvatarURL                     string       `json:"userAvatarURL"`
+	UserHomeBImgURL                   string       `json:"userHomeBImgURL"`
+	UserTitles                        []*UserTitle `json:"userTitles"`
+	UserIntro                         string       `json:"userIntro"`
+	UserNickname                      string       `json:"userNickname"`
+	UserCreateTime                    string       `json:"userCreateTime"`
+	UserSiYuanProExpireTime           float64      `json:"userSiYuanProExpireTime"`
+	UserToken                         string       `json:"userToken"`
+	UserTokenExpireTime               string       `json:"userTokenExpireTime"`
+	UserSiYuanRepoSize                float64      `json:"userSiYuanRepoSize"`
+	UserSiYuanPointExchangeRepoSize   float64      `json:"userSiYuanPointExchangeRepoSize"`
+	UserSiYuanAssetSize               float64      `json:"userSiYuanAssetSize"`
+	UserTrafficUpload                 float64      `json:"userTrafficUpload"`
+	UserTrafficDownload               float64      `json:"userTrafficDownload"`
+	UserTrafficAPIGet                 float64      `json:"userTrafficAPIGet"`
+	UserTrafficAPIPut                 float64      `json:"userTrafficAPIPut"`
+	UserTrafficTime                   float64      `json:"userTrafficTime"`
+	UserSiYuanSubscriptionPlan        float64      `json:"userSiYuanSubscriptionPlan"`        // -1：未订阅，0：标准订阅，1：教育订阅，2：试用
+	UserSiYuanSubscriptionStatus      float64      `json:"userSiYuanSubscriptionStatus"`      // -1：未订阅，0：订阅可用，1：订阅封禁，2：订阅过期
+	UserSiYuanSubscriptionType        float64      `json:"userSiYuanSubscriptionType"`        // 0 年付；1 终生；2 月付
+	UserSiYuanThirdPartySyncPayStatus float64      `json:"UserSiYuanThirdPartySyncPayStatus"` // 0 未付费；1 已付费
 }
 
 type UserTitle struct {

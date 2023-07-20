@@ -21,6 +21,16 @@ Caption "${PRODUCT_NAME} ${VERSION}"
     ${EndIf}
 !macroend
 
+!macro customUnInstall
+    ${IfNot} ${isUpdated}
+        MessageBox MB_YESNO "是否需要删除全局配置（$PROFILE\.config\siyuan\）？$\n$\n\
+            Do you want to delete the global configuration ($PROFILE\.config\siyuan\)?$\n" \
+            /SD IDYES IDYES Accepted IDNO Skipped
+            Accepted:
+                RMDir /r "$PROFILE\.config\siyuan\"
+            Skipped:
+    ${EndIf}
+!macroend
 
 # https://nsis.sourceforge.io/FindIt:_Simple_search_for_file_/_directory
 !macro un.FindIt In For Result

@@ -215,6 +215,9 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 		return
 	}
 
+	keyword = strings.TrimSpace(keyword)
+	replacement = strings.TrimSpace(replacement)
+
 	if keyword == replacement {
 		return
 	}

@@ -280,6 +280,8 @@ interface ISiyuan {
     ctrlIsPressed?: boolean,
     altIsPressed?: boolean,
     shiftIsPressed?: boolean,
+    pageX?: number,
+    pageY?: number,
     clientX?: number,
     clientY?: number,
     screenX?: number,

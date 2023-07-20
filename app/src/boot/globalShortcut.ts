@@ -106,6 +106,7 @@ export const globalShortcut = (app: App) => {
         }
     });
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
+        // https://github.com/siyuan-note/siyuan/pull/8793
         window.siyuan.pageX = event.pageX;
         window.siyuan.pageY = event.pageY;
         window.siyuan.clientX = event.clientX;

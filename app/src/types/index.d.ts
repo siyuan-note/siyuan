@@ -280,12 +280,14 @@ interface ISiyuan {
     ctrlIsPressed?: boolean,
     altIsPressed?: boolean,
     shiftIsPressed?: boolean,
-    pageX?: number,
-    pageY?: number,
-    clientX?: number,
-    clientY?: number,
-    screenX?: number,
-    screenY?: number,
+    coordinates?: {
+        pageX: number,
+        pageY: number,
+        clientX: number,
+        clientY: number,
+        screenX: number,
+        screenY: number,
+    },
     menus?: import("../menus").Menus
     languages?: {
         [key: string]: any;

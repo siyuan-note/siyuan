@@ -107,12 +107,14 @@ export const globalShortcut = (app: App) => {
     });
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
         // https://github.com/siyuan-note/siyuan/pull/8793
-        window.siyuan.pageX = event.pageX;
-        window.siyuan.pageY = event.pageY;
-        window.siyuan.clientX = event.clientX;
-        window.siyuan.clientY = event.clientY;
-        window.siyuan.screenX = event.screenX;
-        window.siyuan.screenY = event.screenY;
+        window.siyuan.coordinates = {
+            pageX: event.pageX,
+            pageY: event.pageY,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            screenX: event.screenX,
+            screenY: event.screenY,
+        };
 
         if (window.siyuan.hideBreadcrumb) {
             document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {

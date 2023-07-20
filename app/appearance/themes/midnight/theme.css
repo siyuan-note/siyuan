@@ -59,13 +59,13 @@
 
     /* 卡片背景 */
     --b3-card-error-color: rgb(243, 153, 147);
-    --b3-card-error-background: #cc352d3d;
+    --b3-card-error-background: #442724;
     --b3-card-warning-color: rgb(255, 213, 153);
-    --b3-card-warning-background: #be8b585d;
+    --b3-card-warning-background: #554636;
     --b3-card-info-color: rgb(166, 213, 250);
-    --b3-card-info-background: rgba(0, 153, 255, 0.288);
+    --b3-card-info-background: #28405c;
     --b3-card-success-color: rgb(183, 223, 185);
-    --b3-card-success-background: #85d0a34d;
+    --b3-card-success-background: #425347;
 
     /* 自定义文字 */
     --b3-font-color1: var(--b3-card-error-color);

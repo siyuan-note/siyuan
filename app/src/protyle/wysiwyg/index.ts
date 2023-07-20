@@ -2003,6 +2003,12 @@ export class WYSIWYG {
                         range.selectNodeContents(emptyEditElement);
                         range.collapse(true);
                         focusByRange(range);
+                        // 需等待 range 更新再次进行渲染
+                        if (protyle.options.render.breadcrumb) {
+                            setTimeout(() => {
+                                protyle.breadcrumb.render(protyle);
+                            }, Constants.TIMEOUT_TRANSITION)
+                        }
                     } else if (lastEditElement) {
                         range.selectNodeContents(lastEditElement);
                         range.collapse(false);

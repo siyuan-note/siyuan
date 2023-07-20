@@ -111,6 +111,9 @@ export const globalShortcut = (app: App) => {
                 item.classList.remove("protyle-breadcrumb__bar--hide");
             });
             window.siyuan.hideBreadcrumb = false;
+            getAllModels().editor.forEach(item => {
+                item.editor.protyle.breadcrumb.render(item.editor.protyle, true);
+            });
         }
         if (event.buttons === 0 &&  // 鼠标按键被按下时不触发
             window.siyuan.layout.bottomDock &&

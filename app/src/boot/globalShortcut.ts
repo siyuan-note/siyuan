@@ -106,6 +106,13 @@ export const globalShortcut = (app: App) => {
         }
     });
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
+        window.siyuan.pageX = event.pageX;
+        window.siyuan.pageY = event.pageY;
+        window.siyuan.clientX = event.clientX;
+        window.siyuan.clientY = event.clientY;
+        window.siyuan.screenX = event.screenX;
+        window.siyuan.screenY = event.screenY;
+
         if (window.siyuan.hideBreadcrumb) {
             document.querySelectorAll(".protyle-breadcrumb__bar--hide").forEach(item => {
                 item.classList.remove("protyle-breadcrumb__bar--hide");

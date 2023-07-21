@@ -78,6 +78,9 @@ func removeDuplicateDatabaseIndex() {
 	roots := sql.GetBlocks(duplicatedRootIDs)
 	rootMap := map[string]*sql.Block{}
 	for _, root := range roots {
+		if nil == root {
+			continue
+		}
 		rootMap[root.ID] = root
 	}
 

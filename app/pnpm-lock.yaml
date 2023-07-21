@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@electron/remote':
     specifier: ^2.0.9
@@ -4463,7 +4467,3 @@ packages:
     dependencies:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false

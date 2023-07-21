@@ -1,4 +1,5 @@
 {
+  "needLogin": "Esta función requiere iniciar sesión",
   "calcResultCountAll": "CONTAR",
   "calcResultCountValues": "VALORES",
   "calcResultCountUniqueValues": "ÚNICO",

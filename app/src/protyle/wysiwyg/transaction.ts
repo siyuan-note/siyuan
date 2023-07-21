@@ -17,7 +17,7 @@ import {genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
-import {needSubscribe} from "../../util/needSubscribe";
+import {needLogin, needSubscribe} from "../../util/needSubscribe";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -73,7 +73,8 @@ const promiseTransaction = () => {
             promiseTransaction();
         }
         /// #if MOBILE
-        if ((0 !== window.siyuan.config.sync.provider || (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
+        if (((0 !== window.siyuan.config.sync.provider && !needLogin("")) ||
+                (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
             window.siyuan.config.repo.key && window.siyuan.config.sync.enabled) {
             document.getElementById("toolbarSync").classList.remove("fn__none");
         }

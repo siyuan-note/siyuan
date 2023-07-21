@@ -1,4 +1,5 @@
 {
+  "needLogin": "Cette fonctionnalité nécessite une connexion",
   "calcResultCountAll": "COUNT",
   "calcResultCountValues": "VALEURS",
   "calcResultCountUniqueValues": "UNIQUE",

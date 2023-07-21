@@ -384,7 +384,7 @@ ${renewHTML}
         account.bindEvent(element);
         account.onSetaccount();
         if (element.getAttribute("data-action") === "go-repos") {
-            if (needSubscribe()) {
+            if (needSubscribe("") && 0 === window.siyuan.config.sync.provider) {
                 const dialogElement = hasClosestByClassName(element, "b3-dialog--open");
                 if (dialogElement) {
                     dialogElement.querySelector('.b3-tab-bar [data-name="repos"]').dispatchEvent(new CustomEvent("click"));

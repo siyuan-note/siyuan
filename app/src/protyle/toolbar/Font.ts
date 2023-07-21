@@ -12,21 +12,11 @@ export class Font extends ToolbarItem {
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
         this.element.addEventListener("click", () => {
-            let nodeElements: Element[];
-            if (protyle.toolbar.range.toString() === "") {
-                nodeElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-                if (nodeElements.length === 0) {
-                    const nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer);
-                    if (nodeElement) {
-                        nodeElements = [nodeElement];
-                    }
-                }
-            }
             protyle.toolbar.element.classList.add("fn__none");
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
-            protyle.toolbar.subElement.append(appearanceMenu(protyle, nodeElements));
+            protyle.toolbar.subElement.append(appearanceMenu(protyle, getFontNodeElements()));
             protyle.toolbar.subElement.classList.remove("fn__none");
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
@@ -418,3 +408,17 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
     }
     return true; // 清除字体样式会使用 "text" 作为标识
 };
+
+export const getFontNodeElements = (protyle: IProtyle) => {
+    let nodeElements: Element[];
+    if (protyle.toolbar.range.toString() === "") {
+        nodeElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+        if (nodeElements.length === 0) {
+            const nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+            if (nodeElement) {
+                nodeElements = [nodeElement];
+            }
+        }
+    }
+    return nodeElements;
+}

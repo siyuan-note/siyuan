@@ -327,27 +327,28 @@
   &__slash {
     &-title {
       height: 24px;
+      padding: 0 8px;
+      line-height: 24px;
+      color: var(--b3-theme-on-surface);
     }
 
     &-block {
       display: flex;
-      padding: 0px 0 8px 8px;
+      padding-left: 8px;
+      flex-wrap: wrap;
     }
 
     &-item {
       background-color: var(--b3-theme-background);
       border-radius: var(--b3-border-radius);
-      flex: 1;
+      width: calc(50% - 8px);
       display: flex;
       align-items: center;
-      margin-right: 8px;
+      margin: 4px 8px 4px 0;
       position: relative;
       box-shadow: inset 0 0 0 .6px var(--b3-theme-on-surface);
-    }
-
-    &-empty {
-      flex: 1;
-      margin-right: 8px;
+      border: 0;
+      color: var(--b3-theme-on-background);
     }
 
     &-icon {

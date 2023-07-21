@@ -53,6 +53,7 @@
         box-shadow: none;
         border: 0;
         padding: 24px 0;
+        border-radius: 0;
 
         & > .b3-menu__item:first-child {
           border-top: .5px solid var(--b3-theme-background-light);

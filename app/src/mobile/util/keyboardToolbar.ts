@@ -27,7 +27,7 @@ const getSlashItem = (value: string, icon: string, text: string, focus = "false"
 </div>`;
 };
 
-const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
+export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     let colorHTML = "";
     ["var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
@@ -255,7 +255,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     protyle.hint.bindUploadEvent(protyle, utilElement);
 };
 
-const showKeyboardToolbarUtil = (oldScrollTop: number) => {
+export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     window.siyuan.menus.menu.remove();
     showUtil = true;
 

@@ -36,7 +36,7 @@ import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
-import {activeBlur} from "../../mobile/util/keyboardToolbar";
+import {activeBlur, renderTextMenu, showKeyboardToolbarUtil} from "../../mobile/util/keyboardToolbar";
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
@@ -681,6 +681,17 @@ export class Gutter {
             icon: "iconFont",
             accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
             click() {
+                /// #if MOBILE
+                const toolbarElement = document.getElementById("keyboardToolbar");
+                const dynamicElements = toolbarElement.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
+                dynamicElements[0].classList.add("fn__none");
+                dynamicElements[1].classList.remove("fn__none");
+                toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.add("protyle-toolbar__item--current");
+                toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
+                const oldScrollTop = protyle.contentElement.scrollTop;
+                renderTextMenu(protyle, toolbarElement);
+                showKeyboardToolbarUtil(oldScrollTop);
+                /// #else
                 protyle.toolbar.element.classList.add("fn__none");
                 protyle.toolbar.subElement.innerHTML = "";
                 protyle.toolbar.subElement.style.width = "";
@@ -688,7 +699,6 @@ export class Gutter {
                 protyle.toolbar.subElement.append(appearanceMenu(protyle, selectsElement));
                 protyle.toolbar.subElement.classList.remove("fn__none");
                 protyle.toolbar.subElementCloseCB = undefined;
-                /// #if !MOBILE
                 const position = selectsElement[0].getBoundingClientRect();
                 setPosition(protyle.toolbar.subElement, position.left, position.top);
                 /// #endif
@@ -1492,6 +1502,17 @@ export class Gutter {
                 icon: "iconFont",
                 accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
                 click() {
+                    /// #if MOBILE
+                    const toolbarElement = document.getElementById("keyboardToolbar");
+                    const dynamicElements = toolbarElement.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
+                    dynamicElements[0].classList.add("fn__none");
+                    dynamicElements[1].classList.remove("fn__none");
+                    toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.add("protyle-toolbar__item--current");
+                    toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
+                    const oldScrollTop = protyle.contentElement.scrollTop;
+                    renderTextMenu(protyle, toolbarElement);
+                    showKeyboardToolbarUtil(oldScrollTop);
+                    /// #else
                     protyle.toolbar.element.classList.add("fn__none");
                     protyle.toolbar.subElement.innerHTML = "";
                     protyle.toolbar.subElement.style.width = "";
@@ -1499,7 +1520,6 @@ export class Gutter {
                     protyle.toolbar.subElement.append(appearanceMenu(protyle, [nodeElement]));
                     protyle.toolbar.subElement.classList.remove("fn__none");
                     protyle.toolbar.subElementCloseCB = undefined;
-                    /// #if !MOBILE
                     const position = nodeElement.getBoundingClientRect();
                     setPosition(protyle.toolbar.subElement, position.left, position.top);
                     /// #endif

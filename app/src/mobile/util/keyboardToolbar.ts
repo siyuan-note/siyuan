@@ -505,13 +505,33 @@ export const initKeyboardToolbar = () => {
             return;
         }
         const buttonElement = hasClosestByMatchTag(target, "BUTTON");
-        if (!buttonElement || buttonElement.getAttribute("disabled") || getSelection().rangeCount === 0) {
+        if (!buttonElement || buttonElement.getAttribute("disabled")) {
             return;
         }
+        const type = buttonElement.getAttribute("data-type");
+        // appearance
+        if (["clear", "style2", "style4", "color", "backgroundColor", "fontSize", "style1"].includes(type)) {
+            const nodeElements = getFontNodeElements(protyle);
+            if (type === "style1") {
+                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.backgroundColor + Constants.ZWSP + buttonElement.firstElementChild.style.color);
+            } else if (type === "fontSize") {
+                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.textContent.trim());
+            } else if (type === "backgroundColor") {
+                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.backgroundColor);
+            } else if (type === "color") {
+                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.color);
+            } else {
+                fontEvent(protyle, nodeElements, type);
+            }
+        }
+
         event.preventDefault();
         event.stopPropagation();
+        if (getSelection().rangeCount === 0) {
+            return;
+        }
+
         const range = getSelection().getRangeAt(0);
-        const type = buttonElement.getAttribute("data-type");
         if (type === "done") {
             if (toolbarElement.clientHeight > 100) {
                 hideKeyboardToolbarUtil();
@@ -622,21 +642,6 @@ export const initKeyboardToolbar = () => {
             listIndent(protyle, [nodeElement.parentElement], range);
             focusByRange(range);
             return;
-        }
-        // appearance
-        if (["clear", "style2", "style4", "color", "backgroundColor", "fontSize", "style1"].includes(type)) {
-            const nodeElements = getFontNodeElements(protyle);
-            if (type === "style1") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.backgroundColor + Constants.ZWSP + buttonElement.firstElementChild.style.color);
-            } else if (type === "fontSize") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.textContent.trim());
-            } else if (type === "backgroundColor") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.backgroundColor);
-            } else if (type === "color") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.color);
-            } else {
-                fontEvent(protyle, nodeElements, type);
-            }
         }
     });
 };

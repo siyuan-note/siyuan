@@ -107,14 +107,14 @@ export const globalShortcut = (app: App) => {
     });
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
         // https://github.com/siyuan-note/siyuan/pull/8793
-        const coordinates = window.siyuan.coordinates ?? {
+        const coordinates = window.siyuan.coordinates ?? (window.siyuan.coordinates = {
             pageX: 0,
             pageY: 0,
             clientX: 0,
             clientY: 0,
             screenX: 0,
             screenY: 0,
-        };
+        });
         coordinates.pageX = event.pageX;
         coordinates.pageY = event.pageY;
         coordinates.clientX = event.clientX;

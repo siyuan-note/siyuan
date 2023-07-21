@@ -2007,7 +2007,7 @@ export class WYSIWYG {
                         if (protyle.options.render.breadcrumb) {
                             setTimeout(() => {
                                 protyle.breadcrumb.render(protyle);
-                            }, Constants.TIMEOUT_TRANSITION)
+                            }, Constants.TIMEOUT_TRANSITION);
                         }
                     } else if (lastEditElement) {
                         range.selectNodeContents(lastEditElement);

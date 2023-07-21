@@ -426,6 +426,19 @@ export class Gutter {
         };
     }
 
+    private showMobileAppearance(protyle: IProtyle) {
+        const toolbarElement = document.getElementById("keyboardToolbar");
+        const dynamicElements = toolbarElement.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
+        dynamicElements[0].classList.add("fn__none");
+        dynamicElements[1].classList.remove("fn__none");
+        toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.add("protyle-toolbar__item--current");
+        toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
+        const oldScrollTop = protyle.contentElement.scrollTop;
+        renderTextMenu(protyle, toolbarElement);
+        showKeyboardToolbarUtil(oldScrollTop);
+        toolbarElement.classList.remove("fn__none");
+    }
+
     public renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
         let isList = false;
         let isContinue = false;
@@ -680,17 +693,9 @@ export class Gutter {
             label: window.siyuan.languages.appearance,
             icon: "iconFont",
             accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
-            click() {
+            click: () => {
                 /// #if MOBILE
-                const toolbarElement = document.getElementById("keyboardToolbar");
-                const dynamicElements = toolbarElement.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
-                dynamicElements[0].classList.add("fn__none");
-                dynamicElements[1].classList.remove("fn__none");
-                toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.add("protyle-toolbar__item--current");
-                toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
-                const oldScrollTop = protyle.contentElement.scrollTop;
-                renderTextMenu(protyle, toolbarElement);
-                showKeyboardToolbarUtil(oldScrollTop);
+                this.showMobileAppearance(protyle);
                 /// #else
                 protyle.toolbar.element.classList.add("fn__none");
                 protyle.toolbar.subElement.innerHTML = "";
@@ -754,7 +759,7 @@ export class Gutter {
 
     public renderMenu(protyle: IProtyle, buttonElement: Element) {
         if (!buttonElement) {
-            return
+            return;
         }
         hideElements(["util", "toolbar", "hint"], protyle);
         window.siyuan.menus.menu.remove();
@@ -1501,17 +1506,9 @@ export class Gutter {
                 label: window.siyuan.languages.appearance,
                 icon: "iconFont",
                 accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
-                click() {
+                click: () => {
                     /// #if MOBILE
-                    const toolbarElement = document.getElementById("keyboardToolbar");
-                    const dynamicElements = toolbarElement.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
-                    dynamicElements[0].classList.add("fn__none");
-                    dynamicElements[1].classList.remove("fn__none");
-                    toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.add("protyle-toolbar__item--current");
-                    toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
-                    const oldScrollTop = protyle.contentElement.scrollTop;
-                    renderTextMenu(protyle, toolbarElement);
-                    showKeyboardToolbarUtil(oldScrollTop);
+                    this.showMobileAppearance(protyle);
                     /// #else
                     protyle.toolbar.element.classList.add("fn__none");
                     protyle.toolbar.subElement.innerHTML = "";

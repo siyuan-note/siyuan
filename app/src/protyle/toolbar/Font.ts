@@ -421,4 +421,4 @@ export const getFontNodeElements = (protyle: IProtyle) => {
         }
     }
     return nodeElements;
-}
+};

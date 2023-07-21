@@ -41,7 +41,7 @@ const toggleReplaceHistory = (replaceHistoryElement: Element, historyElement: El
         replaceHistoryElement.classList.add("fn__none");
     }
     historyElement.classList.add("fn__none");
-}
+};
 
 const toggleSearchHistory = (historyElement: Element, replaceHistoryElement: Element, searchInputElement: HTMLInputElement) => {
     if (historyElement.classList.contains("fn__none")) {
@@ -64,7 +64,7 @@ const toggleSearchHistory = (historyElement: Element, replaceHistoryElement: Ele
         historyElement.classList.add("fn__none");
     }
     replaceHistoryElement.classList.add("fn__none");
-}
+};
 
 const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
@@ -609,12 +609,12 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
-                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement)
+                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement)
+                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -756,7 +756,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             return;
         }
         const focusIsNew = currentList.getAttribute("data-type") === "search-new";
-        const isHistory = !historyElement.classList.contains("fn__none")
+        const isHistory = !historyElement.classList.contains("fn__none");
         if (event.key === "Enter") {
             if (!isHistory) {
                 if (focusIsNew) {
@@ -779,7 +779,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 searchInputElement.value = historyElement.querySelector(".b3-list-item--focus").textContent.trim();
                 config.page = 1;
                 inputTimeout = inputEvent(element, config, inputTimeout, edit);
-                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement)
+                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
             }
             event.preventDefault();
         }
@@ -789,7 +789,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
         if (isHistory) {
             if (event.key === "Escape") {
-                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement)
+                toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
             } else {
                 upDownHint(historyElement, event);
             }
@@ -860,7 +860,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         if (event.isComposing) {
             return;
         }
-        const isHistory = !replaceHistoryElement.classList.contains("fn__none")
+        const isHistory = !replaceHistoryElement.classList.contains("fn__none");
         if (event.key === "Enter") {
             if (isHistory) {
                 replaceInputElement.value = replaceHistoryElement.querySelector(".b3-list-item--focus").textContent.trim();
@@ -876,7 +876,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
         if (isHistory) {
             if (event.key === "Escape") {
-                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement)
+                toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
             } else {
                 upDownHint(replaceHistoryElement, event);
             }

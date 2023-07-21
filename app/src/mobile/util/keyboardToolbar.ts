@@ -625,7 +625,7 @@ export const initKeyboardToolbar = () => {
         }
         // appearance
         if (["clear", "style2", "style4", "color", "backgroundColor", "fontSize", "style1"].includes(type)) {
-            const nodeElements = getFontNodeElements(protyle)
+            const nodeElements = getFontNodeElements(protyle);
             if (type === "style1") {
                 fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.backgroundColor + Constants.ZWSP + buttonElement.firstElementChild.style.color);
             } else if (type === "fontSize") {

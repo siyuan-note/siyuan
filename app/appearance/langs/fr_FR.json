@@ -1,5 +1,5 @@
 {
-  "needLogin": "Cette fonctionnalité nécessite une connexion",
+  "needLogin": "La fonctionnalité nécessite un numéro de compte de connexion avant de pouvoir être utilisée",
   "calcResultCountAll": "COUNT",
   "calcResultCountValues": "VALEURS",
   "calcResultCountUniqueValues": "UNIQUE",

@@ -1,5 +1,5 @@
 {
-  "needLogin": "该功能需要登录",
+  "needLogin": "该功能需要登录账号后才能使用",
   "calcResultCountAll": "行计数",
   "calcResultCountValues": "值计数",
   "calcResultCountUniqueValues": "唯一值计数",

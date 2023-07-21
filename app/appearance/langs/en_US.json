@@ -1,5 +1,5 @@
 {
-  "needLogin": "This feature requires login",
+  "needLogin": "This function needs to be logged in to use",
   "calcResultCountAll": "COUNT",
   "calcResultCountValues": "VALUES",
   "calcResultCountUniqueValues": "UNIQUE",

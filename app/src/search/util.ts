@@ -154,9 +154,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 <svg><use xlink:href="#iconMore"></use></svg>
             </span>
             <span class="fn__space"></span>
-            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="${closeCB ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__w">
+            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconRefresh"></use></svg>
             </span>
+            <span class="${closeCB ? "" : "fn__none "}fn__space"></span>
             <span id="searchOpen" aria-label="${window.siyuan.languages.openInNewTab}" class="${closeCB ? "" : "fn__none "}block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconLayoutRight"></use></svg>
             </span>

@@ -138,6 +138,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <input id="searchInput" style="padding-right: 60px" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
         <div id="searchHistoryList" data-close="false" class="fn__none b3-menu b3-list b3-list--background"></div>
         <div class="block__icons">
+            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon b3-tooltips b3-tooltips__w">
+                <svg><use xlink:href="#iconRefresh"></use></svg>
+            </span>
+            <span class="fn__space"></span>
             <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconReplace"></use></svg>
             </span>
@@ -152,10 +156,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             <span class="fn__space"></span>
             <span id="searchMore" aria-label="${window.siyuan.languages.more}" class="block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconMore"></use></svg>
-            </span>
-            <span class="fn__space"></span>
-            <span id="searchRefresh" aria-label="${window.siyuan.languages.refresh}" class="block__icon b3-tooltips b3-tooltips__w">
-                <svg><use xlink:href="#iconRefresh"></use></svg>
             </span>
             <span class="${closeCB ? "" : "fn__none "}fn__space"></span>
             <span id="searchOpen" aria-label="${window.siyuan.languages.openInNewTab}" class="${closeCB ? "" : "fn__none "}block__icon b3-tooltips b3-tooltips__w">

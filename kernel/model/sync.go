@@ -234,11 +234,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		if !IsSubscriber() {
 			return false
 		}
-	case conf.ProviderWebDAV:
-		if !IsThirdPartySyncPaid() {
-			return false
-		}
-	case conf.ProviderS3:
+	case conf.ProviderWebDAV, conf.ProviderS3:
 		if !IsThirdPartySyncPaid() {
 			return false
 		}

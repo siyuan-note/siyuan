@@ -1,5 +1,5 @@
 {
-  "needLogin": "This feature requires login",
+  "needLogin": "This function needs to be logged in to use",
   "calcResultCountAll": "COUNT",
   "calcResultCountValues": "VALUES",
   "calcResultCountUniqueValues": "UNIQUE",
@@ -1234,6 +1234,7 @@
     "210": "Verifying cloud data %v/%v",
     "211": "Cloud data verification complete",
     "212": "There are some defects in the current version of cloud data sync, please upgrade to the latest version. Sorry for the inconvenience",
-    "213": "Cloud verification failed, please try to upgrade to the latest version and log in again before syncing"
+    "213": "Cloud verification failed, please try to upgrade to the latest version and log in again before syncing",
+    "214": "This function needs to be logged in to use"
   }
 }

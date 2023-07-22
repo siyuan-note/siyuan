@@ -43,8 +43,12 @@ func IsEmptyDir(p string) bool {
 	return 1 > len(files)
 }
 
+func IsSymlink(dir fs.DirEntry) bool {
+	return dir.Type() == fs.ModeSymlink
+}
+
 func IsDirRegularOrSymlink(dir fs.DirEntry) bool {
-	return dir.IsDir() || dir.Type() == fs.ModeSymlink
+	return dir.IsDir() || IsSymlink(dir)
 }
 
 func IsPathRegularDirOrSymlinkDir(path string) bool {

@@ -172,9 +172,18 @@ func readDir(c *gin.Context) {
 
 	files := []map[string]interface{}{}
 	for _, entry := range entries {
+		path := filepath.Join(dirPath, entry.Name())
+		info, err = os.Stat(path)
+		if nil != err {
+			logging.LogErrorf("stat [%s] failed: %s", path, err)
+			ret.Code = 500
+			ret.Msg = err.Error()
+			return
+		}
 		files = append(files, map[string]interface{}{
-			"name":  entry.Name(),
-			"isDir": entry.IsDir(),
+			"name":      entry.Name(),
+			"isDir":     info.IsDir(),
+			"isSymlink": util.IsSymlink(entry),
 		})
 	}
 

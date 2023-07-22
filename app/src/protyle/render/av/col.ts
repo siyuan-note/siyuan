@@ -158,6 +158,9 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
         }
     });
     const addOptionElement = options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement;
+    if (!addOptionElement) {
+        return;
+    }
     addOptionElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
             return;

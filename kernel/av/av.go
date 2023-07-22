@@ -182,8 +182,9 @@ func Round(val float64, precision int) float64 {
 }
 
 type ValueDate struct {
-	Content  int64 `json:"content"`
-	Content2 int64 `json:"content2"`
+	Content    int64 `json:"content"`
+	Content2   int64 `json:"content2"`
+	HasEndDate bool  `json:"hasEndDate"`
 }
 
 type ValueSelect struct {

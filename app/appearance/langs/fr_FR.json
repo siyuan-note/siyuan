@@ -1,4 +1,5 @@
 {
+  "endDate": "Date de fin",
   "needLogin": "La fonctionnalité nécessite un numéro de compte de connexion avant de pouvoir être utilisée",
   "calcResultCountAll": "COUNT",
   "calcResultCountValues": "VALEURS",

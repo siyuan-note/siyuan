@@ -294,6 +294,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
     } else if (["select", "mSelect"].includes(type) && blockElement) {
         openMenuPanel({protyle, blockElement, type: "select", cellElements});
         return;
+    } else if (type === "date" && blockElement) {
+        openMenuPanel({protyle, blockElement, type: "date", cellElements});
+        return;
     }
     window.siyuan.menus.menu.remove();
     document.body.insertAdjacentHTML("beforeend", `<div class="av__mask">

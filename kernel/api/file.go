@@ -173,8 +173,9 @@ func readDir(c *gin.Context) {
 	files := []map[string]interface{}{}
 	for _, entry := range entries {
 		files = append(files, map[string]interface{}{
-			"name":  entry.Name(),
-			"isDir": entry.IsDir(),
+			"name":      entry.Name(),
+			"isDir":     entry.IsDir(),
+			"isSymlink": util.IsSymlink(entry),
 		})
 	}
 

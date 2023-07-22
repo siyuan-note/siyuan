@@ -53,14 +53,14 @@ export const openMenuPanel = (options: {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
             bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
-            const inputElement = menuElement.querySelector("input")
+            const inputElement = menuElement.querySelector("input");
             inputElement.select();
             inputElement.focus();
         } else if (options.type === "date") {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
             bindDateEvent({protyle: options.protyle, data, menuElement});
-            const inputElement = menuElement.querySelector("input")
+            const inputElement = menuElement.querySelector("input");
             inputElement.select();
             inputElement.focus();
         } else {

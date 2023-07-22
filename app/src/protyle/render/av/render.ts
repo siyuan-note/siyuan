@@ -2,6 +2,7 @@ import {fetchPost} from "../../../util/fetch";
 import {getColIconByType, showColMenu} from "./col";
 import {Constants} from "../../../constants";
 import {getCalcValue} from "./cell";
+import * as dayjs from "dayjs";
 
 export const avRender = (element: Element, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -37,7 +38,6 @@ ${column.wrap ? "" : "white-space: nowrap;"}">
     </div>
     <div class="av__widthdrag"></div>
 </div>`;
-
                     calcHTML += `<div class="av__calc${calcHTML ? "" : " av__calc--show"}${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}"  
 style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
                 });
@@ -78,7 +78,14 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text = `<span class="av__celltext">${text}</span>`;
                             }
                         } else if (cell.valueType === "date") {
-                            text = `<span class="av__celltext">${cell.value?.date.content || ""}</span>`;
+                            text = '<span class="av__celltext">';
+                            if (cell.value?.date.content) {
+                                text += dayjs(cell.value.date.content).format("YYYY-MM-DD HH:mm");
+                            }
+                            if (cell.value?.date.hasEndDate) {
+                                text += `<svg style="margin-left: 5px"><use xlink:href="#iconForward"></use></svg>${dayjs(cell.value.date.content2).format("YYYY-MM-DD HH:mm")}</span>`;
+                            }
+                            text += "</span>"
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  

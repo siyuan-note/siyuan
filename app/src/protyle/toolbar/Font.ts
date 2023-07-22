@@ -16,7 +16,7 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
-            protyle.toolbar.subElement.append(appearanceMenu(protyle, getFontNodeElements()));
+            protyle.toolbar.subElement.append(appearanceMenu(protyle, getFontNodeElements(protyle)));
             protyle.toolbar.subElement.classList.remove("fn__none");
             protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);

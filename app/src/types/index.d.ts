@@ -925,10 +925,10 @@ interface IAVCell {
 }
 
 interface IAVCellValue {
-    type: TAVCol,
+    type?: TAVCol,
     text?: { content: string },
     number?: { content?: number, isNotEmpty: boolean, format?: string, formattedContent?: string },
     mSelect?: { content: string, color: string }[]
     block?: { content: string, id: string }
-    date?: { content: string, content2?: string }
+    date?: { content?: number, content2?: number, hasEndDate?: boolean }
 }

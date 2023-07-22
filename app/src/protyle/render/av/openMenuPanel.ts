@@ -7,7 +7,7 @@ import {hasClosestByAttribute} from "../../util/hasClosest";
 import {bindSelectEvent, getSelectHTML, addColOptionOrCell, setColOption, removeCellOption} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
-import {bindDateEvent, getDateHTML} from "./date";
+import {bindDateEvent, getDateHTML, setDateValue} from "./date";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -59,7 +59,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "date") {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-            bindDateEvent({protyle: options.protyle, data, menuElement});
+            bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
             const inputElement = menuElement.querySelector("input");
             inputElement.select();
             inputElement.focus();
@@ -601,6 +601,21 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "removeCellOption") {
                     removeCellOption(options.protyle, data, options.cellElements, target.parentElement);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "clearDate") {
+                    setDateValue({
+                        cellElements: options.cellElements,
+                        data,
+                        protyle: options.protyle,
+                        value: {
+                            content: 0,
+                            content2: 0,
+                            hasEndDate: false
+                        }
+                    });
+                    avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

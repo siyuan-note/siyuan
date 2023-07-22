@@ -1076,10 +1076,12 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "data": [
         {
             "isDir": true,
+            "isSymlink": false,
             "name": "20210808180320-abz7w6k"
         },
         {
             "isDir": false,
+            "isSymlink": false,
             "name": "20210808180320-abz7w6k.sy"
         }
     ]

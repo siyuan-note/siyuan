@@ -574,7 +574,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 != earliest {
-			col.Calc.Result = &Value{Date: &ValueDate{Content: earliest}}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(earliest, DateFormatNone)}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -586,7 +586,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 != latest {
-			col.Calc.Result = &Value{Date: &ValueDate{Content: latest}}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest, DateFormatNone)}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
@@ -602,7 +602,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 != earliest && 0 != latest {
-			col.Calc.Result = &Value{Date: &ValueDate{Content: latest - earliest}}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest-earliest, DateFormatNone)}
 		}
 	}
 }

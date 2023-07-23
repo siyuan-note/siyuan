@@ -49,6 +49,12 @@ export const getCalcValue = (column: IAVColumn) => {
         case  "Range":
             value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultRange}`;
             break;
+        case  "Earliest":
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcOperatorEarliest}`;
+            break;
+        case  "Latest":
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcOperatorLatest}`;
+            break;
     }
     return value;
 };
@@ -266,6 +272,34 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
             oldOperator,
             operator: "Max",
             label: window.siyuan.languages.calcOperatorMax
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Range",
+            label: window.siyuan.languages.calcOperatorRange
+        });
+    } else if (type === "date") {
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Earliest",
+            label: window.siyuan.languages.calcOperatorEarliest
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Latest",
+            label: window.siyuan.languages.calcOperatorLatest
         });
         calcItem({
             menu,

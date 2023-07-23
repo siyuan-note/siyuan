@@ -602,7 +602,7 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 			}
 		}
 		if 0 != earliest && 0 != latest {
-			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest-earliest, DateFormatNone)}
+			col.Calc.Result = &Value{Date: NewFormattedValueDate(latest-earliest, DateFormatDuration)}
 		}
 	}
 }

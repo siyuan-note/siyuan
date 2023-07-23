@@ -177,15 +177,22 @@ type ValueDate struct {
 type DateFormat string
 
 const (
-	DateFormatNone DateFormat = ""
+	DateFormatNone     DateFormat = ""
+	DateFormatDuration DateFormat = "duration"
 )
 
 func NewFormattedValueDate(content int64, format DateFormat) (ret *ValueDate) {
+	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+	switch format {
+	case DateFormatNone:
+	case DateFormatDuration:
+		formatted = time.Duration(content).String()
+	}
 	ret = &ValueDate{
 		Content:          content,
 		Content2:         0,
 		HasEndDate:       false,
-		FormattedContent: time.UnixMilli(content).Format("2006-01-02 15:04"),
+		FormattedContent: formatted,
 	}
 	return
 }

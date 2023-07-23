@@ -181,16 +181,21 @@ const (
 	DateFormatDuration DateFormat = "duration"
 )
 
-func NewFormattedValueDate(content int64, format DateFormat) (ret *ValueDate) {
+func NewFormattedValueDate(content, content2 int64, format DateFormat) (ret *ValueDate) {
 	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+	if 0 < content2 {
+		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
+	}
 	switch format {
 	case DateFormatNone:
 	case DateFormatDuration:
-		formatted = time.Duration(content).String()
+		t1 := time.UnixMilli(content)
+		t2 := time.UnixMilli(content2)
+		formatted = util.HumanizeRelTime(t1, t2, util.Lang)
 	}
 	ret = &ValueDate{
 		Content:          content,
-		Content2:         0,
+		Content2:         content2,
 		HasEndDate:       false,
 		FormattedContent: formatted,
 	}

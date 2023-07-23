@@ -7,7 +7,11 @@ export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
         return "";
     }
-    const resultCalc = column.calc.result.number;
+    let resultCalc: any = column.calc.result.number;
+    if (column.calc.operator === "Earliest" || column.calc.operator === "Latest" ||
+        (column.calc.operator === "Range" && column.type === "date")) {
+        resultCalc = column.calc.result.date;
+    }
     let value = "";
     switch (column.calc.operator) {
         case "Count all":

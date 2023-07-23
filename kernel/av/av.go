@@ -185,7 +185,7 @@ func NewFormattedValueDate(content int64, format DateFormat) (ret *ValueDate) {
 		Content:          content,
 		Content2:         0,
 		HasEndDate:       false,
-		FormattedContent: time.UnixMilli(content).Format("2006-01-02 15:04:05"),
+		FormattedContent: time.UnixMilli(content).Format("2006-01-02 15:04"),
 	}
 	return
 }

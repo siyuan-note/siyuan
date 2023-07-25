@@ -3,7 +3,7 @@ import * as dayjs from "dayjs";
 
 export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     let hasEndDate = true;
-    let cellValue:IAVCell
+    let cellValue:IAVCell;
     cellElements.forEach((cellElement) => {
         data.rows.find(row => {
             if (cellElement.parentElement.dataset.id === row.id) {
@@ -23,13 +23,13 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     if (!cellValue) {
         hasEndDate = false;
     }
-    let value = ""
+    let value = "";
     if (cellValue?.value?.date?.content) {
-        value = dayjs(cellValue.value.date.content).format("YYYY-MM-DDTHH:mm")
+        value = dayjs(cellValue.value.date.content).format("YYYY-MM-DDTHH:mm");
     }
-    let value2 = ""
+    let value2 = "";
     if (cellValue?.value?.date?.content2) {
-        value2 = dayjs(cellValue.value.date.content2).format("YYYY-MM-DDTHH:mm")
+        value2 = dayjs(cellValue.value.date.content2).format("YYYY-MM-DDTHH:mm");
     }
     return `<div>
     <input type="datetime-local" value="${value}" class="b3-text-field fn__size200"><br>
@@ -64,7 +64,7 @@ export const bindDateEvent = (options: {
                 content: new Date(inputElements[0].value).getTime()
             }
         });
-    })
+    });
     inputElements[1].addEventListener("change", () => {
         setDateValue({
             cellElements: options.cellElements,
@@ -74,13 +74,13 @@ export const bindDateEvent = (options: {
                 content2: new Date(inputElements[1].value).getTime()
             }
         });
-    })
+    });
     const checkElement = options.menuElement.querySelector(".b3-switch") as HTMLInputElement;
     checkElement.addEventListener("change", () => {
         if (checkElement.checked) {
-            inputElements[1].classList.remove("fn__none")
+            inputElements[1].classList.remove("fn__none");
         } else {
-            inputElements[1].classList.add("fn__none")
+            inputElements[1].classList.add("fn__none");
         }
         setDateValue({
             cellElements: options.cellElements,
@@ -115,7 +115,7 @@ export const setDateValue = (options: {
     const cellUndoOperations: IOperation[] = [];
     options.cellElements.forEach(item => {
         let cellData: IAVCell;
-        let oldValue
+        let oldValue;
         const rowID = item.parentElement.dataset.id;
         options.data.view.rows.find(row => {
             if (row.id === rowID) {
@@ -151,4 +151,4 @@ export const setDateValue = (options: {
         });
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
-}
+};

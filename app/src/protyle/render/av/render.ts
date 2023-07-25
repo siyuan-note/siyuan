@@ -85,7 +85,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             if (cell.value?.date.hasEndDate) {
                                 text += `<svg style="margin-left: 5px"><use xlink:href="#iconForward"></use></svg>${dayjs(cell.value.date.content2).format("YYYY-MM-DD HH:mm")}</span>`;
                             }
-                            text += "</span>"
+                            text += "</span>";
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  

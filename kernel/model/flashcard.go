@@ -272,10 +272,14 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating, reviewedCardIDs 
 		reviewCardCache[cardID] = card
 	}
 
-	deck.Review(cardID, rating)
-	err = deck.Save()
-	if nil != err {
+	log := deck.Review(cardID, rating)
+	if err = deck.Save(); nil != err {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
+		return
+	}
+
+	if err = deck.SaveLog(log); nil != err {
+		logging.LogErrorf("save review log [%s] failed: %s", deckID, err)
 		return
 	}
 

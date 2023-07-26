@@ -68,7 +68,9 @@ func RemoveID(name string) string {
 	ext := path.Ext(name)
 	name = strings.TrimSuffix(name, ext)
 	if 23 < len(name) {
-		name = name[:len(name)-23]
+		if id := name[len(name)-22:]; ast.IsNodeIDPattern(id) {
+			name = name[:len(name)-23]
+		}
 	}
 	return name + ext
 }

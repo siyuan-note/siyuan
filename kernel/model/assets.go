@@ -738,7 +738,14 @@ func MissingAssets() (ret []string) {
 			}
 
 			if "" == assetsPathMap[dest] {
-				ret = append(ret, dest)
+				if strings.HasPrefix(dest, "assets/.") {
+					// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
+					if !gulu.File.IsExist(filepath.Join(util.DataDir, dest)) {
+						ret = append(ret, dest)
+					}
+				} else {
+					ret = append(ret, dest)
+				}
 				continue
 			}
 		}

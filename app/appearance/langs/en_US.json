@@ -1237,6 +1237,6 @@
     "212": "There are some defects in the current version of cloud data sync, please upgrade to the latest version. Sorry for the inconvenience",
     "213": "Cloud verification failed, please try to upgrade to the latest version and log in again before syncing",
     "214": "This function needs to be signed in to use",
-    "215": "保存失败：目标文件并且正在被其他程序占用"
+    "215": "Save failed: The target file is being used by another program"
   }
 }

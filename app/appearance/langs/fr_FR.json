@@ -41,6 +41,7 @@
   "filterOperatorEndsWith": "Se termine par",
   "filterOperatorIsEmpty": "Est vide",
   "filterOperatorIsNotEmpty": "N'est pas vide",
+  "filterOperatorIsBetween": "Est entre",
   "asc": "Ascendant",
   "desc": "Descendant",
   "hideCol": "Masquer la colonne",

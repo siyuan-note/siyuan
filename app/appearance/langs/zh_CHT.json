@@ -41,6 +41,7 @@
   "filterOperatorEndsWith": "結尾為",
   "filterOperatorIsEmpty": "為空",
   "filterOperatorIsNotEmpty": "不為空",
+  "filterOperatorIsBetween": "介於",
   "asc": "升序",
   "desc": "降序",
   "hideCol": "隱藏列",

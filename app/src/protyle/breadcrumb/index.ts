@@ -468,7 +468,12 @@ export class Breadcrumb {
         if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
             if (!protyle.wysiwyg.element.isEqualNode(range.startContainer) && !protyle.wysiwyg.element.contains(range.startContainer)) {
-                blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
+               if (protyle.element.id ==="searchPreview") {
+                   // https://github.com/siyuan-note/siyuan/issues/8807
+                   blockElement = hasClosestBlock(protyle.wysiwyg.element.querySelector('[data-type="search-mark"]')) as Element;
+               } else {
+                   blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
+               }
             } else {
                 blockElement = hasClosestBlock(range.startContainer) as Element;
             }

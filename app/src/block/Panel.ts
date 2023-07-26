@@ -275,6 +275,10 @@ export class BlockPanel {
                         } else {
                             targetRect = this.targetElement.getBoundingClientRect();
                         }
+                        // 下部位置大的话就置于下部 https://ld246.com/article/1690333302147
+                        if (window.innerHeight - targetRect.bottom - 4 > targetRect.top + 12) {
+                            this.element.style.maxHeight = Math.floor(window.innerHeight - targetRect.bottom - 12) + "px";
+                        }
                         // 靠边不宜拖拽 https://github.com/siyuan-note/siyuan/issues/2937
                         setPosition(this.element, targetRect.left, targetRect.bottom + 4, targetRect.height + 12, 8);
                     } else if (typeof this.x === "number" && typeof this.y === "number") {
@@ -282,9 +286,9 @@ export class BlockPanel {
                     }
                     const elementRect = this.element.getBoundingClientRect();
                     if (this.targetElement && elementRect.top < targetRect.top) {
-                        this.element.style.maxHeight = (targetRect.top - elementRect.top - 8) + "px";
+                        this.element.style.maxHeight = Math.floor(targetRect.top - elementRect.top - 8) + "px";
                     } else {
-                        this.element.style.maxHeight = (window.innerHeight - elementRect.top - 8) + "px";
+                        this.element.style.maxHeight = Math.floor(window.innerHeight - elementRect.top - 8) + "px";
                     }
                     this.element.classList.add("block__popover--open");
                 } : undefined);

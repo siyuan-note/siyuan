@@ -377,7 +377,17 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (err error) {
 		return errors.New(msg)
 	}
 
-	if err = filelock.Copy(tmpDocxPath, filepath.Join(savePath, name+".docx")); nil != err {
+	targetPath := filepath.Join(savePath, name+".docx")
+	if gulu.File.IsExist(targetPath) {
+		// 先删除目标文件，以检查是否被占用 https://github.com/siyuan-note/siyuan/issues/8822
+		if err := os.RemoveAll(targetPath); nil != err {
+			logging.LogErrorf("export docx failed: %s", err)
+			msg := fmt.Sprintf(Conf.language(215))
+			return errors.New(msg)
+		}
+	}
+
+	if err = filelock.Copy(tmpDocxPath, targetPath); nil != err {
 		logging.LogErrorf("export docx failed: %s", err)
 		return errors.New(fmt.Sprintf(Conf.Language(14), err))
 	}

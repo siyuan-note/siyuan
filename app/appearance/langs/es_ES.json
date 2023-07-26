@@ -1236,6 +1236,7 @@
     "211": "Verificaci\u00f3n de datos en la nube completada",
     "212": "Hay algunos defectos en la versi\u00f3n actual de sincronizaci\u00f3n de datos en la nube, actualice a la versi\u00f3n m\u00e1s reciente. Disculpe las molestias",
     "213": "La verificaci\u00f3n en la nube fall\u00f3, intente actualizar a la versi\u00f3n m\u00e1s reciente e inicie sesi\u00f3n de nuevo antes de sincronizar",
-    "214": "Esta función requiere iniciar sesión en la cuenta antes de poder usarla"
+    "214": "Esta función requiere iniciar sesión en la cuenta antes de poder usarla",
+    "215": "Error al guardar: el archivo objetivo esta siendo usado por otro programa"
   }
 }

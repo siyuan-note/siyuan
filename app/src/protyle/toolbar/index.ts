@@ -453,13 +453,12 @@ export class Toolbar {
                 setFontStyle(inlineElement, textObj);
                 newNodes.push(inlineElement);
             } else {
-                //  https://github.com/siyuan-note/siyuan/issues/7477
+                // https://github.com/siyuan-note/siyuan/issues/7477
+                // https://github.com/siyuan-note/siyuan/issues/8825
                 if (type === "block-ref") {
-                    contents.childNodes.forEach((item: HTMLElement, index) => {
-                        if (index !== 0) {
-                            item.remove();
-                        }
-                    });
+                    while (contents.childNodes.length > 1) {
+                        contents.childNodes[0].remove();
+                    }
                 }
                 contents.childNodes.forEach((item: HTMLElement, index) => {
                     if (item.nodeType === 3) {

@@ -292,6 +292,8 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/siyuan-note/dejavu v0.0.0-20230726100545-ae7efdf72dc6 h1:gr5xMKR0h2+AnWIpKKBHvyeztVaQiZNsiNlFpmHO2Hw=
 github.com/siyuan-note/dejavu v0.0.0-20230726100545-ae7efdf72dc6/go.mod h1:9IW5sPUKd2bLtdKKhvCBAQEtKKtqMy94hZ5DIP9SwfE=
+github.com/siyuan-note/dejavu v0.0.0-20230726101238-8af49418073e h1:ssNcALG/+uEtc1mXadZIz0wumfQ4soS/TsKmLpv4unw=
+github.com/siyuan-note/dejavu v0.0.0-20230726101238-8af49418073e/go.mod h1:9IW5sPUKd2bLtdKKhvCBAQEtKKtqMy94hZ5DIP9SwfE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75 h1:Bi7/7f29LW+Fm0cHc0J1NO1cZqyJwljSWVmfOqVZgaE=
 github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75/go.mod h1:H8fyqqAbp9XreANjeSbc72zEdFfKTXYN34tc1TjZwtw=
 github.com/siyuan-note/eventbus v0.0.0-20230702081350-6dde667e7112 h1:lb+8C+XEEEn/lcBtoXlrf5mZEoe0y0KlqiIGG93Gozc=

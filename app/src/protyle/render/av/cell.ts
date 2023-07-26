@@ -66,7 +66,7 @@ export const getCalcValue = (column: IAVColumn) => {
 export const genCellValue = (colType: TAVCol, value: string | {
     content: string,
     color: string
-}[]) => {
+}[] | { content?: number, content2?: number, hasEndDate?: boolean }) => {
     let cellValue: IAVCellValue;
     if (typeof value === "string") {
         if (colType === "number") {
@@ -94,7 +94,7 @@ export const genCellValue = (colType: TAVCol, value: string | {
                 }
             };
         } else if (colType === "mSelect" || colType === "select") {
-            return {
+            cellValue = {
                 type: colType,
                 mSelect: [{
                     content: value,
@@ -102,14 +102,23 @@ export const genCellValue = (colType: TAVCol, value: string | {
                 }]
             };
         }
-        return cellValue;
+    } else {
+        if (colType === "mSelect" || colType === "select") {
+            cellValue = {
+                type: colType,
+                mSelect: value as {
+                    content: string,
+                    color: string
+                }[]
+            };
+        } else if (colType === "date") {
+            cellValue = {
+                type: colType,
+                date: value as { content?: number, content2?: number, hasEndDate?: boolean }
+            };
+        }
     }
-    if (colType === "mSelect" || colType === "select") {
-        return {
-            type: colType,
-            mSelect: value
-        };
-    }
+    return cellValue;
 };
 
 const calcItem = (options: {

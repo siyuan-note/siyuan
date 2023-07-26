@@ -5,6 +5,7 @@ import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {objEquals} from "../../../util/functions";
 import {genCellValue} from "./cell";
+import * as dayjs from "dayjs";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
     if (type === "number" || type === "select") {
@@ -15,16 +16,30 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
     }
 };
 
-const toggleEmpty = (element: HTMLElement, show: boolean) => {
+const toggleEmpty = (element: HTMLElement, operator: string, type: TAVCol) => {
     const menuElement = hasClosestByClassName(element, "b3-menu");
     if (menuElement) {
-        menuElement.querySelectorAll("input, .b3-chip").forEach(inputElement => {
+        menuElement.querySelectorAll("input, .b3-chip").forEach((inputElement, index) => {
             const menuItemElement = hasClosestByClassName(inputElement, "b3-menu__item");
             if (menuItemElement) {
-                if (show) {
-                    menuItemElement.classList.remove("fn__none");
+                if (type === "date") {
+                    if (operator === "Is between") {
+                        menuItemElement.classList.remove("fn__none");
+                    } else if (operator === "Is empty" || operator === "Is not empty") {
+                        menuItemElement.classList.add("fn__none");
+                    } else {
+                        if (index === 0) {
+                            menuItemElement.classList.remove("fn__none");
+                        } else {
+                            menuItemElement.classList.add("fn__none");
+                        }
+                    }
                 } else {
-                    menuItemElement.classList.add("fn__none");
+                    if (operator !== "Is empty" && operator !== "Is not empty") {
+                        menuItemElement.classList.remove("fn__none");
+                    } else {
+                        menuItemElement.classList.add("fn__none");
+                    }
                 }
             }
         });
@@ -40,10 +55,19 @@ export const setFilter = (options: {
     const rectTarget = options.target.getBoundingClientRect();
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
+        const operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator
         let hasMatch = false;
         let cellValue: IAVCellValue;
-        if (textElement) {
-            cellValue = genCellValue(options.filter.value.type, textElement.value);
+        if (textElements.length > 0) {
+            if (colData.type === "date") {
+                cellValue = genCellValue(colData.type, {
+                    content: new Date(textElements[0].value).getTime(),
+                    content2: new Date(textElements[1].value).getTime(),
+                    hasEndDate: operator === "Is between"
+                });
+            } else {
+                cellValue = genCellValue(colData.type, textElements[0].value);
+            }
         } else {
             const mSelect: { color: string, content: string }[] = [];
             window.siyuan.menus.menu.element.querySelectorAll("svg").forEach(item => {
@@ -58,12 +82,12 @@ export const setFilter = (options: {
             if (mSelect.length === 0) {
                 mSelect.push({color: "", content: ""});
             }
-            cellValue = genCellValue(options.filter.value.type, mSelect);
+            cellValue = genCellValue(colData.type, mSelect);
         }
         const newFilter: IAVFilter = {
             column: options.filter.column,
             value: cellValue,
-            operator: (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator
+            operator
         };
 
         let isSame = false;
@@ -100,7 +124,13 @@ export const setFilter = (options: {
     }
     let selectHTML = "";
     let colData: IAVColumn;
-    switch (options.filter.value.type) {
+    options.data.view.columns.find((column) => {
+        if (column.id === options.filter.column) {
+            colData = column;
+            return true;
+        }
+    });
+    switch (colData.type) {
         case "text":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
@@ -109,8 +139,17 @@ export const setFilter = (options: {
 <option ${"Starts with" === options.filter.operator ? "selected" : ""} value="Starts with">${window.siyuan.languages.filterOperatorStartsWith}</option>
 <option ${"Ends with" === options.filter.operator ? "selected" : ""} value="Ends with">${window.siyuan.languages.filterOperatorEndsWith}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
-<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
-`;
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
+            break;
+        case "date":
+            selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+<option ${">" === options.filter.operator ? "selected" : ""} value=">">${window.siyuan.languages.filterOperatorIsAfter}</option>
+<option ${"<" === options.filter.operator ? "selected" : ""} value="<">${window.siyuan.languages.filterOperatorIsBefore}</option>
+<option ${">=" === options.filter.operator ? "selected" : ""} value=">=">${window.siyuan.languages.filterOperatorIsOnOrAfter}</option>
+<option ${"<=" === options.filter.operator ? "selected" : ""} value="<=">${window.siyuan.languages.filterOperatorIsOnOrBefore}</option>
+<option ${"Is between" === options.filter.operator ? "selected" : ""} value="Is between">${window.siyuan.languages.filterOperatorIsBetween}</option>
+<option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
         case "number":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">=</option>
@@ -120,40 +159,31 @@ export const setFilter = (options: {
 <option ${">=" === options.filter.operator ? "selected" : ""} value=">=">&GreaterEqual;</option>
 <option ${"<=" === options.filter.operator ? "selected" : ""} value="<=">&le;</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
-<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
-`;
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
         case "mSelect":
         case "select":
-            options.data.view.columns.find((column) => {
-                if (column.id === options.filter.column) {
-                    colData = column;
-                    if (column.type === "select") {
-                        selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
+            if (colData.type === "select") {
+                selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
-<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
-`;
-                    } else {
-                        selectHTML = `<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
+            } else {
+                selectHTML = `<option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
 <option ${"Does not contains" === options.filter.operator ? "selected" : ""} value="Does not contains">${window.siyuan.languages.filterOperatorDoesNotContain}</option>
 <option ${"Is empty" === options.filter.operator ? "selected" : ""} value="Is empty">${window.siyuan.languages.filterOperatorIsEmpty}</option>
-<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>
-`;
-                    }
-                    return true;
-                }
-            });
+<option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
+            }
             break;
     }
     menu.addItem({
         iconHTML: "",
         label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
     });
-    if (options.filter.value.type === "select" || options.filter.value.type === "mSelect") {
+    if (colData.type === "select" || colData.type === "mSelect") {
         colData.options?.forEach((option) => {
             let icon = "iconUncheck";
-            options.filter.value.mSelect.find((optionItem) => {
+            options.filter.value?.mSelect.find((optionItem) => {
                 if (optionItem.content === option.name) {
                     icon = "iconCheck";
                 }
@@ -175,15 +205,24 @@ export const setFilter = (options: {
                 }
             });
         });
-    } else if (options.filter.value.type === "text") {
+    } else if (colData.type === "text") {
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value.text.content}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${options.filter.value?.text.content || ""}" class="b3-text-field fn__size200">`
         });
-    } else if (options.filter.value.type === "number") {
+    } else if (colData.type === "number") {
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${options.filter.value?.number.isNotEmpty ? options.filter.value.number.content : ""}" class="b3-text-field fn__size200">`
+        });
+    } else if (colData.type === "date") {
+        menu.addItem({
+            iconHTML: "",
+            label: `<input style="margin: 4px 0" value="${options.filter.value?.date.content ? dayjs(options.filter.value.date.content).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
+        });
+        menu.addItem({
+            iconHTML: "",
+            label: `<input style="margin: 4px 0" value="${options.filter.value?.date.content2 ? dayjs(options.filter.value.date.content2).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200">`
         });
     }
     menu.addItem({
@@ -214,11 +253,11 @@ export const setFilter = (options: {
     });
     const selectElement = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement);
     selectElement.addEventListener("change", () => {
-        toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty");
+        toggleEmpty(selectElement, selectElement.value, colData.type);
     });
-    const textElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
-    if (textElement) {
-        textElement.addEventListener("keydown", (event) => {
+    const textElements: NodeListOf<HTMLInputElement> = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field");
+    textElements.forEach(item => {
+        item.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.isComposing) {
                 event.preventDefault();
                 return;
@@ -228,11 +267,11 @@ export const setFilter = (options: {
                 event.preventDefault();
             }
         });
-    }
-    toggleEmpty(selectElement, selectElement.value !== "Is empty" && selectElement.value !== "Is not empty");
+    })
+    toggleEmpty(selectElement, selectElement.value, colData.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
-    if (textElement) {
-        textElement.select();
+    if (textElements.length > 0) {
+        textElements[0].select();
     }
 };
 
@@ -279,7 +318,7 @@ export const addFilter = (options: {
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
                     setFilter({
                         filter: {
-                            operator:  getDefaultOperatorByType(column.type),
+                            operator: getDefaultOperatorByType(column.type),
                             column: column.id,
                             value: cellValue
                         },

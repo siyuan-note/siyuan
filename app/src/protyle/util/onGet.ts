@@ -104,7 +104,9 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             afterCB: options.afterCB,
         }, options.protyle);
-        setTitle(response.data.ial.title);
+        if (options.protyle.model) {
+            setTitle(response.data.ial.title);
+        }
         removeLoading(options.protyle);
     });
 };

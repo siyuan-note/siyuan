@@ -3,7 +3,6 @@
     background-color: var(--b3-theme-background);
     position: absolute;
     box-shadow: var(--b3-dialog-shadow);
-    z-index: 205;
     width: 60vw;
     word-break: break-word;
     border-radius: var(--b3-border-radius-b);
@@ -17,6 +16,7 @@
 
     &--open {
       opacity: 1;
+      z-index: 205;
     }
 
     &--top {

@@ -153,8 +153,7 @@ func FlushQueue() {
 	}
 
 	// Push database index commit event https://github.com/siyuan-note/siyuan/issues/8814
-	evt := util.NewCmdResult("databaseIndexCommit", 0, util.PushModeBroadcast)
-	util.PushEvent(evt)
+	util.BroadcastByType("main", "databaseIndexCommit", 0, "", nil)
 }
 
 func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (err error) {

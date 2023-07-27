@@ -12,6 +12,7 @@
     display: flex;
     flex-direction: column;
     min-height: 197px;
+    z-index: -1;
     border: 1px solid var(--b3-theme-surface-lighter);
 
     &--open {
@@ -19,7 +20,7 @@
       z-index: 205;
     }
 
-    &--top {
+    &--top.block__popover--open {
       z-index: 206;
     }
 

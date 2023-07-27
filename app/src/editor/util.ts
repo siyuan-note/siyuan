@@ -346,7 +346,13 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         zoomOut({protyle: editor.editor.protyle, id: options.id});
         return true;
     }
-    let nodeElement = editor.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.id}"]`);
+    let nodeElement: Element;
+    Array.from(editor.editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${options.id}"]`)).find(item => {
+        if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+            nodeElement = item;
+            return true;
+        }
+    });
     if ((!nodeElement || nodeElement?.clientHeight === 0) && options.id !== options.rootID) {
         fetchPost("/api/filetree/getDoc", {
             id: options.id,

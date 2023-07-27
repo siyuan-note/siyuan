@@ -196,6 +196,8 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			end := true
 			if value.Date.HasEndDate {
 				end = value.Date.Content2 <= other.Date.Content2
+			} else {
+				end = value.Date.Content <= other.Date.Content2
 			}
 			return start && end
 		case FilterOperatorIsEmpty:

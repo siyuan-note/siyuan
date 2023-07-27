@@ -669,7 +669,10 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         iconHTML: "",
         label: `<textarea style="margin: 4px 0" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.imageURL}">${imgElement.getAttribute("src")}</textarea>`,
         bind(element) {
-            element.querySelector("textarea").addEventListener("change", (event) => {
+            element.querySelector("textarea").addEventListener("input", (event:InputEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
                 const value = (event.target as HTMLInputElement).value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "");
                 imgElement.setAttribute("src", value);
                 imgElement.setAttribute("data-src", value);

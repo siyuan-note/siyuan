@@ -101,6 +101,15 @@ export const genCellValue = (colType: TAVCol, value: string | {
                     color: ""
                 }]
             };
+        } else if (colType === "date" && value === "") {
+            cellValue = {
+                type: colType,
+                date: {
+                    content: null,
+                    content2: null,
+                    hasEndDate: false,
+                }
+            };
         }
     } else {
         if (colType === "mSelect" || colType === "select") {

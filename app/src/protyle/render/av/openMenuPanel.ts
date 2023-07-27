@@ -670,7 +670,8 @@ const getPropertiesHTML = (data: IAVTable) => {
 </button>
 ${hideHTML}`;
     }
-    return `<button class="b3-menu__item" data-type="nobg">
+    return `<div class="b3-menu__items">
+<button class="b3-menu__item" data-type="nobg">
     <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
@@ -694,11 +695,13 @@ ${hideHTML}
 <button class="b3-menu__item" data-type="newCol">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.new}</span>
-</button>`;
+</button>
+</div>`;
 };
 
 const getConfigHTML = (data: IAVTable) => {
-    return `<button class="b3-menu__item" data-type="nobg">
+    return `<div class="b3-menu__items">
+<button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.config}</span>
     <svg class="b3-menu__action" data-type="close" style="opacity: 1"><use xlink:href="#iconCloseRound"></use></svg>
 </button>
@@ -726,5 +729,6 @@ const getConfigHTML = (data: IAVTable) => {
     <span class="b3-menu__label">${window.siyuan.languages.pageCount}</span>
     <span class="b3-menu__accelerator">50</span>
     <svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>
-</button>`;
+</button>
+</div>`;
 };

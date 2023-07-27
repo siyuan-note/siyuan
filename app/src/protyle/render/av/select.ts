@@ -532,9 +532,11 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
         }
     });
 
-    return `<div class="b3-chips">
+    return `<div class="b3-menu__items">
+<div class="b3-chips">
     ${selectedHTML}
     <input>
 </div>
-<div>${filterSelectHTML("", colData.options)}</div>`;
+<div>${filterSelectHTML("", colData.options)}</div>
+</div>`;
 };

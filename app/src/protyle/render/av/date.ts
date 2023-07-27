@@ -31,7 +31,8 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     if (cellValue?.value?.date?.content2) {
         value2 = dayjs(cellValue.value.date.content2).format("YYYY-MM-DDTHH:mm");
     }
-    return `<div>
+    return `<div class="b3-menu__items">
+<div>
     <input type="datetime-local" value="${value}" class="b3-text-field fn__size200"><br>
     <input type="datetime-local" value="${value2}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
     <button class="b3-menu__separator"></button>
@@ -45,6 +46,7 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
         <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.clear}</span>
     </button>
+</div>
 </div>`;
 };
 

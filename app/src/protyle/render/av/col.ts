@@ -108,7 +108,8 @@ export const getEditHTML = (options: {
 </button>`;
         });
     }
-    return `${html}
+    return `<div class="b3-menu__items">
+${html}
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
     <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
@@ -121,7 +122,8 @@ export const getEditHTML = (options: {
 <button class="b3-menu__item" data-type="removeCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
-</button>`;
+</button>
+</div>`;
 };
 
 export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuElement: HTMLElement }) => {

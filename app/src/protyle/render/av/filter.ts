@@ -376,7 +376,8 @@ export const getFiltersHTML = (data: IAVTable) => {
     <svg class="b3-menu__action" data-type="removeFilter"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;
     });
-    return `<button class="b3-menu__item" data-type="nobg">
+    return `<div class="b3-menu__items">
+<button class="b3-menu__item" data-type="nobg">
     <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goConfig">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
@@ -392,5 +393,6 @@ ${html}
 <button class="b3-menu__item${html ? "" : " fn__none"}" data-type="removeFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
-</button>`;
+</button>
+</div>`;
 };

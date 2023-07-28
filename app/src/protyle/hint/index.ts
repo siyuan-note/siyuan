@@ -239,13 +239,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     }
 
     private getHTMLByData(data: IHintData[], hasSearch = false) {
-        let hintsHTML = "";
+        let hintsHTML = '<div style="flex: 1;overflow:auto;">';
         if (hasSearch) {
-            hintsHTML = '<input style="margin: 0 4px 4px 4px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
-            this.element.style.display = "flex";
-            this.element.style.flexDirection = "column";
-        } else {
-            this.element.style.display = "";
+            hintsHTML = '<input style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
         }
         data.forEach((hintData, i) => {
             // https://github.com/siyuan-note/siyuan/issues/1229 提示时，新建文件不应默认选中
@@ -260,10 +256,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 hintsHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
             }
         });
-        if (hasSearch) {
-            hintsHTML = hintsHTML + "</div>";
-        }
-        return hintsHTML;
+        return `${hintsHTML}</div>`;
     }
 
     public genHTML(data: IHintData[], protyle: IProtyle, hide = false, hasSearch = false) {

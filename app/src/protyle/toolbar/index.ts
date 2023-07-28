@@ -1146,7 +1146,7 @@ export class Toolbar {
         });
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
-        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input placeholder="${window.siyuan.languages.search}" style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input placeholder="${window.siyuan.languages.search}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
 <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>`;
 
@@ -1271,7 +1271,7 @@ export class Toolbar {
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
 <div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "min-width: 260px;max-width:50vw"}">
-    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
+    <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
         <span class="fn__space"></span>
         <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>
@@ -1444,7 +1444,7 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
-        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 0 8px 4px 8px" class="b3-text-field"/>
 <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height:64px" src="/stage/loading-pure.svg"></div>
 </div>`;
 
@@ -1511,7 +1511,7 @@ export class Toolbar {
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
 <div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:50vw"}">
-    <div class="fn__flex" style="margin: 4px 8px 8px 8px">
+    <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
         <span class="fn__space"></span>
         <span data-type="previous" class="block__icon block__icon--show"><svg><use xlink:href="#iconLeft"></use></svg></span>

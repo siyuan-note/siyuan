@@ -438,7 +438,7 @@ export class Background {
                 html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
             });
             window.siyuan.menus.menu.remove();
-            window.siyuan.menus.menu.element.lastElementChild.innerHTML = `<div class="fn__flex-column" style="max-height:50vh"><input style="margin: 4px 8px 8px 8px" class="b3-text-field"/>
+            window.siyuan.menus.menu.element.lastElementChild.innerHTML = `<div class="fn__flex-column" style="max-height:50vh;margin: 0 -8px"><input style="margin: 0px 8px 4px 8px" class="b3-text-field"/>
 <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>`;
 

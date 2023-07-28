@@ -56,6 +56,8 @@
     max-height: 402px;
     box-sizing: border-box;
     padding: 8px 0;
+    display: flex;
+    flex-direction: column;
   }
 
   &-util {
@@ -64,7 +66,7 @@
     box-shadow: var(--b3-dialog-shadow);
     border: 1px solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-menu-background);
-    padding: 8px;
+    padding: 8px 0;
     max-height: 80vh;
     z-index: 4;
     box-sizing: border-box;

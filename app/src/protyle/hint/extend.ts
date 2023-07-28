@@ -311,7 +311,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
                 dataList[1].focus = true;
             }
         }
-        protyle.hint.genHTML(dataList, protyle, true);
+        protyle.hint.genHTML(dataList, protyle, true, "hint");
     });
 
     return [];
@@ -344,9 +344,9 @@ export const genHintItemHTML = (item: IBlock) => {
     <span class="b3-list-item__text">${item.content}</span>
 </div>
 <div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div>`;
-}
+};
 
-export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintData[] => {
+export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
     protyle.hint.genLoading(protyle);
     fetchPost("/api/search/searchRefBlock", {
@@ -360,14 +360,14 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
         if (response.data.newDoc) {
             const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
             dataList.push({
-                value: isQuick ? `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))` : `((newFile '${newFileName}${Lute.Caret}'))`,
+                value: source === "search" ? `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))` : `((newFile '${newFileName}${Lute.Caret}'))`,
                 html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div>`,
             });
         }
         response.data.blocks.forEach((item: IBlock) => {
             let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText}</span>`;
-            if (isQuick) {
+            if (source === "search") {
                 value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}</span>`;
             }
             dataList.push({
@@ -375,7 +375,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
                 html: genHintItemHTML(item),
             });
         });
-        if (isQuick) {
+        if (source === "search") {
             protyle.hint.splitChar = "((";
             protyle.hint.lastIndex = -1;
         }
@@ -387,7 +387,7 @@ export const hintRef = (key: string, protyle: IProtyle, isQuick = false): IHintD
         } else if (response.data.newDoc && dataList.length > 1) {
             dataList[1].focus = true;
         }
-        protyle.hint.genHTML(dataList, protyle, true, isQuick);
+        protyle.hint.genHTML(dataList, protyle, true, source);
     });
     return [];
 };
@@ -417,7 +417,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
                 html: window.siyuan.languages.emptyContent,
             });
         }
-        protyle.hint.genHTML(dataList, protyle, true);
+        protyle.hint.genHTML(dataList, protyle, true, "hint");
     });
     return [];
 };

@@ -46,6 +46,7 @@ type TEventBus = "ws-main" |
     "input-search" |
     "loaded-protyle"
 type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block" | "mSelect"
+type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
     | "!="

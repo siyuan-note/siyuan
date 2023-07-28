@@ -105,7 +105,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     let fontSize = "16px";
     const nodeElements = getFontNodeElements(protyle);
     if (nodeElements && nodeElements.length > 0) {
-        textElement = nodeElements[0];
+        textElement = nodeElements[0] as HTMLElement;
     } else {
         textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
         if (!textElement) {
@@ -512,14 +512,15 @@ export const initKeyboardToolbar = () => {
         // appearance
         if (["clear", "style2", "style4", "color", "backgroundColor", "fontSize", "style1"].includes(type)) {
             const nodeElements = getFontNodeElements(protyle);
+            const itemElement = buttonElement.firstElementChild as HTMLElement;
             if (type === "style1") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.backgroundColor + Constants.ZWSP + buttonElement.firstElementChild.style.color);
+                fontEvent(protyle, nodeElements, type, itemElement.style.backgroundColor + Constants.ZWSP + itemElement.style.color);
             } else if (type === "fontSize") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.textContent.trim());
+                fontEvent(protyle, nodeElements, type, itemElement.textContent.trim());
             } else if (type === "backgroundColor") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.backgroundColor);
+                fontEvent(protyle, nodeElements, type, itemElement.style.backgroundColor);
             } else if (type === "color") {
-                fontEvent(protyle, nodeElements, type, buttonElement.firstElementChild.style.color);
+                fontEvent(protyle, nodeElements, type, itemElement.style.color);
             } else {
                 fontEvent(protyle, nodeElements, type);
             }

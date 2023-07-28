@@ -131,7 +131,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const addRowElement = hasClosestByClassName(event.target, "av__row--add");
     if (addRowElement) {
-        hintRef("", protyle, true);
+        (blockElement.querySelector(".av__title") as HTMLInputElement).focus()
+        hintRef("", protyle, "av");
         event.preventDefault();
         event.stopPropagation();
         return true;

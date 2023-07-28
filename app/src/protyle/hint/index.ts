@@ -43,6 +43,7 @@ export class Hint {
     public enableExtend = false;
     public splitChar = "";
     public lastIndex = -1;
+    private source: THintSource;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -58,7 +59,7 @@ export class Hint {
             }
             const btnElement = hasClosestByMatchTag(eventTarget, "BUTTON");
             if (btnElement && !btnElement.classList.contains("emojis__item") && !btnElement.classList.contains("emojis__type")) {
-                if (btnElement.parentElement.classList.contains("b3-list")) {
+                if (this.source !== "search") {
                     this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, true, isCtrl(event));
                 } else {
                     // 划选引用点击，需先重置 range
@@ -194,7 +195,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         if (this.splitChar === "/" || this.splitChar === "、") {
             clearTimeout(this.timeId);
             if (this.enableSlash && !isMobile()) {
-                this.genHTML(hintSlash(key, protyle), protyle);
+                this.genHTML(hintSlash(key, protyle), protyle, false, "hint");
             }
             return;
         }
@@ -203,7 +204,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             if (item.key === this.splitChar) {
                 clearTimeout(this.timeId);
                 this.timeId = window.setTimeout(() => {
-                    this.genHTML(item.hint(key, protyle), protyle);
+                    this.genHTML(item.hint(key, protyle, "hint"), protyle, false, "hint");
                 }, protyle.options.hint.delay);
             }
         });
@@ -238,9 +239,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }
     }
 
-    private getHTMLByData(data: IHintData[], hasSearch = false) {
+    private getHTMLByData(data: IHintData[]) {
         let hintsHTML = '<div style="flex: 1;overflow:auto;">';
-        if (hasSearch) {
+        if (this.source !== "hint") {
             hintsHTML = '<input style="margin:0 8px 4px 8px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
         }
         data.forEach((hintData, i) => {
@@ -259,7 +260,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         return `${hintsHTML}</div>`;
     }
 
-    public genHTML(data: IHintData[], protyle: IProtyle, hide = false, hasSearch = false) {
+    public genHTML(data: IHintData[], protyle: IProtyle, hide = false, source: THintSource) {
+        this.source = source;
         if (data.length === 0) {
             if (!this.element.querySelector(".fn__loading") || hide) {
                 this.element.classList.add("fn__none");
@@ -267,7 +269,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             return;
         }
 
-        this.element.innerHTML = this.getHTMLByData(data, hasSearch);
+        this.element.innerHTML = this.getHTMLByData(data);
         this.element.classList.remove("fn__none");
         // https://github.com/siyuan-note/siyuan/issues/4575
         if (data[0].filter) {
@@ -280,7 +282,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
         this.element.scrollTop = 0;
         this.bindUploadEvent(protyle, this.element);
-        if (hasSearch) {
+        if (this.source !== "hint") {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;
             const oldValue = this.element.querySelector("mark")?.textContent || "";
             searchElement.value = oldValue;
@@ -305,7 +307,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                     focusByRange(protyle.toolbar.range);
                 }
             });
-            const nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+            const nodeElement = protyle.toolbar.range ? hasClosestBlock(protyle.toolbar.range.startContainer) : false;
             searchElement.addEventListener("input", (event: InputEvent) => {
                 if (event.isComposing) {
                     return;
@@ -394,12 +396,56 @@ ${genHintItemHTML(item)}
 
     public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
         hideElements(["hint", "toolbar"], protyle);
-        if (updateRange) {
+        if (updateRange && this.source !== "av") {
             protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element);
         }
         const range = protyle.toolbar.range;
         let nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer) as HTMLElement;
         if (!nodeElement) {
+            return;
+        }
+        if (this.source === "av") {
+            const avID = nodeElement.getAttribute("data-av-id");
+            const rowsElement = nodeElement.querySelectorAll(".av__row")
+            const previousID = rowsElement[rowsElement.length - 1].getAttribute("data-id")
+            let tempElement = document.createElement("div");
+            tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
+            tempElement = tempElement.firstElementChild as HTMLDivElement;
+            if (value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
+                const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
+                const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
+                getSavePath(protyle.path, protyle.notebookId, (pathString) => {
+                    fetchPost("/api/filetree/createDocWithMd", {
+                        notebook: protyle.notebookId,
+                        path: pathPosix().join(pathString, realFileName),
+                        parentID: protyle.block.rootID,
+                        markdown: ""
+                    }, response => {
+                        transaction(protyle, [{
+                            action: "insertAttrViewBlock",
+                            avID,
+                            previousID,
+                            srcIDs: [response.data],
+                        }], [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: [response.data],
+                            avID,
+                        }]);
+                    });
+                });
+            } else {
+                const sourceId = tempElement.getAttribute('data-id')
+                transaction(protyle, [{
+                    action: "insertAttrViewBlock",
+                    avID,
+                    previousID,
+                    srcIDs: [sourceId],
+                }], [{
+                    action: "removeAttrViewBlock",
+                    srcIDs: [sourceId],
+                    avID,
+                }]);
+            }
             return;
         }
         this.enableExtend = false;
@@ -513,7 +559,7 @@ ${genHintItemHTML(item)}
             this.enableExtend = true;
             if (value === "((" || value === "{{") {
                 if (value === "((") {
-                    hintRef("", protyle);
+                    hintRef("", protyle, "hint");
                 } else {
                     hintEmbed("", protyle);
                 }
@@ -596,12 +642,12 @@ ${genHintItemHTML(item)}
                     const ids = value.split(Constants.ZWSP);
                     if (ids[1] === plugin.name) {
                         plugin.protyleSlash.find((slash) => {
-                            if (slash.id === ids[2]){
+                            if (slash.id === ids[2]) {
                                 slash.callback(protyle.getInstance());
                                 return true;
                             }
                         });
-                        return  true;
+                        return true;
                     }
                 });
                 return;

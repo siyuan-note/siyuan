@@ -345,7 +345,7 @@ interface IHintData {
 interface IHintExtend {
     key: string;
 
-    hint?(value: string, protyle: IProtyle): IHintData[];
+    hint?(value: string, protyle: IProtyle, source: THintSource): IHintData[];
 }
 
 /** @link https://ld246.com/article/1549638745630#options-hint */

@@ -13,7 +13,7 @@ export class BlockRef extends ToolbarItem {
                 return;
             }
             fixTableRange(protyle.toolbar.range);
-            hintRef(protyle.toolbar.range.toString(), protyle, true);
+            hintRef(protyle.toolbar.range.toString(), protyle, "search");
             protyle.toolbar.element.classList.add("fn__none");
             event.stopPropagation();
         });

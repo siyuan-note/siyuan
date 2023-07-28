@@ -23,6 +23,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -237,6 +238,42 @@ func exportData(c *gin.Context) {
 	}
 	ret.Data = map[string]interface{}{
 		"zip": zipPath,
+	}
+}
+
+func exportResources(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var name string
+	if nil != arg["name"] {
+		name = util.TruncateLenFileName(arg["name"].(string))
+	}
+	if name == "" {
+		name = time.Now().Format("export-2006-01-02_15-04-05") // 生成的 *.zip 文件主文件名
+	}
+
+	var resourcePaths []string // 文件/文件夹在工作空间中的路径
+	if nil != arg["paths"] {
+		for _, resourcePath := range arg["paths"].([]interface{}) {
+			resourcePaths = append(resourcePaths, resourcePath.(string))
+		}
+	}
+
+	zipFilePath, err := model.ExportResources(resourcePaths, name)
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+	ret.Data = map[string]interface{}{
+		"path": zipFilePath, // 相对于工作空间目录的路径
 	}
 }
 

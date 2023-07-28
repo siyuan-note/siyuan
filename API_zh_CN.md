@@ -47,6 +47,7 @@
     * [列出文件](#列出文件)
 * [导出](#导出)
     * [导出 Markdown 文本](#导出-markdown-文本)
+    * [导出文件与目录](#导出文件与目录)
 * [转换](#转换)
     * [Pandoc](#Pandoc)
 * [通知](#通知)
@@ -1109,6 +1110,45 @@
 
     * `hPath`：人类可读的路径
     * `content`：Markdown 内容
+
+### 导出文件与目录
+
+* `/api/export/exportResources`
+* 参数
+
+  ```json
+  {
+    "paths": [
+      "/conf/appearance/boot",
+      "/conf/appearance/langs",
+      "/conf/appearance/emojis/conf.json",
+      "/conf/appearance/icons/index.html",
+    ],
+    "name": "zip-file-name"
+  }
+  ```
+
+    * `paths`：要导出的文件或文件夹路径列表，相同名称的文件/文件夹会被覆盖
+    * `name`：（可选）导出的文件名，未设置时默认为 `export-YYYY-MM-DD_hh-mm-ss.zip`
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "path": "temp/export/zip-file-name.zip"
+    }
+  }
+  ```
+
+    * `path`：创建的 `*.zip` 文件路径
+        * `zip-file-name.zip` 中的目录结构如下所示：
+            * `zip-file-name`
+                * `boot`
+                * `langs`
+                * `conf.json`
+                * `index.html`
 
 ## 转换
 

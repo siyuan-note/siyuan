@@ -324,6 +324,50 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	return
 }
 
+func ExportResources(resourcePaths []string, mainName string) (exportFilePath string, err error) {
+	WaitForWritingFiles()
+
+	// 用于导出的临时文件夹完整路径
+	exportFolderPath := filepath.Join(util.TempDir, "export", mainName)
+	if err = os.MkdirAll(exportFolderPath, 0755); nil != err {
+		logging.LogErrorf("create export temp folder failed: %s", err)
+		return
+	}
+
+	// 将需要导出的文件/文件夹复制到临时文件夹
+	for _, resourcePath := range resourcePaths {
+		resourceFullPath := filepath.Join(util.WorkspaceDir, resourcePath)    // 资源完整路径
+		resourceBaseName := filepath.Base(resourceFullPath)                   // 资源名称
+		resourceCopyPath := filepath.Join(exportFolderPath, resourceBaseName) // 资源副本完整路径
+		if err = filelock.Copy(resourceFullPath, resourceCopyPath); nil != err {
+			logging.LogErrorf("copy resource will be exported from [%s] to [%s] failed: %s", resourcePath, resourceCopyPath, err)
+			err = fmt.Errorf(Conf.Language(14), err.Error())
+			return
+		}
+	}
+
+	zipFilePath := exportFolderPath + ".zip" // 导出的 *.zip 文件完整路径
+	zip, err := gulu.Zip.Create(zipFilePath)
+	if nil != err {
+		logging.LogErrorf("create export zip [%s] failed: %s", zipFilePath, err)
+		return
+	}
+
+	if err = zip.AddDirectory(mainName, exportFolderPath); nil != err {
+		logging.LogErrorf("create export zip [%s] failed: %s", exportFolderPath, err)
+		return
+	}
+
+	if err = zip.Close(); nil != err {
+		logging.LogErrorf("close export zip failed: %s", err)
+	}
+
+	os.RemoveAll(exportFolderPath)
+
+	exportFilePath = path.Join("temp", "export", mainName+".zip") // 导出的 *.zip 文件相对于工作区目录的路径
+	return
+}
+
 func Preview(id string) (retStdHTML string, retOutline []*Path) {
 	tree, _ := loadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, false,

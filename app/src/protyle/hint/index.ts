@@ -8,7 +8,7 @@ import {
     getSelectionOffset,
     getSelectionPosition
 } from "../util/selection";
-import {hintEmbed, hintRef, hintSlash} from "./extend";
+import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath} from "../../util/newFile";
 import {upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
@@ -238,7 +238,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }
     }
 
-    public getHTMLByData(data: IHintData[], hasSearch = false) {
+    private getHTMLByData(data: IHintData[], hasSearch = false) {
         let hintsHTML = "";
         if (hasSearch) {
             hintsHTML = '<input style="margin: 0 4px 4px 4px" class="b3-text-field"><div style="flex: 1;overflow:auto;">';
@@ -338,39 +338,17 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             let searchHTML = "";
             if (response.data.newDoc) {
                 const blockRefText = `((newFile "${oldValue}"${Constants.ZWSP}'${response.data.k}${Lute.Caret}'))`;
-                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+                searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${response.data.blocks.length === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefText)}"><div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
             }
             response.data.blocks.forEach((item: IBlock, index: number) => {
-                let iconHTML;
-                if (item.type === "NodeDocument" && item.ial.icon) {
-                    iconHTML = unicode2Emoji(item.ial.icon, "b3-list-item__graphic popover__block", true);
-                    iconHTML = iconHTML.replace('popover__block"', `popover__block" data-id="${item.id}"`);
-                } else {
-                    iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>`;
-                }
-                let attrHTML = "";
-                if (item.name) {
-                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span>${item.name}</span></span><span class="fn__space"></span>`;
-                }
-                if (item.alias) {
-                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg><span>${item.alias}</span></span><span class="fn__space"></span>`;
-                }
-                if (item.memo) {
-                    attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg><span>${item.memo}</span></span>`;
-                }
-                if (attrHTML) {
-                    attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
-                }
                 const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
-                searchHTML += `<button class="b3-list-item b3-list-item--two fn__block${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">${attrHTML}<div class="b3-list-item__first">
-    ${iconHTML}
-    <span class="b3-list-item__text">${item.content}</span>
-</div>
-<div class="b3-list-item__meta b3-list-item__showall" style="margin-bottom: 4px">${item.hPath}</div></button>`;
+                searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">
+${genHintItemHTML(item)}
+</button>`;
             });
             if (searchHTML === "") {
-                searchHTML = `<button class="b3-list-item b3-list-item--two fn__block" data-value="">${window.siyuan.languages.emptyContent}</button>`;
+                searchHTML = `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="">${window.siyuan.languages.emptyContent}</button>`;
             }
             this.element.lastElementChild.innerHTML = searchHTML;
         });

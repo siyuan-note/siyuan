@@ -728,7 +728,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 }
 
 func syncDelete2AttributeView(node *ast.Node) {
-	avs := node.IALAttr(NodeAttrNameAVs)
+	avs := node.IALAttr(NodeAttrNameAvs)
 	if "" == avs {
 		return
 	}
@@ -1240,7 +1240,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 	// 2. 更新属性视图主键内容
 	for _, updatedDefNode := range updatedDefNodes {
-		avs := updatedDefNode.IALAttr(NodeAttrNameAVs)
+		avs := updatedDefNode.IALAttr(NodeAttrNameAvs)
 		if "" == avs {
 			continue
 		}

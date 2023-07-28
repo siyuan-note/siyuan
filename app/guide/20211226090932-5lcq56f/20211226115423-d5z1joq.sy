@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
-		"updated": "20230428165314"
+		"updated": "20230728103709"
 	},
 	"Children": [
 		{
@@ -82,7 +82,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20211226115745-rorv31l",
-				"updated": "20230428165314"
+				"updated": "20230728103709"
 			},
 			"Children": [
 				{
@@ -97,7 +97,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20211226115745-mwd9by9",
-						"updated": "20230428165314"
+						"updated": "20230728103709"
 					},
 					"Children": [
 						{
@@ -128,7 +128,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20211226115745-f8vrixq",
-								"updated": "20230428165314"
+								"updated": "20230728103709"
 							},
 							"Children": [
 								{
@@ -140,7 +140,7 @@
 									},
 									"Properties": {
 										"id": "20211226115745-5043oh9",
-										"updated": "20211225212444"
+										"updated": "20230728103709"
 									},
 									"Children": [
 										{
@@ -148,12 +148,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226115745-n838dky",
-												"updated": "20211225212444"
+												"updated": "20230728103709"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "新建筆記本，在筆記本下新建文檔"
+													"Data": "在文檔樹面板中新建筆記本，在筆記本下新建文檔"
 												}
 											]
 										}

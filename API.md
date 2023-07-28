@@ -47,6 +47,7 @@
     * [List files](#List-files)
 * [Export](#Export)
     * [Export Markdown](#Export-Markdown)
+    * [Export Files and Folders](#Export-files-and-folders)
 * [Conversion](#Conversion)
     * [Pandoc](#Pandoc)
 * [Notification](#Notification)
@@ -1117,6 +1118,45 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
     * `hPath`: human-readable path
     * `content`: Markdown content
+
+### Export files and folders
+
+* `/api/export/exportResources`
+* Parameters
+
+  ```json
+  {
+    "paths": [
+      "/conf/appearance/boot",
+      "/conf/appearance/langs",
+      "/conf/appearance/emojis/conf.json",
+      "/conf/appearance/icons/index.html",
+    ],
+    "name": "zip-file-name"
+  }
+  ```
+
+    * `paths`: A list of file or folder paths to be exported, the same filename/folder name will be overwritten
+    * `name`: (Optional) The exported file name, which defaults to `export-YYYY-MM-DD_hh-mm-ss.zip` when not set
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "path": "temp/export/zip-file-name.zip"
+    }
+  }
+  ```
+
+    * `path`: The path of `*.zip` file created
+        * The directory structure in `zip-file-name.zip` is as follows:
+            * `zip-file-name`
+                * `boot`
+                * `langs`
+                * `conf.json`
+                * `index.html`
 
 ## Conversion
 

@@ -10,6 +10,10 @@
   &__header {
     top: -43px;
     z-index: 2;
+
+    .layout-tab-bar {
+      background-color: transparent;
+    }
   }
 
   &__title {
@@ -28,6 +32,7 @@
     position: absolute;
     bottom: 0;
     height: 30px;
+    padding: 0 5px;
     background-color: var(--b3-theme-background);
   }
 
@@ -304,7 +309,6 @@
 
   &.protyle-wysiwyg--select,
   &.protyle-wysiwyg--hl {
-    .layout-tab-bar,
     .av__row--header,
     .av__row--footer {
       background-color: transparent;

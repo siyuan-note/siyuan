@@ -372,13 +372,13 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[NodeAttrNamePrefixAvKey+operation.AvID+"-"+blockValues.Key.ID] = "" // 将列作为属性添加到块中
 
-	if "" == attrs[NodeAttrNameAVs] {
-		attrs[NodeAttrNameAVs] = operation.AvID
+	if "" == attrs[NodeAttrNameAvs] {
+		attrs[NodeAttrNameAvs] = operation.AvID
 	} else {
-		avIDs := strings.Split(attrs[NodeAttrNameAVs], ",")
+		avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
 		avIDs = append(avIDs, operation.AvID)
 		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-		attrs[NodeAttrNameAVs] = strings.Join(avIDs, ",")
+		attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
 	}
 
 	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
@@ -946,6 +946,6 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 }
 
 const (
-	NodeAttrNameAVs         = "custom-avs"
-	NodeAttrNamePrefixAvKey = "custom-av-key-"
+	NodeAttrNameAvs         = "custom-avs"     // 用于标记块所属的属性视图，逗号分隔 av id
+	NodeAttrNamePrefixAvKey = "custom-av-key-" // 用于标记列
 )

@@ -278,8 +278,16 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             this.element.classList.remove("hint--menu");
         }
         this.element.style.width = Math.max(protyle.element.clientWidth / 2, 320) + "px";
-        const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
-        setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+        if (this.source === "av") {
+            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer)
+            if (blockElement) {
+                const rowAddRect = blockElement.querySelector(".av__row--add").getBoundingClientRect();
+                setPosition(this.element, rowAddRect.left, rowAddRect.bottom, rowAddRect.height);
+            }
+        } else {
+            const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+            setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+        }
         this.element.scrollTop = 0;
         this.bindUploadEvent(protyle, this.element);
         if (this.source !== "hint") {

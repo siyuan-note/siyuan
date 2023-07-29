@@ -343,7 +343,7 @@ export class WYSIWYG {
             const rect = protyle.element.getBoundingClientRect();
             const mostLeft = rect.left + parseInt(protyle.wysiwyg.element.style.paddingLeft) + 1;
             // 不能用 firstElement，否则 https://ld246.com/article/1668758661338
-            const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight)) - 1;
+            const mostRight = mostLeft + (protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight)) - 2;
             const mostBottom = rect.bottom;
             const y = event.clientY;
 
@@ -650,17 +650,17 @@ export class WYSIWYG {
                 hideElements(["select"], protyle);
                 let firstElement;
                 if (moveEvent.clientY > y) {
-                    firstElement = startFirstElement || document.elementFromPoint(newLeft - 1, newTop);
+                    firstElement = startFirstElement || document.elementFromPoint(newLeft, newTop);
                     endLastElement = undefined;
                 } else {
-                    firstElement = document.elementFromPoint(newLeft - 1, newTop);
+                    firstElement = document.elementFromPoint(newLeft, newTop);
                     startFirstElement = undefined;
                 }
                 if (!firstElement) {
                     return;
                 }
                 if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") || firstElement.classList.contains("sb") || firstElement.classList.contains("bq")) {
-                    firstElement = document.elementFromPoint(newLeft - 1, newTop + 16);
+                    firstElement = document.elementFromPoint(newLeft, newTop + 16);
                 }
                 if (!firstElement) {
                     return;

@@ -114,7 +114,7 @@ export const exportConfig = {
     <span class="fn__space"></span>
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportData"><svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}</button>
 </label>
-<div class="fn__flex b3-label config__item">
+<label class="fn__flex b3-label config__item">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.import} Data
         <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
@@ -124,7 +124,7 @@ export const exportConfig = {
         <input id="importData" class="b3-form__upload" type="file">
         <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
     </button>
-</div>`;
+</label>`;
     },
     bindEvent: () => {
         (exportConfig.element.querySelector("#pdfFooter") as HTMLInputElement).value = window.siyuan.config.export.pdfFooter;

@@ -303,7 +303,7 @@ export const repos = {
     <input type="checkbox" id="generateConflictDoc"${window.siyuan.config.sync.generateConflictDoc ? " checked='checked'" : ""} class="b3-switch fn__flex-center">
 </label>
 <div class="b3-label">
-    <div class="fn__flex config__item">
+    <label class="fn__flex config__item">
         <div class="fn__flex-1">
             ${window.siyuan.languages.syncMode}
             <div class="b3-label__text">${window.siyuan.languages.syncModeTip}</div>
@@ -314,7 +314,7 @@ export const repos = {
             <option value="2" ${window.siyuan.config.sync.mode === 2 ? "selected" : ""}>${window.siyuan.languages.syncMode2}</option>
             <option value="3" ${window.siyuan.config.sync.mode === 3 ? "selected" : ""}>${window.siyuan.languages.syncMode3}</option>
         </select>
-    </div>
+    </label>
     <label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker" || window.siyuan.config.sync.provider !== 0) ? " fn__none" : ""}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.syncPerception}

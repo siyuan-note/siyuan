@@ -174,6 +174,8 @@ github.com/imdario/mergo v0.3.16 h1:wwQJbIsHYGMUyLSPrEq1CT16AhnhNJQ51+4fdHUnCl4=
 github.com/imdario/mergo v0.3.16/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
 github.com/imroc/req/v3 v3.37.2 h1:vEemuA0cq9zJ6lhe+mSRhsZm951bT0CdiSH47+KTn6I=
 github.com/imroc/req/v3 v3.37.2/go.mod h1:DECzjVIrj6jcUr5n6e+z0ygmCO93rx4Jy0RjOEe1YCI=
+github.com/imroc/req/v3 v3.38.0 h1:HpUrW3evLgy3XGyJ4kyIdMAYNagaMzNAeqyWS8XaTeM=
+github.com/imroc/req/v3 v3.38.0/go.mod h1:4wMbz0QYY5jmXNWk0BsWrRTR9ItZqOxzSJdGL0M9kzY=
 github.com/jinzhu/copier v0.3.5 h1:GlvfUwHk62RokgqVNvYsku0TATCF7bAHVwEXoBh3iJg=
 github.com/jinzhu/copier v0.3.5/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
@@ -300,6 +302,8 @@ github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524 h1:ZuxN5gwqtU
 github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524/go.mod h1:jK5lCYfPbFOrW23/HMeU7kmpLdEd5GkennF+kUpy7Vs=
 github.com/siyuan-note/httpclient v0.0.0-20230726100424-dca968525ec6 h1:h96nJtx52LnV2BwbrccxhPbbU1sKYiwPCpX32PllIXc=
 github.com/siyuan-note/httpclient v0.0.0-20230726100424-dca968525ec6/go.mod h1:NBC9D4kBDDHJk00trpUBl7bVedYkjGk7TEsfVXyr6jg=
+github.com/siyuan-note/httpclient v0.0.0-20230728124841-53922bac2be2 h1:z6vYbmEOVoytf30Ny6YDjyZTYdCPmazeAl4BN67+308=
+github.com/siyuan-note/httpclient v0.0.0-20230728124841-53922bac2be2/go.mod h1:m08iHf8dRNed32QXaCriC9pcYY9je23OzfJK9bz2rzo=
 github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493 h1:oaN5b0WDFkjdBgGxmmBnMrtZxaJ76LZLwhQSZnznJMI=
 github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493/go.mod h1:6mRFtAAvYPn3cDzqvyv+t8BVPGqpONDMMb5ywOhY1D4=
 github.com/siyuan-note/riff v0.0.0-20230728105206-f7c344346d61 h1:67G1+JSlkcbRsCig83khfK7e96DxrsVnha87Tm/xgdo=

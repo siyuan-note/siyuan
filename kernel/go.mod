@@ -32,7 +32,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/flock v0.8.1
 	github.com/gorilla/websocket v1.5.0
-	github.com/imroc/req/v3 v3.37.2
+	github.com/imroc/req/v3 v3.38.0
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -49,7 +49,7 @@ require (
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230702081350-6dde667e7112
 	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524
-	github.com/siyuan-note/httpclient v0.0.0-20230726100424-dca968525ec6
+	github.com/siyuan-note/httpclient v0.0.0-20230728124841-53922bac2be2
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230728105206-f7c344346d61
 	github.com/steambap/captcha v1.4.1

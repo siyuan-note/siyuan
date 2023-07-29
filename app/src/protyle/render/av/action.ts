@@ -9,6 +9,7 @@ import {emitOpenMenu} from "../../../plugin/EventBus";
 import {addCol} from "./addCol";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
+import {hideElements} from "../../ui/hideElements";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -131,9 +132,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const addRowElement = hasClosestByClassName(event.target, "av__row--add");
     if (addRowElement) {
-        protyle.toolbar.range = document.createRange()
-        protyle.toolbar.range.selectNodeContents(blockElement.querySelector(".av__title"));
-        hintRef("", protyle, "av");
+        if (protyle.hint.element.classList.contains("fn__none")) {
+            protyle.toolbar.range = document.createRange();
+            protyle.toolbar.range.selectNodeContents(blockElement.querySelector(".av__title"));
+            hintRef("", protyle, "av");
+        } else {
+            hideElements(["hint"], protyle);
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;

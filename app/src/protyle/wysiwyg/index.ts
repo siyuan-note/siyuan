@@ -1563,7 +1563,14 @@ export class WYSIWYG {
                     event
                 });
             });
-            hideElements(["hint", "util"], protyle);
+
+            const addRowElement = hasClosestByClassName(event.target, "av__row--add");
+            if (addRowElement) {
+                hideElements(["util"], protyle);
+            } else {
+                hideElements(["hint", "util"], protyle);
+            }
+
             const ctrlIsPressed = event.metaKey || event.ctrlKey;
             /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");

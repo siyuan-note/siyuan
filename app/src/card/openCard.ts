@@ -349,7 +349,7 @@ export const bindCardEvent = (options: {
             }
             return;
         }
-        if (["0", "1", "2", "3", "-3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
+        if (["1", "2", "3", "4", "-3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
             fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
                 deckID: options.blocks[index].deckID,
                 cardID: options.blocks[index].cardID,

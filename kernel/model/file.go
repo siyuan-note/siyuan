@@ -387,6 +387,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 			return fileTreeFiles[i].Sort < fileTreeFiles[j].Sort
 		})
 		ret = append(ret, fileTreeFiles...)
+		totals = len(ret)
 		if maxListCount < len(ret) {
 			ret = ret[:maxListCount]
 		}
@@ -414,6 +415,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 		ret = append(ret, docs...)
 	}
 
+	totals = len(ret)
 	if maxListCount < len(ret) {
 		ret = ret[:maxListCount]
 	}

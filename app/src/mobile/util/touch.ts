@@ -40,7 +40,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         if (types.includes("block-ref")) {
             refMenu(editor.protyle, target);
         } else if (types.includes("file-annotation-ref")) {
-           fileAnnotationRefMenu(editor.protyle, target);
+            fileAnnotationRefMenu(editor.protyle, target);
         } else if (types.includes("tag")) {
             tagMenu(editor.protyle, target);
         } else if (types.includes("a")) {
@@ -68,6 +68,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
     // 有些事件不经过 touchmove
 
     let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
+        hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
         hasClosestByAttribute(target, "data-type", "NodeTable") ||
         hasTopClosestByClassName(target, "list");
     if (scrollElement) {
@@ -75,6 +76,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
             scrollElement = scrollElement.firstElementChild as HTMLElement;
         } else if (scrollElement.classList.contains("code-block")) {
             scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
+        } else if (scrollElement.classList.contains("av")) {
+            scrollElement = scrollElement.querySelector(".av__scroll") as HTMLElement;
         }
         if ((xDiff <= 0 && scrollElement.scrollLeft > 0) ||
             (xDiff >= 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {
@@ -217,6 +220,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     previousClientX = event.touches[0].clientX;
     if (Math.abs(xDiff) > Math.abs(yDiff)) {
         let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
+            hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
             hasClosestByAttribute(target, "data-type", "NodeTable") ||
             hasTopClosestByClassName(target, "list");
         if (scrollElement) {
@@ -224,6 +228,8 @@ export const handleTouchMove = (event: TouchEvent) => {
                 scrollElement = scrollElement.firstElementChild as HTMLElement;
             } else if (scrollElement.classList.contains("code-block")) {
                 scrollElement = scrollElement.firstElementChild.nextElementSibling as HTMLElement;
+            } else if (scrollElement.classList.contains("av")) {
+                scrollElement = scrollElement.querySelector(".av__scroll") as HTMLElement;
             }
             if ((xDiff < 0 && scrollElement.scrollLeft > 0) ||
                 (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)) {

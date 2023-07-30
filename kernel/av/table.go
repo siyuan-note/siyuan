@@ -379,6 +379,8 @@ func (table *Table) CalcCols() {
 			table.calcColSelect(col, i)
 		case KeyTypeMSelect:
 			table.calcColMSelect(col, i)
+		case KeyTypeURL:
+			table.calcColURL(col, i)
 		}
 	}
 }
@@ -804,6 +806,69 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 		countNotEmpty := 0
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Text && "" != row.Cells[colIndex].Value.Text.Content {
+				countNotEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	}
+}
+
+func (table *Table) calcColURL(col *TableColumn, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(table.Rows)), NumberFormatNone)}
+	case CalcOperatorCountValues:
+		countValues := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.URL && "" != row.Cells[colIndex].Value.URL.Content {
+				countValues++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.URL && "" != row.Cells[colIndex].Value.URL.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.URL.Content] {
+					uniqueValues[row.Cells[colIndex].Value.URL.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.URL || "" == row.Cells[colIndex].Value.URL.Content {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
+	case CalcOperatorCountNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.URL && "" != row.Cells[colIndex].Value.URL.Content {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.URL || "" == row.Cells[colIndex].Value.URL.Content {
+				countEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.URL && "" != row.Cells[colIndex].Value.URL.Content {
 				countNotEmpty++
 			}
 		}

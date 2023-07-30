@@ -59,6 +59,7 @@ const (
 	KeyTypeDate    KeyType = "date"
 	KeyTypeSelect  KeyType = "select"
 	KeyTypeMSelect KeyType = "mSelect"
+	KeyTypeURL     KeyType = "url"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -97,6 +98,7 @@ type Value struct {
 	Number  *ValueNumber   `json:"number,omitempty"`
 	Date    *ValueDate     `json:"date,omitempty"`
 	MSelect []*ValueSelect `json:"mSelect,omitempty"`
+	URL     *ValueURL      `json:"url,omitempty"`
 }
 
 func (value *Value) ToJSONString() string {
@@ -220,6 +222,10 @@ func Round(val float64, precision int) float64 {
 type ValueSelect struct {
 	Content string `json:"content"`
 	Color   string `json:"color"`
+}
+
+type ValueURL struct {
+	Content string `json:"content"`
 }
 
 // View 描述了视图的结构。

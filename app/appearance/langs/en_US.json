@@ -1,5 +1,5 @@
 {
-  "buildIn": "Build-in",
+  "builtIn": "Built-in",
   "endDate": "End date",
   "needLogin": "This function needs to be logged in to use",
   "calcResultCountAll": "COUNT",

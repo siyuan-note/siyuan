@@ -299,7 +299,7 @@ export class Title {
         if (response.data.ial["custom-riff-decks"]) {
             this.element.setAttribute("custom-riff-decks", response.data.ial["custom-riff-decks"]);
         }
-        protyle.background.render(response.data.ial, protyle.block.rootID);
+        protyle.background?.render(response.data.ial, protyle.block.rootID);
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.editElement.setAttribute("data-render", "true");
         this.setTitle(response.data.ial.title);

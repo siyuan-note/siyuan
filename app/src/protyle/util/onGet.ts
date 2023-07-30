@@ -228,7 +228,9 @@ const setHTML = (options: {
     if (options.isSyncing) {
         disabledForeverProtyle(protyle);
     } else {
-        protyle.breadcrumb.element.nextElementSibling.textContent = "";
+        if (protyle.breadcrumb) {
+            protyle.breadcrumb.element.nextElementSibling.textContent = "";
+        }
         protyle.element.removeAttribute("disabled-forever");
         if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
             disabledProtyle(protyle);

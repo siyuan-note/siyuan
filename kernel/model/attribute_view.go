@@ -30,6 +30,62 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+type BlockAttributeViewKeys struct {
+	AvID      string          `json:"avID"`
+	AvName    string          `json:"avName"`
+	KeyValues []*av.KeyValues `json:"keyValues"`
+}
+
+func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
+	waitForSyncingStorages()
+
+	ret = []*BlockAttributeViewKeys{}
+	attrs := GetBlockAttrs(blockID)
+	avs := attrs[NodeAttrNameAvs]
+	if "" == avs {
+		return
+	}
+
+	avIDs := strings.Split(avs, ",")
+	for _, avID := range avIDs {
+		attrView, err := av.ParseAttributeView(avID)
+		if nil != err {
+			logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+			return
+		}
+
+		if 1 > len(attrView.Views) {
+			err = av.ErrViewNotFound
+			return
+		}
+
+		var keyValues []*av.KeyValues
+		for _, kv := range attrView.KeyValues {
+			if av.KeyTypeBlock == kv.Key.Type {
+				continue
+			}
+
+			kValues := &av.KeyValues{Key: kv.Key}
+			for _, v := range kv.Values {
+				if v.BlockID == blockID {
+					kValues.Values = append(kValues.Values, v)
+				}
+			}
+
+			if 0 < len(kValues.Values) {
+				keyValues = append(keyValues, kValues)
+			}
+		}
+
+		ret = append(ret, &BlockAttributeViewKeys{
+			AvID:      avID,
+			AvName:    attrView.Name,
+			KeyValues: keyValues,
+		})
+	}
+	return
+}
+
 func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 

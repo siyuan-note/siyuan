@@ -359,6 +359,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("GET", "/snippets/*filepath", serveSnippets)
 
 	ginServer.Handle("POST", "/api/av/renderAttributeView", model.CheckAuth, renderAttributeView)
+	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckReadonly, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckReadonly, chatGPTWithAction)

@@ -331,23 +331,24 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
     if (!colData.options) {
         colData.options = [];
     }
+    const listElement = menuElement.lastElementChild.lastElementChild as HTMLElement
     inputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
             return;
         }
-        menuElement.lastElementChild.innerHTML = filterSelectHTML(inputElement.value, colData.options);
+        listElement.innerHTML = filterSelectHTML(inputElement.value, colData.options);
     });
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event.isComposing) {
             return;
         }
-        menuElement.lastElementChild.innerHTML = filterSelectHTML(inputElement.value, colData.options);
+        listElement.innerHTML = filterSelectHTML(inputElement.value, colData.options);
     });
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
             return;
         }
-        let currentElement = upDownHint(menuElement.lastElementChild, event, "b3-menu__item--current");
+        let currentElement = upDownHint(listElement, event, "b3-menu__item--current");
         if (event.key === "Enter") {
             if (!currentElement) {
                 currentElement = menuElement.querySelector(".b3-menu__item--current");

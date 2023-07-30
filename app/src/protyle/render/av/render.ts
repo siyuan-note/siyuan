@@ -61,6 +61,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         let text = "";
                         if (cell.valueType === "text") {
                             text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
+                        } else if (cell.valueType === "url") {
+                            text = `<span class="av__celltext av__celltext--url">${cell.value?.url.content || ""}</span>`;
+                            if (cell.value?.url.content) {
+                                text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="a" data-href="${cell.value.url.content}">${window.siyuan.languages.openBy}</span>`;
+                            }
                         } else if (cell.valueType === "block") {
                             text = `<span class="av__celltext">${cell.value?.block.content || ""}</span>`;
                             if (cell.value?.block.id) {

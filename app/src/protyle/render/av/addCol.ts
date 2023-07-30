@@ -94,5 +94,23 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             }]);
         }
     });
+    menu.addItem({
+        icon: "iconLink",
+        label: window.siyuan.languages.link,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: "Link",
+                avID,
+                type: "url",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+        }
+    });
     return menu;
 };

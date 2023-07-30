@@ -183,11 +183,20 @@
       flex-shrink: 0;
     }
 
-    [data-type="block-ref"] {
+    [data-type="block-ref"],
+    [data-type="a"] {
       display: none;
       position: absolute;
       right: 5px;
       font-size: 10px;
+    }
+
+    &:hover [data-type="a"] {
+      display: block;
+
+      &:hover {
+        border-bottom: 0 !important;
+      }
     }
   }
 
@@ -205,6 +214,10 @@
 
     .b3-chip {
       margin: 1px 2px;
+    }
+
+    &--url {
+      text-decoration: underline var(--b3-border-color);
     }
   }
 

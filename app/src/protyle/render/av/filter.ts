@@ -11,7 +11,7 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
     if (type === "number" || type === "select") {
         return "=";
     }
-    if (type === "text" || type === "mSelect") {
+    if (type === "text" || type === "mSelect" || type === "url") {
         return "Contains";
     }
 };
@@ -132,6 +132,7 @@ export const setFilter = (options: {
     });
     switch (colData.type) {
         case "text":
+        case "url":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
 <option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
@@ -205,7 +206,7 @@ export const setFilter = (options: {
                 }
             });
         });
-    } else if (colData.type === "text") {
+    } else if (colData.type === "text" || colData.type === "url") {
         menu.addItem({
             iconHTML: "",
             label: `<input style="margin: 4px 0" value="${options.filter.value?.text.content || ""}" class="b3-text-field fn__size200">`

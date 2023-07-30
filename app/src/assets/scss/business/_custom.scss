@@ -3,4 +3,33 @@
     display: block;
     padding: 8px 16px;
   }
+
+  .block__logo {
+    width: 160px;
+    color: var(--b3-theme-on-surface);
+
+    svg {
+      margin-right: 4px;
+    }
+
+    span {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+
+  .b3-text-field--text {
+    background-color: transparent;
+    cursor: pointer;
+    transition: var(--b3-transition);
+
+    &:hover {
+      background-color: var(--b3-theme-background);
+    }
+  }
+
+  .b3-chip {
+    margin: 1px 2px;
+  }
 }

@@ -193,3 +193,62 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         lastParentID = null;
     }, Constants.TIMEOUT_TRANSITION);
 };
+
+const genAVValueHTML = (value: IAVCellValue) => {
+    let html = ""
+    switch (value.type) {
+        case "text":
+            html = `<input value="${value.text.content}" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            break;
+        case "number":
+            html = `<input value="${value.number.content}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            break;
+        case "mSelect":
+        case "select":
+            value.mSelect.forEach(item => {
+                html += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
+            })
+            break;
+        case "date":
+            html = `<input value="${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}" type="datetime-local" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            if (value.date.hasEndDate) {
+                html += `<span class="fn__space"></span>
+<input value="${dayjs(value.date.content2).format("YYYY-MM-DD HH:mm")}" type="datetime-local" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            }
+            break;
+        case "url":
+            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            break;
+    }
+    return html;
+}
+
+export const renderAVAttribute = (element: HTMLElement, id: string) => {
+    fetchPost("/api/av/getAttributeViewKeys", {id}, (response) => {
+        let html = ""
+        response.data.forEach((table: {
+            keyValues: {
+                key: {
+                    type: TAVCol,
+                    name: string
+                },
+                values: IAVCellValue[]
+            }[],
+            avName: string
+        }) => {
+            html += `<div class="b3-label b3-label--bordr">${table.avName}</div>`;
+            table.keyValues?.forEach(item => {
+                html += `<div class="block__icons">
+    <div class="block__logo">
+        <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
+        <span>${item.key.name || window.siyuan.languages.title}</span>
+    </div>
+    <div class="fn__flex-1 fn__flex">
+        ${genAVValueHTML(item.values[0])}
+    </div>
+</div>`
+            })
+        })
+        element.innerHTML = html
+    })
+}

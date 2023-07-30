@@ -45,7 +45,7 @@ type TEventBus = "ws-main" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
     "input-search" |
     "loaded-protyle"
-type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block" | "mSelect"
+type TAVCol = "text" | "date" | "number" | "relation" | "rollup" | "select" | "block" | "mSelect" | "url"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
@@ -931,5 +931,6 @@ interface IAVCellValue {
     number?: { content?: number, isNotEmpty: boolean, format?: string, formattedContent?: string },
     mSelect?: { content: string, color: string }[]
     block?: { content: string, id: string }
+    url?: { content: string }
     date?: { content?: number, content2?: number, hasEndDate?: boolean }
 }

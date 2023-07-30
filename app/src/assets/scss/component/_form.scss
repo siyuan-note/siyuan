@@ -120,4 +120,8 @@
   &--noborder {
     border-bottom: 0;
   }
+
+  &--bordr {
+    border-bottom: 1px solid var(--b3-border-color) !important;
+  }
 }

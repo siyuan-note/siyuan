@@ -25,6 +25,7 @@ import * as dayjs from "dayjs";
 import {Constants} from "../constants";
 import {exportImage} from "../protyle/export/util";
 import {App} from "../index";
+import {renderAVAttribute} from "../protyle/render/av/render";
 
 const bindAttrInput = (inputElement: HTMLInputElement, confirmElement: Element) => {
     inputElement.addEventListener("keydown", (event) => {
@@ -161,7 +162,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
 const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rms: string[]) => void) => {
     let customHTML = "";
     let notifyHTML = "";
-    let avHTML = "";
+    let hasAV = false;
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     Object.keys(attrs).forEach(item => {
         if ("custom-riff-decks" === item) {
@@ -174,14 +175,15 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
     <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DDTHH:mm")}">
 </label>`;
         } else if (item.indexOf("custom-av") > -1) {
-            avHTML += `<label class="b3-label b3-label--noborder">
-     <div class="fn__flex">
-        <span class="fn__flex-1">${item.replace("custom-", "")}</span>
-        <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
-    </div>
-    <div class="fn__hr"></div>
-    <textarea class="b3-text-field fn__block" rows="1" data-name="${item}">${attrs[item]}</textarea>
-</label>`;
+            hasAV = true
+//             avHTML += `<label class="b3-label b3-label--noborder">
+//      <div class="fn__flex">
+//         <span class="fn__flex-1">${item.replace("custom-", "")}</span>
+//         <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
+//     </div>
+//     <div class="fn__hr"></div>
+//     <textarea class="b3-text-field fn__block" rows="1" data-name="${item}">${attrs[item]}</textarea>
+// </label>`;
         } else if (item.indexOf("custom") > -1) {
             customHTML += `<label class="b3-label b3-label--noborder">
      <div class="fn__flex">
@@ -203,7 +205,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
             <span class="item__text">${window.siyuan.languages.buildIn}</span>
             <span class="fn__flex-1"></span>
         </div>
-        <div class="item item--full${avHTML ? "" : " fn__none"}" data-type="av">
+        <div class="item item--full${hasAV ? "" : " fn__none"}" data-type="av">
             <span class="fn__flex-1"></span>
             <span class="item__text">${window.siyuan.languages.database}</span>
             <span class="fn__flex-1"></span>
@@ -241,9 +243,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
             </label>
             ${notifyHTML}
         </div>
-        <div data-type="av" class="fn__none custom-attr">
-           ${avHTML}
-        </div>
+        <div data-type="av" class="fn__none custom-attr"></div>
         <div data-type="custom" class="fn__none custom-attr">
            ${customHTML}
            <div class="b3-label">
@@ -279,6 +279,9 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
                 target.classList.add("item--focus")
                 dialog.element.querySelectorAll(".custom-attr").forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
+                        if (item.dataset.type === "av" && item.innerHTML === "") {
+                            renderAVAttribute(item, attrs.id);
+                        }
                         item.classList.remove("fn__none")
                     } else {
                         item.classList.add("fn__none")

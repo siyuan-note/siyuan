@@ -200,7 +200,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
     <div class="layout-tab-bar fn__flex" style="flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
         <div class="item item--full item--focus" data-type="attr">
             <span class="fn__flex-1"></span>
-            <span class="item__text">${window.siyuan.languages.attr}</span>
+            <span class="item__text">${window.siyuan.languages.buildIn}</span>
             <span class="fn__flex-1"></span>
         </div>
         <div class="item item--full${avHTML ? "" : " fn__none"}" data-type="av">

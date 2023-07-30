@@ -1,4 +1,5 @@
 {
+  "buildIn": "Incorporado",
   "endDate": "Fecha de finalización",
   "needLogin": "Esta función requiere iniciar sesión en la cuenta antes de poder usarla",
   "calcResultCountAll": "CONTAR",

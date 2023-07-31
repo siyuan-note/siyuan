@@ -20,7 +20,10 @@ export const avRender = (element: Element, cb?: () => void) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
-            fetchPost("/api/av/renderAttributeView", {id: e.getAttribute("data-av-id"), nodeID: e.getAttribute("data-node-id")}, (response) => {
+            fetchPost("/api/av/renderAttributeView", {
+                id: e.getAttribute("data-av-id"),
+                nodeID: e.getAttribute("data-node-id")
+            }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header
                 let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol"><svg style="height: 32px"><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -215,10 +218,9 @@ const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            html = `<input value="${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}" type="datetime-local" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            html = `${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}`;
             if (value.date.hasEndDate) {
-                html += `<span class="fn__space"></span>
-<input value="${dayjs(value.date.content2).format("YYYY-MM-DD HH:mm")}" type="datetime-local" class="b3-text-field b3-text-field--text fn__flex-1">`;
+                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg>${dayjs(value.date.content2).format("YYYY-MM-DD HH:mm")}`;
             }
             break;
         case "url":
@@ -237,8 +239,9 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
                     type: TAVCol,
                     name: string
                 },
-                values: IAVCellValue[]
+                values: { keyID: string, id: string, blockID: string, type?: TAVCol & IAVCellValue }  []
             }[],
+            avID: string
             avName: string
         }) => {
             html += `<div class="block__logo custom-attr__avheader">
@@ -251,12 +254,44 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
         <span>${item.key.name}</span>
     </div>
-    <div class="fn__flex-1 fn__flex">
+    <div data-av-id="${table.avID}" data-key-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-block-id="${item.values[0].id}" data-type="${item.values[0].type}"  
+    class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
         ${genAVValueHTML(item.values[0])}
     </div>
 </div>`;
             });
         });
         element.innerHTML = html;
+        element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
+            item.addEventListener("change", () => {
+                let value
+                if (item.parentElement.dataset.type === "url") {
+                    value = {
+                        url: {
+                            content: item.value
+                        }
+                    }
+                } else if (item.parentElement.dataset.type === "text") {
+                    value = {
+                        text: {
+                            content: item.value
+                        }
+                    }
+                } else if (item.parentElement.dataset.type === "number") {
+                    value = {
+                        number: {
+                            content: parseFloat(item.value)
+                        }
+                    }
+                }
+                fetchPost("/api/av/setAttributeViewBlockAttr", {
+                    avID: item.parentElement.dataset.avId,
+                    keyID: item.parentElement.dataset.keyId,
+                    rowID: item.parentElement.dataset.blockId,
+                    cellID: id,
+                    value
+                })
+            })
+        })
     });
 };

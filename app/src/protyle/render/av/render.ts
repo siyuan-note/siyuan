@@ -200,7 +200,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
 };
 
 const genAVValueHTML = (value: IAVCellValue) => {
-    let html = ""
+    let html = "";
     switch (value.type) {
         case "text":
             html = `<input value="${value.text.content}" class="b3-text-field b3-text-field--text fn__flex-1">`;
@@ -212,7 +212,7 @@ const genAVValueHTML = (value: IAVCellValue) => {
         case "select":
             value.mSelect?.forEach(item => {
                 html += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
-            })
+            });
             break;
         case "date":
             html = `<input value="${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}" type="datetime-local" class="b3-text-field b3-text-field--text fn__flex-1">`;
@@ -226,11 +226,11 @@ const genAVValueHTML = (value: IAVCellValue) => {
             break;
     }
     return html;
-}
+};
 
 export const renderAVAttribute = (element: HTMLElement, id: string) => {
     fetchPost("/api/av/getAttributeViewKeys", {id}, (response) => {
-        let html = ""
+        let html = "";
         response.data.forEach((table: {
             keyValues: {
                 key: {
@@ -254,9 +254,9 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
     <div class="fn__flex-1 fn__flex">
         ${genAVValueHTML(item.values[0])}
     </div>
-</div>`
-            })
-        })
-        element.innerHTML = html
-    })
-}
+</div>`;
+            });
+        });
+        element.innerHTML = html;
+    });
+};

@@ -23,7 +23,7 @@ export const openMenuPanel = (options: {
     }
     window.siyuan.menus.menu.remove();
     const avID = options.blockElement.getAttribute("data-av-id");
-    const nodeID = options.blockElement.getAttribute("data-node-id")
+    const nodeID = options.blockElement.getAttribute("data-node-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
         nodeID

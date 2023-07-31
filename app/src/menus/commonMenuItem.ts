@@ -174,7 +174,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
     <input class="b3-text-field fn__block" type="datetime-local" readonly data-name="${item}" value="${dayjs(attrs[item]).format("YYYY-MM-DDTHH:mm")}">
 </label>`;
         } else if (item.indexOf("custom-av") > -1) {
-            hasAV = true
+            hasAV = true;
 //             avHTML += `<label class="b3-label b3-label--noborder">
 //      <div class="fn__flex">
 //         <span class="fn__flex-1">${item.replace("custom-", "")}</span>
@@ -272,27 +272,27 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
             return;
         }
         while (!target.isSameNode(dialog.element)) {
-            const type = target.dataset.action
+            const type = target.dataset.action;
             if (target.classList.contains("item--full")) {
-                target.parentElement.querySelector('.item--focus').classList.remove("item--focus")
-                target.classList.add("item--focus")
+                target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
+                target.classList.add("item--focus");
                 dialog.element.querySelectorAll(".custom-attr").forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
                         if (item.dataset.type === "av" && item.innerHTML === "") {
                             renderAVAttribute(item, attrs.id);
                         }
-                        item.classList.remove("fn__none")
+                        item.classList.remove("fn__none");
                     } else {
-                        item.classList.add("fn__none")
+                        item.classList.add("fn__none");
                     }
-                })
+                });
             } else if (type === "remove") {
                 if (target.previousElementSibling.tagName === "SPAN") {
                     removeAttrs.push(target.parentElement.parentElement.querySelector("textarea").getAttribute("data-name"));
                 }
                 target.parentElement.parentElement.remove();
-                event.stopPropagation()
-                event.preventDefault()
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "bookmark") {
                 fetchPost("/api/attr/getBookmarkLabels", {}, (response) => {
@@ -317,8 +317,8 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
                     window.siyuan.menus.menu.element.classList.add("b3-menu--list");
                     window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                 });
-                event.stopPropagation()
-                event.preventDefault()
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "addCustom") {
                 target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
@@ -334,8 +334,8 @@ const genAttr = (attrs: IObject, focusName = "bookmark", cb: (dialog: Dialog, rm
                 inputElements[inputElements.length - 2].focus();
                 bindAttrInput(inputElements[inputElements.length - 1], dialog.element);
                 bindAttrInput(inputElements[inputElements.length - 2], dialog.element);
-                event.stopPropagation()
-                event.preventDefault()
+                event.stopPropagation();
+                event.preventDefault();
                 break;
             } else if (type === "closeDialog") {
                 dialog.destroy();

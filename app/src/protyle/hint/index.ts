@@ -27,7 +27,6 @@ import {uploadFiles} from "../upload";
 import {openFileById} from "../../editor/util";
 /// #endif
 import {openMobileFileById} from "../../mobile/editor";
-import {getIconByType} from "../../editor/getIcon";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
@@ -279,7 +278,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }
         this.element.style.width = Math.max(protyle.element.clientWidth / 2, 320) + "px";
         if (this.source === "av") {
-            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer)
+            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
             if (blockElement) {
                 const rowAddRect = blockElement.querySelector(".av__row--add").getBoundingClientRect();
                 setPosition(this.element, rowAddRect.left, rowAddRect.bottom, rowAddRect.height);
@@ -414,8 +413,8 @@ ${genHintItemHTML(item)}
         }
         if (this.source === "av") {
             const avID = nodeElement.getAttribute("data-av-id");
-            const rowsElement = nodeElement.querySelectorAll(".av__row")
-            const previousID = rowsElement[rowsElement.length - 1].getAttribute("data-id")
+            const rowsElement = nodeElement.querySelectorAll(".av__row");
+            const previousID = rowsElement[rowsElement.length - 1].getAttribute("data-id");
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
@@ -442,7 +441,7 @@ ${genHintItemHTML(item)}
                     });
                 });
             } else {
-                const sourceId = tempElement.getAttribute('data-id')
+                const sourceId = tempElement.getAttribute("data-id");
                 transaction(protyle, [{
                     action: "insertAttrViewBlock",
                     avID,

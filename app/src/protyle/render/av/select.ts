@@ -331,7 +331,7 @@ export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLE
     if (!colData.options) {
         colData.options = [];
     }
-    const listElement = menuElement.lastElementChild.lastElementChild as HTMLElement
+    const listElement = menuElement.lastElementChild.lastElementChild as HTMLElement;
     inputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
             return;

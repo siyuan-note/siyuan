@@ -55,7 +55,7 @@ export const setFilter = (options: {
     const rectTarget = options.target.getBoundingClientRect();
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
-        const operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator
+        const operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
         let hasMatch = false;
         let cellValue: IAVCellValue;
         if (textElements.length > 0) {
@@ -268,7 +268,7 @@ export const setFilter = (options: {
                 event.preventDefault();
             }
         });
-    })
+    });
     toggleEmpty(selectElement, selectElement.value, colData.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElements.length > 0) {

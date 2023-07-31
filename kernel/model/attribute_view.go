@@ -103,6 +103,14 @@ func RenderAttributeView(avID, nodeID string) (viewable av.Viewable, attrView *a
 		return
 	}
 
+	if "" == attrView.NodeID {
+		attrView.NodeID = nodeID
+		if err = av.SaveAttributeView(attrView); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	}
+
 	if 1 > len(attrView.Views) {
 		err = av.ErrViewNotFound
 		return

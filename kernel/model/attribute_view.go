@@ -103,6 +103,14 @@ func RenderAttributeView(avID, nodeID string) (viewable av.Viewable, attrView *a
 		return
 	}
 
+	if "" == attrView.NodeID {
+		attrView.NodeID = nodeID
+		if err = av.SaveAttributeView(attrView); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	}
+
 	if 1 > len(attrView.Views) {
 		err = av.ErrViewNotFound
 		return
@@ -378,14 +386,13 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	firstSrcID := operation.SrcIDs[0]
-	tree, err := tx.loadTree(firstSrcID)
-	if nil != err {
-		logging.LogErrorf("load tree [%s] failed: %s", firstSrcID, err)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: firstSrcID, msg: err.Error()}
-	}
-
 	for _, id := range operation.SrcIDs {
+		tree, err := tx.loadTree(id)
+		if nil != err {
+			logging.LogErrorf("load tree [%s] failed: %s", id, err)
+			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: err.Error()}
+		}
+
 		var avErr error
 		if avErr = addAttributeViewBlock(id, operation, tree, tx); nil != avErr {
 			return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: avErr.Error()}

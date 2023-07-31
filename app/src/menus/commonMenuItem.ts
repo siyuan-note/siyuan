@@ -263,7 +263,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark") => {
             } else if (type === "remove") {
                 fetchPost("/api/attr/setBlockAttrs", {
                     id: attrs.id,
-                    attrs: {[target.previousElementSibling.textContent]: ""}
+                    attrs: {["custom-"+target.previousElementSibling.textContent]: ""}
                 });
                 target.parentElement.parentElement.remove();
                 event.stopPropagation();
@@ -283,7 +283,9 @@ const genAttr = (attrs: IObject, focusName = "bookmark") => {
                             window.siyuan.menus.menu.append(new MenuItem({
                                 label: item,
                                 click() {
-                                    target.parentElement.parentElement.querySelector("input").value = item;
+                                    const bookmarkInputElement = target.parentElement.parentElement.querySelector("input");
+                                    bookmarkInputElement.value = item;
+                                    bookmarkInputElement.dispatchEvent(new  CustomEvent("change"));
                                 }
                             }).element);
                         });
@@ -326,7 +328,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark") => {
         <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
     <div class="fn__hr"></div>
-    <textarea data-name="${inputElement.value}" class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
+    <textarea data-name="custom-${inputElement.value}" class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
 </div>`);
                     const valueElement = target.parentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement;
                     valueElement.focus();

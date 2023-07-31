@@ -23,7 +23,11 @@ export const openMenuPanel = (options: {
     }
     window.siyuan.menus.menu.remove();
     const avID = options.blockElement.getAttribute("data-av-id");
-    fetchPost("/api/av/renderAttributeView", {id: avID}, (response) => {
+    const nodeID = options.blockElement.getAttribute("data-node-id")
+    fetchPost("/api/av/renderAttributeView", {
+        id: avID,
+        nodeID
+    }, (response) => {
         const data = response.data as IAV;
         let html;
         if (options.type === "config") {
@@ -565,7 +569,14 @@ export const openMenuPanel = (options: {
                 } else if (type === "duplicateCol") {
                     const colId = menuElement.firstElementChild.getAttribute("data-col-id");
                     const colData = data.view.columns.find((item: IAVColumn) => item.id === colId);
-                    duplicateCol(options.protyle, colData.type, avID, colId, colData.name);
+                    duplicateCol({
+                        protyle: options.protyle,
+                        type: colData.type,
+                        avID,
+                        colId,
+                        nodeID,
+                        newValue: colData.name
+                    });
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

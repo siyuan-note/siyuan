@@ -820,7 +820,7 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 	return
 }
 
-func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, value interface{}) (err error) {
+func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
@@ -857,7 +857,7 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, value interface{
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(value)
+	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
 		return
 	}

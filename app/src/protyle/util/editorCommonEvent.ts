@@ -602,6 +602,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         });
     }
     if (!isCopy &&
+        isSameDoc &&    // 同一文档分屏后，oldSourceParentElement 已经被移走，不可再 update https://github.com/siyuan-note/siyuan/issues/8863
         oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
         oldSourceParentElement.getAttribute("data-subtype") === "o" &&
         !oldSourceParentElement.isSameNode(sourceElements[0].parentElement) && oldSourceParentElement.childElementCount > 1) {

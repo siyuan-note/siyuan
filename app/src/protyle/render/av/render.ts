@@ -210,7 +210,7 @@ const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "mSelect":
         case "select":
-            value.mSelect.forEach(item => {
+            value.mSelect?.forEach(item => {
                 html += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
             })
             break;
@@ -241,12 +241,15 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
             }[],
             avName: string
         }) => {
-            html += `<div class="b3-label b3-label--bordr">${table.avName}</div>`;
+            html += `<div class="block__logo custom-attr__avheader">
+    <svg><use xlink:href="#iconDatabase"></use></svg>
+    <span>${table.avName || window.siyuan.languages.title}</span>
+</div>`;
             table.keyValues?.forEach(item => {
                 html += `<div class="block__icons">
     <div class="block__logo">
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
-        <span>${item.key.name || window.siyuan.languages.title}</span>
+        <span>${item.key.name}</span>
     </div>
     <div class="fn__flex-1 fn__flex">
         ${genAVValueHTML(item.values[0])}

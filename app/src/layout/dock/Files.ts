@@ -349,10 +349,16 @@ export class Files extends Model {
                 }
                 let ids = "";
                 const ghostElement = document.createElement("ul");
-                selectElements.forEach((item: HTMLElement) => {
+                selectElements.forEach((item: HTMLElement, index) => {
                     ghostElement.append(item.cloneNode(true));
                     item.style.opacity = "0.1";
-                    ids += (item.getAttribute("data-node-id") || "") + ",";
+                    const itemNodeId = item.getAttribute("data-node-id") || ""
+                    if (itemNodeId) {
+                        ids += itemNodeId;
+                        if (index < selectElements.length - 1) {
+                            ids += ",";
+                        }
+                    }
                 });
                 ghostElement.setAttribute("style", `width: 219px;position: fixed;top:-${selectElements.length * 30}px`);
                 ghostElement.setAttribute("class", "b3-list b3-list--background");

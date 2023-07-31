@@ -816,19 +816,24 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+	err = UpdateAttributeViewCell(operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
+	return
+}
+
+func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, value interface{}) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return
 	}
 
 	var val *av.Value
 	for _, keyValues := range attrView.KeyValues {
-		if operation.KeyID != keyValues.Key.ID {
+		if keyID != keyValues.Key.ID {
 			continue
 		}
 
 		for _, value := range keyValues.Values {
-			if operation.ID == value.ID {
+			if cellID == value.ID {
 				val = value
 				val.Type = keyValues.Key.Type
 				break
@@ -836,13 +841,13 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 		}
 
 		if nil == val {
-			val = &av.Value{ID: operation.ID, KeyID: keyValues.Key.ID, BlockID: operation.RowID, Type: keyValues.Key.Type}
+			val = &av.Value{ID: cellID, KeyID: keyValues.Key.ID, BlockID: rowID, Type: keyValues.Key.Type}
 			keyValues.Values = append(keyValues.Values, val)
 		}
 		break
 	}
 
-	tree, err := tx.loadTree(val.BlockID)
+	tree, err := loadTreeByBlockID(val.BlockID)
 	if nil != err {
 		return
 	}
@@ -852,7 +857,7 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	data, err := gulu.JSON.MarshalJSON(value)
 	if nil != err {
 		return
 	}
@@ -861,8 +866,9 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 	}
 
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvKey+operation.AvID+"-"+val.KeyID] = val.ToJSONString()
-	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+	attrs[NodeAttrNamePrefixAvKey+avID+"-"+val.KeyID] = val.ToJSONString()
+
+	if err = setNodeAttrs(node, tree, attrs); nil != err {
 		return
 	}
 

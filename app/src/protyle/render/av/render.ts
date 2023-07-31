@@ -243,7 +243,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
         }) => {
             html += `<div class="block__logo custom-attr__avheader">
     <svg><use xlink:href="#iconDatabase"></use></svg>
-    <span>${table.avName || window.siyuan.languages.title}</span>
+    <span>${table.avName || window.siyuan.languages.database}</span>
 </div>`;
             table.keyValues?.forEach(item => {
                 html += `<div class="block__icons">

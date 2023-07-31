@@ -78,7 +78,7 @@ func getAttributeViewKeys(c *gin.Context) {
 	ret.Data = blockAttributeViewKeys
 }
 
-func setAttributeViewBlockAttrs(c *gin.Context) {
+func setAttributeViewBlockAttr(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 

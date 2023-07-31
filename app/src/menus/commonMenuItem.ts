@@ -3,7 +3,7 @@ import {shell} from "electron";
 /// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidAttrName} from "../util/functions";
-import {isLocalPath, movePathTo, moveToPath, pathPosix, setNotebookName} from "../util/pathName";
+import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {saveExport} from "../protyle/export";
 import {openByMobile, writeText} from "../protyle/util/compatibility";
@@ -319,7 +319,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark") => {
                 });
                 btnsElement[1].addEventListener("click", () => {
                     if (!isValidAttrName(inputElement.value)) {
-                        showMessage(window.siyuan.languages.attrName + " <b>" + inputElement.value + "</b> " + window.siyuan.languages.invalid)
+                        showMessage(window.siyuan.languages.attrName + " <b>" + inputElement.value + "</b> " + window.siyuan.languages.invalid);
                         return false;
                     }
                     target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">

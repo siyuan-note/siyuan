@@ -264,25 +264,25 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
         element.innerHTML = html;
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
-                let value
+                let value;
                 if (item.parentElement.dataset.type === "url") {
                     value = {
                         url: {
                             content: item.value
                         }
-                    }
+                    };
                 } else if (item.parentElement.dataset.type === "text") {
                     value = {
                         text: {
                             content: item.value
                         }
-                    }
+                    };
                 } else if (item.parentElement.dataset.type === "number") {
                     value = {
                         number: {
                             content: parseFloat(item.value)
                         }
-                    }
+                    };
                 }
                 fetchPost("/api/av/setAttributeViewBlockAttr", {
                     avID: item.parentElement.dataset.avId,
@@ -290,8 +290,8 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
                     rowID: item.parentElement.dataset.blockId,
                     cellID: id,
                     value
-                })
-            })
-        })
+                });
+            });
+        });
     });
 };

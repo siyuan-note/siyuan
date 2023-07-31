@@ -53,6 +53,7 @@
     border-radius: var(--b3-border-radius);
     padding: 4px 8px;
     line-height: 26px;
+    min-height: 26px;
 
     &:hover {
       background-color: var(--b3-theme-background);

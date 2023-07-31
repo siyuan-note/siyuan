@@ -256,7 +256,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
         <span>${item.key.name}</span>
     </div>
-    <div data-av-id="${table.avID}" data-key-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-block-id="${item.values[0].id}" data-type="${item.values[0].type}"  
+    <div data-av-id="${table.avID}" data-key-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}"  
     class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
         ${genAVValueHTML(item.values[0])}
     </div>
@@ -327,7 +327,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
                     avID: item.parentElement.dataset.avId,
                     keyID: item.parentElement.dataset.keyId,
                     rowID: item.parentElement.dataset.blockId,
-                    cellID: id,
+                    cellID: item.parentElement.dataset.id,
                     value
                 });
             });

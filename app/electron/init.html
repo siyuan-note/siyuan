@@ -364,9 +364,6 @@
 
                 const {ipcRenderer} = require('electron')
                 const initPath = result.filePaths[0]
-                if (defaultWorkspace !== initPath) {
-                    fs.rmdirSync(defaultWorkspace, {recursive: true})
-                }
 
                 if (isICloudPath(initPath)) {
                     let msg = '⚠️ This folder is under the iCloud sync path, please change another path'

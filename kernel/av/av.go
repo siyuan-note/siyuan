@@ -172,8 +172,10 @@ func (number *ValueNumber) FormatNumber() {
 
 type ValueDate struct {
 	Content          int64  `json:"content"`
-	Content2         int64  `json:"content2"`
+	IsNotEmpty       bool   `json:"isNotEmpty"`
 	HasEndDate       bool   `json:"hasEndDate"`
+	Content2         int64  `json:"content2"`
+	IsNotEmpty2      bool   `json:"isNotEmpty2"`
 	FormattedContent string `json:"formattedContent"`
 }
 

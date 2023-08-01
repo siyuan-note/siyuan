@@ -1063,6 +1063,7 @@ func buildBlockRefInText() {
 			}
 
 			t := parse.Inline("", n.Tokens, lute.ParseOptions) // 使用行级解析
+			parse.NestedInlines2FlattedSpans(t)
 			var children []*ast.Node
 			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {
 				children = append(children, c)

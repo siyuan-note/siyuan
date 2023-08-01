@@ -240,7 +240,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     const headUseElement = headElement.querySelector("use");
     const counterElement = blockElement.querySelector(".av__counter");
     const avHeadElement = blockElement.querySelector(".av__header") as HTMLElement;
-    if (diffCount === 0) {
+    if (diffCount === 0 && rowElement.parentElement.childElementCount - 3 !== 0) {
         headElement.classList.add("av__row--select");
         headUseElement.setAttribute("xlink:href", "#iconCheck");
     } else if (diffCount === rowElement.parentElement.childElementCount - 3) {

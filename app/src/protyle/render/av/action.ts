@@ -10,6 +10,7 @@ import {addCol} from "./addCol";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
 import {hideElements} from "../../ui/hideElements";
+import {focusByRange} from "../../util/selection";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -135,6 +136,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         if (protyle.hint.element.classList.contains("fn__none")) {
             protyle.toolbar.range = document.createRange();
             protyle.toolbar.range.selectNodeContents(blockElement.querySelector(".av__title"));
+            focusByRange(protyle.toolbar.range);
             hintRef("", protyle, "av");
         } else {
             hideElements(["hint"], protyle);
@@ -187,6 +189,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
+            const previousElement = rowElement.previousElementSibling as HTMLElement;
             transaction(protyle, [{
                 action: "removeAttrViewBlock",
                 srcIDs: blockIds,
@@ -194,10 +197,11 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
             }], [{
                 action: "insertAttrViewBlock",
                 avID: blockElement.getAttribute("data-av-id"),
-                previousID: rowElement.previousElementSibling?.getAttribute("data-id") || "",
+                previousID: previousElement?.getAttribute("data-id") || "",
                 srcIDs: rowIds,
             }]);
             rowElement.remove();
+            updateHeader(previousElement);
         }
     });
     if (rowIds.length === 1) {

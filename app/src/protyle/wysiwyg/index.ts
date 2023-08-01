@@ -2019,6 +2019,7 @@ export class WYSIWYG {
                     } else if (lastEditElement) {
                         range.selectNodeContents(lastEditElement);
                         range.collapse(false);
+                        focusByRange(range);
                     }
                 }
             }

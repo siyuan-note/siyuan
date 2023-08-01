@@ -932,5 +932,13 @@ interface IAVCellValue {
     mSelect?: { content: string, color: string }[]
     block?: { content: string, id: string }
     url?: { content: string }
-    date?: { content?: number, content2?: number, hasEndDate?: boolean }
+    date?: IAVCellDateValue
+}
+
+interface IAVCellDateValue {
+    content?: number,
+    isNotEmpty: boolean
+    content2?: number,
+    isNotEmpty2: boolean
+    hasEndDate?: boolean
 }

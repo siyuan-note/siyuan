@@ -3,7 +3,7 @@ import * as dayjs from "dayjs";
 
 export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     let hasEndDate = true;
-    let cellValue:IAVCell;
+    let cellValue: IAVCell;
     cellElements.forEach((cellElement) => {
         data.rows.find(row => {
             if (cellElement.parentElement.dataset.id === row.id) {
@@ -24,11 +24,11 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
         hasEndDate = false;
     }
     let value = "";
-    if (cellValue?.value?.date?.content) {
+    if (cellValue?.value?.date?.isNotEmpty) {
         value = dayjs(cellValue.value.date.content).format("YYYY-MM-DDTHH:mm");
     }
     let value2 = "";
-    if (cellValue?.value?.date?.content2) {
+    if (cellValue?.value?.date?.isNotEmpty2) {
         value2 = dayjs(cellValue.value.date.content2).format("YYYY-MM-DDTHH:mm");
     }
     return `<div class="b3-menu__items">
@@ -128,7 +128,10 @@ export const setDateValue = (options: {
                     cellData.value = {};
                 }
                 oldValue = Object.assign({}, cellData.value.date);
-                cellData.value.date = Object.assign(cellData.value.date || {}, options.value);
+                cellData.value.date = Object.assign(cellData.value.date || {
+                    isNotEmpty2: false,
+                    isNotEmpty: false
+                }, options.value);
                 return true;
             }
         });

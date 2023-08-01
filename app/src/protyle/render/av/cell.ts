@@ -66,7 +66,7 @@ export const getCalcValue = (column: IAVColumn) => {
 export const genCellValue = (colType: TAVCol, value: string | {
     content: string,
     color: string
-}[] | { content?: number, content2?: number, hasEndDate?: boolean }) => {
+}[] | IAVCellDateValue) => {
     let cellValue: IAVCellValue;
     if (typeof value === "string") {
         if (colType === "number") {
@@ -106,7 +106,9 @@ export const genCellValue = (colType: TAVCol, value: string | {
                 type: colType,
                 date: {
                     content: null,
+                    isNotEmpty: false,
                     content2: null,
+                    isNotEmpty2: false,
                     hasEndDate: false,
                 }
             };
@@ -123,7 +125,7 @@ export const genCellValue = (colType: TAVCol, value: string | {
         } else if (colType === "date") {
             cellValue = {
                 type: colType,
-                date: value as { content?: number, content2?: number, hasEndDate?: boolean }
+                date: value as IAVCellDateValue
             };
         }
     }

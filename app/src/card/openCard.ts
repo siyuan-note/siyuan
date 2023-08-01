@@ -80,28 +80,28 @@ export const genCardHTML = (options: {
         </div>
         <div>
             <span></span>
-            <button data-type="0" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__n b3-tooltips">
+            <button data-type="1" aria-label="1 / j" class="b3-button b3-button--error b3-tooltips__n b3-tooltips">
                 <div>🙈</div>
                 ${window.siyuan.languages.cardRatingAgain} (1)
             </button>
         </div>
         <div>
             <span></span>
-            <button data-type="1" aria-label="2 / k" class="b3-button b3-button--warning b3-tooltips__n b3-tooltips">
+            <button data-type="2" aria-label="2 / k" class="b3-button b3-button--warning b3-tooltips__n b3-tooltips">
                 <div>😬</div>
                 ${window.siyuan.languages.cardRatingHard} (2)
             </button>
         </div>
         <div>
             <span></span>
-            <button data-type="2" aria-label="3 / l" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
+            <button data-type="3" aria-label="3 / l" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
                 <div>😊</div>
                 ${window.siyuan.languages.cardRatingGood} (3)
             </button>
         </div>
         <div>
             <span></span>
-            <button data-type="3" aria-label="4 / ;" class="b3-button b3-button--success b3-tooltips__n b3-tooltips">
+            <button data-type="4" aria-label="4 / ;" class="b3-button b3-button--success b3-tooltips__n b3-tooltips">
                 <div>🌈</div>
                 ${window.siyuan.languages.cardRatingEasy} (4)
             </button>
@@ -184,13 +184,13 @@ export const bindCardEvent = (options: {
         let type = "";
         if (typeof event.detail === "string") {
             if (event.detail === "1" || event.detail === "j") {
-                type = "0";
-            } else if (event.detail === "2" || event.detail === "k") {
                 type = "1";
-            } else if (event.detail === "3" || event.detail === "l") {
+            } else if (event.detail === "2" || event.detail === "k") {
                 type = "2";
-            } else if (event.detail === "4" || event.detail === ";") {
+            } else if (event.detail === "3" || event.detail === "l") {
                 type = "3";
+            } else if (event.detail === "4" || event.detail === ";") {
+                type = "4";
             } else if (event.detail === " ") {
                 type = "-1";
             } else if (event.detail === "p") {
@@ -326,9 +326,7 @@ export const bindCardEvent = (options: {
             editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb");
             actionElements[0].classList.add("fn__none");
             actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
-                if (btnIndex !== 0) {
-                    element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex - 1];
-                }
+               element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex];
             });
             actionElements[1].classList.remove("fn__none");
             return;

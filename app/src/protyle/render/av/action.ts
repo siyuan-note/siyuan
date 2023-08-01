@@ -180,7 +180,8 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
     const rowIds: string[] = [];
     const blockIds: string[] = [];
-    blockElement.querySelectorAll(".av__row--select:not(.av__row--header )").forEach(item => {
+    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
+    rowElements.forEach(item => {
         rowIds.push(item.getAttribute("data-id"));
         blockIds.push(item.querySelector(".av__cell").getAttribute("data-block-id"));
     });
@@ -189,7 +190,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
-            const previousElement = rowElement.previousElementSibling as HTMLElement;
+            const previousElement = rowElements[0].previousElementSibling as HTMLElement;
             transaction(protyle, [{
                 action: "removeAttrViewBlock",
                 srcIDs: blockIds,
@@ -200,7 +201,9 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
                 previousID: previousElement?.getAttribute("data-id") || "",
                 srcIDs: rowIds,
             }]);
-            rowElement.remove();
+            rowElements.forEach(item => {
+                item.remove();
+            });
             updateHeader(previousElement);
         }
     });

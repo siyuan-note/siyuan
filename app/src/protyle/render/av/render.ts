@@ -5,6 +5,7 @@ import {getCalcValue} from "./cell";
 import * as dayjs from "dayjs";
 import {hasClosestByAttribute} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
+import {escapeAttr} from "../../../util/escape";
 
 export const avRender = (element: Element, cb?: () => void) => {
     let avElements: Element[] = [];
@@ -241,7 +242,8 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
             keyValues: {
                 key: {
                     type: TAVCol,
-                    name: string
+                    name: string,
+                    options?: { name: string, color: string }[]
                 },
                 values: { keyID: string, id: string, blockID: string, type?: TAVCol & IAVCellValue }  []
             }[],
@@ -258,8 +260,9 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
         <svg><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>
         <span>${item.key.name}</span>
     </div>
-    <div data-av-id="${table.avID}" data-key-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}"  
-    class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
+    <div data-av-id="${table.avID}" data-key-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
+data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
+class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
         ${genAVValueHTML(item.values[0])}
     </div>
 </div>`;
@@ -338,10 +341,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
                         (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked = false
                     }
                 })
-                const targetRect = target.getBoundingClientRect()
+                const datetRect = dateElement.getBoundingClientRect()
                 dateMenu.open({
-                    x: targetRect.left,
-                    y: targetRect.bottom
+                    x: datetRect.left,
+                    y: datetRect.bottom
                 })
                 window.siyuan.menus.menu.element.style.zIndex = "400";
                 event.stopPropagation()
@@ -350,7 +353,78 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
             }
             const mSelectElement = hasClosestByAttribute(target, "data-type", "select") || hasClosestByAttribute(target, "data-type", "mSelect")
             if (mSelectElement) {
-                return
+                const mSelectMenu = new Menu("custom-attr-av-select", () => {
+                    const mSelect: { content: string, color: string }[] = []
+                    let mSelectHTML = "";
+                    window.siyuan.menus.menu.element.querySelectorAll('.svg').forEach(item => {
+                        const chipElement = item.parentElement.previousElementSibling.firstElementChild as HTMLElement
+                        const content = chipElement.textContent.trim()
+                        const color = chipElement.dataset.color
+                        mSelect.push({
+                            content,
+                            color
+                        })
+                        mSelectHTML += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${color});color:var(--b3-font-color${color})">${content}</span>`
+                    })
+                    fetchPost("/api/av/setAttributeViewBlockAttr", {
+                        avID: mSelectElement.dataset.avId,
+                        keyID: mSelectElement.dataset.keyId,
+                        rowID: mSelectElement.dataset.blockId,
+                        cellID: mSelectElement.dataset.id,
+                        value: {
+                            mSelect
+                        }
+                    });
+                    mSelectElement.innerHTML = mSelectHTML
+                })
+                if (mSelectMenu.isOpen) {
+                    return;
+                }
+                const names: string[] = []
+                mSelectElement.querySelectorAll(".b3-chip").forEach(item => {
+                    names.push(item.textContent.trim())
+                })
+                JSON.parse(mSelectElement.dataset.options || "").forEach((item: { name: string, color: string }) => {
+                    mSelectMenu.addItem({
+                        iconHTML: "",
+                        label: `<span class="b3-chip" data-color="${item.color}" style="height:24px;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+    <span class="fn__ellipsis">${item.name}</span>
+</span>`,
+                        accelerator: names.includes(item.name) ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : Constants.ZWSP,
+                        click(element) {
+                            const acceleratorElement = element.querySelector(".b3-menu__accelerator")
+                            if (mSelectElement.dataset.type === "select") {
+                                window.siyuan.menus.menu.element.querySelectorAll(".b3-menu__accelerator").forEach(itemElement => {
+                                    if (itemElement.isSameNode(acceleratorElement)) {
+                                        if (acceleratorElement.querySelector("svg")) {
+                                            acceleratorElement.innerHTML = "";
+                                        } else {
+                                            acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>'
+                                        }
+                                    } else {
+                                        itemElement.innerHTML = "";
+                                    }
+                                })
+                                return false;
+                            }
+                            if (acceleratorElement.querySelector("svg")) {
+                                acceleratorElement.innerHTML = "";
+                            } else {
+                                acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>'
+                            }
+                            return true;
+                        }
+                    })
+                })
+                const mSelecttRect = mSelectElement.getBoundingClientRect()
+                mSelectMenu.open({
+                    x: mSelecttRect.left,
+                    y: mSelecttRect.bottom
+                })
+                window.siyuan.menus.menu.element.style.zIndex = "400";
+                event.stopPropagation()
+                event.preventDefault();
+                return;
             }
         })
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {

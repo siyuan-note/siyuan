@@ -23,6 +23,7 @@ export const avRender = (element: Element, cb?: () => void) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
             }
+            const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
             fetchPost("/api/av/renderAttributeView", {
                 id: e.getAttribute("data-av-id"),
                 nodeID: e.getAttribute("data-node-id")
@@ -151,6 +152,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     </div>
 </div>`;
                 e.setAttribute("data-render", "true");
+                e.querySelector(".av__scroll").scrollLeft = left;
                 if (cb) {
                     cb();
                 }

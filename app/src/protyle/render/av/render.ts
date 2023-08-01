@@ -270,12 +270,12 @@ class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].ty
         });
         element.innerHTML = html;
         element.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement
-            const dateElement = hasClosestByAttribute(target, "data-type", "date")
+            const target = event.target as HTMLElement;
+            const dateElement = hasClosestByAttribute(target, "data-type", "date");
             if (dateElement) {
                 const dateMenu = new Menu("custom-attr-av-date", () => {
-                    const textElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>
-                    const hasEndDate = (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked
+                    const textElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
+                    const hasEndDate = (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked;
                     fetchPost("/api/av/setAttributeViewBlockAttr", {
                         avID: dateElement.dataset.avId,
                         keyID: dateElement.dataset.keyId,
@@ -289,29 +289,29 @@ class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].ty
                             }
                         }
                     });
-                    let dataHTML = ""
+                    let dataHTML = "";
                     if (textElements[0].value) {
-                        dataHTML = `<span data-content="${new Date(textElements[0].value).getTime()}">${dayjs(textElements[0].value).format("YYYY-MM-DD HH:mm")}</span>`
+                        dataHTML = `<span data-content="${new Date(textElements[0].value).getTime()}">${dayjs(textElements[0].value).format("YYYY-MM-DD HH:mm")}</span>`;
                     }
                     if (hasEndDate && textElements[0].value && textElements[1].value) {
-                        dataHTML += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${new Date(textElements[1].value).getTime()}">${dayjs(textElements[1].value).format("YYYY-MM-DD HH:mm")}</span>`
+                        dataHTML += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${new Date(textElements[1].value).getTime()}">${dayjs(textElements[1].value).format("YYYY-MM-DD HH:mm")}</span>`;
                     }
                     dateElement.innerHTML = dataHTML;
                 });
                 if (dateMenu.isOpen) {
                     return;
                 }
-                const hasEndDate = dateElement.querySelector("svg")
-                const timeElements = dateElement.querySelectorAll("span")
+                const hasEndDate = dateElement.querySelector("svg");
+                const timeElements = dateElement.querySelectorAll("span");
                 dateMenu.addItem({
                     iconHTML: "",
                     label: `<input value="${timeElements[0] ? dayjs(parseInt(timeElements[0].dataset.content)).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200" style="margin: 4px 0">`
-                })
+                });
                 dateMenu.addItem({
                     iconHTML: "",
                     label: `<input value="${timeElements[1] ? dayjs(parseInt(timeElements[1].dataset.content)).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}" style="margin: 4px 0">`
-                })
-                dateMenu.addSeparator()
+                });
+                dateMenu.addSeparator();
                 dateMenu.addItem({
                     iconHTML: "",
                     label: `<label class="fn__flex">
@@ -320,7 +320,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].ty
     <input type="checkbox" class="b3-switch fn__flex-center"${hasEndDate ? " checked" : ""}>
 </label>`,
                     click(element, event) {
-                        const switchElement = element.querySelector(".b3-switch") as HTMLInputElement
+                        const switchElement = element.querySelector(".b3-switch") as HTMLInputElement;
                         if ((event.target as HTMLElement).tagName !== "INPUT") {
                             switchElement.checked = !switchElement.checked;
                         } else {
@@ -329,43 +329,43 @@ class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].ty
                         window.siyuan.menus.menu.element.querySelectorAll('[type="datetime-local"]')[1].classList.toggle("fn__none");
                         return true;
                     }
-                })
-                dateMenu.addSeparator()
+                });
+                dateMenu.addSeparator();
                 dateMenu.addItem({
                     icon: "iconTrashcan",
                     label: window.siyuan.languages.clear,
                     click() {
-                        const textElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>
+                        const textElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
                         textElements[0].value = "";
                         textElements[1].value = "";
-                        (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked = false
+                        (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked = false;
                     }
-                })
-                const datetRect = dateElement.getBoundingClientRect()
+                });
+                const datetRect = dateElement.getBoundingClientRect();
                 dateMenu.open({
                     x: datetRect.left,
                     y: datetRect.bottom
-                })
+                });
                 window.siyuan.menus.menu.element.style.zIndex = "400";
-                event.stopPropagation()
+                event.stopPropagation();
                 event.preventDefault();
                 return;
             }
-            const mSelectElement = hasClosestByAttribute(target, "data-type", "select") || hasClosestByAttribute(target, "data-type", "mSelect")
+            const mSelectElement = hasClosestByAttribute(target, "data-type", "select") || hasClosestByAttribute(target, "data-type", "mSelect");
             if (mSelectElement) {
                 const mSelectMenu = new Menu("custom-attr-av-select", () => {
-                    const mSelect: { content: string, color: string }[] = []
+                    const mSelect: { content: string, color: string }[] = [];
                     let mSelectHTML = "";
-                    window.siyuan.menus.menu.element.querySelectorAll('.svg').forEach(item => {
-                        const chipElement = item.parentElement.previousElementSibling.firstElementChild as HTMLElement
-                        const content = chipElement.textContent.trim()
-                        const color = chipElement.dataset.color
+                    window.siyuan.menus.menu.element.querySelectorAll(".svg").forEach(item => {
+                        const chipElement = item.parentElement.previousElementSibling.firstElementChild as HTMLElement;
+                        const content = chipElement.textContent.trim();
+                        const color = chipElement.dataset.color;
                         mSelect.push({
                             content,
                             color
-                        })
-                        mSelectHTML += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${color});color:var(--b3-font-color${color})">${content}</span>`
-                    })
+                        });
+                        mSelectHTML += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${color});color:var(--b3-font-color${color})">${content}</span>`;
+                    });
                     fetchPost("/api/av/setAttributeViewBlockAttr", {
                         avID: mSelectElement.dataset.avId,
                         keyID: mSelectElement.dataset.keyId,
@@ -375,15 +375,15 @@ class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].ty
                             mSelect
                         }
                     });
-                    mSelectElement.innerHTML = mSelectHTML
-                })
+                    mSelectElement.innerHTML = mSelectHTML;
+                });
                 if (mSelectMenu.isOpen) {
                     return;
                 }
-                const names: string[] = []
+                const names: string[] = [];
                 mSelectElement.querySelectorAll(".b3-chip").forEach(item => {
-                    names.push(item.textContent.trim())
-                })
+                    names.push(item.textContent.trim());
+                });
                 JSON.parse(mSelectElement.dataset.options || "").forEach((item: { name: string, color: string }) => {
                     mSelectMenu.addItem({
                         iconHTML: "",
@@ -392,41 +392,41 @@ class="fn__flex-1 fn__flex${["url", "text", "number"].includes(item.values[0].ty
 </span>`,
                         accelerator: names.includes(item.name) ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : Constants.ZWSP,
                         click(element) {
-                            const acceleratorElement = element.querySelector(".b3-menu__accelerator")
+                            const acceleratorElement = element.querySelector(".b3-menu__accelerator");
                             if (mSelectElement.dataset.type === "select") {
                                 window.siyuan.menus.menu.element.querySelectorAll(".b3-menu__accelerator").forEach(itemElement => {
                                     if (itemElement.isSameNode(acceleratorElement)) {
                                         if (acceleratorElement.querySelector("svg")) {
                                             acceleratorElement.innerHTML = "";
                                         } else {
-                                            acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>'
+                                            acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>';
                                         }
                                     } else {
                                         itemElement.innerHTML = "";
                                     }
-                                })
+                                });
                                 return false;
                             }
                             if (acceleratorElement.querySelector("svg")) {
                                 acceleratorElement.innerHTML = "";
                             } else {
-                                acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>'
+                                acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>';
                             }
                             return true;
                         }
-                    })
-                })
-                const mSelecttRect = mSelectElement.getBoundingClientRect()
+                    });
+                });
+                const mSelecttRect = mSelectElement.getBoundingClientRect();
                 mSelectMenu.open({
                     x: mSelecttRect.left,
                     y: mSelecttRect.bottom
-                })
+                });
                 window.siyuan.menus.menu.element.style.zIndex = "400";
-                event.stopPropagation()
+                event.stopPropagation();
                 event.preventDefault();
                 return;
             }
-        })
+        });
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;

@@ -92,8 +92,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                             if (cell.value?.date.content) {
                                 text += dayjs(cell.value.date.content).format("YYYY-MM-DD HH:mm");
                             }
-                            if (cell.value?.date.hasEndDate) {
-                                text += `<svg style="margin-left: 5px"><use xlink:href="#iconForward"></use></svg>${dayjs(cell.value.date.content2).format("YYYY-MM-DD HH:mm")}</span>`;
+                            if (cell.value?.date.hasEndDate && cell.value?.date.content && cell.value?.date.content2) {
+                                text += `<svg style="margin-left: 5px"><use xlink:href="#iconForward"></use></svg>`;
+                            }
+                            if (cell.value?.date.content2) {
+                                text += dayjs(cell.value.date.content2).format("YYYY-MM-DD HH:mm");
                             }
                             text += "</span>";
                         }
@@ -220,9 +223,14 @@ const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            html = `${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}`;
-            if (value.date.hasEndDate) {
-                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg>${dayjs(value.date.content2).format("YYYY-MM-DD HH:mm")}`;
+            if (value.date.content) {
+                html = `<span data-content="${value.date.content}">${dayjs(value.date.content).format("YYYY-MM-DD HH:mm")}</span>`;
+            }
+            if (value.date.hasEndDate && value.date.content && value.date.content2) {
+                html += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg>`;
+            }
+            if (value.date.content2) {
+                html += `<span data-content="${value.date.content2}">${dayjs(value.date.content2).format("YYYY-MM-DD HH:mm")}</span>`;
             }
             break;
         case "url":
@@ -264,28 +272,101 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
             });
         });
         element.innerHTML = html;
-        // TODO
-        // element.addEventListener("click", (event) => {
-        //     const target = event.target as HTMLElement
-        //     const dateElement = hasClosestByAttribute(target, "data-type", "date")
-        //     if (dateElement) {
-        //         const dateMenu = new Menu("custom-attr-av-date", () => {
-        //
-        //         })
-        //         if (dateMenu.isOpen) {
-        //             return;
-        //         }
-        //         dateMenu.addItem({
-        //             iconHTML:"",
-        //             label:`<input>`
-        //         })
-        //         return;
-        //     }
-        //     const mSelectElement = hasClosestByAttribute(target, "data-type", "select")||hasClosestByAttribute(target, "data-type", "mSelect")
-        //     if (mSelectElement) {
-        //         return
-        //     }
-        // })
+        element.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement
+            const dateElement = hasClosestByAttribute(target, "data-type", "date")
+            if (dateElement) {
+                const dateMenu = new Menu("custom-attr-av-date", () => {
+                    const textElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>
+                    const hasEndDate = (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked
+                    fetchPost("/api/av/setAttributeViewBlockAttr", {
+                        avID: dateElement.dataset.avId,
+                        keyID: dateElement.dataset.keyId,
+                        rowID: dateElement.dataset.blockId,
+                        cellID: dateElement.dataset.id,
+                        value: {
+                            date: {
+                                content: new Date(textElements[0].value).getTime(),
+                                content2: new Date(textElements[1].value).getTime(),
+                                hasEndDate
+                            }
+                        }
+                    });
+                    let dataHTML = ""
+                    if (textElements[0].value) {
+                        dataHTML = `<span data-content="${new Date(textElements[0].value).getTime()}">${dayjs(textElements[0].value).format("YYYY-MM-DD HH:mm")}</span>`
+                    }
+                    if (hasEndDate && textElements[0].value && textElements[1].value) {
+                        dataHTML += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg>`
+                    }
+                    if (textElements[1].value) {
+                        dataHTML += `<span data-content="${new Date(textElements[1].value).getTime()}">${dayjs(textElements[1].value).format("YYYY-MM-DD HH:mm")}</span>`
+                    }
+                    dateElement.innerHTML = dataHTML;
+                });
+                if (dateMenu.isOpen) {
+                    return;
+                }
+                const hasEndDate = dateElement.querySelector("svg")
+                const timeElements = dateElement.querySelectorAll("span")
+                dateMenu.addItem({
+                    iconHTML: "",
+                    label: `<input value="${timeElements[0] ? dayjs(parseInt(timeElements[0].dataset.content)).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200" style="margin: 4px 0">`
+                })
+                dateMenu.addItem({
+                    iconHTML: "",
+                    label: `<input value="${timeElements[1] ? dayjs(parseInt(timeElements[1].dataset.content)).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}" style="margin: 4px 0">`
+                })
+                dateMenu.addSeparator()
+                dateMenu.addItem({
+                    iconHTML: "",
+                    label: `<label class="fn__flex">
+    <span>${window.siyuan.languages.endDate}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input type="checkbox" class="b3-switch fn__flex-center"${hasEndDate ? " checked" : ""}>
+</label>`,
+                    click(element) {
+                        const switchElement = element.querySelector(".b3-switch") as HTMLInputElement
+                        // TODO
+                        switchElement.checked = !switchElement.checked
+                        window.siyuan.menus.menu.element.querySelectorAll('[type="datetime-local"]')[1].classList.toggle("fn__none");
+                        return true;
+                    }
+                })
+                dateMenu.addSeparator()
+                dateMenu.addItem({
+                    icon: "iconTrashcan",
+                    label: window.siyuan.languages.clear,
+                    click() {
+                        fetchPost("/api/av/setAttributeViewBlockAttr", {
+                            avID: dateElement.dataset.avId,
+                            keyID: dateElement.dataset.keyId,
+                            rowID: dateElement.dataset.blockId,
+                            cellID: dateElement.dataset.id,
+                            value: {
+                                date: {
+                                    content: null, content2: null, hasEndDate: false
+                                }
+                            }
+                        });
+                        dateElement.innerHTML = ""
+                    }
+                })
+                const targetRect = target.getBoundingClientRect()
+                dateMenu.open({
+                    x: targetRect.left,
+                    y: targetRect.bottom
+                })
+                window.siyuan.menus.menu.element.style.zIndex = "400";
+                event.stopPropagation()
+                event.preventDefault();
+                return;
+            }
+            const mSelectElement = hasClosestByAttribute(target, "data-type", "select") || hasClosestByAttribute(target, "data-type", "mSelect")
+            if (mSelectElement) {
+                return
+            }
+        })
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;

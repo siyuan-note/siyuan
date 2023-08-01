@@ -23,12 +23,21 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 
 !macro customUnInstall
     ${IfNot} ${isUpdated}
-        MessageBox MB_YESNO "是否需要删除全局配置（$PROFILE\.config\siyuan\）？$\n$\n\
+        MessageBox MB_YESNO "是否需要彻底删除全局配置（$PROFILE\.config\siyuan\）？$\n$\n\
             Do you want to delete the global configuration ($PROFILE\.config\siyuan\)?$\n" \
-            /SD IDYES IDYES Accepted IDNO Skipped
-            Accepted:
+            /SD IDYES IDYES AcceptedRMConf IDNO SkippedRMConf
+            AcceptedRMConf:
                 RMDir /r "$PROFILE\.config\siyuan\"
-            Skipped:
+            SkippedRMConf:
+    ${EndIf}
+
+    ${IfNot} ${isUpdated}
+        MessageBox MB_YESNO "是否需要彻底删除默认工作空间（$PROFILE\SiYuan\）？$\n$\n\
+            Do you want to completely delete the default workspace ($PROFILE\SiYuan\)?$\n" \
+            /SD IDNO IDYES AcceptedRMWorkspace IDNO SkippedRMWrokspace
+            AcceptedRMWorkspace:
+                RMDir /r "$PROFILE\SiYuan\"
+            SkippedRMWrokspace:
     ${EndIf}
 !macroend
 

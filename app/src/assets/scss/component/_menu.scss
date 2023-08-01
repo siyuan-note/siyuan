@@ -109,7 +109,9 @@
 
       &__label {
         font-size: 17px;
-        overflow: auto;
+        white-space: break-spaces;
+        line-height: 26px;
+        margin: 8px 0;
       }
 
       &__icon {

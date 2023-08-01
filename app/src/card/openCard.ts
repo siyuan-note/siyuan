@@ -326,9 +326,7 @@ export const bindCardEvent = (options: {
             editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb");
             actionElements[0].classList.add("fn__none");
             actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
-                if (btnIndex !== 0) {
-                    element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex - 1];
-                }
+               element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex];
             });
             actionElements[1].classList.remove("fn__none");
             return;

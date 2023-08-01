@@ -241,7 +241,8 @@
     <label class="b3-label">
         <div>
             🌐 Language
-            <div class="b3-label__text">User interface language, which can be switched later in <kbd>Settings</kbd> - <kbd>Appearance</kbd>
+            <div class="b3-label__text">User interface language, which can be switched later in <kbd>Settings</kbd> -
+                <kbd>Appearance</kbd>
             </div>
         </div>
         <div class="fn__space"></div>
@@ -257,7 +258,8 @@
     <label class="b3-label">
         <div>
             🗂️ Workspace
-            <div class="b3-label__text">The workspace is used to store data, which can be switched later in the top bar menu later
+            <div class="b3-label__text">The workspace is used to store data, which can be switched later in the top bar
+                menu later
             </div>
         </div>
         <div class="fn__space"></div>
@@ -350,10 +352,12 @@
             const {dialog} = require('@electron/remote')
             const path = require('path')
             const fs = require('fs')
+
             const defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "SiYuan")
             if (!fs.existsSync(defaultWorkspace)) {
                 fs.mkdirSync(defaultWorkspace, {mode: 0o755, recursive: true})
             }
+
             dialog.showOpenDialog({
                 defaultPath: defaultWorkspace,
                 properties: ['openDirectory', 'createDirectory'],

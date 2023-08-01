@@ -93,5 +93,6 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	cellID := arg["cellID"].(string)
 	value := arg["value"].(interface{})
 	blockAttributeViewKeys := model.UpdateAttributeViewCell(avID, keyID, rowID, cellID, value)
+	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
 	ret.Data = blockAttributeViewKeys
 }

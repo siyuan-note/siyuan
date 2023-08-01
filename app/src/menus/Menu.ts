@@ -179,7 +179,7 @@ export class MenuItem {
                 if (this.element.getAttribute("disabled")) {
                     return;
                 }
-                let keepOpen = options.click(this.element);
+                let keepOpen = options.click(this.element, event);
                 if (keepOpen instanceof Promise) {
                     keepOpen = false;
                 }

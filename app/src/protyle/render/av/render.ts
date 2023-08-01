@@ -264,43 +264,28 @@ export const renderAVAttribute = (element: HTMLElement, id: string) => {
             });
         });
         element.innerHTML = html;
-        element.addEventListener("click", (event) => {
-            const target = event.target as HTMLElement
-            const dateElement = hasClosestByAttribute(target, "data-type", "date")
-            if (dateElement) {
-                const dateMenu = new Menu("custom-attr-av-date", () => {
-
-                })
-                if (dateMenu.isOpen) {
-                    return;
-                }
-                dateMenu.addItem({
-                    iconHTML:"",
-                    label:`<input>`
-                })
-                // <div class="b3-menu__items">
-                // <div>
-                //     <input type="datetime-local" value="${value}" class="b3-text-field fn__size200"><br>
-                //     <input type="datetime-local" value="${value2}" style="margin-top: 8px" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}">
-                // <button class="b3-menu__separator"></button>
-                //     <button class="b3-menu__item">
-                //     <span>${window.siyuan.languages.endDate}</span>
-                //     <span class="fn__space fn__flex-1"></span>
-                //     <input type="checkbox" class="b3-switch fn__flex-center"${hasEndDate ? " checked" : ""}>
-                //     </button>
-                //     <button class="b3-menu__separator"></button>
-                //     <button class="b3-menu__item" data-type="clearDate">
-                // <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
-                // <span class="b3-menu__label">${window.siyuan.languages.clear}</span>
-                //     </button>
-                //     </div>
-                return;
-            }
-            const mSelectElement = hasClosestByAttribute(target, "data-type", "select")||hasClosestByAttribute(target, "data-type", "mSelect")
-            if (mSelectElement) {
-                return
-            }
-        })
+        // TODO
+        // element.addEventListener("click", (event) => {
+        //     const target = event.target as HTMLElement
+        //     const dateElement = hasClosestByAttribute(target, "data-type", "date")
+        //     if (dateElement) {
+        //         const dateMenu = new Menu("custom-attr-av-date", () => {
+        //
+        //         })
+        //         if (dateMenu.isOpen) {
+        //             return;
+        //         }
+        //         dateMenu.addItem({
+        //             iconHTML:"",
+        //             label:`<input>`
+        //         })
+        //         return;
+        //     }
+        //     const mSelectElement = hasClosestByAttribute(target, "data-type", "select")||hasClosestByAttribute(target, "data-type", "mSelect")
+        //     if (mSelectElement) {
+        //         return
+        //     }
+        // })
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;

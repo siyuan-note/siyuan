@@ -349,8 +349,13 @@
         item.addEventListener('click', () => {
             const {dialog} = require('@electron/remote')
             const path = require('path')
+            const fs = require('fs')
+            const defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "SiYuan")
+            if (!fs.existsSync(defaultWorkspace)) {
+                fs.mkdirSync(defaultWorkspace, {mode: 0o755, recursive: true})
+            }
             dialog.showOpenDialog({
-                defaultPath: decodeURIComponent(getSearch('home')),
+                defaultPath: defaultWorkspace,
                 properties: ['openDirectory', 'createDirectory'],
             }).then((result) => {
                 if (result.canceled) {
@@ -358,8 +363,11 @@
                 }
 
                 const {ipcRenderer} = require('electron')
-                const fs = require('fs')
                 const initPath = result.filePaths[0]
+                if (defaultWorkspace !== initPath) {
+                    fs.rmdirSync(defaultWorkspace, {recursive: true})
+                }
+
                 if (isICloudPath(initPath)) {
                     let msg = '⚠️ This folder is under the iCloud sync path, please change another path'
                     if (isChinese(currentLang)) {

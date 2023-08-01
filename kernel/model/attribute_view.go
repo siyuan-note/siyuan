@@ -475,16 +475,14 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 }
 
 func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
-	for _, id := range operation.SrcIDs {
-		var avErr error
-		if avErr = removeAttributeViewBlock(id, operation); nil != avErr {
-			return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
-		}
+	err := removeAttributeViewBlock(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
 	}
 	return
 }
 
-func removeAttributeViewBlock(blockID string, operation *Operation) (err error) {
+func removeAttributeViewBlock(operation *Operation) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
@@ -496,15 +494,18 @@ func removeAttributeViewBlock(blockID string, operation *Operation) (err error) 
 	}
 
 	for _, keyValues := range attrView.KeyValues {
+		tmp := keyValues.Values[:0]
 		for i, values := range keyValues.Values {
-			if values.BlockID == blockID {
-				keyValues.Values = append(keyValues.Values[:i], keyValues.Values[i+1:]...)
-				break
+			if !gulu.Str.Contains(values.BlockID, operation.SrcIDs) {
+				tmp = append(tmp, keyValues.Values[i])
 			}
 		}
+		keyValues.Values = tmp
 	}
 
-	view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
+	for _, blockID := range operation.SrcIDs {
+		view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
+	}
 
 	err = av.SaveAttributeView(attrView)
 	return

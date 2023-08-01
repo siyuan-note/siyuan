@@ -24,16 +24,21 @@ import (
 	"github.com/88250/lute/html"
 )
 
-// InsertElem inserts a new element value at the specified index position.
-// 0 <= index <= len(a)
-func InsertElem[T any](ret []T, index int, value T) []T {
-	if len(ret) == index { // nil or empty slice or after last element
-		return append(ret, value)
+// InsertElem inserts value at index into a.
+// 0 <= index <= len(s)
+func InsertElem[T any](s []T, index int, value T) []T {
+	if len(s) == index { // nil or empty slice or after last element
+		return append(s, value)
 	}
 
-	ret = append(ret[:index+1], ret[index:]...) // index < len(a)
-	ret[index] = value
-	return ret
+	s = append(s[:index+1], s[index:]...) // index < len(s)
+	s[index] = value
+	return s
+}
+
+// RemoveElem removes the element at index i from s.
+func RemoveElem[T any](s []T, index int) []T {
+	return append(s[:index], s[index+1:]...)
 }
 
 func EscapeHTML(s string) string {

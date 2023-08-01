@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230604120806"
+		"updated": "20230801231949"
 	},
 	"Children": [
 		{
@@ -833,7 +833,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230202231728-0z5bs0m",
-				"updated": "20230202231731"
+				"updated": "20230801231949"
 			},
 			"Children": [
 				{
@@ -843,7 +843,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note:"
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230627215826"
+		"updated": "20230802130902"
 	},
 	"Children": [
 		{
@@ -1852,12 +1852,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230406111519-ro0o3iv",
-				"updated": "20230406111521"
+				"updated": "20230802130902"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "All local features are free, even for commercial use."
+					"Data": "Most features are free, even for commercial use."
 				}
 			]
 		},

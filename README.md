@@ -41,7 +41,7 @@ Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
 
 ### Free
 
-All local features are free, even for commercial use.
+Most features are free, even for commercial use.
 
 * Content block
   * Block-level reference and two-way links
@@ -274,7 +274,7 @@ The first sub-block under the list item is the block icon omitted. You can move 
 
 ### Do I need to pay for it?
 
-All local features are free, even for commercial use.
+Most features are free, even for commercial use.
 
 [Cloud Service](https://b3log.org/siyuan/en/pricing.html) require a paid subscription to use.
 

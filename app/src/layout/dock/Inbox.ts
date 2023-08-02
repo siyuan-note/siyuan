@@ -318,7 +318,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
             loadingElement.classList.add("fn__none");
             let html = "";
             if (response.data.data.shorthands.length === 0) {
-                html = '<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.inboxTip}</li></ul>';
+                html = `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.inboxTip}</li></ul>`;
             } else {
                 html = '<ul style="padding: 8px 0" class="b3-list b3-list--background">';
                 response.data.data.shorthands.forEach((item: IInbox) => {

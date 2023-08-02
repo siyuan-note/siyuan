@@ -1,5 +1,5 @@
 {
-  "inboxTip": "打开用户指南搜索 收集箱 查看使用说明",
+  "inboxTip": "打开用户指南搜索 <code class='fn__code'>收集箱</code> 查看使用说明",
   "builtIn": "内置",
   "endDate": "结束时间",
   "needLogin": "该功能需要登录账号后才能使用",

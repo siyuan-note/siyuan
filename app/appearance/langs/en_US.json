@@ -1,5 +1,5 @@
 {
-  "inboxTip": "Open the user guide to search the inbox to view the instructions",
+  "inboxTip": "Open the user guide to search the <code class='fn__code'>inbox</code> to view the instructions",
   "builtIn": "Built-in",
   "endDate": "End date",
   "needLogin": "This function needs to be logged in to use",

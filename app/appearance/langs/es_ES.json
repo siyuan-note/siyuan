@@ -1,5 +1,5 @@
 {
-  "inboxTip": "Abra la guía del usuario para buscar en la bandeja de entrada y ver las instrucciones",
+  "inboxTip": "Abra la guía del usuario para buscar en la <code class='fn__code'>bandeja de entrada</code> para ver las instrucciones",
   "builtIn": "Incorporado",
   "endDate": "Fecha de finalización",
   "needLogin": "Esta función requiere iniciar sesión en la cuenta antes de poder usarla",

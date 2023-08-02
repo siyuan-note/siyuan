@@ -63,6 +63,7 @@ export const bindDateEvent = (options: {
             data: options.data,
             protyle: options.protyle,
             value: {
+                isNotEmpty: inputElements[0].value !== "",
                 content: new Date(inputElements[0].value).getTime()
             }
         });
@@ -73,6 +74,7 @@ export const bindDateEvent = (options: {
             data: options.data,
             protyle: options.protyle,
             value: {
+                isNotEmpty2: inputElements[1].value !== "",
                 content2: new Date(inputElements[1].value).getTime()
             }
         });
@@ -99,11 +101,7 @@ export const setDateValue = (options: {
     cellElements: HTMLElement[],
     data: IAV
     protyle: IProtyle,
-    value: {
-        content?: number,
-        content2?: number,
-        hasEndDate?: boolean
-    }
+    value: IAVCellDateValue
 }) => {
     let cellIndex = 0;
     Array.from(options.cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {

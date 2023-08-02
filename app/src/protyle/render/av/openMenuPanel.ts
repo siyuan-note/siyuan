@@ -621,8 +621,10 @@ export const openMenuPanel = (options: {
                         data,
                         protyle: options.protyle,
                         value: {
-                            content: 0,
-                            content2: 0,
+                            isNotEmpty2: false,
+                            isNotEmpty: false,
+                            content: null,
+                            content2: null,
                             hasEndDate: false
                         }
                     });

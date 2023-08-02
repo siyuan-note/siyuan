@@ -937,8 +937,8 @@ interface IAVCellValue {
 
 interface IAVCellDateValue {
     content?: number,
-    isNotEmpty: boolean
+    isNotEmpty?: boolean
     content2?: number,
-    isNotEmpty2: boolean
+    isNotEmpty2?: boolean
     hasEndDate?: boolean
 }

@@ -140,7 +140,7 @@ export class Title {
                 fetchPost("/api/block/getDocInfo", {
                     id: protyle.block.rootID
                 }, (response) => {
-                    openFileAttr(response.data.ial, protyle.block.rootID);
+                    openFileAttr(response.data.ial);
                 });
                 event.preventDefault();
                 event.stopPropagation();
@@ -179,7 +179,7 @@ export class Title {
                 fetchPost("/api/block/getDocInfo", {
                     id: protyle.block.rootID
                 }, (response) => {
-                    openFileAttr(response.data.ial, protyle.block.rootID);
+                    openFileAttr(response.data.ial);
                 });
             } else {
                 const iconRect = iconElement.getBoundingClientRect();

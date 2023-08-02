@@ -374,7 +374,7 @@ export const getFiltersHTML = (data: IAVTable) => {
                         if (index !== filter.value.mSelect.length - 1) {
                             selectContent += ", ";
                         }
-                    })
+                    });
                     if ("Contains" === filter.operator) {
                         filterValue = `: ${selectContent}`;
                     } else if (filter.operator === "Does not contains") {

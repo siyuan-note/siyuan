@@ -1929,7 +1929,7 @@ export class WYSIWYG {
                         }
                         hideElements(["gutter"], protyle);
                     } else if (event.shiftKey) {
-                        openAttr(actionElement.parentElement, protyle);
+                        openAttr(actionElement.parentElement);
                     } else if (ctrlIsPressed) {
                         zoomOut({protyle, id: actionElement.parentElement.getAttribute("data-node-id")});
                     } else {

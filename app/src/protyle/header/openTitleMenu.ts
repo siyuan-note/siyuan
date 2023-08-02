@@ -55,7 +55,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                 label: window.siyuan.languages.attr,
                 accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
                 click() {
-                    openFileAttr(response.data.ial, protyle.block.rootID);
+                    openFileAttr(response.data.ial);
                 }
             }).element);
         }

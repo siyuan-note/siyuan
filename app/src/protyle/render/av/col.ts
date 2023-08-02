@@ -291,7 +291,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
         bind(element) {
             element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
-                    return
+                    return;
                 }
                 if (event.key === "Enter") {
                     menu.close();

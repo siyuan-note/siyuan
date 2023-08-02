@@ -149,7 +149,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     });
 };
 
-const genAttr = (attrs: IObject, focusName = "bookmark") => {
+export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
     let customHTML = "";
     let notifyHTML = "";
     let hasAV = false;
@@ -263,7 +263,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark") => {
             } else if (type === "remove") {
                 fetchPost("/api/attr/setBlockAttrs", {
                     id: attrs.id,
-                    attrs: {["custom-"+target.previousElementSibling.textContent]: ""}
+                    attrs: {["custom-" + target.previousElementSibling.textContent]: ""}
                 });
                 target.parentElement.parentElement.remove();
                 event.stopPropagation();
@@ -285,7 +285,7 @@ const genAttr = (attrs: IObject, focusName = "bookmark") => {
                                 click() {
                                     const bookmarkInputElement = target.parentElement.parentElement.querySelector("input");
                                     bookmarkInputElement.value = item;
-                                    bookmarkInputElement.dispatchEvent(new  CustomEvent("change"));
+                                    bookmarkInputElement.dispatchEvent(new CustomEvent("change"));
                                 }
                             }).element);
                         });
@@ -350,147 +350,13 @@ const genAttr = (attrs: IObject, focusName = "bookmark") => {
     });
 };
 
-export const openFileAttr = (attrs: IObject, id: string, focusName = "bookmark") => {
-    genAttr(attrs, focusName,
-        //     (dialog) => {
-        //     let nodeAttrHTML = "";
-        //     let errorTip = "";
-        //     const attrsResult: IObject = {};
-        //     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-        //         let name = item.getAttribute("data-name");
-        //         if (!name) {
-        //             if (item.tagName === "INPUT") {
-        //                 return;
-        //             }
-        //             name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value;
-        //         }
-        //         if (item.value.trim()) {
-        //             if (!isValidAttrName(name)) {
-        //                 errorTip += name.replace(/^custom-/, "") + ", ";
-        //                 return;
-        //             }
-        //             attrsResult[name] = item.value;
-        //             const escapeHTML = Lute.EscapeHTMLStr(item.value);
-        //             if (name === "bookmark") {
-        //                 nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
-        //             } else if (name === "name") {
-        //                 nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHTML}</div>`;
-        //             } else if (name === "alias") {
-        //                 nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
-        //             } else if (name === "memo") {
-        //                 nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
-        //             }
-        //         }
-        //     });
-        //     if (errorTip) {
-        //         showMessage(errorTip.substr(0, errorTip.length - 2) + " " + window.siyuan.languages.invalid);
-        //     }
-        //     /// #if !MOBILE
-        //     getAllModels().editor.forEach(item => {
-        //         if (item.editor.protyle.block.rootID === id) {
-        //             const refElement = item.editor.protyle.title.element.querySelector(".protyle-attr--refcount");
-        //             if (refElement) {
-        //                 nodeAttrHTML += refElement.outerHTML;
-        //             }
-        //             item.editor.protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
-        //             item.editor.protyle.wysiwyg.renderCustom(attrsResult);
-        //         }
-        //         // https://github.com/siyuan-note/siyuan/issues/6398
-        //         item.editor.protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${id}"][data-subtype="d"]`).forEach(item => {
-        //             fetchPost("/api/block/getRefText", {id: id}, (response) => {
-        //                 item.innerHTML = response.data;
-        //             });
-        //         });
-        //     });
-        //     /// #endif
-        //     fetchPost("/api/attr/resetBlockAttrs", {id, attrs: attrsResult}, () => {
-        //         /// #if !MOBILE
-        //         if (attrsResult.bookmark !== attrs.bookmark) {
-        //             const bookmark = getDockByType("bookmark").data.bookmark;
-        //             if (bookmark instanceof Bookmark) {
-        //                 bookmark.update();
-        //             }
-        //         }
-        //         /// #endif
-        //     });
-        //     dialog.destroy();
-        // }
-    );
-};
-
-export const openAttr = (nodeElement: Element, protyle: IProtyle, focusName = "bookmark") => {
+export const openAttr = (nodeElement: Element, focusName = "bookmark") => {
     if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return;
     }
     const id = nodeElement.getAttribute("data-node-id");
     fetchPost("/api/attr/getBlockAttrs", {id}, (response) => {
-        genAttr(response.data, focusName,
-            //     (dialog, removeAttrs) => {
-            //     let nodeAttrHTML = "";
-            //     const oldHTML = nodeElement.outerHTML;
-            //     let errorTip = "";
-            //     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-            //         let name = item.getAttribute("data-name");
-            //         if (!name) {
-            //             if (item.tagName === "INPUT") {
-            //                 return;
-            //             }
-            //             name = "custom-" + (item.parentElement.querySelector(".b3-text-field") as HTMLInputElement).value;
-            //         }
-            //         if (item.value.trim()) {
-            //             if (!isValidAttrName(name)) {
-            //                 errorTip += name.replace(/^custom-/, "") + ", ";
-            //                 return;
-            //             }
-            //             if (removeAttrs.includes(name)) {
-            //                 removeAttrs.find((rmAttr, index) => {
-            //                     if (rmAttr === name) {
-            //                         removeAttrs.splice(index, 1);
-            //                         return true;
-            //                     }
-            //                 });
-            //             }
-            //             const escapeHTML = Lute.EscapeHTMLStr(item.value);
-            //             nodeElement.setAttribute(name, escapeHTML);
-            //             if (name === "bookmark") {
-            //                 /// #if !MOBILE
-            //                 if (escapeHTML !== response.data.bookmark) {
-            //                     const bookmark = getDockByType("bookmark").data.bookmark;
-            //                     if (bookmark instanceof Bookmark) {
-            //                         setTimeout(() => {
-            //                             bookmark.update();
-            //                         }, 219);
-            //                     }
-            //                 }
-            //                 /// #endif
-            //                 nodeAttrHTML += `<div class="protyle-attr--bookmark">${escapeHTML}</div>`;
-            //             } else if (name === "name") {
-            //                 nodeAttrHTML += `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${escapeHTML}</div>`;
-            //             } else if (name === "alias") {
-            //                 nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
-            //             } else if (name === "memo") {
-            //                 nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
-            //             }
-            //         } else {
-            //             nodeElement.removeAttribute(name);
-            //         }
-            //     });
-            //     removeAttrs.forEach(item => {
-            //         nodeElement.removeAttribute(item);
-            //     });
-            //     if (errorTip) {
-            //         showMessage(errorTip.substr(0, errorTip.length - 2) + " " + window.siyuan.languages.invalid);
-            //     }
-            //     const refElement = nodeElement.lastElementChild.querySelector(".protyle-attr--refcount");
-            //     if (refElement) {
-            //         nodeAttrHTML += refElement.outerHTML;
-            //     }
-            //     nodeElement.lastElementChild.innerHTML = nodeAttrHTML + Constants.ZWSP;
-            //     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            //     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            //     dialog.destroy();
-            // }
-        );
+        openFileAttr(response.data, focusName);
     });
 };
 

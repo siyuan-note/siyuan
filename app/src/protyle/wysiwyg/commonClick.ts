@@ -17,9 +17,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, protyle.block.rootID, "bookmark");
+                openFileAttr(data, "bookmark");
             } else {
-                openAttr(attrBookmarkElement.parentElement.parentElement, protyle, "bookmark");
+                openAttr(attrBookmarkElement.parentElement.parentElement, "bookmark");
             }
         }
         event.stopPropagation();
@@ -34,9 +34,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, protyle.block.rootID, "name");
+                openFileAttr(data, "name");
             } else {
-                openAttr(attrNameElement.parentElement.parentElement, protyle, "name");
+                openAttr(attrNameElement.parentElement.parentElement, "name");
             }
         }
         event.stopPropagation();
@@ -51,9 +51,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, protyle.block.rootID, "alias");
+                openFileAttr(data, "alias");
             } else {
-                openAttr(attrAliasElement.parentElement.parentElement, protyle, "alias");
+                openAttr(attrAliasElement.parentElement.parentElement, "alias");
             }
         }
         event.stopPropagation();
@@ -68,9 +68,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, protyle.block.rootID, "memo");
+                openFileAttr(data, "memo");
             } else {
-                openAttr(attrMemoElement.parentElement.parentElement, protyle, "memo");
+                openAttr(attrMemoElement.parentElement.parentElement, "memo");
             }
         }
         event.stopPropagation();

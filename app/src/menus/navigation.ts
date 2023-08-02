@@ -365,7 +365,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 fetchPost("/api/block/getDocInfo", {
                     id
                 }, (response) => {
-                    openFileAttr(response.data.ial, id);
+                    openFileAttr(response.data.ial);
                 });
             }
         }).element);

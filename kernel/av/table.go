@@ -376,11 +376,6 @@ func (table *Table) FilterRows() {
 	for _, row := range table.Rows {
 		pass := true
 		for j, index := range colIndexes {
-			c := table.Columns[index]
-			if c.Type == KeyTypeBlock {
-				continue
-			}
-
 			if !row.Cells[index].Value.CompareOperator(table.Filters[j].Value, table.Filters[j].Operator) {
 				pass = false
 				break

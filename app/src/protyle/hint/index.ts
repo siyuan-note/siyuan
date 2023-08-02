@@ -854,7 +854,7 @@ ${genHintItemHTML(item)}
             event.stopPropagation();
             return true;
         } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-            upDownHint(this.element, event);
+            upDownHint(this.element.firstElementChild, event);
             event.preventDefault();
             event.stopPropagation();
             return true;

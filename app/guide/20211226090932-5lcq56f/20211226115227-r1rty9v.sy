@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230630143055"
+		"updated": "20230802131043"
 	},
 	"Children": [
 		{
@@ -1845,12 +1845,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230406111448-cuahrpa",
-				"updated": "20230406111448"
+				"updated": "20230802131043"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有本地功能都是免費的，即使是在商業環境下使用。"
+					"Data": "大部分功能是免費的，即使是在商業環境下使用。"
 				}
 			]
 		},

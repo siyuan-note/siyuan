@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220105101227-n5zpr1a",
 		"title": "Limitations",
-		"updated": "20230526091133"
+		"updated": "20230526091044"
 	},
 	"Children": [
 		{
@@ -14,7 +14,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220105101254-dhwb8a1",
-				"updated": "20230526091133"
+				"updated": "20230526091044"
 			},
 			"Children": [
 				{
@@ -139,7 +139,7 @@
 					},
 					"Properties": {
 						"id": "20220105101254-fvel6pz",
-						"updated": "20230526091133"
+						"updated": "20230526091044"
 					},
 					"Children": [
 						{
@@ -178,7 +178,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230526091044-hit1355",
-								"updated": "20230526091133"
+								"updated": "20230526091044"
 							},
 							"Children": [
 								{
@@ -204,34 +204,6 @@
 												{
 													"Type": "NodeText",
 													"Data": "From 15 days before the expiration, the expiration reminder will pop up every time you open the software, and the reminder will stop after 2 days of expiration"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20230526091044-aw31eq1",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20230526091044-aw31eq1",
-										"updated": "20230526091044"
-									},
-									"Children": [
-										{
-											"ID": "20230526091044-czi0jwq",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20230526091044-czi0jwq",
-												"updated": "20230526091044"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "2 days before the expiration date, a SMS reminder will be sent to the mobile phone bound to the account"
 												}
 											]
 										}

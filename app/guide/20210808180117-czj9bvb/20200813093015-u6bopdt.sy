@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230627214807"
+		"updated": "20230802131007"
 	},
 	"Children": [
 		{
@@ -1848,12 +1848,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120447-xj9cd10",
-				"updated": "20230406111412"
+				"updated": "20230802131007"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有本地功能都是免费的，即使是在商业环境下使用。"
+					"Data": "大部分功能是免费的，即使是在商业环境下使用。"
 				}
 			]
 		},

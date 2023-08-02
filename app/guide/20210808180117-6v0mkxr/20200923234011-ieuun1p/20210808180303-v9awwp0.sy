@@ -6,7 +6,7 @@
 		"icon": "1f308",
 		"id": "20210808180303-v9awwp0",
 		"title": "Cloud Services",
-		"updated": "20230627215230"
+		"updated": "20230802131124"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230627215141-57hf66s",
-				"updated": "20230627215143"
+				"updated": "20230802131124"
 			},
 			"Children": [
 				{
@@ -88,6 +88,37 @@
 									"TextMarkBlockRefID": "20220708103401-mgydrfg",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "Data backup"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230802131114-4anamcv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230802131114-4anamcv",
+						"updated": "20230802131124"
+					},
+					"Children": [
+						{
+							"ID": "20230802131114-4qdgspb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230802131114-4qdgspb",
+								"updated": "20230802131124"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230802114825-2jkkct7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Inbox"
 								}
 							]
 						}

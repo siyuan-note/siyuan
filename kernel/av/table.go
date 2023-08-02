@@ -123,6 +123,9 @@ func (value *Value) Compare(other *Value) int {
 		}
 		return strings.Compare(v1, v2)
 	}
+	if nil != value.URL && nil != other.URL {
+		return strings.Compare(value.URL.Content, other.URL.Content)
+	}
 	return 0
 }
 
@@ -132,7 +135,24 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 	}
 
 	if nil != value.Block && nil != other.Block {
-		return strings.Contains(value.Block.Content, other.Block.Content)
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Block.Content == other.Block.Content
+		case FilterOperatorIsNotEqual:
+			return value.Block.Content != other.Block.Content
+		case FilterOperatorContains:
+			return strings.Contains(value.Block.Content, other.Block.Content)
+		case FilterOperatorDoesNotContain:
+			return !strings.Contains(value.Block.Content, other.Block.Content)
+		case FilterOperatorStartsWith:
+			return strings.HasPrefix(value.Block.Content, other.Block.Content)
+		case FilterOperatorEndsWith:
+			return strings.HasSuffix(value.Block.Content, other.Block.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Block.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Block.Content)
+		}
 	}
 
 	if nil != value.Text && nil != other.Text {
@@ -238,6 +258,28 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 			return 0 != len(value.MSelect) && !(1 == len(value.MSelect) && "" == value.MSelect[0].Content)
 		}
 	}
+
+	if nil != value.URL && nil != other.URL {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.URL.Content == other.URL.Content
+		case FilterOperatorIsNotEqual:
+			return value.URL.Content != other.URL.Content
+		case FilterOperatorContains:
+			return strings.Contains(value.URL.Content, other.URL.Content)
+		case FilterOperatorDoesNotContain:
+			return !strings.Contains(value.URL.Content, other.URL.Content)
+		case FilterOperatorStartsWith:
+			return strings.HasPrefix(value.URL.Content, other.URL.Content)
+		case FilterOperatorEndsWith:
+			return strings.HasSuffix(value.URL.Content, other.URL.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.URL.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.URL.Content)
+		}
+	}
+
 	return true
 }
 
@@ -301,11 +343,6 @@ func (table *Table) SortRows() {
 
 	sort.Slice(table.Rows, func(i, j int) bool {
 		for _, colIndexSort := range colIndexSorts {
-			c := table.Columns[colIndexSort.Index]
-			if c.Type == KeyTypeBlock {
-				continue
-			}
-
 			result := table.Rows[i].Cells[colIndexSort.Index].Value.Compare(table.Rows[j].Cells[colIndexSort.Index].Value)
 			if 0 == result {
 				continue

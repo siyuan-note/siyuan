@@ -341,11 +341,14 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
     const type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+    if (type === "block") {
+        return;
+    }
     const cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
     const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`;
     const blockElement = hasClosestBlock(cellElements[0]);
-    if (["block", "text", "url"].includes(type)) {
+    if (["text", "url"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].textContent}" ${style} class="b3-text-field">`;

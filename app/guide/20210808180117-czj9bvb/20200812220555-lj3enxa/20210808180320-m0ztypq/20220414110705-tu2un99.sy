@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220414110705-tu2un99",
 		"title": "收集箱",
-		"updated": "20221022010553"
+		"updated": "20230802115243"
 	},
 	"Children": [
 		{
@@ -557,12 +557,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220419193546-kq7dd5i",
-				"updated": "20220419193549"
+				"updated": "20230802115243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "请注意："
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
 				}
 			]
 		},

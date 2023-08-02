@@ -710,7 +710,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
              when memo LIKE '%${keyword}%' then 90
              when content LIKE '%${keyword}%' and type != 'i' and type != 'l' then 100
              else 65535 end ASC, sort ASC, length ASC`
-	orderBy = strings.ReplaceAll(orderBy, "${keyword}", keyword)
+	orderBy = strings.ReplaceAll(orderBy, "${keyword}", quotedKeyword)
 	stmt += orderBy + " LIMIT " + strconv.Itoa(Conf.Search.Limit)
 	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)

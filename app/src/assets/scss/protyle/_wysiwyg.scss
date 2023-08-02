@@ -269,6 +269,7 @@
     &.table[custom-pinthead="true"] {
       table {
         max-height: 50vh;
+        display: inline-block;
       }
 
       thead {

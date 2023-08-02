@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220415232231-pqcizol",
 		"title": "Query syntax",
-		"updated": "20220502163630"
+		"updated": "20230802221616"
 	},
 	"Children": [
 		{
@@ -1275,12 +1275,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415233433-tcac279",
-				"updated": "20220415233433"
+				"updated": "20230802221616"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The disadvantage of this is that it increases disk space usage and reduces indexing performance, but there is currently no better solution, so it can only be done first. In addition, Unicode case folding and diacritics are not supported, only English letters are supported ignoring case."
+					"Data": "The disadvantage of this is that it increases disk space usage and reduces indexing performance, but there is currently no better solution, so it can only be done first. In addition, diacritics are not supported, only supported case insensitive."
 				}
 			]
 		},

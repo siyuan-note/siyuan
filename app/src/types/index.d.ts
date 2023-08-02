@@ -930,7 +930,7 @@ interface IAVCellValue {
     text?: { content: string },
     number?: { content?: number, isNotEmpty: boolean, format?: string, formattedContent?: string },
     mSelect?: { content: string, color: string }[]
-    block?: { content: string, id: string }
+    block?: { content: string, id?: string }
     url?: { content: string }
     date?: IAVCellDateValue
 }

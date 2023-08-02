@@ -86,10 +86,10 @@ export const genCellValue = (colType: TAVCol, value: string | {
                     }
                 };
             }
-        } else if (colType === "text") {
+        } else if (["text", "block", "url"].includes(colType)) {
             cellValue = {
                 type: colType,
-                text: {
+                [colType]: {
                     content: value
                 }
             };

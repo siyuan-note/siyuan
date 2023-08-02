@@ -52,7 +52,10 @@ export const setFilter = (options: {
     data: IAV,
     target: HTMLElement,
 }) => {
-    const rectTarget = options.target.getBoundingClientRect();
+    let rectTarget = options.target.getBoundingClientRect();
+    if (rectTarget.height === 0) {
+        rectTarget = options.protyle.wysiwyg.element.querySelector(`[data-col-id="${options.target.dataset.colId}"]`).getBoundingClientRect();
+    }
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         const operator = (window.siyuan.menus.menu.element.querySelector(".b3-select") as HTMLSelectElement).value as TAVFilterOperator;
@@ -212,7 +215,7 @@ export const setFilter = (options: {
     } else if (["text", "url", "block"].includes(colData.type)) {
         menu.addItem({
             iconHTML: "",
-            label: `<input style="margin: 4px 0" value="${options.filter.value?.text.content || ""}" class="b3-text-field fn__size200">`
+            label: `<input style="margin: 4px 0" value="${options.filter.value ? options.filter.value[colData.type as "text"].content : ""}" class="b3-text-field fn__size200">`
         });
     } else if (colData.type === "number") {
         menu.addItem({
@@ -385,17 +388,18 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if ("<=" === filter.operator) {
                         filterValue = ` ≤ ${filter.value.number.content}`;
                     }
-                } else if (filter.value?.text?.content) {
+                } else if (filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content) {
+                    const content = filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content;
                     if (["=", "Contains"].includes(filter.operator)) {
-                        filterValue = `: ${filter.value.text.content}`;
+                        filterValue = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${filter.value.text.content}`;
+                        filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
                     } else if (filter.operator === "!=") {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorIsNot} ${filter.value.text.content}`;
+                        filterValue = ` ${window.siyuan.languages.filterOperatorIsNot} ${content}`;
                     } else if ("Starts with" === filter.operator) {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorStartsWith} ${filter.value.text.content}`;
+                        filterValue = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
                     } else if ("Ends with" === filter.operator) {
-                        filterValue = ` ${window.siyuan.languages.filterOperatorEndsWith} ${filter.value.text.content}`;
+                        filterValue = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
                     }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">

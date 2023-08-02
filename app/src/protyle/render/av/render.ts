@@ -231,7 +231,9 @@ const genAVValueHTML = (value: IAVCellValue) => {
             }
             break;
         case "url":
-            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1">
+<span class="fn__space"></span>
+<a href="${value.url.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconLink"></use></svg></a>`;
             break;
     }
     return html;

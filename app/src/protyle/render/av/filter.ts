@@ -352,16 +352,51 @@ export const getFiltersHTML = (data: IAVTable) => {
                     filterValue = ": " + window.siyuan.languages.filterOperatorIsEmpty;
                 } else if (filter.operator === "Is not empty") {
                     filterValue = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
-                } else if (filter.value?.number?.content && ["=", "!=", ">", "<", ">=", "<="].includes(filter.operator)) {
-                    filterValue = ` ${filter.operator} ${filter.value.number.content}`;
-                } else if (filter.value?.text?.content && ["=", "Contains"].includes(filter.operator)) {
-                    filterValue = `: ${filter.value.text.content}`;
-                } else if (filter.value?.text?.content && ["!=", "Does not contains"].includes(filter.operator)) {
-                    filterValue = `Not ${filter.value.text.content}`;
-                } else if (filter.value?.text?.content && "Starts with" === filter.operator) {
-                    filterValue = `: ${window.siyuan.languages.filterOperatorStartsWith} ${filter.value.text.content}`;
-                } else if (filter.value?.text?.content && "Ends with" === filter.operator) {
-                    filterValue = `: ${window.siyuan.languages.filterOperatorEndsWith} ${filter.value.text.content}`;
+                } else if (filter.value?.date?.content) {
+                    if (filter.value?.date?.content2 && filter.operator === "Is between") {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")} ${dayjs(filter.value.date.content2).format("YYYY-MM-DD HH:mm")}`;
+                    } else if ("=" === filter.operator) {
+                        filterValue = `: ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                    } else if ([">", "<"].includes(filter.operator)) {
+                        filterValue = ` ${filter.operator} ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                    } else if (">=" === filter.operator) {
+                        filterValue = ` ≥ ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                    } else if ("<=" === filter.operator) {
+                        filterValue = ` ≤ ${dayjs(filter.value.date.content).format("YYYY-MM-DD HH:mm")}`;
+                    }
+                } else if (filter.value?.mSelect?.length > 0) {
+                    let selectContent = "";
+                    filter.value.mSelect.forEach((item, index) => {
+                        selectContent += item.content;
+                        if (index !== filter.value.mSelect.length - 1) {
+                            selectContent += ", ";
+                        }
+                    })
+                    if ("Contains" === filter.operator) {
+                        filterValue = `: ${selectContent}`;
+                    } else if (filter.operator === "Does not contains") {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
+                    }
+                } else if (filter.value?.number?.content) {
+                    if (["=", "!=", ">", "<"].includes(filter.operator)) {
+                        filterValue = ` ${filter.operator} ${filter.value.number.content}`;
+                    } else if (">=" === filter.operator) {
+                        filterValue = ` ≥ ${filter.value.number.content}`;
+                    } else if ("<=" === filter.operator) {
+                        filterValue = ` ≤ ${filter.value.number.content}`;
+                    }
+                } else if (filter.value?.text?.content) {
+                    if (["=", "Contains"].includes(filter.operator)) {
+                        filterValue = `: ${filter.value.text.content}`;
+                    } else if (filter.operator === "Does not contains") {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${filter.value.text.content}`;
+                    } else if (filter.operator === "!=") {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorIsNot} ${filter.value.text.content}`;
+                    } else if ("Starts with" === filter.operator) {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorStartsWith} ${filter.value.text.content}`;
+                    } else if ("Ends with" === filter.operator) {
+                        filterValue = ` ${window.siyuan.languages.filterOperatorEndsWith} ${filter.value.text.content}`;
+                    }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterValue ? " b3-chip--primary" : ""}">
     <svg><use xlink:href="#${getColIconByType(item.type)}"></use></svg>

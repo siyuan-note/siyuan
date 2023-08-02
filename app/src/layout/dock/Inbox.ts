@@ -301,7 +301,7 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
         if (needSubscribe("")) {
             this.element.lastElementChild.innerHTML = `<ul class="b3-list b3-list--background">
     <li class="b3-list--empty">
-        相关功能可打开帮助文档搜索 <code>收集箱</code> 查看使用说明
+        打开帮助文档搜索 <code>收集箱</code> 查看使用说明
     </li>
     <li class="b3-list--empty">
         ${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29].replace("${url}", getCloudURL("subscribe/siyuan"))}

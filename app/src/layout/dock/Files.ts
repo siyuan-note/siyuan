@@ -352,7 +352,8 @@ export class Files extends Model {
                 selectElements.forEach((item: HTMLElement, index) => {
                     ghostElement.append(item.cloneNode(true));
                     item.style.opacity = "0.1";
-                    const itemNodeId = item.dataset.nodeId || item.dataset.path;
+                    const itemNodeId = item.dataset.nodeId ||
+                        item.dataset.path; // 拖拽笔记本时值不能为空，否则 drop 就不会继续排序
                     if (itemNodeId) {
                         ids += itemNodeId;
                         if (index < selectElements.length - 1) {

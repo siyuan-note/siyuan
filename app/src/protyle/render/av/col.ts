@@ -285,6 +285,16 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
     menu.addItem({
         icon: getColIconByType(type),
         label: `<input style="margin: 4px 0" class="b3-text-field" type="text" value="${cellElement.innerText.trim()}">`,
+        bind(element) {
+            element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return
+                }
+                if (event.key === "Enter") {
+                    menu.close();
+                }
+            });
+        }
     });
     if (type !== "block") {
         menu.addItem({

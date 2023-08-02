@@ -352,7 +352,7 @@ export class Files extends Model {
                 selectElements.forEach((item: HTMLElement, index) => {
                     ghostElement.append(item.cloneNode(true));
                     item.style.opacity = "0.1";
-                    const itemNodeId = item.getAttribute("data-node-id") || "";
+                    const itemNodeId = item.dataset.nodeId || item.dataset.path;
                     if (itemNodeId) {
                         ids += itemNodeId;
                         if (index < selectElements.length - 1) {

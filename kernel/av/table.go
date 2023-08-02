@@ -135,7 +135,24 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 	}
 
 	if nil != value.Block && nil != other.Block {
-		return strings.Contains(value.Block.Content, other.Block.Content)
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Block.Content == other.Block.Content
+		case FilterOperatorIsNotEqual:
+			return value.Block.Content != other.Block.Content
+		case FilterOperatorContains:
+			return strings.Contains(value.Block.Content, other.Block.Content)
+		case FilterOperatorDoesNotContain:
+			return !strings.Contains(value.Block.Content, other.Block.Content)
+		case FilterOperatorStartsWith:
+			return strings.HasPrefix(value.Block.Content, other.Block.Content)
+		case FilterOperatorEndsWith:
+			return strings.HasSuffix(value.Block.Content, other.Block.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Block.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Block.Content)
+		}
 	}
 
 	if nil != value.Text && nil != other.Text {
@@ -326,11 +343,6 @@ func (table *Table) SortRows() {
 
 	sort.Slice(table.Rows, func(i, j int) bool {
 		for _, colIndexSort := range colIndexSorts {
-			c := table.Columns[colIndexSort.Index]
-			if c.Type == KeyTypeBlock {
-				continue
-			}
-
 			result := table.Rows[i].Cells[colIndexSort.Index].Value.Compare(table.Rows[j].Cells[colIndexSort.Index].Value)
 			if 0 == result {
 				continue

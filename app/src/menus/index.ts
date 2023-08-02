@@ -18,6 +18,9 @@ export class Menus {
         this.menu = new Menu();
         /// #if !MOBILE
         window.addEventListener("contextmenu", (event) => {
+            if (event.shiftKey) {
+                return;
+            }
             let target = event.target as HTMLElement;
             while (target && !target.parentElement.isEqualNode(document.querySelector("body"))) {
                 event.preventDefault();

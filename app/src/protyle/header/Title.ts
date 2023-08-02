@@ -187,6 +187,9 @@ export class Title {
             }
         });
         this.element.addEventListener("contextmenu", (event) => {
+            if (event.shiftKey) {
+                return;
+            }
             if (getSelection().rangeCount === 0) {
                 openTitleMenu(protyle, {x: event.clientX, y: event.clientY});
                 return;

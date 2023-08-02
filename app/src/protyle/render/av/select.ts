@@ -101,7 +101,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     if (!menuElement) {
         return;
     }
-    const colId = cellElements ? cellElements[0].dataset.colId : menuElement.firstElementChild.getAttribute("data-col-id");
+    const colId = cellElements ? cellElements[0].dataset.colId : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     let name = target.parentElement.dataset.name;
     let color = target.parentElement.dataset.color;
     const menu = new Menu("av-col-option", () => {
@@ -169,7 +169,17 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     }
     menu.addItem({
         iconHTML: "",
-        label: `<input class="b3-text-field" style="margin: 4px 0" value="${name}">`
+        label: `<input class="b3-text-field" style="margin: 4px 0" value="${name}">`,
+        bind(element) {
+            element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                if (event.key === "Enter") {
+                    menu.close();
+                }
+            });
+        }
     });
     menu.addItem({
         label: window.siyuan.languages.delete,

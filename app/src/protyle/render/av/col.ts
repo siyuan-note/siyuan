@@ -135,7 +135,7 @@ ${html}
 
 export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuElement: HTMLElement }) => {
     const avID = options.data.id;
-    const colId = options.menuElement.firstElementChild.getAttribute("data-col-id");
+    const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
     const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
     nameElement.addEventListener("blur", () => {
@@ -163,6 +163,9 @@ export const bindEditEvent = (options: { protyle: IProtyle, data: IAV, menuEleme
             return;
         }
         if (event.key === "Escape") {
+            options.menuElement.parentElement.remove();
+        } else if (event.key === "Enter") {
+            nameElement.dispatchEvent(new CustomEvent("blur"));
             options.menuElement.parentElement.remove();
         }
     });

@@ -133,8 +133,19 @@ type ValueNumber struct {
 type NumberFormat string
 
 const (
-	NumberFormatNone    NumberFormat = ""
-	NumberFormatPercent NumberFormat = "percent"
+	NumberFormatNone           NumberFormat = ""
+	NumberFormatCommas         NumberFormat = "commas"
+	NumberFormatPercent        NumberFormat = "percent"
+	NumberFormatUSDollar       NumberFormat = "usDollar"
+	NumberFormatYuan           NumberFormat = "yuan"
+	NumberFormatEuro           NumberFormat = "euro"
+	NumberFormatPound          NumberFormat = "pound"
+	NumberFormatYen            NumberFormat = "yen"
+	NumberFormatRuble          NumberFormat = "ruble"
+	NumberFormatRupee          NumberFormat = "rupee"
+	NumberFormatWon            NumberFormat = "won"
+	NumberFormatCanadianDollar NumberFormat = "canadianDollar"
+	NumberFormatFranc          NumberFormat = "franc"
 )
 
 func NewValueNumber(content float64) *ValueNumber {

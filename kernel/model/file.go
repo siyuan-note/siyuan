@@ -702,13 +702,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 				}
 			}
 
-			// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
-			if ast.NodeCodeBlockCode == n.Type && 0 < len(keywords) && !treenode.IsChartCodeBlockCode(n) {
-				text := string(n.Tokens)
-				text = search.EncloseHighlighting(text, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
-				n.Tokens = gulu.Str.ToBytes(text)
-			}
-
 			if 0 < len(keywords) {
 				hitBlock := false
 				for p := n.Parent; nil != p; p = p.Parent {
@@ -718,7 +711,15 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 					}
 				}
 				if hitBlock {
-					if markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine) {
+					if ast.NodeCodeBlockCode == n.Type && !treenode.IsChartCodeBlockCode(n) {
+						// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
+						code := string(n.Tokens)
+						markedCode := search.EncloseHighlighting(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
+						if code != markedCode {
+							n.Tokens = gulu.Str.ToBytes(markedCode)
+							return ast.WalkContinue
+						}
+					} else if markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine) {
 						return ast.WalkContinue
 					}
 				}

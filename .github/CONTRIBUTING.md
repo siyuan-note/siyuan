@@ -36,6 +36,9 @@ Note: In the development environment, the kernel process will not be automatical
 
 ## Kernel
 
+1. Install the latest version of [golang](https://go.dev/)
+2. Open CGO support, that is, configure the environment variable `CGO_ENABLED=1`
+
 ### Desktop
 
 * `cd kernel`

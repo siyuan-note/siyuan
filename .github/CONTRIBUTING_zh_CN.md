@@ -38,6 +38,9 @@ NPM 镜像：
 
 ## 内核
 
+1. 安装最新版 [golang](https://go.dev/)
+2. 打开 CGO 支持，即配置环境变量 `CGO_ENABLED=1`
+
 ### 桌面端
 
 * `cd kernel`

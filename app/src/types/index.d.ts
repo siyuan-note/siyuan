@@ -912,6 +912,7 @@ interface IAVColumn {
     wrap: boolean,
     hidden: boolean,
     type: TAVCol,
+    numberFormat: string,
     calc: {
         operator: string,
         result: IAVCellValue

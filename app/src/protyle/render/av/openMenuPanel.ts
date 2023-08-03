@@ -430,6 +430,11 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "numberFormat") {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "newCol") {
                     avPanelElement.remove();
                     const addMenu = addCol(options.protyle, options.blockElement);

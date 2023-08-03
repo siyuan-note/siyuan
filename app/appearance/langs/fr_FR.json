@@ -1,4 +1,5 @@
 {
+  "format": "Format des nombres",
   "numberFormatNone": "Numéro",
   "numberFormatCommas": "Nombre avec des virgules",
   "numberFormatPercent": "Pourcentage",

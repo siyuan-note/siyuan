@@ -219,6 +219,18 @@
     &--url {
       text-decoration: underline var(--b3-border-color);
     }
+
+    &--date {
+      display: flex;
+      align-items: center;
+
+      svg {
+        margin: 0 5px;
+        height: 10px;
+        width: 10px;
+        flex-shrink: 0;
+      }
+    }
   }
 
   &__firstcol {

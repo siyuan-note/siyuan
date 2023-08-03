@@ -351,7 +351,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
     if (["text", "url", "email", "phone"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
-        html = `<input type="number" value="${cellElements[0].textContent}" ${style} class="b3-text-field">`;
+        html = `<input type="number" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
     } else if (["select", "mSelect"].includes(type) && blockElement) {
         openMenuPanel({protyle, blockElement, type: "select", cellElements});
         return;

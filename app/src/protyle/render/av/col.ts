@@ -115,6 +115,14 @@ export const getEditHTML = (options: {
 </button>`;
         });
     }
+    if (colData.type === "number") {
+        html += `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="numberFormat">
+    <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.format}</span>
+    <span class="b3-menu__accelerator">${colData.numberFormat}</span>
+</button>`;
+    }
     return `<div class="b3-menu__items">
 ${html}
 <button class="b3-menu__separator"></button>

@@ -1,5 +1,5 @@
 import {getWorkspaceName} from "../util/noRelyPCFunction";
-import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isHuawei, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {processSync} from "../dialog/processSystem";
 import {goBack, goForward} from "../util/backForward";
 import {syncGuide} from "../sync/syncGuide";
@@ -304,13 +304,15 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
 
 const openPlugin = (app: App, target: Element) => {
     const menu = new Menu("topBarPlugin");
-    menu.addItem({
-        icon: "iconSettings",
-        label: window.siyuan.languages.config,
-        click() {
-            openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
-        }
-    });
+    if(!isHuawei()) {
+        menu.addItem({
+            icon: "iconSettings",
+            label: window.siyuan.languages.config,
+            click() {
+                openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+            }
+        });
+    }
     menu.addItem({
         icon: "iconLayoutBottom",
         accelerator: window.siyuan.config.keymap.general.commandPanel.custom,

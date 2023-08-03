@@ -16,6 +16,7 @@ import {initAbout} from "../settings/about";
 import {getRecentDocs} from "./getRecentDocs";
 import {initEditor} from "../settings/editor";
 import {App} from "../../index";
+import {isHuawei} from "../../protyle/util/compatibility";
 
 export const popMenu = () => {
     activeBlur();
@@ -40,9 +41,6 @@ export const initRightMenu = (app: App) => {
     let aiHTML = `<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAI">
         <svg class="b3-menu__icon"><use xlink:href="#iconSparkles"></use></svg><span class="b3-menu__label">AI</span>
     </div>`;
-    const isHuawei = () => {
-        return 0 < window.siyuan.config.system.osPlatform.toLowerCase().indexOf("huawei");
-    };
     if (isHuawei()) {
         // Access to the OpenAI API is no longer supported on Huawei devices https://github.com/siyuan-note/siyuan/issues/8192
         aiHTML = "";

@@ -89,6 +89,10 @@ export const isCtrl = (event: KeyboardEvent | MouseEvent) => {
     }
 };
 
+export const isHuawei = () => {
+    return window.siyuan.config.system.osPlatform.toLowerCase().indexOf("huawei") > -1;
+};
+
 export const isMac = () => {
     return navigator.platform.toUpperCase().indexOf("MAC") > -1;
 };

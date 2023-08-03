@@ -149,6 +149,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		Sorts:   view.Table.Sorts,
 	}
 
+	// 组装列
 	for _, col := range view.Table.Columns {
 		key, getErr := attrView.GetKey(col.ID)
 		if nil != getErr {
@@ -169,6 +170,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		})
 	}
 
+	// 生成行
 	rows := map[string][]*av.Value{}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
@@ -176,6 +178,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 	}
 
+	// 过滤掉不存在的行
 	notFound := []string{}
 	for blockID, _ := range rows {
 		if treenode.GetBlockTree(blockID) == nil {
@@ -186,6 +189,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		delete(rows, blockID)
 	}
 
+	// 生成行单元格
 	for rowID, row := range rows {
 		var tableRow av.TableRow
 		for _, col := range ret.Columns {
@@ -207,11 +211,17 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 				}
 			}
 			tableRow.ID = rowID
+
+			if av.KeyTypeNumber == tableCell.ValueType {
+				tableCell.Value.Number.FormatNumber()
+			}
+
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
 
+	// 自定义排序
 	sortRowIDs := map[string]int{}
 	if 0 < len(view.Table.RowIDs) {
 		for i, rowID := range view.Table.RowIDs {

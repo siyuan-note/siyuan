@@ -32,6 +32,8 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 // AttributeView 描述了属性视图的结构。
@@ -176,12 +178,51 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 }
 
 func (number *ValueNumber) FormatNumber() {
-	switch number.Format {
+	number.FormattedContent = formatNumber(number.Content, number.Format)
+}
+
+func formatNumber(content float64, format NumberFormat) string {
+	switch format {
 	case NumberFormatNone:
-		number.FormattedContent = strconv.FormatFloat(number.Content, 'f', -1, 64)
+		return strconv.FormatFloat(content, 'f', -1, 64)
+	case NumberFormatCommas:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("%d", content)
 	case NumberFormatPercent:
-		s := fmt.Sprintf("%.2f", number.Content*100)
-		number.FormattedContent = strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
+		s := fmt.Sprintf("%.2f", content*100)
+		return strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
+	case NumberFormatUSDollar:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("$%d", content)
+	case NumberFormatYuan:
+		p := message.NewPrinter(language.Chinese)
+		return p.Sprintf("CN¥%d", content)
+	case NumberFormatEuro:
+		p := message.NewPrinter(language.German)
+		return p.Sprintf("€%d", content)
+	case NumberFormatPound:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("£%d", content)
+	case NumberFormatYen:
+		p := message.NewPrinter(language.Japanese)
+		return p.Sprintf("¥%d", content)
+	case NumberFormatRuble:
+		p := message.NewPrinter(language.Russian)
+		return p.Sprintf("₽%d", content)
+	case NumberFormatRupee:
+		p := message.NewPrinter(language.Hindi)
+		return p.Sprintf("₹%d", content)
+	case NumberFormatWon:
+		p := message.NewPrinter(language.Korean)
+		return p.Sprintf("₩%d", content)
+	case NumberFormatCanadianDollar:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("CA$%d", content)
+	case NumberFormatFranc:
+		p := message.NewPrinter(language.French)
+		return p.Sprintf("CHF%d", content)
+	default:
+		return strconv.FormatFloat(content, 'f', -1, 64)
 	}
 }
 

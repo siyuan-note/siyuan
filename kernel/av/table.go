@@ -353,7 +353,8 @@ type TableColumn struct {
 
 	// 以下是某些列类型的特有属性
 
-	Options []*KeySelectOption `json:"options,omitempty"` // 选项列表
+	Options      []*KeySelectOption `json:"options,omitempty"` // 选项列表
+	NumberFormat NumberFormat       `json:"numberFormat"`      // 列数字格式化
 }
 
 type TableRow struct {

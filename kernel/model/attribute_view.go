@@ -158,15 +158,16 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 		}
 
 		ret.Columns = append(ret.Columns, &av.TableColumn{
-			ID:      key.ID,
-			Name:    key.Name,
-			Type:    key.Type,
-			Icon:    key.Icon,
-			Options: key.Options,
-			Wrap:    col.Wrap,
-			Hidden:  col.Hidden,
-			Width:   col.Width,
-			Calc:    col.Calc,
+			ID:           key.ID,
+			Name:         key.Name,
+			Type:         key.Type,
+			Icon:         key.Icon,
+			Options:      key.Options,
+			NumberFormat: key.NumberFormat,
+			Wrap:         col.Wrap,
+			Hidden:       col.Hidden,
+			Width:        col.Width,
+			Calc:         col.Calc,
 		})
 	}
 
@@ -213,7 +214,8 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			tableRow.ID = rowID
 
 			// 格式化数字
-			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number {
+			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number && av.NumberFormatNone != col.NumberFormat {
+				tableCell.Value.Number.Format = col.NumberFormat
 				tableCell.Value.Number.FormatNumber()
 			}
 
@@ -773,6 +775,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 			if keyValues.Key.ID == operation.ID {
 				keyValues.Key.Name = operation.Name
 				keyValues.Key.Type = colType
+				keyValues.Key.NumberFormat = av.NumberFormat(operation.Format)
 				break
 			}
 		}

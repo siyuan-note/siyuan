@@ -116,11 +116,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const linkElement = hasClosestByClassName(event.target, "av__celltext--url");
     if (linkElement) {
-        let prefix = ""
+        let prefix = "";
         if (linkElement.dataset.type === "phone") {
-            prefix = "tel:"
+            prefix = "tel:";
         } else if (linkElement.dataset.type === "email") {
-            prefix = "mailto:"
+            prefix = "mailto:";
         }
         window.open(prefix + linkElement.textContent.trim());
         event.preventDefault();

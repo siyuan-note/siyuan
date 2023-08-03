@@ -212,7 +212,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 			}
 			tableRow.ID = rowID
 
-			if av.KeyTypeNumber == tableCell.ValueType {
+			if av.KeyTypeNumber == tableCell.ValueType && nil != tableCell.Value && nil != tableCell.Value.Number {
 				tableCell.Value.Number.FormatNumber()
 			}
 

@@ -1,4 +1,6 @@
 {
+  "email": "邮箱",
+  "phone": "电话",
   "inboxTip": "打开用户指南搜索 <code class='fn__code'>收集箱</code> 查看使用说明",
   "builtIn": "内置",
   "endDate": "结束时间",

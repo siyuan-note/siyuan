@@ -86,7 +86,7 @@ export const genCellValue = (colType: TAVCol, value: string | {
                     }
                 };
             }
-        } else if (["text", "block", "url"].includes(colType)) {
+        } else if (["text", "block", "url", "phone", "email"].includes(colType)) {
             cellValue = {
                 type: colType,
                 [colType]: {
@@ -348,7 +348,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
     let html = "";
     const style = `style="position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 200)}px;height: ${cellRect.height}px"`;
     const blockElement = hasClosestBlock(cellElements[0]);
-    if (["text", "url"].includes(type)) {
+    if (["text", "url", "email", "phone"].includes(type)) {
         html = `<textarea ${style} class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
     } else if (type === "number") {
         html = `<input type="number" value="${cellElements[0].textContent}" ${style} class="b3-text-field">`;

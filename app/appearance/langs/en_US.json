@@ -1,4 +1,6 @@
 {
+  "email": "Email",
+  "phone": "Phone",
   "inboxTip": "Open the user guide to search the <code class='fn__code'>inbox</code> to view the instructions",
   "builtIn": "Built-in",
   "endDate": "End date",

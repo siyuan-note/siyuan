@@ -1,4 +1,6 @@
 {
+  "email": "E-mail",
+  "phone": "Téléphone",
   "inboxTip": "Ouvrez le guide de l'utilisateur pour rechercher la <code class='fn__code'>boîte de réception</code> pour afficher les instructions",
   "builtIn": "Intégré",
   "endDate": "Date de fin",

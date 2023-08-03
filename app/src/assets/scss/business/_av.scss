@@ -175,28 +175,21 @@
     display: flex;
     align-items: center;
 
-    svg {
-      height: 12px;
-      width: 12px;
-      color: var(--b3-theme-on-surface);
-      margin-right: 5px;
-      flex-shrink: 0;
-    }
-
-    [data-type="block-ref"],
-    [data-type="a"] {
+    [data-type="block-ref"] {
       display: none;
       position: absolute;
       right: 5px;
       font-size: 10px;
     }
 
-    &:hover [data-type="a"] {
-      display: block;
+    .block__icon {
+      position: absolute;
+      right: 5px;
+    }
 
-      &:hover {
-        border-bottom: 0 !important;
-      }
+    &:hover .block__icon {
+      opacity: 1;
+      background-color: var(--b3-theme-background-light) !important;
     }
   }
 
@@ -206,10 +199,17 @@
     align-items: center;
     flex: 1;
     overflow: hidden;
+
+    & > svg {
+      height: 12px;
+      width: 12px;
+      color: var(--b3-theme-on-surface);
+      margin-right: 5px;
+      flex-shrink: 0;
+    }
   }
 
   &__celltext {
-    flex: 1;
     overflow: hidden;
 
     .b3-chip {

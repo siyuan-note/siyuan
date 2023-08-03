@@ -229,6 +229,10 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconCalendar";
         case "url":
             return "iconLink";
+        case "email":
+            return "iconEmail";
+        case "phone":
+            return "iconPhone";
     }
 };
 

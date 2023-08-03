@@ -11,7 +11,7 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
     if (type === "number" || type === "select") {
         return "=";
     }
-    if (["text", "mSelect", "url", "block"].includes(type)) {
+    if (["text", "mSelect", "url", "block", "email", "phone"].includes(type)) {
         return "Contains";
     }
 };
@@ -139,6 +139,8 @@ export const setFilter = (options: {
         case "block":
         case "text":
         case "url":
+        case "phone":
+        case "email":
             selectHTML = `<option ${"=" === options.filter.operator ? "selected" : ""} value="=">${window.siyuan.languages.filterOperatorIs}</option>
 <option ${"!=" === options.filter.operator ? "selected" : ""} value="!=">${window.siyuan.languages.filterOperatorIsNot}</option>
 <option ${"Contains" === options.filter.operator ? "selected" : ""} value="Contains">${window.siyuan.languages.filterOperatorContains}</option>
@@ -212,7 +214,7 @@ export const setFilter = (options: {
                 }
             });
         });
-    } else if (["text", "url", "block"].includes(colData.type)) {
+    } else if (["text", "url", "block", "email", "phone"].includes(colData.type)) {
         menu.addItem({
             iconHTML: "",
             label: `<input style="margin: 4px 0" value="${options.filter.value ? options.filter.value[colData.type as "text"].content : ""}" class="b3-text-field fn__size200">`
@@ -388,8 +390,10 @@ export const getFiltersHTML = (data: IAVTable) => {
                     } else if ("<=" === filter.operator) {
                         filterValue = ` ≤ ${filter.value.number.content}`;
                     }
-                } else if (filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content) {
-                    const content = filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content;
+                } else if (filter.value?.text?.content || filter.value?.block?.content || filter.value?.url?.content ||
+                    filter.value?.phone?.content || filter.value?.email?.content) {
+                    const content = filter.value?.text?.content || filter.value?.block?.content ||
+                        filter.value?.url?.content || filter.value?.phone?.content || filter.value?.email?.content;
                     if (["=", "Contains"].includes(filter.operator)) {
                         filterValue = `: ${content}`;
                     } else if (filter.operator === "Does not contains") {

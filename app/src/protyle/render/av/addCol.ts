@@ -101,9 +101,45 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Link",
+                name: "URL",
                 avID,
                 type: "url",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+        }
+    });
+    menu.addItem({
+        icon: "iconEmail",
+        label: window.siyuan.languages.email,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: "Email",
+                avID,
+                type: "email",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+        }
+    });
+    menu.addItem({
+        icon: "iconPhone",
+        label: window.siyuan.languages.phone,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: "Phone",
+                avID,
+                type: "phone",
                 id
             }], [{
                 action: "removeAttrViewCol",

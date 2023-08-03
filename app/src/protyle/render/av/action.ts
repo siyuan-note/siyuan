@@ -11,6 +11,8 @@ import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
 import {hideElements} from "../../ui/hideElements";
 import {focusByRange} from "../../util/selection";
+import {writeText} from "../../util/compatibility";
+import {showMessage} from "../../../dialog/message";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -98,6 +100,29 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const filtersElement = hasClosestByAttribute(event.target, "data-type", "av-filter");
     if (filtersElement) {
         openMenuPanel({protyle, blockElement, type: "filters"});
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
+    if (copyElement) {
+        writeText(copyElement.previousElementSibling.textContent.trim());
+        showMessage(window.siyuan.languages.copied);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const linkElement = hasClosestByClassName(event.target, "av__celltext--url");
+    if (linkElement) {
+        let prefix = ""
+        if (linkElement.dataset.type === "phone") {
+            prefix = "tel:"
+        } else if (linkElement.dataset.type === "email") {
+            prefix = "mailto:"
+        }
+        window.open(prefix + linkElement.textContent.trim());
         event.preventDefault();
         event.stopPropagation();
         return true;

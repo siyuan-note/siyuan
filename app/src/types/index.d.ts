@@ -36,6 +36,7 @@ type TOperation =
     | "setAttrViewFilters"
     | "setAttrViewSorts"
     | "setAttrViewColCalc"
+    | "updateAttrViewColNumberFormat"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" |
@@ -329,6 +330,7 @@ interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
     avID?: string,  // av
+    format?: string // updateAttrViewColNumberFormat 专享
     keyID?: string // updateAttrViewCell 专享
     rowID?: string // updateAttrViewCell 专享
     data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}

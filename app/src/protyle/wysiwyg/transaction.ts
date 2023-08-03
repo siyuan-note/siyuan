@@ -655,7 +655,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
     } else if (["addAttrViewCol", "insertAttrViewBlock", "updateAttrViewCol", "updateAttrViewColOptions",
         "updateAttrViewColOption", "updateAttrViewCell", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
         "setAttrViewColWrap", "setAttrViewColWidth", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
-        "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol"].includes(operation.action)) {
+        "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat"].includes(operation.action)) {
         refreshAV(protyle, operation);
     }
 };

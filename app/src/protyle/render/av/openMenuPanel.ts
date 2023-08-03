@@ -8,6 +8,7 @@ import {bindSelectEvent, getSelectHTML, addColOptionOrCell, setColOption, remove
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML, setDateValue} from "./date";
+import {formatNumber} from "./number";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -431,7 +432,14 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "numberFormat") {
-
+                    formatNumber({
+                        avPanelElement,
+                        element: target,
+                        protyle: options.protyle,
+                        oldFormat: target.dataset.format,
+                        colId: menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),
+                        avID
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

@@ -1091,6 +1091,7 @@ type Operation struct {
 	SrcIDs []string `json:"srcIDs"` // 用于将块拖拽到属性视图中
 	Name   string   `json:"name"`   // 属性视图列名
 	Typ    string   `json:"type"`   // 属性视图列类型
+	Format string   `json:"format"` // 属性视图列格式化
 	KeyID  string   `json:"keyID"`  // 属性视列 ID
 	RowID  string   `json:"rowID"`  // 属性视图行 ID
 

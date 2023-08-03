@@ -754,6 +754,35 @@ func addAttributeViewColumn(operation *Operation) (err error) {
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewColNumberFormat(operation *Operation) (ret *TxErr) {
+	err := updateAttributeViewColNumberFormat(operation)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func updateAttributeViewColNumberFormat(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if nil != err {
+		return
+	}
+
+	colType := av.KeyType(operation.Typ)
+	switch colType {
+	case av.KeyTypeNumber:
+		for _, keyValues := range attrView.KeyValues {
+			if keyValues.Key.ID == operation.ID && av.KeyTypeNumber == keyValues.Key.Type {
+				keyValues.Key.NumberFormat = av.NumberFormat(operation.Format)
+				break
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doUpdateAttrViewColumn(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColumn(operation)
 	if nil != err {
@@ -775,7 +804,6 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 			if keyValues.Key.ID == operation.ID {
 				keyValues.Key.Name = operation.Name
 				keyValues.Key.Type = colType
-				keyValues.Key.NumberFormat = av.NumberFormat(operation.Format)
 				break
 			}
 		}

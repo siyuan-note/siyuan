@@ -20,6 +20,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/88250/gulu"
@@ -35,7 +36,7 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	initHttpClient()
 	ServerPort = FixedPort
 	Container = container
-	UserAgent = UserAgent + " " + Container
+	UserAgent = UserAgent + " " + Container + "/" + runtime.GOOS
 	httpclient.SetUserAgent(UserAgent)
 	Lang = lang
 

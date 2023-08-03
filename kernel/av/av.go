@@ -61,6 +61,8 @@ const (
 	KeyTypeSelect  KeyType = "select"
 	KeyTypeMSelect KeyType = "mSelect"
 	KeyTypeURL     KeyType = "url"
+	KeyTypeEmail   KeyType = "email"
+	KeyTypePhone   KeyType = "phone"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -100,6 +102,8 @@ type Value struct {
 	Date    *ValueDate     `json:"date,omitempty"`
 	MSelect []*ValueSelect `json:"mSelect,omitempty"`
 	URL     *ValueURL      `json:"url,omitempty"`
+	Email   *ValueEmail    `json:"email,omitempty"`
+	Phone   *ValuePhone    `json:"phone,omitempty"`
 }
 
 func (value *Value) ToJSONString() string {
@@ -228,6 +232,14 @@ type ValueSelect struct {
 }
 
 type ValueURL struct {
+	Content string `json:"content"`
+}
+
+type ValueEmail struct {
+	Content string `json:"content"`
+}
+
+type ValuePhone struct {
 	Content string `json:"content"`
 }
 

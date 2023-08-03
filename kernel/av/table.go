@@ -126,6 +126,12 @@ func (value *Value) Compare(other *Value) int {
 	if nil != value.URL && nil != other.URL {
 		return strings.Compare(value.URL.Content, other.URL.Content)
 	}
+	if nil != value.Email && nil != other.Email {
+		return strings.Compare(value.Email.Content, other.Email.Content)
+	}
+	if nil != value.Phone && nil != other.Phone {
+		return strings.Compare(value.Phone.Content, other.Phone.Content)
+	}
 	return 0
 }
 
@@ -280,6 +286,48 @@ func (value *Value) CompareOperator(other *Value, operator FilterOperator) bool 
 		}
 	}
 
+	if nil != value.Email && nil != other.Email {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Email.Content == other.Email.Content
+		case FilterOperatorIsNotEqual:
+			return value.Email.Content != other.Email.Content
+		case FilterOperatorContains:
+			return strings.Contains(value.Email.Content, other.Email.Content)
+		case FilterOperatorDoesNotContain:
+			return !strings.Contains(value.Email.Content, other.Email.Content)
+		case FilterOperatorStartsWith:
+			return strings.HasPrefix(value.Email.Content, other.Email.Content)
+		case FilterOperatorEndsWith:
+			return strings.HasSuffix(value.Email.Content, other.Email.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Email.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Email.Content)
+		}
+	}
+
+	if nil != value.Phone && nil != other.Phone {
+		switch operator {
+		case FilterOperatorIsEqual:
+			return value.Phone.Content == other.Phone.Content
+		case FilterOperatorIsNotEqual:
+			return value.Phone.Content != other.Phone.Content
+		case FilterOperatorContains:
+			return strings.Contains(value.Phone.Content, other.Phone.Content)
+		case FilterOperatorDoesNotContain:
+			return !strings.Contains(value.Phone.Content, other.Phone.Content)
+		case FilterOperatorStartsWith:
+			return strings.HasPrefix(value.Phone.Content, other.Phone.Content)
+		case FilterOperatorEndsWith:
+			return strings.HasSuffix(value.Phone.Content, other.Phone.Content)
+		case FilterOperatorIsEmpty:
+			return "" == strings.TrimSpace(value.Phone.Content)
+		case FilterOperatorIsNotEmpty:
+			return "" != strings.TrimSpace(value.Phone.Content)
+		}
+	}
+
 	return true
 }
 
@@ -413,6 +461,10 @@ func (table *Table) CalcCols() {
 			table.calcColMSelect(col, i)
 		case KeyTypeURL:
 			table.calcColURL(col, i)
+		case KeyTypeEmail:
+			table.calcColEmail(col, i)
+		case KeyTypePhone:
+			table.calcColPhone(col, i)
 		}
 	}
 }
@@ -901,6 +953,132 @@ func (table *Table) calcColURL(col *TableColumn, colIndex int) {
 		countNotEmpty := 0
 		for _, row := range table.Rows {
 			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.URL && "" != row.Cells[colIndex].Value.URL.Content {
+				countNotEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	}
+}
+
+func (table *Table) calcColEmail(col *TableColumn, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(table.Rows)), NumberFormatNone)}
+	case CalcOperatorCountValues:
+		countValues := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Email && "" != row.Cells[colIndex].Value.Email.Content {
+				countValues++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Email && "" != row.Cells[colIndex].Value.Email.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Email.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Email.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Email || "" == row.Cells[colIndex].Value.Email.Content {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
+	case CalcOperatorCountNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Email && "" != row.Cells[colIndex].Value.Email.Content {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Email || "" == row.Cells[colIndex].Value.Email.Content {
+				countEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Email && "" != row.Cells[colIndex].Value.Email.Content {
+				countNotEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	}
+}
+
+func (table *Table) calcColPhone(col *TableColumn, colIndex int) {
+	switch col.Calc.Operator {
+	case CalcOperatorCountAll:
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(len(table.Rows)), NumberFormatNone)}
+	case CalcOperatorCountValues:
+		countValues := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Phone && "" != row.Cells[colIndex].Value.Phone.Content {
+				countValues++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
+	case CalcOperatorCountUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Phone && "" != row.Cells[colIndex].Value.Phone.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Phone.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Phone.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues), NumberFormatNone)}
+	case CalcOperatorCountEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Phone || "" == row.Cells[colIndex].Value.Phone.Content {
+				countEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty), NumberFormatNone)}
+	case CalcOperatorCountNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Phone && "" != row.Cells[colIndex].Value.Phone.Content {
+				countNotEmpty++
+			}
+		}
+		col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty), NumberFormatNone)}
+	case CalcOperatorPercentEmpty:
+		countEmpty := 0
+		for _, row := range table.Rows {
+			if nil == row.Cells[colIndex] || nil == row.Cells[colIndex].Value || nil == row.Cells[colIndex].Value.Phone || "" == row.Cells[colIndex].Value.Phone.Content {
+				countEmpty++
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentNotEmpty:
+		countNotEmpty := 0
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Phone && "" != row.Cells[colIndex].Value.Phone.Content {
 				countNotEmpty++
 			}
 		}

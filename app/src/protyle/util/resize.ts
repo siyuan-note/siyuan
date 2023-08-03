@@ -5,7 +5,9 @@ import {Constants} from "../../constants";
 
 export const resize = (protyle: IProtyle) => {
     hideElements(["gutter"], protyle);
-    setPadding(protyle);
+    if (setPadding(protyle)) {
+        return;
+    }
     // 不能 clearTimeout，否则 split 时左侧无法 resize
     window.setTimeout(() => {
         if (typeof echarts !== "undefined") {

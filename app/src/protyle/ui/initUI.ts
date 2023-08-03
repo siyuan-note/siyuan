@@ -141,13 +141,6 @@ export const setPadding = (protyle: IProtyle) => {
             min24 = 96;
         }
     }
-    if (protyle.options.render.background) {
-        protyle.background.element.lastElementChild.setAttribute("style", `left:${min16}px`);
-        protyle.background.element.querySelector(".protyle-background__img .protyle-icons").setAttribute("style", `right:${min16}px`);
-    }
-    if (protyle.options.render.title) {
-        protyle.title.element.style.margin = `16px ${min16}px 0 ${min24}px`;
-    }
     let bottomHeight = "16px";
     if (protyle.options.typewriterMode) {
         if (isMobile()) {
@@ -157,9 +150,25 @@ export const setPadding = (protyle: IProtyle) => {
         }
     }
     if (protyle.options.backlinkData) {
+        if ((min16 === min24 && protyle.wysiwyg.element.style.padding === `4px ${min16}px`) ||
+            (min16 !== min24 && protyle.wysiwyg.element.style.padding === `4px ${min16}px 4px ${min24}px`)) {
+            return true;
+        }
         protyle.wysiwyg.element.style.padding = `4px ${min16}px 4px ${min24}px`;
     } else {
+        // https://github.com/siyuan-note/siyuan/issues/8859
+        if ((min16 === min24 && protyle.wysiwyg.element.style.padding === `16px ${min16}px ${bottomHeight}`) ||
+            (min16 !== min24 && protyle.wysiwyg.element.style.padding === `16px ${min16}px ${bottomHeight} ${min24}px`)) {
+            return true;
+        }
         protyle.wysiwyg.element.style.padding = `16px ${min16}px ${bottomHeight} ${min24}px`;
+    }
+    if (protyle.options.render.background) {
+        protyle.background.element.lastElementChild.setAttribute("style", `left:${min16}px`);
+        protyle.background.element.querySelector(".protyle-background__img .protyle-icons").setAttribute("style", `right:${min16}px`);
+    }
+    if (protyle.options.render.title) {
+        protyle.title.element.style.margin = `16px ${min16}px 0 ${min24}px`;
     }
     if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
         setTimeout(() => { // https://github.com/siyuan-note/siyuan/issues/5612

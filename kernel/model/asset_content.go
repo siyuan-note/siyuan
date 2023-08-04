@@ -160,7 +160,9 @@ func (searcher *AssetsSearcher) FullIndex() {
 func NewAssetsSearcher() *AssetsSearcher {
 	return &AssetsSearcher{
 		Parsers: map[string]AssetParser{
-			".txt": &TxtAssetParser{},
+			".txt":      &TxtAssetParser{},
+			".md":       &TxtAssetParser{},
+			".markdown": &TxtAssetParser{},
 		},
 
 		lock: &sync.Mutex{},

@@ -1260,6 +1260,8 @@
     "212": "Il y a quelques défauts dans la version actuelle de la synchronisation des données cloud, veuillez mettre à niveau vers la dernière version. Désolé pour le désagrément",
     "213": "Échec de la vérification cloud, veuillez essayer de mettre à niveau vers la dernière version et de vous reconnecter avant de synchroniser",
     "214": "La fonctionnalité nécessite un numéro de compte de connexion avant de pouvoir être utilisée",
-    "215": "Échec de l'enregistrement : le fichier de destination est utilisé par un autre programme"
+    "215": "Échec de l'enregistrement : le fichier de destination est utilisé par un autre programme",
+    "216": "Reconstruction de l'index des données du contenu des ressources, veuillez patienter...",
+    "217": "[%d/%d] Création d'un index de données de contenu d'actif"
   }
 }

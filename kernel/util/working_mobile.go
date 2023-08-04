@@ -159,6 +159,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 	os.Setenv("TMP", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
 	HistoryDBPath = filepath.Join(TempDir, "history.db")
+	AssetContentDBPath = filepath.Join(TempDir, "asset_content.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
 

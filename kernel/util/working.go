@@ -158,22 +158,23 @@ var (
 	HomeDir, _    = gulu.OS.Home()
 	WorkingDir, _ = os.Getwd()
 
-	WorkspaceDir   string        // 工作空间目录路径
-	WorkspaceLock  *flock.Flock  // 工作空间锁
-	ConfDir        string        // 配置目录路径
-	DataDir        string        // 数据目录路径
-	RepoDir        string        // 仓库目录路径
-	HistoryDir     string        // 数据历史目录路径
-	TempDir        string        // 临时目录路径
-	LogPath        string        // 配置目录下的日志文件 siyuan.log 路径
-	DBName         = "siyuan.db" // SQLite 数据库文件名
-	DBPath         string        // SQLite 数据库文件路径
-	HistoryDBPath  string        // SQLite 历史数据库文件路径
-	BlockTreePath  string        // 区块树文件路径
-	AppearancePath string        // 配置目录下的外观目录 appearance/ 路径
-	ThemesPath     string        // 配置目录下的外观目录下的 themes/ 路径
-	IconsPath      string        // 配置目录下的外观目录下的 icons/ 路径
-	SnippetsPath   string        // 数据目录下的 snippets/ 路径
+	WorkspaceDir       string        // 工作空间目录路径
+	WorkspaceLock      *flock.Flock  // 工作空间锁
+	ConfDir            string        // 配置目录路径
+	DataDir            string        // 数据目录路径
+	RepoDir            string        // 仓库目录路径
+	HistoryDir         string        // 数据历史目录路径
+	TempDir            string        // 临时目录路径
+	LogPath            string        // 配置目录下的日志文件 siyuan.log 路径
+	DBName             = "siyuan.db" // SQLite 数据库文件名
+	DBPath             string        // SQLite 数据库文件路径
+	HistoryDBPath      string        // SQLite 历史数据库文件路径
+	AssetContentDBPath string        // SQLite 资源文件内容数据库文件路径
+	BlockTreePath      string        // 区块树文件路径
+	AppearancePath     string        // 配置目录下的外观目录 appearance/ 路径
+	ThemesPath         string        // 配置目录下的外观目录下的 themes/ 路径
+	IconsPath          string        // 配置目录下的外观目录下的 icons/ 路径
+	SnippetsPath       string        // 数据目录下的 snippets/ 路径
 
 	UIProcessIDs = sync.Map{} // UI 进程 ID
 )
@@ -247,6 +248,7 @@ func initWorkspaceDir(workspaceArg string) {
 	os.Setenv("TMP", osTmpDir)
 	DBPath = filepath.Join(TempDir, DBName)
 	HistoryDBPath = filepath.Join(TempDir, "history.db")
+	AssetContentDBPath = filepath.Join(TempDir, "asset_content.db")
 	BlockTreePath = filepath.Join(TempDir, "blocktree")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
 }

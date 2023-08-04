@@ -49,6 +49,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		model.InitAppearance()
 		sql.InitDatabase(false)
 		sql.InitHistoryDatabase(false)
+		sql.InitAssetContentDatabase(false)
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
 

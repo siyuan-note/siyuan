@@ -47,7 +47,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.6
 	github.com/siyuan-note/dejavu v0.0.0-20230801123133-2edc24064c33
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
-	github.com/siyuan-note/eventbus v0.0.0-20230702081350-6dde667e7112
+	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
 	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524
 	github.com/siyuan-note/httpclient v0.0.0-20230728124841-53922bac2be2
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493

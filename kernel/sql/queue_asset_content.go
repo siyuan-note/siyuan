@@ -31,32 +31,32 @@ import (
 )
 
 var (
-	historyOperationQueue []*historyDBQueueOperation
-	historyDBQueueLock    = sync.Mutex{}
+	assetContentOperationQueue []*assetContentDBQueueOperation
+	assetContentDBQueueLock    = sync.Mutex{}
 
-	historyTxLock = sync.Mutex{}
+	assetContentTxLock = sync.Mutex{}
 )
 
-type historyDBQueueOperation struct {
+type assetContentDBQueueOperation struct {
 	inQueueTime time.Time
-	action      string // index/deletePathPrefix
+	action      string // index/deletePath
 
-	histories  []*History // index
-	pathPrefix string     // deletePathPrefix
+	assetContents []*AssetContent // index
+	path          string          // deletePath
 }
 
-func FlushHistoryTxJob() {
-	task.AppendTask(task.HistoryDatabaseIndexCommit, FlushHistoryQueue)
+func FlushAssetContentTxJob() {
+	task.AppendTask(task.AssetContentDatabaseIndexCommit, FlushAssetContentQueue)
 }
 
-func FlushHistoryQueue() {
-	ops := getHistoryOperations()
+func FlushAssetContentQueue() {
+	ops := getAssetContentOperations()
 	if 1 > len(ops) {
 		return
 	}
 
-	historyTxLock.Lock()
-	defer historyTxLock.Unlock()
+	assetContentTxLock.Lock()
+	defer assetContentTxLock.Unlock()
 	start := time.Now()
 
 	groupOpsTotal := map[string]int{}
@@ -71,7 +71,7 @@ func FlushHistoryQueue() {
 			return
 		}
 
-		tx, err := beginHistoryTx()
+		tx, err := beginAssetContentTx()
 		if nil != err {
 			return
 		}
@@ -80,14 +80,14 @@ func FlushHistoryQueue() {
 		context["current"] = groupOpsCurrent[op.action]
 		context["total"] = groupOpsTotal[op.action]
 
-		if err = execHistoryOp(op, tx, context); nil != err {
+		if err = execAssetContentOp(op, tx, context); nil != err {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
-			eventbus.Publish(util.EvtSQLHistoryRebuild)
+			eventbus.Publish(util.EvtSQLAssetContentRebuild)
 			return
 		}
 
-		if err = commitHistoryTx(tx); nil != err {
+		if err = commitAssetContentTx(tx); nil != err {
 			logging.LogErrorf("commit tx failed: %s", err)
 			return
 		}
@@ -103,45 +103,45 @@ func FlushHistoryQueue() {
 
 	elapsed := time.Now().Sub(start).Milliseconds()
 	if 7000 < elapsed {
-		logging.LogInfof("database history op tx [%dms]", elapsed)
+		logging.LogInfof("database asset content op tx [%dms]", elapsed)
 	}
 }
 
-func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx, context map[string]interface{}) (err error) {
+func execAssetContentOp(op *assetContentDBQueueOperation, tx *sql.Tx, context map[string]interface{}) (err error) {
 	switch op.action {
 	case "index":
-		err = insertHistories(tx, op.histories, context)
-	case "deletePathPrefix":
-		err = deleteHistoriesByPathPrefix(tx, op.pathPrefix, context)
+		err = insertAssetContents(tx, op.assetContents, context)
+	case "delete":
+		err = deleteAssetContentsByPath(tx, op.path, context)
 	default:
-		msg := fmt.Sprintf("unknown history operation [%s]", op.action)
+		msg := fmt.Sprintf("unknown asset content operation [%s]", op.action)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 	}
 	return
 }
 
-func DeleteHistoriesByPathPrefixQueue(pathPrefix string) {
-	historyDBQueueLock.Lock()
-	defer historyDBQueueLock.Unlock()
+func DeleteAssetContentsByPathQueue(path string) {
+	assetContentTxLock.Lock()
+	defer assetContentTxLock.Unlock()
 
-	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "deletePathPrefix", pathPrefix: pathPrefix}
-	historyOperationQueue = append(historyOperationQueue, newOp)
+	newOp := &assetContentDBQueueOperation{inQueueTime: time.Now(), action: "deletePath", path: path}
+	assetContentOperationQueue = append(assetContentOperationQueue, newOp)
 }
 
-func IndexHistoriesQueue(histories []*History) {
-	historyDBQueueLock.Lock()
-	defer historyDBQueueLock.Unlock()
+func IndexAssetContentsQueue(assetContents []*AssetContent) {
+	assetContentTxLock.Lock()
+	defer assetContentTxLock.Unlock()
 
-	newOp := &historyDBQueueOperation{inQueueTime: time.Now(), action: "index", histories: histories}
-	historyOperationQueue = append(historyOperationQueue, newOp)
+	newOp := &assetContentDBQueueOperation{inQueueTime: time.Now(), action: "index", assetContents: assetContents}
+	assetContentOperationQueue = append(assetContentOperationQueue, newOp)
 }
 
-func getHistoryOperations() (ops []*historyDBQueueOperation) {
-	historyDBQueueLock.Lock()
-	defer historyDBQueueLock.Unlock()
+func getAssetContentOperations() (ops []*assetContentDBQueueOperation) {
+	assetContentTxLock.Lock()
+	defer assetContentTxLock.Unlock()
 
-	ops = historyOperationQueue
-	historyOperationQueue = nil
+	ops = assetContentOperationQueue
+	assetContentOperationQueue = nil
 	return
 }

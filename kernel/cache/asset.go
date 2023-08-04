@@ -79,7 +79,7 @@ func LoadAssets() {
 		assetsCache[path] = &Asset{
 			HName:   hName,
 			Path:    path,
-			Updated: info.ModTime().UnixMilli(),
+			Updated: info.ModTime().Unix(),
 		}
 		return nil
 	})

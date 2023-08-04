@@ -303,4 +303,16 @@ func subscribeSQLEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
+
+	eventbus.Subscribe(eventbus.EvtSQLInsertAssetContent, func(context map[string]interface{}) {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+			return
+		}
+
+		current := context["current"].(int)
+		total := context["total"]
+		msg := fmt.Sprintf(Conf.Language(217), current, total)
+		util.SetBootDetails(msg)
+		util.ContextPushMsg(context, msg)
+	})
 }

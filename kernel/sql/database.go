@@ -45,8 +45,9 @@ import (
 )
 
 var (
-	db        *sql.DB
-	historyDB *sql.DB
+	db             *sql.DB
+	historyDB      *sql.DB
+	assetContentDB *sql.DB
 )
 
 func init() {
@@ -193,7 +194,36 @@ func initDBTables() {
 	}
 }
 
+func initDBConnection() {
+	if nil != db {
+		closeDatabase()
+	}
+	dsn := util.DBPath + "?_journal_mode=WAL" +
+		"&_synchronous=OFF" +
+		"&_mmap_size=2684354560" +
+		"&_secure_delete=OFF" +
+		"&_cache_size=-20480" +
+		"&_page_size=32768" +
+		"&_busy_timeout=7000" +
+		"&_ignore_check_constraints=ON" +
+		"&_temp_store=MEMORY" +
+		"&_case_sensitive_like=OFF"
+	var err error
+	db, err = sql.Open("sqlite3_extended", dsn)
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create database failed: %s", err)
+	}
+	db.SetMaxIdleConns(20)
+	db.SetMaxOpenConns(20)
+	db.SetConnMaxLifetime(365 * 24 * time.Hour)
+}
+
+var initHistoryDatabaseLock = sync.Mutex{}
+
 func InitHistoryDatabase(forceRebuild bool) {
+	initHistoryDatabaseLock.Lock()
+	defer initHistoryDatabaseLock.Unlock()
+
 	initHistoryDBConnection()
 
 	if !forceRebuild && gulu.File.IsExist(util.HistoryDBPath) {
@@ -228,7 +258,7 @@ func initHistoryDBConnection() {
 	var err error
 	historyDB, err = sql.Open("sqlite3_extended", dsn)
 	if nil != err {
-		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create database failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create history database failed: %s", err)
 	}
 	historyDB.SetMaxIdleConns(3)
 	historyDB.SetMaxOpenConns(3)
@@ -243,11 +273,34 @@ func initHistoryDBTables() {
 	}
 }
 
-func initDBConnection() {
-	if nil != db {
-		closeDatabase()
+var initAssetContentDatabaseLock = sync.Mutex{}
+
+func InitAssetContentDatabase(forceRebuild bool) {
+	initAssetContentDatabaseLock.Lock()
+	defer initAssetContentDatabaseLock.Unlock()
+
+	initAssetContentDBConnection()
+
+	if !forceRebuild && gulu.File.IsExist(util.AssetContentDBPath) {
+		return
 	}
-	dsn := util.DBPath + "?_journal_mode=WAL" +
+
+	assetContentDB.Close()
+	if err := os.RemoveAll(util.AssetContentDBPath); nil != err {
+		logging.LogErrorf("remove assets database file [%s] failed: %s", util.AssetContentDBPath, err)
+		return
+	}
+
+	initAssetContentDBConnection()
+	initAssetContentDBTables()
+}
+
+func initAssetContentDBConnection() {
+	if nil != assetContentDB {
+		assetContentDB.Close()
+	}
+
+	dsn := util.AssetContentDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_mmap_size=2684354560" +
 		"&_secure_delete=OFF" +
@@ -258,13 +311,21 @@ func initDBConnection() {
 		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
-	db, err = sql.Open("sqlite3_extended", dsn)
+	assetContentDB, err = sql.Open("sqlite3_extended", dsn)
 	if nil != err {
-		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create database failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create assets database failed: %s", err)
 	}
-	db.SetMaxIdleConns(20)
-	db.SetMaxOpenConns(20)
-	db.SetConnMaxLifetime(365 * 24 * time.Hour)
+	assetContentDB.SetMaxIdleConns(3)
+	assetContentDB.SetMaxOpenConns(3)
+	assetContentDB.SetConnMaxLifetime(365 * 24 * time.Hour)
+}
+
+func initAssetContentDBTables() {
+	assetContentDB.Exec("DROP TABLE asset_contents_fts_case_insensitive")
+	_, err := assetContentDB.Exec("CREATE VIRTUAL TABLE asset_contents_fts_case_insensitive USING fts5(id UNINDEXED, name, ext, path, size UNINDEXED, updated UNINDEXED, content, tokenize=\"siyuan case_insensitive\")")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [asset_contents_fts_case_insensitive] failed: %s", err)
+	}
 }
 
 var (
@@ -1161,6 +1222,18 @@ func beginTx() (tx *sql.Tx, err error) {
 	return
 }
 
+func commitTx(tx *sql.Tx) (err error) {
+	if nil == tx {
+		logging.LogErrorf("tx is nil")
+		return errors.New("tx is nil")
+	}
+
+	if err = tx.Commit(); nil != err {
+		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
+	}
+	return
+}
+
 func beginHistoryTx() (tx *sql.Tx, err error) {
 	if tx, err = historyDB.Begin(); nil != err {
 		logging.LogErrorf("begin history tx failed: %s\n  %s", err, logging.ShortStack())
@@ -1183,7 +1256,17 @@ func commitHistoryTx(tx *sql.Tx) (err error) {
 	return
 }
 
-func commitTx(tx *sql.Tx) (err error) {
+func beginAssetContentTx() (tx *sql.Tx, err error) {
+	if tx, err = assetContentDB.Begin(); nil != err {
+		logging.LogErrorf("begin asset content tx failed: %s\n  %s", err, logging.ShortStack())
+		if strings.Contains(err.Error(), "database is locked") {
+			os.Exit(logging.ExitCodeReadOnlyDatabase)
+		}
+	}
+	return
+}
+
+func commitAssetContentTx(tx *sql.Tx) (err error) {
 	if nil == tx {
 		logging.LogErrorf("tx is nil")
 		return errors.New("tx is nil")

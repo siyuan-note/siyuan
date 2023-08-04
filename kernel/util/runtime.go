@@ -408,5 +408,6 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 const (
 	EvtConfPandocInitialized = "conf.pandoc.initialized"
 
-	EvtSQLHistoryRebuild = "sql.history.rebuild"
+	EvtSQLHistoryRebuild      = "sql.history.rebuild"
+	EvtSQLAssetContentRebuild = "sql.assetContent.rebuild"
 )

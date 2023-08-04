@@ -524,10 +524,6 @@ export const globalShortcut = (app: App) => {
                 });
                 dockHtml = dockHtml + "</ul>";
             }
-            let range: Range;
-            if (getSelection().rangeCount > 0) {
-                range = getSelection().getRangeAt(0).cloneRange();
-            }
             hideElements(["dialog"]);
             switchDialog = new Dialog({
                 title: window.siyuan.languages.switchTab,
@@ -538,11 +534,6 @@ export const globalShortcut = (app: App) => {
     </div>
     <div class="switch-doc__path"></div>
 </div>`,
-                destroyCallback: () => {
-                    if (range && range.getBoundingClientRect().height !== 0) {
-                        focusByRange(range);
-                    }
-                }
             });
             // 需移走光标，否则编辑器会继续监听并执行按键操作
             switchDialog.element.querySelector("input").focus();
@@ -656,9 +647,6 @@ export const globalShortcut = (app: App) => {
         const matchDock = getAllDocks().find(item => {
             if (matchHotKey(item.hotkey, event)) {
                 getDockByType(item.type).toggleModel(item.type);
-                if (document.activeElement) {
-                    (document.activeElement as HTMLElement).blur();
-                }
                 event.preventDefault();
                 return true;
             }

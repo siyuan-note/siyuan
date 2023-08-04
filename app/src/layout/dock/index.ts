@@ -4,7 +4,7 @@ import {Wnd} from "../Wnd";
 import {Tab} from "../Tab";
 import {Files} from "./Files";
 import {Outline} from "./Outline";
-import {getAllModels} from "../getAll";
+import {getAllModels, getAllTabs} from "../getAll";
 import {Bookmark} from "./Bookmark";
 import {Tag} from "./Tag";
 import {Graph} from "./Graph";
@@ -312,6 +312,9 @@ export class Dock {
                     }
                 });
                 if (needFocus) {
+                    if (document.activeElement) {
+                        (document.activeElement as HTMLElement).blur();
+                    }
                     this.showDock();
                     return;
                 }
@@ -331,6 +334,17 @@ export class Dock {
                 this.resizeElement.classList.add("fn__none");
                 this.hideDock();
             }
+            // 关闭 dock 后设置光标
+            if (!document.querySelector(".layout__center .layout__wnd--active")) {
+                const currentElement = document.querySelector(".layout__center .layout-tab-bar .item--focus")
+                getAllTabs().find(item => {
+                    if (item.id === currentElement.getAttribute("data-id")) {
+                        item.parent.switchTab(item.headElement);
+                        return true;
+                    }
+                })
+            }
+            return;
         } else {
             this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).forEach(item => {
                 item.classList.remove("dock__item--active", "dock__item--activefocus");
@@ -474,6 +488,9 @@ export class Dock {
                 setTimeout(() => {
                     this.resizeElement.classList.remove("fn__none");
                 }, 200);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
+            }
+            if (document.activeElement) {
+                (document.activeElement as HTMLElement).blur();
             }
         }
 

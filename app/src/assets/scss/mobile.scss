@@ -299,6 +299,11 @@
     border: 0;
     color: var(--b3-theme-on-surface);
 
+    span {
+      padding: 6px;
+      white-space: nowrap;
+    }
+
     &[disabled] {
       opacity: 0.38;
     }

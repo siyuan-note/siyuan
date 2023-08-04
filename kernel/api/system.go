@@ -128,6 +128,9 @@ func getEmojiConf(c *gin.Context) {
 						if strings.HasPrefix(name, ".") {
 							continue
 						}
+						if subCustomEmoji.IsDir() {
+							continue
+						}
 
 						addCustomEmoji(customEmoji.Name()+"/"+name, &items)
 					}

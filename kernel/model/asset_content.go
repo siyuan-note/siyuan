@@ -17,6 +17,12 @@
 package model
 
 import (
+	"io/fs"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/eventbus"
@@ -25,10 +31,47 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"io/fs"
-	"path/filepath"
-	"strings"
 )
+
+var assetContentSearcher = NewAssetsSearcher()
+
+func IndexAssetContent(absPath string) {
+	assetsDir := util.GetDataAssetsAbsPath()
+
+	ext := strings.ToLower(filepath.Ext(absPath))
+	parser, found := assetContentSearcher.Parsers[ext]
+	if !found {
+		return
+	}
+
+	result := parser.Parse(absPath)
+	if nil == result {
+		return
+	}
+
+	info, err := os.Stat(absPath)
+	if nil != err {
+		logging.LogErrorf("stat [%s] failed: %s", absPath, err)
+		return
+	}
+
+	p := "assets" + filepath.ToSlash(strings.TrimPrefix(absPath, assetsDir))
+
+	assetContents := []*sql.AssetContent{
+		{
+			ID:      ast.NewNodeID(),
+			Name:    filepath.Base(p),
+			Ext:     filepath.Ext(p),
+			Path:    p,
+			Size:    info.Size(),
+			Updated: info.ModTime().Unix(),
+			Content: result.Content,
+		},
+	}
+
+	sql.DeleteAssetContentsByPathQueue(p)
+	sql.IndexAssetContentsQueue(assetContents)
+}
 
 func ReindexAssetContent() {
 	task.AppendTask(task.AssetContentDatabaseIndexFull, fullReindexAssetContent)
@@ -39,8 +82,7 @@ func fullReindexAssetContent() {
 	util.PushMsg(Conf.Language(216), 7*1000)
 	sql.InitAssetContentDatabase(true)
 
-	assetsSearch := NewAssetsSearcher()
-	assetsSearch.Index()
+	assetContentSearcher.FullIndex()
 	return
 }
 
@@ -59,12 +101,13 @@ var (
 )
 
 type AssetsSearcher struct {
-	AssetsDir string
-	Parsers   map[string]AssetParser
+	Parsers map[string]AssetParser
+
+	lock *sync.Mutex
 }
 
-func (searcher *AssetsSearcher) Index() {
-	assetsDir := searcher.AssetsDir
+func (searcher *AssetsSearcher) FullIndex() {
+	assetsDir := util.GetDataAssetsAbsPath()
 	if !gulu.File.IsDir(assetsDir) {
 		return
 	}
@@ -116,10 +159,11 @@ func (searcher *AssetsSearcher) Index() {
 
 func NewAssetsSearcher() *AssetsSearcher {
 	return &AssetsSearcher{
-		AssetsDir: util.GetDataAssetsAbsPath(),
 		Parsers: map[string]AssetParser{
 			".txt": &TxtAssetParser{},
 		},
+
+		lock: &sync.Mutex{},
 	}
 }
 

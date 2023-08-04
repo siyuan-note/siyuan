@@ -342,9 +342,8 @@ export class Dock {
                         item.parent.switchTab(item.headElement);
                         return true;
                     }
-                })
+                });
             }
-            return;
         } else {
             this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).forEach(item => {
                 item.classList.remove("dock__item--active", "dock__item--activefocus");

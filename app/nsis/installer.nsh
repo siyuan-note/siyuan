@@ -37,9 +37,6 @@ Caption "${PRODUCT_NAME} ${VERSION}"
             /SD IDNO IDYES AcceptedRMWorkspace IDNO SkippedRMWrokspace
             AcceptedRMWorkspace:
                 RMDir /r "$PROFILE\SiYuan\"
-                RMDir /r "$PROFILE\Desktop\conf\"
-                RMDir /r "$PROFILE\Desktop\data\"
-                RMDir /r "$PROFILE\Desktop\temp\"
             SkippedRMWrokspace:
     ${EndIf}
 !macroend

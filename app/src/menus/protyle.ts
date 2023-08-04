@@ -23,7 +23,7 @@ import {copyPlainText, readText, setStorageVal, writeText} from "../protyle/util
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {pasteAsPlainText, pasteText} from "../protyle/util/paste";
+import {pasteAsPlainText, pasteEscaped, pasteText} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
 import {openGlobalSearch} from "../search/util";
@@ -411,6 +411,9 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
 export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     const range = getEditorRange(nodeElement);
     window.siyuan.menus.menu.remove();
+    /// #if MOBILE
+    protyle.toolbar.showContent(protyle, range, nodeElement);
+    /// #else
     if (range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji")) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCopy",
@@ -464,6 +467,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.paste,
+            icon: "iconPaste",
             accelerator: "⌘V",
             async click() {
                 if (document.queryCommandSupported("paste")) {
@@ -488,46 +492,14 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.pasteEscaped,
-            async click() {
-                try {
-                    // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
-                    let clipText = await readText();
-                    // https://github.com/siyuan-note/siyuan/issues/5446
-                    // A\B\C\D\
-                    // E
-                    // task-blog-2~default~baiduj 无法原义粘贴含有 `~foo~` 的文本 https://github.com/siyuan-note/siyuan/issues/5523
-
-                    // 这里必须多加一个反斜杆，因为 Lute 在进行 Markdown 嵌套节点转换平铺标记节点时会剔除 Backslash 节点，
-                    // 多加入的一个反斜杆会作为文本节点保留下来，后续 Spin 时刚好用于转义标记符 https://github.com/siyuan-note/siyuan/issues/6341
-                    clipText = clipText.replace(/\\/g, "\\\\\\\\")
-                        .replace(/\*/g, "\\\\\\*")
-                        .replace(/\_/g, "\\\\\\_")
-                        .replace(/\[/g, "\\\\\\[")
-                        .replace(/\]/g, "\\\\\\]")
-                        .replace(/\!/g, "\\\\\\!")
-                        .replace(/\`/g, "\\\\\\`")
-                        .replace(/\</g, "\\\\\\<")
-                        .replace(/\>/g, "\\\\\\>")
-                        .replace(/\&/g, "\\\\\\&")
-                        .replace(/\~/g, "\\\\\\~")
-                        .replace(/\{/g, "\\\\\\{")
-                        .replace(/\}/g, "\\\\\\}")
-                        .replace(/\(/g, "\\\\\\(")
-                        .replace(/\)/g, "\\\\\\)")
-                        .replace(/\=/g, "\\\\\\=")
-                        .replace(/\#/g, "\\\\\\#")
-                        .replace(/\$/g, "\\\\\\$")
-                        .replace(/\^/g, "\\\\\\^")
-                        .replace(/\|/g, "\\\\\\|");
-                    pasteText(protyle, clipText, nodeElement);
-                } catch (e) {
-                    console.log(e);
-                }
+            click() {
+                pasteEscaped(protyle, nodeElement);
             }
         }).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.selectAll,
+        icon: "iconSelect",
         accelerator: "⌘A",
         click() {
             selectAll(protyle, nodeElement, range);
@@ -544,6 +516,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }).element);
         }
     }
+    /// #endif
     if (protyle?.app?.plugins) {
         emitOpenMenu({
             plugins: protyle.app.plugins,
@@ -669,7 +642,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         iconHTML: "",
         label: `<textarea style="margin: 4px 0" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.imageURL}">${imgElement.getAttribute("src")}</textarea>`,
         bind(element) {
-            element.querySelector("textarea").addEventListener("input", (event:InputEvent) => {
+            element.querySelector("textarea").addEventListener("input", (event: InputEvent) => {
                 if (event.isComposing) {
                     return;
                 }

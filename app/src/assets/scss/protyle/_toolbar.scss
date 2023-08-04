@@ -14,7 +14,8 @@
       background-color: transparent;
       height: 29px;
       box-sizing: border-box;
-      font-size: 0;
+      font-size: 10px;
+      white-space: nowrap;
       padding: 1px 6px;
 
       &:focus {

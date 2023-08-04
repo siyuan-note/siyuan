@@ -6,7 +6,7 @@ import {
     focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionPosition,
+    getSelectionPosition, selectAll,
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
@@ -15,7 +15,7 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {openByMobile, setStorageVal} from "../util/compatibility";
+import {copyPlainText, openByMobile, readText, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -45,6 +45,7 @@ import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {pasteAsPlainText, pasteEscaped, pasteText} from "../util/paste";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -835,6 +836,7 @@ export class Toolbar {
         const autoHeight = () => {
             textElement.style.height = textElement.scrollHeight + "px";
             if (isMobile()) {
+                setPosition(this.subElement, 0, 0);
                 return;
             }
             if (this.subElement.firstElementChild.getAttribute("data-drag") === "true") {
@@ -1258,6 +1260,8 @@ export class Toolbar {
         /// #if !MOBILE
         const nodeRect = languageElement.getBoundingClientRect();
         setPosition(this.subElement, nodeRect.left, nodeRect.bottom, nodeRect.height);
+        /// #else
+        setPosition(this.subElement, 0, 0);
         /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
@@ -1434,6 +1438,8 @@ export class Toolbar {
             const rangePosition = getSelectionPosition(nodeElement, range);
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
             (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
+            /// #else
+            setPosition(this.subElement, 0, 0);
             /// #endif
         });
     }
@@ -1499,6 +1505,8 @@ export class Toolbar {
             /// #if !MOBILE
             const rangePosition = getSelectionPosition(nodeElement, range);
             setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+            /// #else
+            setPosition(this.subElement, 0, 0);
             /// #endif
         });
     }
@@ -1605,6 +1613,8 @@ export class Toolbar {
         /// #if !MOBILE
         const rangePosition = getSelectionPosition(nodeElement, range);
         setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+        /// #else
+        setPosition(this.subElement, 0, 0);
         /// #endif
         this.element.classList.add("fn__none");
         inputElement.select();
@@ -1620,5 +1630,101 @@ export class Toolbar {
             }
             this.subElement.querySelector(".b3-list--background").innerHTML = html;
         });
+    }
+
+    public showContent(protyle: IProtyle, range: Range, nodeElement: Element) {
+        this.range = range;
+        hideElements(["hint"], protyle);
+
+        this.subElement.style.width = "auto";
+        this.subElement.style.padding = "0 8px";
+        let html = ""
+        const hasCopy = range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji");
+        if (hasCopy) {
+            html += `<button class="protyle-toolbar__item" data-action="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>`
+            if (!protyle.disabled) {
+                html += `<button class="protyle-toolbar__item" data-action="cut"><svg><use xlink:href="#iconCut"></use></svg></button>
+<button class="protyle-toolbar__item" data-action="delete"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`
+            }
+        }
+        if (!protyle.disabled) {
+            html += `<button class="protyle-toolbar__item" data-action="paste"><svg><use xlink:href="#iconPaste"></use></svg></button>
+<button class="protyle-toolbar__item" data-action="select"><svg><use xlink:href="#iconSelect"></use></svg></button>`
+        }
+        if (hasCopy || !protyle.disabled) {
+            html += `<button class="protyle-toolbar__item" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>`
+        }
+        this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
+        this.subElement.lastElementChild.addEventListener("click", async (event) => {
+            const btnElemen = hasClosestByClassName(event.target as HTMLElement, "protyle-toolbar__item");
+            if (!btnElemen) {
+                return
+            }
+            const action = btnElemen.getAttribute("data-action");
+            if (action === "copy") {
+                focusByRange(getEditorRange(nodeElement));
+                document.execCommand("copy");
+                this.subElement.classList.add("fn__none");
+            } else if (action === "cut") {
+                focusByRange(getEditorRange(nodeElement));
+                document.execCommand("cut");
+                this.subElement.classList.add("fn__none");
+            } else if (action === "delete") {
+                const currentRange = getEditorRange(nodeElement);
+                currentRange.insertNode(document.createElement("wbr"));
+                const oldHTML = nodeElement.outerHTML;
+                currentRange.extractContents();
+                focusByWbr(nodeElement, currentRange);
+                focusByRange(currentRange);
+                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                this.subElement.classList.add("fn__none");
+            } else if (action === "paste") {
+                if (document.queryCommandSupported("paste")) {
+                    document.execCommand("paste");
+                } else {
+                    try {
+                        const clipText = await readText();
+                        pasteText(protyle, clipText, nodeElement);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+                this.subElement.classList.add("fn__none");
+            } else if (action === "select") {
+                selectAll(protyle, nodeElement, range);
+                this.subElement.classList.add("fn__none");
+            } else if (action === "copyPlainText") {
+                focusByRange(getEditorRange(nodeElement));
+                const cloneContents = getSelection().getRangeAt(0).cloneContents();
+                cloneContents.querySelectorAll('[data-type="backslash"]').forEach(item => {
+                    item.firstElementChild.remove();
+                });
+                copyPlainText(cloneContents.textContent);
+                this.subElement.classList.add("fn__none");
+            } else if (action === "pasteAsPlainText") {
+                focusByRange(getEditorRange(nodeElement));
+                pasteAsPlainText(protyle);
+                this.subElement.classList.add("fn__none");
+            } else if (action === "pasteEscaped") {
+                pasteEscaped(protyle, nodeElement);
+                this.subElement.classList.add("fn__none");
+            } else if (action === "back") {
+                this.subElement.lastElementChild.innerHTML = html;
+            } else if (action === "more") {
+                this.subElement.lastElementChild.innerHTML = `<button class="protyle-toolbar__item${hasCopy ? "" : " fn__none"}" data-action="copyPlainText">${window.siyuan.languages.copyPlainText}</button>
+<div class="protyle-toolbar__divider${hasCopy ? "" : " fn__none"}"></div>
+<button class="protyle-toolbar__item${protyle.disabled ? " fn__none" : ""}" data-action="pasteAsPlainText">${window.siyuan.languages.pasteAsPlainText}</button>
+<div class="protyle-toolbar__divider${protyle.disabled ? " fn__none" : ""}"></div>
+<button class="protyle-toolbar__item${protyle.disabled ? " fn__none" : ""}" data-action="pasteEscaped">${window.siyuan.languages.pasteEscaped}</button>
+<div class="protyle-toolbar__divider${protyle.disabled ? " fn__none" : ""}"></div>
+<button class="protyle-toolbar__item" data-action="back"><svg><use xlink:href="#iconBack"></use></svg></button>`
+                setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+            }
+        });
+        this.subElement.classList.remove("fn__none");
+        this.subElementCloseCB = undefined;
+        this.element.classList.add("fn__none");
+        const rangePosition = getSelectionPosition(nodeElement, range);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
     }
 }

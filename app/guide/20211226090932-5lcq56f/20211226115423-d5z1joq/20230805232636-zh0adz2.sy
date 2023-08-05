@@ -1,0 +1,122 @@
+{
+	"ID": "20230805232636-zh0adz2",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f451",
+		"id": "20230805232636-zh0adz2",
+		"title": "會員特權",
+		"updated": "20230805232803"
+	},
+	"Children": [
+		{
+			"ID": "20230805232747-clx5a75",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232747-clx5a75",
+				"updated": "20230805232747"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "會員特權分為兩個部分："
+				}
+			]
+		},
+		{
+			"ID": "20230805232747-qg8pf8q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805232747-qg8pf8q",
+				"updated": "20230805232803"
+			},
+			"Children": [
+				{
+					"ID": "20230805232747-3qusyrc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232747-3qusyrc",
+						"updated": "20230805232755"
+					},
+					"Children": [
+						{
+							"ID": "20230805232747-ohpvoq9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232747-ohpvoq9",
+								"updated": "20230805232755"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "年付訂閱"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226121232-23s79xr",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "雲端服務"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805232747-gk289de",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232747-gk289de",
+						"updated": "20230805232803"
+					},
+					"Children": [
+						{
+							"ID": "20230805232747-civtylq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232747-civtylq",
+								"updated": "20230805232803"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "一次性付費"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230805232719-04mqbcx",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "功能特性"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230805232747-m6ck3ps",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232747-m6ck3ps",
+				"updated": "20230805232747"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "這兩部分需要分別購買，其中年付訂閱包含了一次性付費功能特性，即在訂閱期內可以使用所有付費功能特性。"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,36 @@
+{
+	"ID": "20230805232134-3d6mx2k",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230805232134-3d6mx2k",
+		"title": "Search asset content",
+		"updated": "20230805232250"
+	},
+	"Children": [
+		{
+			"ID": "20230805232134-cpi0qgh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232134-cpi0qgh",
+				"updated": "20230805232250"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This feature is still under development, please pay attention to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/8874",
+					"TextMarkTextContent": "https://github.com/siyuan-note/siyuan/issues/8874"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

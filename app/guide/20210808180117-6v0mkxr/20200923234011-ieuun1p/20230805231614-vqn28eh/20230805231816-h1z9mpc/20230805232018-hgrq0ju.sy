@@ -1,0 +1,277 @@
+{
+	"ID": "20230805232018-hgrq0ju",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230805232018-hgrq0ju",
+		"title": "Connect with third-party cloud storage",
+		"updated": "20230805234114"
+	},
+	"Children": [
+		{
+			"ID": "20230805232156-36i5l2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232156-36i5l2n",
+				"updated": "20230805232213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please configure in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud Storage Provider"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, currently supported:"
+				}
+			]
+		},
+		{
+			"ID": "20230805232156-kbi85az",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805232156-kbi85az",
+				"updated": "20230805232156"
+			},
+			"Children": [
+				{
+					"ID": "20230805232156-7qr1p7z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232156-7qr1p7z",
+						"updated": "20230805232156"
+					},
+					"Children": [
+						{
+							"ID": "20230805232156-sttblb7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232156-sttblb7",
+								"updated": "20230805232156"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "S3 compatible object storage services, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://s.qiniu.com/VbQfeu",
+									"TextMarkTextContent": "Qiniu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.aliyun.com/product/oss?userCode=yqovuas2",
+									"TextMarkTextContent": "Aliyun OSS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.cloudflare.com/",
+									"TextMarkTextContent": "Cloudflare R2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805232156-vqfp7fz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232156-vqfp7fz",
+						"updated": "20230805232156"
+					},
+					"Children": [
+						{
+							"ID": "20230805232156-tliw65p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232156-tliw65p",
+								"updated": "20230805232156"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "WebDAV protocol, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://infini-cloud.net/",
+									"TextMarkTextContent": "InfiniCLOUD"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://koofr.eu/",
+									"TextMarkTextContent": "Koofr"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230805232156-0vkqwwy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232156-0vkqwwy",
+				"updated": "20230805232156"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Synchronizing data through third-party cloud storage services is also "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210721112229-fp97j3c",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "end-to-end encrypted"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and third-party cloud storage service providers cannot obtain our plaintext data."
+				}
+			]
+		},
+		{
+			"ID": "20230805233729-4b7gh6h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805233729-4b7gh6h",
+				"updated": "20230805233729"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: In order to ensure the availability of data synchronization, please ensure:"
+				}
+			]
+		},
+		{
+			"ID": "20230805233729-3jx41zo",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805233729-3jx41zo",
+				"updated": "20230805234114"
+			},
+			"Children": [
+				{
+					"ID": "20230805233729-mqkxeu2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805233729-mqkxeu2",
+						"updated": "20230805233805"
+					},
+					"Children": [
+						{
+							"ID": "20230805233729-1oo1zy1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805233729-1oo1zy1",
+								"updated": "20230805233805"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The system time of multiple devices is consistent, please control the deviation within one minute"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805233729-951k3f8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805233729-951k3f8",
+						"updated": "20230805234114"
+					},
+					"Children": [
+						{
+							"ID": "20230805233729-3bxjki0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805233729-3bxjki0",
+								"updated": "20230805234114"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The network is stable (For example, in mainland China, please do not use services in non-mainland China)"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

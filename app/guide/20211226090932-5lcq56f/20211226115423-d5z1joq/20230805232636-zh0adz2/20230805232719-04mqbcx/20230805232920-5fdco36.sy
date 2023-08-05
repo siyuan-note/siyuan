@@ -1,0 +1,36 @@
+{
+	"ID": "20230805232920-5fdco36",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230805232920-5fdco36",
+		"title": "搜索資源文件內容",
+		"updated": "20230805233014"
+	},
+	"Children": [
+		{
+			"ID": "20230805232920-8xpdtdi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232920-8xpdtdi",
+				"updated": "20230805233014"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "該特性還在開發中，請關注 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/8874",
+					"TextMarkTextContent": "https://github.com/siyuan-note/siyuan/issues/8874"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

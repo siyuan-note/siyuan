@@ -1,0 +1,185 @@
+{
+	"ID": "20230805231816-h1z9mpc",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f387",
+		"id": "20230805231816-h1z9mpc",
+		"title": "Function Features",
+		"updated": "20230805232135"
+	},
+	"Children": [
+		{
+			"ID": "20230805231959-n3hxspj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805231959-n3hxspj",
+				"updated": "20230805232013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Membership function features include:"
+				}
+			]
+		},
+		{
+			"ID": "20230805231959-y72erst",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805231959-y72erst",
+				"updated": "20230805232135"
+			},
+			"Children": [
+				{
+					"ID": "20230805231959-ilc4bqc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805231959-ilc4bqc",
+						"updated": "20230805232119"
+					},
+					"Children": [
+						{
+							"ID": "20230805231959-z7a3zw1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805231959-z7a3zw1",
+								"updated": "20230805232119"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230805232018-hgrq0ju",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Connect with third-party cloud storage"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805231959-dxodu0t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805231959-dxodu0t",
+						"updated": "20230805232135"
+					},
+					"Children": [
+						{
+							"ID": "20230805231959-war6lc7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805231959-war6lc7",
+								"updated": "20230805232135"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230805232134-3d6mx2k",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Search asset content"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230805231959-002m9re",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805231959-002m9re",
+				"updated": "20230805231959"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Membership functions need to be paid before they can be used:"
+				}
+			]
+		},
+		{
+			"ID": "20230805231959-ccaewzp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805231959-ccaewzp",
+				"updated": "20230805231959"
+			},
+			"Children": [
+				{
+					"ID": "20230805231959-yuzsshz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805231959-yuzsshz",
+						"updated": "20230805231959"
+					},
+					"Children": [
+						{
+							"ID": "20230805231959-lcqdp46",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805231959-lcqdp46",
+								"updated": "20230805231959"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/one-time-pay/siyuan",
+									"TextMarkTextContent": "Mainland China"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805231959-c2me81s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805231959-c2me81s",
+						"updated": "20230805231959"
+					},
+					"Children": [
+						{
+							"ID": "20230805231959-1ck6bju",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805231959-1ck6bju",
+								"updated": "20230805231959"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/one-time-pay/siyuan",
+									"TextMarkTextContent": "Non-Mainland China"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

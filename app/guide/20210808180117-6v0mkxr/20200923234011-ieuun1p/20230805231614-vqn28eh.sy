@@ -1,0 +1,122 @@
+{
+	"ID": "20230805231614-vqn28eh",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f451",
+		"id": "20230805231614-vqn28eh",
+		"title": "Member's privileges",
+		"updated": "20230805231924"
+	},
+	"Children": [
+		{
+			"ID": "20230805231739-lefcwty",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805231739-lefcwty",
+				"updated": "20230805231739"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Membership privileges are divided into two parts:"
+				}
+			]
+		},
+		{
+			"ID": "20230805231739-xyiqizg",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805231739-xyiqizg",
+				"updated": "20230805231859"
+			},
+			"Children": [
+				{
+					"ID": "20230805231739-h3vti5x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805231739-h3vti5x",
+						"updated": "20230805231805"
+					},
+					"Children": [
+						{
+							"ID": "20230805231739-kfudetr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805231739-kfudetr",
+								"updated": "20230805231805"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Annual subscription "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210808180303-v9awwp0",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Cloud Services"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805231739-xsjhaq5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805231739-xsjhaq5",
+						"updated": "20230805231859"
+					},
+					"Children": [
+						{
+							"ID": "20230805231739-bor00kg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805231739-bor00kg",
+								"updated": "20230805231859"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "One-time payment "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230805231816-h1z9mpc",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Function Features"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230805231739-8ld7004",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805231739-8ld7004",
+				"updated": "20230805231924"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "These two parts need to be purchased separately, and the annual subscription includes one-time payment features, that is, all function features can be used during the subscription period."
+				}
+			]
+		}
+	]
+}

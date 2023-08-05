@@ -1,0 +1,273 @@
+{
+	"ID": "20210721101227-pi8f6ga",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210721101227-pi8f6ga",
+		"title": "存储空间",
+		"updated": "20220708095808"
+	},
+	"Children": [
+		{
+			"ID": "20220708095733-mckzi0l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220708095733-mckzi0l",
+				"updated": "20220708095738"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210721101227-ihokmao",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721101227-ihokmao",
+				"updated": "20220703223351"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "云端存储空间大小为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "8G"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，分为以下部分："
+				}
+			]
+		},
+		{
+			"ID": "20210721102906-c702lun",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721102906-c702lun",
+				"updated": "20210721103222"
+			},
+			"Children": [
+				{
+					"ID": "20210721102908-okwizz5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721102908-okwizz5",
+						"updated": "20210721103035"
+					},
+					"Children": [
+						{
+							"ID": "20210721102908-70v7srz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721102908-70v7srz",
+								"updated": "20210721103035"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步数据：提供给同步功能使用，数据是加密的"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708095522-2sfdlai",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220708095522-2sfdlai",
+						"updated": "20220708095532"
+					},
+					"Children": [
+						{
+							"ID": "20220708095522-7qv01fs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708095522-7qv01fs",
+								"updated": "20220708095532"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "备份数据：提供给备份功能使用，数据是加密的"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721102922-6m5qwbk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721102922-6m5qwbk",
+						"updated": "20210721103222"
+					},
+					"Children": [
+						{
+							"ID": "20210721102922-aqvitfe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721102922-aqvitfe",
+								"updated": "20210721103222"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "资源文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：提供给复制到公众号、知乎和语雀等使用，HTTPS CDN"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210721110423-5m6vo52",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721110423-5m6vo52",
+				"updated": "20220708095720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "端到端加密"
+				}
+			]
+		},
+		{
+			"ID": "20210525215124-ifljpao",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210525215124-ifljpao",
+				"updated": "20220708095808"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同步数据和备份数据使用端到端加密传输，云端不保存任何明文数据。"
+				}
+			]
+		},
+		{
+			"ID": "20210525215316-438zsvu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210525215316-438zsvu",
+				"updated": "20210525220426"
+			},
+			"Children": [
+				{
+					"ID": "20220703222217-vfqq9x9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703222217-vfqq9x9",
+						"updated": "20220703222217"
+					},
+					"Children": [
+						{
+							"ID": "20220703222217-cvrogps",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703222217-cvrogps",
+								"updated": "20220703222217"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "密钥仅存储在本地，不会上传到云端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210525220029-7myvzw8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210525220029-7myvzw8",
+						"updated": "20210721111300"
+					},
+					"Children": [
+						{
+							"ID": "20210525220029-c9i66lb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210525220029-c9i66lb",
+								"updated": "20210721111300"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密和解密过程完全在本地设备上进行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210525220320-a9li63c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210525220320-a9li63c",
+						"updated": "20210525220426"
+					},
+					"Children": [
+						{
+							"ID": "20210525220320-h0rm7h0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210525220320-h0rm7h0",
+								"updated": "20210525220426"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密算法为业界公认安全的 AES GCM"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

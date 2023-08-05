@@ -1,0 +1,185 @@
+{
+	"ID": "20230805232719-04mqbcx",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f387",
+		"id": "20230805232719-04mqbcx",
+		"title": "功能特性",
+		"updated": "20230805232932"
+	},
+	"Children": [
+		{
+			"ID": "20230805232858-noh8nse",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232858-noh8nse",
+				"updated": "20230805232858"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "會員功能特性包括："
+				}
+			]
+		},
+		{
+			"ID": "20230805232858-0cdermn",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805232858-0cdermn",
+				"updated": "20230805232932"
+			},
+			"Children": [
+				{
+					"ID": "20230805232858-0kifi13",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232858-0kifi13",
+						"updated": "20230805232916"
+					},
+					"Children": [
+						{
+							"ID": "20230805232858-ms730n0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232858-ms730n0",
+								"updated": "20230805232916"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230805232903-erdoerp",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "對接第三方雲端存儲"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805232858-tgkyp09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232858-tgkyp09",
+						"updated": "20230805232932"
+					},
+					"Children": [
+						{
+							"ID": "20230805232858-wkq1if1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232858-wkq1if1",
+								"updated": "20230805232932"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230805232920-5fdco36",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "搜索資源文件內容"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230805232858-9xarpkb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232858-9xarpkb",
+				"updated": "20230805232858"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "會員功能特需要付費後才能使用："
+				}
+			]
+		},
+		{
+			"ID": "20230805232858-hx2lziu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805232858-hx2lziu",
+				"updated": "20230805232858"
+			},
+			"Children": [
+				{
+					"ID": "20230805232858-3y7xwlh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232858-3y7xwlh",
+						"updated": "20230805232858"
+					},
+					"Children": [
+						{
+							"ID": "20230805232858-kclie6f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232858-kclie6f",
+								"updated": "20230805232858"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/one-time-pay/siyuan",
+									"TextMarkTextContent": "中國大陸地區"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805232858-1dor6ze",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232858-1dor6ze",
+						"updated": "20230805232858"
+					},
+					"Children": [
+						{
+							"ID": "20230805232858-u7kfuwa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232858-u7kfuwa",
+								"updated": "20230805232858"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/one-time-pay/siyuan",
+									"TextMarkTextContent": "非中國大陸地區"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

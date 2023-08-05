@@ -1,0 +1,302 @@
+{
+	"ID": "20230802114825-2jkkct7",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230802114825-2jkkct7",
+		"title": "Inbox",
+		"updated": "20230802115024"
+	},
+	"Children": [
+		{
+			"ID": "20230802114900-1zcvrjv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230802114900-1zcvrjv",
+				"updated": "20230802115327"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230802114900-tff1e21",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230802114900-tff1e21",
+				"updated": "20230802115024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We can collect external data through the cloud inbox, and then obtain these data from the cloud through the inbox panel in SiYuan and send them to the notebook for further sorting."
+				}
+			]
+		},
+		{
+			"ID": "20230802115337-7ehbupv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230802115337-7ehbupv",
+				"updated": "20230802115337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20230802114928-gcmnpw5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230802114928-gcmnpw5",
+				"updated": "20230802115037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Currently, the following methods are provided for data access."
+				}
+			]
+		},
+		{
+			"ID": "20230802114913-l5bxvst",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230802114913-l5bxvst",
+				"updated": "20230802114914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "API"
+				}
+			]
+		},
+		{
+			"ID": "20230802114940-rxa544n",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230802114940-rxa544n",
+				"updated": "20230802114940"
+			},
+			"Children": [
+				{
+					"ID": "20230802114940-o6vf7yb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230802114940-o6vf7yb",
+						"updated": "20230802114940"
+					},
+					"Children": [
+						{
+							"ID": "20230802114940-5ig0gfm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230802114940-5ig0gfm",
+								"updated": "20230802115054"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "POST "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://liuyun.io/apis/siyuan/inbox/addCloudShorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230802114940-shylzs1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230802114940-shylzs1",
+						"updated": "20230802114940"
+					},
+					"Children": [
+						{
+							"ID": "20230802114940-jsg0fq5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230802114940-jsg0fq5",
+								"updated": "20230802114940"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Body"
+								}
+							]
+						},
+						{
+							"ID": "20230802114940-vnx4oi9",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20230802114940-vnx4oi9",
+								"updated": "20230802114940"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "anNvbg=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "{\n    \"title\": \"A simple text title\",\n    \"content\": \"Content with **Markdown**.\"\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230802114940-z2139xt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230802114940-z2139xt",
+						"updated": "20230802114940"
+					},
+					"Children": [
+						{
+							"ID": "20230802114940-r5paolz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230802114940-r5paolz",
+								"updated": "20230802115200"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The authentication method is the HTTP request header "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Authorization"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, the value is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "token {Your API Token}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (note case and spaces), API Token can be found at "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/settings/account",
+									"TextMarkTextContent": "LiuYun - Settings - Account"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230802115301-5syqyra",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230802115301-5syqyra",
+				"updated": "20230802115307"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20230802115301-qo09t8m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230802115301-qo09t8m",
+				"updated": "20230802115314"
+			},
+			"Children": [
+				{
+					"ID": "20230802115301-ebyp74j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230802115301-ebyp74j",
+						"updated": "20230802115314"
+					},
+					"Children": [
+						{
+							"ID": "20230802115301-ola9hu3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230802115301-ola9hu3",
+								"updated": "20230802115314"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Frequency limit: Up to 128 inserts per 24 hours"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

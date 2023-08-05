@@ -1,0 +1,277 @@
+{
+	"ID": "20230805232903-erdoerp",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230805232903-erdoerp",
+		"title": "對接第三方雲端存儲",
+		"updated": "20230805233635"
+	},
+	"Children": [
+		{
+			"ID": "20230805232945-7gjof94",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232945-7gjof94",
+				"updated": "20230805232955"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雲端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雲端存儲服務提供商"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中進行選擇和配置，目前已經支持："
+				}
+			]
+		},
+		{
+			"ID": "20230805232945-ugjx8sl",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805232945-ugjx8sl",
+				"updated": "20230805232945"
+			},
+			"Children": [
+				{
+					"ID": "20230805232945-t45nd4k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232945-t45nd4k",
+						"updated": "20230805232945"
+					},
+					"Children": [
+						{
+							"ID": "20230805232945-nr6un47",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232945-nr6un47",
+								"updated": "20230805232945"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "S3 兼容的對象存儲服務，比如"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://s.qiniu.com/VbQfeu",
+									"TextMarkTextContent": "七牛雲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.aliyun.com/product/oss?userCode=yqovuas2",
+									"TextMarkTextContent": "阿里雲 OSS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.cloudflare.com/",
+									"TextMarkTextContent": "Cloudflare R2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805232945-2dksutx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805232945-2dksutx",
+						"updated": "20230805232945"
+					},
+					"Children": [
+						{
+							"ID": "20230805232945-ayx9zfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805232945-ayx9zfr",
+								"updated": "20230805232945"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "WebDAV 協議，比如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://infini-cloud.net/",
+									"TextMarkTextContent": "InfiniCLOUD"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://koofr.eu/",
+									"TextMarkTextContent": "Koofr"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230805232945-r48wifb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805232945-r48wifb",
+				"updated": "20230805232945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通過第三方雲端存儲服務同步資料同樣是"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211227210109-0f92zh2",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "端到端加密"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "的，第三方雲端存儲服務提供商無法獲得我們的明文資料。"
+				}
+			]
+		},
+		{
+			"ID": "20230805233635-snj106h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230805233635-snj106h",
+				"updated": "20230805233635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：為了保障數據同步的可用性，請確保："
+				}
+			]
+		},
+		{
+			"ID": "20230805233635-1g7253n",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230805233635-1g7253n",
+				"updated": "20230805233635"
+			},
+			"Children": [
+				{
+					"ID": "20230805233635-psiklqc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805233635-psiklqc",
+						"updated": "20230805233635"
+					},
+					"Children": [
+						{
+							"ID": "20230805233635-uq3wdb2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805233635-uq3wdb2",
+								"updated": "20230805233635"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "多設備系統時間一致，誤差請控制在一分鐘以內"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230805233635-aeqfx8q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230805233635-aeqfx8q",
+						"updated": "20230805233635"
+					},
+					"Children": [
+						{
+							"ID": "20230805233635-tsbfefo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230805233635-tsbfefo",
+								"updated": "20230805233635"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "網絡穩定（比如中國大陸地區請勿使用非中大陸地區的服務）"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230806002102"
+		"updated": "20230806004418"
 	},
 	"Children": [
 		{
@@ -674,7 +674,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220526112905-4lumsx2",
-				"updated": "20220808132844"
+				"updated": "20230806002258"
 			},
 			"Children": [
 				{
@@ -715,7 +715,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221202214433-gt06q1x"
+						"id": "20221202214433-gt06q1x",
+						"updated": "20230806002258"
 					},
 					"Children": [
 						{
@@ -723,7 +724,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221202214433-gyqo6sf",
-								"updated": "20221202214435"
+								"updated": "20230806002258"
 							},
 							"Children": [
 								{
@@ -1700,19 +1701,29 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230406111448-rqncida",
-				"updated": "20230627214818"
+				"updated": "20230806004418"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20211226121232-23s79xr",
+					"TextMarkBlockRefID": "20230805232636-zh0adz2",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "雲端服務"
+					"TextMarkTextContent": "會員特權"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "需要付費訂閱後才能使用。"
+					"Data": "需要付費後才能使用，請參考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/pricing.html",
+					"TextMarkTextContent": "定價"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

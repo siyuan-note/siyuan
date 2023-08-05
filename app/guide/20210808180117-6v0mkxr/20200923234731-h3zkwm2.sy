@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230806002204"
+		"updated": "20230806004444"
 	},
 	"Children": [
 		{
@@ -1707,19 +1707,29 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230627215819-kfmomdw",
-				"updated": "20230627215826"
+				"updated": "20230806004444"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20210808180303-v9awwp0",
+					"TextMarkBlockRefID": "20230805231614-vqn28eh",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "Cloud services"
+					"TextMarkTextContent": "Member\u0026apos;s privileges"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " require a paid subscription to use."
+					"Data": " can only be used after payment, please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/pricing.html",
+					"TextMarkTextContent": "Pricing"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

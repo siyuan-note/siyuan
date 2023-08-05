@@ -39,8 +39,6 @@ Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
 
 ## 🔮 Features
 
-### Free
-
 Most features are free, even for commercial use.
 
 * Content block
@@ -72,13 +70,7 @@ Most features are free, even for commercial use.
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 * Community marketplace
 
-### Paid subscription
-
-Cloud services require a paid subscription.
-
-* VIP identity
-* End-to-end encrypted data sync and backup (including S3/WebDAV)
-* Cloud assets hosting
+Some features are only available to paid members, for more details please refer to [Pricing](https://b3log.org/siyuan/en/pricing.html).
 
 ## 🏗️ Architecture design and open source ecosystem
 
@@ -208,12 +200,7 @@ The data is saved in the workspace folder, in the workspace data folder:
 
 Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted.
 
-Although it does not support third-party sync disks, it supports third-party cloud storage services, which can be configured in <kbd>Settings</kbd> - <kbd>Cloud</kbd> - <kbd>Cloud Storage Provider</kbd>, currently supported:
-
-* S3 compatible object storage services, such as [Qiniu](https://s.qiniu.com/VbQfeu), [Aliyun OSS](https://www.aliyun.com/product/oss?userCode=yqovuas2), [Cloudflare R2](https://www.cloudflare.com/)
-* WebDAV protocol, such as [TeraCLOUD](https://teracloud.jp/), [Koofr](https://koofr.eu/)
-
-Synchronizing data through third-party cloud storage services is also end-to-end encrypted, and third-party cloud storage service providers cannot obtain our plaintext data.
+Although it does not support third-party sync disks, it supports connect with third-party cloud storage (Member's privileges).
 
 In addition, you can also consider manually exporting and importing data to achieve data synchronization:
 
@@ -237,9 +224,7 @@ For more details, please refer to [Development Guide](https://github.com/siyuan-
 * If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
 * If it is installed by manual installation package, please download the installation package again to install
 
-You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or by following [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
-
-**Note**: Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory
+You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official website](https://b3log.org/siyuan/) or [GitHub Releases](https ://github.com/siyuan-note/siyuan/releases) to get the new version.
 
 ### Is there any note for deleting docs?
 
@@ -276,7 +261,7 @@ The first sub-block under the list item is the block icon omitted. You can move 
 
 Most features are free, even for commercial use.
 
-[Cloud Service](https://b3log.org/siyuan/en/pricing.html) require a paid subscription to use.
+Member's privileges can only be used after payment, please refer to [Pricing](https://b3log.org/siyuan/en/pricing.html).
 
 ## 🙏 Acknowledgement
 

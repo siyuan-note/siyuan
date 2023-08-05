@@ -201,9 +201,12 @@ ${config.page}/${response.data.pageCount || 1}`;
 };
 
 let toolbarSearchTimeout = 0;
-const updateSearchResult = (config: ISearchOption, element: Element) => {
+const updateSearchResult = (config: ISearchOption, element: Element, rmCurrentCriteria = false) => {
     clearTimeout(toolbarSearchTimeout);
     toolbarSearchTimeout = window.setTimeout(() => {
+        if (rmCurrentCriteria) {
+            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+        }
         const loadingElement = element.querySelector(".fn__loading--top");
         loadingElement.classList.remove("fn__none");
         const previousElement = element.querySelector('[data-type="previous"]');
@@ -254,14 +257,14 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
             return;
         }
         config.page = 1;
-        updateSearchResult(config, element);
+        updateSearchResult(config, element, true);
     });
     searchInputElement.addEventListener("input", (event: InputEvent) => {
         if (event && event.isComposing) {
             return;
         }
         config.page = 1;
-        updateSearchResult(config, element);
+        updateSearchResult(config, element, true);
     });
     searchInputElement.addEventListener("blur", () => {
         if (config.removed) {
@@ -274,7 +277,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
     replaceInputElement.value = config.r || "";
 
     const criteriaData: ISearchOption[] = [];
-    initCriteriaMenu(element.querySelector("#criteria"), criteriaData);
+    initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
 
     const searchListElement = element.querySelector("#searchList") as HTMLElement;
     element.addEventListener("click", (event: MouseEvent) => {
@@ -299,6 +302,8 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 break;
             } else if (type === "set-criteria") {
                 config.removed = false;
+                target.parentElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
+                target.classList.add("b3-chip--current");
                 criteriaData.find(item => {
                     if (item.name === target.innerText.trim()) {
                         updateConfig(element, item, config);
@@ -329,7 +334,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 config.hPath = "";
                 element.querySelector("#searchPath").classList.add("fn__none");
                 config.page = 1;
-                updateSearchResult(config, element);
+                updateSearchResult(config, element, true);
                 const includeElement = element.querySelector('[data-type="include"]');
                 includeElement.classList.remove("toolbar__icon--active");
                 includeElement.setAttribute("disabled", "disabled");
@@ -388,7 +393,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             includeElement.setAttribute("disabled", "disabled");
                         }
                         config.page = 1;
-                        updateSearchResult(config, element);
+                        updateSearchResult(config, element, true);
                     });
                 }, [], undefined, window.siyuan.languages.specifyPath);
                 event.stopPropagation();
@@ -410,7 +415,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                     });
                 }
                 config.page = 1;
-                updateSearchResult(config, element);
+                updateSearchResult(config, element, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -424,7 +429,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
             } else if (type === "more") {
                 moreMenu(config, criteriaData, element, () => {
                     config.page = 1;
-                    updateSearchResult(config, element);
+                    updateSearchResult(config, element, true);
                 }, () => {
                     updateConfig(element, {
                         removed: true,
@@ -453,6 +458,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                         }
                     }, config);
                 });
+                element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 window.siyuan.menus.menu.element.style.zIndex = "220";
                 window.siyuan.menus.menu.fullscreen();
                 event.stopPropagation();
@@ -460,7 +466,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 break;
             } else if (type === "filter") {
                 filterMenu(config, () => {
-                    updateSearchResult(config, element);
+                    updateSearchResult(config, element, true);
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -468,7 +474,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
             } else if (type === "query") {
                 queryMenu(config, () => {
                     config.page = 1;
-                    updateSearchResult(config, element);
+                    updateSearchResult(config, element, true);
                 });
                 window.siyuan.menus.menu.element.style.zIndex = "220";
                 window.siyuan.menus.menu.fullscreen();

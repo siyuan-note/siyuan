@@ -194,8 +194,14 @@ func (parser *TxtAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
+	content := normalizeAssetContent(string(data))
 	ret = &AssetParseResult{
-		Content: string(data),
+		Content: content,
 	}
+	return
+}
+
+func normalizeAssetContent(content string) (ret string) {
+	ret = strings.Join(strings.Fields(content), " ")
 	return
 }

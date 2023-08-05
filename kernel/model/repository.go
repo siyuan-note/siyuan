@@ -634,7 +634,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 			return
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3:
-		if !IsThirdPartySyncPaid() {
+		if !IsOneTimePaid() {
 			util.PushErrMsg(Conf.Language(214), 5000)
 			return
 		}
@@ -676,7 +676,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 			return
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3:
-		if !IsThirdPartySyncPaid() {
+		if !IsOneTimePaid() {
 			util.PushErrMsg(Conf.Language(214), 5000)
 			return
 		}
@@ -722,7 +722,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 			return
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3:
-		if !IsThirdPartySyncPaid() {
+		if !IsOneTimePaid() {
 			util.PushErrMsg(Conf.Language(214), 5000)
 			return
 		}
@@ -754,7 +754,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 			return
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3:
-		if !IsThirdPartySyncPaid() {
+		if !IsOneTimePaid() {
 			util.PushErrMsg(Conf.Language(214), 5000)
 			return
 		}
@@ -790,7 +790,7 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 			return
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3:
-		if !IsThirdPartySyncPaid() {
+		if !IsOneTimePaid() {
 			util.PushErrMsg(Conf.Language(214), 5000)
 			return
 		}

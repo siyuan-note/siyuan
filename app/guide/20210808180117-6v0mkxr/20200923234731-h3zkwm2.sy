@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230802130902"
+		"updated": "20230805233206"
 	},
 	"Children": [
 		{
@@ -470,173 +470,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221112205611-eafvvel",
-				"updated": "20221112205652"
+				"updated": "20230805233206"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Although it does not support third-party sync disks, it supports third-party cloud storage services, which can be configured in "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Cloud"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Cloud Storage Provider"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​, currently supported:"
-				}
-			]
-		},
-		{
-			"ID": "20221112205611-b4zhc8p",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20221112205611-b4zhc8p",
-				"updated": "20221112205611"
-			},
-			"Children": [
-				{
-					"ID": "20221112205611-97prfc9",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221112205611-97prfc9",
-						"updated": "20221112205611"
-					},
-					"Children": [
-						{
-							"ID": "20221112205611-uzrdaj3",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221112205611-uzrdaj3",
-								"updated": "20221112210327"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "S3 compatible object storage services, such as "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://s.qiniu.com/VbQfeu",
-									"TextMarkTextContent": "Qiniu"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://www.aliyun.com/product/oss?userCode=yqovuas2",
-									"TextMarkTextContent": "Aliyun OSS"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://www.cloudflare.com/",
-									"TextMarkTextContent": "Cloudflare R2"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221112205611-2igreuz",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221112205611-2igreuz",
-						"updated": "20221112205611"
-					},
-					"Children": [
-						{
-							"ID": "20221112205611-j3l9b8r",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221112205611-j3l9b8r",
-								"updated": "20221112210118"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "WebDAV protocol, such as "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://infini-cloud.net/",
-									"TextMarkTextContent": "InfiniCLOUD"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://koofr.eu/",
-									"TextMarkTextContent": "Koofr"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20221112205611-5r7862d",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20221112205611-5r7862d",
-				"updated": "20221112211041"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Synchronizing data through third-party cloud storage services is also "
+					"Data": "Although it does not support third-party sync disks, it supports "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20210721112229-fp97j3c",
+					"TextMarkBlockRefID": "20230805232018-hgrq0ju",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "end-to-end encrypted"
+					"TextMarkTextContent": "Connect with third-party cloud storage"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", and third-party cloud storage service providers cannot obtain our plaintext data."
+					"Data": "."
 				}
 			]
 		},

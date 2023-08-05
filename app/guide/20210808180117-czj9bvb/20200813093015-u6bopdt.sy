@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230802131007"
+		"updated": "20220808181532"
 	},
 	"Children": [
 		{
@@ -470,170 +470,18 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "不支持通过第三方同步盘进行数据同步，否则可能会导致数据损坏。"
-				}
-			]
-		},
-		{
-			"ID": "20221112210648-7737myk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20221112210648-7737myk"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "虽然不支持第三方同步盘，但是支持第三方云端存储服务，可在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "云端"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "云端存储服务提供商"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中进行选择和配置，目前已经支持："
-				}
-			]
-		},
-		{
-			"ID": "20221112204518-3qo0gc8",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20221112204518-3qo0gc8",
-				"updated": "20221112204519"
-			},
-			"Children": [
-				{
-					"ID": "20221112204519-8xbk4th",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221112204519-8xbk4th",
-						"updated": "20221112204519"
-					},
-					"Children": [
-						{
-							"ID": "20221112204519-52kxq65",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221112204519-52kxq65",
-								"updated": "20221112210256"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "S3 兼容的对象存储服务，比如"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://s.qiniu.com/VbQfeu",
-									"TextMarkTextContent": "七牛云"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "、"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://www.aliyun.com/product/oss?userCode=yqovuas2",
-									"TextMarkTextContent": "阿里云 OSS"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "、"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://www.cloudflare.com/",
-									"TextMarkTextContent": "Cloudflare R2"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221112204524-19sdb6j",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221112204524-19sdb6j"
-					},
-					"Children": [
-						{
-							"ID": "20221112204524-3ipwudy",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221112204524-3ipwudy",
-								"updated": "20221112210014"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "WebDAV 协议，比如 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://infini-cloud.net/",
-									"TextMarkTextContent": "InfiniCLOUD"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20221112204704-cmwcneg",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20221112204704-cmwcneg",
-				"updated": "20221112211001"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "通过第三方云端存储服务同步数据同样是"
+					"Data": "不支持通过第三方同步盘进行数据同步，否则可能会导致数据损坏。虽然不支持第三方同步盘，但是支持"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20210721110423-5m6vo52",
+					"TextMarkBlockRefID": "20230805230131-sn7obzb",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "端到端加密"
+					"TextMarkTextContent": "对接第三方云端存储"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "的，第三方云端存储服务提供商无法获得我们的明文数据。"
+					"Data": "。"
 				}
 			]
 		},

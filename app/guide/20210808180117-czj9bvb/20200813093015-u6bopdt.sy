@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20220808181532"
+		"updated": "20230806002027"
 	},
 	"Children": [
 		{
@@ -960,7 +960,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100742-liorixq",
-				"updated": "20230617085407"
+				"updated": "20230806002027"
 			},
 			"Children": [
 				{
@@ -1001,7 +1001,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，也可以通过关注 "
+					"Data": "​，也可以通过关注"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/",
+					"TextMarkTextContent": "官方网站"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "或者 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1012,25 +1022,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " 来获取新版本。"
-				}
-			]
-		},
-		{
-			"ID": "20220909100800-1g0ueym",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220909100800-1g0ueym",
-				"updated": "20220909100829"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "：切勿将工作空间放置于安装目录下，因为更新版本会清空安装目录下的所有文件"
 				}
 			]
 		},

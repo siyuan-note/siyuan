@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230805233124"
+		"updated": "20230806002102"
 	},
 	"Children": [
 		{
@@ -962,7 +962,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100912-rvyxrtl",
-				"updated": "20230617085423"
+				"updated": "20230806002102"
 			},
 			"Children": [
 				{
@@ -976,7 +976,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -985,7 +985,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "​​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -994,7 +994,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中 "
+					"Data": "​​ 中 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1003,7 +1003,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，也可以通過關注 "
+					"Data": "​​，也可以通過關注"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/",
+					"TextMarkTextContent": "官方網站"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "或者 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1014,25 +1024,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " 來獲取新版本。"
-				}
-			]
-		},
-		{
-			"ID": "20220909100912-ng52828",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220909100912-ng52828",
-				"updated": "20220909100912"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "：切勿將工作空間放置於安裝目錄下，因為更新版本會清空安裝目錄下的所有文件"
 				}
 			]
 		},

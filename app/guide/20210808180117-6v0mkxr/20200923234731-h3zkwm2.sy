@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230805233206"
+		"updated": "20230806002204"
 	},
 	"Children": [
 		{
@@ -967,7 +967,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100946-9eyc3uh",
-				"updated": "20230617085510"
+				"updated": "20230806002204"
 			},
 			"Children": [
 				{
@@ -1008,7 +1008,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, or by following "
+					"Data": "​, or pay attention to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/",
+					"TextMarkTextContent": "Official website"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1019,25 +1029,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " to get the new version."
-				}
-			]
-		},
-		{
-			"ID": "20220909100946-k0d6ska",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220909100946-k0d6ska",
-				"updated": "20220909100946"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ": Do not place the workspace in the installation directory, because the updated version will clear all files in the installation directory"
 				}
 			]
 		},

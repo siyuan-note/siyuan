@@ -488,6 +488,8 @@ func FullReindex() {
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	task.AppendTask(task.ReloadUI, util.ReloadUI)
+
+	// TODO ReindexAssetContent()
 }
 
 func fullReindex() {

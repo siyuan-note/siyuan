@@ -124,11 +124,12 @@ func getEmojiConf(c *gin.Context) {
 					}
 
 					for _, subCustomEmoji := range subCustomEmojis {
-						name = subCustomEmoji.Name()
-						if strings.HasPrefix(name, ".") {
+						if subCustomEmoji.IsDir() {
 							continue
 						}
-						if subCustomEmoji.IsDir() {
+
+						name = subCustomEmoji.Name()
+						if strings.HasPrefix(name, ".") {
 							continue
 						}
 

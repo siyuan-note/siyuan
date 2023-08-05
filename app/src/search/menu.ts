@@ -1,5 +1,5 @@
 import {Dialog} from "../dialog";
-import {isMobile} from "../util/functions";
+import {isMobile, objEquals} from "../util/functions";
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
@@ -229,8 +229,9 @@ export const saveCriterion = (config: ISearchOption,
         fetchPost("/api/storage/setCriterion", {criterion}, () => {
             saveDialog.destroy();
             const criteriaElement = element.querySelector("#criteria");
+            criteriaElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
             criteriaElement.classList.remove("fn__none");
-            criteriaElement.firstElementChild.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.firstElementChild.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
+            criteriaElement.firstElementChild.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.firstElementChild.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
         });
     });
 };
@@ -379,12 +380,18 @@ export const moreMenu = async (config: ISearchOption,
     }).element);
 };
 
-export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[]) => {
+export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[], config: ISearchOption) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
         let html = "";
         response.data.forEach((item: ISearchOption, index: number) => {
             data.push(item);
-            html += `<div data-type="set-criteria" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+            let isSame = false;
+            if (item.group === config.group && item.hPath === config.hPath && item.hasReplace === config.hasReplace &&
+                item.k === config.k && item.method === config.method && item.r === config.r &&
+                item.sort === config.sort && objEquals(item.types, config.types) && objEquals(item.idPath, config.idPath)) {
+                isSame = true;
+            }
+            html += `<div data-type="set-criteria" class="${isSame ? "b3-chip--current " : ""}b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
         });
         /// #if MOBILE
         element.innerHTML = `<div class="b3-chips">

@@ -40,36 +40,70 @@
   &--secondary {
     background-color: var(--b3-theme-secondary);
     color: var(--b3-theme-on-secondary);
+
+    &.b3-chip--current {
+      box-shadow: 0 0 0 2px var(--b3-theme-secondary) inset;
+    }
   }
 
   &--primary {
     background-color: var(--b3-theme-primary);
     color: var(--b3-theme-on-primary);
+
+    &.b3-chip--current {
+      box-shadow: 0 0 0 2px var(--b3-theme-primary) inset;
+    }
   }
 
   &--pink {
     color: var(--b3-theme-on-secondary);
     background-color: #ea4aaa;
+
+    &.b3-chip--current {
+      box-shadow: 0 0 0 2px #ea4aaa inset;
+    }
   }
 
   &--info {
     color: var(--b3-card-info-color);
     background-color: var(--b3-card-info-background);
+
+    &.b3-chip--current {
+      box-shadow: 0 0 0 2px var(--b3-card-info-background) inset;
+    }
   }
 
   &--warning {
     color: var(--b3-card-warning-color);
     background-color: var(--b3-card-warning-background);
+
+    &.b3-chip--current {
+      box-shadow: 0 0 0 2px var(--b3-card-warning-background) inset;
+    }
   }
 
   &--error {
     color: var(--b3-card-error-color);
     background-color: var(--b3-card-error-background);
+
+    &.b3-chip--current {
+      box-shadow: 0 0 0 2px var(--b3-card-error-background) inset;
+    }
   }
 
   &--success {
     color: var(--b3-card-success-color);
     background-color: var(--b3-card-success-background);
+
+    &.b3-chip--current {
+      box-shadow: 0 0 0 2px var(--b3-card-success-background) inset;
+    }
+  }
+
+  &--current {
+    background-color: var(--b3-theme-surface);
+    color: var(--b3-theme-on-surface);
+    box-shadow: 0 0 0 2px var(--b3-list-hover) inset;
   }
 
   &--pointer {

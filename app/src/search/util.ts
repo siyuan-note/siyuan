@@ -223,7 +223,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
     const criteriaData: ISearchOption[] = [];
-    initCriteriaMenu(element.querySelector("#criteria"), criteriaData);
+    initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
     const searchPanelElement = element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
@@ -343,6 +343,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         embedBlock: window.siyuan.config.search.embedBlock,
                     }
                 }, config, edit);
+                element.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -369,6 +370,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (target.classList.contains("b3-chip") && type === "set-criteria") {
                 config.removed = false;
+                target.parentElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
+                target.classList.add("b3-chip--current");
                 criteriaData.find(item => {
                     if (item.name === target.innerText.trim()) {
                         updateConfig(element, item, config, edit);
@@ -397,7 +400,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 config.page = 1;
                 searchPathInputElement.innerHTML = config.hPath;
                 searchPathInputElement.setAttribute("title", "");
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
                 const includeElement = element.querySelector("#searchInclude");
                 includeElement.classList.remove("b3-button--cancel");
                 includeElement.setAttribute("disabled", "disabled");
@@ -453,7 +456,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         } else {
                             includeElement.setAttribute("disabled", "disabled");
                         }
-                        inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                        inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
                     });
                 }, [], undefined, window.siyuan.languages.specifyPath);
                 event.stopPropagation();
@@ -475,7 +478,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     });
                 }
                 config.page = 1;
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -504,7 +507,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (target.id === "searchMore") {
                 moreMenu(config, criteriaData, element, () => {
                     config.page = 1;
-                    inputEvent(element, config, undefined, edit);
+                    inputEvent(element, config, undefined, edit, true);
                 }, () => {
                     updateConfig(element, {
                         removed: true,
@@ -532,6 +535,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                             embedBlock: window.siyuan.config.search.embedBlock,
                         }
                     }, config, edit);
+                    element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 }, () => {
                     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
                     const isPopover = hasClosestByClassName(element, "b3-dialog__container");
@@ -592,7 +596,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (target.id === "searchFilter") {
                 filterMenu(config, () => {
                     config.page = 1;
-                    inputEvent(element, config, undefined, edit);
+                    inputEvent(element, config, undefined, edit, true);
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -601,7 +605,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 queryMenu(config, () => {
                     element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", getQueryTip(config.method));
                     config.page = 1;
-                    inputEvent(element, config, undefined, edit);
+                    inputEvent(element, config, undefined, edit, true);
                 });
                 const rect = target.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
@@ -638,7 +642,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 if (target.parentElement.id === "searchHistoryList") {
                     searchInputElement.value = target.textContent;
                     config.page = 1;
-                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
                 } else if (target.parentElement.id === "replaceHistoryList") {
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
@@ -712,11 +716,17 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
 
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
         config.page = 1;
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
+        if (event.isComposing) {
+            return;
+        }
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
     });
     searchInputElement.addEventListener("input", (event: InputEvent) => {
         config.page = 1;
-        inputTimeout = inputEvent(element, config, inputTimeout, edit, event);
+        if (event.isComposing) {
+            return;
+        }
+        inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
     });
     searchInputElement.addEventListener("blur", () => {
         if (config.removed) {
@@ -778,7 +788,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else {
                 searchInputElement.value = historyElement.querySelector(".b3-list-item--focus").textContent.trim();
                 config.page = 1;
-                inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
                 toggleSearchHistory(historyElement, replaceHistoryElement, searchInputElement);
             }
             event.preventDefault();
@@ -1110,12 +1120,12 @@ const replace = (element: Element, config: ISearchOption, edit: Protyle, isAll: 
     });
 };
 
-const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, event?: InputEvent) => {
-    if (event && event.isComposing) {
-        return;
-    }
+const inputEvent = (element: Element, config: ISearchOption, inputTimeout: number, edit: Protyle, rmCurrentCriteria = false) => {
     clearTimeout(inputTimeout);
     inputTimeout = window.setTimeout(() => {
+        if (rmCurrentCriteria) {
+            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+        }
         const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
         const loadingElement = element.querySelector(".fn__loading--top");
         loadingElement.classList.remove("fn__none");

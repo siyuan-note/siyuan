@@ -59,13 +59,17 @@ export const account = {
     ${window.siyuan.languages.day} 
     <a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>
 </div>`;
+                if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
+                    subscriptionHTML = `<div class="b3-chip"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>
+<div class="fn__hr--b"></div>`;
+                }
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
-                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
+                    subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
 ${renewHTML}
 <div class="fn__hr--b"></div>
 `;
                 } else {
-                    subscriptionHTML = `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
+                    subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
                 }
             }
             return `<div class="fn__flex config-account">

@@ -66,8 +66,7 @@ export const account = {
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
                     subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
 ${renewHTML}
-<div class="fn__hr--b"></div>
-`;
+<div class="fn__hr--b"></div>`;
                 } else {
                     subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
                 }

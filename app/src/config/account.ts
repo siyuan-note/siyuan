@@ -414,6 +414,9 @@ ${renewHTML}
                     html = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.account10}"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg></div>`;
                 }
             }
+            if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
+                html += `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.onepay}"><svg><use xlink:href="#iconVIP"></use></svg></div>`;
+            }
         }
         if (!window.siyuan.user || (window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === -1)) {
             html = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.freeSub}"><svg class="ft__error"><use xlink:href="#iconVIP"></use></svg></div>`;

@@ -1,4 +1,5 @@
 {
+  "onepay": "PRO",
   "format": "Number format",
   "numberFormatNone": "Number",
   "numberFormatCommas": "Number with commas",

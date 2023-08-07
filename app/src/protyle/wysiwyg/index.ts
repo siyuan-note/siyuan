@@ -247,17 +247,17 @@ export class WYSIWYG {
                     }
                 } else {
                     selectElements.forEach((item, index) => {
-                        const topElement = getTopAloneElement(item);
+                        // 复制列表项中的块会变为复制列表项，因此不能使用 getTopAloneElement https://github.com/siyuan-note/siyuan/issues/8925
                         if (isRefText && index === 0) {
-                            const cloneElement = topElement.cloneNode(true) as HTMLElement;
+                            const cloneElement = item.cloneNode(true) as HTMLElement;
                             const cloneEditElement = getContenteditableElement(cloneElement);
                             if (cloneEditElement) {
-                                cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${topElement.getAttribute("data-node-id")}">*</span>`);
+                                cloneEditElement.insertAdjacentHTML("beforeend", ` <span data-type="block-ref" data-subtype="s" data-id="${item.getAttribute("data-node-id")}">*</span>`);
                             }
                             html += removeEmbed(cloneElement);
                             selectElements[0].removeAttribute("data-reftext");
                         } else {
-                            html += removeEmbed(topElement);
+                            html += removeEmbed(item);
                         }
                     });
                 }

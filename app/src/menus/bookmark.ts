@@ -53,12 +53,14 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
             }
         }).element);
     }
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: window.siyuan.languages.copy,
-        type: "submenu",
-        icon: "iconCopy",
-        submenu: copySubMenu(element.getAttribute("data-node-id"), false)
-    }).element);
+    if (id) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copy,
+            type: "submenu",
+            icon: "iconCopy",
+            submenu: copySubMenu(element.getAttribute("data-node-id"), false)
+        }).element);
+    }
 
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({

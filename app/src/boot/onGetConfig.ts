@@ -292,19 +292,22 @@ export const initWindow = (app: App) => {
             }
             if (isSYProtocol(url)) {
                 const id = getIdFromSYProtocol(url);
+                const focus = getSearch("focus", url) === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                     if (existResponse.data) {
                         openFileById({
                             app,
                             id,
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                            zoomIn: getSearch("focus", url) === "1"
+                            zoomIn: focus,
                         });
                         ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
                     }
                     app.plugins.forEach(plugin => {
                         plugin.eventBus.emit("open-siyuan-url-blocks", {
                             url,
+                            id,
+                            focus,
                             exist: existResponse.data,
                         });
                     });

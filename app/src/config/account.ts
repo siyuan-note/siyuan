@@ -42,7 +42,7 @@ export const account = {
                 });
                 userTitlesHTML += "</div>";
             }
-            let subscriptionHTML = payHTML;
+            let subscriptionHTML = "";
             let activeSubscriptionHTML = `<div class="b3-form__icon fn__block">
    <svg class="ft__secondary b3-form__icon-icon"><use xlink:href="#iconVIP"></use></svg>
    <input class="b3-text-field fn__block b3-form__icon-input" style="padding-right: 44px;" placeholder="${window.siyuan.languages.activationCodePlaceholder}">
@@ -70,6 +70,8 @@ ${renewHTML}
                 } else {
                     subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
                 }
+            } else {
+                subscriptionHTML = payHTML;
             }
             return `<div class="fn__flex config-account">
 <div class="config-account__center">

@@ -51,7 +51,7 @@ export const pasteEscaped = async (protyle:IProtyle, nodeElement:Element) => {
     } catch (e) {
         console.log(e);
     }
-}
+};
 
 const filterClipboardHint = (protyle: IProtyle, textPlain: string) => {
     let needRender = true;

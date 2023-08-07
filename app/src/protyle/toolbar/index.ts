@@ -1638,27 +1638,27 @@ export class Toolbar {
 
         this.subElement.style.width = "auto";
         this.subElement.style.padding = "0 8px";
-        let html = ""
+        let html = "";
         const hasCopy = range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji");
         if (hasCopy) {
-            html += `<button class="keyboard__action" data-action="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>`
+            html += "<button class=\"keyboard__action\" data-action=\"copy\"><svg><use xlink:href=\"#iconCopy\"></use></svg></button>";
             if (!protyle.disabled) {
                 html += `<button class="keyboard__action" data-action="cut"><svg><use xlink:href="#iconCut"></use></svg></button>
-<button class="keyboard__action" data-action="delete"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`
+<button class="keyboard__action" data-action="delete"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`;
             }
         }
         if (!protyle.disabled) {
             html += `<button class="keyboard__action" data-action="paste"><svg><use xlink:href="#iconPaste"></use></svg></button>
-<button class="keyboard__action" data-action="select"><svg><use xlink:href="#iconSelect"></use></svg></button>`
+<button class="keyboard__action" data-action="select"><svg><use xlink:href="#iconSelect"></use></svg></button>`;
         }
         if (hasCopy || !protyle.disabled) {
-            html += `<button class="keyboard__action" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>`
+            html += "<button class=\"keyboard__action\" data-action=\"more\"><svg><use xlink:href=\"#iconMore\"></use></svg></button>";
         }
         this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
         this.subElement.lastElementChild.addEventListener("click", async (event) => {
             const btnElemen = hasClosestByClassName(event.target as HTMLElement, "keyboard__action");
             if (!btnElemen) {
-                return
+                return;
             }
             const action = btnElemen.getAttribute("data-action");
             if (action === "copy") {
@@ -1717,7 +1717,7 @@ export class Toolbar {
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
 <button class="keyboard__action${protyle.disabled ? " fn__none" : ""}" data-action="pasteEscaped"><span>${window.siyuan.languages.pasteEscaped}</span></button>
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
-<button class="keyboard__action" data-action="back"><svg><use xlink:href="#iconBack"></use></svg></button>`
+<button class="keyboard__action" data-action="back"><svg><use xlink:href="#iconBack"></use></svg></button>`;
                 setPosition(this.subElement, rangePosition.left, rangePosition.top + 28, Constants.SIZE_TOOLBAR_HEIGHT);
             }
         });

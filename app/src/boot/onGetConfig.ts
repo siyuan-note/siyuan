@@ -257,6 +257,11 @@ export const initWindow = (app: App) => {
                 const pluginId = urlObj.pathname.split("/")[3];
                 if (pluginId) {
                     app.plugins.find(plugin => {
+                        // siyuan://plugins/plugin-name/foo?bar=baz
+                        if (pluginId.startsWith(plugin.name)) {
+                            plugin.eventBus.emit("open-siyuan-url-plugins", { url });
+                        }
+
                         // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
                         const match = Object.keys(plugin.models).find(key => {
                             if (key === pluginId) {
@@ -297,6 +302,12 @@ export const initWindow = (app: App) => {
                         });
                         ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
                     }
+                    app.plugins.forEach(plugin => {
+                        plugin.eventBus.emit("open-siyuan-url-blocks", {
+                            url,
+                            exist: existResponse.data,
+                        });
+                    });
                 });
                 return;
             }

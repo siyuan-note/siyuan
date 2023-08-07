@@ -336,13 +336,15 @@ export class Dock {
             }
             // 关闭 dock 后设置光标
             if (!document.querySelector(".layout__center .layout__wnd--active")) {
-                const currentElement = document.querySelector(".layout__center .layout-tab-bar .item--focus")
-                getAllTabs().find(item => {
-                    if (item.id === currentElement.getAttribute("data-id")) {
-                        item.parent.switchTab(item.headElement);
-                        return true;
-                    }
-                });
+                const currentElement = document.querySelector(".layout__center .layout-tab-bar .item--focus");
+                if (currentElement) {
+                    getAllTabs().find(item => {
+                        if (item.id === currentElement.getAttribute("data-id")) {
+                            item.parent.switchTab(item.headElement);
+                            return true;
+                        }
+                    });
+                }
             }
         } else {
             this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).forEach(item => {

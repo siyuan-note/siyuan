@@ -42,19 +42,6 @@
 			]
 		},
 		{
-			"ID": "20210104091414-xr1dze2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091414-xr1dze2"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The built-in bookmark label are ✨💡️⏳, you can create other text as the bookmark label."
-				}
-			]
-		},
-		{
 			"ID": "20210104091414-b6lifws",
 			"Type": "NodeParagraph",
 			"Properties": {

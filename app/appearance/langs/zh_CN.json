@@ -1,4 +1,5 @@
 {
+  "searchOverwrite": "查询名称重复，是否进行覆盖？",
   "onepay": "功能特性",
   "format": "格式化",
   "numberFormatNone": "数字",

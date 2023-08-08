@@ -321,7 +321,9 @@ func labelTags() (ret map[string]Tags) {
 func appendTagChildren(tags *Tags, labels map[string]Tags) {
 	for _, tag := range *tags {
 		tag.Label = tag.Name
-		tag.Count = len(labels[tag.Label]) + 1
+		if _, ok := labels[tag.Label]; ok {
+			tag.Count = len(labels[tag.Label]) + 1
+		}
 		appendChildren0(tag, labels)
 		sortTags(tag.Children)
 	}
@@ -331,7 +333,9 @@ func appendChildren0(tag *Tag, labels map[string]Tags) {
 	sortTags(tag.tags)
 	for _, t := range tag.tags {
 		t.Label = tag.Label + "/" + t.Name
-		t.Count = len(labels[t.Label]) + 1
+		if _, ok := labels[t.Label]; ok {
+			t.Count = len(labels[t.Label]) + 1
+		}
 		tag.Children = append(tag.Children, t)
 	}
 	for _, child := range tag.tags {

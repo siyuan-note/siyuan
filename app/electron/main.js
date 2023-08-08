@@ -518,7 +518,7 @@ const initKernel = (workspace, port, lang) => {
                 bootWindow.show();
             } catch (e) {
                 writeLog("get kernel version failed: " + e.message);
-                await sleep(100);
+                await sleep(200);
             } finally {
                 count++;
                 if (14 < count) {

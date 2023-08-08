@@ -466,6 +466,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             (event.shiftKey && !event.altKey && isCtrl(event) && (event.key === "Home" || event.key === "End") && !isMac())) {
             const topElement = hasTopClosestByAttribute(nodeElement, "data-node-id", null);
             if (topElement) {
+                // 超级块内已选中某个块
+                topElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--select");
+                });
                 topElement.classList.add("protyle-wysiwyg--select");
                 let nextElement = event.key === "Home" ? topElement.previousElementSibling : topElement.nextElementSibling;
                 while (nextElement) {
@@ -485,6 +489,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // ctrl+home 光标移动到顶
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "Home") {
             goHome(protyle);
+            hideElements(["select"], protyle);
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -492,6 +497,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // ctrl+end 光标移动到尾
         if (!event.altKey && !event.shiftKey && isCtrl(event) && event.key === "End") {
             goEnd(protyle);
+            hideElements(["select"], protyle);
             event.stopPropagation();
             event.preventDefault();
             return;

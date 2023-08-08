@@ -1,81 +1,81 @@
 {
-	"ID": "20220708103401-mgydrfg",
+	"ID": "20230808120348-lgcp9zm",
 	"Spec": "1",
 	"Type": "NodeDocument",
 	"Properties": {
-		"id": "20220708103401-mgydrfg",
-		"title": "Data backup",
-		"updated": "20220708104612"
+		"id": "20230808120348-lgcp9zm",
+		"title": "数据备份",
+		"updated": "20220708103950"
 	},
 	"Children": [
 		{
-			"ID": "20220708103921-t25la2x",
+			"ID": "20230808120348-jzidvij",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20220708103921-t25la2x",
-				"updated": "20220708103921"
+				"id": "20230808120348-jzidvij",
+				"updated": "20220708095359"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Overview"
+					"Data": "概述"
 				}
 			]
 		},
 		{
-			"ID": "20220708103921-2vmuuiv",
+			"ID": "20230808120348-t1mk2y9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220708103921-2vmuuiv",
-				"updated": "20220708104201"
+				"id": "20230808120348-t1mk2y9",
+				"updated": "20220708103950"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Data backup refers to uploading "
+					"Data": "数据备份指的是将"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20220615120602-drz9hwc",
+					"TextMarkBlockRefID": "20220615112531-5yos96d",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "Data snapshot"
+					"TextMarkTextContent": "数据快照"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to the cloud."
+					"Data": "上传到云端。"
 				}
 			]
 		},
 		{
-			"ID": "20220708103921-qto3e6p",
+			"ID": "20230808120348-zi8ct0p",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20220708103921-qto3e6p",
-				"updated": "20220708103921"
+				"id": "20230808120348-zi8ct0p",
+				"updated": "20220708100015"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "How to use"
+					"Data": "使用方式"
 				}
 			]
 		},
 		{
-			"ID": "20220708103921-cdo52rq",
+			"ID": "20230808120348-645onmt",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20220708103921-cdo52rq",
-				"updated": "20220708104612"
+				"id": "20230808120348-645onmt",
+				"updated": "20220708102922"
 			},
 			"Children": [
 				{
-					"ID": "20220708103921-tvg552v",
+					"ID": "20230808120348-mq3qxqd",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -84,39 +84,35 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20220708103921-tvg552v",
-						"updated": "20220708104612"
+						"id": "20230808120348-mq3qxqd",
+						"updated": "20220708100929"
 					},
 					"Children": [
 						{
-							"ID": "20220708103921-y47bxfj",
+							"ID": "20230808120348-ktnbdwv",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220708103921-y47bxfj",
-								"updated": "20220708104612"
+								"id": "20230808120348-ktnbdwv",
+								"updated": "20220708100937"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "After "
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20220615120602-iya2886",
+									"TextMarkBlockRefID": "20220615113758-i2279ot",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "initializing the data repo key"
+									"TextMarkTextContent": "初始化数据仓库密钥"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", if all goes well, the backup has been configured"
+									"Data": "后如果一切正常就已经配置好备份了"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220708103921-zjs6xun",
+					"ID": "20230808120348-totosr9",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -125,26 +121,26 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20220708103921-zjs6xun",
-						"updated": "20220708104321"
+						"id": "20230808120348-totosr9",
+						"updated": "20220708102811"
 					},
 					"Children": [
 						{
-							"ID": "20220708103921-utd4r4b",
+							"ID": "20230808120348-td2yby1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220708103921-utd4r4b",
-								"updated": "20220708104321"
+								"id": "20230808120348-td2yby1",
+								"updated": "20220708102811"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Open the "
+									"Data": "打开 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Data History"
+									"TextMarkTextContent": "数据历史"
 								},
 								{
 									"Type": "NodeText",
@@ -153,23 +149,23 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Data snapshot"
+									"TextMarkTextContent": "数据快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " tab, select the snapshot to be backed up and click "
+									"Data": " 页签，选择需要备份的快照点击 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Tag Snapshot"
+									"TextMarkTextContent": "标记快照"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220708103921-8683oue",
+					"ID": "20230808120348-pa30615",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -178,42 +174,41 @@
 						"Num": 3
 					},
 					"Properties": {
-						"id": "20220708103921-8683oue",
-						"updated": "20220708104416"
+						"id": "20230808120348-pa30615"
 					},
 					"Children": [
 						{
-							"ID": "20220708103921-mqrg0q3",
+							"ID": "20230808120348-d2nxsko",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220708103921-mqrg0q3",
-								"updated": "20220708104416"
+								"id": "20230808120348-d2nxsko",
+								"updated": "20220708101018"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select "
+									"Data": "筛选下拉列表中选择 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Locally tag snapshot"
+									"TextMarkTextContent": "本地标记的快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the filter drop-down list, select the snapshot to upload and click "
+									"Data": "，选择需要上传的快照点击 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Upload"
+									"TextMarkTextContent": "上传"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220708103921-mcdvar5",
+					"ID": "20230808120348-jybz6et",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -222,37 +217,37 @@
 						"Num": 4
 					},
 					"Properties": {
-						"id": "20220708103921-mcdvar5",
-						"updated": "20220708104422"
+						"id": "20230808120348-jybz6et",
+						"updated": "20220708102922"
 					},
 					"Children": [
 						{
-							"ID": "20220708103921-t0fi1cl",
+							"ID": "20230808120348-m0re4pa",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220708103921-t0fi1cl",
-								"updated": "20220708104422"
+								"id": "20230808120348-m0re4pa",
+								"updated": "20220708102922"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After the upload is complete, select "
+									"Data": "上传完成以后，筛选下拉列表中选择 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Cloud tag snapshot"
+									"TextMarkTextContent": "云端标记的快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " from the filter drop-down list to see the snapshots just backed up to the cloud"
+									"Data": " 可以看到刚刚备份到云端的快照"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220708103921-xy155ga",
+					"ID": "20230808120348-ag2s56w",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -261,28 +256,31 @@
 						"Num": 5
 					},
 					"Properties": {
-						"id": "20220708103921-xy155ga",
-						"updated": "20220708104454"
+						"id": "20230808120348-ag2s56w"
 					},
 					"Children": [
 						{
-							"ID": "20220708103921-8rnghsa",
+							"ID": "20230808120348-tbzcgy7",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220708103921-8rnghsa",
-								"updated": "20220708104454"
+								"id": "20230808120348-tbzcgy7",
+								"updated": "20220708101644"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After the snapshot of the cloud backup is downloaded to the local, you can restore the data by "
+									"Data": "云端备份的快照下载到本地后可以通过"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20220615120602-cikdh3o",
+									"TextMarkBlockRefID": "20220615115212-kjebrv4",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "Rollback data snapshot"
+									"TextMarkTextContent": "回滚数据快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "恢复数据"
 								}
 							]
 						}
@@ -291,85 +289,95 @@
 			]
 		},
 		{
-			"ID": "20220708103921-6chdef2",
+			"ID": "20230808120348-5qkf6po",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220708103921-6chdef2",
-				"updated": "20220708104458"
+				"id": "20230808120348-5qkf6po",
+				"updated": "20220708101922"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In addition:"
+					"Data": "另外："
 				}
 			]
 		},
 		{
-			"ID": "20220708103921-1h033iu",
+			"ID": "20230808120348-3h1cxja",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20220708103921-1h033iu",
-				"updated": "20220708104516"
+				"id": "20230808120348-3h1cxja",
+				"updated": "20220708101943"
 			},
 			"Children": [
 				{
-					"ID": "20220708103921-adae5k6",
+					"ID": "20230808120348-xwlnuv3",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220708103921-adae5k6",
-						"updated": "20220708104516"
+						"id": "20230808120348-xwlnuv3",
+						"updated": "20220708101943"
 					},
 					"Children": [
 						{
-							"ID": "20220708103921-r8fkd7j",
+							"ID": "20230808120348-tlm1dq0",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220708103921-r8fkd7j",
-								"updated": "20220708104516"
+								"id": "20230808120348-tlm1dq0",
+								"updated": "20220708101943"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "Ignore files"
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210928094544-vg2c2ts",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "忽略文件"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20220708103921-suugdiz",
+					"ID": "20230808120348-7m3us1s",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220708103921-suugdiz",
-						"updated": "20220708103921"
+						"id": "20230808120348-7m3us1s",
+						"updated": "20220708101925"
 					},
 					"Children": [
 						{
-							"ID": "20220708103921-9tyiwtp",
+							"ID": "20230808120348-3umvlw3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220708103921-9tyiwtp",
-								"updated": "20220708103921"
+								"id": "20230808120348-3umvlw3",
+								"updated": "20220708101925"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The cloud supports saving up to 12 data snapshots"
+									"Data": "云端最多支持保存 12 个数据快照"
 								}
 							]
 						}
 					]
 				}
 			]
+		},
+		{
+			"ID": "20230808120348-c017oom",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120348-c017oom"
+			}
 		}
 	]
 }

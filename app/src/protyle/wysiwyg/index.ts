@@ -1640,7 +1640,8 @@ export class WYSIWYG {
             const range = getEditorRange(this.element);
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
-            const aElement = hasClosestByAttribute(event.target, "data-type", "a");
+            let ifaElement = hasClosestByAttribute(event.target, "data-type", "a");
+            const aElement = ifaElement ? ifaElement : hasClosestByAttribute(event.target, "data-type", "url")
             if (blockRefElement ||
                 (aElement && aElement.getAttribute("data-href").startsWith("siyuan://blocks/"))
             ) {

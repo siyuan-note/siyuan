@@ -68,8 +68,18 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         let text = "";
                         if (cell.valueType === "text") {
                             text = `<span class="av__celltext">${cell.value?.text.content || ""}</span>`;
-                        } else if (["url", "email", "phone"].includes(cell.valueType)) {
-                            text = `<span class="av__celltext av__celltext--url" data-type="${cell.valueType}">${cell.value ? cell.value[cell.valueType as "url"].content : ""}</span>`;
+                        } else if (cell.valueType === "url") {
+                            text = `<span class="av__celltext av__celltext--url" data-type="url"  data-href="${cell.value ? cell.value[cell.valueType as "url"].content : ""}">${cell.value ? cell.value[cell.valueType as "url"].content : ""}</span>`;
+                            if (cell.value && cell.value[cell.valueType as "url"].content) {
+                                text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+                            }
+                        } else if (cell.valueType === "email") {
+                            text = `<span class="av__celltext av__celltext--url" data-type="email"  data-href="${cell.value ? "mailto:" + cell.value[cell.valueType as "url"].content : ""}">${cell.value ? cell.value[cell.valueType as "url"].content : ""}</span>`;
+                            if (cell.value && cell.value[cell.valueType as "url"].content) {
+                                text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
+                            }
+                        } else if (cell.valueType === "phone") {
+                            text = `<span class="av__celltext av__celltext--url" data-type="phone"  data-href="${cell.value ? "tel:" + cell.value[cell.valueType as "url"].content : ""}">${cell.value ? cell.value[cell.valueType as "url"].content : ""}</span>`;
                             if (cell.value && cell.value[cell.valueType as "url"].content) {
                                 text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }

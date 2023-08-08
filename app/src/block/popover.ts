@@ -15,6 +15,7 @@ export const initBlockPopover = (app: App) => {
             return;
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
+            hasClosestByAttribute(event.target, "data-type", "url") ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo");
@@ -207,7 +208,9 @@ export const showPopover = async (app: App, showRef = false) => {
             });
             ids = postResponse.data;
         }
-    } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
+    } else if (
+        popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a") ||
+        popoverTargetElement.getAttribute("data-type")?.split(" ").includes("url")) {
         // 以思源协议开头的链接
         ids = [getIdFromSYProtocol(popoverTargetElement.getAttribute("data-href"))];
     } else {

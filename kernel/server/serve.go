@@ -79,6 +79,11 @@ func Serve(fastMode bool) {
 	serveRepoDiff(ginServer)
 	api.ServeAPI(ginServer)
 
+	// TODO 升级后结束旧内核进程
+	//if !fastMode && "prod" == util.Mode && util.ContainerStd == util.Container {
+	//	killRunningKernel()
+	//}
+
 	var host string
 	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
 		host = "0.0.0.0"

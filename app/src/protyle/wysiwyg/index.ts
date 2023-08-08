@@ -1553,19 +1553,19 @@ export class WYSIWYG {
             if ((event.key === "ArrowLeft" || event.key === "ArrowRight" ||
                     event.key === "Alt" || event.key === "Shift") &&    // 选中后 alt+shift+arrowRight 会导致光标和选中块不一致
                 nodeElement && !nodeElement.classList.contains("protyle-wysiwyg--select")) {
-                const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"))
-                let containRange = false
+                const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                let containRange = false;
                 selectElements.find(item => {
                     if (item.contains(range.startContainer)) {
-                        containRange = true
-                        return true
+                        containRange = true;
+                        return true;
                     }
-                })
+                });
                 if (!containRange && selectElements.length > 0) {
                     selectElements.forEach(item => {
-                        item.classList.remove("protyle-wysiwyg--select")
-                    })
-                    nodeElement.classList.add("protyle-wysiwyg--select")
+                        item.classList.remove("protyle-wysiwyg--select");
+                    });
+                    nodeElement.classList.add("protyle-wysiwyg--select");
                 }
             }
         });

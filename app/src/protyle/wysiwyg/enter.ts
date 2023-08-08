@@ -43,8 +43,8 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             return true;
         }
         // https://github.com/siyuan-note/siyuan/issues/8935
-        const wbrElement = document.createElement("wbr")
-        range.insertNode(wbrElement)
+        const wbrElement = document.createElement("wbr");
+        range.insertNode(wbrElement);
         const html = listItemElement.parentElement.outerHTML;
         wbrElement.remove();
         let newElement = genListItemElement(listItemElement, -1, true);

@@ -1641,12 +1641,12 @@ export class WYSIWYG {
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
             const aElement = hasClosestByAttribute(event.target, "data-type", "a") || hasClosestByAttribute(event.target, "data-type", "url");
-            let aLink = ""
+            let aLink = "";
             if (aElement) {
                 if (aElement.classList.contains("av__celltext")) {
-                    aLink = aElement.textContent.trim()
+                    aLink = aElement.textContent.trim();
                 } else {
-                    aLink = aElement.getAttribute("data-href")
+                    aLink = aElement.getAttribute("data-href");
                 }
             }
             if (blockRefElement || aLink.startsWith("siyuan://blocks/")) {

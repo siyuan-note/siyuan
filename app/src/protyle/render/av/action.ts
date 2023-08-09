@@ -116,13 +116,16 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const linkElement = hasClosestByClassName(event.target, "av__celltext--url");
     if (linkElement) {
-        let prefix = "";
-        if (linkElement.dataset.type === "phone") {
-            prefix = "tel:";
-        } else if (linkElement.dataset.type === "email") {
-            prefix = "mailto:";
-        }
-        window.open(prefix + linkElement.textContent.trim());
+        // let prefix = "";
+        // if (linkElement.dataset.type === "phone") {
+        //     prefix = "tel:";
+        // } else if (linkElement.dataset.type === "email") {
+        //     prefix = "mailto:";
+        // }
+        // window.open(prefix + linkElement.textContent.trim());
+
+        let linkUrl = linkElement.getAttribute("data-href")
+        window.open(linkUrl.trim());
         event.preventDefault();
         event.stopPropagation();
         return true;

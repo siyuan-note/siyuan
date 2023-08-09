@@ -1640,11 +1640,16 @@ export class WYSIWYG {
             const range = getEditorRange(this.element);
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
             const blockRefElement = hasClosestByAttribute(event.target, "data-type", "block-ref");
-            let ifaElement = hasClosestByAttribute(event.target, "data-type", "a");
-            const aElement = ifaElement ? ifaElement : hasClosestByAttribute(event.target, "data-type", "url")
-            if (blockRefElement ||
-                (aElement && aElement.getAttribute("data-href").startsWith("siyuan://blocks/"))
-            ) {
+            const aElement = hasClosestByAttribute(event.target, "data-type", "a") || hasClosestByAttribute(event.target, "data-type", "url");
+            let aLink = ""
+            if (aElement) {
+                if (aElement.classList.contains("av__celltext")) {
+                    aLink = aElement.textContent.trim()
+                } else {
+                    aLink = aElement.getAttribute("data-href")
+                }
+            }
+            if (blockRefElement || aLink.startsWith("siyuan://blocks/")) {
                 event.stopPropagation();
                 event.preventDefault();
                 hideElements(["dialog", "toolbar"], protyle);
@@ -1656,7 +1661,7 @@ export class WYSIWYG {
                 if (blockRefElement) {
                     refBlockId = blockRefElement.getAttribute("data-id");
                 } else if (aElement) {
-                    refBlockId = aElement.getAttribute("data-href").substring(16, 38);
+                    refBlockId = aLink.substring(16, 38);
                 }
 
                 fetchPost("/api/block/checkBlockFold", {id: refBlockId}, (foldResponse) => {
@@ -1666,7 +1671,7 @@ export class WYSIWYG {
                     hideKeyboardToolbar();
                     /// #else
                     if (aElement) {
-                        window.open(aElement.getAttribute("data-href"));
+                        window.open(aLink);
                         return;
                     }
                     if (event.shiftKey) {
@@ -1743,7 +1748,7 @@ export class WYSIWYG {
             if (aElement && !event.altKey) {
                 event.stopPropagation();
                 event.preventDefault();
-                const linkAddress = Lute.UnEscapeHTMLStr(aElement.getAttribute("data-href"));
+                const linkAddress = Lute.UnEscapeHTMLStr(aLink);
                 /// #if MOBILE
                 openByMobile(linkAddress);
                 /// #else

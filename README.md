@@ -323,3 +323,5 @@ SiYuan is made possible by the following open source projects.
 * [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
 * [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
+
+Complete dependencies please refer to [go.mod](https://github.com/siyuan-note/siyuan/blob/master/kernel/go.mod) and [package.json](https://github.com/siyuan-note/siyuan/blob/master/app/package.json).

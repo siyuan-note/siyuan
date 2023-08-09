@@ -330,3 +330,5 @@
 * [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
 * [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
+
+完整的依赖项请参考 [go.mod](https://github.com/siyuan-note/siyuan/blob/master/kernel/go.mod) 和 [package.json](https://github.com/siyuan-note/siyuan/blob/master/app/package.json)。

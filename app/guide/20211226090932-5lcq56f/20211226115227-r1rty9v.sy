@@ -813,7 +813,7 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md",
-					"TextMarkTextContent": "開髮指南"
+					"TextMarkTextContent": "開發指南"
 				},
 				{
 					"Type": "NodeText",

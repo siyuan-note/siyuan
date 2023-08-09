@@ -17,12 +17,14 @@
 package model
 
 import (
+	"bytes"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"code.sajari.com/docconv"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/eventbus"
@@ -31,6 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/xuri/excelize/v2"
 )
 
 var assetContentSearcher = NewAssetsSearcher()
@@ -163,6 +166,9 @@ func NewAssetsSearcher() *AssetsSearcher {
 			".txt":      &TxtAssetParser{},
 			".md":       &TxtAssetParser{},
 			".markdown": &TxtAssetParser{},
+			".docx":     &DocxAssetParser{},
+			".pptx":     &PptxAssetParser{},
+			".xlsx":     &XlsxAssetParser{},
 		},
 
 		lock: &sync.Mutex{},
@@ -203,5 +209,143 @@ func (parser *TxtAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 
 func normalizeAssetContent(content string) (ret string) {
 	ret = strings.Join(strings.Fields(content), " ")
+	return
+}
+
+func copyTempAsset(absPath string) (ret string) {
+	dir := filepath.Join(util.TempDir, "convert", "asset_content")
+	if err := os.MkdirAll(dir, 0755); nil != err {
+		logging.LogErrorf("mkdir [%s] failed: [%s]", dir, err)
+		return
+	}
+
+	ret = filepath.Join(dir, gulu.Rand.String(7)+".docx")
+	if err := filelock.Copy(absPath, ret); nil != err {
+		logging.LogErrorf("copy [%s] to [%s] failed: [%s]", absPath, ret, err)
+		return
+	}
+	return
+}
+
+type DocxAssetParser struct {
+}
+
+func (parser *DocxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
+	if !strings.HasSuffix(strings.ToLower(absPath), ".docx") {
+		return
+	}
+
+	if !gulu.File.IsExist(absPath) {
+		return
+	}
+
+	tmp := copyTempAsset(absPath)
+	if "" == tmp {
+		return
+	}
+	defer os.RemoveAll(tmp)
+
+	f, err := os.Open(tmp)
+	if nil != err {
+		logging.LogErrorf("open [%s] failed: [%s]", tmp, err)
+		return
+	}
+	defer f.Close()
+
+	data, _, err := docconv.ConvertDocx(f)
+	if nil != err {
+		logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
+		return
+	}
+
+	var content = normalizeAssetContent(data)
+	ret = &AssetParseResult{
+		Content: content,
+	}
+	return
+}
+
+type PptxAssetParser struct {
+}
+
+func (parser *PptxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
+	if !strings.HasSuffix(strings.ToLower(absPath), ".pptx") {
+		return
+	}
+
+	if !gulu.File.IsExist(absPath) {
+		return
+	}
+
+	tmp := copyTempAsset(absPath)
+	if "" == tmp {
+		return
+	}
+	defer os.RemoveAll(tmp)
+
+	f, err := os.Open(tmp)
+	if nil != err {
+		logging.LogErrorf("open [%s] failed: [%s]", tmp, err)
+		return
+	}
+	defer f.Close()
+
+	data, _, err := docconv.ConvertPptx(f)
+	if nil != err {
+		logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
+		return
+	}
+
+	var content = normalizeAssetContent(data)
+	ret = &AssetParseResult{
+		Content: content,
+	}
+	return
+}
+
+type XlsxAssetParser struct {
+}
+
+func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
+	if !strings.HasSuffix(strings.ToLower(absPath), ".xlsx") {
+		return
+	}
+
+	if !gulu.File.IsExist(absPath) {
+		return
+	}
+
+	tmp := copyTempAsset(absPath)
+	if "" == tmp {
+		return
+	}
+	defer os.RemoveAll(tmp)
+
+	x, err := excelize.OpenFile(tmp)
+	if nil != err {
+		logging.LogErrorf("open [%s] failed: [%s]", tmp, err)
+		return
+	}
+	defer x.Close()
+
+	buf := bytes.Buffer{}
+	sheetMap := x.GetSheetMap()
+	for _, sheetName := range sheetMap {
+		rows, getErr := x.GetRows(sheetName)
+		if nil != getErr {
+			logging.LogErrorf("get rows from sheet [%s] failed: [%s]", sheetName, getErr)
+			return
+		}
+		for _, row := range rows {
+			for _, colCell := range row {
+				buf.WriteString(colCell + " ")
+			}
+		}
+	}
+
+	var content = normalizeAssetContent(buf.String())
+	ret = &AssetParseResult{
+		Content: content,
+	}
 	return
 }

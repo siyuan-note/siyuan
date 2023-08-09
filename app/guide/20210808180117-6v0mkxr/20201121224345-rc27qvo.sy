@@ -7,7 +7,7 @@
 		"id": "20201121224345-rc27qvo",
 		"title": "Acknowledgements",
 		"type": "doc",
-		"updated": "20230601220909"
+		"updated": "20230809211220"
 	},
 	"Children": [
 		{
@@ -30,7 +30,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220522101213-z3hokh2",
-				"updated": "20230601220909"
+				"updated": "20230809211220"
 			},
 			"Children": [
 				{
@@ -67,6 +67,49 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "BSD-3-Clause License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230809211219-2bk99t0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230809211219-2bk99t0",
+						"updated": "20230809211220"
+					},
+					"Children": [
+						{
+							"ID": "20230809211219-syvv0uy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230809211219-syvv0uy",
+								"updated": "20230809211220"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/sajari/docconv",
+									"TextMarkTextContent": "https://github.com/sajari/docconv"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "MIT License"
 								},
 								{
 									"Type": "NodeText",
@@ -113,7 +156,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -156,7 +199,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -199,7 +242,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -242,7 +285,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -285,7 +328,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -328,7 +371,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -371,7 +414,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -414,7 +457,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -457,7 +500,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -500,7 +543,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -543,7 +586,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -586,7 +629,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -629,7 +672,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -672,7 +715,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -715,7 +758,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -758,7 +801,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -801,7 +844,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -844,7 +887,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -887,7 +930,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -930,7 +973,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -973,7 +1016,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1016,7 +1059,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1059,7 +1102,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1102,7 +1145,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1145,7 +1188,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1188,7 +1231,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1231,7 +1274,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1274,7 +1317,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1317,7 +1360,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​​​"
 								}
 							]
 						}
@@ -1360,7 +1403,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1403,7 +1446,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1446,7 +1489,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1489,7 +1532,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1532,7 +1575,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1575,7 +1618,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1615,6 +1658,48 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "MIT License"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230809211205-15z43s4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230809211205-15z43s4"
+					},
+					"Children": [
+						{
+							"ID": "20230809211205-m43thma",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230809211205-m43thma",
+								"updated": "20230809211205"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/xuri/excelize",
+									"TextMarkTextContent": "https://github.com/xuri/excelize"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "BSD-3-Clause License"
 								},
 								{
 									"Type": "NodeText",
@@ -1661,7 +1746,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						},
@@ -1722,7 +1807,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1765,7 +1850,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1808,7 +1893,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1851,7 +1936,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}
@@ -1894,7 +1979,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								}
 							]
 						}

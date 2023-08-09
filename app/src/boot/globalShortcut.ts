@@ -1148,6 +1148,26 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     }
     const files = dockFile.data.file as Files;
 
+    if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
+        event.preventDefault();
+        const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
+            document.querySelector(".layout-tab-bar > .item--focus");
+        if (element) {
+            const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
+            if (tab && tab.model instanceof Editor) {
+                tab.model.editor.protyle.wysiwyg.element.blur();
+                tab.model.editor.protyle.title.editElement.blur();
+                files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
+            }
+        }
+        dockFile.toggleModel("file", true);
+        return;
+    }
+
+    if (!files.element.parentElement.classList.contains("layout__tab--active")) {
+        return false;
+    }
+
     let matchCommand = false;
     app.plugins.find(item => {
         item.commands.find(command => {
@@ -1165,24 +1185,6 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
-        event.preventDefault();
-        const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
-            document.querySelector(".layout-tab-bar > .item--focus");
-        if (element) {
-            const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
-            if (tab && tab.model instanceof Editor) {
-                tab.model.editor.protyle.wysiwyg.element.blur();
-                tab.model.editor.protyle.title.editElement.blur();
-                files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
-            }
-        }
-        dockFile.toggleModel("file", true);
-        return;
-    }
-    if (!files.element.parentElement.classList.contains("layout__tab--active")) {
-        return false;
-    }
     const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
     if (liElements.length === 0) {
         if (event.key.startsWith("Arrow") && !isCtrl(event)) {

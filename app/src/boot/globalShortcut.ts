@@ -1480,11 +1480,7 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         hasClosestByClassName(target, "protyle", true)) {
         return false;
     }
-    if (!matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) &&
-        !matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) &&
-        !event.key.startsWith("Arrow") && event.key !== "Enter") {
-        return false;
-    }
+
     let activePanelElement = document.querySelector(".layout__tab--active");
     if (!activePanelElement) {
         Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).find(item => {
@@ -1498,6 +1494,28 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
     if (activePanelElement.className.indexOf("sy__") === -1) {
+        return false;
+    }
+
+    let matchCommand = false;
+    app.plugins.find(item => {
+        item.commands.find(command => {
+            if (command.dockCallback && matchHotKey(command.customHotkey, event)) {
+                matchCommand = true;
+                command.dockCallback(activePanelElement as HTMLElement);
+                return true;
+            }
+        });
+        if (matchCommand) {
+            return true;
+        }
+    });
+    if (matchCommand) {
+        return true;
+    }
+    if (!matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) &&
+        !matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) &&
+        !event.key.startsWith("Arrow") && event.key !== "Enter") {
         return false;
     }
     if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event)) {
@@ -1520,23 +1538,6 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         activePanelElement.classList.contains("sy__globalGraph") ||
         activePanelElement.classList.contains("sy__graph")) {
         return false;
-    }
-
-    let matchCommand = false;
-    app.plugins.find(item => {
-        item.commands.find(command => {
-            if (command.dockCallback && matchHotKey(command.customHotkey, event)) {
-                matchCommand = true;
-                command.dockCallback(activePanelElement as HTMLElement);
-                return true;
-            }
-        });
-        if (matchCommand) {
-            return true;
-        }
-    });
-    if (matchCommand) {
-        return true;
     }
     const model = (getInstanceById(activePanelElement.getAttribute("data-id"), window.siyuan.layout.layout) as Tab)?.model;
     if (!model) {

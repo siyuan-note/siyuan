@@ -6,7 +6,7 @@
 		"icon": "1f64f",
 		"id": "20211226114929-08ap1r0",
 		"title": "致謝",
-		"updated": "20230809211225"
+		"updated": "20230809211753"
 	},
 	"Children": [
 		{
@@ -2008,6 +2008,40 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230809211753-297i96h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230809211753-297i96h",
+				"updated": "20230809211753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "完整的依赖项请参考 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/kernel/go.mod",
+					"TextMarkTextContent": "go.mod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/app/package.json",
+					"TextMarkTextContent": "package.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		}

@@ -7,7 +7,7 @@
 		"id": "20201121212605-9td1a62",
 		"title": "致谢",
 		"type": "doc",
-		"updated": "20230809211150"
+		"updated": "20230809211744"
 	},
 	"Children": [
 		{
@@ -2009,6 +2009,40 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230809211739-97nub3m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230809211739-97nub3m",
+				"updated": "20230809211744"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "完整的依赖项请参考 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/kernel/go.mod",
+					"TextMarkTextContent": "go.mod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/app/package.json",
+					"TextMarkTextContent": "package.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		}

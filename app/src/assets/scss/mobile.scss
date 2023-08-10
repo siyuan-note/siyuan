@@ -42,7 +42,7 @@
 
     &__icon {
       font-size: 18px;
-      line-height: 40px;
+      line-height: 32px;
       height: auto;
     }
 
@@ -54,8 +54,8 @@
     }
 
     &__toggle {
-      height: auto;
-      padding: 14px;
+      height: 24px;
+      padding: 4px;
     }
 
     &__arrow {
@@ -64,7 +64,7 @@
     }
 
     &__action {
-      padding: 12px;
+      padding: 8px;
       height: 16px;
 
       svg {

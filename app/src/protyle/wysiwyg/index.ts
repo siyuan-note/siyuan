@@ -1973,15 +1973,7 @@ export class WYSIWYG {
                             actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                             updateTransaction(protyle, actionElement.parentElement.getAttribute("data-node-id"), actionElement.parentElement.outerHTML, html);
                         } else {
-                            protyle.gutter.renderMenu(protyle, actionElement.parentElement);
-                            /// #if MOBILE
-                            window.siyuan.menus.menu.fullscreen();
-                            /// #else
-                            window.siyuan.menus.menu.popup({
-                                x: event.clientX - 16,
-                                y: event.clientY - 16
-                            }, true);
-                            /// #endif
+                            zoomOut({protyle, id: actionElement.parentElement.getAttribute("data-node-id")});
                         }
                     }
                 }

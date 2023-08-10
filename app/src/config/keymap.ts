@@ -51,17 +51,15 @@ export const keymap = {
 </label>`;
             });
             if (commandHTML) {
-                pluginHtml += `
-    <div class="b3-list-item b3-list-item--narrow toggle">
-        <span class="b3-list-item__toggle b3-list-item__toggle--hl">
-            <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-        </span>
-        <span class="b3-list-item__text ft__on-surface">${item.displayName}</span>
-    </div>
-    <div class="fn__none b3-list__panel">
-        ${commandHTML}
-    </div>
-`;
+                pluginHtml += `<div class="b3-list-item b3-list-item--narrow toggle">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl">
+        <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+    </span>
+    <span class="b3-list-item__text ft__on-surface">${item.displayName}</span>
+</div>
+<div class="fn__none b3-list__panel">
+    ${commandHTML}
+</div>`;
             }
         });
         if (pluginHtml) {

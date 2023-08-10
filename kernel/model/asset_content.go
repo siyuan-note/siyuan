@@ -21,6 +21,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -35,6 +36,172 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/xuri/excelize/v2"
 )
+
+// FullTextSearchAssetContent 搜索资源文件内容。
+//
+// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
+// orderBy: 0：相关度（默认），1：按更新时间升序，2：按更新时间降序
+func FullTextSearchAssetContent(query string, types map[string]bool, method, orderBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+	query = strings.TrimSpace(query)
+	beforeLen := 36
+	var blocks []*Block
+	orderByClause := buildAssetContentOrderBy(orderBy)
+	switch method {
+	case 1: // 查询语法
+		filter := buildAssetContentTypeFilter(types)
+		blocks, matchedRootCount = fullTextSearchAssetContentByQuerySyntax(query, filter, orderByClause, beforeLen, page, pageSize)
+	case 2: // SQL
+		blocks, matchedRootCount = searchAssetContentBySQL(query, beforeLen, page, pageSize)
+	case 3: // 正则表达式
+		typeFilter := buildAssetContentTypeFilter(types)
+		blocks, matchedRootCount = fullTextSearchAssetContentByRegexp(query, typeFilter, orderByClause, beforeLen, page, pageSize)
+	default: // 关键字
+		filter := buildAssetContentTypeFilter(types)
+		blocks, matchedRootCount = fullTextSearchAssetContentByKeyword(query, filter, orderByClause, beforeLen, page, pageSize)
+	}
+	pageCount = (matchedRootCount + pageSize - 1) / pageSize
+
+	if 1 > len(ret) {
+		ret = []*Block{}
+	}
+	return
+}
+
+func fullTextSearchAssetContentByQuerySyntax(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+	query = gulu.Str.RemoveInvisible(query)
+	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, beforeLen, page, pageSize)
+}
+
+func fullTextSearchAssetContentByKeyword(query, typeFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+	query = gulu.Str.RemoveInvisible(query)
+	query = stringQuery(query)
+	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, beforeLen, page, pageSize)
+}
+
+func fullTextSearchAssetContentByRegexp(exp, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+	exp = gulu.Str.RemoveInvisible(exp)
+	fieldFilter := assetContentFieldRegexp(exp)
+	stmt := "SELECT * FROM `asset_contents_fts_case_insensitive` WHERE " + fieldFilter + " AND ext IN " + typeFilter
+	stmt += " " + orderBy
+	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	if 1 > len(ret) {
+		ret = []*Block{}
+	}
+
+	matchedAssetsCount = fullTextSearchAssetContentCountByRegexp(exp, typeFilter)
+	return
+}
+
+func assetContentFieldRegexp(exp string) string {
+	buf := bytes.Buffer{}
+	buf.WriteString("(name REGEXP '")
+	buf.WriteString(exp)
+	buf.WriteString("' OR content REGEXP '")
+	buf.WriteString(exp)
+	buf.WriteString("')")
+	return buf.String()
+}
+
+func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAssetsCount int) {
+	fieldFilter := fieldRegexp(exp)
+	stmt := "SELECT COUNT(path) AS `assets` FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
+	result, _ := sql.QueryNoLimit(stmt)
+	if 1 > len(result) {
+		return
+	}
+	matchedAssetsCount = int(result[0]["assets"].(int64))
+	return
+}
+
+func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+	table := "asset_contents_fts_case_insensitive"
+	projections := "id, name, ext, path, size, updated, " +
+		"highlight(" + table + ", 6, '<mark>', '</mark>') AS content"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
+	stmt += ") AND type IN " + typeFilter
+	stmt += " " + orderBy
+	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
+	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	if 1 > len(ret) {
+		ret = []*Block{}
+	}
+
+	matchedAssetsCount = fullTextSearchAssetContentCount(query, typeFilter)
+	return
+}
+
+func searchAssetContentBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+	stmt = gulu.Str.RemoveInvisible(stmt)
+	stmt = strings.TrimSpace(stmt)
+	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
+	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	if 1 > len(ret) {
+		ret = []*Block{}
+		return
+	}
+
+	stmt = strings.ToLower(stmt)
+	stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(path) AS `assets` ")
+	stmt = removeLimitClause(stmt)
+	result, _ := sql.QueryNoLimit(stmt)
+	if 1 > len(ret) {
+		return
+	}
+
+	matchedAssetsCount = int(result[0]["assets"].(int64))
+	return
+}
+
+func fullTextSearchAssetContentCount(query, typeFilter string) (matchedAssetsCount int) {
+	query = gulu.Str.RemoveInvisible(query)
+
+	table := "asset_contents_fts_case_insensitive"
+	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
+	stmt += ") AND type IN " + typeFilter
+	result, _ := sql.QueryNoLimit(stmt)
+	if 1 > len(result) {
+		return
+	}
+	matchedAssetsCount = int(result[0]["assets"].(int64))
+	return
+}
+
+func buildAssetContentColumnFilter() string {
+	return "{name content}"
+}
+
+func buildAssetContentTypeFilter(types map[string]bool) string {
+	if 0 == len(types) {
+		return ""
+	}
+
+	var buf bytes.Buffer
+	buf.WriteString("(")
+	for k, _ := range types {
+		buf.WriteString("'")
+		buf.WriteString(k)
+		buf.WriteString("',")
+	}
+	buf.Truncate(buf.Len() - 1)
+	buf.WriteString(")")
+	return buf.String()
+}
+
+func buildAssetContentOrderBy(orderBy int) string {
+	switch orderBy {
+	case 0:
+		return "ORDER BY rank DESC"
+	case 1:
+		return "ORDER BY updated ASC"
+	case 2:
+		return "ORDER BY updated DESC"
+	default:
+		return "ORDER BY rank DESC"
+	}
+}
 
 var assetContentSearcher = NewAssetsSearcher()
 
@@ -63,8 +230,8 @@ func IndexAssetContent(absPath string) {
 	assetContents := []*sql.AssetContent{
 		{
 			ID:      ast.NewNodeID(),
-			Name:    filepath.Base(p),
-			Ext:     filepath.Ext(p),
+			Name:    util.RemoveID(filepath.Base(p)),
+			Ext:     ext,
 			Path:    p,
 			Size:    info.Size(),
 			Updated: info.ModTime().Unix(),
@@ -148,8 +315,8 @@ func (searcher *AssetsSearcher) FullIndex() {
 	for _, result := range results {
 		assetContents = append(assetContents, &sql.AssetContent{
 			ID:      ast.NewNodeID(),
-			Name:    filepath.Base(result.Path),
-			Ext:     filepath.Ext(result.Path),
+			Name:    util.RemoveID(filepath.Base(result.Path)),
+			Ext:     strings.ToLower(filepath.Ext(result.Path)),
 			Path:    result.Path,
 			Size:    result.Size,
 			Updated: result.Updated,

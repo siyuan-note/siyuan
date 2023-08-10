@@ -132,7 +132,7 @@ export const about = {
     <div class="fn__flex-1">
         ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
         <span id="isInsider"></span>
-        <div class="b3-label__text">${window.siyuan.languages.visitAnnouncements}</div>
+        <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}</div>
     </div>
     <div class="fn__space"></div>
     <div class="fn__flex-center fn__size200 config__item-line">

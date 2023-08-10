@@ -924,7 +924,7 @@
   "about17": "No habilite el proxy cuando esté configurado como <code class='fn__code'>Conexión directa</code>",
   "checkUpdate": "Comprobar actualización",
   "currentVer": "Versión actual",
-  "visitAnnouncements": "<a href=\"https://github.com/siyuan-note/siyuan/releases\" target=\"_blank\">Visita todas las versiones publicadas</a>",
+  "downloadLatestVer": "<a href=\"https://b3log.org/siyuan/download.html\", target=\"_blank\">Descargar la última versión</a>",
   "themeLight": "Claro",
   "themeDark": "Oscuro",
   "themeOS": "Sigue el sistema",

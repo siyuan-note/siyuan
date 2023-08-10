@@ -1067,7 +1067,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p"
   }
   ```
-    * `path`: the file path under the workspace path
+    * `path`: the dir path under the workspace path
 * Return value
 
   ```json

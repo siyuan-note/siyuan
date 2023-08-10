@@ -924,7 +924,7 @@
   "about17": "Do not enable proxy when set to <code class='fn__code'>Direct connection</code>",
   "checkUpdate": "Check update",
   "currentVer": "Current version",
-  "visitAnnouncements": "<a href=\"https://github.com/siyuan-note/siyuan/releases\" target=\"_blank\">Visit all published versions</a>",
+  "downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Download the latest version</a>",
   "themeLight": "Light",
   "themeDark": "Dark",
   "themeOS": "Follow the system",

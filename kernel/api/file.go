@@ -184,6 +184,7 @@ func readDir(c *gin.Context) {
 			"name":      entry.Name(),
 			"isDir":     info.IsDir(),
 			"isSymlink": util.IsSymlink(entry),
+			"updated":   info.ModTime().Unix(),
 		})
 	}
 

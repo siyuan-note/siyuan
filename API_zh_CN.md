@@ -1056,7 +1056,7 @@
 
   ```json
   {
-    "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+    "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p"
   }
   ```
     * `path`：工作空间路径下的文件路径
@@ -1067,16 +1067,18 @@
     "code": 0,
     "msg": "",
     "data": [
-        {
-            "isDir": true,
-            "isSymlink": false,
-            "name": "20210808180320-abz7w6k"
-        },
-        {
-            "isDir": false,
-            "isSymlink": false,
-            "name": "20210808180320-abz7w6k.sy"
-        }
+      {
+        "isDir": true,
+        "isSymlink": false,
+        "name": "20210808180303-6yi0dv5",
+        "updated": 1691467624
+      },
+      {
+        "isDir": false,
+        "isSymlink": false,
+        "name": "20210808180303-6yi0dv5.sy",
+        "updated": 1663298365
+      }
     ]
   }
   ```

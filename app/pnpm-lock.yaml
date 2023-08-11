@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@electron/remote':
     specifier: ^2.0.9
-    version: 2.0.9(electron@25.4.0)
+    version: 2.0.9(electron@25.5.0)
 
 devDependencies:
   '@types/node':
@@ -32,8 +32,8 @@ devDependencies:
     specifier: ^1.11.5
     version: 1.11.5
   electron:
-    specifier: 25.4.0
-    version: 25.4.0
+    specifier: 25.5.0
+    version: 25.5.0
   electron-builder:
     specifier: ^24.4.0
     version: 24.4.0
@@ -182,12 +182,12 @@ packages:
       - supports-color
     dev: true
 
-  /@electron/remote@2.0.9(electron@25.4.0):
+  /@electron/remote@2.0.9(electron@25.5.0):
     resolution: {integrity: sha512-LR0W0ID6WAKHaSs0x5LX9aiG+5pFBNAJL6eQAJfGkCuZPUa6nZz+czZLdlTDETG45CgF/0raSvCtYOYUpr6c+A==}
     peerDependencies:
       electron: '>= 13.0.0'
     dependencies:
-      electron: 25.4.0
+      electron: 25.5.0
     dev: false
 
   /@electron/universal@1.3.4:
@@ -1847,8 +1847,8 @@ packages:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
     dev: true
 
-  /electron@25.4.0:
-    resolution: {integrity: sha512-VLTRxDhL4UvQbqM7pTNENnJo62cdAPZT92N+B7BZQ5Xfok1wuVPEewIjBot4K7U3EpLUuHn1veeLzho3ihiP+Q==}
+  /electron@25.5.0:
+    resolution: {integrity: sha512-w1DNj1LuAk0Vaas1rQ0pAkTe2gZ5YG75J27mC2m88y0G6Do5b5YoFDaF84fOGQHeQ4j8tC5LngSgWhbwmqDlrw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true

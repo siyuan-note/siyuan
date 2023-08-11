@@ -19,12 +19,60 @@ package sql
 import (
 	"database/sql"
 	"errors"
+	"math"
 	"strconv"
 	"strings"
 
 	"github.com/88250/vitess-sqlparser/sqlparser"
 	"github.com/siyuan-note/logging"
 )
+
+func QueryAssetContentNoLimit(stmt string) (ret []map[string]interface{}, err error) {
+	return queryAssetContentRawStmt(stmt, math.MaxInt)
+}
+
+func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interface{}, err error) {
+	rows, err := queryAssetContent(stmt)
+	if nil != err {
+		if strings.Contains(err.Error(), "syntax error") {
+			return
+		}
+		return
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if nil != err || nil == cols {
+		return
+	}
+
+	noLimit := !strings.Contains(strings.ToLower(stmt), " limit ")
+	var count, errCount int
+	for rows.Next() {
+		columns := make([]interface{}, len(cols))
+		columnPointers := make([]interface{}, len(cols))
+		for i := range columns {
+			columnPointers[i] = &columns[i]
+		}
+
+		if err = rows.Scan(columnPointers...); nil != err {
+			return
+		}
+
+		m := make(map[string]interface{})
+		for i, colName := range cols {
+			val := columnPointers[i].(*interface{})
+			m[colName] = *val
+		}
+
+		ret = append(ret, m)
+		count++
+		if (noLimit && limit < count) || 0 < errCount {
+			break
+		}
+	}
+	return
+}
 
 func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*AssetContent) {
 	parsedStmt, err := sqlparser.Parse(stmt)

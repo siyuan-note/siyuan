@@ -249,48 +249,68 @@ export const initWindow = (app: App) => {
     currentWindow.on("blur", winOnBlur);
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-            if (/^siyuan:\/\/plugins\//.test(url)) {
-                // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-                const pluginId = url.replace("siyuan://plugins/", "").split("?")[0];
-                app.plugins.find(plugin => {
-                    const match = Object.keys(plugin.models).find(key => {
-                        if (key === pluginId) {
-                            let data = getSearch("data", url);
-                            try {
-                                data = JSON.parse(data || "{}");
-                            } catch (e) {
-                                console.log("Error open plugin tab with protocol:", e);
+            app.plugins.forEach(plugin => {
+                plugin.eventBus.emit("open-siyuan-url", { url });
+            });
+            if (url.startsWith("siyuan://plugins/")) {
+                const urlObj = new URL(url);
+                const pluginId = urlObj.pathname.split("/")[3];
+                if (pluginId) {
+                    app.plugins.find(plugin => {
+                        // siyuan://plugins/plugin-name/foo?bar=baz
+                        if (pluginId.startsWith(plugin.name)) {
+                            plugin.eventBus.emit("open-siyuan-url-plugins", { url });
+                        }
+
+                        // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
+                        const match = Object.keys(plugin.models).find(key => {
+                            if (key === pluginId) {
+                                let data = getSearch("data", url);
+                                try {
+                                    data = JSON.parse(data || "{}");
+                                } catch (e) {
+                                    console.log("Error open plugin tab with protocol:", e);
+                                }
+                                openFile({
+                                    app,
+                                    custom: {
+                                        title: getSearch("title", url),
+                                        icon: getSearch("icon", url),
+                                        data,
+                                        fn: plugin.models[key]
+                                    },
+                                });
+                                return true;
                             }
-                            openFile({
-                                app,
-                                custom: {
-                                    title: getSearch("title", url),
-                                    icon: getSearch("icon", url),
-                                    data,
-                                    fn: plugin.models[key]
-                                },
-                            });
+                        });
+                        if (match) {
                             return true;
                         }
                     });
-                    if (match) {
-                        return true;
-                    }
-                });
-                return;
+                    return;
+                }
             }
             if (isSYProtocol(url)) {
                 const id = getIdFromSYProtocol(url);
+                const focus = getSearch("focus", url) === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                     if (existResponse.data) {
                         openFileById({
                             app,
                             id,
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                            zoomIn: getSearch("focus", url) === "1"
+                            zoomIn: focus,
                         });
                         ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
                     }
+                    app.plugins.forEach(plugin => {
+                        plugin.eventBus.emit("open-siyuan-url-blocks", {
+                            url,
+                            id,
+                            focus,
+                            exist: existResponse.data,
+                        });
+                    });
                 });
                 return;
             }

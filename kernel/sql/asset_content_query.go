@@ -26,7 +26,7 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*Block) {
+func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*AssetContent) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if nil != err {
 		return selectAssetContentsRawStmt(stmt, limit)
@@ -83,14 +83,18 @@ func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*Block) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		if block := scanAssetContentRows(rows); nil != block {
-			ret = append(ret, block)
+		if ac := scanAssetContentRows(rows); nil != ac {
+			ret = append(ret, ac)
 		}
 	}
 	return
 }
 
-func selectAssetContentsRawStmt(stmt string, limit int) (ret []*Block) {
+func SelectAssetContentsRawStmtNoParse(stmt string, limit int) (ret []*AssetContent) {
+	return selectAssetContentsRawStmt(stmt, limit)
+}
+
+func selectAssetContentsRawStmt(stmt string, limit int) (ret []*AssetContent) {
 	rows, err := queryAssetContent(stmt)
 	if nil != err {
 		if strings.Contains(err.Error(), "syntax error") {
@@ -104,8 +108,8 @@ func selectAssetContentsRawStmt(stmt string, limit int) (ret []*Block) {
 	var count, errCount int
 	for rows.Next() {
 		count++
-		if block := scanAssetContentRows(rows); nil != block {
-			ret = append(ret, block)
+		if ac := scanAssetContentRows(rows); nil != ac {
+			ret = append(ret, ac)
 		} else {
 			logging.LogWarnf("raw sql query [%s] failed", stmt)
 			errCount++
@@ -119,13 +123,12 @@ func selectAssetContentsRawStmt(stmt string, limit int) (ret []*Block) {
 }
 
 func scanAssetContentRows(rows *sql.Rows) (ret *AssetContent) {
-	var block Block
-	if err := rows.Scan(&block.ID, &block.ParentID, &block.RootID, &block.Hash, &block.Box, &block.Path, &block.HPath, &block.Name, &block.Alias, &block.Memo, &block.Tag, &block.Content, &block.FContent, &block.Markdown, &block.Length, &block.Type, &block.SubType, &block.IAL, &block.Sort, &block.Created, &block.Updated); nil != err {
+	var ac AssetContent
+	if err := rows.Scan(&ac.ID, &ac.Name, &ac.Ext, &ac.Path, &ac.Size, &ac.Updated, &ac.Content); nil != err {
 		logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
 		return
 	}
-	ret = &block
-	putBlockCache(ret)
+	ret = &ac
 	return
 }
 

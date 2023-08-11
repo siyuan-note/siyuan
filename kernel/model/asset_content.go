@@ -37,57 +37,66 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+type AssetContent struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Ext     string `json:"ext"`
+	Path    string `json:"path"`
+	Size    int64  `json:"size"`
+	Updated int64  `json:"updated"`
+	Content string `json:"content"`
+}
+
 // FullTextSearchAssetContent 搜索资源文件内容。
 //
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 // orderBy: 0：相关度（默认），1：按更新时间升序，2：按更新时间降序
-func FullTextSearchAssetContent(query string, types map[string]bool, method, orderBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+func FullTextSearchAssetContent(query string, types map[string]bool, method, orderBy, page, pageSize int) (ret []*AssetContent, matchedAssetsCount, pageCount int) {
 	query = strings.TrimSpace(query)
 	beforeLen := 36
-	var blocks []*Block
 	orderByClause := buildAssetContentOrderBy(orderBy)
 	switch method {
 	case 1: // 查询语法
 		filter := buildAssetContentTypeFilter(types)
-		blocks, matchedRootCount = fullTextSearchAssetContentByQuerySyntax(query, filter, orderByClause, beforeLen, page, pageSize)
+		ret, matchedAssetsCount = fullTextSearchAssetContentByQuerySyntax(query, filter, orderByClause, beforeLen, page, pageSize)
 	case 2: // SQL
-		blocks, matchedRootCount = searchAssetContentBySQL(query, beforeLen, page, pageSize)
+		ret, matchedAssetsCount = searchAssetContentBySQL(query, beforeLen, page, pageSize)
 	case 3: // 正则表达式
 		typeFilter := buildAssetContentTypeFilter(types)
-		blocks, matchedRootCount = fullTextSearchAssetContentByRegexp(query, typeFilter, orderByClause, beforeLen, page, pageSize)
+		ret, matchedAssetsCount = fullTextSearchAssetContentByRegexp(query, typeFilter, orderByClause, beforeLen, page, pageSize)
 	default: // 关键字
 		filter := buildAssetContentTypeFilter(types)
-		blocks, matchedRootCount = fullTextSearchAssetContentByKeyword(query, filter, orderByClause, beforeLen, page, pageSize)
+		ret, matchedAssetsCount = fullTextSearchAssetContentByKeyword(query, filter, orderByClause, beforeLen, page, pageSize)
 	}
-	pageCount = (matchedRootCount + pageSize - 1) / pageSize
+	pageCount = (matchedAssetsCount + pageSize - 1) / pageSize
 
 	if 1 > len(ret) {
-		ret = []*Block{}
+		ret = []*AssetContent{}
 	}
 	return
 }
 
-func fullTextSearchAssetContentByQuerySyntax(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+func fullTextSearchAssetContentByQuerySyntax(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetsCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
-func fullTextSearchAssetContentByKeyword(query, typeFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+func fullTextSearchAssetContentByKeyword(query, typeFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetsCount int) {
 	query = gulu.Str.RemoveInvisible(query)
 	query = stringQuery(query)
 	return fullTextSearchAssetContentByFTS(query, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
-func fullTextSearchAssetContentByRegexp(exp, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+func fullTextSearchAssetContentByRegexp(exp, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetsCount int) {
 	exp = gulu.Str.RemoveInvisible(exp)
 	fieldFilter := assetContentFieldRegexp(exp)
 	stmt := "SELECT * FROM `asset_contents_fts_case_insensitive` WHERE " + fieldFilter + " AND ext IN " + typeFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
-	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	assetContents := sql.SelectAssetContentsRawStmtNoParse(stmt, Conf.Search.Limit)
+	ret = fromSQLAssetContents(&assetContents, beforeLen)
 	if 1 > len(ret) {
-		ret = []*Block{}
+		ret = []*AssetContent{}
 	}
 
 	matchedAssetsCount = fullTextSearchAssetContentCountByRegexp(exp, typeFilter)
@@ -105,8 +114,9 @@ func assetContentFieldRegexp(exp string) string {
 }
 
 func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAssetsCount int) {
+	table := "asset_contents_fts_case_insensitive"
 	fieldFilter := fieldRegexp(exp)
-	stmt := "SELECT COUNT(path) AS `assets` FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
+	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return
@@ -115,7 +125,7 @@ func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAss
 	return
 }
 
-func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetsCount int) {
 	table := "asset_contents_fts_case_insensitive"
 	projections := "id, name, ext, path, size, updated, " +
 		"highlight(" + table + ", 6, '<mark>', '</mark>') AS content"
@@ -123,23 +133,23 @@ func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLe
 	stmt += ") AND type IN " + typeFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
-	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	assetContents := sql.SelectAssetContentsRawStmt(stmt, page, pageSize)
+	ret = fromSQLAssetContents(&assetContents, beforeLen)
 	if 1 > len(ret) {
-		ret = []*Block{}
+		ret = []*AssetContent{}
 	}
 
 	matchedAssetsCount = fullTextSearchAssetContentCount(query, typeFilter)
 	return
 }
 
-func searchAssetContentBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedAssetsCount int) {
+func searchAssetContentBySQL(stmt string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetsCount int) {
 	stmt = gulu.Str.RemoveInvisible(stmt)
 	stmt = strings.TrimSpace(stmt)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
-	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	assetContents := sql.SelectAssetContentsRawStmt(stmt, page, pageSize)
+	ret = fromSQLAssetContents(&assetContents, beforeLen)
 	if 1 > len(ret) {
-		ret = []*Block{}
+		ret = []*AssetContent{}
 		return
 	}
 
@@ -167,6 +177,26 @@ func fullTextSearchAssetContentCount(query, typeFilter string) (matchedAssetsCou
 	}
 	matchedAssetsCount = int(result[0]["assets"].(int64))
 	return
+}
+
+func fromSQLAssetContents(assetContents *[]*sql.AssetContent, beforeLen int) (ret []*AssetContent) {
+	ret = []*AssetContent{}
+	for _, assetContent := range *assetContents {
+		ret = append(ret, fromSQLAssetContent(assetContent, beforeLen))
+	}
+	return
+}
+
+func fromSQLAssetContent(assetContent *sql.AssetContent, beforeLen int) *AssetContent {
+	return &AssetContent{
+		ID:      assetContent.ID,
+		Name:    assetContent.Name,
+		Ext:     assetContent.Ext,
+		Path:    assetContent.Path,
+		Size:    assetContent.Size,
+		Updated: assetContent.Updated,
+		Content: assetContent.Content,
+	}
 }
 
 func buildAssetContentColumnFilter() string {

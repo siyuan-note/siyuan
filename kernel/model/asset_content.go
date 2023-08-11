@@ -116,8 +116,8 @@ func assetContentFieldRegexp(exp string) string {
 func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAssetCount int) {
 	table := "asset_contents_fts_case_insensitive"
 	fieldFilter := fieldRegexp(exp)
-	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE " + fieldFilter + " AND type IN " + typeFilter
-	result, _ := sql.QueryNoLimit(stmt)
+	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE " + fieldFilter + " AND ext IN " + typeFilter
+	result, _ := sql.QueryAssetContentNoLimit(stmt)
 	if 1 > len(result) {
 		return
 	}
@@ -130,7 +130,7 @@ func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLe
 	projections := "id, name, ext, path, size, updated, " +
 		"highlight(" + table + ", 6, '<mark>', '</mark>') AS content"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
-	stmt += ") AND type IN " + typeFilter
+	stmt += ") AND ext IN " + typeFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	assetContents := sql.SelectAssetContentsRawStmt(stmt, page, pageSize)
@@ -156,7 +156,7 @@ func searchAssetContentBySQL(stmt string, beforeLen, page, pageSize int) (ret []
 	stmt = strings.ToLower(stmt)
 	stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(path) AS `assets` ")
 	stmt = removeLimitClause(stmt)
-	result, _ := sql.QueryNoLimit(stmt)
+	result, _ := sql.QueryAssetContentNoLimit(stmt)
 	if 1 > len(ret) {
 		return
 	}
@@ -170,8 +170,8 @@ func fullTextSearchAssetContentCount(query, typeFilter string) (matchedAssetCoun
 
 	table := "asset_contents_fts_case_insensitive"
 	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
-	stmt += ") AND type IN " + typeFilter
-	result, _ := sql.QueryNoLimit(stmt)
+	stmt += ") AND ext IN " + typeFilter
+	result, _ := sql.QueryAssetContentNoLimit(stmt)
 	if 1 > len(result) {
 		return
 	}

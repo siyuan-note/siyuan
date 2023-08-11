@@ -104,7 +104,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
             removed: localData.removed,
             page: 1
         },
-        position: "right"
+        position: (window.siyuan.layout.centerLayout.children.length > 1 || window.innerWidth > 1024) ? "right" : undefined
     });
 };
 
@@ -492,7 +492,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             } else if (target.id === "searchOpen") {
                 config.k = searchInputElement.value;
                 config.r = replaceInputElement.value;
-                openFile({app, searchData: config, position: "right"});
+                openFile({
+                    app,
+                    searchData: config,
+                    position: (window.siyuan.layout.centerLayout.children.length > 1 || window.innerWidth > 1024) ? "right" : undefined
+                });
                 if (closeCB) {
                     closeCB();
                 }

@@ -215,6 +215,10 @@ export const openFile = (options: IOpenFileOptions) => {
                 wnd.parent.children.find((item, index) => {
                     if (item.id === wnd.id) {
                         let nextWnd = wnd.parent.children[index + 1];
+                        if (!nextWnd) {
+                            // wnd 为右侧时，应设置其为目标
+                            nextWnd = wnd;
+                        }
                         while (nextWnd instanceof Layout) {
                             nextWnd = nextWnd.children[0];
                         }

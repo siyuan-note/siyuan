@@ -272,7 +272,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	}
 
 	box := Conf.Box(targetBoxID)
-	headingText := getNodeRefText(headingNode)
+	headingText := getNodeRefText0(headingNode)
 	headingText = util.FilterFileName(headingText)
 
 	moveToRoot := "/" == targetPath

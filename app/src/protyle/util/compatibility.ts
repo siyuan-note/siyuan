@@ -148,6 +148,16 @@ export const getLocalStorage = (cb: () => void) => {
         window.siyuan.storage = response.data;
         // 历史数据迁移
         const defaultStorage: any = {};
+        defaultStorage[Constants.LOCAL_SEARCHASSET] = {
+            keys: [],
+            col: "",
+            row: "",
+            layout: 0,
+            method: 0,
+            types: [".txt", ".md", ".docx", ".xlsx", ".pptx"],
+            sort: 0,
+            k: "",
+        };
         defaultStorage[Constants.LOCAL_SEARCHKEYS] = {
             keys: [],
             replaceKeys: [],
@@ -216,9 +226,10 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
 
-        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
-            Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHDATA,
-            Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI, Constants.LOCAL_PLUGINTOPUNPIN].forEach((key) => {
+        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
+            Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
+            Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
+            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

@@ -216,7 +216,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <div class="search__drag"></div>
         <div id="searchPreview" class="fn__flex-1 search__preview"></div>
     </div>
-    <div class="search__tip">
+    <div class="search__tip${closeCB ? "" : " fn__none"}">
         <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
         <kbd>${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</kbd> ${window.siyuan.languages.new}
         <kbd>Enter/Double Click</kbd> ${window.siyuan.languages.searchTip2}
@@ -225,6 +225,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
+<div class="fn__flex-column search__assets fn__none" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}"></div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
     const criteriaData: ISearchOption[] = [];
@@ -495,7 +496,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchAsset") {
-                openSearchAsset();
+                openSearchAsset(element.querySelector(".search__assets"), !!closeCB);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

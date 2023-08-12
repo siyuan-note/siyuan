@@ -1,4 +1,5 @@
 {
+  "searchAssetContent": "Search asset file content",
   "searchOverwrite": "The query name is duplicated, do you want to overwrite it?",
   "onepay": "PRO",
   "format": "Number format",

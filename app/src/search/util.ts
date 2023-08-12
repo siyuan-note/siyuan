@@ -19,6 +19,7 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
 import {App} from "../index";
 import {upDownHint} from "../util/upDownHint";
+import {openSearchAsset} from "./assets";
 
 const toggleReplaceHistory = (replaceHistoryElement: Element, historyElement: Element, replaceInputElement: HTMLInputElement) => {
     if (replaceHistoryElement.classList.contains("fn__none")) {
@@ -160,6 +161,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             <span class="${closeCB ? "" : "fn__none "}fn__space"></span>
             <span id="searchOpen" aria-label="${window.siyuan.languages.openInNewTab}" class="${closeCB ? "" : "fn__none "}block__icon b3-tooltips b3-tooltips__w">
                 <svg><use xlink:href="#iconLayoutRight"></use></svg>
+            </span>
+            <span class="fn__space"></span>
+            <span id="searchAsset" aria-label="${window.siyuan.languages.searchAssetContent}" class="block__icon b3-tooltips b3-tooltips__w">
+                <svg><use xlink:href="#iconExact"></use></svg>
             </span>
         </div>
     </div>
@@ -486,6 +491,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 // ctrl+P 不需要保存
                 config.hasReplace = !config.hasReplace;
                 element.querySelector("#replaceHistoryBtn").parentElement.classList.toggle("fn__none");
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchAsset") {
+                openSearchAsset();
                 event.stopPropagation();
                 event.preventDefault();
                 break;

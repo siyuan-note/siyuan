@@ -153,7 +153,7 @@ func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAss
 func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
 	table := "asset_contents_fts_case_insensitive"
 	projections := "id, name, ext, path, size, updated, " +
-		"highlight(" + table + ", 6, '<mark>', '</mark>') AS content"
+		"snippet(" + table + ", 6, '<mark>', '</mark>', '...', 64) AS content"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
 	stmt += ") AND ext IN " + typeFilter
 	stmt += " " + orderBy

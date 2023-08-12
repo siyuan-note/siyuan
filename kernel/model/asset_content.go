@@ -47,6 +47,31 @@ type AssetContent struct {
 	Content string `json:"content"`
 }
 
+func GetAssetContent(id, query string, queryMethod int) (ret *AssetContent) {
+	if "" != query && (0 == queryMethod || 1 == queryMethod) {
+		if 0 == queryMethod {
+			query = stringQuery(query)
+		}
+	}
+
+	table := "asset_contents_fts_case_insensitive"
+	filter := " id = '" + id + "'"
+	if "" != query {
+		filter += " AND `" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
+	}
+
+	projections := "id, name, ext, path, size, updated, " +
+		"highlight(" + table + ", 6, '<mark>', '</mark>') AS content"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + filter
+	assetContents := sql.SelectAssetContentsRawStmt(stmt, 1, 1)
+	results := fromSQLAssetContents(&assetContents, 36)
+	if 1 > len(results) {
+		return
+	}
+	ret = results[0]
+	return
+}
+
 // FullTextSearchAssetContent 搜索资源文件内容。
 //
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式

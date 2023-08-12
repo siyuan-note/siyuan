@@ -26,6 +26,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getAssetContent(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	query := arg["query"].(string)
+	queryMethod := int(arg["queryMethod"].(float64))
+
+	ret.Data = map[string]interface{}{
+		"assetContent": model.GetAssetContent(id, query, queryMethod),
+	}
+	return
+}
+
 func fullTextSearchAssetContent(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

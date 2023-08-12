@@ -1029,7 +1029,7 @@
     "task.database.index.ref": "Ejecutar referencia de índice de base de datos",
     "task.database.index.fix": "Ejecutar corrección del índice de la base de datos",
     "task.ocr.image": "Ejecutar OCR de imagen para extraer texto",
-    "task.history.generateDoc": "Ejecutar Historial GenerateDoc",
+    "task.history.generateDoc": "Ejecutar base de datos de historial generar doc",
     "task.history.database.index.full": "Ejecutar el índice de reconstrucción de la base de datos del historial",
     "task.history.database.index.commit": "Ejecutar la confirmación del índice de la base de datos del historial",
     "task.database.index.embedBlock": "Ejecutar bloque de incrustación de índice de base de datos",

@@ -29,6 +29,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func fullReindexAssetContent(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	model.ReindexAssetContent()
+}
+
 func getImageOCRText(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

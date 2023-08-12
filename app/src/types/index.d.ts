@@ -142,6 +142,23 @@ interface IPluginSettingOption {
     createActionElement?(): HTMLElement
 }
 
+interface ISearchAssetOption {
+    keys: string[],
+    col: string,
+    row: string,
+    layout: number,
+    method: number,
+    types: {
+        ".txt": boolean,
+        ".md": boolean,
+        ".docx": boolean,
+        ".xlsx": boolean,
+        ".pptx": boolean,
+    },
+    sort: number,
+    k: string,
+}
+
 interface ISearchOption {
     page: number
     removed?: boolean  // 移除后需记录搜索内容 https://github.com/siyuan-note/siyuan/issues/7745

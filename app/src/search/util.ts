@@ -19,7 +19,7 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
 import {App} from "../index";
 import {upDownHint} from "../util/upDownHint";
-import {openSearchAsset} from "./assets";
+import {openSearchAsset, reIndexAssets} from "./assets";
 
 const toggleReplaceHistory = (replaceHistoryElement: Element, historyElement: Element, replaceInputElement: HTMLInputElement) => {
     if (replaceHistoryElement.classList.contains("fn__none")) {
@@ -639,6 +639,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 return;
             } else if (target.id === "replaceAllBtn") {
                 replace(element, config, edit, true);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "reindexAssets") {
+                reIndexAssets(element.querySelector(".fn__loading--top"));
                 event.stopPropagation();
                 event.preventDefault();
                 break;

@@ -154,7 +154,13 @@ export const getLocalStorage = (cb: () => void) => {
             row: "",
             layout: 0,
             method: 0,
-            types: [".txt", ".md", ".docx", ".xlsx", ".pptx"],
+            types: {
+                ".txt": true,
+                ".md": true,
+                ".docx": true,
+                ".xlsx": true,
+                ".pptx": true,
+            },
             sort: 0,
             k: "",
         };

@@ -1029,7 +1029,7 @@
     "task.database.index.ref": "Execute database index reference",
     "task.database.index.fix": "Execute database index fix",
     "task.ocr.image": "Execute image OCR to extract text",
-    "task.history.generateDoc": "Execute GenerateDoc History",
+    "task.history.generateDoc": "Execute history database generate doc",
     "task.history.database.index.full": "Execute history database rebuild index",
     "task.history.database.index.commit": "Execute history database index commit",
     "task.database.index.embedBlock": "Execute database index embed block",

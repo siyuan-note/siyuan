@@ -225,7 +225,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
-<div class="fn__flex-column search__assets fn__none" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}"></div>
+<div class="fn__flex-column fn__none" id="searchAssets" style="height: 100%;${closeCB ? "border-radius: var(--b3-border-radius-b);overflow: hidden;" : ""}"></div>
 <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
     const criteriaData: ISearchOption[] = [];
@@ -317,6 +317,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         };
     });
 
+    const assetsElement = element.querySelector("#searchAssets")
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
@@ -496,7 +497,14 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchAsset") {
-                openSearchAsset(element.querySelector(".search__assets"), !!closeCB);
+                openSearchAsset(assetsElement, !!closeCB);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "searchAssetClose") {
+                assetsElement.classList.add("fn__none")
+                assetsElement.previousElementSibling.classList.remove("fn__none")
+                searchInputElement.select();
                 event.stopPropagation();
                 event.preventDefault();
                 break;

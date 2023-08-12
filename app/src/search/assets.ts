@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {upDownHint} from "../util/upDownHint";
 import {escapeHtml} from "../util/escape";
 
-export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
+export const openSearchAsset = (element: Element, isStick: boolean) => {
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption
     let methodText = window.siyuan.languages.keyword;
     if (localSearch.method === 1) {
@@ -43,7 +43,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
             <svg><use xlink:href="#iconLayoutRight"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <span id="searchAsset" aria-label="${isStick ? window.siyuan.languages.stickSearch : window.siyuan.languages.globalSearch}" class="block__icon b3-tooltips b3-tooltips__w">
+        <span id="searchAssetClose" aria-label="${isStick ? window.siyuan.languages.stickSearch : window.siyuan.languages.globalSearch}" class="block__icon b3-tooltips b3-tooltips__w">
             <svg><use xlink:href="#iconBack"></use></svg>
         </span>
     </div>
@@ -74,6 +74,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
         return
     }
     const searchInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement
+    searchInputElement.select();
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event.isComposing) {
             return;

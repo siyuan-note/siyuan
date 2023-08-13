@@ -714,13 +714,15 @@ func IsSubscriber() bool {
 	return nil != Conf.User && (-1 == Conf.User.UserSiYuanProExpireTime || 0 < Conf.User.UserSiYuanProExpireTime) && 0 == Conf.User.UserSiYuanSubscriptionStatus
 }
 
+// TODO 判断用户是否订阅
 func IsOneTimePaid() bool {
-	if IsSubscriber() {
-		return true
-	}
-	return nil != Conf.User // Sign in to use S3/WebDAV data sync https://github.com/siyuan-note/siyuan/issues/8779
+	//if IsSubscriber() {
+	//	return true
+	//}
+	//return nil != Conf.User // Sign in to use S3/WebDAV data sync https://github.com/siyuan-note/siyuan/issues/8779
 	// TODO https://github.com/siyuan-note/siyuan/issues/8780
 	// return nil != Conf.User && 1 == Conf.User.UserSiYuanOneTimePayStatus
+	return true
 }
 
 const (

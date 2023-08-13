@@ -9,7 +9,10 @@ export const needLogin = (tip = window.siyuan.languages.needLogin) => {
     //     showMessage(tip);
     // }
     // return true;
-    return true;
+    if (tip) {
+        showMessage(tip);
+    }
+    return false;
 };
 
 export const needSubscribe = (tip = window.siyuan.languages._kernel[29]) => {

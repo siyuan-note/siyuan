@@ -38,9 +38,9 @@ const renderProvider = (provider: number) => {
     ${window.siyuan.languages.syncOfficialProviderIntro}
 </div>`;
     }
-    if (needLogin("")) {
-        return `<div class="b3-label b3-label--inner">${window.siyuan.languages.needLogin}</div>`;
-    }
+    // if (needLogin("")) {
+    //     return `<div class="b3-label b3-label--inner">${window.siyuan.languages.needLogin}</div>`;
+    // }
     if (provider === 2) {
         return `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderS3Intro}

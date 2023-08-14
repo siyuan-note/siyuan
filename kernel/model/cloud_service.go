@@ -349,7 +349,7 @@ func RefreshUser(token string) error {
 
 Net:
 	start := time.Now()
-	user, err := getUser(token)
+	user, userdata, err := getUser(token)
 	if err != nil {
 		if nil == Conf.User || errInvalidUser == err {
 			return errors.New(Conf.Language(19))
@@ -369,8 +369,7 @@ Net:
 	}
 
 	Conf.User = user
-	data, _ := gulu.JSON.MarshalJSON(user)
-	Conf.UserData = util.AESEncrypt(string(data))
+	Conf.UserData = userdata
 	Conf.Save()
 
 	if elapsed := time.Now().Sub(start).Milliseconds(); 3000 < elapsed {
@@ -386,8 +385,15 @@ func loadUserFromConf() *conf.User {
 
 	data := util.AESDecrypt(Conf.UserData)
 	data, _ = hex.DecodeString(string(data))
+	payload, err := util.CheckJWS(data)
 	user := &conf.User{}
-	if err := gulu.JSON.UnmarshalJSON(data, &user); nil == err {
+	if err != nil {
+		// try to unmarshal legacy non-signed userdata
+		// if userdata is a forged JWS unmarshaling will fail as JWS data is not a plain JSON user structure
+		if err := gulu.JSON.UnmarshalJSON(data, &user); nil == err {
+			return user
+		}
+	} else if err = gulu.JSON.UnmarshalJSON(payload, &user); nil == err {
 		return user
 	}
 	return nil
@@ -492,7 +498,7 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 
 var errInvalidUser = errors.New("invalid user")
 
-func getUser(token string) (*conf.User, error) {
+func getUser(token string) (*conf.User, string, error) {
 	result := map[string]interface{}{}
 	request := httpclient.NewCloudRequest30s()
 	_, err := request.
@@ -501,26 +507,32 @@ func getUser(token string) (*conf.User, error) {
 		Post(util.GetCloudServer() + "/apis/siyuan/user")
 	if nil != err {
 		logging.LogErrorf("get community user failed: %s", err)
-		return nil, errors.New(Conf.Language(18))
+		return nil, "", errors.New(Conf.Language(18))
 	}
 
 	code := result["code"].(float64)
 	if 0 != code {
 		if 255 == code {
-			return nil, errInvalidUser
+			return nil, "", errInvalidUser
 		}
 		logging.LogErrorf("get community user failed: %s", result["msg"])
-		return nil, errors.New(Conf.Language(18))
+		return nil, "", errors.New(Conf.Language(18))
 	}
 
-	dataStr := result["data"].(string)
+	// result must return ["data"] = legacy user data JSON for older version of SiYuan and
+	// ["datasigned"] = signed user data JSON for newer versions that needs signed user data
+	dataStr := result["datasigned"].(string)
 	data := util.AESDecrypt(dataStr)
-	user := &conf.User{}
-	if err = gulu.JSON.UnmarshalJSON(data, &user); nil != err {
-		logging.LogErrorf("get community user failed: %s", err)
-		return nil, errors.New(Conf.Language(18))
+	payload, err := util.CheckJWS(data)
+	if err != nil {
+		return nil, "", errors.New(Conf.Language(18))
 	}
-	return user, nil
+	user := &conf.User{}
+	if err = gulu.JSON.UnmarshalJSON(payload, &user); nil != err {
+		logging.LogErrorf("get community user failed: %s", err)
+		return nil, "", errors.New(Conf.Language(18))
+	}
+	return user, dataStr, nil
 }
 
 func UseActivationcode(code string) (err error) {

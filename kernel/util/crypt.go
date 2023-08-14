@@ -20,10 +20,30 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/x509"
 	"encoding/hex"
+	"encoding/pem"
+	"errors"
 
+	"github.com/lestrrat-go/jwx/jwa"
+	"github.com/lestrrat-go/jwx/jws"
 	"github.com/siyuan-note/logging"
 )
+
+// JWSPubKey used for userdata verification
+// This public key should be replaced by a dedicated SiYuan backend key
+// For demo purposes the matching private key from cloud_service_test.go had been used here
+var JWSPubKey = `
+-----BEGIN RSA PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu/TwSPImYo/YsDmjhKK+
+kPcm9gfxNRqZH8pzE3HxAeN5UIQoWu8VYOCAI26IN+e7rSa0utirREV8j9rhZt8U
+QOLqyaP6UMddw+R/yQUrQ0wYOsQH2bS+GARJ8JX1s7SOF1eM/dVp49efT5BQKANE
+GEw6zETEpEgcyeDSJ8seFmDUKdmymFuzDH31c+uJd20IQom4ZlzFsneayHn0kOhJ
+C4mswjv9JNltoZ28soEdqbfuAP5dxmlTnjWu2YflLfZbtu1x8y906kTDJE1I+ccD
+9VjOAzO6HbzoULYr487h+K0Wbnm62s2Jc0wah0hZG9HRDqzgPE3Hfbb83f51jmwX
+tQIDAQAB
+-----END RSA PUBLIC KEY-----
+`
 
 var SK = []byte("696D897C9AA0611B")
 
@@ -75,4 +95,21 @@ func AESDecrypt(cryptStr string) []byte {
 func pkcs5Trimming(encrypt []byte) []byte {
 	padding := encrypt[len(encrypt)-1]
 	return encrypt[:len(encrypt)-int(padding)]
+}
+
+// CheckJWS will return the payload of the signed JWS
+func CheckJWS(data []byte) (res []byte, err error) {
+	pkpem, _ := pem.Decode([]byte(JWSPubKey))
+	if pkpem == nil {
+		return nil, errors.New("empty PEM failure")
+	}
+	pk, err := x509.ParsePKIXPublicKey(pkpem.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	payload, err := jws.Verify(data, jwa.RS256, pk)
+	if err != nil {
+		return nil, errors.New("failed to verify signature")
+	}
+	return payload, nil
 }

@@ -28,6 +28,7 @@ import (
 	"code.sajari.com/docconv"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/dustin/go-humanize"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -43,6 +44,7 @@ type AssetContent struct {
 	Ext     string `json:"ext"`
 	Path    string `json:"path"`
 	Size    int64  `json:"size"`
+	HSize   string `json:"hSize"`
 	Updated int64  `json:"updated"`
 	Content string `json:"content"`
 }
@@ -219,6 +221,7 @@ func fromSQLAssetContent(assetContent *sql.AssetContent, beforeLen int) *AssetCo
 		Ext:     assetContent.Ext,
 		Path:    assetContent.Path,
 		Size:    assetContent.Size,
+		HSize:   humanize.Bytes(uint64(assetContent.Size)),
 		Updated: assetContent.Updated,
 		Content: assetContent.Content,
 	}

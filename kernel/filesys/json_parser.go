@@ -232,6 +232,9 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 		// 建立索引时无法解析 `v2.2.0-` 版本的块引用 https://github.com/siyuan-note/siyuan/issues/6889
 		// 早先的迁移程序有缺陷，漏迁移了块引用节点，这里检测到块引用节点后标识需要迁移
 		*needMigrate2Spec1 = true
+	case ast.NodeInlineHTML:
+		*needFix = true
+		node.Type = ast.NodeHTMLBlock
 	}
 
 	for _, kv := range node.KramdownIAL {

@@ -689,6 +689,16 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			attributes = append(attributes, attrs...)
 		}
 
+		if ast.NodeInlineHTML == n.Type {
+			// 没有行级 HTML，只有块级 HTML，这里转换为块
+			b, attrs := buildBlockFromNode(n, tree)
+			b.Type = ast.NodeHTMLBlock.String()
+			blocks = append(blocks, b)
+			attributes = append(attributes, attrs...)
+			walkStatus = ast.WalkContinue
+			return
+		}
+
 		if 1 > len(nodes) {
 			walkStatus = ast.WalkContinue
 			return

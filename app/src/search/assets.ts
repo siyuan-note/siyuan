@@ -346,15 +346,6 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: Constants.ZWSP,
-        label: "SQL",
-        current: method === 2,
-        click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 2;
-            cb();
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.regex,
         current: method === 3,
         click() {

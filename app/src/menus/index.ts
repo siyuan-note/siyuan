@@ -58,7 +58,10 @@ export class Menus {
                 }
 
                 if (dataType === "search-item") {
-                    initSearchMenu(target.getAttribute("data-node-id")).popup({x: event.clientX, y: event.clientY});
+                    const nodeId = target.getAttribute("data-node-id");
+                    if (nodeId) {
+                        initSearchMenu(nodeId).popup({x: event.clientX, y: event.clientY});
+                    }
                     event.stopPropagation();
                     break;
                 }

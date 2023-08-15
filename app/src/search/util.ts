@@ -26,7 +26,7 @@ import {upDownHint} from "../util/upDownHint";
 import {
     assetFilterMenu,
     assetInputEvent,
-    assetMethodMenu,
+    assetMethodMenu, assetMoreMenu,
     openSearchAsset,
     renderPreview,
     toggleAssetHistory
@@ -633,6 +633,14 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     config.page = 1;
                     inputEvent(element, config, undefined, edit, true);
                 });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "assetMore") {
+                assetMoreMenu(target, assetsElement, () => {
+                    assetInputEvent(assetsElement);
+                    setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+                })
                 event.stopPropagation();
                 event.preventDefault();
                 break;

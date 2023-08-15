@@ -46,7 +46,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             <svg><use xlink:href="#iconFilter"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <span id="searchMore" aria-label="${window.siyuan.languages.more}" class="block__icon b3-tooltips b3-tooltips__w">
+        <span id="assetMore" aria-label="${window.siyuan.languages.more}" class="block__icon b3-tooltips b3-tooltips__w">
             <svg><use xlink:href="#iconMore"></use></svg>
         </span>
         <span class="fn__space"></span>
@@ -241,13 +241,6 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
     }, Constants.TIMEOUT_INPUT);
 };
 
-export const reIndexAssets = (loadingElement: HTMLElement) => {
-    loadingElement.classList.remove("fn__none");
-    fetchPost("/api/asset/fullReindexAssetContent", {}, (response) => {
-        // assetInputEvent()
-    });
-};
-
 export const toggleAssetHistory = (historyElement: Element, searchInputElement: HTMLInputElement) => {
     if (historyElement.classList.contains("fn__none")) {
         const keys = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
@@ -276,15 +269,15 @@ export const renderPreview = (element: Element, id: string, query: string, query
     });
 };
 
-export const assetMethodMenu = (target: HTMLElement, cb:() => void) => {
-   const method = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method;
+export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
+    const method = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method;
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMethod") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchAssetMethod") {
         window.siyuan.menus.menu.remove();
         return;
     }
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.setAttribute("data-name", "searchMethod");
+    window.siyuan.menus.menu.element.setAttribute("data-name", "searchAssetMethod");
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.keyword,
@@ -325,7 +318,7 @@ export const assetMethodMenu = (target: HTMLElement, cb:() => void) => {
     window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
 };
 
-export const assetFilterMenu = (assetsElement:Element) => {
+export const assetFilterMenu = (assetsElement: Element) => {
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].types;
     const filterDialog = new Dialog({
         title: window.siyuan.languages.type,
@@ -370,7 +363,7 @@ export const assetFilterMenu = (assetsElement:Element) => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width:  "520px",
+        width: "520px",
         height: "70vh",
     });
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
@@ -386,3 +379,105 @@ export const assetFilterMenu = (assetsElement:Element) => {
         filterDialog.destroy();
     });
 };
+
+export const assetMoreMenu = (target: Element, element: Element, cb: () => void) => {
+    if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchAssetMore") {
+        window.siyuan.menus.menu.remove();
+        return;
+    }
+    window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", "searchAssetMore");
+    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET]
+    const sortMenu = [{
+        iconHTML: Constants.ZWSP,
+        label: window.siyuan.languages.sortByRankAsc,
+        current: localData.sort === 1,
+        click() {
+            localData.sort = 1;
+            cb();
+        }
+    }, {
+        iconHTML: Constants.ZWSP,
+        label: window.siyuan.languages.sortByRankDesc,
+        current: localData.sort === 0,
+        click() {
+            localData.sort = 0;
+            cb();
+        }
+    }, {
+        iconHTML: Constants.ZWSP,
+        label: window.siyuan.languages.modifiedASC,
+        current: localData.sort === 3,
+        click() {
+            localData.sort = 3;
+            cb();
+        }
+    }, {
+        iconHTML: Constants.ZWSP,
+        label: window.siyuan.languages.modifiedDESC,
+        current: localData.sort === 2,
+        click() {
+            localData.sort = 2;
+            cb();
+        }
+    }];
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
+        label: window.siyuan.languages.sort,
+        type: "submenu",
+        submenu: sortMenu,
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
+        label: window.siyuan.languages.layout,
+        type: "submenu",
+        submenu: [{
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.topBottomLayout,
+            current: localData.layout === 0,
+            click() {
+                element.querySelector(".search__layout").classList.remove("search__layout--row");
+                const previewElement = element.querySelector("#searchAssetPreview") as HTMLInputElement
+                previewElement.style.width = "";
+                if (localData.row) {
+                    previewElement.style.height = localData.row;
+                    previewElement.classList.remove("fn__flex-1");
+                } else {
+                    previewElement.classList.add("fn__flex-1");
+                }
+                localData.layout = 0;
+                setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+            }
+        }, {
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.leftRightLayout,
+            current: localData.layout === 1,
+            click() {
+                const previewElement = element.querySelector("#searchAssetPreview") as HTMLInputElement
+                element.querySelector(".search__layout").classList.add("search__layout--row");
+                previewElement.style.height = "";
+                if (localData.col) {
+                    previewElement.style.width = localData.col
+                    previewElement.classList.remove("fn__flex-1");
+                } else {
+                    previewElement.classList.add("fn__flex-1");
+                }
+                localData.layout = 1;
+                setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+            }
+        }]
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: Constants.ZWSP,
+        label: window.siyuan.languages.rebuildIndex,
+        click() {
+            element.nextElementSibling.classList.remove("fn__none");
+            fetchPost("/api/asset/fullReindexAssetContent", {}, () => {
+                assetInputEvent(element, localData)
+            });
+        },
+    }).element);
+    const rect = target.getBoundingClientRect();
+    window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
+}

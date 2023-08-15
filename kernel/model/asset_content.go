@@ -444,9 +444,12 @@ func copyTempAsset(absPath string) (ret string) {
 		return
 	}
 
+	filelock.RWLock.Lock()
+	defer filelock.RWLock.Unlock()
+
 	ret = filepath.Join(dir, gulu.Rand.String(7)+".docx")
-	if err := filelock.Copy(absPath, ret); nil != err {
-		logging.LogErrorf("copy [%s] to [%s] failed: [%s]", absPath, ret, err)
+	if err := gulu.File.Copy(absPath, ret); nil != err {
+		logging.LogErrorf("copy [src=%s, dest=%s] failed: %s", absPath, ret, err)
 		return
 	}
 	return

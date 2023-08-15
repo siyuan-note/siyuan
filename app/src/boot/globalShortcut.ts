@@ -55,6 +55,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {openRecentDocs} from "../business/openRecentDocs";
 import {App} from "../index";
 import {commandPanel} from "../plugin/commandPanel";
+import {toggleDockBar} from "../layout/dock/util";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
@@ -632,6 +633,11 @@ export const globalShortcut = (app: App) => {
             if (!window.siyuan.config.readonly) {
                 openHistory(app);
             }
+            event.preventDefault();
+            return;
+        }
+        if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.toggleDock.custom, event)) {
+            toggleDockBar(document.querySelector("#barDock use"));
             event.preventDefault();
             return;
         }

@@ -242,6 +242,7 @@ export abstract class Constants {
             recentDocs: {default: "⌘E", custom: "⌘E"},
             move: {default: "", custom: ""},
             selectOpen1: {default: "", custom: ""},
+            toggleDock: {default: "", custom: ""},
         },
         editor: {
             general: {

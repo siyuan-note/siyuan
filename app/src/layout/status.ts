@@ -9,13 +9,14 @@ import {getCurrentWindow} from "@electron/remote";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
-import {resetFloatDockSize} from "./dock/util";
+import {toggleDockBar} from "./dock/util";
+import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
     let barDockHTML = "";
     if (!isWindow) {
-        barDockHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.config.uiLayout.hideDock ? window.siyuan.languages.showDock : window.siyuan.languages.hideDock}">
+        barDockHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.languages.toggleDock} ${updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom)}">
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
@@ -33,24 +34,7 @@ export const initStatus = (isWindow = false) => {
         let target = event.target as HTMLElement;
         while (target.id !== "status") {
             if (target.id === "barDock") {
-                const useElement = target.firstElementChild.firstElementChild;
-                const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
-                if (dockIsShow) {
-                    useElement.setAttribute("xlink:href", "#iconDock");
-                    target.setAttribute("aria-label", window.siyuan.languages.showDock);
-                } else {
-                    useElement.setAttribute("xlink:href", "#iconHideDock");
-                    target.setAttribute("aria-label", window.siyuan.languages.hideDock);
-                }
-                document.querySelectorAll(".dock").forEach(item => {
-                    if (dockIsShow) {
-                        item.classList.add("fn__none");
-                    } else if (item.querySelectorAll(".dock__item").length > 1) {
-                        item.classList.remove("fn__none");
-                    }
-                });
-                resizeTabs();
-                resetFloatDockSize();
+                toggleDockBar(target.firstElementChild.firstElementChild);
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("status__backgroundtask")) {

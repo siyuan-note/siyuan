@@ -143,7 +143,7 @@ func assetContentFieldRegexp(exp string) string {
 
 func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAssetCount int) {
 	table := "asset_contents_fts_case_insensitive"
-	fieldFilter := fieldRegexp(exp)
+	fieldFilter := assetContentFieldRegexp(exp)
 	stmt := "SELECT COUNT(path) AS `assets` FROM `" + table + "` WHERE " + fieldFilter + " AND ext IN " + typeFilter
 	result, _ := sql.QueryAssetContentNoLimit(stmt)
 	if 1 > len(result) {

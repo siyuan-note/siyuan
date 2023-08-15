@@ -78,6 +78,19 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     if (element.querySelector("#searchAssetList").innerHTML !== "") {
         return;
     }
+    const previewElement = element.querySelector("#searchAssetPreview") as HTMLElement;
+    if (localSearch.layout === 1) {
+        if (localSearch.col) {
+            previewElement.style.width = localSearch.col;
+            previewElement.classList.remove("fn__flex-1");
+        }
+    } else {
+        if (localSearch.row) {
+            previewElement.classList.remove("fn__flex-1");
+            previewElement.style.height = localSearch.row;
+        }
+    }
+
     const searchInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement;
     searchInputElement.select();
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
@@ -172,9 +185,44 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             }
             event.preventDefault();
         }
-        renderPreview(element.querySelector("#searchAssetPreview"), currentList.dataset.id, searchInputElement.value, localSearch.method);
+        renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
     });
     assetInputEvent(element, localSearch);
+
+    const dragElement = element.querySelector(".search__drag");
+    dragElement.addEventListener("mousedown", (event: MouseEvent) => {
+        const documentSelf = document;
+        const nextElement = dragElement.nextElementSibling as HTMLElement;
+        const previousElement = dragElement.previousElementSibling as HTMLElement;
+        const direction = localSearch.layout === 1 ? "lr" : "tb";
+        const x = event[direction === "lr" ? "clientX" : "clientY"];
+        const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
+        const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
+
+        nextElement.classList.remove("fn__flex-1");
+        nextElement.style[direction === "lr" ? "width" : "height"] = nextSize + "px";
+
+        documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+            moveEvent.preventDefault();
+            moveEvent.stopPropagation();
+            const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+            const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+            if (previousNowSize < 120 || nextNowSize < 120) {
+                return;
+            }
+            nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
+        };
+
+        documentSelf.onmouseup = () => {
+            documentSelf.onmousemove = null;
+            documentSelf.onmouseup = null;
+            documentSelf.ondragstart = null;
+            documentSelf.onselectstart = null;
+            documentSelf.onselect = null;
+            window.siyuan.storage[Constants.LOCAL_SEARCHASSET][direction === "lr" ? "col" : "row"] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
+            setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+        };
+    });
 };
 
 let inputTimeout: number;
@@ -438,7 +486,7 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
             current: localData.layout === 0,
             click() {
                 element.querySelector(".search__layout").classList.remove("search__layout--row");
-                const previewElement = element.querySelector("#searchAssetPreview") as HTMLInputElement
+                const previewElement = element.querySelector("#searchAssetPreview") as HTMLElement
                 previewElement.style.width = "";
                 if (localData.row) {
                     previewElement.style.height = localData.row;
@@ -454,7 +502,7 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
             label: window.siyuan.languages.leftRightLayout,
             current: localData.layout === 1,
             click() {
-                const previewElement = element.querySelector("#searchAssetPreview") as HTMLInputElement
+                const previewElement = element.querySelector("#searchAssetPreview") as HTMLElement
                 element.querySelector(".search__layout").classList.add("search__layout--row");
                 previewElement.style.height = "";
                 if (localData.col) {

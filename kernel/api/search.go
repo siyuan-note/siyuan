@@ -365,7 +365,7 @@ func parseSearchAssetContentArgs(arg map[string]interface{}) (page, pageSize int
 		method = int(methodArg.(float64))
 	}
 
-	// orderBy：0：相关度（默认），1：按更新时间升序，2：按更新时间降序
+	// orderBy：0：按相关度降序，1：按相关度升序，2：按更新时间升序，3：按更新时间降序
 	orderByArg := arg["orderBy"]
 	if nil != orderByArg {
 		orderBy = int(orderByArg.(float64))

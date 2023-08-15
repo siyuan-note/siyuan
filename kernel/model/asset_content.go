@@ -77,7 +77,7 @@ func GetAssetContent(id, query string, queryMethod int) (ret *AssetContent) {
 // FullTextSearchAssetContent 搜索资源文件内容。
 //
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
-// orderBy: 0：相关度（默认），1：按更新时间升序，2：按更新时间降序
+// orderBy: 0：按相关度降序，1：按相关度升序，2：按更新时间升序，3：按更新时间降序
 func FullTextSearchAssetContent(query string, types map[string]bool, method, orderBy, page, pageSize int) (ret []*AssetContent, matchedAssetCount, pageCount int) {
 	query = strings.TrimSpace(query)
 	beforeLen := 36
@@ -238,11 +238,20 @@ func buildAssetContentTypeFilter(types map[string]bool) string {
 
 	var buf bytes.Buffer
 	buf.WriteString("(")
-	for k, _ := range types {
+	for k, enabled := range types {
+		if !enabled {
+			continue
+		}
+
 		buf.WriteString("'")
 		buf.WriteString(k)
 		buf.WriteString("',")
 	}
+	if 1 == buf.Len() {
+		buf.WriteString(")")
+		return buf.String()
+	}
+
 	buf.Truncate(buf.Len() - 1)
 	buf.WriteString(")")
 	return buf.String()
@@ -253,8 +262,10 @@ func buildAssetContentOrderBy(orderBy int) string {
 	case 0:
 		return "ORDER BY rank DESC"
 	case 1:
-		return "ORDER BY updated ASC"
+		return "ORDER BY rank ASC"
 	case 2:
+		return "ORDER BY updated ASC"
+	case 3:
 		return "ORDER BY updated DESC"
 	default:
 		return "ORDER BY rank DESC"

@@ -434,7 +434,7 @@ func initLang() {
 		for k, v := range kernelLangs {
 			num, err := strconv.Atoi(k)
 			if nil != err {
-				logging.LogErrorf("parse language configuration [%s] item [%d] failed [%s] failed: %s", p, num, err)
+				logging.LogErrorf("parse language configuration [%s] item [%d] failed [%s]", p, num, err)
 				continue
 			}
 			kernelMap[num] = v.(string)

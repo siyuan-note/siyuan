@@ -328,7 +328,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         };
     });
 
-    const assetsElement = element.querySelector("#searchAssets")
+    const assetsElement = element.querySelector("#searchAssets");
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
@@ -514,8 +514,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 break;
             } else if (target.id === "searchAssetClose") {
                 window.siyuan.menus.menu.remove();
-                assetsElement.classList.add("fn__none")
-                assetsElement.previousElementSibling.classList.remove("fn__none")
+                assetsElement.classList.add("fn__none");
+                assetsElement.previousElementSibling.classList.remove("fn__none");
                 searchInputElement.select();
                 event.stopPropagation();
                 event.preventDefault();
@@ -646,7 +646,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     element.querySelector("#assetSyntaxCheck").setAttribute("aria-label", getQueryTip(window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method));
                     assetInputEvent(assetsElement);
                     setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
-                })
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -698,7 +698,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item")) {
-                const searchAssetInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement
+                const searchAssetInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement;
                 if (target.parentElement.id === "searchHistoryList") {
                     searchInputElement.value = target.textContent;
                     config.page = 1;
@@ -719,7 +719,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 if (!target.classList.contains("b3-list-item--focus")) {
                                     assetsElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
-                                    renderPreview(element.querySelector('#searchAssetPreview'), target.dataset.id, searchAssetInputElement.value, window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method);
+                                    renderPreview(element.querySelector("#searchAssetPreview"), target.dataset.id, searchAssetInputElement.value, window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method);
                                     searchAssetInputElement.focus();
                                 }
                             } else {

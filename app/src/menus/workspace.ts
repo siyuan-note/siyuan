@@ -78,7 +78,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             submenu: dockMenu
         }).element);
         if (!window.siyuan.config.readonly) {
-            let workspaceSubMenu: IMenu[]
+            let workspaceSubMenu: IMenu[];
             /// #if !BROWSER
             workspaceSubMenu = [{
                 label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,

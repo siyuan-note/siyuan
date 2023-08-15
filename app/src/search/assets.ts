@@ -19,12 +19,12 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         (element.querySelector("#searchAssetInput") as HTMLInputElement).select();
         return;
     }
-    const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption
+    const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     const loadingElement = element.nextElementSibling;
     loadingElement.classList.remove("fn__none");
-    let enterTip = ""
+    let enterTip = "";
     /// #if !BROWSER
-    enterTip = `<kbd>Enter/Double Click</kbd> ${window.siyuan.languages.showInFolder}`
+    enterTip = `<kbd>Enter/Double Click</kbd> ${window.siyuan.languages.showInFolder}`;
     /// #endif
     element.innerHTML = `<div class="b3-form__icon search__header">
     <span class="fn__a" id="assetHistoryBtn">
@@ -73,12 +73,12 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
     ${enterTip}
     <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
-</div>`
+</div>`;
     const searchPanelElement = element.querySelector("#searchAssetList");
     if (element.querySelector("#searchAssetList").innerHTML !== "") {
-        return
+        return;
     }
-    const searchInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement
+    const searchInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement;
     searchInputElement.select();
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event.isComposing) {
@@ -94,7 +94,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     });
     searchInputElement.addEventListener("blur", () => {
         if (!searchInputElement.value) {
-            return
+            return;
         }
         let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
         list.splice(0, 0, searchInputElement.value);
@@ -106,7 +106,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = list;
         setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
     });
-    const historyElement = element.querySelector("#searchAssetHistoryList")
+    const historyElement = element.querySelector("#searchAssetHistoryList");
     const lineHeight = 28;
     searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -172,26 +172,26 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             }
             event.preventDefault();
         }
-        renderPreview(element.querySelector('#searchAssetPreview'), currentList.dataset.id, searchInputElement.value, localSearch.method);
+        renderPreview(element.querySelector("#searchAssetPreview"), currentList.dataset.id, searchInputElement.value, localSearch.method);
     });
     assetInputEvent(element, localSearch);
-}
+};
 
-let inputTimeout: number
+let inputTimeout: number;
 export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOption, page = 1,) => {
-    element.nextElementSibling.classList.remove("fn__none")
+    element.nextElementSibling.classList.remove("fn__none");
     clearTimeout(inputTimeout);
     inputTimeout = window.setTimeout(() => {
         if (!localSearch) {
-            localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption
+            localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
         }
-        const previousElement = element.querySelector('[data-type="assetPrevious"]')
+        const previousElement = element.querySelector('[data-type="assetPrevious"]');
         if (page > 1) {
             previousElement.removeAttribute("disabled");
         } else {
             previousElement.setAttribute("disabled", "disabled");
         }
-        const searchInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement
+        const searchInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement;
         fetchPost("/api/search/fullTextSearchAssetContent", {
             page,
             query: searchInputElement.value,
@@ -199,9 +199,9 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
             method: localSearch.method,
             orderBy: localSearch.sort
         }, (response) => {
-            element.nextElementSibling.classList.add("fn__none")
-            const nextElement = element.querySelector('[data-type="assetNext"]')
-            const previewElement = element.querySelector('#searchAssetPreview')
+            element.nextElementSibling.classList.add("fn__none");
+            const nextElement = element.querySelector('[data-type="assetNext"]');
+            const previewElement = element.querySelector("#searchAssetPreview");
             if (page < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
             } else {
@@ -236,17 +236,17 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
 <span class="ft__on-surface">${window.siyuan.languages.total} ${response.data.matchedAssetCount}</span>`;
             element.querySelector("#searchAssetList").innerHTML = resultHTML || `<div class="search__empty">
     ${window.siyuan.languages.emptyContent}
-</div>`
-        })
+</div>`;
+        });
     }, Constants.TIMEOUT_INPUT);
-}
+};
 
 export const reIndexAssets = (loadingElement: HTMLElement) => {
-    loadingElement.classList.remove("fn__none")
+    loadingElement.classList.remove("fn__none");
     fetchPost("/api/asset/fullReindexAssetContent", {}, (response) => {
         // assetInputEvent()
-    })
-}
+    });
+};
 
 export const toggleAssetHistory = (historyElement: Element, searchInputElement: HTMLInputElement) => {
     if (historyElement.classList.contains("fn__none")) {
@@ -271,13 +271,13 @@ export const toggleAssetHistory = (historyElement: Element, searchInputElement: 
 };
 
 export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {
-    fetchPost('/api/search/getAssetContent', {id, query, queryMethod}, (response) => {
+    fetchPost("/api/search/getAssetContent", {id, query, queryMethod}, (response) => {
         element.innerHTML = response.data.assetContent.content;
-    })
-}
+    });
+};
 
 export const assetMethodMenu = (target: HTMLElement, cb:() => void) => {
-   const method = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method
+   const method = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method;
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMethod") {
         window.siyuan.menus.menu.remove();
@@ -290,7 +290,7 @@ export const assetMethodMenu = (target: HTMLElement, cb:() => void) => {
         label: window.siyuan.languages.keyword,
         current: method === 0,
         click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 0
+            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 0;
             cb();
         }
     }).element);
@@ -299,7 +299,7 @@ export const assetMethodMenu = (target: HTMLElement, cb:() => void) => {
         label: window.siyuan.languages.querySyntax,
         current: method === 1,
         click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 1
+            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 1;
             cb();
         }
     }).element);
@@ -308,7 +308,7 @@ export const assetMethodMenu = (target: HTMLElement, cb:() => void) => {
         label: "SQL",
         current: method === 2,
         click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 2
+            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 2;
             cb();
         }
     }).element);
@@ -317,16 +317,16 @@ export const assetMethodMenu = (target: HTMLElement, cb:() => void) => {
         label: window.siyuan.languages.regex,
         current: method === 3,
         click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 3
+            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method = 3;
             cb();
         }
     }).element);
     const rect = target.getBoundingClientRect();
     window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
-}
+};
 
 export const assetFilterMenu = (assetsElement:Element) => {
-    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].types
+    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].types;
     const filterDialog = new Dialog({
         title: window.siyuan.languages.type,
         content: `<div class="b3-dialog__content">

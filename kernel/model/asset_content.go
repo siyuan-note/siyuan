@@ -282,6 +282,8 @@ func buildAssetContentOrderBy(orderBy int) string {
 var assetContentSearcher = NewAssetsSearcher()
 
 func IndexAssetContent(absPath string) {
+	defer logging.Recover()
+
 	assetsDir := util.GetDataAssetsAbsPath()
 
 	ext := strings.ToLower(filepath.Ext(absPath))
@@ -353,6 +355,8 @@ type AssetsSearcher struct {
 }
 
 func (searcher *AssetsSearcher) FullIndex() {
+	defer logging.Recover()
+
 	assetsDir := util.GetDataAssetsAbsPath()
 	if !gulu.File.IsDir(assetsDir) {
 		return

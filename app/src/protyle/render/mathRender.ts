@@ -10,6 +10,7 @@ declare const katex: {
         output: string;
         macros: IObject;
         trust: boolean;
+        strict: (errorCode:string) =>  'ignore' | 'warn';
     }): string;
 };
 
@@ -48,6 +49,7 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         output: "html",
                         macros,
                         trust: true, // REF: https://katex.org/docs/supported#html
+                        strict: (errorCode) => errorCode === 'unicodeTextInMathMode' ? 'ignore' : 'warn',
                     });
                     renderElement.classList.remove("ft__error");
                     const blockElement = hasClosestBlock(mathElement);

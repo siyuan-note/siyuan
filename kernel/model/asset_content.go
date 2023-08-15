@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -63,7 +64,7 @@ func GetAssetContent(id, query string, queryMethod int) (ret *AssetContent) {
 	}
 
 	projections := "id, name, ext, path, size, updated, " +
-		"highlight(" + table + ", 6, '<mark>', '</mark>') AS content"
+		"highlight(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + filter
 	assetContents := sql.SelectAssetContentsRawStmt(stmt, 1, 1)
 	results := fromSQLAssetContents(&assetContents, 36)
@@ -155,7 +156,7 @@ func fullTextSearchAssetContentCountByRegexp(exp, typeFilter string) (matchedAss
 func fullTextSearchAssetContentByFTS(query, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*AssetContent, matchedAssetCount int) {
 	table := "asset_contents_fts_case_insensitive"
 	projections := "id, name, ext, path, size, updated, " +
-		"snippet(" + table + ", 6, '<mark>', '</mark>', '...', 64) AS content"
+		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS content"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + buildAssetContentColumnFilter() + ":(" + query + ")'"
 	stmt += ") AND ext IN " + typeFilter
 	stmt += " " + orderBy
@@ -215,6 +216,12 @@ func fromSQLAssetContents(assetContents *[]*sql.AssetContent, beforeLen int) (re
 }
 
 func fromSQLAssetContent(assetContent *sql.AssetContent, beforeLen int) *AssetContent {
+	content := util.EscapeHTML(assetContent.Content)
+	if strings.Contains(content, search.SearchMarkLeft) {
+		content = strings.ReplaceAll(content, search.SearchMarkLeft, "<mark>")
+		content = strings.ReplaceAll(content, search.SearchMarkRight, "</mark>")
+	}
+
 	return &AssetContent{
 		ID:      assetContent.ID,
 		Name:    assetContent.Name,
@@ -223,7 +230,7 @@ func fromSQLAssetContent(assetContent *sql.AssetContent, beforeLen int) *AssetCo
 		Size:    assetContent.Size,
 		HSize:   humanize.Bytes(uint64(assetContent.Size)),
 		Updated: assetContent.Updated,
-		Content: assetContent.Content,
+		Content: content,
 	}
 }
 
@@ -452,6 +459,11 @@ func copyTempAsset(absPath string) (ret string) {
 	dir := filepath.Join(util.TempDir, "convert", "asset_content")
 	if err := os.MkdirAll(dir, 0755); nil != err {
 		logging.LogErrorf("mkdir [%s] failed: [%s]", dir, err)
+		return
+	}
+
+	baseName := filepath.Base(absPath)
+	if strings.HasPrefix(baseName, "~") {
 		return
 	}
 

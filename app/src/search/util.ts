@@ -1,4 +1,8 @@
 import {getAllModels} from "../layout/getAll";
+/// #if !BROWSER
+import {shell} from "electron";
+import * as path from "path";
+/// #endif
 import {Constants} from "../constants";
 import {escapeAttr, escapeGreat, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
@@ -19,7 +23,14 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu, saveCriterion} from "./menu";
 import {App} from "../index";
 import {upDownHint} from "../util/upDownHint";
-import {openSearchAsset, reIndexAssets} from "./assets";
+import {
+    assetFilterMenu,
+    assetInputEvent,
+    assetMethodMenu,
+    openSearchAsset,
+    renderPreview,
+    toggleAssetHistory
+} from "./assets";
 
 const toggleReplaceHistory = (replaceHistoryElement: Element, historyElement: Element, replaceInputElement: HTMLInputElement) => {
     if (replaceHistoryElement.classList.contains("fn__none")) {
@@ -236,7 +247,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     const replaceHistoryElement = element.querySelector("#replaceHistoryList");
     const historyElement = element.querySelector("#searchHistoryList");
 
-    const lineHeight = 30;
+    const lineHeight = 28;
     const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
         blockId: "",
         render: {
@@ -502,6 +513,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchAssetClose") {
+                window.siyuan.menus.menu.remove();
                 assetsElement.classList.add("fn__none")
                 assetsElement.previousElementSibling.classList.remove("fn__none")
                 searchInputElement.select();
@@ -624,6 +636,20 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (target.id === "assetFilter") {
+                assetFilterMenu(assetsElement);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.id === "assetSyntaxCheck") {
+                assetMethodMenu(target, () => {
+                    element.querySelector("#assetSyntaxCheck").setAttribute("aria-label", getQueryTip(window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method));
+                    assetInputEvent(assetsElement);
+                    setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+                })
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (target.id === "searchSyntaxCheck") {
                 queryMenu(config, () => {
                     element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", getQueryTip(config.method));
@@ -640,6 +666,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.stopPropagation();
                 event.preventDefault();
                 return;
+            } else if (target.id === "assetHistoryBtn") {
+                toggleAssetHistory(target.nextElementSibling.nextElementSibling, target.nextElementSibling as HTMLInputElement);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             } else if (target.id === "replaceHistoryBtn") {
                 toggleReplaceHistory(replaceHistoryElement, historyElement, replaceInputElement);
                 event.stopPropagation();
@@ -650,8 +681,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "reindexAssets") {
-                reIndexAssets(element.querySelector(".fn__loading--top"));
+            } else if (type === "assetRefresh") {
+                assetInputEvent(assetsElement);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -667,65 +698,85 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item")) {
+                const searchAssetInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement
                 if (target.parentElement.id === "searchHistoryList") {
                     searchInputElement.value = target.textContent;
                     config.page = 1;
                     inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
+                } else if (target.parentElement.id === "searchAssetHistoryList") {
+                    searchAssetInputElement.value = target.textContent;
+                    assetInputEvent(assetsElement);
                 } else if (target.parentElement.id === "replaceHistoryList") {
                     replaceInputElement.value = target.textContent;
                     replaceHistoryElement.classList.add("fn__none");
                 } else if (type === "search-new") {
                     newFileByName(app, searchInputElement.value);
                 } else if (type === "search-item") {
+                    const isAsset = target.dataset.id;
                     if (event.detail === 1) {
                         clickTimeout = window.setTimeout(() => {
-                            if (event.altKey) {
-                                const id = target.getAttribute("data-node-id");
-                                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                                    openFileById({
-                                        app,
-                                        id,
-                                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                                        zoomIn: foldResponse.data,
-                                        position: "right"
+                            if (isAsset) {
+                                if (!target.classList.contains("b3-list-item--focus")) {
+                                    assetsElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
+                                    target.classList.add("b3-list-item--focus");
+                                    renderPreview(element.querySelector('#searchAssetPreview'), target.dataset.id, searchAssetInputElement.value, window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method);
+                                    searchAssetInputElement.focus();
+                                }
+                            } else {
+                                if (event.altKey) {
+                                    const id = target.getAttribute("data-node-id");
+                                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                                        openFileById({
+                                            app,
+                                            id,
+                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                                            zoomIn: foldResponse.data,
+                                            position: "right"
+                                        });
+                                        if (closeCB) {
+                                            closeCB();
+                                        }
                                     });
-                                    if (closeCB) {
-                                        closeCB();
-                                    }
-                                });
-                            } else if (!target.classList.contains("b3-list-item--focus")) {
-                                searchPanelElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
-                                target.classList.add("b3-list-item--focus");
-                                getArticle({
-                                    edit,
-                                    id: target.getAttribute("data-node-id"),
-                                    config,
-                                    value: searchInputElement.value,
-                                });
-                                searchInputElement.focus();
-                            } else if (target.classList.contains("b3-list-item--focus")) {
-                                renderNextSearchMark({
-                                    edit,
-                                    id: target.getAttribute("data-node-id"),
-                                    target,
-                                });
-                                searchInputElement.focus();
+                                } else if (!target.classList.contains("b3-list-item--focus")) {
+                                    searchPanelElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
+                                    target.classList.add("b3-list-item--focus");
+                                    getArticle({
+                                        edit,
+                                        id: target.getAttribute("data-node-id"),
+                                        config,
+                                        value: searchInputElement.value,
+                                    });
+                                    searchInputElement.focus();
+                                } else if (target.classList.contains("b3-list-item--focus")) {
+                                    renderNextSearchMark({
+                                        edit,
+                                        id: target.getAttribute("data-node-id"),
+                                        target,
+                                    });
+                                    searchInputElement.focus();
+                                }
                             }
                         }, Constants.TIMEOUT_DBLCLICK);
                     } else if (event.detail === 2 && !event.ctrlKey) {
                         clearTimeout(clickTimeout);
-                        const id = target.getAttribute("data-node-id");
-                        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                            openFileById({
-                                app,
-                                id,
-                                action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                                zoomIn: foldResponse.data
+                        if (isAsset) {
+                            /// #if !BROWSER
+                            shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
+                            /// #endif
+                        } else {
+                            const id = target.getAttribute("data-node-id");
+                            fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                                openFileById({
+                                    app,
+                                    id,
+                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                                    zoomIn: foldResponse.data
+                                });
+                                if (closeCB) {
+                                    closeCB();
+                                }
                             });
-                            if (closeCB) {
-                                closeCB();
-                            }
-                        });
+                        }
                     }
                     window.siyuan.menus.menu.remove();
                 } else if (target.querySelector(".b3-list-item__toggle")) {
@@ -740,6 +791,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
         historyElement.classList.add("fn__none");
         replaceHistoryElement.classList.add("fn__none");
+        element.querySelector("#searchAssetHistoryList")?.classList.add("fn__none");
     }, false);
 
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
@@ -927,7 +979,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
     return edit;
 };
 
-const getQueryTip = (method: number) => {
+export const getQueryTip = (method: number) => {
     let methodTip = window.siyuan.languages.searchMethod + " ";
     switch (method) {
         case 0:

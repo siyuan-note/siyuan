@@ -678,6 +678,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
 		return
 	}
+	// loop through pages and get content
 	content := ""
 	for page := 0; page < pageCount.PageCount; page++ {
 		req := &requests.GetPageText{
@@ -693,7 +694,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 			logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
 			return
 		}
-		content += normalizeAssetContent(pt.Text)
+		content += " " + normalizeAssetContent(pt.Text)
 	}
 
 	ret = &AssetParseResult{

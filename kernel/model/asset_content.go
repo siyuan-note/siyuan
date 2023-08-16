@@ -419,6 +419,7 @@ func NewAssetsSearcher() *AssetsSearcher {
 			".docx":     &DocxAssetParser{},
 			".pptx":     &PptxAssetParser{},
 			".xlsx":     &XlsxAssetParser{},
+			".pdf":      &PdfAssetParser{},
 		},
 
 		lock: &sync.Mutex{},

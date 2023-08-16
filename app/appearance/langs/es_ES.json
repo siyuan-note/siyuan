@@ -909,7 +909,7 @@
   "theme": "Tema",
   "language": "Idioma",
   "about": "Acerca de",
-  "about1": "Copyright (c) 2020-presente • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/en/privacy.html'>Política de privacidad</a> • <a target='_blank' href='https://b3log.org/siyuan/en/eula.html'>Acuerdo de usuario</a><div class='fn__hr'></div><div class='fn__hr'></div><div class='ft__on-surface'>Los principales desarrolladores de SiYuan son <a href=\"https://github.com/88250\" target=\"_blank\">D</a> y <a href=\"https://github.com/Vanessa219\" target=\"_blank\">V</a>, y los contribuyentes al desarrollo de la comunidad pueden verse <a href=\"https://github.com/siyuan-note/bazaar/graphs/contributors\" target=\"_blank\">aquí</a></div>",
+  "about1": "Copyright (c) 2020-presente • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/en/privacy.html'>Política de privacidad</a> • <a target='_blank' href='https://b3log.org/siyuan/en/eula.html'>Acuerdo de usuario</a>",
   "about2": "Uso en el navegador",
   "about3": "Por favor, utilice el navegador Chrome y manténgalo en la misma red que el ordenador, puerto <code class='fn__code'>${port}</code>(Además del puerto aleatorio, el primer espacio de trabajo iniciado también escuchará automáticamente <code class='fn__code'>6806</code> como un puerto fijo, por lo que es conveniente que el navegador recorte extensiones u otros programas externos para llamar a la interfaz del kernel), las direcciones que se pueden conectar son las siguientes: ",
   "about4": "Abrir el navegador",

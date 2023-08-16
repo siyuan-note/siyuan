@@ -909,7 +909,7 @@
   "language": "語言",
   "theme": "主題",
   "about": "關於",
-  "about1": "版權所有 (c) 2020-現在 • 雲南鏈滴科技有限公司 • <a target='_blank' href='https://b3log.org/siyuan/privacy.html'>隱私政策</a> • <a target='_blank' href='https://b3log.org/siyuan/eula.html'>用戶協議</a><div class='fn__hr'></div><div class='fn__hr'></div><div class='ft__on-surface'>思源筆記的核心開發者是 <a href=\"https://github.com/88250\" target=\"_blank\">D</a> 和 <a href=\"https://github.com/Vanessa219\" target=\"_blank\">V</a>，社區開發貢獻者可在<a href=\"https://github.com/siyuan-note/bazaar/graphs/contributors\" target=\"_blank\">這裡</a>看到</div>",
+  "about1": "版權所有 (c) 2020-現在 • 雲南鏈滴科技有限公司 • <a target='_blank' href='https://b3log.org/siyuan/privacy.html'>隱私政策</a> • <a target='_blank' href='https://b3log.org/siyuan/eula.html'>用戶協議</a>",
   "about2": "在瀏覽器上使用",
   "about3": "請使用 Chrome 瀏覽器並保持和電腦在同一個網路內，埠 <code class='fn__code'>${port}</code>（第一個啟動的工作空間除了隨機埠外也會自動偵聽 <code class='fn__code'>6806</code> 作為固定埠，以方便瀏覽器剪藏擴展或者其他外部程序調用Kernel接口），可能連通的網絡地址：",
   "about4": "打開瀏覽器",

@@ -1589,6 +1589,7 @@ export class Gutter {
 
     private genHeadingTransform(protyle: IProtyle, id: string, level: number) {
         return {
+            iconHTML: "",
             icon: "iconHeading" + level,
             label: window.siyuan.languages["heading" + level],
             click() {

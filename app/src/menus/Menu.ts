@@ -225,8 +225,9 @@ export class MenuItem {
         if (options.submenu) {
             const submenuElement = document.createElement("div");
             submenuElement.classList.add("b3-menu__submenu");
+            submenuElement.innerHTML = '<div class="b3-menu__items"></div>';
             options.submenu.forEach((item) => {
-                submenuElement.append(new MenuItem(item).element);
+                submenuElement.firstElementChild.append(new MenuItem(item).element);
             });
             this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--arrow"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);

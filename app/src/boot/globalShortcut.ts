@@ -679,6 +679,19 @@ export const globalShortcut = (app: App) => {
             event.preventDefault();
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/8913#issuecomment-1679720605
+        const confirmElement = document.querySelector("#confirmDialogConfirmBtn");
+        if (confirmElement) {
+            if (event.key === "Enter") {
+                confirmElement.dispatchEvent(new CustomEvent("click"));
+                event.preventDefault();
+                return;
+            } else if (event.key === "Escape") {
+                confirmElement.previousElementSibling.previousElementSibling.dispatchEvent(new CustomEvent("click"));
+                event.preventDefault();
+                return;
+            }
+        }
 
         if (event.key === "Escape" && !event.isComposing) {
             const imgPreviewElement = document.querySelector(".protyle-img");
@@ -757,13 +770,6 @@ export const globalShortcut = (app: App) => {
 
         if (matchHotKey(window.siyuan.config.keymap.general.goBack.custom, event)) {
             goBack(app);
-            event.preventDefault();
-            return;
-        }
-
-        const confirmElement = document.querySelector("#confirmDialogConfirmBtn");
-        if (confirmElement && event.key === "Enter") {
-            confirmElement.dispatchEvent(new CustomEvent("click"));
             event.preventDefault();
             return;
         }

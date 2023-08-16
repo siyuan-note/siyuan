@@ -87,15 +87,25 @@ export class Dialog {
                 event.preventDefault();
                 return;
             }
+            const confirmElement = document.querySelector("#confirmDialogConfirmBtn");
             if (event.key === "Escape") {
-                this.destroy();
+                if (confirmElement) {
+                    confirmElement.previousElementSibling.previousElementSibling.dispatchEvent(new CustomEvent("click"));
+                } else {
+                    this.destroy();
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 return;
             }
             if (!event.shiftKey && !isCtrl(event) && event.key === "Enter" && enterEvent) {
-                enterEvent();
+                if (confirmElement) {
+                    confirmElement.dispatchEvent(new CustomEvent("click"));
+                } else {
+                    enterEvent();
+                }
                 event.preventDefault();
+                event.stopPropagation();
             }
         });
     }

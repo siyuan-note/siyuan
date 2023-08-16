@@ -65,6 +65,11 @@ require (
 )
 
 require (
+	github.com/jolestar/go-commons-pool/v2 v2.1.2 // indirect
+	github.com/tetratelabs/wazero v1.3.1 // indirect
+)
+
+require (
 	dmitri.shuralyov.com/font/woff2 v0.0.0-20180220214647-957792cbbdab // indirect
 	github.com/JalfResi/justext v0.0.0-20170829062021-c0282dea7198 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -111,6 +116,7 @@ require (
 	github.com/juju/errors v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
+	github.com/klippa-app/go-pdfium v1.6.0
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect
 	github.com/lufia/plan9stats v0.0.0-20230326075908-cb1d2100619a // indirect

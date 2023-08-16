@@ -112,6 +112,7 @@ func GetBlockTreeRootByPath(boxID, path string) (ret *BlockTree) {
 }
 
 func GetBlockTreeRootByHPath(boxID, hPath string) (ret *BlockTree) {
+	hPath = gulu.Str.RemoveInvisible(hPath)
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)
 		slice.m.Lock()
@@ -128,6 +129,7 @@ func GetBlockTreeRootByHPath(boxID, hPath string) (ret *BlockTree) {
 }
 
 func GetBlockTreeRootByHPathPreferredParentID(boxID, hPath, preferredParentID string) (ret *BlockTree) {
+	hPath = gulu.Str.RemoveInvisible(hPath)
 	var roots []*BlockTree
 	blockTrees.Range(func(key, value interface{}) bool {
 		slice := value.(*btSlice)

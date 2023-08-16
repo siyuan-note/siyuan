@@ -404,11 +404,11 @@ export const showKeyboardToolbar = () => {
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
             const cursorTop = getSelectionPosition(contentElement).top - contentElement.getBoundingClientRect().top;
-            if (cursorTop < window.innerHeight - 96) {
+            if (cursorTop < window.innerHeight - 118.5) {   // 118: contentElement.getBoundingClientRect().top + toolbarElement.clientHeight
                 return;
             }
             contentElement.scroll({
-                top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 65) / 2 - 30),
+                top: contentElement.scrollTop + cursorTop - ((window.outerHeight - 118.5) / 2 - 26),
                 left: contentElement.scrollLeft,
                 behavior: "smooth"
             });

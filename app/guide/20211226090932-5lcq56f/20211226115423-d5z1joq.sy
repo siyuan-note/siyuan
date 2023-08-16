@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
-		"updated": "20230808220623"
+		"updated": "20230816170515"
 	},
 	"Children": [
 		{
@@ -82,7 +82,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20211226115745-rorv31l",
-				"updated": "20230728103709"
+				"updated": "20211226115745"
 			},
 			"Children": [
 				{
@@ -332,7 +332,7 @@
 									},
 									"Properties": {
 										"id": "20211226115745-z2p8vju",
-										"updated": "20211225212623"
+										"updated": "20211226115745"
 									},
 									"Children": [
 										{
@@ -348,36 +348,6 @@
 													"TextMarkType": "a",
 													"TextMarkAHref": "https://ld246.com/article/1619868273581",
 													"TextMarkTextContent": "緣起"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20211226115745-x2tcgwg",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20211226115745-x2tcgwg",
-										"updated": "20211226115745"
-									},
-									"Children": [
-										{
-											"ID": "20211226115745-4xvotrv",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20211226115745-4xvotrv",
-												"updated": "20211225212644"
-											},
-											"Children": [
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://github.com/orgs/siyuan-note/projects/1",
-													"TextMarkTextContent": "路線圖"
 												}
 											]
 										}
@@ -400,7 +370,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20211226115745-1yev4ow",
-				"updated": "20211226115745"
+				"updated": "20230816170515"
 			},
 			"Children": [
 				{
@@ -522,7 +492,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20211226115745-gllrx2n",
-						"updated": "20221114173758"
+						"updated": "20230816170515"
 					},
 					"Children": [
 						{
@@ -553,7 +523,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20211226115745-rx1tyat",
-								"updated": "20221114173758"
+								"updated": "20230816170515"
 							},
 							"Children": [
 								{
@@ -596,7 +566,7 @@
 									},
 									"Properties": {
 										"id": "20221114173649-jg9t3nk",
-										"updated": "20221114173707"
+										"updated": "20230816170515"
 									},
 									"Children": [
 										{
@@ -604,14 +574,14 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20221114173649-umu8m0b",
-												"updated": "20221114173707"
+												"updated": "20230816170515"
 											},
 											"Children": [
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "a",
-													"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-													"TextMarkTextContent": "社區集市"
+													"TextMarkAHref": "https://b3log.org/siyuan/pricing.html",
+													"TextMarkTextContent": "付费支持开发"
 												}
 											]
 										}

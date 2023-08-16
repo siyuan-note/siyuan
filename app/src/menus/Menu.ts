@@ -297,7 +297,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         currentElement.classList.remove("b3-menu__item--current");
         currentElement.classList.add("b3-menu__item--show");
 
-        const actionMenuElement = getActionMenu(subMenuElement.firstElementChild, true);
+        const actionMenuElement = getActionMenu(subMenuElement.firstElementChild.firstElementChild, true);
         if (actionMenuElement) {
             actionMenuElement.classList.add("b3-menu__item--current");
         }
@@ -308,9 +308,12 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (!currentElement) {
             return true;
         }
-        currentElement.parentElement.parentElement.classList.remove("b3-menu__item--show");
-        currentElement.parentElement.parentElement.classList.add("b3-menu__item--current");
-        currentElement.classList.remove("b3-menu__item--current");
+        const parentItemElement = hasClosestByClassName(currentElement, "b3-menu__item--show")
+        if (parentItemElement) {
+            parentItemElement.classList.remove("b3-menu__item--show");
+            parentItemElement.classList.add("b3-menu__item--current");
+            currentElement.classList.remove("b3-menu__item--current");
+        }
         return true;
     } else if (event.code === "Enter") {
         const currentElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--current");

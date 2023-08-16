@@ -148,15 +148,14 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             // 使用 md 闭合后继续输入应为普通文本
             blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
         }
-        // https://github.com/siyuan-note/siyuan/issues/8972
-        const mathSize = blockElement.querySelectorAll('[data-type="inline-math"]').length;
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach((item: HTMLElement) => {
             if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
                 !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
                 blockElement = item;
             }
         });
-        if (mathSize > 0 && mathSize < html.split('<span data-type="inline-math" data-subtype="math"').length - 1) {
+        // https://github.com/siyuan-note/siyuan/issues/8972
+        if (html.split('<span data-type="inline-math" data-subtype="math"').length > 1) {
             Array.from(blockElement.querySelectorAll('[data-type="inline-math"]')).find((item: HTMLElement) => {
                 if (item.dataset.content.indexOf("<wbr>") > -1) {
                     item.setAttribute("data-content", item.dataset.content.replace("<wbr>", ""));

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPDFIndexer(t *testing.T) {
+func TestPDFParser(t *testing.T) {
 	p := &PdfAssetParser{}
 	res := p.Parse("../../testdata/parsertest.pdf")
 	if res == nil || res.Content == "" {

@@ -173,6 +173,7 @@ export const addGA = () => {
             subscriptionStatus: -1,
             subscriptionPlan: -1,
             subscriptionType: -1,
+            oneTimePayStatus: -1,
             syncEnabled: false,
             syncProvider: -1,
             cTreeCount: window.siyuan.config.stat.cTreeCount,
@@ -185,6 +186,7 @@ export const addGA = () => {
             para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus;
             para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan;
             para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType;
+            para.oneTimePayStatus = window.siyuan.user.userSiYuanOneTimePayStatus;
         }
         if (window.siyuan.config.sync) {
             para.syncEnabled = window.siyuan.config.sync.enabled;

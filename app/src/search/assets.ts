@@ -358,7 +358,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
 };
 
 let filterTypes: string[] = [
-    ".txt", ".md", ".markdown", ".docx", ".xlsx", ".pptx", ".json", ".log", ".sql", ".html", ".xml", ".java", ".h", ".c",
+    ".txt", ".md", ".markdown", ".docx", ".xlsx", ".pptx", ".pdf", ".json", ".log", ".sql", ".html", ".xml", ".java", ".h", ".c",
     ".cpp", ".go", ".rs", ".swift", ".kt", ".py", ".php", ".js", ".css", ".ts", ".sh", ".bat", ".cmd", ".ini", ".yaml",
     ".rst", ".adoc", ".textile", ".opml", ".org", ".wiki",
 ]

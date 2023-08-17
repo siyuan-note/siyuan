@@ -290,8 +290,8 @@ func IndexAssetContent(absPath string) {
 	assetsDir := util.GetDataAssetsAbsPath()
 
 	ext := strings.ToLower(filepath.Ext(absPath))
-	parser, found := assetContentSearcher.Parsers[ext]
-	if !found {
+	parser := assetContentSearcher.GetParser(ext)
+	if nil == parser {
 		return
 	}
 
@@ -352,9 +352,15 @@ var (
 )
 
 type AssetsSearcher struct {
-	Parsers map[string]AssetParser
+	parsers map[string]AssetParser
+	lock    *sync.Mutex
+}
 
-	lock *sync.Mutex
+func (searcher *AssetsSearcher) GetParser(ext string) AssetParser {
+	searcher.lock.Lock()
+	defer searcher.lock.Unlock()
+
+	return searcher.parsers[ext]
 }
 
 func (searcher *AssetsSearcher) FullIndex() {
@@ -377,8 +383,8 @@ func (searcher *AssetsSearcher) FullIndex() {
 		}
 
 		ext := strings.ToLower(filepath.Ext(absPath))
-		parser, found := searcher.Parsers[ext]
-		if !found {
+		parser := searcher.GetParser(ext)
+		if nil == parser {
 			return nil
 		}
 
@@ -411,11 +417,39 @@ func (searcher *AssetsSearcher) FullIndex() {
 }
 
 func NewAssetsSearcher() *AssetsSearcher {
+	txtAssetParser := &TxtAssetParser{}
 	return &AssetsSearcher{
-		Parsers: map[string]AssetParser{
-			".txt":      &TxtAssetParser{},
-			".md":       &TxtAssetParser{},
-			".markdown": &TxtAssetParser{},
+		parsers: map[string]AssetParser{
+			".txt":      txtAssetParser,
+			".md":       txtAssetParser,
+			".markdown": txtAssetParser,
+			".json":     txtAssetParser,
+			".log":      txtAssetParser,
+			".sql":      txtAssetParser,
+			".html":     txtAssetParser,
+			".xml":      txtAssetParser,
+			".java":     txtAssetParser,
+			".h":        txtAssetParser,
+			".c":        txtAssetParser,
+			".cpp":      txtAssetParser,
+			".go":       txtAssetParser,
+			".swift":    txtAssetParser,
+			".kt":       txtAssetParser,
+			".py":       txtAssetParser,
+			".js":       txtAssetParser,
+			".css":      txtAssetParser,
+			".ts":       txtAssetParser,
+			".sh":       txtAssetParser,
+			".bat":      txtAssetParser,
+			".cmd":      txtAssetParser,
+			".ini":      txtAssetParser,
+			".yaml":     txtAssetParser,
+			".rst":      txtAssetParser,
+			".adoc":     txtAssetParser,
+			".textile":  txtAssetParser,
+			".opml":     txtAssetParser,
+			".org":      txtAssetParser,
+			".wiki":     txtAssetParser,
 			".docx":     &DocxAssetParser{},
 			".pptx":     &PptxAssetParser{},
 			".xlsx":     &XlsxAssetParser{},

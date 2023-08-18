@@ -412,7 +412,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         const initData = item.getAttribute("data-initdata");
         if (initData) {
             const initDataObj = JSON.parse(initData);
-            if (initDataObj.instance === "Custom") {
+            if (initDataObj.instance === "Custom" && initDataObj.customModelType !== "siyuan-card") {
                 let hasPlugin = false;
                 app.plugins.find(plugin => {
                     if (Object.keys(plugin.models).includes(initDataObj.customModelType)) {

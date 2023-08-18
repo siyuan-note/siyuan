@@ -437,11 +437,11 @@ interface IOpenFileOptions {
         title: string,
         icon: string,
         data?: any
+        id: string,
         fn?: (options: {
             tab: import("../layout/Tab").Tab,
             data: any,
-            app: import("../index").App
-        }) => import("../layout/Model").Model,
+        }) => import("../layout/Model").Model,   // plugin 0.8.3 历史兼容
     }
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填

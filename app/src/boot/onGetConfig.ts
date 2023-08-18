@@ -259,25 +259,20 @@ export const initWindow = (app: App) => {
                         // siyuan://plugins/plugin-name/foo?bar=baz
                         plugin.eventBus.emit("open-siyuan-url-plugin", {url});
                         // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-                        Object.keys(plugin.models).find(key => {
-                            if (key === pluginId) {
-                                let data = getSearch("data", url);
-                                try {
-                                    data = JSON.parse(data || "{}");
-                                } catch (e) {
-                                    console.log("Error open plugin tab with protocol:", e);
-                                }
-                                openFile({
-                                    app,
-                                    custom: {
-                                        title: getSearch("title", url),
-                                        icon: getSearch("icon", url),
-                                        data,
-                                        fn: plugin.models[key]
-                                    },
-                                });
-                                return true;
-                            }
+                        let data = getSearch("data", url);
+                        try {
+                            data = JSON.parse(data || "{}");
+                        } catch (e) {
+                            console.log("Error open plugin tab with protocol:", e);
+                        }
+                        openFile({
+                            app,
+                            custom: {
+                                title: getSearch("title", url),
+                                icon: getSearch("icon", url),
+                                data,
+                                id: pluginId
+                            },
                         });
                         return true;
                     }

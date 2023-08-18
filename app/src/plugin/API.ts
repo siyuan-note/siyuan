@@ -8,13 +8,11 @@ import {getBackend, getFrontend} from "../util/functions";
 import {openFile, openFileById} from "../editor/util";
 /// #endif
 import {updateHotkeyTip} from "../protyle/util/compatibility";
-import {newCardModel} from "../card/newCardTab";
 import {App} from "../index";
 import {Constants} from "../constants";
-import {Model} from "../layout/Model";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";
-import { Protyle } from "../protyle";
+import {Protyle} from "../protyle";
 
 let openTab;
 /// #if MOBILE
@@ -47,7 +45,7 @@ openTab = (options: {
         title: string,
         icon: string,
         data?: any
-        fn?: () => Model,
+        id: string
     }
     position?: "right" | "bottom",
     keepCursor?: boolean // 是否跳转到新 tab 上
@@ -128,7 +126,7 @@ openTab = (options: {
                     id: options.card.id || "",
                     title: options.card.title,
                 },
-                fn: newCardModel
+                id: "siyuan-card"
             },
         });
     }

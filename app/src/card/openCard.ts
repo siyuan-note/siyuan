@@ -221,7 +221,7 @@ export const bindCardEvent = (options: {
                             id: filterElement.getAttribute("data-id"),
                             title: options.title
                         },
-                        fn: newCardModel
+                        id: "siyuan-card"
                     },
                 });
                 if (options.dialog) {

@@ -508,7 +508,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchAsset") {
-                openSearchAsset(assetsElement, !!closeCB);
+                openSearchAsset(assetsElement, !closeCB);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

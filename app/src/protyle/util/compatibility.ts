@@ -154,16 +154,13 @@ export const getLocalStorage = (cb: () => void) => {
             row: "",
             layout: 0,
             method: 0,
-            types: {
-                ".txt": true,
-                ".md": true,
-                ".docx": true,
-                ".xlsx": true,
-                ".pptx": true,
-            },
+            types: {},
             sort: 0,
             k: "",
         };
+        Constants.SIYUAN_ASSETS_SEARCH.forEach(type => {
+            defaultStorage[Constants.LOCAL_SEARCHASSET].types[type] = true
+        })
         defaultStorage[Constants.LOCAL_SEARCHKEYS] = {
             keys: [],
             replaceKeys: [],

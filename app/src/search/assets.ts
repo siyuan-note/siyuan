@@ -69,7 +69,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
     <div class="search__drag"></div>
     <div id="searchAssetPreview" class="fn__flex-1 search__preview" style="padding: 8px"></div>
 </div>
-<div class="search__tip${isStick ? "" : " fn__none"}">
+<div class="search__tip${isStick ? " fn__none" : ""}">
     <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
     ${enterTip}
     <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
@@ -357,35 +357,27 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
 };
 
-let filterTypes: string[] = [
-    ".txt", ".md", ".markdown", ".docx", ".xlsx", ".pptx", ".pdf", ".json", ".log", ".sql", ".html", ".xml", ".java", ".h", ".c",
-    ".cpp", ".go", ".rs", ".swift", ".kt", ".py", ".php", ".js", ".css", ".ts", ".sh", ".bat", ".cmd", ".ini", ".yaml",
-    ".rst", ".adoc", ".textile", ".opml", ".org", ".wiki",
-]
-
-const filterTypesHTML = (types: string[]) => {
-    filterTypes = filterTypes.sort((a: string, b: string) => {
-        return a.localeCompare(b);
-    });
-
+const filterTypesHTML = (types:IObject) => {
     let html = "";
-    types.forEach((type: string) => {
+    Constants.SIYUAN_ASSETS_SEARCH.sort((a: string, b: string) => {
+        return a.localeCompare(b);
+    }).forEach((type: string) => {
         html += `<label class="fn__flex b3-label">
         <div class="fn__flex-1 fn__flex-center">
             ${type}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type="${type}" type="checkbox" checked>
+        <input class="b3-switch fn__flex-center" data-type="${type}" type="checkbox" ${types[type] ? " checked" : ""}>
     </label>`;
     });
     return html;
-}
+};
 
 export const assetFilterMenu = (assetsElement: Element) => {
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].types;
     const filterDialog = new Dialog({
         title: window.siyuan.languages.type,
-        content: `<div class="b3-dialog__content">` + filterTypesHTML(filterTypes) + `</div>
+        content: `<div class="b3-dialog__content">${filterTypesHTML(localData)}</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>

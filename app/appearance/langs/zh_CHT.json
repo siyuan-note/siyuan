@@ -239,7 +239,7 @@
   "regex": "正則表達式",
   "keywordsLimit": "關鍵字數量限制",
   "exportAsImage": "導出為圖片",
-  "featureBetaStage": "該特性支持即將收費（訂閱會員不用再單獨付費），一次性付費後終身可用",
+  "featureBetaStage": "該特性支持即將收費（訂閱會員不用再單獨付費），<a href=\"https://b3log.org/siyuan/pricing.html\" target=\"_blank\">一次性付費後終身可用</a>",
   "syncOfficialProviderIntro": "當前選擇的是 SiYuan 官方提供的雲端存儲服務，僅支持付費訂閱用戶使用",
   "syncThirdPartyProviderS3Intro": "當前選擇的是 Amazon S3 協議兼容的第三方雲端存儲服務（比如<a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">七牛雲</a>、<a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">阿里雲 OSS</a>、<a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>）",
   "syncThirdPartyProviderWebDAVIntro": "當前選擇的是 WebDAV 協議的第三方雲端存儲服務。由於該協議性能較差且穩定性不足，建議優先選擇 S3 服務",

@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/wmentor/epub"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -456,6 +457,7 @@ func NewAssetsSearcher() *AssetsSearcher {
 			".pptx":     &PptxAssetParser{},
 			".xlsx":     &XlsxAssetParser{},
 			".pdf":      &PdfAssetParser{},
+			".epub":     &EpubAssetParser{},
 		},
 
 		lock: &sync.Mutex{},
@@ -745,6 +747,44 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		content += " " + normalizeAssetContent(pt.Text)
 	}
 
+	ret = &AssetParseResult{
+		Content: content,
+	}
+	return
+}
+
+type EpubAssetParser struct {
+}
+
+func (parser *EpubAssetParser) Parse(absPath string) (ret *AssetParseResult) {
+	if !strings.HasSuffix(strings.ToLower(absPath), ".epub") {
+		return
+	}
+
+	if !gulu.File.IsExist(absPath) {
+		return
+	}
+
+	tmp := copyTempAsset(absPath)
+	if "" == tmp {
+		return
+	}
+	defer os.RemoveAll(tmp)
+
+	f, err := os.Open(tmp)
+	if nil != err {
+		logging.LogErrorf("open [%s] failed: [%s]", tmp, err)
+		return
+	}
+	defer f.Close()
+
+	buf := bytes.Buffer{}
+	if err = epub.ToTxt(tmp, &buf); nil != err {
+		logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
+		return
+	}
+
+	content := normalizeAssetContent(buf.String())
 	ret = &AssetParseResult{
 		Content: content,
 	}

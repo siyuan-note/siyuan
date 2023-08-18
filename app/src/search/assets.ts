@@ -357,47 +357,35 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
 };
 
+let filterTypes: string[] = [
+    ".txt", ".md", ".markdown", ".docx", ".xlsx", ".pptx", ".pdf", ".json", ".log", ".sql", ".html", ".xml", ".java", ".h", ".c",
+    ".cpp", ".go", ".rs", ".swift", ".kt", ".py", ".php", ".js", ".css", ".ts", ".sh", ".bat", ".cmd", ".ini", ".yaml",
+    ".rst", ".adoc", ".textile", ".opml", ".org", ".wiki",
+]
+
+const filterTypesHTML = (types: string[]) => {
+    filterTypes = filterTypes.sort((a: string, b: string) => {
+        return a.localeCompare(b);
+    });
+
+    let html = "";
+    types.forEach((type: string) => {
+        html += `<label class="fn__flex b3-label">
+        <div class="fn__flex-1 fn__flex-center">
+            ${type}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="${type}" type="checkbox" checked>
+    </label>`;
+    });
+    return html;
+}
+
 export const assetFilterMenu = (assetsElement: Element) => {
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].types;
     const filterDialog = new Dialog({
         title: window.siyuan.languages.type,
-        content: `<div class="b3-dialog__content">
-    <label class="fn__flex b3-label">
-        <div class="fn__flex-1 fn__flex-center">
-            .txt
-        </div>
-        <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type=".txt" type="checkbox"${localData[".txt"] ? " checked" : ""}>
-    </label>
-    <label class="fn__flex b3-label">
-        <div class="fn__flex-1 fn__flex-center">
-            .md
-        </div>
-        <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type=".md" type="checkbox"${localData[".md"] ? " checked" : ""}>
-    </label>
-    <label class="fn__flex b3-label">
-        <div class="fn__flex-1 fn__flex-center">
-            .docx
-        </div>
-        <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type=".docx" type="checkbox"${localData[".docx"] ? " checked" : ""}>
-    </label>
-    <label class="fn__flex b3-label">
-        <div class="fn__flex-1 fn__flex-center">
-            .xlsx
-        </div>
-        <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type=".xlsx" type="checkbox"${localData[".xlsx"] ? " checked" : ""}>
-    </label>
-    <label class="fn__flex b3-label">
-        <div class="fn__flex-1 fn__flex-center">
-            .pptx
-        </div>
-        <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type=".pptx" type="checkbox"${localData[".pptx"] ? " checked" : ""}>
-    </label>
-</div>
+        content: `<div class="b3-dialog__content">` + filterTypesHTML(filterTypes) + `</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>

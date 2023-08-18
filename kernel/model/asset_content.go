@@ -289,7 +289,7 @@ func IndexAssetContent(absPath string) {
 
 	assetsDir := util.GetDataAssetsAbsPath()
 
-	ext := strings.ToLower(filepath.Ext(absPath))
+	ext := filepath.Ext(absPath)
 	parser := assetContentSearcher.GetParser(ext)
 	if nil == parser {
 		return
@@ -360,7 +360,7 @@ func (searcher *AssetsSearcher) GetParser(ext string) AssetParser {
 	searcher.lock.Lock()
 	defer searcher.lock.Unlock()
 
-	return searcher.parsers[ext]
+	return searcher.parsers[strings.ToLower(ext)]
 }
 
 func (searcher *AssetsSearcher) FullIndex() {
@@ -382,7 +382,7 @@ func (searcher *AssetsSearcher) FullIndex() {
 			return nil
 		}
 
-		ext := strings.ToLower(filepath.Ext(absPath))
+		ext := filepath.Ext(absPath)
 		parser := searcher.GetParser(ext)
 		if nil == parser {
 			return nil
@@ -433,9 +433,11 @@ func NewAssetsSearcher() *AssetsSearcher {
 			".c":        txtAssetParser,
 			".cpp":      txtAssetParser,
 			".go":       txtAssetParser,
+			".rs":       txtAssetParser,
 			".swift":    txtAssetParser,
 			".kt":       txtAssetParser,
 			".py":       txtAssetParser,
+			".php":      txtAssetParser,
 			".js":       txtAssetParser,
 			".css":      txtAssetParser,
 			".ts":       txtAssetParser,
@@ -460,6 +462,10 @@ func NewAssetsSearcher() *AssetsSearcher {
 	}
 }
 
+const (
+	TxtAssetContentMaxSize = 1024 * 1024 * 4
+)
+
 type AssetParseResult struct {
 	Path    string
 	Size    int64
@@ -475,7 +481,14 @@ type TxtAssetParser struct {
 }
 
 func (parser *TxtAssetParser) Parse(absPath string) (ret *AssetParseResult) {
-	if !strings.HasSuffix(strings.ToLower(absPath), ".txt") {
+	info, err := os.Stat(absPath)
+	if nil != err {
+		logging.LogErrorf("stat file [%s] failed: %s", absPath, err)
+		return
+	}
+
+	if TxtAssetContentMaxSize < info.Size() {
+		logging.LogWarnf("file [%s] is too large [%s]", absPath, humanize.Bytes(uint64(info.Size())))
 		return
 	}
 

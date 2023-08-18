@@ -1266,7 +1266,11 @@ export class WYSIWYG {
             }
             protyle.toolbar.range = getEditorRange(protyle.element);
             if (target.tagName === "SPAN") { // https://ld246.com/article/1665141518103
-                const types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
+                let types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
+                if (types.length === 0) {
+                    // https://github.com/siyuan-note/siyuan/issues/8960
+                    types = (target.dataset.type || "").split(" ");
+                }
                 if (types.length > 0) {
                     removeSearchMark(target);
                 }

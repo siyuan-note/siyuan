@@ -1,4 +1,6 @@
 {
+  "searchRemoveName": "¿Desea eliminar ${x} y asignar su condición de consulta a ${y}?",
+  "searchUpdateName": "¿Actualizar nombre ${x} a ${y}?",
   "searchAssetContent": "Buscar contenido del archivo de activos",
   "searchOverwrite": "El nombre de la consulta está duplicado, ¿quieres sobrescribirlo?",
   "onepay": "PRO",

@@ -1,4 +1,6 @@
 {
+  "searchRemoveName": "Do you want to delete ${x} and assign its query condition to ${y}?",
+  "searchUpdateName": "Update name ${x} to ${y}?",
   "searchAssetContent": "Search asset file content",
   "searchOverwrite": "The query name is duplicated, do you want to overwrite it?",
   "onepay": "PRO",

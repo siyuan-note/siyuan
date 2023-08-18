@@ -1,4 +1,6 @@
 {
+  "searchRemoveName": "是否删 ${x} 并将其查询条件赋值给 ${y}？",
+  "searchUpdateName": "是否将查询名称 ${x} 更新为 ${y}？",
   "searchAssetContent": "搜索资源文件内容",
   "searchOverwrite": "查询名称重复，是否进行覆盖？",
   "onepay": "功能特性",

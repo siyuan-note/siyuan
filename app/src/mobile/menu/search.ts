@@ -458,7 +458,6 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                         }
                     }, config);
                 });
-                element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 window.siyuan.menus.menu.element.style.zIndex = "220";
                 window.siyuan.menus.menu.fullscreen();
                 event.stopPropagation();

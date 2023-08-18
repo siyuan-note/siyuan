@@ -1330,7 +1330,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (!nodeElement.classList.contains("code-block") && !event.repeat) {
+        if (!nodeElement.classList.contains("code-block") && !event.repeat &&
+            !hasClosestByAttribute(nodeElement, "data-type", "NodeBlockQueryEmbed")) {
             let findToolbar = false;
             protyle.options.toolbar.find((menuItem: IMenuItem) => {
                 if (!menuItem.hotkey) {

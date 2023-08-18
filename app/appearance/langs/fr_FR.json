@@ -239,7 +239,7 @@
   "regex": "Regex",
   "keywordsLimit": "Limite de mots clés",
   "exportAsImage": "Exporter en tant qu'image",
-  "featureBetaStage": "Cette fonctionnalité prend en charge la facturation immédiate (les membres abonnés n'ont pas besoin de payer séparément), <a href=\"https://b3log.org/siyuan/pricing.html\" target=\"_blank\">le paiement unique peut être utilisé à vie</a>",
+  "featureBetaStage": "Cette fonctionnalité prend en charge la facturation immédiate (les membres abonnés n'ont pas besoin de payer séparément), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">le paiement unique peut être utilisé à vie</a>",
   "syncOfficialProviderIntro": "Actuellement sélectionné est le service de stockage en nuage officiellement fourni par SiYuan, qui ne prend en charge que les utilisateurs d'abonnement payant",
   "syncThirdPartyProviderS3Intro": "L'actuel sélectionné est un service de stockage cloud tiers compatible avec le protocole Amazon S3",
   "syncThirdPartyProviderWebDAVIntro": "Le service de stockage cloud tiers du protocole WebDAV est actuellement sélectionné. En raison des performances médiocres et de la stabilité insuffisante de ce protocole, il est recommandé de choisir d'abord le service S3",

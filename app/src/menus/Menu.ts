@@ -308,7 +308,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (!currentElement) {
             return true;
         }
-        const parentItemElement = hasClosestByClassName(currentElement, "b3-menu__item--show")
+        const parentItemElement = hasClosestByClassName(currentElement, "b3-menu__item--show");
         if (parentItemElement) {
             parentItemElement.classList.remove("b3-menu__item--show");
             parentItemElement.classList.add("b3-menu__item--current");

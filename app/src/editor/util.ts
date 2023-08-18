@@ -15,6 +15,7 @@ import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER
 import {shell} from "electron";
 import {BrowserWindow, getCurrentWindow} from "@electron/remote";
+import {newCardModel} from "../card/newCardTab";
 /// #endif
 import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
@@ -28,7 +29,6 @@ import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
 import {App} from "../index";
-import {newCardModel} from "../card/newCardTab";
 
 export const openFileById = async (options: {
     app: App,
@@ -444,7 +444,7 @@ const newTab = (options: IOpenFileOptions) => {
                                 }));
                                 return true;
                             }
-                        })
+                        });
                     }
                 } else {
                     // plugin 0.8.3 历史兼容

@@ -118,4 +118,4 @@ export const toggleDockBar = (useElement:Element)=> {
     });
     resizeTabs();
     resetFloatDockSize();
-}
+};

@@ -1,5 +1,5 @@
 /// #if !MOBILE
-import {getDockByType, resizeTabs} from "./util";
+import {getDockByType} from "./util";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";

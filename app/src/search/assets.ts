@@ -407,7 +407,7 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
     }
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", "searchAssetMore");
-    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET]
+    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHASSET];
     const sortMenu = [{
         iconHTML: Constants.ZWSP,
         label: window.siyuan.languages.sortByRankAsc,
@@ -457,7 +457,7 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
             current: localData.layout === 0,
             click() {
                 element.querySelector(".search__layout").classList.remove("search__layout--row");
-                const previewElement = element.querySelector("#searchAssetPreview") as HTMLElement
+                const previewElement = element.querySelector("#searchAssetPreview") as HTMLElement;
                 previewElement.style.width = "";
                 if (localData.row) {
                     previewElement.style.height = localData.row;
@@ -473,11 +473,11 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
             label: window.siyuan.languages.leftRightLayout,
             current: localData.layout === 1,
             click() {
-                const previewElement = element.querySelector("#searchAssetPreview") as HTMLElement
+                const previewElement = element.querySelector("#searchAssetPreview") as HTMLElement;
                 element.querySelector(".search__layout").classList.add("search__layout--row");
                 previewElement.style.height = "";
                 if (localData.col) {
-                    previewElement.style.width = localData.col
+                    previewElement.style.width = localData.col;
                     previewElement.classList.remove("fn__flex-1");
                 } else {
                     previewElement.classList.add("fn__flex-1");
@@ -493,10 +493,10 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
         click() {
             element.nextElementSibling.classList.remove("fn__none");
             fetchPost("/api/asset/fullReindexAssetContent", {}, () => {
-                assetInputEvent(element, localData)
+                assetInputEvent(element, localData);
             });
         },
     }).element);
     const rect = target.getBoundingClientRect();
     window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
-}
+};

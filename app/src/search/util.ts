@@ -640,7 +640,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 assetMoreMenu(target, assetsElement, () => {
                     assetInputEvent(assetsElement);
                     setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
-                })
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;

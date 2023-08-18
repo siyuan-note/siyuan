@@ -4,13 +4,13 @@ import {fetchPost} from "../util/fetch";
 import {isMobile, isWindow} from "../util/functions";
 /// #if !MOBILE
 import {Custom} from "../layout/dock/Custom";
+import {getAllModels} from "../layout/getAll";
 /// #endif
 import {Tab} from "../layout/Tab";
 import {getDockByType, setPanelFocus} from "../layout/util";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
-import {getAllModels} from "../layout/getAll";
 
 export class Plugin {
     private app: App;
@@ -182,16 +182,18 @@ export class Plugin {
     }
 
     public getOpenedTab() {
-        const tabs: { [key: string]: Custom[] } = {}
-        const modelKeys = Object.keys(this.models)
+        const tabs: { [key: string]: Custom[] } = {};
+        const modelKeys = Object.keys(this.models);
         modelKeys.forEach(item => {
-            tabs[item.replace(this.name, "")] = []
-        })
+            tabs[item.replace(this.name, "")] = [];
+        });
+        /// #if !MOBILE
         getAllModels().custom.find(item => {
             if (modelKeys.includes(item.type)) {
                 tabs[item.type.replace(this.name, "")].push(item);
             }
-        })
+        });
+        /// #endif
         return tabs;
     }
 

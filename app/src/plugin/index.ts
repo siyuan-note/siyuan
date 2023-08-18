@@ -10,6 +10,7 @@ import {getDockByType, setPanelFocus} from "../layout/util";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
+import {getAllModels} from "../layout/getAll";
 
 export class Plugin {
     private app: App;
@@ -178,6 +179,20 @@ export class Plugin {
                 resolve(response);
             });
         });
+    }
+
+    public getOpenedTab() {
+        const tabs: { [key: string]: Custom[] } = {}
+        const modelKeys = Object.keys(this.models)
+        modelKeys.forEach(item => {
+            tabs[item.replace(this.name, "")] = []
+        })
+        getAllModels().custom.find(item => {
+            if (modelKeys.includes(item.type)) {
+                tabs[item.type.replace(this.name, "")].push(item);
+            }
+        })
+        return tabs;
     }
 
     public addTab(options: {

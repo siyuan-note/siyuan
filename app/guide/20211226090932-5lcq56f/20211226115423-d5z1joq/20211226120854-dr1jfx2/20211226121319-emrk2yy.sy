@@ -2626,7 +2626,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2696,7 +2696,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2766,7 +2766,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2836,7 +2836,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2906,7 +2906,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2972,7 +2972,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -3042,7 +3042,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -3508,7 +3508,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/adrai/flowchart.js",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "flowchart.js"
 				},
 				{

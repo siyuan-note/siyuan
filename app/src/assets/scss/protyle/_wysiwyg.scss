@@ -555,6 +555,23 @@
   }
 }
 
+// 只读情况下列表前的圆点需要可以点击进行缩放
+.protyle .protyle-wysiwyg {
+  .li[data-subtype="o"] > .protyle-action,
+  .li[data-subtype="u"] > .protyle-action,
+  &[contenteditable="true"] .li[data-subtype="t"] > .protyle-action {
+    cursor: pointer;
+
+    &:hover {
+      &:after {
+        background-color: var(--b3-theme-background-light);
+      }
+
+      color: var(--b3-theme-on-background);
+    }
+  }
+}
+
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[contenteditable="true"] {
   span[data-type~="inline-math"],
@@ -563,7 +580,6 @@
   span[data-type~="file-annotation-ref"],
   .protyle-action__language,
   .img > span:nth-child(2),
-  .li > .protyle-action,
   .render-node {
     cursor: pointer;
   }
@@ -575,14 +591,6 @@
   span[data-type~="block-ref"]:hover,
   span[data-type~="file-annotation-ref"]:hover {
     opacity: 1;
-  }
-
-  .li > .protyle-action:hover {
-    &:after {
-      opacity: .68;
-    }
-
-    color: var(--b3-theme-on-background);
   }
 
   .code-block .protyle-action {

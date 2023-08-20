@@ -1932,8 +1932,8 @@ export class WYSIWYG {
                         clientX: event.clientX + 4,
                         clientY: event.clientY
                     });
-                } else if (!protyle.disabled && actionElement.parentElement.classList.contains("li")) {
-                    if (event.altKey) {
+                } else if (actionElement.parentElement.classList.contains("li")) {
+                    if (event.altKey && !protyle.disabled) {
                         // 展开/折叠当前层级的所有列表项
                         if (actionElement.parentElement.parentElement.classList.contains("protyle-wysiwyg")) {
                             // 缩放列表项 https://ld246.com/article/1653123034794
@@ -1961,22 +1961,24 @@ export class WYSIWYG {
                             updateTransaction(protyle, actionElement.parentElement.parentElement.getAttribute("data-node-id"), actionElement.parentElement.parentElement.outerHTML, oldHTML);
                         }
                         hideElements(["gutter"], protyle);
-                    } else if (event.shiftKey) {
+                    } else if (event.shiftKey && !protyle.disabled) {
                         openAttr(actionElement.parentElement);
                     } else if (ctrlIsPressed) {
                         zoomOut({protyle, id: actionElement.parentElement.getAttribute("data-node-id")});
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
-                            const html = actionElement.parentElement.outerHTML;
-                            if (actionElement.parentElement.classList.contains("protyle-task--done")) {
-                                actionElement.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                                actionElement.parentElement.classList.remove("protyle-task--done");
-                            } else {
-                                actionElement.querySelector("use").setAttribute("xlink:href", "#iconCheck");
-                                actionElement.parentElement.classList.add("protyle-task--done");
+                            if (!protyle.disabled) {
+                                const html = actionElement.parentElement.outerHTML;
+                                if (actionElement.parentElement.classList.contains("protyle-task--done")) {
+                                    actionElement.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
+                                    actionElement.parentElement.classList.remove("protyle-task--done");
+                                } else {
+                                    actionElement.querySelector("use").setAttribute("xlink:href", "#iconCheck");
+                                    actionElement.parentElement.classList.add("protyle-task--done");
+                                }
+                                actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                                updateTransaction(protyle, actionElement.parentElement.getAttribute("data-node-id"), actionElement.parentElement.outerHTML, html);
                             }
-                            actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                            updateTransaction(protyle, actionElement.parentElement.getAttribute("data-node-id"), actionElement.parentElement.outerHTML, html);
                         } else {
                             zoomOut({protyle, id: actionElement.parentElement.getAttribute("data-node-id")});
                         }

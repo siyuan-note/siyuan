@@ -76,6 +76,7 @@ func GetAssetContent(id, query string, queryMethod int) (ret *AssetContent) {
 		return
 	}
 	ret = results[0]
+	ret.Content = strings.ReplaceAll(ret.Content, "\n", "<br>")
 	return
 }
 
@@ -494,20 +495,26 @@ func (parser *TxtAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
-	data, err := filelock.ReadFile(absPath)
+	tmp := copyTempAsset(absPath)
+	if "" == tmp {
+		return
+	}
+	defer os.RemoveAll(tmp)
+
+	data, err := os.ReadFile(tmp)
 	if nil != err {
 		logging.LogErrorf("read file [%s] failed: %s", absPath, err)
 		return
 	}
 
-	content := normalizeAssetContent(string(data))
+	content := string(data)
 	ret = &AssetParseResult{
 		Content: content,
 	}
 	return
 }
 
-func normalizeAssetContent(content string) (ret string) {
+func normalizeNonTxtAssetContent(content string) (ret string) {
 	ret = strings.Join(strings.Fields(content), " ")
 	return
 }
@@ -566,7 +573,7 @@ func (parser *DocxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
-	var content = normalizeAssetContent(data)
+	var content = normalizeNonTxtAssetContent(data)
 	ret = &AssetParseResult{
 		Content: content,
 	}
@@ -604,7 +611,7 @@ func (parser *PptxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
-	var content = normalizeAssetContent(data)
+	var content = normalizeNonTxtAssetContent(data)
 	ret = &AssetParseResult{
 		Content: content,
 	}
@@ -651,7 +658,7 @@ func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		}
 	}
 
-	var content = normalizeAssetContent(buf.String())
+	var content = normalizeNonTxtAssetContent(buf.String())
 	ret = &AssetParseResult{
 		Content: content,
 	}
@@ -744,7 +751,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 			logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
 			return
 		}
-		content += " " + normalizeAssetContent(pt.Text)
+		content += " " + normalizeNonTxtAssetContent(pt.Text)
 	}
 
 	ret = &AssetParseResult{
@@ -784,7 +791,7 @@ func (parser *EpubAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
-	content := normalizeAssetContent(buf.String())
+	content := normalizeNonTxtAssetContent(buf.String())
 	ret = &AssetParseResult{
 		Content: content,
 	}

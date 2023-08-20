@@ -67,11 +67,12 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
 <div class="search__layout${localSearch.layout === 1 ? " search__layout--row" : ""}">
     <div id="searchAssetList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
     <div class="search__drag"></div>
-    <div id="searchAssetPreview" class="fn__flex-1 search__preview" style="padding: 8px"></div>
+    <div id="searchAssetPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px"></div>
 </div>
 <div class="search__tip${isStick ? " fn__none" : ""}">
     <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
     ${enterTip}
+    <kbd>Click</kbd> ${window.siyuan.languages.searchTip3}
     <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
 </div>`;
     const searchPanelElement = element.querySelector("#searchAssetList");
@@ -313,8 +314,34 @@ export const toggleAssetHistory = (historyElement: Element, searchInputElement: 
 
 export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {
     fetchPost("/api/search/getAssetContent", {id, query, queryMethod}, (response) => {
-        element.innerHTML = response.data.assetContent.content;
+        element.innerHTML = `<p>${response.data.assetContent.content}</p>`;
+        const matchElement = element.querySelector("mark");
+        if (matchElement) {
+            matchElement.classList.add("mark--hl");
+            const contentRect = element.getBoundingClientRect();
+            element.scrollTop = element.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+        }
     });
+};
+
+export const renderNextAssetMark = (element: Element) => {
+    let matchElement;
+    const allMatchElements = Array.from(element.querySelectorAll("mark"));
+    allMatchElements.find((item, itemIndex) => {
+        if (item.classList.contains("mark--hl")) {
+            item.classList.remove("mark--hl");
+            matchElement = allMatchElements[itemIndex + 1];
+            return;
+        }
+    });
+    if (!matchElement) {
+        matchElement = allMatchElements[0];
+    }
+    if (matchElement) {
+        matchElement.classList.add("mark--hl");
+        const contentRect = element.getBoundingClientRect();
+        element.scrollTop = element.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+    }
 };
 
 export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
@@ -357,7 +384,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom}, true);
 };
 
-const filterTypesHTML = (types:IObject) => {
+const filterTypesHTML = (types: IObject) => {
     let html = "";
     Constants.SIYUAN_ASSETS_SEARCH.sort((a: string, b: string) => {
         return a.localeCompare(b);

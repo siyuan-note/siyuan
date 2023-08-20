@@ -27,7 +27,7 @@ import {
     assetFilterMenu,
     assetInputEvent,
     assetMethodMenu, assetMoreMenu,
-    openSearchAsset,
+    openSearchAsset, renderNextAssetMark,
     renderPreview,
     toggleAssetHistory
 } from "./assets";
@@ -728,6 +728,9 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                     assetsElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
                                     renderPreview(element.querySelector("#searchAssetPreview"), target.dataset.id, searchAssetInputElement.value, window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method);
+                                    searchAssetInputElement.focus();
+                                } else if (target.classList.contains("b3-list-item--focus")) {
+                                    renderNextAssetMark(element.querySelector("#searchAssetPreview"));
                                     searchAssetInputElement.focus();
                                 }
                             } else {

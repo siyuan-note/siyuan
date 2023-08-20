@@ -88,9 +88,9 @@
     background-color: var(--b3-protyle-inline-mark-background);
     color: var(--b3-protyle-inline-mark-color);
 
-    &.mark__current {
-      background-color: var(--b3-protyle-search-current-background);
-      box-shadow: 0 0 1px var(--b3-theme-on-background);
+    &.mark--hl {
+      background-color: var(--b3-theme-primary-lighter);
+      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
     }
   }
 

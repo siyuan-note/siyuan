@@ -50,12 +50,14 @@ NPM 镜像：
 
 ### iOS
 
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./kernel/mobile/`
+* `cd kernel`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
 * https://github.com/siyuan-note/siyuan-ios
 
 ### Android
 
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' ./kernel/mobile/`
+* `cd kernel`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' -androidapi 24 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 移动端请参考对应项目仓库。

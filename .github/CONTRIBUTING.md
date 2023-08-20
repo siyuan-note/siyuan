@@ -55,7 +55,7 @@ Note: In the development environment, the kernel process will not be automatical
 ### Android
 
 * `cd kernel`
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' ./mobile/`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' -androidapi 24 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 For the mobile-end, please refer to the corresponding project repository.

@@ -314,7 +314,7 @@ export const toggleAssetHistory = (historyElement: Element, searchInputElement: 
 
 export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {
     fetchPost("/api/search/getAssetContent", {id, query, queryMethod}, (response) => {
-        element.innerHTML = `<p>${response.data.assetContent.content}</p>`;
+        element.innerHTML = `<p style="white-space: pre;">${response.data.assetContent.content}</p>`;
         const matchElement = element.querySelector("mark");
         if (matchElement) {
             matchElement.classList.add("mark--hl");

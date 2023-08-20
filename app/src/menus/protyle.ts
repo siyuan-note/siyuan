@@ -626,7 +626,7 @@ export const zoomOut = (options: {
                 });
                 return;
             }
-        } else {
+        } else if (options.id !== options.protyle.block.rootID) {
             options.protyle.wysiwyg.element.classList.add("protyle-wysiwyg--animate");
             setTimeout(() => {
                 options.protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--animate");

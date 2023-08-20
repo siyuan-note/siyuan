@@ -466,6 +466,10 @@
     }
   }
 
+  &--animate {
+    animation: scale 0.3s ease-in-out;
+  }
+
   [data-type="backslash"] span {
     display: none;
   }

@@ -626,6 +626,11 @@ export const zoomOut = (options: {
                 });
                 return;
             }
+        } else {
+            options.protyle.wysiwyg.element.classList.add("protyle-wysiwyg--animate");
+            setTimeout(() => {
+                options.protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--animate");
+            }, 365);
         }
         /// #if !MOBILE
         if (options.protyle.model) {

@@ -6,7 +6,7 @@
 		"id": "20201227194925-7ipoiv6",
 		"title": "内核 API",
 		"type": "doc",
-		"updated": "20220224233723"
+		"updated": "20230820185829"
 	},
 	"Children": [
 		{
@@ -14,22 +14,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210822163618-m0zvvbe",
-				"updated": "20220224233723"
+				"updated": "20230820185829"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "请浏览 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md",
-					"TextMarkTextContent": "API 文档"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": "请浏览 API 文档 (github repo: siyuan-note/siyuan)。"
 				}
 			]
 		}

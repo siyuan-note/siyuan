@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20230418094804"
+		"updated": "20230820184056"
 	},
 	"Children": [
 		{
@@ -1384,40 +1384,6 @@
 			]
 		},
 		{
-			"ID": "20220125164049-swihkvs",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220125164049-swihkvs",
-				"style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);",
-				"updated": "20220224233837"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In addition to modifying the style through theme.css, if theme.js exists in the theme folder, it will be automatically loaded when rendering the interface, so that some function-related customizations can be achieved through JavaScript code. "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ": Do not modify the editor DOM, the blocks in the editor should pass the "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md#Blocks",
-					"TextMarkTextContent": "Block API"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to operate."
-				}
-			]
-		},
-		{
 			"ID": "20201225222754-u4sica8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1437,7 +1403,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173346-65wavr3",
-				"updated": "20230418085902"
+				"updated": "20230820184056"
 			},
 			"Children": [
 				{
@@ -1447,8 +1413,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community marketplace README"
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "Community marketplace repo"
 				},
 				{
 					"Type": "NodeText",

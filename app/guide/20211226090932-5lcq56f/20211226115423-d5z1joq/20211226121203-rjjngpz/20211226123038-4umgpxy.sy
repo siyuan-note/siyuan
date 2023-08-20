@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20230604120825"
+		"updated": "20230820185516"
 	},
 	"Children": [
 		{
@@ -814,7 +814,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003901-5pfzttc",
-				"updated": "20230117003908"
+				"updated": "20230820185516"
 			},
 			"Children": [
 				{
@@ -823,8 +823,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/tesseract-ocr/tesseract",
+					"TextMarkType": "em",
 					"TextMarkTextContent": "Tesseract OCR"
 				},
 				{

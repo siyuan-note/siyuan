@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20230328091244"
+		"updated": "20230820185102"
 	},
 	"Children": [
 		{
@@ -2642,7 +2642,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2718,7 +2718,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2788,7 +2788,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2858,7 +2858,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2928,7 +2928,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2994,7 +2994,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -3064,7 +3064,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -3386,22 +3386,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211213121948-zo8q9wp",
-				"updated": "20211213122027"
+				"updated": "20230820185102"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Please refer to "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/paulrosen/abcjs",
-					"TextMarkTextContent": "abcjs"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " for the syntax."
+					"Data": "Please refer to abcjs (github repo: paulrosen/abcjs) for the syntax."
 				}
 			]
 		},
@@ -3542,7 +3532,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/adrai/flowchart.js",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "flowchart.js"
 				},
 				{

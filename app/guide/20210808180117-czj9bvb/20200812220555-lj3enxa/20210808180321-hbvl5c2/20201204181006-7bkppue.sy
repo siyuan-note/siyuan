@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20221114172718"
+		"updated": "20230820185615"
 	},
 	"Children": [
 		{
@@ -128,31 +128,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091309-mvyh081",
-				"updated": "20210502204943"
+				"updated": "20230820185615"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我们通过开源项目 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/Masterminds/sprig",
-					"TextMarkTextContent": "Sprig"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 内置了一些变量和函数来丰富模板。比如可通过 "
+					"Data": "我们通过开源项目 Sprig (github repo: Masterminds/sprig) 内置了一些变量和函数来丰富模板。比如可通过 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": ".action{now | date \"2006-01-02 15:04:05​\"}"
+					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 来渲染当前时间，更多用法请参考 "
+					"Data": "​ 来渲染当前时间，更多用法请参考 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -695,7 +685,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114172717-fu9oalt",
-				"updated": "20221114172718"
+				"updated": "20230820184212"
 			},
 			"Children": [
 				{
@@ -705,8 +695,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社区集市 README"
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社区集市仓库"
 				},
 				{
 					"Type": "NodeText",

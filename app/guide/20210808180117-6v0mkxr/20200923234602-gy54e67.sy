@@ -384,7 +384,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/LICENSE",
+					"TextMarkAHref": "https://www.gnu.org/licenses/#AGPL",
 					"TextMarkTextContent": "AGPLv3 Open Source License"
 				},
 				{

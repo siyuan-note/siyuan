@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230506205948-yah52eb",
 		"title": "Plugins",
-		"updated": "20230512195433"
+		"updated": "20230820184257"
 	},
 	"Children": [
 		{
@@ -147,7 +147,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210937-i9vqw4g",
-				"updated": "20230506210937"
+				"updated": "20230820184257"
 			},
 			"Children": [
 				{
@@ -157,8 +157,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community Bazaar README"
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "Community marketplace repo"
 				},
 				{
 					"Type": "NodeText",

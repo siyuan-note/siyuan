@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220415232129-shpzg6r",
 		"title": "查詢語法",
-		"updated": "20230802221509"
+		"updated": "20230820184809"
 	},
 	"Children": [
 		{
@@ -626,7 +626,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-go31ixg",
-				"updated": "20220415232130"
+				"updated": "20230820184809"
 			},
 			"Children": [
 				{
@@ -640,17 +640,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 進行連接。一個短語是由一些記號（Token）有序構成，這些記號由用戶的輸入文字通過分詞器處理得到。思源使用的分詞器為了讓中文搜索好用（支持單字搜索），所以實現方式是按照字分詞的（"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/sqlite-fts5-siyuan-tokenizer",
-					"TextMarkTextContent": "分詞器代碼"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "），也就是說每個漢字或者英文字母都會被拆分為一個記號。這對 "
+					"Data": "​ 進行連接。一個短語是由一些記號（Token）有序構成，這些記號由用戶的輸入文字通過分詞器處理得到。思源使用的分詞器為了讓中文搜索好用（支持單字搜索），所以實現方式是按照字分詞的，也就是說每個漢字或者英文字母都會被拆分為一個記號。這對 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -659,7 +649,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 連接會產生一些影響，所以如果不確定的話，建議不要使用 "
+					"Data": "​ 連接會產生一些影響，所以如果不確定的話，建議不要使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -668,7 +658,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 組合多個短語。"
+					"Data": "​ 組合多個短語。"
 				}
 			]
 		},

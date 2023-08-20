@@ -6,7 +6,7 @@
 		"icon": "2753",
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
-		"updated": "20230806004418"
+		"updated": "20230820183402"
 	},
 	"Children": [
 		{
@@ -655,169 +655,16 @@
 			]
 		},
 		{
-			"ID": "20220526112905-720doo3",
+			"ID": "20230820183402-8j6kygp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220526112905-720doo3",
-				"updated": "20221114173816"
+				"id": "20230820183402-8j6kygp",
+				"updated": "20230820183402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源筆記是完全開源的，歡迎參與貢獻："
-				}
-			]
-		},
-		{
-			"ID": "20220526112905-4lumsx2",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220526112905-4lumsx2",
-				"updated": "20230806002258"
-			},
-			"Children": [
-				{
-					"ID": "20220526112905-mc93oj3",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112905-mc93oj3",
-						"updated": "20220526112905"
-					},
-					"Children": [
-						{
-							"ID": "20220526112905-0xsljf4",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112905-0xsljf4",
-								"updated": "20220526112905"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan",
-									"TextMarkTextContent": "界面和Kernel"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221202214433-gt06q1x",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221202214433-gt06q1x",
-						"updated": "20230806002258"
-					},
-					"Children": [
-						{
-							"ID": "20221202214433-gyqo6sf",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221202214433-gyqo6sf",
-								"updated": "20230806002258"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-android",
-									"TextMarkTextContent": "Android 端"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221202214436-snvza5h",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221202214436-snvza5h"
-					},
-					"Children": [
-						{
-							"ID": "20221202214436-ym3tiwx",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221202214436-ym3tiwx"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-ios",
-									"TextMarkTextContent": "iOS 端"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112905-q4sgprn",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112905-q4sgprn",
-						"updated": "20220526112905"
-					},
-					"Children": [
-						{
-							"ID": "20220526112905-ewnoyot",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112905-ewnoyot",
-								"updated": "20220526112905"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-chrome",
-									"TextMarkTextContent": "Chrome 剪藏擴展"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220526112905-yjamiap",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220526112905-yjamiap",
-				"updated": "20220526112905"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更多細節請參考"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md",
-					"TextMarkTextContent": "開發指南"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": "思源筆記是完全開源的，在 GitHub 上可以找到完整的源代碼。"
 				}
 			]
 		},
@@ -963,7 +810,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100912-rvyxrtl",
-				"updated": "20230806002102"
+				"updated": "20230820182924"
 			},
 			"Children": [
 				{
@@ -977,7 +824,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​​ - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -986,7 +833,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​​ - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -995,7 +842,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​​ 中 "
+					"Data": "​ 中 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1004,7 +851,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​​，也可以通過關注"
+					"Data": "​，也可以通過關注"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1014,17 +861,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "或者 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/releases",
-					"TextMarkTextContent": "GitHub Releases"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 來獲取新版本。"
+					"Data": "來獲取新版本。"
 				}
 			]
 		},

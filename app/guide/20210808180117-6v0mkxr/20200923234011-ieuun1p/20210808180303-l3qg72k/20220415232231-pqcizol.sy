@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220415232231-pqcizol",
 		"title": "Query syntax",
-		"updated": "20230802221616"
+		"updated": "20230820184820"
 	},
 	"Children": [
 		{
@@ -622,7 +622,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-eewj58z",
-				"updated": "20220415232750"
+				"updated": "20230820184820"
 			},
 			"Children": [
 				{
@@ -636,17 +636,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". A phrase is composed of some tokens in order, and these tokens are processed by the user's input text through the tokenizer. The tokenizer used by SiYuan is to make Chinese search easy to use (supports single-word search), so the implementation is based on word segmentation ("
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/sqlite-fts5-siyuan-tokenizer",
-					"TextMarkTextContent": "Tokenizer code"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "), which means that each Chinese character or English letter will be split into a token. This has some effect on "
+					"Data": "​. A phrase is composed of some tokens in order, and these tokens are processed by the user's input text through the tokenizer. The tokenizer used by SiYuan is to make Chinese search easy to use (supports single-word search), so the implementation is based on word segmentation, which means that each Chinese character or English letter will be split into a token. This has some effect on "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -655,7 +645,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " concatenation, so it is recommended not to use "
+					"Data": "​ concatenation, so it is recommended not to use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -664,7 +654,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to combine multiple phrases if unsure."
+					"Data": "​ to combine multiple phrases if unsure."
 				}
 			]
 		},

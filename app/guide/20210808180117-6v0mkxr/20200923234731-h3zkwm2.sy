@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230806004444"
+		"updated": "20230820183340"
 	},
 	"Children": [
 		{
@@ -663,165 +663,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220526112843-3ufaqy8",
-				"updated": "20220526112843"
+				"updated": "20230820183340"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan is completely open source, and contributions are welcome:"
-				}
-			]
-		},
-		{
-			"ID": "20220526112843-xbvl2ni",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220526112843-xbvl2ni",
-				"updated": "20221202214406"
-			},
-			"Children": [
-				{
-					"ID": "20220526112843-p7zhonk",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112843-p7zhonk",
-						"updated": "20220526112843"
-					},
-					"Children": [
-						{
-							"ID": "20220526112843-ivai3f9",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112843-ivai3f9",
-								"updated": "20220526112843"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan",
-									"TextMarkTextContent": "User Interface and Kernel"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221202214345-gctwcoa",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221202214345-gctwcoa",
-						"updated": "20221202214406"
-					},
-					"Children": [
-						{
-							"ID": "20221202214345-4p4zmco",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221202214345-4p4zmco",
-								"updated": "20221202214406"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-android",
-									"TextMarkTextContent": "Android"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221202214348-poddvse",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221202214348-poddvse"
-					},
-					"Children": [
-						{
-							"ID": "20221202214348-tk7i2le",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221202214348-tk7i2le"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-ios",
-									"TextMarkTextContent": "iOS"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112843-gruql45",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112843-gruql45",
-						"updated": "20220526112843"
-					},
-					"Children": [
-						{
-							"ID": "20220526112843-fncmbjl",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112843-fncmbjl",
-								"updated": "20220526112843"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-chrome",
-									"TextMarkTextContent": "Chrome Clipping Extension"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220526112843-epfwhb9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220526112843-epfwhb9",
-				"updated": "20220526112843"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "For more details, please refer to "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md",
-					"TextMarkTextContent": "Development Guide"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
+					"Data": "SiYuan is completely open source, and the complete source code can be found on GitHub."
 				}
 			]
 		},
@@ -967,7 +814,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100946-9eyc3uh",
-				"updated": "20230806002204"
+				"updated": "20230820182932"
 			},
 			"Children": [
 				{
@@ -1015,16 +862,6 @@
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://b3log.org/siyuan/",
 					"TextMarkTextContent": "Official website"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https ://github.com/siyuan-note/siyuan/releases",
-					"TextMarkTextContent": "GitHub Releases"
 				},
 				{
 					"Type": "NodeText",

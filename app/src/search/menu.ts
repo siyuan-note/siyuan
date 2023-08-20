@@ -201,6 +201,7 @@ const saveCriterionData = (config: ISearchOption,
     fetchPost("/api/storage/setCriterion", {criterion}, () => {
         saveDialog.destroy();
         const criteriaElement = element.querySelector("#criteria").firstElementChild;
+        criteriaElement.classList.remove("fn__none");
         criteriaElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
         criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
     });

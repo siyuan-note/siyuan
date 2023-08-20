@@ -15,6 +15,15 @@ import {showMessage} from "../../dialog/message";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {activeBlur, hideKeyboardToolbar} from "../util/keyboardToolbar";
 import {App} from "../../index";
+import {
+    assetFilterMenu,
+    assetInputEvent,
+    assetMethodMenu, assetMoreMenu,
+    renderNextAssetMark,
+    renderPreview,
+    toggleAssetHistory
+} from "../../search/assets";
+import {getQueryTip} from "../../search/util";
 
 const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -193,9 +202,9 @@ ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
     listElement.scrollTop = 0;
     let countHTML = "";
     if (response) {
-        countHTML = `${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}
+        countHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>
 <span class="fn__flex-1"></span>
-${config.page}/${response.data.pageCount || 1}`;
+<span class="fn__flex-center">${config.page}/${response.data.pageCount || 1}</span>`;
     }
     listElement.previousElementSibling.querySelector('[data-type="result"]').innerHTML = countHTML;
 };
@@ -279,7 +288,9 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
     const criteriaData: ISearchOption[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
 
+    const assetsElement = document.querySelector("#searchAssetsPanel")
     const searchListElement = element.querySelector("#searchList") as HTMLElement;
+    const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         while (target && !target.isSameNode(element)) {
@@ -485,6 +496,51 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "queryAsset") {
+                assetMethodMenu(target, () => {
+                    assetInputEvent(assetsElement, localSearch);
+                    setStorageVal(Constants.LOCAL_SEARCHASSET, localSearch);
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "filterAsset") {
+                assetFilterMenu(assetsElement);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "moreAsset") {
+                assetMoreMenu(target, assetsElement, () => {
+                    assetInputEvent(assetsElement);
+                    setStorageVal(Constants.LOCAL_SEARCHASSET, localSearch);
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "goAsset") {
+                goAsset();
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "goSearch") {
+                assetsElement.classList.add("fn__none");
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "assetPrevious") {
+                if (!target.getAttribute("disabled")) {
+                    assetInputEvent(assetsElement, localSearch, parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1]) - 1);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "assetNext") {
+                if (!target.getAttribute("disabled")) {
+                    assetInputEvent(assetsElement, localSearch, parseInt(assetsElement.querySelector("#searchAssetResult .fn__flex-center").textContent.split("/")[1]) + 1);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (type === "replace") {
                 replace(element, config, false);
                 event.stopPropagation();
@@ -501,13 +557,23 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                     newFileByName(app, searchInputElement.value);
                 } else if (target.getAttribute("data-type") === "search-item") {
                     const id = target.getAttribute("data-node-id");
-                    if (window.siyuan.mobile.editor.protyle) {
-                        preventScroll(window.siyuan.mobile.editor.protyle);
+                    if (id) {
+                        if (window.siyuan.mobile.editor.protyle) {
+                            preventScroll(window.siyuan.mobile.editor.protyle);
+                        }
+                        fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                            openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                        });
+                        closePanel();
+                    } else {
+                        if (!target.classList.contains("b3-list-item--focus")) {
+                            element.querySelector("#searchAssetList .b3-list-item--focus").classList.remove("b3-list-item--focus");
+                            target.classList.add("b3-list-item--focus");
+                            renderPreview(element.querySelector("#searchAssetPreview"), target.dataset.id, (element.querySelector("#searchAssetInput") as HTMLInputElement).value, window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method);
+                        } else if (target.classList.contains("b3-list-item--focus")) {
+                            renderNextAssetMark(element.querySelector("#searchAssetPreview"));
+                        }
                     }
-                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                        openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
-                    });
-                    closePanel();
                 } else if (target.querySelector(".b3-list-item__toggle")) {
                     target.nextElementSibling.classList.toggle("fn__none");
                     target.firstElementChild.firstElementChild.classList.toggle("b3-list-item__arrow--open");
@@ -574,8 +640,35 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
         <svg data-type="expand" class="toolbar__icon${config.group === 0 ? " fn__none" : ""}"><use xlink:href="#iconExpand"></use></svg>
         <svg data-type="contract" class="toolbar__icon${config.group === 0 ? " fn__none" : ""}"><use xlink:href="#iconContract"></use></svg>
         <svg data-type="more" class="toolbar__icon"><use xlink:href="#iconMore"></use></svg>
+        <svg data-type="goAsset" class="toolbar__icon"><use xlink:href="#iconExact"></use></svg>
         <span class="fn__flex-1"></span>
      </div>
+     <div class="fn__none fn__flex-column" style="position: fixed;top: 0;width: 100%;background: var(--b3-theme-surface);height: 100%;" id="searchAssetsPanel">
+        <div class="toolbar toolbar--border">
+            <svg class="toolbar__icon"><use xlink:href="#iconSearch"></use></svg>
+            <span class="toolbar__text"><input id="searchAssetInput" placeholder="${window.siyuan.languages.keyword}" class="toolbar__title fn__block"></span>
+            <svg class="toolbar__icon" data-type="goSearch">
+                <use xlink:href="#iconCloseRound"></use>
+            </svg>
+        </div>
+        <div class="toolbar">
+            <span class="fn__space"></span>
+            <span id="searchAssetResult" class="fn__flex-1 fn__flex"><span class="fn__flex-1"></span></span>
+            <span class="fn__space"></span>
+            <svg data-type="assetPrevious" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
+            <svg data-type="assetNext" disabled="disabled" class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
+        </div>
+        <div id="searchAssetList" style="overflow:auto;" class="fn__flex-1 b3-list b3-list--background"></div>
+        <div id="searchAssetPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px;border-bottom: 1px solid var(--b3-border-color);"></div>
+        <div class="toolbar">
+            <span class="fn__flex-1"></span>
+            <svg data-type="queryAsset" class="toolbar__icon"><use xlink:href="#iconRegex"></use></svg>
+            <svg data-type="filterAsset" class="toolbar__icon"><use xlink:href="#iconFilter"></use></svg>
+            <svg data-type="moreAsset" class="toolbar__icon"><use xlink:href="#iconMore"></use></svg>
+            <svg data-type="goSearch" class="toolbar__icon"><use xlink:href="#iconBack"></use></svg>
+            <span class="fn__flex-1"></span>
+         </div>
+    </div>
      <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         bindEvent(element) {
@@ -584,3 +677,28 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
         }
     });
 };
+
+const goAsset = () => {
+    const assetsElement = document.querySelector("#searchAssetsPanel")
+    assetsElement.classList.remove("fn__none")
+    const listElement = assetsElement.querySelector("#searchAssetList")
+    if (listElement.innerHTML) {
+        return
+    }
+    const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
+    const inputElement = assetsElement.querySelector("input")
+    inputElement.value = localSearch.k;
+    inputElement.addEventListener("compositionend", (event: InputEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        assetInputEvent(assetsElement, localSearch);
+    });
+    inputElement.addEventListener("input", (event: InputEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        assetInputEvent(assetsElement, localSearch);
+    });
+    assetInputEvent(assetsElement, localSearch);
+}

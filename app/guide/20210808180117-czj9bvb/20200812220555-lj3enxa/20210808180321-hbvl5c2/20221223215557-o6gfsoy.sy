@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
-		"updated": "20230328100253"
+		"updated": "20230820185147"
 	},
 	"Children": [
 		{
@@ -28,22 +28,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221223215621-389av1h",
-				"updated": "20221223221748"
+				"updated": "20230820185147"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "将内容块设置为闪卡后会自动通过间隔重复算法 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler",
-					"TextMarkTextContent": "FSRS"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 安排复习。"
+					"Data": "将内容块设置为闪卡后会自动通过间隔重复算法 FSRS (github repo: open-spaced-repetition/free-spaced-repetition-scheduler) 安排复习。"
 				}
 			]
 		},

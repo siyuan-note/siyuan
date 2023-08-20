@@ -74,7 +74,7 @@ func watchAssets() {
 				lastEvent = event
 				timer.Reset(time.Millisecond * 100)
 
-				if lastEvent.Op&fsnotify.Rename == fsnotify.Rename {
+				if lastEvent.Op&fsnotify.Rename == fsnotify.Rename || lastEvent.Op&fsnotify.Write == fsnotify.Write {
 					IndexAssetContent(lastEvent.Name)
 				} else if lastEvent.Op&fsnotify.Remove == fsnotify.Remove {
 					RemoveIndexAssetContent(lastEvent.Name)
@@ -87,7 +87,6 @@ func watchAssets() {
 			case <-timer.C:
 				//logging.LogInfof("assets changed: %s", lastEvent)
 				if lastEvent.Op&fsnotify.Write == fsnotify.Write {
-					// 外部修改已有资源文件后纳入云端同步 https://github.com/siyuan-note/siyuan/issues/4694
 					IncSync()
 				}
 

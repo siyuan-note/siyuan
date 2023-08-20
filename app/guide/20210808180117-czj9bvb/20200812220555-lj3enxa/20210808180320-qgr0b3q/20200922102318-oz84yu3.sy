@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20230820183933"
+		"updated": "20230820185914"
 	},
 	"Children": [
 		{
@@ -1431,40 +1431,6 @@
 			]
 		},
 		{
-			"ID": "20220125162841-7fpgtq7",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220125162841-7fpgtq7",
-				"style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);",
-				"updated": "20220224233943"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "除了可以通过 theme.css 修改样式以外，如果主题文件夹下存在 theme.js，则渲染界面时会自动加载它，这样就能够通过 JavaScript 代码来实现一些功能相关定制。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "：请勿修改编辑器 DOM，编辑器里的块应该通过"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md#%E5%9D%97",
-					"TextMarkTextContent": "块 API"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 进行操作。"
-				}
-			]
-		},
-		{
 			"ID": "20201225212401-ru1scjs",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1484,7 +1450,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114172704-ke0r60p",
-				"updated": "20230820183933"
+				"updated": "20230820185914"
 			},
 			"Children": [
 				{
@@ -1495,7 +1461,7 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
-					"TextMarkTextContent": "社区集市仓库。"
+					"TextMarkTextContent": "社区集市仓库"
 				},
 				{
 					"Type": "NodeText",

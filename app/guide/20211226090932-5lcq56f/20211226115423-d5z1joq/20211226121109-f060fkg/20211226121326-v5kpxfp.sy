@@ -1317,40 +1317,6 @@
 			]
 		},
 		{
-			"ID": "20211226121625-vxrsxjp",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226121625-vxrsxjp",
-				"style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);",
-				"updated": "20220224233905"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "除了可以通過 theme.css 修改樣式以外，如果主題文件夾下存在 theme.js，則渲染界面時會自動加載它，這樣就能夠通過 JavaScript 代碼來實現一些功能相關定制。 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "：請勿修改編輯器 DOM，編輯器裡的塊應該通過"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md#Blocks",
-					"TextMarkTextContent": "塊 API"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 進行操作。"
-				}
-			]
-		},
-		{
 			"ID": "20211226121625-3wjcf6l",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

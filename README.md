@@ -265,6 +265,10 @@ Member's privileges can only be used after payment, please refer to [Pricing](ht
 
 ## 🙏 Acknowledgement
 
+The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source code/kernel/go.mod, package.json and project homepage.
+
+The growth of SiYuan is inseparable from user feedback and promotion, thank you for everyone's help to SiYuan ❤️
+
 ### Contributors
 
 Welcome to join us and contribute code to SiYuan together.
@@ -272,56 +276,3 @@ Welcome to join us and contribute code to SiYuan together.
 <a href="https://github.com/siyuan-note/siyuan/graphs/contributors">
    <img src="https://contrib.rocks/image?repo=siyuan-note/siyuan" />
 </a>
-
-### Open source project dependencies
-
-SiYuan is made possible by the following open source projects.
-
-* [https://github.com/golang/go](https://github.com/golang/go) `BSD-3-Clause License`
-* [https://github.com/sajari/docconv](https://github.com/sajari/docconv) `MIT License`
-* [https://github.com/atotto/clipboard](https://github.com/atotto/clipboard) `BSD-3-Clause License`
-* [https://github.com/vanng822/css](https://github.com/vanng822/css) `MIT License`
-* [https://github.com/gofrs/flock](https://github.com/gofrs/flock) `BSD-3-Clause License`
-* [https://github.com/olahol/melody](https://github.com/olahol/melody) `BSD-2-Clause License`
-* [https://github.com/pdfcpu/pdfcpu](https://github.com/pdfcpu/pdfcpu) `Apache-2.0 License`
-* [https://github.com/blastrain/vitess-sqlparser](https://github.com/blastrain/vitess-sqlparser) `Apache-2.0 License`
-* [https://github.com/ConradIrwin/font](https://github.com/ConradIrwin/font) `MIT License`
-* [https://github.com/Masterminds/sprig](https://github.com/Masterminds/sprig) `MIT License`
-* [https://github.com/PuerkitoBio/goquery](https://github.com/PuerkitoBio/goquery) `BSD-3-Clause License`
-* [https://github.com/Xuanwo/go-locale](https://github.com/Xuanwo/go-locale) `Apache-2.0 License` 
-* [https://github.com/araddon/dateparse](https://github.com/araddon/dateparse) `MIT License`
-* [https://github.com/common-nighthawk/go-figure](https://github.com/common-nighthawk/go-figure) `MIT License`
-* [https://github.com/denisbrodbeck/machineid](https://github.com/denisbrodbeck/machineid) `MIT License`
-* [https://github.com/dgraph-io/ristretto](https://github.com/dgraph-io/ristretto) `Apache-2.0 License`
-* [https://github.com/dustin/go-humanize](https://github.com/dustin/go-humanize) `MIT License`
-* [https://github.com/emirpasic/gods](https://github.com/emirpasic/gods) `BSD-2-Clause License`
-* [https://github.com/facette/natsort](https://github.com/facette/natsort) `BSD-3-Clause License`
-* [https://github.com/flopp/go-findfont](https://github.com/flopp/go-findfont) `MIT License`
-* [https://github.com/fsnotify/fsnotify](https://github.com/fsnotify/fsnotify) `BSD-3-Clause License`
-* [https://github.com/gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) `MIT License`
-* [https://github.com/gin-contrib/cors](https://github.com/gin-contrib/cors) `MIT License`
-* [https://github.com/gin-contrib/gzip](https://github.com/gin-contrib/gzip) `MIT License`
-* [https://github.com/gin-contrib/sessions](https://github.com/gin-contrib/sessions) `MIT License`
-* [https://github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) `MIT License`
-* [https://github.com/go-ole/go-ole](https://github.com/go-ole/go-ole) `MIT License`
-* [https://github.com/imroc/req](https://github.com/imroc/req) `MIT License`
-* [https://github.com/jinzhu/copier](https://github.com/jinzhu/copier) `MIT License`
-* [https://github.com/mattn/go-sqlite3](https://github.com/mattn/go-sqlite3) `MIT License`
-* [https://github.com/mitchellh/go-ps](https://github.com/mitchellh/go-ps) `MIT License`
-* [https://github.com/mssola/useragent](https://github.com/mssola/useragent) `MIT License`
-* [https://github.com/panjf2000/ants](https://github.com/panjf2000/ants) `MIT License`
-* [https://github.com/patrickmn/go-cache](https://github.com/patrickmn/go-cache) `MIT License`
-* [https://github.com/radovskyb/watcher](https://github.com/radovskyb/watcher) `BSD-3-Clause License`
-* [https://github.com/sabhiram/go-gitignore](https://github.com/sabhiram/go-gitignore) `MIT License`
-* [https://github.com/steambap/captcha](https://github.com/steambap/captcha) `MIT License`
-* [https://github.com/vmihailenco/msgpack](https://github.com/vmihailenco/msgpack) `BSD-2-Clause License`
-* [https://github.com/xrash/smetrics](https://github.com/xrash/smetrics) `MIT License`
-* [https://github.com/xuri/excelize](https://github.com/xuri/excelize) `BSD-3-Clause License`
-* [https://github.com/jgm/pandoc](https://github.com/jgm/pandoc) `GPL-2.0 License`
-* [https://github.com/microsoft/TypeScript](https://github.com/microsoft/TypeScript) `Apache-2.0 License`
-* [https://github.com/electron/electron](https://github.com/electron/electron) `MIT License`
-* [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
-* [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
-* [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
-
-Complete dependencies please refer to [go.mod](https://github.com/siyuan-note/siyuan/blob/master/kernel/go.mod) and [package.json](https://github.com/siyuan-note/siyuan/blob/master/app/package.json).

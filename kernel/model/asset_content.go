@@ -286,10 +286,16 @@ func buildAssetContentOrderBy(orderBy int) string {
 
 var assetContentSearcher = NewAssetsSearcher()
 
-func IndexAssetContent(absPath string) {
+func RemoveIndexAssetContent(absPath string) {
 	defer logging.Recover()
 
 	assetsDir := util.GetDataAssetsAbsPath()
+	p := "assets" + filepath.ToSlash(strings.TrimPrefix(absPath, assetsDir))
+	sql.DeleteAssetContentsByPathQueue(p)
+}
+
+func IndexAssetContent(absPath string) {
+	defer logging.Recover()
 
 	ext := filepath.Ext(absPath)
 	parser := assetContentSearcher.GetParser(ext)
@@ -308,6 +314,7 @@ func IndexAssetContent(absPath string) {
 		return
 	}
 
+	assetsDir := util.GetDataAssetsAbsPath()
 	p := "assets" + filepath.ToSlash(strings.TrimPrefix(absPath, assetsDir))
 
 	assetContents := []*sql.AssetContent{

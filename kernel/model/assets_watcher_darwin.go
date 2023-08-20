@@ -60,8 +60,11 @@ func watchAssets() {
 				// 重新缓存资源文件，以便使用 /资源 搜索
 				go cache.LoadAssets()
 
-				// 索引资源文件内容
-				IndexAssetContent(event.Path)
+				if watcher.Remove == event.Op {
+					RemoveIndexAssetContent(event.Path)
+				} else {
+					IndexAssetContent(event.Path)
+				}
 			case err, ok := <-assetsWatcher.Error:
 				if !ok {
 					return

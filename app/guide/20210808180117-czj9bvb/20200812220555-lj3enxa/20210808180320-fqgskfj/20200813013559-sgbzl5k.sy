@@ -6,7 +6,7 @@
 		"id": "20200813013559-sgbzl5k",
 		"title": "引用内容块",
 		"type": "doc",
-		"updated": "20230518100526"
+		"updated": "20230820103525"
 	},
 	"Children": [
 		{
@@ -731,7 +731,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230420123112-keq7tik",
-				"updated": "20230420123152"
+				"updated": "20230820103525"
 			},
 			"Children": [
 				{
@@ -743,7 +743,7 @@
 					},
 					"Properties": {
 						"id": "20230420123137-dju5jji",
-						"updated": "20230420123137"
+						"updated": "20230820102949"
 					},
 					"Children": [
 						{
@@ -751,7 +751,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123137-61yxpkv",
-								"updated": "20230420123137"
+								"updated": "20230820102949"
 							},
 							"Children": [
 								{
@@ -765,7 +765,18 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 在所有类型的块中进行搜索"
+									"Data": "​​ 在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200905090211-2vixtlf",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "所有类型的块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中进行搜索"
 								}
 							]
 						}
@@ -780,7 +791,7 @@
 					},
 					"Properties": {
 						"id": "20230420123140-08i801q",
-						"updated": "20230420123152"
+						"updated": "20230820103525"
 					},
 					"Children": [
 						{
@@ -788,7 +799,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123140-ghbasee",
-								"updated": "20230420123152"
+								"updated": "20230820103525"
 							},
 							"Children": [
 								{
@@ -802,7 +813,14 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 仅在文档块中进行搜索"
+									"Data": "​ 仅搜索"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210104090624-5abfwla",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "文档块"
 								}
 							]
 						}

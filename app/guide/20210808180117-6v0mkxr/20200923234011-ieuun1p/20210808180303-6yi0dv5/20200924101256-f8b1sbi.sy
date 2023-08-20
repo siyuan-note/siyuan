@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20230518100627"
+		"updated": "20230820102811"
 	},
 	"Children": [
 		{
@@ -684,7 +684,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230420123242-7uymi9i",
-				"updated": "20230420123252"
+				"updated": "20230820102811"
 			},
 			"Children": [
 				{
@@ -696,7 +696,7 @@
 					},
 					"Properties": {
 						"id": "20230420123242-gn62yz6",
-						"updated": "20230420123242"
+						"updated": "20230820102811"
 					},
 					"Children": [
 						{
@@ -704,7 +704,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123242-sbvr7xx",
-								"updated": "20230420123242"
+								"updated": "20230820102811"
 							},
 							"Children": [
 								{
@@ -718,7 +718,14 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to search in all types of blocks"
+									"Data": "​​ to search in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924101225-k254i8g",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "all types of blocks"
 								}
 							]
 						}
@@ -733,7 +740,7 @@
 					},
 					"Properties": {
 						"id": "20230420123242-gm0o5hw",
-						"updated": "20230420123252"
+						"updated": "20230820102741"
 					},
 					"Children": [
 						{
@@ -741,7 +748,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123242-ba8ysjk",
-								"updated": "20230420123252"
+								"updated": "20230820102741"
 							},
 							"Children": [
 								{
@@ -755,7 +762,14 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to search only within doc blocks"
+									"Data": "​ to search only "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210104091538-clx67q4",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "doc blocks"
 								}
 							]
 						}

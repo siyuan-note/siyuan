@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
-		"updated": "20230630093355"
+		"updated": "20230820102920"
 	},
 	"Children": [
 		{
@@ -693,7 +693,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230420123224-9l7kdi7",
-				"updated": "20230420123224"
+				"updated": "20230820102920"
 			},
 			"Children": [
 				{
@@ -705,7 +705,7 @@
 					},
 					"Properties": {
 						"id": "20230420123224-arcczbk",
-						"updated": "20230420123224"
+						"updated": "20230820102844"
 					},
 					"Children": [
 						{
@@ -713,7 +713,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123224-fo6o8dw",
-								"updated": "20230420123224"
+								"updated": "20230820102844"
 							},
 							"Children": [
 								{
@@ -727,7 +727,18 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 在所有類型的塊中進行搜索"
+									"Data": "​​ 在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226120147-ib6yy3i",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "所有類型的塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中進行搜索"
 								}
 							]
 						}
@@ -742,7 +753,7 @@
 					},
 					"Properties": {
 						"id": "20230420123224-7ivzvzz",
-						"updated": "20230420123224"
+						"updated": "20230820102920"
 					},
 					"Children": [
 						{
@@ -750,7 +761,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123224-okegooe",
-								"updated": "20230420123224"
+								"updated": "20230820102920"
 							},
 							"Children": [
 								{
@@ -764,7 +775,14 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 僅在文檔塊中進行搜索"
+									"Data": "​ 僅搜索"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226120227-ub34qwj",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "文檔塊"
 								}
 							]
 						}

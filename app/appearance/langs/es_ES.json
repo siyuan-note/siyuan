@@ -124,7 +124,7 @@
   "attrMemoTip": "Establece una nota para este bloque, solo se admite texto sin formato",
   "switchDirect": "Cambiar dirección de comparación",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> solo buscar documentos",
-  "onlySearchForDocTip": "Después de habilitar, [[ o 【【 para buscar referencias de bloque solo en bloques de documentos",
+  "onlySearchForDocTip": "Después de habilitar, [[ o 【【 para buscar referencias de bloque solo en nombres de documentos",
   "ocrResult": "Texto de resultado de OCR",
   "reOCR": "Re-OCR",
   "continueReview1": "Continuar revisión",

@@ -124,7 +124,7 @@
   "attrMemoTip": "Set a memo for this block, only plain text is supported",
   "switchDirect": "Switch comparison direction",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> only search documents",
-  "onlySearchForDocTip": "After enabling, [[ or 【【 to search for block references only in doc blocks",
+  "onlySearchForDocTip": "After enabling, [[ or 【【 to search for block references only in doc names",
   "ocrResult": "OCR result text",
   "reOCR": "Re OCR",
   "continueReview1": "Continue Review",

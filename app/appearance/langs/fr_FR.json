@@ -124,7 +124,7 @@
   "attrMemoTip": "Définissez un mémo pour ce bloc, seul le texte brut est pris en charge",
   "switchDirect": "Changer le sens de comparaison",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> rechercher uniquement les documents",
-  "onlySearchForDocTip": "Après l'activation, [[ ou 【【 pour rechercher des références de bloc uniquement dans les blocs doc",
+  "onlySearchForDocTip": "Après l'activation, [[ ou 【【 pour rechercher des références de bloc uniquement dans les noms de documents",
   "ocrResult": "Texte du résultat OCR",
   "reOCR": "ReOCR",
   "continueReview1": "Continuer la révision",

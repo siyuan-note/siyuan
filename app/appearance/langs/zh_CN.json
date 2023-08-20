@@ -124,7 +124,7 @@
   "attrMemoTip": "为该块设置备注，仅支持纯文本",
   "switchDirect": "交换对比方向",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> 仅搜索文档",
-  "onlySearchForDocTip": "启用后使用 [[ 或 【【 搜索块引用时将只在文档块中进行搜索",
+  "onlySearchForDocTip": "启用后使用 [[ 或 【【 搜索块引用时将只在文档名中搜索",
   "ocrResult": "OCR 结果文本",
   "reOCR": "重新 OCR",
   "continueReview1": "继续复习",

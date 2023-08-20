@@ -1,6 +1,6 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByMatchTag, hasClosestByTag} from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
-import {iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
+import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {copyPlainText, updateHotkeyTip, writeText} from "../util/compatibility";
@@ -1427,22 +1427,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.general.enterBack.custom,
                 label: window.siyuan.languages.enterBack,
                 click: () => {
-                    if (!protyle.block.showAll) {
-                        const ids = protyle.path.split("/");
-                        if (ids.length > 2) {
-                            /// #if MOBILE
-                            openMobileFileById(protyle.app, ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
-                            /// #else
-                            openFileById({
-                                app: protyle.app,
-                                id: ids[ids.length - 2],
-                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                            });
-                            /// #endif
-                        }
-                    } else {
-                        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id});
-                    }
+                    enterBack(protyle, id);
                 }
             }).element);
         }

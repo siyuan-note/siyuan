@@ -43,6 +43,7 @@ import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
+import {openMobileFileById} from "../mobile/editor";
 
 export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement) => {
     const nodeElement = hasClosestBlock(refElement);
@@ -530,6 +531,25 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         });
     }
 };
+
+export const enterBack = (protyle: IProtyle, id: string) => {
+    if (!protyle.block.showAll) {
+        const ids = protyle.path.split("/");
+        if (ids.length > 2) {
+            /// #if MOBILE
+            openMobileFileById(protyle.app, ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+            /// #else
+            openFileById({
+                app: protyle.app,
+                id: ids[ids.length - 2],
+                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+            });
+            /// #endif
+        }
+    } else {
+        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id});
+    }
+}
 
 export const zoomOut = (options: {
     protyle: IProtyle,

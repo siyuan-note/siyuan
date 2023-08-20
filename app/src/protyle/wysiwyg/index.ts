@@ -21,7 +21,7 @@ import {isLocalPath, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {previewImage} from "../preview/image";
 import {
-    contentMenu,
+    contentMenu, enterBack,
     fileAnnotationRefMenu,
     imgMenu,
     linkMenu,
@@ -1933,6 +1933,7 @@ export class WYSIWYG {
                         clientY: event.clientY
                     });
                 } else if (actionElement.parentElement.classList.contains("li")) {
+                    const actionId = actionElement.parentElement.getAttribute("data-node-id")
                     if (event.altKey && !protyle.disabled) {
                         // 展开/折叠当前层级的所有列表项
                         if (actionElement.parentElement.parentElement.classList.contains("protyle-wysiwyg")) {
@@ -1964,7 +1965,7 @@ export class WYSIWYG {
                     } else if (event.shiftKey && !protyle.disabled) {
                         openAttr(actionElement.parentElement);
                     } else if (ctrlIsPressed) {
-                        zoomOut({protyle, id: actionElement.parentElement.getAttribute("data-node-id")});
+                        zoomOut({protyle, id: actionId});
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             if (!protyle.disabled) {
@@ -1977,10 +1978,14 @@ export class WYSIWYG {
                                     actionElement.parentElement.classList.add("protyle-task--done");
                                 }
                                 actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                                updateTransaction(protyle, actionElement.parentElement.getAttribute("data-node-id"), actionElement.parentElement.outerHTML, html);
+                                updateTransaction(protyle, actionId, actionElement.parentElement.outerHTML, html);
                             }
                         } else {
-                            zoomOut({protyle, id: actionElement.parentElement.getAttribute("data-node-id")});
+                            if (protyle.block.id === actionId) {
+                                enterBack(protyle, actionId);
+                            } else {
+                                zoomOut({protyle, id: actionId});
+                            }
                         }
                     }
                 }

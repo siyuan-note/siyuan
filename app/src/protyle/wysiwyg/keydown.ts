@@ -52,7 +52,7 @@ import {
     goHome,
     upSelect
 } from "./commonHotkey";
-import {fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
+import {enterBack, fileAnnotationRefMenu, linkMenu, refMenu, setFold, tagMenu, zoomOut} from "../../menus/protyle";
 import {removeEmbed} from "./removeEmbed";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -445,18 +445,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
-            if (!protyle.block.showAll) {
-                const ids = protyle.path.split("/");
-                if (ids.length > 2) {
-                    openFileById({
-                        app: protyle.app,
-                        id: ids[ids.length - 2],
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
-                    });
-                }
-            } else {
-                zoomOut({protyle, id: protyle.block.parent2ID, focusId: nodeElement.getAttribute("data-node-id")});
-            }
+            enterBack(protyle, nodeElement.getAttribute("data-node-id"));
             event.preventDefault();
             event.stopPropagation();
             return;

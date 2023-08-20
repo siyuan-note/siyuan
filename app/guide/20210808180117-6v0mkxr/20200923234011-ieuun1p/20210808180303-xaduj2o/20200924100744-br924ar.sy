@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20230801231949"
+		"updated": "20230820185510"
 	},
 	"Children": [
 		{
@@ -809,7 +809,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117003636-0buf00n",
-				"updated": "20230117003758"
+				"updated": "20230820185510"
 			},
 			"Children": [
 				{
@@ -818,8 +818,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/tesseract-ocr/tesseract",
+					"TextMarkType": "em",
 					"TextMarkTextContent": "Tesseract OCR"
 				},
 				{

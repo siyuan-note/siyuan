@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20230604120815"
+		"updated": "20230820185522"
 	},
 	"Children": [
 		{
@@ -831,7 +831,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230117002059-ssmlejt",
-				"updated": "20230117003750"
+				"updated": "20230820185522"
 			},
 			"Children": [
 				{
@@ -840,8 +840,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/tesseract-ocr/tesseract",
+					"TextMarkType": "em",
 					"TextMarkTextContent": "Tesseract OCR"
 				},
 				{

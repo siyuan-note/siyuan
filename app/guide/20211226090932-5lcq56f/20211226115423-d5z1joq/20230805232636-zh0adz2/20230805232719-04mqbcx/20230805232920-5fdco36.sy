@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232920-5fdco36",
 		"title": "搜索資源文件內容",
-		"updated": "20230818102519"
+		"updated": "20230821123201"
 	},
 	"Children": [
 		{
@@ -13,7 +13,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230818102501-pyzoppc",
-				"updated": "20230818102506"
+				"updated": "20230821123201"
 			},
 			"Children": [
 				{
@@ -27,7 +27,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 界面右上角可以將搜索功能切換到搜索資源文件內容，目前支持如下格式的資源文件內容搜索："
+					"Data": "​ 界面右上角可以將搜索功能切換到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索資源文件內容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，目前支持如下格式的資源文件內容搜索："
 				}
 			]
 		},

@@ -724,33 +724,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             copyPNG(imgElement);
         }
     }).element);
-    /// #if !BROWSER
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: "OCR",
-        submenu: [{
-            iconHTML: Constants.ZWSP,
-            label: window.siyuan.languages.reOCR,
-            click() {
-                fetchPost("/api/asset/getImageOCRText", {
-                    path: imgElement.getAttribute("src"),
-                    force: true
-                });
-            }
-        }, {
-            iconHTML: Constants.ZWSP,
-            label: `<textarea data-type="ocr" style="margin: 4px 0" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.ocrResult}"></textarea>`,
-            bind(element) {
-                fetchPost("/api/asset/getImageOCRText", {
-                    path: imgElement.getAttribute("src"),
-                    force: false
-                }, (response) => {
-                    element.querySelector("textarea").value = response.data.text;
-                });
-            }
-        }],
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem(exportAsset(imgElement.getAttribute("data-src"))).element);
-    /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconCut",
         accelerator: "⌘X",
@@ -784,6 +757,32 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             }
         }).element);
     }
+    /// #if !BROWSER
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: "OCR",
+        submenu: [{
+            iconHTML: Constants.ZWSP,
+            label: window.siyuan.languages.reOCR,
+            click() {
+                fetchPost("/api/asset/getImageOCRText", {
+                    path: imgElement.getAttribute("src"),
+                    force: true
+                });
+            }
+        }, {
+            iconHTML: Constants.ZWSP,
+            label: `<textarea data-type="ocr" style="margin: 4px 0" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.ocrResult}"></textarea>`,
+            bind(element) {
+                fetchPost("/api/asset/getImageOCRText", {
+                    path: imgElement.getAttribute("src"),
+                    force: false
+                }, (response) => {
+                    element.querySelector("textarea").value = response.data.text;
+                });
+            }
+        }],
+    }).element);
+    /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconAlignCenter",
         label: window.siyuan.languages.alignCenter,
@@ -840,6 +839,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         openMenu(protyle.app, imgSrc, false, false);
     }
+    /// #if !BROWSER
+    window.siyuan.menus.menu.append(new MenuItem(exportAsset(imgElement.getAttribute("data-src"))).element);
+    /// #endif
     if (protyle?.app?.plugins) {
         emitOpenMenu({
             plugins: protyle.app.plugins,
@@ -964,8 +966,33 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             });
         }
     }).element);
-    if (linkAddress) {
-        openMenu(protyle.app, linkAddress, false, true);
+    window.siyuan.menus.menu.append(new MenuItem({
+        icon: "iconTrashcan",
+        label: window.siyuan.languages.remove,
+        click() {
+            const oldHTML = nodeElement.outerHTML;
+            linkElement.insertAdjacentHTML("afterend", "<wbr>");
+            linkElement.remove();
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            focusByWbr(nodeElement, protyle.toolbar.range);
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
+        icon: "iconRefresh",
+        click() {
+            removeLink(linkElement, protyle.toolbar.range);
+            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+        }
+    }).element);
+    if (linkAddress?.startsWith("assets/")) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.rename,
+            click() {
+                renameAsset(linkAddress);
+            }
+        }).element);
     }
     if (linkAddress?.startsWith("siyuan://blocks/")) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -988,35 +1015,15 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             }
         }).element);
     }
-    window.siyuan.menus.menu.append(new MenuItem({
-        label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
-        icon: "iconRefresh",
-        click() {
-            removeLink(linkElement, protyle.toolbar.range);
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+    if (linkAddress) {
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element)
+        openMenu(protyle.app, linkAddress, false, true);
+        /// #if !BROWSER
+        if (linkAddress?.startsWith("assets/")) {
+            window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element)
         }
-    }).element);
-    if (linkAddress?.startsWith("assets/")) {
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.rename,
-            click() {
-                renameAsset(linkAddress);
-            }
-        }).element);
+        /// #endif
     }
-    window.siyuan.menus.menu.append(new MenuItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.remove,
-        click() {
-            const oldHTML = nodeElement.outerHTML;
-            linkElement.insertAdjacentHTML("afterend", "<wbr>");
-            linkElement.remove();
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            focusByWbr(nodeElement, protyle.toolbar.range);
-        }
-    }).element);
-
     if (protyle?.app?.plugins) {
         emitOpenMenu({
             plugins: protyle.app.plugins,
@@ -1286,13 +1293,16 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             }
         });
     }
+    const VideoSrc = videoElement.getAttribute("src");
+    if (VideoSrc) {
+        subMenus.push({
+            label: window.siyuan.languages.openBy,
+            submenu: openMenu(protyle.app, VideoSrc, true, false) as IMenu[]
+        });
+    }
     /// #if !BROWSER
     subMenus.push(exportAsset(src));
     /// #endif
-    const VideoSrc = videoElement.getAttribute("src");
-    if (VideoSrc) {
-        return subMenus.concat(openMenu(protyle.app, VideoSrc, true, false) as IMenu[]);
-    }
     return subMenus;
 };
 

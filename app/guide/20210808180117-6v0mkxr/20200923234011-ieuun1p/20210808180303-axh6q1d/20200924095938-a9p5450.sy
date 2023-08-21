@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20230820184056"
+		"updated": "20230821210921"
 	},
 	"Children": [
 		{
@@ -755,7 +755,8 @@
 				"Num": 1
 			},
 			"Properties": {
-				"id": "20201225174048-zqtzaox"
+				"id": "20201225174048-zqtzaox",
+				"updated": "20230821210921"
 			},
 			"Children": [
 				{
@@ -869,14 +870,16 @@
 						"Num": 3
 					},
 					"Properties": {
-						"id": "20201225174048-92haint"
+						"id": "20201225174048-92haint",
+						"updated": "20230821210921"
 					},
 					"Children": [
 						{
 							"ID": "20201225174048-fh16r64",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20201225174048-fh16r64"
+								"id": "20201225174048-fh16r64",
+								"updated": "20230821210921"
 							},
 							"Children": [
 								{
@@ -890,7 +893,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the opened folder, and create new "
+									"Data": "​ in the opened folder, and create new "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -899,7 +902,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " and "
+									"Data": "​ and "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -908,7 +911,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " files in "
+									"Data": "​ files in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -916,94 +919,8 @@
 									"TextMarkTextContent": "alice"
 								},
 								{
-									"Type": "NodeSoftBreak",
-									"Data": "\n"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "The "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "theme.json"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " file is as follows:"
-								}
-							]
-						},
-						{
-							"ID": "20201225174048-d4ms7ra",
-							"Type": "NodeCodeBlock",
-							"IsFencedCodeBlock": true,
-							"CodeBlockFenceChar": 96,
-							"CodeBlockFenceLen": 3,
-							"CodeBlockOpenFence": "YGBg",
-							"CodeBlockInfo": "anNvbg==",
-							"CodeBlockCloseFence": "YGBg",
-							"Properties": {
-								"id": "20201225174048-d4ms7ra"
-							},
-							"Children": [
-								{
-									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
-								},
-								{
-									"Type": "NodeCodeBlockFenceInfoMarker",
-									"CodeBlockInfo": "anNvbg=="
-								},
-								{
-									"ID": "20220307092214-d3wazmu",
-									"Type": "NodeCodeBlockCode",
-									"Data": "{\n  \"name\": \"midnight\",\n  \"author\": \"Vanessa\",\n  \"version\": \"1.0.0\",\n  \"modes\": [\"dark\"]\n}\n",
-									"Properties": {
-										"id": "20220307092214-d3wazmu"
-									}
-								},
-								{
-									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
-								}
-							]
-						},
-						{
-							"ID": "20201225174048-crkpdob",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20201225174048-crkpdob"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "modes"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " is the appearance mode, divided into "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "dark"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " and "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "light"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ". Please modify the other fields as needed."
+									"Data": "​, for specific examples, please refer to github repo: siyuan-note/theme-sample\n"
 								}
 							]
 						}

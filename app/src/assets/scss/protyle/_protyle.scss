@@ -147,19 +147,14 @@
     margin-right: 8px;
     opacity: 1;
     border: 0;
-    background-color: transparent;
-    color: var(--b3-theme-on-surface);
     line-height: 24px;
     border-radius: var(--b3-border-radius);
     align-self: center;
     padding: 0 4px;
     font-size: 12px;
     white-space: nowrap;
-
-    &:hover {
-      color: var(--b3-theme-on-background);
-      background-color: var(--b3-list-hover);
-    }
+    color: var(--b3-theme-on-background);
+    background-color: var(--b3-list-hover);
   }
 
   &__arrow {

@@ -6,7 +6,7 @@
 		"icon": "1f64f",
 		"id": "20211226114929-08ap1r0",
 		"title": "致謝",
-		"updated": "20230820180117"
+		"updated": "20230821234659"
 	},
 	"Children": [
 		{
@@ -14,12 +14,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230820175833-d4s3asp",
-				"updated": "20230820175914"
+				"updated": "20230821234659"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源的誕生離不開眾多的開源項目和貢獻者，請參考項目源代碼/kernel/go.mod、package.json 和項目首頁。"
+					"Data": "思源的誕生離不開眾多的開源項目和貢獻者，請參考項目源代碼 kernel/go.mod、app/package.json 和項目首頁。"
 				}
 			]
 		},

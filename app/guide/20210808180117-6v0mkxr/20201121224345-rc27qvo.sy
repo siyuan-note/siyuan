@@ -7,7 +7,7 @@
 		"id": "20201121224345-rc27qvo",
 		"title": "Acknowledgements",
 		"type": "doc",
-		"updated": "20230820180114"
+		"updated": "20230821234713"
 	},
 	"Children": [
 		{
@@ -15,12 +15,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230820175825-khk2ihn",
-				"updated": "20230820175917"
+				"updated": "20230821234713"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source code/kernel/go.mod, package.json and project homepage."
+					"Data": "The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source code kernel/go.mod, app/package.json and project homepage."
 				}
 			]
 		},

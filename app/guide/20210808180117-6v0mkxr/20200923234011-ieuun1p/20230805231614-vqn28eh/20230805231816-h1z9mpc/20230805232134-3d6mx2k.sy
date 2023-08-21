@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232134-3d6mx2k",
 		"title": "Search asset content",
-		"updated": "20230818102341"
+		"updated": "20230821123134"
 	},
 	"Children": [
 		{
@@ -13,7 +13,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230818102341-c9x1xox",
-				"updated": "20230818102402"
+				"updated": "20230821123134"
 			},
 			"Children": [
 				{
@@ -27,7 +27,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ interface, you can switch the search function to search asset content. Currently, asset content search in the following formats is supported:"
+					"Data": "​ interface, you can switch the search function to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search asset file content"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Currently, asset content search in the following formats is supported:"
 				}
 			]
 		},

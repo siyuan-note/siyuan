@@ -91,9 +91,6 @@ func setAI(c *gin.Context) {
 	if 0 > ai.OpenAI.APIMaxTokens {
 		ai.OpenAI.APIMaxTokens = 0
 	}
-	if 4096 < ai.OpenAI.APIMaxTokens {
-		ai.OpenAI.APIMaxTokens = 4096
-	}
 
 	model.Conf.AI = ai
 	model.Conf.Save()

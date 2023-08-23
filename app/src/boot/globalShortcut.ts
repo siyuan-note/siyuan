@@ -445,7 +445,8 @@ export const globalShortcut = (app: App) => {
         if (!event.altKey && !event.shiftKey && isCtrl(event)) {
             if (event.key === "Meta" || event.key === "Control" || event.ctrlKey || event.metaKey) {
                 window.siyuan.ctrlIsPressed = true;
-                if (window.siyuan.config.editor.floatWindowMode === 1 && !event.repeat) {
+                if ((event.key === "Meta" || event.key === "Control") &&
+                    window.siyuan.config.editor.floatWindowMode === 1 && !event.repeat) {
                     showPopover(app);
                 }
             } else {

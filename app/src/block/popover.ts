@@ -52,6 +52,10 @@ export const initBlockPopover = (app: App) => {
             if (!getTarget(event, aElement)) {
                 return;
             }
+            // https://github.com/siyuan-note/siyuan/issues/9007
+            if (event.relatedTarget && !document.contains(event.relatedTarget as Node)) {
+                return;
+            }
             if (window.siyuan.ctrlIsPressed) {
                 clearTimeout(timeoutHide);
                 showPopover(app);

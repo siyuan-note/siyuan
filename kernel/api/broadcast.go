@@ -104,7 +104,7 @@ postMessage send string message to a broadcast channel
 
 @returns
 
-	body.data.count: indicate how many clients received the message
+	body.data.count: indicate how many websocket session received the message
 */
 func postMessage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -134,6 +134,45 @@ func postMessage(c *gin.Context) {
 			ret.Msg = err.Error()
 			return
 		}
+
+		count := broadcastChannel.Len()
+		ret.Data = map[string]interface{}{
+			"count": count,
+		}
+	}
+}
+
+/*
+getListenerCount gets the number of broadcast listeners in a channel
+
+@param
+
+	body.channel: channel name
+
+@returns
+
+	body.data.count: indicate how many websocket session received the message
+*/
+func getListenerCount(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	channel := arg["channel"].(string)
+
+	if _broadcastChannel, ok := BroadcastChannels.Load(channel); !ok {
+		err := fmt.Errorf("broadcast channel [%s] not found", channel)
+		logging.LogWarnf(err.Error())
+
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	} else {
+		var broadcastChannel = _broadcastChannel.(*melody.Melody)
 
 		count := broadcastChannel.Len()
 		ret.Data = map[string]interface{}{

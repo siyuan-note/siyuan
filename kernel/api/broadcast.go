@@ -28,6 +28,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+type Channel struct {
+	Name  string `json:"name"`
+	Count int    `json:"count"`
+}
+
 var (
 	BroadcastChannels = sync.Map{}
 )
@@ -178,5 +183,33 @@ func getListenerCount(c *gin.Context) {
 		ret.Data = map[string]interface{}{
 			"count": count,
 		}
+	}
+}
+
+/*
+getChannels gets the channel name and lintener number of all broadcast chanel
+
+@returns
+
+	body.data.channels: {
+		name: channel name
+		count: listener count
+	}[]
+*/
+func getChannels(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	var channels []*Channel
+	BroadcastChannels.Range(func(key, value any) bool {
+		broadcastChannel := value.(*melody.Melody)
+		channels = append(channels, &Channel{
+			Name:  key.(string),
+			Count: broadcastChannel.Len(),
+		})
+		return true
+	})
+	ret.Data = map[string]interface{}{
+		"channels": channels,
 	}
 }

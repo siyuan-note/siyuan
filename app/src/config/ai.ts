@@ -28,7 +28,7 @@ export const ai = {
 <div class="b3-label">
     ${window.siyuan.languages.apiMaxTokens}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="0" id="apiMaxTokens" max="4096" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+    <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="0" id="apiMaxTokens" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
     <div class="b3-label__text">${window.siyuan.languages.apiMaxTokensTip}</div>
 </div>
 <div class="b3-label">
@@ -77,7 +77,7 @@ export const ai = {
         <div class="b3-label__text">${window.siyuan.languages.apiMaxTokensTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="0" id="apiMaxTokens" max="4096" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
+    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="0" id="apiMaxTokens" value="${window.siyuan.config.ai.openAI.apiMaxTokens}"/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">

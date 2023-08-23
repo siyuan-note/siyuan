@@ -57,10 +57,12 @@ func broadcast(c *gin.Context) {
 	if _broadcastChannel, exist := BroadcastChannels.Load(channel); exist {
 		// channel exists, use it
 		broadcastChannel = _broadcastChannel.(*melody.Melody)
+		subscribe(c, broadcastChannel, channel)
 	} else {
 		// channel not found, create a new one
 		broadcastChannel := melody.New()
 		BroadcastChannels.Store(channel, broadcastChannel)
+		subscribe(c, broadcastChannel, channel)
 
 		// broadcast string message to other session
 		broadcastChannel.HandleMessage(func(s *melody.Session, msg []byte) {
@@ -85,8 +87,10 @@ func broadcast(c *gin.Context) {
 			return nil
 		})
 	}
+}
 
-	// create a new websocket connect
+// subscribe creates a new websocket session to a channel
+func subscribe(c *gin.Context, broadcastChannel *melody.Melody, channel string) {
 	if err := broadcastChannel.HandleRequestWithKeys(
 		c.Writer,
 		c.Request,
@@ -109,7 +113,8 @@ postMessage send string message to a broadcast channel
 
 @returns
 
-	body.data.count: indicate how many websocket session received the message
+	body.data.channel.name: channel name
+	body.data.channel.count: indicate how many websocket session received the message
 */
 func postMessage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -142,13 +147,16 @@ func postMessage(c *gin.Context) {
 
 		count := broadcastChannel.Len()
 		ret.Data = map[string]interface{}{
-			"count": count,
+			"channel": &Channel{
+				Name:  channel,
+				Count: count,
+			},
 		}
 	}
 }
 
 /*
-getListenerCount gets the number of broadcast listeners in a channel
+getChannelInfo gets the information of a broadcast channel
 
 @param
 
@@ -156,9 +164,9 @@ getListenerCount gets the number of broadcast listeners in a channel
 
 @returns
 
-	body.data.count: indicate how many websocket session received the message
+	body.data.channel: the channel information
 */
-func getListenerCount(c *gin.Context) {
+func getChannelInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -181,7 +189,10 @@ func getListenerCount(c *gin.Context) {
 
 		count := broadcastChannel.Len()
 		ret.Data = map[string]interface{}{
-			"count": count,
+			"channel": &Channel{
+				Name:  channel,
+				Count: count,
+			},
 		}
 	}
 }

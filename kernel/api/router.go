@@ -376,5 +376,5 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("GET", "/ws/broadcast", model.CheckAuth, broadcast)
 	ginServer.Handle("GET", "/api/broadcast/channels", model.CheckAuth, getChannels)
 	ginServer.Handle("POST", "/api/broadcast/postMessage", model.CheckAuth, postMessage)
-	ginServer.Handle("POST", "/api/broadcast/getListenerCount", model.CheckAuth, getListenerCount)
+	ginServer.Handle("POST", "/api/broadcast/getChannelInfo", model.CheckAuth, getChannelInfo)
 }

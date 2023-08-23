@@ -84,6 +84,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         wbrElement.remove();
         return;
     }
+    // https://github.com/siyuan-note/siyuan/issues/9015
+    if (trimStartText === "¥¥<wbr>") {
+        editElement.innerHTML = "$$<wbr>";
+    }
     const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
     if (refElement && refElement.getAttribute("data-subtype") === "d") {
         const response = await fetchSyncPost("/api/block/getRefText", {id: refElement.getAttribute("data-id")});

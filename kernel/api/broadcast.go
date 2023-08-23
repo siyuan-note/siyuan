@@ -160,7 +160,7 @@ getChannelInfo gets the information of a broadcast channel
 
 @param
 
-	body.channel: channel name
+	body.name: channel name
 
 @returns
 
@@ -175,10 +175,10 @@ func getChannelInfo(c *gin.Context) {
 		return
 	}
 
-	channel := arg["channel"].(string)
+	name := arg["name"].(string)
 
-	if _broadcastChannel, ok := BroadcastChannels.Load(channel); !ok {
-		err := fmt.Errorf("broadcast channel [%s] not found", channel)
+	if _broadcastChannel, ok := BroadcastChannels.Load(name); !ok {
+		err := fmt.Errorf("broadcast channel [%s] not found", name)
 		logging.LogWarnf(err.Error())
 
 		ret.Code = -1
@@ -190,7 +190,7 @@ func getChannelInfo(c *gin.Context) {
 		count := broadcastChannel.Len()
 		ret.Data = map[string]interface{}{
 			"channel": &Channel{
-				Name:  channel,
+				Name:  name,
 				Count: count,
 			},
 		}

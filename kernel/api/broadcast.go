@@ -211,7 +211,7 @@ func getChannels(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	var channels []*Channel
+	channels := []*Channel{}
 	BroadcastChannels.Range(func(key, value any) bool {
 		broadcastChannel := value.(*melody.Melody)
 		channels = append(channels, &Channel{

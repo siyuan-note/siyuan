@@ -265,6 +265,12 @@ const setHTML = (options: {
     }
 
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
+        protyle.app.plugins.forEach(item => {
+            item.eventBus.emit("loaded-protyle-dynamic", {
+                protyle,
+                positon: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
+            });
+        });
         return;
     }
     if (protyle.options.render.breadcrumb) {

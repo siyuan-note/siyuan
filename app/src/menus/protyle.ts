@@ -598,12 +598,14 @@ export const zoomOut = (options: {
                 data: getResponse,
                 protyle: options.protyle,
                 action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML],
+                afterCB: options.callback
             });
         } else {
             onGet({
                 data: getResponse,
                 protyle: options.protyle,
                 action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML],
+                afterCB: options.callback
             });
         }
         // https://github.com/siyuan-note/siyuan/issues/4874
@@ -643,9 +645,6 @@ export const zoomOut = (options: {
             updateBacklinkGraph(allModels, options.protyle);
         }
         /// #endif
-        if (options.callback) {
-            options.callback();
-        }
     });
 };
 

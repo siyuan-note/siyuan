@@ -56,7 +56,7 @@ export const removeSearchMark = (element: HTMLElement) => {
         }
     }
 
-    if (element.getAttribute("data-type").includes("search-mark")) {
+    if ((element.getAttribute("data-type") || "").includes("search-mark")) {
         element.setAttribute("data-type", element.getAttribute("data-type").replace("search-mark", "").trim());
     }
 };

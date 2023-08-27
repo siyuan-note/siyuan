@@ -861,12 +861,12 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	}
 
 	// loop through ordered PDF text pages and join content for asset parse DB result
-	content := ""
+	contentBuilder := bytes.Buffer{}
 	for _, pt := range pageText {
-		content += " " + normalizeNonTxtAssetContent(pt)
+		contentBuilder.WriteString(" " + normalizeNonTxtAssetContent(pt))
 	}
 	ret = &AssetParseResult{
-		Content: content,
+		Content: contentBuilder.String(),
 	}
 	return
 }

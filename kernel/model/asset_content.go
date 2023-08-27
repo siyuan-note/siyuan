@@ -705,7 +705,7 @@ func (parser *PdfAssetParser) getTextPageWorker(id int, instance pdfium.Pdfium, 
 		doc, err := instance.OpenDocument(&requests.OpenDocument{
 			File: pd.data,
 		})
-		if err != nil {
+		if nil != err {
 			instance.FPDF_CloseDocument(&requests.FPDF_CloseDocument{
 				Document: doc.Document,
 			})
@@ -725,7 +725,7 @@ func (parser *PdfAssetParser) getTextPageWorker(id int, instance pdfium.Pdfium, 
 			},
 		}
 		res, err := instance.GetPageText(req)
-		if err != nil {
+		if nil != err {
 			instance.FPDF_CloseDocument(&requests.FPDF_CloseDocument{
 				Document: doc.Document,
 			})
@@ -778,7 +778,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		MaxIdle:  cores,
 		MaxTotal: cores,
 	})
-	if err != nil {
+	if nil != err {
 		logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
 		return
 	}
@@ -786,20 +786,20 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 
 	// first get the number of PDF pages to convert into text
 	instance, err := pool.GetInstance(time.Second * 30)
-	if err != nil {
+	if nil != err {
 		logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
 		return
 	}
 	doc, err := instance.OpenDocument(&requests.OpenDocument{
 		File: &pdfData,
 	})
-	if err != nil {
+	if nil != err {
 		instance.Close()
 		logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
 		return
 	}
 	pc, err := instance.FPDF_GetPageCount(&requests.FPDF_GetPageCount{Document: doc.Document})
-	if err != nil {
+	if nil != err {
 		instance.FPDF_CloseDocument(&requests.FPDF_CloseDocument{
 			Document: doc.Document,
 		})
@@ -820,7 +820,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	results := make(chan *pdfTextResult, pc.PageCount)
 	for i := 0; i < cores; i++ {
 		inst, err := pool.GetInstance(time.Second * 30)
-		if err != nil {
+		if nil != err {
 			close(pages)
 			close(results)
 			logging.LogErrorf("convert [%s] failed: [%s]", tmp, err)
@@ -845,7 +845,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	for p := 0; p < pc.PageCount; p++ {
 		res := <-results
 		pagetext[res.pageNo] = res.text
-		if res.err != nil {
+		if res.nil != err {
 			logging.LogErrorf("convert [%s] of page %d failed: [%s]", tmp, res.pageNo, err)
 		}
 	}

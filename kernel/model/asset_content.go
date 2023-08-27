@@ -748,7 +748,7 @@ func (parser *PdfAssetParser) getTextPageWorker(id int, instance pdfium.Pdfium, 
 
 // Parse will parse a PDF document using PDFium webassembly module using a worker pool
 func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
-	st := time.Now()
+	now := time.Now()
 	if !strings.HasSuffix(strings.ToLower(absPath), ".pdf") {
 		return
 	}
@@ -850,7 +850,10 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		}
 	}
 	close(results)
-	logging.LogInfof("convert [%s] PDF with %d pages using %d workers took %s.\n", tmp, pc.PageCount, cores, time.Since(st))
+
+	if 256 < pc.PageCount {
+		logging.LogInfof("convert [%s] PDF with [%d[ pages using [%d] workers took [%s]", absPath, pc.PageCount, cores, time.Since(now))
+	}
 
 	// loop through ordered PDF text pages and join content for asset parse DB result
 	content := ""

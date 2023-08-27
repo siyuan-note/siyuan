@@ -26,6 +26,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"code.sajari.com/docconv"
 	"github.com/88250/gulu"
@@ -513,6 +514,11 @@ func (parser *TxtAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	data, err := os.ReadFile(tmp)
 	if nil != err {
 		logging.LogErrorf("read file [%s] failed: %s", absPath, err)
+		return
+	}
+
+	if !utf8.Valid(data) {
+		// Non-UTF-8 encoded text files are not included in asset file content searching https://github.com/siyuan-note/siyuan/issues/9052
 		return
 	}
 

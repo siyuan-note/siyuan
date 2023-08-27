@@ -851,7 +851,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	}
 	close(results)
 
-	if 256 < pc.PageCount {
+	if 128 < pc.PageCount {
 		logging.LogInfof("convert [%s] PDF with [%d[ pages using [%d] workers took [%s]", absPath, pc.PageCount, cores, time.Since(now))
 	}
 

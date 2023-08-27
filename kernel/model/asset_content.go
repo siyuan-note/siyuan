@@ -846,10 +846,10 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	// finally fetch the PDF page text results
 	// Note: some workers will process pages faster than other workers depending on the page contents
 	// the order of returned PDF text pages is random and must be sorted using the pageNo index
-	pagetext := make([]string, pc.PageCount)
+	pageText := make([]string, pc.PageCount)
 	for p := 0; p < pc.PageCount; p++ {
 		res := <-results
-		pagetext[res.pageNo] = res.text
+		pageText[res.pageNo] = res.text
 		if nil != res.err {
 			logging.LogErrorf("convert [%s] of page %d failed: [%s]", tmp, res.pageNo, err)
 		}
@@ -862,7 +862,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 
 	// loop through ordered PDF text pages and join content for asset parse DB result
 	content := ""
-	for _, pt := range pagetext {
+	for _, pt := range pageText {
 		content += " " + normalizeNonTxtAssetContent(pt)
 	}
 	ret = &AssetParseResult{

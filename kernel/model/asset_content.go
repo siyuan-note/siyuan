@@ -774,6 +774,10 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	// initialize go-pdfium with number of available cores
 	// we fire up the complete worker pool for maximum performance
 	cores := runtime.NumCPU()
+	if 4 < cores {
+		cores = 4 // Limit memory usage
+	}
+
 	pool, err := webassembly.Init(webassembly.Config{
 		MinIdle:  cores,
 		MaxIdle:  cores,
@@ -853,7 +857,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	close(results)
 
 	if 128 < pc.PageCount {
-		logging.LogInfof("convert [%s] PDF with [%d[ pages using [%d] workers took [%s]", absPath, pc.PageCount, cores, time.Since(now))
+		logging.LogInfof("convert [%s] PDF with [%d] pages using [%d] workers took [%s]", absPath, pc.PageCount, cores, time.Since(now))
 	}
 
 	// loop through ordered PDF text pages and join content for asset parse DB result

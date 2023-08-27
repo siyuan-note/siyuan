@@ -845,7 +845,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	for p := 0; p < pc.PageCount; p++ {
 		res := <-results
 		pagetext[res.pageNo] = res.text
-		if res.nil != err {
+		if nil != res.err {
 			logging.LogErrorf("convert [%s] of page %d failed: [%s]", tmp, res.pageNo, err)
 		}
 	}

@@ -477,6 +477,7 @@ func NewAssetsSearcher() *AssetsSearcher {
 
 const (
 	TxtAssetContentMaxSize = 1024 * 1024 * 4
+	PDFAssetContentMaxPage = 1024
 )
 
 type AssetParseResult struct {
@@ -501,7 +502,7 @@ func (parser *TxtAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	}
 
 	if TxtAssetContentMaxSize < info.Size() {
-		logging.LogWarnf("file [%s] is too large [%s]", absPath, humanize.Bytes(uint64(info.Size())))
+		logging.LogWarnf("text asset [%s] is too large [%s]", absPath, humanize.Bytes(uint64(info.Size())))
 		return
 	}
 
@@ -519,7 +520,7 @@ func (parser *TxtAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 
 	if !utf8.Valid(data) {
 		// Non-UTF-8 encoded text files are not included in asset file content searching https://github.com/siyuan-note/siyuan/issues/9052
-		logging.LogWarnf("asset [%s] is not UTF-8 encoded", absPath)
+		logging.LogWarnf("text asset [%s] is not UTF-8 encoded", absPath)
 		return
 	}
 
@@ -809,7 +810,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	}
 	instance.Close()
 
-	if 1024 < pc.PageCount {
+	if PDFAssetContentMaxPage < pc.PageCount {
 		// PDF files longer than 1024 pages are not included in asset file content searching https://github.com/siyuan-note/siyuan/issues/9053
 		logging.LogWarnf("ignore large PDF asset [%s] with [%d] pages", absPath, pc.PageCount)
 		return

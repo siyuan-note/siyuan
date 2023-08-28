@@ -159,9 +159,11 @@ export const lineNumberRender = (block: HTMLElement) => {
     });
 
     lineNumberTemp.remove();
+    const height = block.offsetHeight;
     if (block.nextElementSibling?.classList.contains("protyle-linenumber__rows")) {
         block.nextElementSibling.innerHTML = lineNumberHTML;
+        (block.nextElementSibling as HTMLElement).style.height = height + "px";
     } else {
-        block.insertAdjacentHTML("afterend", `<span contenteditable="false" class="protyle-linenumber__rows">${lineNumberHTML}</span>`);
+        block.insertAdjacentHTML("afterend", `<span contenteditable="false" style="height:${height}px" class="protyle-linenumber__rows">${lineNumberHTML}</span>`);
     }
 };

@@ -95,7 +95,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                         // windows 需等待字体下载完成再计算，否则导致不换行，高度计算错误
                         // https://github.com/siyuan-note/siyuan/issues/9029
                         lineNumberRender(block);
-                    }, Constants.TIMEOUT_DBLCLICK);
+                    }, block.getAttribute("contenteditable") === "true" ? 0 : Constants.TIMEOUT_DBLCLICK);
                     if (languageElement) {
                         languageElement.style.marginLeft = "3.6em";
                     }

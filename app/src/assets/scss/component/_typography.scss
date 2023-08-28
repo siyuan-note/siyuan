@@ -239,6 +239,7 @@
   code:not(.hljs),
   span[data-type~="code"] {
     @extend .fn__code;
+    tab-size: 4;
   }
 
   a[href^=pdf-outline] {
@@ -302,6 +303,7 @@
     font-family: var(--b3-font-family-code);
     min-height: 22px !important;
     overflow-x: overlay;
+    tab-size: 4;
 
     &.protyle-linenumber {
       border-top-left-radius: 0;

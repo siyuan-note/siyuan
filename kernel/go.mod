@@ -59,7 +59,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/wmentor/epub v1.0.1
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
-	github.com/xuri/excelize/v2 v2.7.1
+	github.com/xuri/excelize/v2 v2.8.0
 	golang.org/x/image v0.11.0
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda
 	golang.org/x/mod v0.12.0

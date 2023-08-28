@@ -774,6 +774,10 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	// initialize go-pdfium with number of available cores
 	// we fire up the complete worker pool for maximum performance
 	cores := runtime.NumCPU()
+	if 4 < cores {
+		cores = 4 // Limit memory usage
+	}
+
 	pool, err := webassembly.Init(webassembly.Config{
 		MinIdle:  cores,
 		MaxIdle:  cores,
@@ -842,10 +846,10 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	// finally fetch the PDF page text results
 	// Note: some workers will process pages faster than other workers depending on the page contents
 	// the order of returned PDF text pages is random and must be sorted using the pageNo index
-	pagetext := make([]string, pc.PageCount)
+	pageText := make([]string, pc.PageCount)
 	for p := 0; p < pc.PageCount; p++ {
 		res := <-results
-		pagetext[res.pageNo] = res.text
+		pageText[res.pageNo] = res.text
 		if nil != res.err {
 			logging.LogErrorf("convert [%s] of page %d failed: [%s]", tmp, res.pageNo, err)
 		}
@@ -853,16 +857,16 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	close(results)
 
 	if 128 < pc.PageCount {
-		logging.LogInfof("convert [%s] PDF with [%d[ pages using [%d] workers took [%s]", absPath, pc.PageCount, cores, time.Since(now))
+		logging.LogInfof("convert [%s] PDF with [%d] pages using [%d] workers took [%s]", absPath, pc.PageCount, cores, time.Since(now))
 	}
 
 	// loop through ordered PDF text pages and join content for asset parse DB result
-	content := ""
-	for _, pt := range pagetext {
-		content += " " + normalizeNonTxtAssetContent(pt)
+	contentBuilder := bytes.Buffer{}
+	for _, pt := range pageText {
+		contentBuilder.WriteString(" " + normalizeNonTxtAssetContent(pt))
 	}
 	ret = &AssetParseResult{
-		Content: content,
+		Content: contentBuilder.String(),
 	}
 	return
 }

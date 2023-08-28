@@ -333,7 +333,7 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle) =
     });
 }
 
-const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation) => {
+const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation, focus: boolean) => {
     updateElements.forEach(item => {
         item.outerHTML = operation.data;
     });
@@ -444,7 +444,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
     }
     if (operation.action === "update") {
         if (updateElements.length > 0) {
-            updateBlock(updateElements, protyle, operation);
+            updateBlock(updateElements, protyle, operation, focus);
         } else {
             zoomOut({
                 protyle,
@@ -457,7 +457,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: b
                             updateElements.push(item);
                         }
                     });
-                    updateBlock(updateElements, protyle, operation);
+                    updateBlock(updateElements, protyle, operation, focus);
                 }
             });
         }

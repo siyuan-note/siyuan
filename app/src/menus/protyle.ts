@@ -549,7 +549,7 @@ export const enterBack = (protyle: IProtyle, id: string) => {
     } else {
         zoomOut({protyle, id: protyle.block.parent2ID, focusId: id});
     }
-}
+};
 
 export const zoomOut = (options: {
     protyle: IProtyle,
@@ -1015,11 +1015,11 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         }).element);
     }
     if (linkAddress) {
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element)
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         openMenu(protyle.app, linkAddress, false, true);
         /// #if !BROWSER
         if (linkAddress?.startsWith("assets/")) {
-            window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element)
+            window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
         }
         /// #endif
     }

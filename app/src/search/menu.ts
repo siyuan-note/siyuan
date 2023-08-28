@@ -286,7 +286,7 @@ export const saveCriterion = (config: ISearchOption,
                         }
                     });
                     saveCriterionData(config, criteriaData, element, value, saveDialog);
-                })
+                });
             }
         } else if (!hasSameName && hasSameConfig) {
             confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", hasSameConfig).replace("${y}", value), () => {
@@ -458,10 +458,10 @@ const configIsSame = (config: ISearchOption, config2: ISearchOption) => {
     if (config2.group === config.group && config2.hPath === config.hPath && config2.hasReplace === config.hasReplace &&
         config2.k === config.k && config2.method === config.method && config2.r === config.r &&
         config2.sort === config.sort && objEquals(config2.types, config.types) && objEquals(config2.idPath, config.idPath)) {
-        return true
+        return true;
     }
-    return false
-}
+    return false;
+};
 
 export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[], config: ISearchOption) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {

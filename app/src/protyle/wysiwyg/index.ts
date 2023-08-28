@@ -1935,7 +1935,7 @@ export class WYSIWYG {
                         clientY: event.clientY
                     });
                 } else if (actionElement.parentElement.classList.contains("li")) {
-                    const actionId = actionElement.parentElement.getAttribute("data-node-id")
+                    const actionId = actionElement.parentElement.getAttribute("data-node-id");
                     if (event.altKey && !protyle.disabled) {
                         // 展开/折叠当前层级的所有列表项
                         if (actionElement.parentElement.parentElement.classList.contains("protyle-wysiwyg")) {

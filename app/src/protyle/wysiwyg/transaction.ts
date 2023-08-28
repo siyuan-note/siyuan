@@ -331,7 +331,7 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle) =
             blockRender(protyle, item);
         }
     });
-}
+};
 
 const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation, focus: boolean) => {
     updateElements.forEach(item => {
@@ -363,7 +363,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
     updateEmbed(protyle, operation);
     // 更新 ws 引用块
     updateRef(protyle, operation.id);
-}
+};
 
 // 用于推送和撤销
 export const onTransaction = (protyle: IProtyle, operation: IOperation, focus: boolean) => {

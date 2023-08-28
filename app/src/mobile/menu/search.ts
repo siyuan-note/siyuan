@@ -21,9 +21,7 @@ import {
     assetMethodMenu, assetMoreMenu,
     renderNextAssetMark,
     renderPreview,
-    toggleAssetHistory
 } from "../../search/assets";
-import {getQueryTip} from "../../search/util";
 
 const replace = (element: Element, config: ISearchOption, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -288,7 +286,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
     const criteriaData: ISearchOption[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
 
-    const assetsElement = document.querySelector("#searchAssetsPanel")
+    const assetsElement = document.querySelector("#searchAssetsPanel");
     const searchListElement = element.querySelector("#searchList") as HTMLElement;
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     element.addEventListener("click", (event: MouseEvent) => {
@@ -679,14 +677,14 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
 };
 
 const goAsset = () => {
-    const assetsElement = document.querySelector("#searchAssetsPanel")
-    assetsElement.classList.remove("fn__none")
-    const listElement = assetsElement.querySelector("#searchAssetList")
+    const assetsElement = document.querySelector("#searchAssetsPanel");
+    assetsElement.classList.remove("fn__none");
+    const listElement = assetsElement.querySelector("#searchAssetList");
     if (listElement.innerHTML) {
-        return
+        return;
     }
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
-    const inputElement = assetsElement.querySelector("input")
+    const inputElement = assetsElement.querySelector("input");
     inputElement.value = localSearch.k;
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         if (event.isComposing) {
@@ -701,4 +699,4 @@ const goAsset = () => {
         assetInputEvent(assetsElement, localSearch);
     });
     assetInputEvent(assetsElement, localSearch);
-}
+};

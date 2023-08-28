@@ -23,11 +23,7 @@ import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {cancelSB, insertEmptyBlock, jumpToParentNext} from "../../block/util";
 import {countBlockWord} from "../../layout/status";
-/// #if !MOBILE
-import {openFileById} from "../../editor/util";
-/// #endif
 import {Constants} from "../../constants";
-import {openMobileFileById} from "../../mobile/editor";
 import {mathRender} from "../render/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {movePathTo} from "../../util/pathName";

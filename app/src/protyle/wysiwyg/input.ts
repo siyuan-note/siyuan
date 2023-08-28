@@ -85,7 +85,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         return;
     }
     // https://github.com/siyuan-note/siyuan/issues/9015
-    if (trimStartText === "¥¥<wbr>") {
+    if (trimStartText === "¥¥<wbr>" || trimStartText === "￥￥<wbr>") {
         editElement.innerHTML = "$$<wbr>";
     }
     const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");

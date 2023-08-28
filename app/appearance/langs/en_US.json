@@ -1,4 +1,5 @@
 {
+  "mainMenu": "Main Menu",
   "searchRemoveName": "Do you want to delete ${x} and assign its query condition to ${y}?",
   "searchUpdateName": "Update name ${x} to ${y}?",
   "searchAssetContent": "Search asset file content",

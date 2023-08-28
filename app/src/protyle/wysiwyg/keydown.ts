@@ -151,8 +151,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             range = cloneRange;
         }
 
-        if (bindMenuKeydown(event)) {
-            event.stopPropagation();
+        if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+            (event.code.startsWith("Arrow") || event.code === "Enter") &&
+            !event.altKey && !event.shiftKey && !isCtrl(event)) {
             event.preventDefault();
             return;
         } else if (event.key !== "Escape") {

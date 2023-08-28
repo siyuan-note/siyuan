@@ -212,6 +212,7 @@ export abstract class Constants {
     // "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦" 不可自定义
     public static readonly SIYUAN_KEYMAP: IKeymap = {
         general: {
+            mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},
             editMode: {default: "⇧⌘G", custom: "⇧⌘G"},
             syncNow: {default: "F9", custom: "F9"},

@@ -1,4 +1,5 @@
 {
+  "mainMenu": "Menú principal",
   "searchRemoveName": "¿Desea eliminar ${x} y asignar su condición de consulta a ${y}?",
   "searchUpdateName": "¿Actualizar nombre ${x} a ${y}?",
   "searchAssetContent": "Buscar contenido del archivo de activos",

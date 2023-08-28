@@ -1,4 +1,5 @@
 {
+  "mainMenu": "Menu principal",
   "searchRemoveName": "Voulez-vous supprimer ${x} et affecter sa condition de requête à ${y} ?",
   "searchUpdateName": "Mettre à jour le nom ${x} en ${y} ?",
   "searchAssetContent": "Rechercher le contenu du fichier d'actif",

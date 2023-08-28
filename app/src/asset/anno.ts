@@ -4,14 +4,10 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasC
 import * as dayjs from "dayjs";
 import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
-/// #if !BROWSER
-import {NativeImage} from "electron";
-import {getCurrentWindow} from "@electron/remote";
-/// #endif
 import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
 
-export const initAnno = (file: string, element: HTMLElement, annoId: string, pdf: any, pdfConfig: any) => {
+export const initAnno = (element: HTMLElement, pdf: any, pdfConfig: any) => {
     getConfig(pdf);
     const rectAnnoElement = pdfConfig.toolbar.rectAnno;
     rectAnnoElement.addEventListener("click", () => {
@@ -614,15 +610,13 @@ export const hlPDFRect = (element: HTMLElement, id: string) => {
     }
 };
 
-const copyAnno = (idPath: string, fileName: string, pdf:any) => {
+const copyAnno = (idPath: string, fileName: string, pdf: any) => {
     const mode = rectElement.getAttribute("data-mode");
     const content = rectElement.getAttribute("data-content");
     setTimeout(() => {
-        /// #if !BROWSER
         if (mode === "rect" ||
             (mode === "" && rectElement.childElementCount === 1 && content.startsWith(fileName)) // 兼容历史，以前没有 mode
         ) {
-            // const rect = rectElement.firstElementChild.getBoundingClientRect();
             getRectImgData(pdf).then((imageDataURL: string) => {
                 fetch(imageDataURL).then((response) => {
                     return response.blob();
@@ -639,119 +633,72 @@ const copyAnno = (idPath: string, fileName: string, pdf:any) => {
         } else {
             writeText(`<<${idPath} "${content}">>`);
         }
-        /// #else
-        writeText(`<<${idPath} "${content}">>`);
-        /// #endif
     }, Constants.TIMEOUT_DBLCLICK);
 };
 
-async function getRectImgData(pdfObj: any) {
-    let captureScale = getCaptureScale(pdfObj)
-    let rect = (rectElement.firstElementChild as HTMLElement)
-    let pageElement = getPage(rect)
-    let canvas = getCanvas(pageElement)
-    let scale = getScale(canvas)
-    let CaptureLocation = getCaptureTargetLocation(rect, scale, captureScale, pdfObj)
-    let pdfPage = await getPdfPage(pdfObj, pageElement)
-    let captureCanvas = await getCaptureCanvas(pdfPage, captureScale)
-    let captureImageData = getCaptureImageData(captureCanvas, CaptureLocation)
-    let DataURL = getDataURLFromImgData(captureImageData)
-    return DataURL
-}
 
-
-function getCaptureScale(pdfObj: any) {
-    return pdfObj.pdfViewer.currentScale + 2
-}
-
-
-function getPage(element: HTMLElement) {
-    if (element.classList.contains("page")) {
-        return element
+const getPage = (element: Element): Element | null => {
+    if (!element) {
+        return null;
+    } else if (element.classList.contains("page")) {
+        return element;
     }
-    return getPage(element.parentElement)
+    return getPage(element.parentElement);
 }
 
-function getCanvas(pageElement: HTMLElement): HTMLCanvasElement | null {
-    return pageElement.querySelector(".canvasWrapper canvas")
-}
-
-
-function getDataURLFromImgData(imgData: ImageData) {
-    let tempCanvas = document.createElement("canvas")
-    tempCanvas.width = imgData.width
-    tempCanvas.height = imgData.height
-    let ctx = tempCanvas.getContext("2d")
-    ctx.putImageData(imgData, 0, 0)
-    return tempCanvas.toDataURL();
-}
-
-function getScale(canvas: HTMLCanvasElement) {
-    let width = canvas.width
-    let trueWith = canvas.getBoundingClientRect().width
-    if (trueWith <= 0) {
-        return window.devicePixelRatio || 1;
-    }
-    else {
-        return width / trueWith
-    }
-}
-
-function getPdfPage(pdfObj: any, pageElement: HTMLElement) {
-    let pageNumber = parseInt(pageElement.getAttribute("data-page-number"))
-    return pdfObj.pdfDocument.getPage(pageNumber)
-}
-
-async function getCaptureCanvas(page: any, captureScale: number) {
-    var scale = captureScale;
-    var pdfjsLib = require("./pdf/pdfjs")
-    var viewport = page.getViewport({ scale: scale * pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS, });
+const getCaptureCanvas = async (page: any, captureScale: number) => {
+    const viewport = page.getViewport({scale: captureScale * window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS});
     // Support HiDPI-screens.
-    var outputScale = window.devicePixelRatio || 1;
+    const outputScale = window.devicePixelRatio || 1;
 
-    var canvas = document.createElement("canvas")
-    var context = canvas.getContext('2d');
-
+    const canvas = document.createElement("canvas")
     canvas.width = Math.floor(viewport.width * outputScale);
     canvas.height = Math.floor(viewport.height * outputScale);
     canvas.style.width = Math.floor(viewport.width) + "px";
     canvas.style.height = Math.floor(viewport.height) + "px";
 
-    var transform = outputScale !== 1
-        ? [outputScale, 0, 0, outputScale, 0, 0]
-        : null;
-
-    var renderContext = {
-        canvasContext: context,
-        transform: transform,
+    await page.render({
+        canvasContext: canvas.getContext('2d'),
+        transform: outputScale !== 1
+            ? [outputScale, 0, 0, outputScale, 0, 0]
+            : null,
         viewport: viewport
-    };
-    await page.render(renderContext).promise;
+    }).promise;
+
     return canvas
 }
 
-type CaptureLocation = {
-    width: number,
-    height: number,
-    top: number,
-    left: number
-}
+async function getRectImgData(pdfObj: any) {
+    const pageElement = getPage(rectElement.firstElementChild)
+    if (!pageElement) {
+        return
+    }
+    const cavasElement = pageElement.querySelector(".canvasWrapper canvas") as HTMLCanvasElement
+    let scale;
+    const trueWith = cavasElement.getBoundingClientRect().width
+    if (trueWith <= 0) {
+        scale = window.devicePixelRatio || 1;
+    } else {
+        scale = cavasElement.width / trueWith
+    }
+    const rectStyle = (rectElement.firstElementChild as HTMLElement).style
+    const captureLocation = {
+        width: scale * parseFloat(rectStyle.width),
+        height: scale * parseFloat(rectStyle.height),
+        top: scale * parseFloat(rectStyle.top),
+        left: scale * parseFloat(rectStyle.left),
+    }
 
-function getCaptureTargetLocation(rect: HTMLElement, scale: number, captureScale: number, pdfObj: any) {
-    let captureLocation = {} as CaptureLocation;
-    let currentScale = pdfObj.pdfViewer.currentScale
-    captureLocation.width = captureScale / currentScale * scale * parseFloat(rect.style.width)
-    captureLocation.height = captureScale / currentScale * scale * parseFloat(rect.style.height)
-    captureLocation.top = captureScale / currentScale * scale * parseFloat(rect.style.top)
-    captureLocation.left = captureScale / currentScale * scale * parseFloat(rect.style.left)
-    return captureLocation
-}
+    const pdfPage = await pdfObj.pdfDocument.getPage(parseInt(pageElement.getAttribute("data-page-number")))
+    const captureCanvas = await getCaptureCanvas(pdfPage, pdfObj.pdfViewer.currentScale);
+    const captureImageData = captureCanvas.getContext("2d").getImageData(captureLocation.left, captureLocation.top, captureLocation.width, captureLocation.height)
 
-
-function getCaptureImageData(captureCanvas: HTMLCanvasElement, captureLocation: CaptureLocation) {
-    let ctx = captureCanvas.getContext("2d")
-    let img = ctx.getImageData(captureLocation.left, captureLocation.top, captureLocation.width, captureLocation.height)
-    return img
+    const tempCanvas = document.createElement("canvas")
+    tempCanvas.width = captureImageData.width
+    tempCanvas.height = captureImageData.height
+    const ctx = tempCanvas.getContext("2d")
+    ctx.putImageData(captureImageData, 0, 0)
+    return tempCanvas.toDataURL();
 }
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {

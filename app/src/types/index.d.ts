@@ -79,6 +79,7 @@ type TAVFilterOperator =
 declare module "blueimp-md5"
 
 interface Window {
+    pdfjsLib: any
     dataLayer: any[]
     siyuan: ISiyuan
     webkit: any

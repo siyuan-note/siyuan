@@ -7,7 +7,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
 	github.com/88250/gulu v1.2.3-0.20230615033005-b519d6875346
-	github.com/88250/lute v1.7.6-0.20230825024657-6aaf62ba0c5f
+	github.com/88250/lute v1.7.6-0.20230828091650-fcb96f789c8f
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20230727142813-c94579738c5b
@@ -33,7 +33,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/flock v0.8.1
 	github.com/gorilla/websocket v1.5.0
-	github.com/imroc/req/v3 v3.41.7
+	github.com/imroc/req/v3 v3.41.8
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/klippa-app/go-pdfium v1.7.0
@@ -47,11 +47,11 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-openai v1.14.2
 	github.com/shirou/gopsutil/v3 v3.23.7
-	github.com/siyuan-note/dejavu v0.0.0-20230827093240-236ee9cf8c30
+	github.com/siyuan-note/dejavu v0.0.0-20230828092709-8829d35e88f7
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
 	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524
-	github.com/siyuan-note/httpclient v0.0.0-20230827092931-dfa68ac1958d
+	github.com/siyuan-note/httpclient v0.0.0-20230828092314-a81a23f8c0bd
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230728105206-f7c344346d61
 	github.com/steambap/captcha v1.4.1
@@ -81,6 +81,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fatih/set v0.2.1 // indirect
@@ -134,7 +135,7 @@ require (
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/qtls-go1-20 v0.3.3 // indirect
 	github.com/quic-go/quic-go v0.38.1 // indirect
-	github.com/refraction-networking/utls v1.4.3 // indirect
+	github.com/refraction-networking/utls v1.5.0 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect

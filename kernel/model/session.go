@@ -195,7 +195,7 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	// 通过 API token
+	// 通过 API token (header: Authorization)
 	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
 		if strings.HasPrefix(authHeader, "Token ") {
 			token := strings.TrimPrefix(authHeader, "Token ")
@@ -208,6 +208,18 @@ func CheckAuth(c *gin.Context) {
 			c.Abort()
 			return
 		}
+	}
+
+	// 通过 API token (query-params: token)
+	if token := c.Query("token"); "" != token {
+		if Conf.Api.Token == token {
+			c.Next()
+			return
+		}
+
+		c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+		c.Abort()
+		return
 	}
 
 	if "/check-auth" == c.Request.URL.Path { // 跳过访问授权页

@@ -421,17 +421,32 @@
 
         // macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
         const path = require('path')
-        const iCloudRoot = path.join(decodeURIComponent(getSearch('home')), 'Library', 'Mobile Documents')
-        const allFiles = walk(iCloudRoot)
+        const homePath =  decodeURIComponent(getSearch('home'))
         const absPathLower = absPath.toLowerCase()
-        for (const file of allFiles) {
-            if (-1 < absPathLower.indexOf(file.toLowerCase())) {
-                return true
+        const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
+        //进行简单判断文件路径
+        if(!simpleCheckPath(absPath, iCloudRoot)){
+            //简单判断无法通过则复杂验证
+            const allFiles = walk(iCloudRoot)
+            for (const file of allFiles) {
+                if (-1 < absPathLower.indexOf(file.toLowerCase())) {
+                    return true
+                }
             }
-        }
+        }      
         return false
     }
+    const simpleCheckPath =(path, iCloudRoot)=>{
+        const fs = require('fs')
+        let stat = fs.lstatSync(path)
+        if(stat.isSymbolicLink()){
+            // 不允许目标路径是软链 或者硬链接
+            return false
+        }
+        const absPathLower = path.toLowerCase()
+        return !(-1 < absPathLower.indexOf(iCloudRoot.toLowerCase()))
 
+    }
     const walk = (dir, files = []) => {
         let dirFiles;
         const fs = require('fs')
@@ -440,7 +455,6 @@
                 console.log("dir [" + dir + "] not exists")
                 return files
             }
-
             dirFiles = fs.readdirSync(dir)
         } catch (e) {
             console.error("read dir [" + dir + "] failed: ", e)
@@ -459,9 +473,11 @@
                 if (files.includes(dir + path.sep + f)) {
                     continue
                 }
+                files.push(dir + path.sep + f)
                 walk(dir + path.sep + f, files)
             } else {
-                files.push(dir + path.sep + f)
+                //不在添加文件到过滤路径 最小细粒度为目录
+                //files.push(dir + path.sep + f)
             }
         }
         return files

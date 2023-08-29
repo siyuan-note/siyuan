@@ -424,8 +424,7 @@
         const homePath =  decodeURIComponent(getSearch('home'))
         const absPathLower = absPath.toLowerCase()
         const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
-        //进行简单判断文件路径
-        if(!simpleCheckPath(absPath, iCloudRoot)){
+        if(!simpleCheckIcloudPath(absPath, homePath)){
             //简单判断无法通过则复杂验证
             const allFiles = walk(iCloudRoot)
             for (const file of allFiles) {
@@ -436,15 +435,29 @@
         }      
         return false
     }
-    const simpleCheckPath =(path, iCloudRoot)=>{
+    //简单判断Icloud同步目录
+    //不允许 为桌面 文档 和 icloud 文件夹 和软链接
+    const simpleCheckIcloudPath =(absPath, homePath)=>{
         const fs = require('fs')
-        let stat = fs.lstatSync(path)
+        let stat = fs.lstatSync(absPath)
         if(stat.isSymbolicLink()){
-            // 不允许目标路径是软链 或者硬链接
             return false
         }
-        const absPathLower = path.toLowerCase()
-        return !(-1 < absPathLower.indexOf(iCloudRoot.toLowerCase()))
+        const path = require('path')
+        const absPathLower = absPath.toLowerCase()
+        const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
+        if(absPathLower.startsWith(iCloudRoot.toLowerCase())){
+            return false
+        }
+        const documentsRoot = path.join(homePath, 'Documents')
+        if (absPathLower.startsWith(documentsRoot.toLowerCase())) {
+            return false
+        }
+        const desktopRoot = path.join(homePath, 'Desktop')
+        if (absPathLower.startsWith(desktopRoot.toLowerCase())) {
+            return false
+        }
+        return  true
 
     }
     const walk = (dir, files = []) => {
@@ -475,9 +488,6 @@
                 }
                 files.push(dir + path.sep + f)
                 walk(dir + path.sep + f, files)
-            } else {
-                //不在添加文件到过滤路径 最小细粒度为目录
-                //files.push(dir + path.sep + f)
             }
         }
         return files

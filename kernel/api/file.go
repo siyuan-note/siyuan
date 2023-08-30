@@ -84,6 +84,7 @@ func getFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
+		ret.Code = -1
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}

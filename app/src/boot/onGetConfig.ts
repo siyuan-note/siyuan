@@ -10,7 +10,6 @@ import {onWindowsMsg} from "../window/onWindowsMsg";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
-import {globalShortcut} from "../boot/globalShortcut";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {addGA, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
@@ -27,6 +26,7 @@ import {setProxy} from "../config/util/about";
 import {openChangelog} from "./openChangelog";
 import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 import {App} from "../index";
+import {initWindowEvent} from "./globalEvent/event";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -131,7 +131,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
         window.siyuan.config.uiLayout = Constants.SIYUAN_EMPTY_LAYOUT;
     }
-    globalShortcut(app);
+    initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {

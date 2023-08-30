@@ -1410,7 +1410,7 @@ export class WYSIWYG {
             }
             const nodeElement = hasClosestBlock(event.target);
             if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
-                // 光标在列表下部应显示右侧的元素，而不是列表本身。放在 globalShortcut 中的 mousemove 下处理
+                // 光标在列表下部应显示右侧的元素，而不是列表本身。放在 windowEvent 中的 mousemove 下处理
                 return;
             }
             if (nodeElement) {

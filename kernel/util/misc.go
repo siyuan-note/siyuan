@@ -45,9 +45,6 @@ func EscapeHTML(s string) string {
 	if strings.ContainsAny(s, "<>\"'") {
 		return html.EscapeString(s)
 	}
-	if strings.Contains(s, "&amp;") || strings.Contains(s, "&quot;") || strings.Contains(s, "&lt;") || strings.Contains(s, "&gt;") || strings.Contains(s, "&#39;") || strings.Contains(s, "&apos;") {
-		return s
-	}
 	return s
 }
 

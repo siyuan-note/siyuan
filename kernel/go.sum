@@ -55,6 +55,8 @@ github.com/88250/clipboard v0.1.5 h1:V/mCiSrjwmIiJwvchGTs+W2ozdINxk7y7KgHNTSzlCI
 github.com/88250/clipboard v0.1.5/go.mod h1:bNLJx4L8cF6fEgiXMPVrK1Iidnaff8BTkktTNtefcks=
 github.com/88250/css v0.1.2 h1:+AADhEwWoGZFbUjqIsBcdnq2xfj8fDFDAGRXhBUhUY8=
 github.com/88250/css v0.1.2/go.mod h1:XfcZHQ0YuUb9VncVBurQfVyw1ZQicsB5Gc9N7BK3/ig=
+github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48 h1:qiE88Pw/9GG8hvMfpfB4aUhnIikZTwG+Z/Xbn0a9R14=
+github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48/go.mod h1:UgVSq5iO9pOvqs3hIGNVk6WXDiAB0v3Dlg4nssQJ7W4=
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5 h1:8HdZozCsXSiEXYAo8Zbi/r2Ld6Dd4MmGHgir3EaSuHQ=
 github.com/88250/go-sqlite3 v1.14.13-0.20220714142610-fbbda1ee84f5/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20230615033005-b519d6875346 h1:U0wZN6zuf+vUhzdHC6DbZE/bY5FUt3FuCwn/KgObV44=
@@ -577,8 +579,6 @@ github.com/vmihailenco/msgpack/v5 v5.3.5 h1:5gO0H1iULLWGhs2H5tbAHIZTV8/cYafcFOr9
 github.com/vmihailenco/msgpack/v5 v5.3.5/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
-github.com/wmentor/epub v1.0.1 h1:88Jod0B9g+7NxdbAHhmE/qHnK+i4Ns/NJjeyQ/V8YwI=
-github.com/wmentor/epub v1.0.1/go.mod h1:PydFqUA+hmJ9g1lI/3XRYAK2TPC5WVFEZh7lkV9ETtM=
 github.com/wmentor/html v1.0.1 h1:iIuDyH7pohHMMzdD5WQhvya5UyIecFDWTYzdM873Ook=
 github.com/wmentor/html v1.0.1/go.mod h1:nwnrzqG0xD0Q1mO+a4iNfgh40K8/tFuq6smFlHOBu10=
 github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 h1:bAn7/zixMGCfxrRTfdpNzjtPYqr8smhKouy9mxVdGPU=

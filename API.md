@@ -993,12 +993,12 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 * Return value
 
     * Response status code `200`: File content
-    * Response status code `204`: Exception information
+    * Response status code `202`: Exception information
 
-      ```typescript
+      ```json
       {
-        "code": number,
-        "msg": string,
+        "code": 404,
+        "msg": "",
         "data": null
       }
       ```

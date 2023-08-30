@@ -6,6 +6,7 @@ require (
 	code.sajari.com/docconv v1.3.5
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/css v0.1.2
+	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/gulu v1.2.3-0.20230615033005-b519d6875346
 	github.com/88250/lute v1.7.6-0.20230828091650-fcb96f789c8f
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
@@ -57,7 +58,6 @@ require (
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	github.com/wmentor/epub v1.0.1
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	github.com/xuri/excelize/v2 v2.8.0
 	golang.org/x/image v0.11.0
@@ -177,3 +177,4 @@ replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20
 //replace github.com/88250/pdfcpu => D:\88250\pdfcpu
 //replace github.com/88250/gulu => D:\88250\gulu
 //replace github.com/mattn/go-sqlite3 => D:\88250\go-sqlite3
+//replace github.com/88250/epub => D:\88250\epub

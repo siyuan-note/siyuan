@@ -29,6 +29,7 @@ import (
 	"unicode/utf8"
 
 	"code.sajari.com/docconv"
+	"github.com/88250/epub"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/dustin/go-humanize"
@@ -42,7 +43,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"github.com/wmentor/epub"
 	"github.com/xuri/excelize/v2"
 )
 

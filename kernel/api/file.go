@@ -84,7 +84,7 @@ func getFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
-		c.JSON(http.StatusOK, ret)
+		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 
@@ -93,21 +93,21 @@ func getFile(c *gin.Context) {
 	info, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
 		ret.Code = 404
-		c.JSON(http.StatusOK, ret)
+		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 	if nil != err {
 		logging.LogErrorf("stat [%s] failed: %s", filePath, err)
 		ret.Code = 500
 		ret.Msg = err.Error()
-		c.JSON(http.StatusOK, ret)
+		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 	if info.IsDir() {
 		logging.LogErrorf("file [%s] is a directory", filePath)
 		ret.Code = 405
 		ret.Msg = "file is a directory"
-		c.JSON(http.StatusOK, ret)
+		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 
@@ -116,7 +116,7 @@ func getFile(c *gin.Context) {
 		logging.LogErrorf("read file [%s] failed: %s", filePath, err)
 		ret.Code = 500
 		ret.Msg = err.Error()
-		c.JSON(http.StatusOK, ret)
+		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 

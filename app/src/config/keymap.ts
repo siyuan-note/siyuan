@@ -1,14 +1,11 @@
-import {hotKey2Electron, isCtrl, isMac, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isCtrl, isMac, updateHotkeyTip} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {exportLayout} from "../layout/util";
-/// #if !BROWSER
-import {getCurrentWindow} from "@electron/remote";
-import {ipcRenderer} from "electron";
-/// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
 import {App} from "../index";
+import {sendGlobalShortcut} from "../boot/globalEvent/keydown";
 
 export const keymap = {
     element: undefined as Element,
@@ -192,13 +189,7 @@ export const keymap = {
         fetchPost("/api/setting/setKeymap", {
             data
         }, () => {
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
-                languages: window.siyuan.languages["_trayMenu"],
-                id: getCurrentWindow().id,
-                hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
-            });
-            /// #endif
+            sendGlobalShortcut(app);
         });
     },
     search(value: string, keymapString: string) {
@@ -298,13 +289,7 @@ export const keymap = {
                     data: Constants.SIYUAN_KEYMAP,
                 }, () => {
                     window.location.reload();
-                    /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
-                        languages: window.siyuan.languages["_trayMenu"],
-                        id: getCurrentWindow().id,
-                        hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
-                    });
-                    /// #endif
+                    sendGlobalShortcut(app);
                 });
             });
         });

@@ -49,6 +49,24 @@ try {
     app.exit();
 }
 
+const hotKey2Electron = (key) => {
+    console.log(key)
+    if (!key) {
+        return key;
+    }
+    let electronKey = "";
+    if (key.indexOf("⌘") > -1) {
+        electronKey += "CommandOrControl+";
+    }
+    if (key.indexOf("⇧") > -1) {
+        electronKey += "Shift+";
+    }
+    if (key.indexOf("⌥") > -1) {
+        electronKey += "Alt+";
+    }
+    return electronKey + key.substr(key.length - 1);
+};
+
 const exitApp = (port, errorWindowId) => {
     let tray;
     let mainWindow;
@@ -756,36 +774,52 @@ app.whenReady().then(() => {
     });
     ipcMain.on("siyuan-hotkey", (event, data) => {
         globalShortcut.unregisterAll();
-        if (!data.hotkey) {
+        if (!data.hotkeys || data.hotkeys.length === 0) {
             return;
         }
-        globalShortcut.register(data.hotkey, () => {
-            workspaces.forEach(item => {
-                const mainWindow = item.browserWindow;
-                if (mainWindow.isMinimized()) {
-                    mainWindow.restore();
-                    mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
-                } else {
-                    if (mainWindow.isVisible()) {
-                        if (1 === workspaces.length) { // 改进 `Alt+M` 激活窗口 https://github.com/siyuan-note/siyuan/issues/7258
-                            if (!mainWindow.isFocused()) {
-                                mainWindow.show();
-                            } else {
-                                hideWindow(mainWindow);
-                            }
+        data.hotkeys.forEach((item, index) => {
+            const shortcut = hotKey2Electron(item);
+            if (!shortcut) {
+                return;
+            }
+            if (index === 0) {
+                globalShortcut.register(shortcut, () => {
+                    workspaces.forEach(workspaceItem => {
+                        const mainWindow = workspaceItem.browserWindow;
+                        if (mainWindow.isMinimized()) {
+                            mainWindow.restore();
+                            mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
                         } else {
-                            hideWindow(mainWindow);
+                            if (mainWindow.isVisible()) {
+                                if (1 === workspaces.length) { // 改进 `Alt+M` 激活窗口 https://github.com/siyuan-note/siyuan/issues/7258
+                                    if (!mainWindow.isFocused()) {
+                                        mainWindow.show();
+                                    } else {
+                                        hideWindow(mainWindow);
+                                    }
+                                } else {
+                                    hideWindow(mainWindow);
+                                }
+                            } else {
+                                mainWindow.show();
+                            }
                         }
-                    } else {
-                        mainWindow.show();
-                    }
-                }
 
-                if ("win32" === process.platform || "linux" === process.platform) {
-                    resetTrayMenu(item.tray, data.languages, mainWindow);
-                }
-            });
-        });
+                        if ("win32" === process.platform || "linux" === process.platform) {
+                            resetTrayMenu(workspaceItem.tray, data.languages, mainWindow);
+                        }
+                    });
+                });
+            } else {
+                globalShortcut.register(data.hotkey, () => {
+                    BrowserWindow.getAllWindows().forEach(itemB => {
+                        itemB.webContents.send("siyuan-hotkey", {
+                            hotkey: item
+                        });
+                    });
+                });
+            }
+        })
     });
     ipcMain.on("siyuan-send_windows", (event, data) => {
         BrowserWindow.getAllWindows().forEach(item => {

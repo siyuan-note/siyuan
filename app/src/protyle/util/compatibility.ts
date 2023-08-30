@@ -129,20 +129,6 @@ export const updateHotkeyTip = (hotkey: string) => {
     return keys.join("+");
 };
 
-export const hotKey2Electron = (key: string) => {
-    let electronKey = "";
-    if (key.indexOf("⌘") > -1) {
-        electronKey += "CommandOrControl+";
-    }
-    if (key.indexOf("⇧") > -1) {
-        electronKey += "Shift+";
-    }
-    if (key.indexOf("⌥") > -1) {
-        electronKey += "Alt+";
-    }
-    return electronKey + key.substr(key.length - 1);
-};
-
 export const getLocalStorage = (cb: () => void) => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
         window.siyuan.storage = response.data;

@@ -25,11 +25,9 @@ import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath} fr
 import {openFileById} from "../../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../../layout/getAll";
 import {openGlobalSearch} from "../../search/util";
-import {getColIndex} from "../../protyle/util/table";
 import {focusBlock, focusByRange} from "../../protyle/util/selection";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {bindMenuKeydown} from "../../menus/Menu";
-import {showMessage} from "../../dialog/message";
 import {Dialog} from "../../dialog";
 import {unicode2Emoji} from "../../emoji";
 import {deleteFiles} from "../../editor/deleteFile";
@@ -43,6 +41,8 @@ import {hintMoveBlock} from "../../protyle/hint/extend";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
 import {setZoom} from "../../layout/topBar";
+import {getCurrentWindow} from "@electron/remote";
+import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../../history/history";
 import {openCard, openCardByData} from "../../card/openCard";
@@ -56,7 +56,6 @@ import {App} from "../../index";
 import {commandPanel} from "../../plugin/commandPanel";
 import {toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
-
 
 const switchDialogEvent = (app: App, event: MouseEvent, switchDialog: Dialog) => {
     event.preventDefault();
@@ -816,7 +815,7 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
     return false;
 };
 
-export const windowKeyDown = (app: App, event: KeyboardEvent, switchDialog:Dialog) => {
+export const windowKeyDown = (app: App, event: KeyboardEvent, switchDialog: Dialog) => {
 
     if (document.querySelector(".av__mask") || document.getElementById("errorLog") || event.isComposing) {
         return;
@@ -1301,4 +1300,22 @@ export const windowKeyDown = (app: App, event: KeyboardEvent, switchDialog:Dialo
         event.preventDefault();
         return true;
     }
+};
+
+export const sendGlobalShortcut = (app: App) => {
+    /// #if !BROWSER
+    const hotkeys = [window.siyuan.config.keymap.general.toggleWin.custom];
+    app.plugins.forEach(plugin => {
+        plugin.commands.forEach(command => {
+            if (command.globalCallback) {
+                hotkeys.push(command.customHotkey)
+            }
+        })
+    })
+    ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
+        languages: window.siyuan.languages["_trayMenu"],
+        id: getCurrentWindow().id,
+        hotkeys
+    });
+    /// #endif
 };

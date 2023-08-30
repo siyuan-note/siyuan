@@ -811,7 +811,7 @@ app.whenReady().then(() => {
                     });
                 });
             } else {
-                globalShortcut.register(data.hotkey, () => {
+                globalShortcut.register(shortcut, () => {
                     BrowserWindow.getAllWindows().forEach(itemB => {
                         itemB.webContents.send("siyuan-hotkey", {
                             hotkey: item

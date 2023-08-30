@@ -116,7 +116,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         id: getCurrentWindow().id,
         port: location.port
     });
-    sendGlobalShortcut(app);
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     /// #endif
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
@@ -127,6 +126,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
             JSONToLayout(app, isStart);
+            /// #if !BROWSER
+            sendGlobalShortcut(app);
+            /// #endif
             openChangelog();
         } catch (e) {
             resetLayout();
@@ -309,7 +311,7 @@ export const initWindow = (app: App) => {
         let matchCommand = false;
         app.plugins.find(item => {
             item.commands.find(command => {
-                if (command.globalCallback && data === command.customHotkey) {
+                if (command.globalCallback && data.hotkey === command.customHotkey) {
                     matchCommand = true;
                     command.globalCallback();
                     return true;

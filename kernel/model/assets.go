@@ -30,6 +30,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -37,6 +38,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -87,6 +89,12 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 			return
 		}
 	}
+
+	browserClient := req.C().
+		SetUserAgent(util.UserAgent).
+		SetTimeout(30 * time.Second).
+		EnableInsecureSkipVerify(). // HTTPS certificate is no longer verified when `Convert network images to local images` https://github.com/siyuan-note/siyuan/issues/9080
+		SetProxy(httpclient.ProxyFromEnvironment)
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -140,7 +148,8 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 					//}
 				}
 				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), u), 15000)
-				request := httpclient.NewBrowserRequest()
+				request := browserClient.R()
+				request.SetRetryCount(1).SetRetryFixedInterval(3 * time.Second)
 				if "" != originalURL {
 					request.SetHeader("Referer", originalURL) // 改进浏览器剪藏扩展转换本地图片成功率 https://github.com/siyuan-note/siyuan/issues/7464
 				}

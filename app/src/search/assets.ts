@@ -142,8 +142,10 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
                 searchInputElement.value = historyElement.querySelector(".b3-list-item--focus").textContent.trim();
                 assetInputEvent(element, localSearch);
                 toggleAssetHistory(historyElement, searchInputElement);
+                renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
             }
             event.preventDefault();
+            return;
         }
         if (event.key === "ArrowDown" && event.altKey) {
             toggleAssetHistory(historyElement, searchInputElement);
@@ -175,7 +177,10 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
                 searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + lineHeight;
             }
             event.preventDefault();
-        } else if (event.key === "ArrowUp") {
+            renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
+            return;
+        }
+        if (event.key === "ArrowUp") {
             currentList.classList.remove("b3-list-item--focus");
             if (!currentList.previousElementSibling) {
                 searchPanelElement.lastElementChild.classList.add("b3-list-item--focus");
@@ -188,8 +193,8 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
                 searchPanelElement.scrollTop = currentList.offsetTop - lineHeight * 2;
             }
             event.preventDefault();
+            renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
         }
-        renderPreview(previewElement, currentList.dataset.id, searchInputElement.value, localSearch.method);
     });
     assetInputEvent(element, localSearch);
 

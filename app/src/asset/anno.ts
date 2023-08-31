@@ -638,7 +638,7 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
 
 const getCaptureCanvas = async (pdfObj: any, pageNumber: number) => {
     const pdfPage = await pdfObj.pdfDocument.getPage(pageNumber);
-    const viewport = pdfPage.getViewport({scale: window.devicePixelRatio || 1});
+    const viewport = pdfPage.getViewport({scale: 2});   // 不使用 window.devicePixelRatio 否则 window 下画质不够
     const canvas = document.createElement("canvas");
     canvas.width = Math.floor(viewport.width);
     canvas.height = Math.floor(viewport.height);
@@ -660,7 +660,7 @@ async function getRectImgData(pdfObj: any) {
     const captureCanvas = await getCaptureCanvas(pdfObj, parseInt(pageElement.getAttribute("data-page-number")));
 
     const rectStyle = (rectElement.firstElementChild as HTMLElement).style;
-    const scale = (window.devicePixelRatio || 1) / pdfObj.pdfViewer.currentScale / window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS;
+    const scale = 2 / pdfObj.pdfViewer.currentScale / window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS;
     const captureImageData = captureCanvas.getContext("2d").getImageData(
         scale * parseFloat(rectStyle.left),
         scale * parseFloat(rectStyle.top),

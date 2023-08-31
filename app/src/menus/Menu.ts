@@ -248,7 +248,12 @@ const getActionMenu = (element: Element, next: boolean) => {
 };
 
 export const bindMenuKeydown = (event: KeyboardEvent) => {
-    if (window.siyuan.menus.menu.element.classList.contains("fn__none") || event.altKey || event.shiftKey || isCtrl(event)) {
+    if (window.siyuan.menus.menu.element.classList.contains("fn__none")
+        || event.altKey || event.shiftKey || isCtrl(event)) {
+        return false;
+    }
+    const target = event.target as HTMLElement
+    if (window.siyuan.menus.menu.element.contains(target) && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return false;
     }
     if (event.code === "ArrowDown" || event.code === "ArrowUp") {

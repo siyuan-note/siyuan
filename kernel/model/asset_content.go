@@ -776,6 +776,9 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	cores := runtime.NumCPU()
 	if 4 < cores {
 		cores = 4 // Limit memory usage
+		if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+			cores = 1 // Reduce the memory usage of PDF asset file content parsing on the mobile https://github.com/siyuan-note/siyuan/issues/9079
+		}
 	}
 
 	pool, err := webassembly.Init(webassembly.Config{

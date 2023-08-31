@@ -50,7 +50,6 @@ try {
 }
 
 const hotKey2Electron = (key) => {
-    console.log(key)
     if (!key) {
         return key;
     }

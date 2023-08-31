@@ -636,32 +636,15 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
     }, Constants.TIMEOUT_DBLCLICK);
 };
 
-
-const getPage = (element: Element): Element | null => {
-    if (!element) {
-        return null;
-    } else if (element.classList.contains("page")) {
-        return element;
-    }
-    return getPage(element.parentElement);
-};
-
-const getCaptureCanvas = async (page: any, captureScale: number) => {
-    const viewport = page.getViewport({scale: captureScale * window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS});
-    // Support HiDPI-screens.
-    const outputScale = window.devicePixelRatio || 1;
-
+const getCaptureCanvas = async (pdfObj: any, pageNumber: number) => {
+    const pdfPage = await pdfObj.pdfDocument.getPage(pageNumber);
+    const viewport = pdfPage.getViewport({scale: window.devicePixelRatio || 1});
     const canvas = document.createElement("canvas");
-    canvas.width = Math.floor(viewport.width * outputScale);
-    canvas.height = Math.floor(viewport.height * outputScale);
-    canvas.style.width = Math.floor(viewport.width) + "px";
-    canvas.style.height = Math.floor(viewport.height) + "px";
+    canvas.width = Math.floor(viewport.width);
+    canvas.height = Math.floor(viewport.height);
 
-    await page.render({
+    await pdfPage.render({
         canvasContext: canvas.getContext("2d"),
-        transform: outputScale !== 1
-            ? [outputScale, 0, 0, outputScale, 0, 0]
-            : null,
         viewport: viewport
     }).promise;
 
@@ -669,29 +652,20 @@ const getCaptureCanvas = async (page: any, captureScale: number) => {
 };
 
 async function getRectImgData(pdfObj: any) {
-    const pageElement = getPage(rectElement.firstElementChild);
+    const pageElement = hasClosestByClassName(rectElement, "page");
     if (!pageElement) {
         return;
     }
-    const cavasElement = pageElement.querySelector(".canvasWrapper canvas") as HTMLCanvasElement;
-    let scale;
-    const trueWith = cavasElement.getBoundingClientRect().width;
-    if (trueWith <= 0) {
-        scale = window.devicePixelRatio || 1;
-    } else {
-        scale = cavasElement.width / trueWith;
-    }
-    const rectStyle = (rectElement.firstElementChild as HTMLElement).style;
-    const captureLocation = {
-        width: scale * parseFloat(rectStyle.width),
-        height: scale * parseFloat(rectStyle.height),
-        top: scale * parseFloat(rectStyle.top),
-        left: scale * parseFloat(rectStyle.left),
-    };
 
-    const pdfPage = await pdfObj.pdfDocument.getPage(parseInt(pageElement.getAttribute("data-page-number")));
-    const captureCanvas = await getCaptureCanvas(pdfPage, pdfObj.pdfViewer.currentScale);
-    const captureImageData = captureCanvas.getContext("2d").getImageData(captureLocation.left, captureLocation.top, captureLocation.width, captureLocation.height);
+    const captureCanvas = await getCaptureCanvas(pdfObj, parseInt(pageElement.getAttribute("data-page-number")));
+
+    const rectStyle = (rectElement.firstElementChild as HTMLElement).style;
+    const scale = (window.devicePixelRatio || 1) / pdfObj.pdfViewer.currentScale / window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS;
+    const captureImageData = captureCanvas.getContext("2d").getImageData(
+        scale * parseFloat(rectStyle.left),
+        scale * parseFloat(rectStyle.top),
+        scale * parseFloat(rectStyle.width),
+        scale * parseFloat(rectStyle.height));
 
     const tempCanvas = document.createElement("canvas");
     tempCanvas.width = captureImageData.width;

@@ -56,14 +56,14 @@ export class Menu {
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
-        const parentRect = subMenuElement.parentElement.getBoundingClientRect();
-        subMenuElement.style.top = (parentRect.top - 8) + "px";
-        subMenuElement.style.left = (parentRect.right + 8) + "px";
+        const itemRect = subMenuElement.parentElement.getBoundingClientRect();
+        subMenuElement.style.top = (itemRect.top - 8) + "px";
+        subMenuElement.style.left = (itemRect.right + 8) + "px";
         subMenuElement.style.bottom = "auto";
         const rect = subMenuElement.getBoundingClientRect();
         if (rect.right > window.innerWidth) {
-            if (parentRect.left - 8 > rect.width) {
-                subMenuElement.style.left = (parentRect.left - 8 - rect.width) + "px";
+            if (itemRect.left - 8 > rect.width) {
+                subMenuElement.style.left = (itemRect.left - 8 - rect.width) + "px";
             } else {
                 subMenuElement.style.left = (window.innerWidth - rect.width) + "px";
             }

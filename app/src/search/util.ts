@@ -630,6 +630,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchFilter") {
+                window.siyuan.menus.menu.remove();
                 filterMenu(config, () => {
                     config.page = 1;
                     inputEvent(element, config, undefined, edit, true);

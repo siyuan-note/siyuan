@@ -5,6 +5,7 @@ import {windowKeyUp} from "./keyup";
 import {windowKeyDown} from "./keydown";
 import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
+import {Constants} from "../../constants";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -14,9 +15,18 @@ export const initWindowEvent = (app: App) => {
             window.siyuan.layout.bottomDock.hideDock();
         }
     });
+    let mouseIsEnter = false;
+    document.body.addEventListener("mouseenter", () => {
+        if (window.siyuan.layout.leftDock) {
+            mouseIsEnter = true;
+            setTimeout(() => {
+                mouseIsEnter = false;
+            }, Constants.TIMEOUT_TRANSITION);
+        }
+    });
 
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
-        windowMouseMove(event);
+        windowMouseMove(event, mouseIsEnter);
     });
 
     window.addEventListener("mouseup", (event) => {
@@ -46,6 +56,6 @@ export const initWindowEvent = (app: App) => {
     });
 
     window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-       globalClick(event);
+        globalClick(event);
     });
 };

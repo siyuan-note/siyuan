@@ -14,7 +14,11 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     return nodeElement;
 };
 
-export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }) => {
+export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mouseIsEnter:boolean) => {
+    if (document.body.classList.contains("body--blur")) {
+        // 非激活状态下不执行 https://ld246.com/article/1693474547631
+        return;
+    }
     // https://github.com/siyuan-note/siyuan/pull/8793
     const coordinates = window.siyuan.coordinates ?? (window.siyuan.coordinates = {
         pageX: 0,
@@ -40,7 +44,8 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }) => 
             item.editor.protyle.breadcrumb.render(item.editor.protyle, true);
         });
     }
-    if (event.buttons === 0 &&  // 鼠标按键被按下时不触发
+    if (!mouseIsEnter &&
+        event.buttons === 0 &&  // 鼠标按键被按下时不触发
         window.siyuan.layout.bottomDock &&
         !isWindow() && !hasClosestByClassName(event.target, "b3-dialog") && !hasClosestByClassName(event.target, "b3-menu")) {
         if (event.clientX < 43) {

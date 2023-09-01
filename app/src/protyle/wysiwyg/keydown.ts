@@ -969,9 +969,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.copyText.custom, event)) {
             // 用于标识复制文本 *
-            nodeElement.setAttribute("data-reftext", "true");
-            focusByRange(getEditorRange(nodeElement));
-            document.execCommand("copy");
+            if (selectText !== "") {
+                // 和复制块引用保持一致 https://github.com/siyuan-note/siyuan/issues/9093
+                writeText(`${Lute.EscapeHTMLStr(selectText)} ((${nodeElement.getAttribute("data-node-id")} "*"))`);
+            } else {
+                nodeElement.setAttribute("data-reftext", "true");
+                focusByRange(getEditorRange(nodeElement));
+                document.execCommand("copy");
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

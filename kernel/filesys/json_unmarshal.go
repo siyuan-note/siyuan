@@ -19,18 +19,14 @@
 package filesys
 
 import (
-	"time"
-
 	"github.com/goccy/go-json"
-	"github.com/siyuan-note/logging"
 )
 
 func unmarshalJSON(data []byte, v interface{}) error {
-	now := time.Now()
-	defer func() {
-		elapsed := time.Since(now)
-		logging.LogInfof("[go-json] unmarshalJSON took %s", elapsed)
-	}()
-
+	//now := time.Now()
+	//defer func() {
+	//	elapsed := time.Since(now)
+	//	logging.LogInfof("[go-json] unmarshalJSON took %s", elapsed)
+	//}()
 	return json.Unmarshal(data, v)
 }

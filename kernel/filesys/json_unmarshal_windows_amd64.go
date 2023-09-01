@@ -17,18 +17,14 @@
 package filesys
 
 import (
-	"time"
-
 	"github.com/bytedance/sonic"
-	"github.com/siyuan-note/logging"
 )
 
 func unmarshalJSON(data []byte, v interface{}) error {
-	now := time.Now()
-	defer func() {
-		elapsed := time.Since(now)
-		logging.LogInfof("[sonic] unmarshalJSON took %s", elapsed)
-	}()
-
+	//now := time.Now()
+	//defer func() {
+	//	elapsed := time.Since(now)
+	//	logging.LogInfof("[sonic] unmarshalJSON took %s", elapsed)
+	//}()
 	return sonic.Unmarshal(data, v)
 }

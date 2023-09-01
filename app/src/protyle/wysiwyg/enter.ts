@@ -42,7 +42,11 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         if (listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
             return true;
         }
+        // https://github.com/siyuan-note/siyuan/issues/8935
+        const wbrElement = document.createElement("wbr");
+        range.insertNode(wbrElement);
         const html = listItemElement.parentElement.outerHTML;
+        wbrElement.remove();
         let newElement = genListItemElement(listItemElement, -1, true);
         if (!blockElement.previousElementSibling.classList.contains("protyle-action")) {
             // 列表项中有多个块，最后一个块为空，换行应进行缩进

@@ -163,7 +163,7 @@ export class Asset extends Model {
             <span id="findMsg" class="b3-button b3-button--small b3-button--cancel"></span>
         </div>  <!-- findbar -->
         <div id="secondaryToolbar" class="secondaryToolbar fn__hidden doorHangerRight b3-menu">
-          <div id="secondaryToolbarButtonContainer">
+          <div id="secondaryToolbarButtonContainer" class="b3-menu__items">
             <button id="pdfLight" class="secondaryToolbarButton b3-menu__item toggled">
               <svg class="b3-menu__icon"><use xlink:href="#iconLight"></use></svg> 
               <span class="b3-menu__label">${window.siyuan.languages.themeLight}</span>

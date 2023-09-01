@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123101-qjw03ab",
 		"title": "小工具",
-		"updated": "20230512195243"
+		"updated": "20230820184228"
 	},
 	"Children": [
 		{
@@ -129,7 +129,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173603-zms87ks",
-				"updated": "20221114173603"
+				"updated": "20230820184228"
 			},
 			"Children": [
 				{
@@ -139,8 +139,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社區集市 README"
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{
 					"Type": "NodeText",

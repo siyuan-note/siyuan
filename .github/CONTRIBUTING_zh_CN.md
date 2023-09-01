@@ -16,11 +16,11 @@
 
 * macOS/Linux: 
  ```
- ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@25.4.0 -D
+ ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@25.7.0 -D
  ```
 * Windows:
     * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
-    * `pnpm install electron@25.4.0 -D`
+    * `pnpm install electron@25.7.0 -D`
 
 NPM 镜像：
 
@@ -30,7 +30,7 @@ NPM 镜像：
 
 桌面端进入 app 文件夹运行：
 
-* `pnpm install electron@25.4.0 -D`
+* `pnpm install electron@25.7.0 -D`
 * `pnpm run dev`
 * `pnpm run start`
 
@@ -50,12 +50,14 @@ NPM 镜像：
 
 ### iOS
 
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./kernel/mobile/`
+* `cd kernel`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
 * https://github.com/siyuan-note/siyuan-ios
 
 ### Android
 
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' ./kernel/mobile/`
+* `cd kernel`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' -androidapi 24 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 移动端请参考对应项目仓库。

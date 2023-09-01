@@ -249,14 +249,6 @@ const setHTML = (options: {
         });
         protyle.options.defId = undefined;
     }
-    // https://ld246.com/article/1653639418266
-    if (protyle.element.classList.contains("block__edit")) {
-        if (protyle.element.nextElementSibling || protyle.element.previousElementSibling) {
-            protyle.element.style.minHeight = Math.min(30 + protyle.wysiwyg.element.clientHeight, window.innerHeight / 3) + "px";
-        }
-        // 49 = 16（上图标）+16（下图标）+8（padding）+9（底部距离）
-        protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(protyle.contentElement.clientHeight - 49, 200)}px;${isMobile() ? "" : "right:10px"}`);
-    }
     // 屏幕太高的页签 https://github.com/siyuan-note/siyuan/issues/5018
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
@@ -273,6 +265,12 @@ const setHTML = (options: {
     }
 
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
+        protyle.app.plugins.forEach(item => {
+            item.eventBus.emit("loaded-protyle-dynamic", {
+                protyle,
+                positon: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
+            });
+        });
         return;
     }
     if (protyle.options.render.breadcrumb) {

@@ -1,7 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {fixTableRange, focusBlock, focusByWbr, getEditorRange} from "./selection";
 import {mathRender} from "../render/mathRender";
 import {Constants} from "../../constants";
@@ -148,6 +148,15 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                     replaceInnerHTML = replaceInnerHTML.substring(0, languageIndex) + (localStorage["local-codelang"] || "") + replaceInnerHTML.substring(languageIndex);
 
                     editableElement.innerHTML = replaceInnerHTML;
+                }
+            }
+            const editWbrElement = editableElement.querySelector("wbr")
+            if (editWbrElement && editableElement && !trimStartText.endsWith("\n")) {
+                // 数学公式后无换行，后期渲染后添加导致 rang 错误，中文输入错误 https://github.com/siyuan-note/siyuan/issues/9054
+                const previousElement = hasPreviousSibling(editWbrElement) as HTMLElement
+                if (previousElement && previousElement.nodeType !== 3 && previousElement.dataset.type.indexOf("inline-math") > -1 &&
+                    !hasNextSibling(editWbrElement)) {
+                    editWbrElement.insertAdjacentText("afterend", "\n");
                 }
             }
             mathRender(blockElement);

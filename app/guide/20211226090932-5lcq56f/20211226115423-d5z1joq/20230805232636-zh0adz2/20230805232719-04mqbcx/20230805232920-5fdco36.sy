@@ -5,30 +5,189 @@
 	"Properties": {
 		"id": "20230805232920-5fdco36",
 		"title": "搜索資源文件內容",
-		"updated": "20230805233014"
+		"updated": "20230821123201"
 	},
 	"Children": [
 		{
-			"ID": "20230805232920-8xpdtdi",
+			"ID": "20230818102501-pyzoppc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230805232920-8xpdtdi",
-				"updated": "20230805233014"
+				"id": "20230818102501-pyzoppc",
+				"updated": "20230821123201"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "該特性還在開發中，請關注 "
+					"Data": "在 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/8874",
-					"TextMarkTextContent": "https://github.com/siyuan-note/siyuan/issues/8874"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​ 界面右上角可以將搜索功能切換到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索資源文件內容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，目前支持如下格式的資源文件內容搜索："
+				}
+			]
+		},
+		{
+			"ID": "20230818102501-gq9fesz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230818102501-gq9fesz",
+				"updated": "20230818102519"
+			},
+			"Children": [
+				{
+					"ID": "20230818102501-2qu8flm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102501-2qu8flm",
+						"updated": "20230818102519"
+					},
+					"Children": [
+						{
+							"ID": "20230818102501-p1l631d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102501-p1l631d",
+								"updated": "20230818102519"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文本文件（.txt、.md、.json、.log、.sql、.html、.xml、.java、.h、.c、.cpp、.go、.rs、.swift、.kt、.py、.php、.js、.css、.ts、.sh、.bat、.cmd、.ini、.yaml、.rst、.adoc、.textile、.opml、.org、.wiki）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102501-8jue7y8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102501-8jue7y8",
+						"updated": "20230818102501"
+					},
+					"Children": [
+						{
+							"ID": "20230818102501-fom9qf4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102501-fom9qf4",
+								"updated": "20230818102501"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".docx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102501-609htp0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102501-609htp0",
+						"updated": "20230818102501"
+					},
+					"Children": [
+						{
+							"ID": "20230818102501-fu9up7s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102501-fu9up7s",
+								"updated": "20230818102501"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".pptx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102501-cjozdv1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102501-cjozdv1",
+						"updated": "20230818102501"
+					},
+					"Children": [
+						{
+							"ID": "20230818102501-ewonoc2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102501-ewonoc2",
+								"updated": "20230818102501"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".xlsx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102501-ljun2c0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102501-ljun2c0",
+						"updated": "20230818102501"
+					},
+					"Children": [
+						{
+							"ID": "20230818102501-w0e68xh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102501-w0e68xh",
+								"updated": "20230818102501"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".pdf"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

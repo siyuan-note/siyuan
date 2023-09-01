@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
-		"updated": "20221114173626"
+		"updated": "20230820185634"
 	},
 	"Children": [
 		{
@@ -108,31 +108,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123024-eurqp4g",
-				"updated": "20211228124240"
+				"updated": "20230820185634"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我們通過開原專案 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/Masterminds/sprig",
-					"TextMarkTextContent": "Sprig"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 內置了一些變量和函數來豐富範本。比如可通過 "
+					"Data": "我們通過開原專案 Sprig (github repo: Masterminds/sprig) 內置了一些變量和函數來豐富範本。比如可通過 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": ".action{now | date \"2006-01-02 15:04:05\"}"
+					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 來渲染當前時間，更多用法請參考 "
+					"Data": "​ 來渲染當前時間，更多用法請參考 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -665,7 +655,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173549-5ie5uaj",
-				"updated": "20221114173549"
+				"updated": "20230820184235"
 			},
 			"Children": [
 				{
@@ -675,8 +665,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社區集市 README"
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{
 					"Type": "NodeText",

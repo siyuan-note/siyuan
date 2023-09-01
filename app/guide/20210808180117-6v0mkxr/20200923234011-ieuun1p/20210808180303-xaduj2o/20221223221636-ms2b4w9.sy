@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
-		"updated": "20230328100306"
+		"updated": "20230820185231"
 	},
 	"Children": [
 		{
@@ -28,22 +28,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221223221639-ii0381j",
-				"updated": "20221223221754"
+				"updated": "20230820185231"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After setting the content block as a flashcard, it will automatically arrange the review through the spaced repetition algorithm "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler",
-					"TextMarkTextContent": "FSRS"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
+					"Data": "After setting the content block as a flashcard, it will automatically arrange the review through the spaced repetition algorithm FSRS (github repo: open-spaced-repetition/free-spaced-repetition-scheduler)."
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20201227201751-gv0fpx2",
 		"title": "Kernel API",
 		"type": "doc",
-		"updated": "20210918114757"
+		"updated": "20230820185847"
 	},
 	"Children": [
 		{
@@ -14,22 +14,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210822164043-6gvv84p",
-				"updated": "20210918114757"
+				"updated": "20230820185847"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Please refer to "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md",
-					"TextMarkTextContent": "API Doc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
+					"Data": "Please refer to API Doc (github repo: siyuan-note/siyuan)."
 				}
 			]
 		}

@@ -1076,7 +1076,10 @@ export class Toolbar {
             }
 
             // 光标定位
-            if (getSelection().rangeCount === 0) {  // https://ld246.com/article/1665306093005
+            if (getSelection().rangeCount === 0 ||
+                // $$ 中间输入后再 ESC 光标无法定位
+                (getSelection().rangeCount > 0 && hasClosestByClassName(getSelection().getRangeAt(0).startContainer, "protyle-util"))
+            ) {  // https://ld246.com/article/1665306093005
                 if (renderElement.tagName === "SPAN") {
                     if (inlineLastNode) {
                         if (inlineLastNode.parentElement) {

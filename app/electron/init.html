@@ -421,15 +421,47 @@
 
         // macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
         const path = require('path')
-        const iCloudRoot = path.join(decodeURIComponent(getSearch('home')), 'Library', 'Mobile Documents')
-        const allFiles = walk(iCloudRoot)
+        const homePath = decodeURIComponent(getSearch('home'))
         const absPathLower = absPath.toLowerCase()
-        for (const file of allFiles) {
-            if (-1 < absPathLower.indexOf(file.toLowerCase())) {
-                return true
+        const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
+        if (!simpleCheckIcloudPath(absPath, homePath)) {
+            // 简单判断无法通过则复杂验证
+            const allFiles = walk(iCloudRoot)
+            for (const file of allFiles) {
+                if (-1 < absPathLower.indexOf(file.toLowerCase())) {
+                    return true
+                }
             }
         }
         return false
+    }
+
+    // 简单判断 iCloud 同步目录
+    // 不允许 为桌面 文档 和 iCloud 文件夹 和软链接
+    const simpleCheckIcloudPath = (absPath, homePath) => {
+        const fs = require('fs')
+        let stat = fs.lstatSync(absPath)
+        if (stat.isSymbolicLink()) {
+            return false
+        }
+
+        const path = require('path')
+        const absPathLower = absPath.toLowerCase()
+        const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
+        if (absPathLower.startsWith(iCloudRoot.toLowerCase())) {
+            return false
+        }
+
+        const documentsRoot = path.join(homePath, 'Documents')
+        if (absPathLower.startsWith(documentsRoot.toLowerCase())) {
+            return false
+        }
+
+        const desktopRoot = path.join(homePath, 'Desktop')
+        if (absPathLower.startsWith(desktopRoot.toLowerCase())) {
+            return false
+        }
+        return true
     }
 
     const walk = (dir, files = []) => {
@@ -440,7 +472,6 @@
                 console.log("dir [" + dir + "] not exists")
                 return files
             }
-
             dirFiles = fs.readdirSync(dir)
         } catch (e) {
             console.error("read dir [" + dir + "] failed: ", e)
@@ -459,9 +490,8 @@
                 if (files.includes(dir + path.sep + f)) {
                     continue
                 }
-                walk(dir + path.sep + f, files)
-            } else {
                 files.push(dir + path.sep + f)
+                walk(dir + path.sep + f, files)
             }
         }
         return files

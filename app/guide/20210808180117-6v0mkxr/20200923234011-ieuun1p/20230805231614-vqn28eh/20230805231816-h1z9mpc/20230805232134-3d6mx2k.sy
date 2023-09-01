@@ -5,30 +5,184 @@
 	"Properties": {
 		"id": "20230805232134-3d6mx2k",
 		"title": "Search asset content",
-		"updated": "20230805232250"
+		"updated": "20230821123134"
 	},
 	"Children": [
 		{
-			"ID": "20230805232134-cpi0qgh",
+			"ID": "20230818102341-c9x1xox",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230805232134-cpi0qgh",
-				"updated": "20230805232250"
+				"id": "20230818102341-c9x1xox",
+				"updated": "20230821123134"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "This feature is still under development, please pay attention to "
+					"Data": "In the upper right corner of the "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/issues/8874",
-					"TextMarkTextContent": "https://github.com/siyuan-note/siyuan/issues/8874"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": "​ interface, you can switch the search function to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search asset file content"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Currently, asset content search in the following formats is supported:"
+				}
+			]
+		},
+		{
+			"ID": "20230818102341-ny18orr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230818102341-ny18orr",
+				"updated": "20230818102341"
+			},
+			"Children": [
+				{
+					"ID": "20230818102341-eg8labw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102341-eg8labw",
+						"updated": "20230818102341"
+					},
+					"Children": [
+						{
+							"ID": "20230818102341-izc16tp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102341-izc16tp",
+								"updated": "20230818102426"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text files (.txt, .md, .json, .log, .sql, .html, .xml, .java, .h, .c, .cpp, .go, .rs, .swift, .kt, . py, .php, .js, .css, .ts, .sh, .bat, .cmd, .ini, .yaml, .rst, .adoc, .textile, .opml, .org, .wiki)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102427-os9c4nm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102427-os9c4nm"
+					},
+					"Children": [
+						{
+							"ID": "20230818102427-dyojs23",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102427-dyojs23",
+								"updated": "20230818102429"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".docx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102430-sw9p4uf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102430-sw9p4uf"
+					},
+					"Children": [
+						{
+							"ID": "20230818102430-boci4wf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102430-boci4wf",
+								"updated": "20230818102431"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".pptx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102432-6uclx4n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102432-6uclx4n"
+					},
+					"Children": [
+						{
+							"ID": "20230818102432-3n95b7k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102432-3n95b7k",
+								"updated": "20230818102433"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".xlsx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102434-9xgwy7r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102434-9xgwy7r"
+					},
+					"Children": [
+						{
+							"ID": "20230818102434-1efdkw9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102434-1efdkw9"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".pdf"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

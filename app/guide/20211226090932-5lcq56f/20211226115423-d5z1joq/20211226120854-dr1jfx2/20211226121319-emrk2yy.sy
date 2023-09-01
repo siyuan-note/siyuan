@@ -7,7 +7,7 @@
 		"id": "20211226121319-emrk2yy",
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
-		"updated": "20230428155746"
+		"updated": "20230820185037"
 	},
 	"Children": [
 		{
@@ -2626,7 +2626,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2696,7 +2696,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2766,7 +2766,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2836,7 +2836,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2906,7 +2906,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -2972,7 +2972,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -3042,7 +3042,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/mermaid-js/mermaid",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "Mermaid"
 				},
 				{
@@ -3358,22 +3358,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122008-nkonel6",
-				"updated": "20211226002152"
+				"updated": "20230820185037"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "語法請參考 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/paulrosen/abcjs",
-					"TextMarkTextContent": "abcjs"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": "語法請參考 abcjs (github repo: paulrosen/abcjs)。"
 				}
 			]
 		},
@@ -3508,7 +3498,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/adrai/flowchart.js",
+					"TextMarkAHref": "https://mermaid.js.org/",
 					"TextMarkTextContent": "flowchart.js"
 				},
 				{

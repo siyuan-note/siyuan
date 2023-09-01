@@ -1,5 +1,5 @@
 import {exportLayout, JSONToLayout, resetLayout, resizeTopbar, resizeTabs} from "../layout/util";
-import {hotKey2Electron, setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {dialog, getCurrentWindow} from "@electron/remote";
 import {ipcRenderer, OpenDialogReturnValue, webFrame} from "electron";
@@ -10,7 +10,6 @@ import {onWindowsMsg} from "../window/onWindowsMsg";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
-import {globalShortcut} from "../boot/globalShortcut";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {addGA, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
@@ -27,6 +26,8 @@ import {setProxy} from "../config/util/about";
 import {openChangelog} from "./openChangelog";
 import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 import {App} from "../index";
+import {initWindowEvent} from "./globalEvent/event";
+import {sendGlobalShortcut} from "./globalEvent/keydown";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -105,13 +106,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         fetchPost("/api/setting/setKeymap", {
             data: window.siyuan.config.keymap
         }, () => {
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
-                languages: window.siyuan.languages["_trayMenu"],
-                id: getCurrentWindow().id,
-                hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
-            });
-            /// #endif
+            sendGlobalShortcut(app);
         });
     }
     /// #if !BROWSER
@@ -121,21 +116,19 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         id: getCurrentWindow().id,
         port: location.port
     });
-    ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
-        languages: window.siyuan.languages["_trayMenu"],
-        id: getCurrentWindow().id,
-        hotkey: hotKey2Electron(window.siyuan.config.keymap.general.toggleWin.custom)
-    });
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     /// #endif
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
         window.siyuan.config.uiLayout = Constants.SIYUAN_EMPTY_LAYOUT;
     }
-    globalShortcut(app);
+    initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         try {
             JSONToLayout(app, isStart);
+            /// #if !BROWSER
+            sendGlobalShortcut(app);
+            /// #endif
             openChangelog();
         } catch (e) {
             resetLayout();
@@ -249,31 +242,31 @@ export const initWindow = (app: App) => {
     currentWindow.on("blur", winOnBlur);
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
-            if (/^siyuan:\/\/plugins\//.test(url)) {
-                // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
+            if (url.startsWith("siyuan://plugins/")) {
                 const pluginId = url.replace("siyuan://plugins/", "").split("?")[0];
+                if (!pluginId) {
+                    return;
+                }
                 app.plugins.find(plugin => {
-                    const match = Object.keys(plugin.models).find(key => {
-                        if (key === pluginId) {
-                            let data = getSearch("data", url);
-                            try {
-                                data = JSON.parse(data || "{}");
-                            } catch (e) {
-                                console.log("Error open plugin tab with protocol:", e);
-                            }
-                            openFile({
-                                app,
-                                custom: {
-                                    title: getSearch("title", url),
-                                    icon: getSearch("icon", url),
-                                    data,
-                                    fn: plugin.models[key]
-                                },
-                            });
-                            return true;
+                    if (pluginId.startsWith(plugin.name)) {
+                        // siyuan://plugins/plugin-name/foo?bar=baz
+                        plugin.eventBus.emit("open-siyuan-url-plugin", {url});
+                        // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
+                        let data = getSearch("data", url);
+                        try {
+                            data = JSON.parse(data || "{}");
+                        } catch (e) {
+                            console.log("Error open plugin tab with protocol:", e);
                         }
-                    });
-                    if (match) {
+                        openFile({
+                            app,
+                            custom: {
+                                title: getSearch("title", url),
+                                icon: getSearch("icon", url),
+                                data,
+                                id: pluginId
+                            },
+                        });
                         return true;
                     }
                 });
@@ -281,16 +274,25 @@ export const initWindow = (app: App) => {
             }
             if (isSYProtocol(url)) {
                 const id = getIdFromSYProtocol(url);
+                const focus = getSearch("focus", url) === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                     if (existResponse.data) {
                         openFileById({
                             app,
                             id,
                             action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                            zoomIn: getSearch("focus", url) === "1"
+                            zoomIn: focus,
                         });
                         ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);
                     }
+                    app.plugins.forEach(plugin => {
+                        plugin.eventBus.emit("open-siyuan-url-block", {
+                            url,
+                            id,
+                            focus,
+                            exist: existResponse.data,
+                        });
+                    });
                 });
                 return;
             }
@@ -304,6 +306,21 @@ export const initWindow = (app: App) => {
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_CLOSE, () => {
         window.siyuan.printWin.destroy();
+    });
+    ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
+        let matchCommand = false;
+        app.plugins.find(item => {
+            item.commands.find(command => {
+                if (command.globalCallback && data.hotkey === command.customHotkey) {
+                    matchCommand = true;
+                    command.globalCallback();
+                    return true;
+                }
+            });
+            if (matchCommand) {
+                return true;
+            }
+        });
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
         dialog.showOpenDialog({

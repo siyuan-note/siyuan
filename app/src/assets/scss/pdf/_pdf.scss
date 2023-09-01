@@ -337,7 +337,10 @@
   top: 36px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  max-height: 60vh;
+
+  .b3-menu__items {
+    max-height: 60vh;
+  }
 }
 
 #secondaryToolbarButtonContainer.hiddenScrollModeButtons > .scrollModeButtons,

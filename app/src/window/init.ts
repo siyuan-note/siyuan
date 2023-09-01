@@ -1,6 +1,5 @@
 import {Constants} from "../constants";
 import {webFrame} from "electron";
-import {globalShortcut} from "../boot/globalShortcut";
 import {fetchPost} from "../util/fetch";
 import {getInstanceById, JSONToCenter, resizeTabs} from "../layout/util";
 import {initStatus} from "../layout/status";
@@ -12,10 +11,11 @@ import {initWindow} from "../boot/onGetConfig";
 import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
+import {initWindowEvent} from "../boot/globalEvent/event";
 
 export const init = (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
-    globalShortcut(app);
+    initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
 

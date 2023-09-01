@@ -20,8 +20,8 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "historyRetentionDays", "historyRetentionDaysTip", "clearHistory", "katexMacros", "katexMacrosTip",
             "editReadonly", "editReadonlyTip", "embedBlockBreadcrumb", "embedBlockBreadcrumbTip", "outlineOutdentTip",
             "outdent", "floatWindowMode", "floatWindowModeTip", "justify", "justifyTip", "rtl", "rtlTip", "spellcheck",
-            "spellcheckTip", "backlinkExpand", "backlinkExpandTip", "onlySearchForDocTip", "dynamicLoadBlocks",
-            "dynamicLoadBlocksTip", "fontSizeScrollZoom", "fontSizeScrollZoomTip"
+            "spellcheckTip", "backlinkExpand", "backlinkExpandTip", "onlySearchForDoc", "onlySearchForDocTip",
+            "dynamicLoadBlocks", "dynamicLoadBlocksTip", "fontSizeScrollZoom", "fontSizeScrollZoomTip"
         ]),
 
         // 文档树
@@ -82,7 +82,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         getLang(["autoLaunch", "autoLaunchTip", "about", "about1", "about2", "about3", "about4", "about5", "about6",
             "about9", "about10", "about11", "about12", "about13", "about14", "about17", "config", "dataRepoKey",
             "dataRepoKeyTip1", "dataRepoKeyTip2", "slogan", "currentVer", "checkUpdate", "updatePath", "systemLog",
-            "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export", "visitAnnouncements",
+            "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export", "downloadLatestVer",
             "safeQuit", "directConnection", "siyuanNote", "key", "password", "copied", "resetRepoTip",
             "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip",
             "googleAnalytics", "googleAnalyticsTip"]),

@@ -37,7 +37,7 @@ export const updateEditModeElement = () => {
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `
-<div id="barWorkspace" class="toolbar__item toolbar__item--active">
+<div id="barWorkspace" aria-label="${window.siyuan.languages.mainMenu} ${updateHotkeyTip(window.siyuan.config.keymap.general.mainMenu.custom)}" class="b3-tooltips b3-tooltips__e toolbar__item toolbar__item--active">
     <span class="toolbar__text">${getWorkspaceName()}</span>
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
 </div>

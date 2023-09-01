@@ -15,6 +15,7 @@ import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER
 import {shell} from "electron";
 import {BrowserWindow, getCurrentWindow} from "@electron/remote";
+import {newCardModel} from "../card/newCardTab";
 /// #endif
 import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
@@ -100,7 +101,7 @@ export const openFile = (options: IOpenFileOptions) => {
         }
     } else if (options.custom) {
         const custom = allModels.custom.find((item) => {
-            if (objEquals(item.data, options.custom.data)) {
+            if (objEquals(item.data, options.custom.data) && (!options.custom.id || options.custom.id === item.type)) {
                 if (!pdfIsLoading(item.parent.parent.element)) {
                     item.parent.parent.switchTab(item.parent.headElement);
                     item.parent.parent.showHeading();
@@ -215,6 +216,10 @@ export const openFile = (options: IOpenFileOptions) => {
                 wnd.parent.children.find((item, index) => {
                     if (item.id === wnd.id) {
                         let nextWnd = wnd.parent.children[index + 1];
+                        if (!nextWnd) {
+                            // wnd 为右侧时，应设置其为目标
+                            nextWnd = wnd;
+                        }
                         while (nextWnd instanceof Layout) {
                             nextWnd = nextWnd.children[0];
                         }
@@ -423,11 +428,32 @@ const newTab = (options: IOpenFileOptions) => {
             icon: options.custom.icon,
             title: options.custom.title,
             callback(tab) {
-                tab.addModel(options.custom.fn({
-                    app: options.app,
-                    tab,
-                    data: options.custom.data
-                }));
+                if (options.custom.id) {
+                    if (options.custom.id === "siyuan-card") {
+                        tab.addModel(newCardModel({
+                            app: options.app,
+                            tab,
+                            data: options.custom.data
+                        }));
+                    } else {
+                        options.app.plugins.find(p => {
+                            if (p.models[options.custom.id]) {
+                                tab.addModel(p.models[options.custom.id]({
+                                    tab,
+                                    data: options.custom.data
+                                }));
+                                return true;
+                            }
+                        });
+                    }
+                } else {
+                    // plugin 0.8.3 历史兼容
+                    console.warn("0.8.3 将移除 custom.fn 参数，请参照 https://github.com/siyuan-note/plugin-sample/blob/91a716358941791b4269241f21db25fd22ae5ff5/src/index.ts 将其修改为 custom.id");
+                    tab.addModel(options.custom.fn({
+                        tab,
+                        data: options.custom.data
+                    }));
+                }
                 setPanelFocus(tab.panelElement.parentElement.parentElement);
             }
         });

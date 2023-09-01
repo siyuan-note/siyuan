@@ -88,9 +88,9 @@
     background-color: var(--b3-protyle-inline-mark-background);
     color: var(--b3-protyle-inline-mark-color);
 
-    &.mark__current {
-      background-color: var(--b3-protyle-search-current-background);
-      box-shadow: 0 0 1px var(--b3-theme-on-background);
+    &.mark--hl {
+      background-color: var(--b3-theme-primary-lighter);
+      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
     }
   }
 
@@ -239,6 +239,7 @@
   code:not(.hljs),
   span[data-type~="code"] {
     @extend .fn__code;
+    tab-size: 4;
   }
 
   a[href^=pdf-outline] {
@@ -302,6 +303,7 @@
     font-family: var(--b3-font-family-code);
     min-height: 22px !important;
     overflow-x: overlay;
+    tab-size: 4;
 
     &.protyle-linenumber {
       border-top-left-radius: 0;
@@ -402,6 +404,7 @@
     text-align: center;
     vertical-align: top; // https://ld246.com/article/1647522074722
     margin: 0 auto;
+    max-width: 100%;
 
     &:not([style]) {
       display: initial;

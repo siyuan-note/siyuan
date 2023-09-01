@@ -15,24 +15,23 @@ export const setEmpty = (app: App) => {
     if (emptyElement.innerHTML !== "") {
         return;
     }
-    emptyElement.innerHTML = `
-<div id="emptySearch" class="b3-list-item">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.search}</span>
+    emptyElement.innerHTML = `<div id="emptySearch" class="b3-list-item">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.search}</span>
 </div>
 <div id="emptyRecent" class="b3-list-item">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.recentDocs}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.recentDocs}</span>
 </div>
 <div id="emptyHistory" class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconHistory"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconHistory"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
 </div>
 <div id="emptyNewFile" class="b3-list-item${(getOpenNotebookCount() > 0 || !window.siyuan.config.readonly) ? "" : " fn__none"}">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span>
 </div>
 <div class="b3-list-item" id="emptyNewNotebook${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconFilesRoot"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
 </div>
 <div class="b3-list-item" id="emptyHelp">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.help}</span>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.help}</span>
 </div>`;
     emptyElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;

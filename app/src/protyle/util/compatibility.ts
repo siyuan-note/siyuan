@@ -129,25 +129,24 @@ export const updateHotkeyTip = (hotkey: string) => {
     return keys.join("+");
 };
 
-export const hotKey2Electron = (key: string) => {
-    let electronKey = "";
-    if (key.indexOf("⌘") > -1) {
-        electronKey += "CommandOrControl+";
-    }
-    if (key.indexOf("⇧") > -1) {
-        electronKey += "Shift+";
-    }
-    if (key.indexOf("⌥") > -1) {
-        electronKey += "Alt+";
-    }
-    return electronKey + key.substr(key.length - 1);
-};
-
 export const getLocalStorage = (cb: () => void) => {
     fetchPost("/api/storage/getLocalStorage", undefined, (response) => {
         window.siyuan.storage = response.data;
         // 历史数据迁移
         const defaultStorage: any = {};
+        defaultStorage[Constants.LOCAL_SEARCHASSET] = {
+            keys: [],
+            col: "",
+            row: "",
+            layout: 0,
+            method: 0,
+            types: {},
+            sort: 0,
+            k: "",
+        };
+        Constants.SIYUAN_ASSETS_SEARCH.forEach(type => {
+            defaultStorage[Constants.LOCAL_SEARCHASSET].types[type] = true;
+        });
         defaultStorage[Constants.LOCAL_SEARCHKEYS] = {
             keys: [],
             replaceKeys: [],
@@ -216,9 +215,10 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
 
-        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR, Constants.LOCAL_EXPORTWORD,
-            Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES, Constants.LOCAL_SEARCHDATA,
-            Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI, Constants.LOCAL_PLUGINTOPUNPIN].forEach((key) => {
+        [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
+            Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
+            Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
+            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

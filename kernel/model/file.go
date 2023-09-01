@@ -516,8 +516,12 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	luteEngine := NewLute()
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		err = ErrBlockNotFound
-		return
+		// Unable to open the doc when the block pointed by the scroll position does not exist https://github.com/siyuan-note/siyuan/issues/9030
+		node = treenode.GetNodeInTree(tree, tree.Root.ID)
+		if nil == node {
+			err = ErrBlockNotFound
+			return
+		}
 	}
 
 	if isBacklink { // 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
@@ -1610,7 +1614,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	absParentPath := filepath.Join(util.DataDir, boxID, parentPath)
 	files, err := os.ReadDir(absParentPath)
 	if nil != err {
-		logging.LogErrorf("read dir [%s] failed: %s", err)
+		logging.LogErrorf("read dir [%s] failed: %s", absParentPath, err)
 	}
 
 	sortFolderIDs := map[string]int{}

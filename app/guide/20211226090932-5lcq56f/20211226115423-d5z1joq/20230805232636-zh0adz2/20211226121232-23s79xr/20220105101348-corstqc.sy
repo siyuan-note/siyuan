@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20220105101348-corstqc",
 		"title": "限制",
-		"updated": "20230630142748"
+		"updated": "20230808220451"
 	},
 	"Children": [
 		{
@@ -14,7 +14,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220105101409-es213ce",
-				"updated": "20230630142748"
+				"updated": "20230808220451"
 			},
 			"Children": [
 				{
@@ -135,7 +135,7 @@
 					},
 					"Properties": {
 						"id": "20220105101409-7he9vg5",
-						"updated": "20230630142748"
+						"updated": "20230808220451"
 					},
 					"Children": [
 						{
@@ -166,7 +166,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230526090813-n13j66a",
-								"updated": "20230630142748"
+								"updated": "20230808220451"
 							},
 							"Children": [
 								{
@@ -206,7 +206,7 @@
 									},
 									"Properties": {
 										"id": "20230526090813-18hhanu",
-										"updated": "20230630142748"
+										"updated": "20230808220451"
 									},
 									"Children": [
 										{
@@ -214,12 +214,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230526090813-3or6hwd",
-												"updated": "20230630142748"
+												"updated": "20230808220451"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "到期前 2 天，會推送一次簡訊提醒到賬號綁定的手機上"
+													"Data": "到期前 1 天，會推送一次簡訊提醒到賬號綁定的手機上"
 												}
 											]
 										}

@@ -992,7 +992,24 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     * `path`: the file path under the workspace path
 * Return value
 
-  File content
+    * Response status code `200`: File content
+    * Response status code `202`: Exception information
+
+      ```json
+      {
+        "code": 404,
+        "msg": "",
+        "data": null
+      }
+      ```
+
+        * `code`: non-zero for exceptions
+
+            * `-1`: Parameter parsing error
+            * `404`: Not Found (file doesn't exist)
+            * `405`: Method Not Allowed (it's a directory)
+            * `500`: Server Error (stat file failed / read file failed)
+        * `msg`: a piece of text describing the error
 
 ### Put file
 
@@ -1064,10 +1081,10 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
   ```json
   {
-    "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+    "path": "/data/20210808180117-6v0mkxr/20200923234011-ieuun1p"
   }
   ```
-    * `path`: the file path under the workspace path
+    * `path`: the dir path under the workspace path
 * Return value
 
   ```json
@@ -1075,16 +1092,18 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "code": 0,
     "msg": "",
     "data": [
-        {
-            "isDir": true,
-            "isSymlink": false,
-            "name": "20210808180320-abz7w6k"
-        },
-        {
-            "isDir": false,
-            "isSymlink": false,
-            "name": "20210808180320-abz7w6k.sy"
-        }
+      {
+        "isDir": true,
+        "isSymlink": false,
+        "name": "20210808180303-6yi0dv5",
+        "updated": 1691467624
+      },
+      {
+        "isDir": false,
+        "isSymlink": false,
+        "name": "20210808180303-6yi0dv5.sy",
+        "updated": 1663298365
+      }
     ]
   }
   ```

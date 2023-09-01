@@ -192,13 +192,6 @@ const saveCriterionData = (config: ISearchOption,
                            element: Element,
                            value: string,
                            saveDialog: Dialog) => {
-    if (isMobile()) {
-        config.k = (document.querySelector("#toolbarSearch") as HTMLInputElement).value;
-        config.r = (element.querySelector("#toolbarReplace") as HTMLInputElement).value;
-    } else {
-        config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
-        config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
-    }
     config.removed = false;
     const criterion = config;
     criterion.name = value;
@@ -208,6 +201,7 @@ const saveCriterionData = (config: ISearchOption,
     fetchPost("/api/storage/setCriterion", {criterion}, () => {
         saveDialog.destroy();
         const criteriaElement = element.querySelector("#criteria").firstElementChild;
+        criteriaElement.classList.remove("fn__none");
         criteriaElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
         criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
     });
@@ -240,14 +234,26 @@ export const saveCriterion = (config: ISearchOption,
             showMessage(window.siyuan.languages["_kernel"]["142"]);
             return;
         }
-        const hasSame = criteriaData.find(item => {
+        if (isMobile()) {
+            config.k = (document.querySelector("#toolbarSearch") as HTMLInputElement).value;
+            config.r = (element.querySelector("#toolbarReplace") as HTMLInputElement).value;
+        } else {
+            config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
+            config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
+        }
+        const criteriaElement = element.querySelector("#criteria").firstElementChild;
+        let hasSameName = "";
+        let hasSameConfig = "";
+        criteriaData.forEach(item => {
             if (item.name === value) {
-                return true;
+                hasSameName = item.name;
+            }
+            if (configIsSame(item, config)) {
+                hasSameConfig = item.name;
             }
         });
-        if (hasSame) {
+        if (hasSameName && !hasSameConfig) {
             confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchOverwrite, () => {
-                const criteriaElement = element.querySelector("#criteria").firstElementChild;
                 Array.from(criteriaElement.children).forEach(item => {
                     if (item.textContent === value) {
                         item.remove();
@@ -255,6 +261,43 @@ export const saveCriterion = (config: ISearchOption,
                 });
                 criteriaData.find((item, index) => {
                     if (item.name === value) {
+                        criteriaData.splice(index, 1);
+                        return true;
+                    }
+                });
+                saveCriterionData(config, criteriaData, element, value, saveDialog);
+            });
+        } else if (hasSameName && hasSameConfig) {
+            if (hasSameName === hasSameConfig) {
+                saveDialog.destroy();
+            } else {
+                const removeName = hasSameName === value ? hasSameConfig : hasSameName;
+                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", removeName).replace("${y}", value), () => {
+                    Array.from(criteriaElement.children).forEach(item => {
+                        if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
+                            item.remove();
+                        }
+                    });
+                    criteriaData.find((item, index) => {
+                        if (item.name === removeName || item.name === hasSameName) {
+                            fetchPost("/api/storage/removeCriterion", {name: removeName});
+                            criteriaData.splice(index, 1);
+                            return true;
+                        }
+                    });
+                    saveCriterionData(config, criteriaData, element, value, saveDialog);
+                });
+            }
+        } else if (!hasSameName && hasSameConfig) {
+            confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", hasSameConfig).replace("${y}", value), () => {
+                Array.from(criteriaElement.children).forEach(item => {
+                    if (item.textContent === hasSameConfig) {
+                        item.remove();
+                    }
+                });
+                criteriaData.find((item, index) => {
+                    if (item.name === hasSameConfig) {
+                        fetchPost("/api/storage/removeCriterion", {name: hasSameConfig});
                         criteriaData.splice(index, 1);
                         return true;
                     }
@@ -411,15 +454,22 @@ export const moreMenu = async (config: ISearchOption,
     }).element);
 };
 
+const configIsSame = (config: ISearchOption, config2: ISearchOption) => {
+    if (config2.group === config.group && config2.hPath === config.hPath && config2.hasReplace === config.hasReplace &&
+        config2.k === config.k && config2.method === config.method && config2.r === config.r &&
+        config2.sort === config.sort && objEquals(config2.types, config.types) && objEquals(config2.idPath, config.idPath)) {
+        return true;
+    }
+    return false;
+};
+
 export const initCriteriaMenu = (element: HTMLElement, data: ISearchOption[], config: ISearchOption) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
         let html = "";
         response.data.forEach((item: ISearchOption, index: number) => {
             data.push(item);
             let isSame = false;
-            if (item.group === config.group && item.hPath === config.hPath && item.hasReplace === config.hasReplace &&
-                item.k === config.k && item.method === config.method && item.r === config.r &&
-                item.sort === config.sort && objEquals(item.types, config.types) && objEquals(item.idPath, config.idPath)) {
+            if (configIsSame(item, config)) {
                 isSame = true;
             }
             html += `<div data-type="set-criteria" class="${isSame ? "b3-chip--current " : ""}b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;

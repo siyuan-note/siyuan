@@ -6,7 +6,7 @@
 		"id": "20200922101913-d5yitmq",
 		"title": "图标",
 		"type": "doc",
-		"updated": "20230418095522"
+		"updated": "20230821210605"
 	},
 	"Children": [
 		{
@@ -422,7 +422,7 @@
 			},
 			"Properties": {
 				"id": "20210104091325-n2kixht",
-				"updated": "20210531222206"
+				"updated": "20230821210605"
 			},
 			"Children": [
 				{
@@ -536,14 +536,15 @@
 					},
 					"Properties": {
 						"id": "20210104091325-fkdgqym",
-						"updated": "20210531222206"
+						"updated": "20230821210605"
 					},
 					"Children": [
 						{
 							"ID": "20210104091325-up46nkf",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210104091325-up46nkf"
+								"id": "20210104091325-up46nkf",
+								"updated": "20230821210605"
 							},
 							"Children": [
 								{
@@ -557,7 +558,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，在 "
+									"Data": "​，在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -566,7 +567,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中新建 "
+									"Data": "​ 中新建 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -575,7 +576,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 和 "
+									"Data": "​ 和 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -584,7 +585,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件 "
+									"Data": "​ 文件"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -593,38 +594,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件如下："
-								}
-							]
-						},
-						{
-							"ID": "20210104091325-rz9r9hz",
-							"Type": "NodeCodeBlock",
-							"IsFencedCodeBlock": true,
-							"Properties": {
-								"id": "20210104091325-rz9r9hz",
-								"updated": "20210531222206"
-							},
-							"Children": [
-								{
-									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```"
-								},
-								{
-									"Type": "NodeCodeBlockFenceInfoMarker",
-									"CodeBlockInfo": "anNvbg=="
-								},
-								{
-									"ID": "20220307091943-a4jij0r",
-									"Type": "NodeCodeBlockCode",
-									"Data": "{\n  \"name\": \"alice\",\n  \"author\": \"Vanessa\",\n  \"url\": \"https://github.com/Vanessa219\",\n  \"version\": \"1.0.0\"\n}\n",
-									"Properties": {
-										"id": "20220307091943-a4jij0r"
-									}
-								},
-								{
-									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```"
+									"Data": "​，具体示例请参考 github repo: siyuan-note/icon-sample"
 								}
 							]
 						}
@@ -1481,7 +1451,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114172712-ecuoh5m",
-				"updated": "20221114172712"
+				"updated": "20230820183918"
 			},
 			"Children": [
 				{
@@ -1491,8 +1461,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社区集市 README"
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社区集市仓库"
 				},
 				{
 					"Type": "NodeText",

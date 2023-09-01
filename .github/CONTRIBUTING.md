@@ -14,10 +14,10 @@ Install pnpm: `npm install -g pnpm`
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@25.4.0 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ pnpm install electron@25.7.0 -D`
 * Windows:
     * `SET ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/`
-    * `pnpm install electron@25.4.0 -D`
+    * `pnpm install electron@25.7.0 -D`
 
 NPM mirror:
 
@@ -28,7 +28,7 @@ NPM mirror:
 
 On the desktop, go to the app folder to run:
 
-* `pnpm install electron@25.4.0 -D`
+* `pnpm install electron@25.7.0 -D`
 * `pnpm run dev`
 * `pnpm run start`
 
@@ -55,7 +55,7 @@ Note: In the development environment, the kernel process will not be automatical
 ### Android
 
 * `cd kernel`
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' ./mobile/`
+* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' -androidapi 24 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 For the mobile-end, please refer to the corresponding project repository.

@@ -200,7 +200,7 @@ function webViewerLoad(file, element, pdfPage, annoId) {
     config.file = file
   }
   pdf.run(config)
-  initAnno(file, element, annoId, pdf, config);
+  initAnno(element, pdf, config);
   return pdf
 }
 

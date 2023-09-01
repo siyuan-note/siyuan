@@ -148,6 +148,7 @@
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    line-height: 22px;
 
     kbd {
       &:first-child {
@@ -160,7 +161,8 @@
       border: solid 1px var(--b3-theme-surface-lighter);
       border-radius: var(--b3-border-radius);
       box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
-      margin: 2px 4px 0 16px;
+      margin: 2px 4px 2px 16px;
+      line-height: 14px;
     }
   }
 

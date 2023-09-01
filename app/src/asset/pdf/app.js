@@ -186,6 +186,8 @@ class PDFViewerApplication {
     await this._initializeOptions();
     this._forceCssTheme();
     // NOTE await this._initializeL10n();
+    // https://github.com/siyuan-note/siyuan/issues/8997
+    AppOptions.set("ignoreDestinationZoom", true);
 
     if (
       this.isViewerEmbedded &&

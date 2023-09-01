@@ -283,6 +283,14 @@
 会员特权需要付费后才能使用，请参考[定价](https://b3log.org/siyuan/pricing.html)。
 
 如果你没有会员特权需求但又想支持开发，欢迎进行捐赠：[靠爱发电 - 链滴](https://ld246.com/sponsor)
+The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source
+code kernel/go.mod, app/package.json and project homepage.
+
+The growth of SiYuan is inseparable from user feedback and promotion, thank you for everyone's help to SiYuan ❤️
+
+### Contributors
+
+> > > > > > > a63e1fda2e203917ae7f72cb359155f4094c4f3e
 
 ## 🙏 鸣谢
 
@@ -293,6 +301,7 @@
 <a href="https://github.com/siyuan-note/siyuan/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=siyuan-note/siyuan" />
 </a>
+<<<<<<< HEAD
 
 ### 开源项目依赖列表
 
@@ -342,3 +351,6 @@
 * [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
 * [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
+  =======
+
+> > > > > > > a63e1fda2e203917ae7f72cb359155f4094c4f3e

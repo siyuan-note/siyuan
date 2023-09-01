@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20230621111558"
+		"updated": "20230820191236"
 	},
 	"Children": [
 		{
@@ -180,22 +180,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091447-br9zpri",
-				"updated": "20230621111558"
+				"updated": "20230820191236"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before embarking on these two solutions, please start with understanding "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan",
-					"TextMarkTextContent": "SiYuan Technical Architecture"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
+					"Data": "Before embarking on these two solutions, please start with understanding SiYuan Technical Architecture (github repo: siyuan-note/siyuan)."
 				}
 			]
 		},

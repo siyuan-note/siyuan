@@ -8,7 +8,7 @@
 		"title": "请从这里开始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20230728103645"
+		"updated": "20230816170413"
 	},
 	"Children": [
 		{
@@ -83,7 +83,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20210528115012-vst5lwt",
-				"updated": "20230728103645"
+				"updated": "20210501192542"
 			},
 			"Children": [
 				{
@@ -251,7 +251,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20210528115016-kgyy5mm",
-						"updated": "20210528115049"
+						"updated": "20210501192542"
 					},
 					"Children": [
 						{
@@ -282,7 +282,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20201225220955-5tzog8p",
-								"updated": "20210528115049"
+								"updated": "20210501192542"
 							},
 							"Children": [
 								{
@@ -324,7 +324,8 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20201225220955-uxl2u8n"
+										"id": "20201225220955-uxl2u8n",
+										"updated": "20210501192542"
 									},
 									"Children": [
 										{
@@ -340,36 +341,6 @@
 													"TextMarkType": "a",
 													"TextMarkAHref": "https://ld246.com/article/1619868273581",
 													"TextMarkTextContent": "缘起"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20210528115047-mf8zy3i",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20210528115047-mf8zy3i",
-										"updated": "20210528115049"
-									},
-									"Children": [
-										{
-											"ID": "20210528115047-78736rc",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20210528115047-78736rc",
-												"updated": "20210528115049"
-											},
-											"Children": [
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://github.com/orgs/siyuan-note/projects/1",
-													"TextMarkTextContent": "路线图"
 												}
 											]
 										}
@@ -392,7 +363,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20210528115259-ifi35e9",
-				"updated": "20210601234211"
+				"updated": "20230816170413"
 			},
 			"Children": [
 				{
@@ -514,7 +485,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20210528115302-oa09t9p",
-						"updated": "20221114173007"
+						"updated": "20230816170413"
 					},
 					"Children": [
 						{
@@ -545,7 +516,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20210131160231-t1cr21p",
-								"updated": "20221114173007"
+								"updated": "20230816170413"
 							},
 							"Children": [
 								{
@@ -580,30 +551,30 @@
 									]
 								},
 								{
-									"ID": "20221114172803-v3e5sfh",
+									"ID": "20230816170212-hv7dtb0",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20221114172803-v3e5sfh",
-										"updated": "20221114173007"
+										"id": "20230816170212-hv7dtb0",
+										"updated": "20230816170413"
 									},
 									"Children": [
 										{
-											"ID": "20221114172803-vqryeav",
+											"ID": "20230816170212-3leiyax",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20221114172803-vqryeav",
-												"updated": "20221114173007"
+												"id": "20230816170212-3leiyax",
+												"updated": "20230816170413"
 											},
 											"Children": [
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "a",
-													"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-													"TextMarkTextContent": "社区集市"
+													"TextMarkAHref": "https://b3log.org/siyuan/pricing.html",
+													"TextMarkTextContent": "付费支持开发"
 												}
 											]
 										}

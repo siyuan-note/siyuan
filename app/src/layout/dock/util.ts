@@ -2,7 +2,7 @@ import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {switchWnd} from "../util";
+import {resizeTabs, switchWnd} from "../util";
 import {Backlink} from "./Backlink";
 
 export const openBacklink = (protyle: IProtyle) => {
@@ -100,4 +100,22 @@ export const resetFloatDockSize = () => {
     if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.bottomDock.showDock(true);
     }
+};
+
+export const toggleDockBar = (useElement:Element)=> {
+    const dockIsShow = useElement.getAttribute("xlink:href") === "#iconHideDock";
+    if (dockIsShow) {
+        useElement.setAttribute("xlink:href", "#iconDock");
+    } else {
+        useElement.setAttribute("xlink:href", "#iconHideDock");
+    }
+    document.querySelectorAll(".dock").forEach(item => {
+        if (dockIsShow) {
+            item.classList.add("fn__none");
+        } else if (item.querySelectorAll(".dock__item").length > 1) {
+            item.classList.remove("fn__none");
+        }
+    });
+    resizeTabs();
+    resetFloatDockSize();
 };

@@ -17,4 +17,9 @@ export const destroy = (protyle: IProtyle) => {
             protyle.ws.send("closews", {});
         }, 10240);
     }
+    protyle.app.plugins.forEach(item => {
+        item.eventBus.emit("destroy-protyle", {
+            protyle,
+        });
+    });
 };

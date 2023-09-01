@@ -6,7 +6,7 @@
 		"id": "20200924100110-vcg96wy",
 		"title": "Icon",
 		"type": "doc",
-		"updated": "20230418095635"
+		"updated": "20230821210709"
 	},
 	"Children": [
 		{
@@ -417,7 +417,7 @@
 			},
 			"Properties": {
 				"id": "20210104091404-07yula4",
-				"updated": "20210531222122"
+				"updated": "20230821210709"
 			},
 			"Children": [
 				{
@@ -531,14 +531,15 @@
 					},
 					"Properties": {
 						"id": "20210104091404-wdwknqi",
-						"updated": "20210531222122"
+						"updated": "20230821210709"
 					},
 					"Children": [
 						{
 							"ID": "20210104091404-0errb7b",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210104091404-0errb7b"
+								"id": "20210104091404-0errb7b",
+								"updated": "20230821210709"
 							},
 							"Children": [
 								{
@@ -552,7 +553,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the opened folder, and create new "
+									"Data": "​ in the opened folder, and create new "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -561,7 +562,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " and "
+									"Data": "​ and "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -570,7 +571,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " files in "
+									"Data": "​ files in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -579,47 +580,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " The "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "icon.json"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " file is as follows:"
-								}
-							]
-						},
-						{
-							"ID": "20210104091404-olba0a3",
-							"Type": "NodeCodeBlock",
-							"IsFencedCodeBlock": true,
-							"Properties": {
-								"id": "20210104091404-olba0a3",
-								"updated": "20210531222122"
-							},
-							"Children": [
-								{
-									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```"
-								},
-								{
-									"Type": "NodeCodeBlockFenceInfoMarker",
-									"CodeBlockInfo": "anNvbg=="
-								},
-								{
-									"ID": "20220307092214-z6xa7w8",
-									"Type": "NodeCodeBlockCode",
-									"Data": "{\n  \"name\": \"alice\",\n  \"author\": \"Vanessa\",\n  \"url\": \"https://github.com/Vanessa219\",\n  \"version\": \"1.0.0\"\n}\n",
-									"Properties": {
-										"id": "20220307092214-z6xa7w8"
-									}
-								},
-								{
-									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```"
+									"Data": "​, for specific examples, please refer to github repo: siyuan-note/icon-sample"
 								}
 							]
 						}
@@ -1472,7 +1433,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173333-rfx8ewj",
-				"updated": "20230418085910"
+				"updated": "20230820184044"
 			},
 			"Children": [
 				{
@@ -1482,8 +1443,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community marketplace README"
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "Community marketplace repo"
 				},
 				{
 					"Type": "NodeText",

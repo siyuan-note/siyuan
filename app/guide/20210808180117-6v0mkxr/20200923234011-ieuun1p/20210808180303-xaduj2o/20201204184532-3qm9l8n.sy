@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20230418085914"
+		"updated": "20230820185644"
 	},
 	"Children": [
 		{
@@ -116,31 +116,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091444-c7gg3ak",
-				"updated": "20210502205118"
+				"updated": "20230820185644"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "We have built-in variables and functions to enrich the template through the open source project "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/Masterminds/sprig",
-					"TextMarkTextContent": "Sprig"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ". For example, you can use "
+					"Data": "We have built-in variables and functions to enrich the template through the open source project Sprig (github repo: Masterminds/sprig). For example, you can use "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": ".action{now | date \"2006-01-02 15:04:05\"}"
+					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to render the current time. For more usage, please refer to "
+					"Data": "​ to render the current time. For more usage, please refer to "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -683,7 +673,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173406-3h4imbx",
-				"updated": "20230418085914"
+				"updated": "20230820184302"
 			},
 			"Children": [
 				{
@@ -693,8 +683,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "Community marketplace README"
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "Community marketplace repo"
 				},
 				{
 					"Type": "NodeText",

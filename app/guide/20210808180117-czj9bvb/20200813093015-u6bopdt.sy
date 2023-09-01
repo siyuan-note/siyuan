@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20230806004356"
+		"updated": "20230820183254"
 	},
 	"Children": [
 		{
@@ -658,165 +658,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220526112824-pwyh65i",
-				"updated": "20220526112824"
+				"updated": "20230820183254"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源笔记是完全开源的，欢迎参与贡献："
-				}
-			]
-		},
-		{
-			"ID": "20220526112824-mw30a1z",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220526112824-mw30a1z",
-				"updated": "20221202214109"
-			},
-			"Children": [
-				{
-					"ID": "20220526112824-wdib9l3",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112824-wdib9l3",
-						"updated": "20220526112824"
-					},
-					"Children": [
-						{
-							"ID": "20220526112824-1s97hgn",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112824-1s97hgn",
-								"updated": "20220526112824"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan",
-									"TextMarkTextContent": "界面和内核"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221202214106-cbq0omo",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221202214106-cbq0omo"
-					},
-					"Children": [
-						{
-							"ID": "20221202214106-cpfwdrq",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221202214106-cpfwdrq",
-								"updated": "20221202214109"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-android",
-									"TextMarkTextContent": "Android 端"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221202214109-8fu6oix",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221202214109-8fu6oix",
-						"updated": "20221202214109"
-					},
-					"Children": [
-						{
-							"ID": "20221202214109-wx29l27",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221202214109-wx29l27"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-ios",
-									"TextMarkTextContent": "iOS 端"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220526112824-me0cl0l",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220526112824-me0cl0l",
-						"updated": "20220526112824"
-					},
-					"Children": [
-						{
-							"ID": "20220526112824-rpzg6td",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220526112824-rpzg6td",
-								"updated": "20220526112824"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/siyuan-chrome",
-									"TextMarkTextContent": "Chrome 剪藏扩展"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220526112824-zm96ym7",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220526112824-zm96ym7",
-				"updated": "20220526112824"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "更多细节请参考"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md",
-					"TextMarkTextContent": "开发指南"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": "思源笔记是完全开源的，在 GitHub 上可以找到完整的源代码。"
 				}
 			]
 		},
@@ -960,7 +807,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100742-liorixq",
-				"updated": "20230806002027"
+				"updated": "20230820182913"
 			},
 			"Children": [
 				{
@@ -1011,17 +858,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "或者 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/releases",
-					"TextMarkTextContent": "GitHub Releases"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 来获取新版本。"
+					"Data": "来获取新版本。"
 				}
 			]
 		},

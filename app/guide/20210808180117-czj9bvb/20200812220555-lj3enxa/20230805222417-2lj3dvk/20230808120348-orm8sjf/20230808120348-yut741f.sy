@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230808120348-yut741f",
 		"title": "限制",
-		"updated": "20230526091115"
+		"updated": "20230808220435"
 	},
 	"Children": [
 		{
@@ -14,7 +14,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230808120348-fti66eq",
-				"updated": "20230526091115"
+				"updated": "20230808220435"
 			},
 			"Children": [
 				{
@@ -138,7 +138,7 @@
 					},
 					"Properties": {
 						"id": "20230808120348-34cmomp",
-						"updated": "20230526091115"
+						"updated": "20230808220435"
 					},
 					"Children": [
 						{
@@ -161,7 +161,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230808120348-sfmxfq9",
-								"updated": "20230526091115"
+								"updated": "20230808220435"
 							},
 							"Children": [
 								{
@@ -199,7 +199,8 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20230808120348-gv9fu0a"
+										"id": "20230808120348-gv9fu0a",
+										"updated": "20230808220435"
 									},
 									"Children": [
 										{
@@ -207,12 +208,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230808120348-o7wtrws",
-												"updated": "20230526090536"
+												"updated": "20230808220435"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "到期前 2 天，会推送一次短信提醒到账号绑定的手机上"
+													"Data": "到期前 1 天，会推送一次短信提醒到账号绑定的手机上"
 												}
 											]
 										}

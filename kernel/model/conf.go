@@ -432,9 +432,9 @@ func initLang() {
 		label := langMap["_label"].(string)
 		kernelLangs := langMap["_kernel"].(map[string]interface{})
 		for k, v := range kernelLangs {
-			num, err := strconv.Atoi(k)
-			if nil != err {
-				logging.LogErrorf("parse language configuration [%s] item [%d] failed [%s] failed: %s", p, num, err)
+			num, convErr := strconv.Atoi(k)
+			if nil != convErr {
+				logging.LogErrorf("parse language configuration [%s] item [%d] failed: %s", p, num, convErr)
 				continue
 			}
 			kernelMap[num] = v.(string)

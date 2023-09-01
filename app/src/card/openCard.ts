@@ -12,7 +12,6 @@ import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 /// #if !MOBILE
 import {openFile} from "../editor/util";
-import {newCardModel} from "./newCardTab";
 /// #endif
 import {getDisplayName, movePathTo} from "../util/pathName";
 import {App} from "../index";
@@ -221,7 +220,7 @@ export const bindCardEvent = (options: {
                             id: filterElement.getAttribute("data-id"),
                             title: options.title
                         },
-                        fn: newCardModel
+                        id: "siyuan-card"
                     },
                 });
                 if (options.dialog) {

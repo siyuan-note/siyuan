@@ -77,7 +77,7 @@ export class Tree {
             let style = "";
             if (isMobile()) {
                 if (item.depth > 0) {
-                    style = `padding-left: ${(item.depth - 1) * 30 + 44}px`;
+                    style = `padding-left: ${(item.depth - 1) * 20 + 24}px`;
                 }
             } else {
                 style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`;
@@ -130,7 +130,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
             let style = "";
             if (isMobile()) {
                 if (item.depth > 0) {
-                    style = `padding-left: ${(item.depth - 1) * 30 + 44}px`;
+                    style = `padding-left: ${(item.depth - 1) * 20 + 24}px`;
                 }
             } else {
                 style = `padding-left: ${(item.depth - 1) * 18 + 22}px;margin-right: 2px`;

@@ -16,6 +16,7 @@ export const initBlockPopover = (app: App) => {
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
+            hasClosestByClassName(event.target, "av__celltext") ||
             hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo");
         if (aElement) {
@@ -23,6 +24,9 @@ export const initBlockPopover = (app: App) => {
             // 折叠块标文案替换
             if (hasClosestByAttribute(event.target, "data-type", "fold", true)) {
                 tip = window.siyuan.languages.fold;
+            }
+            if (aElement.classList.contains("av__celltext") && aElement.scrollWidth > aElement.parentElement.clientWidth - 11) {
+                tip = aElement.textContent;
             }
             if (!tip) {
                 tip = aElement.getAttribute("data-href");
@@ -46,6 +50,10 @@ export const initBlockPopover = (app: App) => {
             }, 200);
 
             if (!getTarget(event, aElement)) {
+                return;
+            }
+            // https://github.com/siyuan-note/siyuan/issues/9007
+            if (event.relatedTarget && !document.contains(event.relatedTarget as Node)) {
                 return;
             }
             if (window.siyuan.ctrlIsPressed) {
@@ -158,8 +166,9 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
     if (!popoverTargetElement) {
         popoverTargetElement = hasClosestByClassName(event.target, "popover__block") as HTMLElement;
     }
-    if (!popoverTargetElement && aElement && aElement.getAttribute("data-href")?.startsWith("siyuan://blocks") &&
-        aElement.getAttribute("prevent-popover") !== "true") {
+    if (!popoverTargetElement && aElement && (
+        (aElement.getAttribute("data-href")?.startsWith("siyuan://blocks") && aElement.getAttribute("prevent-popover") !== "true") ||
+        (aElement.classList.contains("av__celltext") && aElement.dataset.type === "url"))) {
         popoverTargetElement = aElement;
     }
     if (!popoverTargetElement || window.siyuan.altIsPressed ||
@@ -210,6 +219,9 @@ export const showPopover = async (app: App, showRef = false) => {
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
         // 以思源协议开头的链接
         ids = [getIdFromSYProtocol(popoverTargetElement.getAttribute("data-href"))];
+    } else if (popoverTargetElement.dataset.type === "url") {
+        // 在 database 的 url 列中以思源协议开头的链接
+        ids = [getIdFromSYProtocol(popoverTargetElement.textContent.trim())];
     } else {
         // pdf
         let targetId;

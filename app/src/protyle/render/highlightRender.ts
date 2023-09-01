@@ -93,8 +93,9 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                     block.classList.add("protyle-linenumber");
                     setTimeout(() => {
                         // windows 需等待字体下载完成再计算，否则导致不换行，高度计算错误
+                        // https://github.com/siyuan-note/siyuan/issues/9029
                         lineNumberRender(block);
-                    }, 20);
+                    }, block.getAttribute("contenteditable") === "true" ? 0 : Constants.TIMEOUT_DBLCLICK);
                     if (languageElement) {
                         languageElement.style.marginLeft = "3.6em";
                     }
@@ -151,16 +152,18 @@ export const lineNumberRender = (block: HTMLElement) => {
         let lineHeight = "";
         if (isWrap) {
             lineNumberTemp.textContent = line || "\n";
-            const height = lineNumberTemp.getBoundingClientRect().height;
+            const height = lineNumberTemp.getBoundingClientRect().height.toFixed(1);
             lineHeight = ` style="height:${height}px;"`;
         }
         lineNumberHTML += `<span${lineHeight}></span>`;
     });
 
     lineNumberTemp.remove();
+    const height = block.offsetHeight;
     if (block.nextElementSibling?.classList.contains("protyle-linenumber__rows")) {
         block.nextElementSibling.innerHTML = lineNumberHTML;
+        (block.nextElementSibling as HTMLElement).style.height = height + "px";
     } else {
-        block.insertAdjacentHTML("afterend", `<span contenteditable="false" class="protyle-linenumber__rows">${lineNumberHTML}</span>`);
+        block.insertAdjacentHTML("afterend", `<span contenteditable="false" style="height:${height}px" class="protyle-linenumber__rows">${lineNumberHTML}</span>`);
     }
 };

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121329-c5v3dto",
 		"title": "Kernel API",
-		"updated": "20211226122348"
+		"updated": "20230820185840"
 	},
 	"Children": [
 		{
@@ -13,22 +13,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226121329-6wf1aig",
-				"updated": "20211226122348"
+				"updated": "20230820185840"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "請瀏覽 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md",
-					"TextMarkTextContent": "API 文檔"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
+					"Data": "請瀏覽 API 文檔 (github repo: siyuan-note/siyuan)。"
 				}
 			]
 		},

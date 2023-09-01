@@ -134,7 +134,10 @@ func getNodeRefText(node *ast.Node) string {
 		ret = util.EscapeHTML(ret)
 		return ret
 	}
+	return getNodeRefText0(node)
+}
 
+func getNodeRefText0(node *ast.Node) string {
 	switch node.Type {
 	case ast.NodeBlockQueryEmbed:
 		return "Query Embed Block..."

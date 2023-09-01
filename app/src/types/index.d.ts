@@ -44,8 +44,10 @@ type TEventBus = "ws-main" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
+    "open-siyuan-url-plugin" | "open-siyuan-url-block" |
     "input-search" |
-    "loaded-protyle"
+    "loaded-protyle" | "loaded-protyle-dynamic"|
+    "destroy-protyle"
 type TAVCol =
     "text"
     | "date"
@@ -77,6 +79,7 @@ type TAVFilterOperator =
 declare module "blueimp-md5"
 
 interface Window {
+    pdfjsLib: any
     dataLayer: any[]
     siyuan: ISiyuan
     webkit: any
@@ -139,6 +142,23 @@ interface IPluginSettingOption {
     actionElement?: HTMLElement
 
     createActionElement?(): HTMLElement
+}
+
+interface ISearchAssetOption {
+    keys: string[],
+    col: string,
+    row: string,
+    layout: number,
+    method: number,
+    types: {
+        ".txt": boolean,
+        ".md": boolean,
+        ".docx": boolean,
+        ".xlsx": boolean,
+        ".pptx": boolean,
+    },
+    sort: number,
+    k: string,
 }
 
 interface ISearchOption {
@@ -387,10 +407,11 @@ interface ICommand {
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
     hotkey: string,
     customHotkey?: string,
-    callback?: () => void
-    fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void
-    editorCallback?: (protyle: IProtyle) => void
-    dockCallback?: (element: HTMLElement) => void
+    callback?: () => void   // 其余回调存在时将不会触
+    globalCallback?: () => void // 焦点不在应用内时执行的回调
+    fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void // 焦点在文档树上时执行的回调
+    editorCallback?: (protyle: IProtyle) => void     // 焦点在编辑器上时执行的回调
+    dockCallback?: (element: HTMLElement) => void    // 焦点在 dock 上时执行的回调
 }
 
 interface IPluginData {
@@ -419,11 +440,11 @@ interface IOpenFileOptions {
         title: string,
         icon: string,
         data?: any
+        id: string,
         fn?: (options: {
             tab: import("../layout/Tab").Tab,
             data: any,
-            app: import("../index").App
-        }) => import("../layout/Model").Model,
+        }) => import("../layout/Model").Model,   // plugin 0.8.3 历史兼容
     }
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填

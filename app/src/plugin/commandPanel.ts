@@ -26,7 +26,11 @@ export const commandPanel = (app: App) => {
             liElement.innerHTML = `<span class="b3-list-item__text">${plugin.displayName}: ${command.langText || plugin.i18n[command.langKey]}</span>
 <span class="b3-list-item__meta">${updateHotkeyTip(command.customHotkey)}</span>`;
             liElement.addEventListener("click", () => {
-                command.callback();
+                if (command.callback) {
+                    command.callback();
+                } else if (command.globalCallback) {
+                    command.globalCallback();
+                }
                 dialog.destroy();
             });
             listElement.insertAdjacentElement("beforeend", liElement);

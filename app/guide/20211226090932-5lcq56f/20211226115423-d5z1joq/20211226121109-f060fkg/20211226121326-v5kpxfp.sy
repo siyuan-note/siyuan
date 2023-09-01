@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
-		"updated": "20230630110309"
+		"updated": "20230821210822"
 	},
 	"Children": [
 		{
@@ -716,7 +716,7 @@
 			},
 			"Properties": {
 				"id": "20211226121625-pcuvzd2",
-				"updated": "20211228134339"
+				"updated": "20230821210822"
 			},
 			"Children": [
 				{
@@ -819,14 +819,15 @@
 					},
 					"Properties": {
 						"id": "20211226121625-dwa3a7v",
-						"updated": "20211228134339"
+						"updated": "20230821210822"
 					},
 					"Children": [
 						{
 							"ID": "20211226121625-e64xwyp",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226121625-e64xwyp"
+								"id": "20211226121625-e64xwyp",
+								"updated": "20230821210822"
 							},
 							"Children": [
 								{
@@ -840,7 +841,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，在 "
+									"Data": "​，在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -849,7 +850,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中新建 "
+									"Data": "​ 中新建 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -858,7 +859,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 和 "
+									"Data": "​ 和 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -867,83 +868,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 文件 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "theme.json"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 文件如下："
-								}
-							]
-						},
-						{
-							"ID": "20211226121625-qlen5oy",
-							"Type": "NodeCodeBlock",
-							"IsFencedCodeBlock": true,
-							"Properties": {
-								"id": "20211226121625-qlen5oy"
-							},
-							"Children": [
-								{
-									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```"
-								},
-								{
-									"Type": "NodeCodeBlockFenceInfoMarker",
-									"CodeBlockInfo": "anNvbg=="
-								},
-								{
-									"ID": "20220307092237-lb5tr6g",
-									"Type": "NodeCodeBlockCode",
-									"Data": "{\n  \"name\": \"midnight\",\n  \"author\": \"Vanessa\",\n  \"url\": \"https://github.com/Vanessa219\",\n  \"version\": \"1.0.0\",\n  \"modes\": [\"dark\"]\n}\n",
-									"Properties": {
-										"id": "20220307092237-lb5tr6g"
-									}
-								},
-								{
-									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```"
-								}
-							]
-						},
-						{
-							"ID": "20211226121625-4lf2j37",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20211226121625-4lf2j37",
-								"updated": "20211228134339"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "modes"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 為外觀呈現模式，分為 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "dark"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 和 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "light"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，其余欄位請按需修改。"
+									"Data": "​ 文件，具體示例請參考 github repo: siyuan-note/theme-sample"
 								}
 							]
 						}
@@ -1317,40 +1242,6 @@
 			]
 		},
 		{
-			"ID": "20211226121625-vxrsxjp",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226121625-vxrsxjp",
-				"style": "color: var(--b3-card-info-color); background-color: var(--b3-card-info-background);",
-				"updated": "20220224233905"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "除了可以通過 theme.css 修改樣式以外，如果主題文件夾下存在 theme.js，則渲染界面時會自動加載它，這樣就能夠通過 JavaScript 代碼來實現一些功能相關定制。 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "：請勿修改編輯器 DOM，編輯器裡的塊應該通過"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md#Blocks",
-					"TextMarkTextContent": "塊 API"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 進行操作。"
-				}
-			]
-		},
-		{
 			"ID": "20211226121625-3wjcf6l",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1370,7 +1261,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173540-jb1qizj",
-				"updated": "20221114173540"
+				"updated": "20230820184013"
 			},
 			"Children": [
 				{
@@ -1380,8 +1271,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-					"TextMarkTextContent": "社區集市 README"
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{
 					"Type": "NodeText",

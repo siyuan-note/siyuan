@@ -170,6 +170,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				if "" != newDefID {
 					n.TextMarkBlockRefID = newDefID
 				}
+			} else if ast.NodeTextMark == n.Type && n.IsTextMarkType("a") && strings.HasPrefix(n.TextMarkAHref, "siyuan://blocks/") {
+				// Block hyperlinks do not point to regenerated block IDs when importing .sy.zip https://github.com/siyuan-note/siyuan/issues/9083
+				defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+				newDefID := blockIDs[defID]
+				if "" != newDefID {
+					n.TextMarkAHref = "siyuan://blocks/" + newDefID
+				}
 			} else if ast.NodeBlockQueryEmbedScript == n.Type {
 				for oldID, newID := range blockIDs {
 					// 导入 `.sy.zip` 后查询嵌入块失效 https://github.com/siyuan-note/siyuan/issues/5316

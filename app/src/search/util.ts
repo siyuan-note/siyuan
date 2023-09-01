@@ -756,7 +756,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                         openFileById({
                                             app,
                                             id,
-                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                                             zoomIn: foldResponse.data,
                                             position: "right"
                                         });
@@ -796,7 +796,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 openFileById({
                                     app,
                                     id,
-                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                                     zoomIn: foldResponse.data
                                 });
                                 if (closeCB) {
@@ -855,7 +855,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     app,
                     id,
                     position: "right",
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                     zoomIn: foldResponse.data
                 });
                 if (closeCB) {
@@ -884,7 +884,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         openFileById({
                             app,
                             id,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
                             zoomIn: foldResponse.data
                         });
                         if (closeCB) {

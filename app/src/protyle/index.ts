@@ -216,11 +216,17 @@ export class Protyle {
                 return;
             }
             if (options.scrollAttr ||
+                mergedOptions.action.includes(Constants.CB_GET_CONTEXT) ||
                 (mergedOptions.action.includes(Constants.CB_GET_SCROLL) && this.protyle.options.mode !== "preview")) {
                 if (!options.scrollAttr) {
                     fetchPost("/api/block/getDocInfo", {
                         id: options.blockId
                     }, (response) => {
+                        if (response.data.rootID !== options.blockId && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) {
+                            // 搜索打开文档等情况需保持上一次历史 https://github.com/siyuan-note/siyuan/issues/9082
+                            this.getDoc(mergedOptions);
+                            return;
+                        }
                         let scrollObj;
                         if (response.data.ial.scroll) {
                             try {

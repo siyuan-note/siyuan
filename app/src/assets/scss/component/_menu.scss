@@ -168,8 +168,9 @@
 
     &[disabled="disabled"] {
       cursor: not-allowed;
+
       & > *:not(.b3-menu__submenu) {
-        opacity: 0.5;
+        opacity: 0.38;
       }
     }
 

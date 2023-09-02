@@ -699,10 +699,9 @@ app.whenReady().then(() => {
         const win = new BrowserWindow({
             show: true,
             trafficLightPosition: {x: 8, y: 13},
-            width: mainScreen.size.width * 0.7,
-            height: mainScreen.size.height * 0.9,
+            width: data.width || mainScreen.size.width * 0.7,
+            height: data.height || mainScreen.size.height * 0.9,
             minWidth: 493,
-            center: true,
             minHeight: 376,
             fullscreenable: true,
             frame: "darwin" === process.platform,
@@ -716,6 +715,11 @@ app.whenReady().then(() => {
                 autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
             },
         });
+        if (data.position) {
+            win.setPosition(data.position.x, data.position.y);
+        } else {
+            win.center();
+        }
         win.loadURL(data.url);
         const targetScreen = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
         if (mainScreen.id !== targetScreen.id) {

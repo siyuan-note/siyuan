@@ -763,7 +763,7 @@ ${genHintItemHTML(item)}
                     const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]');
                     itemElement.classList.add("b3-menu__item--show");
                     window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));
-                    window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
+                    window.siyuan.menus.menu.element.querySelector("textarea").focus();
                 } else if (value === "---") {
                     focusBlock(nodeElement);
                 } else if (nodeElement.classList.contains("av")) {

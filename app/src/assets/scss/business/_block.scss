@@ -17,11 +17,6 @@
 
     &--open {
       opacity: 1;
-      z-index: 205;
-    }
-
-    &--top.block__popover--open {
-      z-index: 206;
     }
 
     & > .block__icons {

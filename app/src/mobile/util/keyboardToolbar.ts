@@ -391,6 +391,7 @@ export const showKeyboardToolbar = () => {
         return;
     }
     toolbarElement.classList.remove("fn__none");
+    toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {
         modelElement.style.paddingBottom = "42px";

@@ -254,7 +254,6 @@ ${(Lute.New()).MarkdownStr("", data.shorthandContent)}
         }
 
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
-        window.siyuan.menus.menu.element.style.zIndex = "221";  // 移动端被右侧栏遮挡
     }
 
     private remove(id?: string) {

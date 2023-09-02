@@ -30,6 +30,7 @@ class App {
         addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
         window.siyuan = {
+            zIndex: 10,
             transactions: [],
             reqIds: {},
             backStack: [],

@@ -156,7 +156,7 @@
   background-color: var(--b3-theme-surface);
   height: 100vh;
   width: 100vw;
-  z-index: 220;
+  z-index: 6;
   transform: translateX(-100vw);
   transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
@@ -239,7 +239,7 @@
 }
 
 #menu {
-  z-index: 220;
+  z-index: 6;
   transform: translateX(100vw);
   top: 0;
 
@@ -261,7 +261,6 @@
   box-sizing: border-box;
   height: 42px;
   background: var(--b3-theme-background);
-  z-index: 306;
   display: flex;
   border-top: 1px solid var(--b3-theme-surface-lighter);
   overflow: hidden;

@@ -467,7 +467,6 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                         }
                     }, config);
                 });
-                window.siyuan.menus.menu.element.style.zIndex = "220";
                 window.siyuan.menus.menu.fullscreen();
                 event.stopPropagation();
                 event.preventDefault();
@@ -484,7 +483,6 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                     config.page = 1;
                     updateSearchResult(config, element, true);
                 });
-                window.siyuan.menus.menu.element.style.zIndex = "220";
                 window.siyuan.menus.menu.fullscreen();
                 event.stopPropagation();
                 event.preventDefault();

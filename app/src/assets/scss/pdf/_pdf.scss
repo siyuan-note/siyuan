@@ -321,6 +321,7 @@
   align-items: center;
   flex-wrap: wrap;
   overflow: initial;
+  z-index: 1;
 
   #findInput {
     width: 120px;
@@ -337,6 +338,7 @@
   top: 36px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  z-index: 1;
 
   .b3-menu__items {
     max-height: 60vh;

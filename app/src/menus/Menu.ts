@@ -134,13 +134,14 @@ export class Menu {
         } else {
             window.addEventListener(this.wheelEvent, this.preventDefault, {passive: false});
         }
-
+        this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
         setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
         this.element.classList.add("b3-menu--fullscreen");
+        this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");
         this.element.classList.remove("fn__none");
         window.addEventListener("touchmove", this.preventDefault, {passive: false});

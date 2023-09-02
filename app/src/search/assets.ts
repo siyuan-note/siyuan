@@ -390,7 +390,6 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
         }
     }).element);
     /// #if MOBILE
-    window.siyuan.menus.menu.element.style.zIndex = "221";
     window.siyuan.menus.menu.fullscreen();
     /// #else
     const rect = target.getBoundingClientRect();
@@ -541,7 +540,6 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
         },
     }).element);
     /// #if MOBILE
-    window.siyuan.menus.menu.element.style.zIndex = "221";
     window.siyuan.menus.menu.fullscreen();
     /// #else
     const rect = target.getBoundingClientRect();

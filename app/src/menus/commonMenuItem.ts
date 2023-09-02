@@ -290,7 +290,6 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
                             }).element);
                         });
                     }
-                    window.siyuan.menus.menu.element.style.zIndex = "310";
                     window.siyuan.menus.menu.element.classList.add("b3-menu--list");
                     window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
                 });

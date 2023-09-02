@@ -286,7 +286,7 @@ export const progressStatus = (data: IWebSocketData) => {
 export const progressLoading = (data: IWebSocketData) => {
     let progressElement = document.getElementById("progress");
     if (!progressElement) {
-        document.body.insertAdjacentHTML("beforeend", '<div id="progress"></div>');
+        document.body.insertAdjacentHTML("beforeend", `<div id="progress" style="z-index: ${++window.siyuan.zIndex}"></div>`);
         progressElement = document.getElementById("progress");
     }
     // code 0: 有进度；1: 无进度；2: 关闭
@@ -295,8 +295,8 @@ export const progressLoading = (data: IWebSocketData) => {
         return;
     }
     if (data.code === 0) {
-        progressElement.innerHTML = `<div class="b3-dialog__scrim" style="z-index:400;opacity: 1"></div>
-<div style="position: fixed;top: 45vh;width: 70vw;left: 15vw;color:var(--b3-theme-on-surface);z-index:400;">
+        progressElement.innerHTML = `<div class="b3-dialog__scrim" style="opacity: 1"></div>
+<div style="position: fixed;top: 45vh;width: 70vw;left: 15vw;color:var(--b3-theme-on-surface);">
     <div style="text-align: right">${data.data.current}/${data.data.total}</div>
     <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color:#fff;"><div style="width: ${data.data.current / data.data.total * 100}%;transition: var(--b3-transition);background-color: var(--b3-theme-primary);height: 8px;"></div></div>
     <div>${data.msg}</div>
@@ -305,8 +305,8 @@ export const progressLoading = (data: IWebSocketData) => {
         if (progressElement.lastElementChild) {
             progressElement.lastElementChild.lastElementChild.innerHTML = data.msg;
         } else {
-            progressElement.innerHTML = `<div class="b3-dialog__scrim" style="z-index:400;opacity: 1"></div>
-<div style="position: fixed;top: 45vh;width: 70vw;left: 15vw;color:var(--b3-theme-on-surface);z-index:400;">
+            progressElement.innerHTML = `<div class="b3-dialog__scrim" style="opacity: 1"></div>
+<div style="position: fixed;top: 45vh;width: 70vw;left: 15vw;color:var(--b3-theme-on-surface);">
     <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color:#fff;"><div style="background-color: var(--b3-theme-primary);height: 8px;background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);animation: stripMove 450ms linear infinite;background-size: 50px 50px;"></div></div>
     <div>${data.msg}</div>
 </div>`;

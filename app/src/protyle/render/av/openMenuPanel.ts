@@ -47,7 +47,7 @@ export const openMenuPanel = (options: {
             html = getDateHTML(data.view, options.cellElements);
         }
 
-        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel">
+        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex}">
     <div class="b3-dialog__scrim" data-type="close"></div>
     <div class="b3-menu">${html}</div>
 </div>`);

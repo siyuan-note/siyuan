@@ -751,8 +751,6 @@ func (parser *PdfAssetParser) getTextPageWorker(id int, instance pdfium.Pdfium, 
 
 // Parse will parse a PDF document using PDFium webassembly module using a worker pool
 func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
-	return nil
-
 	now := time.Now()
 	if !strings.HasSuffix(strings.ToLower(absPath), ".pdf") {
 		return

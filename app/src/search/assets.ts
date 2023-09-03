@@ -5,7 +5,7 @@ import * as path from "path";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {upDownHint} from "../util/upDownHint";
-import {escapeHtml} from "../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !MOBILE
 import {getQueryTip} from "./util";
@@ -278,7 +278,7 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
 <span class="fn__space"></span>
 <span class="b3-list-item__text">${item.content}</span>
 <span class="b3-list-item__meta">${item.hSize}</span>
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis b3-tooltips__w b3-tooltips" aria-label="${item.path}">${item.name}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(item.path)}">${item.name}</span>
 </div>`;
             });
             const previewElement = element.querySelector("#searchAssetPreview");

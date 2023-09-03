@@ -553,7 +553,8 @@ func copyTempAsset(absPath string) (ret string) {
 	filelock.RWLock.Lock()
 	defer filelock.RWLock.Unlock()
 
-	ret = filepath.Join(dir, gulu.Rand.String(7)+".docx")
+	ext := filepath.Ext(absPath)
+	ret = filepath.Join(dir, gulu.Rand.String(7)+ext)
 	if err := gulu.File.Copy(absPath, ret); nil != err {
 		logging.LogErrorf("copy [src=%s, dest=%s] failed: %s", absPath, ret, err)
 		return
@@ -751,6 +752,11 @@ func (parser *PdfAssetParser) getTextPageWorker(id int, instance pdfium.Pdfium, 
 
 // Parse will parse a PDF document using PDFium webassembly module using a worker pool
 func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
+	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+		// PDF asset content searching is not supported on mobile platforms
+		return
+	}
+
 	now := time.Now()
 	if !strings.HasSuffix(strings.ToLower(absPath), ".pdf") {
 		return
@@ -778,9 +784,6 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	cores := runtime.NumCPU()
 	if 4 < cores {
 		cores = 4 // Limit memory usage
-		if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
-			cores = 1 // Reduce the memory usage of PDF asset file content parsing on the mobile https://github.com/siyuan-note/siyuan/issues/9079
-		}
 	}
 
 	pool, err := webassembly.Init(webassembly.Config{

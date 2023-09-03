@@ -400,6 +400,8 @@ func (searcher *AssetsSearcher) FullIndex() {
 			return nil
 		}
 
+		logging.LogInfof("parsing asset content [%s]", absPath)
+
 		result := parser.Parse(absPath)
 		if nil == result {
 			return nil

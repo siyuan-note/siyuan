@@ -8,6 +8,7 @@
   color: var(--b3-theme-on-background);
   transition: box-shadow 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
   background-color: var(--b3-theme-background);
+  -webkit-appearance: none;
 
   &:not(.b3-text-field--text):hover {
     box-shadow: inset 0 0 0 .6px var(--b3-theme-on-background);

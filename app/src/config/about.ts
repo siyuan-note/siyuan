@@ -67,13 +67,13 @@ export const about = {
             <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
         </button>
     </label>
-    <label class="b3-label fn__flex${window.siyuan.config.accessAuthCode ? "" : " fn__none"}">
+    <label class="b3-label fn__flex${!window.siyuan.config.accessAuthCode || isBrowser() ? " fn__none" : ""}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about7}
             <div class="b3-label__text">${window.siyuan.languages.about8}</div>
         </div>
         <div class="fn__space"></div>
-        <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 0 ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
     </label>
 </div>
 <label class="b3-label config__item${isBrowser() ? " fn__none" : " fn__flex"}">
@@ -309,6 +309,10 @@ export const about = {
                     cb: exitSiYuan
                 });
             });
+        });
+        const lockScreenModeElement = about.element.querySelector("#lockScreenMode") as HTMLInputElement;
+        lockScreenModeElement.addEventListener("change", () => {
+            fetchPost("/api/system/setFollowSystemLockScreen", {lockScreenMode: lockScreenModeElement.checked ? 1 : 0});
         });
         const googleAnalyticsElement = about.element.querySelector("#googleAnalytics") as HTMLInputElement;
         googleAnalyticsElement.addEventListener("change", () => {

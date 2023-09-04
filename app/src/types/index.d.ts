@@ -635,6 +635,7 @@ interface IConfig {
     }
     openHelp: boolean
     system: {
+        lockScreenMode: number   // 0：手动，1：手动+跟随系统
         networkProxy: {
             host: string
             port: string

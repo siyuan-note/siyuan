@@ -29,7 +29,7 @@
 <div id="editor" class="fn__none fn__flex-1"></div>
 <div id="empty" class="b3-list--mobile"></div>
 <div id="sidebar" class="side-panel fn__flex-column">
-    <div class="toolbar toolbar--border">
+    <div class="toolbar toolbar--border" style="-webkit-user-select: none">
         <svg data-type="sidebar-file-tab" class="toolbar__icon toolbar__icon--active"><use xlink:href="#iconFiles"></use></svg>
         <svg data-type="sidebar-outline-tab" class="toolbar__icon"><use xlink:href="#iconAlignCenter"></use></svg>
         <svg data-type="sidebar-bookmark-tab" class="toolbar__icon"><use xlink:href="#iconBookmark"></use></svg>

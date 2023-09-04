@@ -918,6 +918,8 @@
   "about4": "Open browser",
   "about5": "Access authorization code",
   "about6": "After configuration, it will be used as the access authentication password, leave it blank to close the authentication",
+  "about7": "Follow system lock screen",
+  "about8": "After enabling, the application will be automatically locked when locking the system screen",
   "about9": "Automatically upload error messages and diagnostic data",
   "about10": "After enabling, it will automatically upload error information and diagnostic data through the <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, which does not involve personal privacy data so that developers can fix bugs. The application will be closed automatically after modification, please restart manually",
   "about11": "Network serving",

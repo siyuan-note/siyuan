@@ -1024,3 +1024,11 @@ powerMonitor.on("shutdown", () => {
         net.fetch(getServer(currentURL.port) + "/api/system/exit", {method: "POST"});
     });
 });
+
+
+powerMonitor.on("lock-screen", () => {
+    writeLog("system lock-screen");
+    BrowserWindow.getAllWindows().forEach(item => {
+        item.webContents.send("siyuan-send_windows", {cmd: "lockscreenByMode"});
+    });
+});

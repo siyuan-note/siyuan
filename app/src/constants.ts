@@ -32,7 +32,7 @@ export abstract class Constants {
     public static readonly SIYUAN_INIT: string = "siyuan-init";
     public static readonly SIYUAN_OPENURL: string = "siyuan-openurl";
     public static readonly SIYUAN_OPENWINDOW: string = "siyuan-openwindow";
-    public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send_windows"; // 主窗口和各新窗口之间的通信，{cmd: "closetab"|"lockscreen", data: {}})
+    public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send_windows"; // 主窗口和各新窗口之间的通信，{cmd: "closetab"|"lockscreen"|"lockscreenByMode", data: {}})
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
     public static readonly SIYUAN_EXPORT_CLOSE: string = "siyuan-export-close";

@@ -281,6 +281,22 @@ func setAccessAuthCode(c *gin.Context) {
 	return
 }
 
+func setFollowSystemLockScreen(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	lockScreenMode := int(arg["lockScreenMode"].(float64))
+
+	model.Conf.System.LockScreenMode = lockScreenMode
+	model.Conf.Save()
+	return
+}
+
 func getSysFonts(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

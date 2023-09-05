@@ -285,12 +285,12 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 			}
 
 			parentDocPath := strings.TrimSuffix(file.path, "/") + ".sy"
-			subDocFile := box.Stat(parentDocPath)
-			if nil == subDocFile {
+			parentDocFile := box.Stat(parentDocPath)
+			if nil == parentDocFile {
 				continue
 			}
 			if ial := box.docIAL(parentDocPath); nil != ial {
-				doc := box.docFromFileInfo(subDocFile, ial)
+				doc := box.docFromFileInfo(parentDocFile, ial)
 				subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, file.path))
 				if nil == err {
 					for _, subFile := range subFiles {
@@ -313,6 +313,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 					docs = append(docs, doc)
 				}
 			}
+
 			continue
 		}
 
@@ -992,7 +993,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	tree, err = createDoc(box.ID, p, title, dom)
+	tree, err = createDoc(box.ID, p, title, dom, true)
 	if nil != err {
 		return
 	}
@@ -1001,7 +1002,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	return
 }
 
-func CreateWithMarkdown(boxID, hPath, md, parentID string) (id string, err error) {
+func CreateWithMarkdown(boxID, hPath, md, parentID string, showInDocTree bool) (id string, err error) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		err = errors.New(Conf.Language(0))
@@ -1011,7 +1012,7 @@ func CreateWithMarkdown(boxID, hPath, md, parentID string) (id string, err error
 	WaitForWritingFiles()
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	id, _, err = createDocsByHPath(box.ID, hPath, dom, parentID)
+	id, _, err = createDocsByHPath(box.ID, hPath, dom, parentID, showInDocTree)
 	return
 }
 
@@ -1414,7 +1415,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	id, existed, err := createDocsByHPath(box.ID, hPath, "", "")
+	id, existed, err := createDocsByHPath(box.ID, hPath, "", "", true)
 	if nil != err {
 		return
 	}
@@ -1459,7 +1460,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	return
 }
 
-func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
+func createDoc(boxID, p, title, dom string, showInDocTree bool) (tree *parse.Tree, err error) {
 	title = gulu.Str.RemoveInvisible(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
@@ -1529,6 +1530,10 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph())
+	}
+
+	if !showInDocTree {
+		tree.Root.SetIALAttr("custom-hidden", "true")
 	}
 
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}

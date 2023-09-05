@@ -66,6 +66,7 @@ type File struct {
 	HCtime       string `json:"hCtime"`
 	Sort         int    `json:"sort"`
 	SubFileCount int    `json:"subFileCount"`
+	Hidden       bool   `json:"hidden"`
 
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`
@@ -231,7 +232,7 @@ type FileInfo struct {
 	isdir bool
 }
 
-func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount int) (ret []*File, totals int, err error) {
+func ListDocTree(boxID, path string, sortMode int, flashcard, showHidden bool, maxListCount int) (ret []*File, totals int, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -290,6 +291,10 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 				continue
 			}
 			if ial := box.docIAL(parentDocPath); nil != ial {
+				if !showHidden && "true" == ial["custom-hidden"] {
+					continue
+				}
+
 				doc := box.docFromFileInfo(parentDocFile, ial)
 				subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, file.path))
 				if nil == err {
@@ -323,6 +328,10 @@ func ListDocTree(boxID, path string, sortMode int, flashcard bool, maxListCount 
 		}
 
 		if ial := box.docIAL(file.path); nil != ial {
+			if !showHidden && "true" == ial["custom-hidden"] {
+				continue
+			}
+
 			doc := box.docFromFileInfo(file, ial)
 
 			if flashcard {

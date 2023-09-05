@@ -2,7 +2,7 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {Constants} from "../constants";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
-import {hasClosestByAttribute} from "../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasTopClosestByClassName} from "../protyle/util/hasClosest";
 import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
@@ -12,10 +12,10 @@ import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {addGA, initAssets, loadAssets} from "../util/assets";
 import {bootSync} from "../dialog/processSystem";
-import {initMessage} from "../dialog/message";
+import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage} from "../protyle/util/compatibility";
+import {getLocalStorage, writeText} from "../protyle/util/compatibility";
 import {openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
 import {initRightMenu} from "./menu";
@@ -59,6 +59,12 @@ class App {
         window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
                 window.siyuan.menus.menu.remove();
+            }
+            const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
+            if (copyElement) {
+                writeText(copyElement.parentElement.nextElementSibling.textContent.trimEnd());
+                showMessage(window.siyuan.languages.copied, 2000);
+                event.preventDefault();
             }
         });
         window.addEventListener("beforeunload", () => {

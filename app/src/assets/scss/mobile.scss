@@ -156,7 +156,7 @@
   background-color: var(--b3-theme-surface);
   height: 100vh;
   width: 100vw;
-  z-index: 6;
+  z-index: 7;
   transform: translateX(-100vw);
   transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
 
@@ -171,7 +171,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 219;
+  z-index: 6;
   background-color: #000;
   opacity: 0;
   transition: opacity 150ms linear;
@@ -239,7 +239,7 @@
 }
 
 #menu {
-  z-index: 6;
+  z-index: 7;
   transform: translateX(100vw);
   top: 0;
 

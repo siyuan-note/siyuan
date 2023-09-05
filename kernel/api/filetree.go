@@ -481,10 +481,10 @@ func createDocWithMd(c *gin.Context) {
 		parentID = parentIDArg.(string)
 	}
 
-	showInDocTree := true
-	showInDocTreeArg := arg["showInDocTree"]
-	if nil != showInDocTreeArg {
-		showInDocTree = showInDocTreeArg.(bool)
+	hidden := true
+	hiddenArg := arg["hidden"]
+	if nil != hiddenArg {
+		hidden = hiddenArg.(bool)
 	}
 
 	hPath := arg["path"].(string)
@@ -502,7 +502,7 @@ func createDocWithMd(c *gin.Context) {
 		hPath = "/" + hPath
 	}
 
-	id, err := model.CreateWithMarkdown(notebook, hPath, markdown, parentID, showInDocTree)
+	id, err := model.CreateWithMarkdown(notebook, hPath, markdown, parentID, hidden)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -510,7 +510,7 @@ func createDocWithMd(c *gin.Context) {
 	}
 	ret.Data = id
 
-	if !showInDocTree {
+	if !hidden {
 		return
 	}
 

@@ -4,6 +4,7 @@ import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 import {getCurrentEditor} from "../editor";
 import {fileAnnotationRefMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
+import {isInIOS} from "../../protyle/util/compatibility";
 
 let clientX: number;
 let clientY: number;
@@ -27,7 +28,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const editor = getCurrentEditor();
     const target = event.target as HTMLElement;
     if (editor && typeof yDiff === "undefined" && new Date().getTime() - time > 900 &&
-        target.tagName === "SPAN" && window.webkit?.messageHandlers &&
+        target.tagName === "SPAN" && isInIOS() &&
         !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
         // ios 长按行内元素弹出菜单
         const types = (target.getAttribute("data-type") || "").split(" ");

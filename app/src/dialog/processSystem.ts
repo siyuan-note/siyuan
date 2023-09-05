@@ -22,6 +22,7 @@ import {setEmpty} from "../mobile/util/setEmpty";
 import {hideElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
+import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
 
 const updateTitle = (rootID: string, tab: Tab) => {
     fetchPost("/api/block/getDocInfo", {
@@ -141,7 +142,7 @@ export const kernelError = () => {
         return;
     }
     let iosReStart = "";
-    if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
+    if (isInIOS()) {
         iosReStart = `<div class="fn__hr"></div><div class="fn__flex"><div class="fn__flex-1"></div><button class="b3-button">${window.siyuan.languages.retry}</button></div>`;
     }
     const dialog = new Dialog({
@@ -181,7 +182,7 @@ export const exitSiYuan = () => {
                         /// #if !BROWSER
                         ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
                         /// #else
-                        if (["ios", "android"].includes(window.siyuan.config.system.container) && (window.webkit?.messageHandlers || window.JSAndroid)) {
+                        if (isInIOS() || isInAndroid()) {
                             window.location.href = "siyuan://api/system/exit";
                         }
                         /// #endif
@@ -221,7 +222,7 @@ export const exitSiYuan = () => {
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
             /// #else
-            if (["ios", "android"].includes(window.siyuan.config.system.container) && (window.webkit?.messageHandlers || window.JSAndroid)) {
+            if (isInIOS() || isInAndroid()) {
                 window.location.href = "siyuan://api/system/exit";
             }
             /// #endif

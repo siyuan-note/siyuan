@@ -8,7 +8,7 @@ export const openByMobile = (uri: string) => {
     }
     if (window.siyuan.config.system.container === "ios") {
         window.location.href = uri;
-    } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+    } else if (isInAndroid()) {
         window.JSAndroid.openExternal(uri);
     } else {
         window.open(uri);
@@ -16,7 +16,7 @@ export const openByMobile = (uri: string) => {
 };
 
 export const readText = () => {
-    if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
+    if (isInAndroid()) {
         return window.JSAndroid.readClipboard();
     }
     return navigator.clipboard.readText();
@@ -29,19 +29,19 @@ export const writeText = (text: string) => {
     }
     try {
         // navigator.clipboard.writeText 抛出异常不进入 catch，这里需要先处理移动端复制
-        if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
+        if (isInAndroid()) {
             window.JSAndroid.writeClipboard(text);
             return;
         }
-        if ("ios" === window.siyuan.config.system.container && window.webkit?.messageHandlers) {
+        if (isInIOS()) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
             return;
         }
         navigator.clipboard.writeText(text);
     } catch (e) {
-        if (window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers) {
+        if (isInIOS()) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
-        } else if (window.siyuan.config.system.container === "android" && window.JSAndroid) {
+        } else if (isInAndroid()) {
             window.JSAndroid.writeClipboard(text);
         } else {
             const textElement = document.createElement("textarea");
@@ -96,6 +96,14 @@ export const isHuawei = () => {
 export const isMac = () => {
     return navigator.platform.toUpperCase().indexOf("MAC") > -1;
 };
+
+export const isInAndroid = () => {
+    return window.siyuan.config.system.container === "android" && window.JSAndroid
+}
+
+export const isInIOS = () => {
+    return window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers
+}
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {

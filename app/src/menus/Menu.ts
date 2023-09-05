@@ -253,7 +253,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         || event.altKey || event.shiftKey || isCtrl(event)) {
         return false;
     }
-    const target = event.target as HTMLElement
+    const target = event.target as HTMLElement;
     if (window.siyuan.menus.menu.element.contains(target) && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return false;
     }

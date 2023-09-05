@@ -1308,10 +1308,10 @@ export const sendGlobalShortcut = (app: App) => {
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
             if (command.globalCallback) {
-                hotkeys.push(command.customHotkey)
+                hotkeys.push(command.customHotkey);
             }
-        })
-    })
+        });
+    });
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
         languages: window.siyuan.languages["_trayMenu"],
         id: getCurrentWindow().id,

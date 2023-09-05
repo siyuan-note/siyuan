@@ -822,7 +822,7 @@ app.whenReady().then(() => {
                     });
                 });
             }
-        })
+        });
     });
     ipcMain.on("siyuan-send_windows", (event, data) => {
         BrowserWindow.getAllWindows().forEach(item => {

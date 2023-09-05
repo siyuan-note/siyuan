@@ -115,4 +115,4 @@ export const windowKeyUp  = (app: App,event:KeyboardEvent, switchDialog:Dialog) 
             switchDialog = undefined;
         }
     }
-}
+};

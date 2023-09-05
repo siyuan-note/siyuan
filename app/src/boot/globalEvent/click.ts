@@ -73,4 +73,4 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     ) {
         currentPDFViewerObject.findBar.close();
     }
-}
+};

@@ -896,6 +896,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 	now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
 	for _, link := range assetLinks {
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/export/temp/", "")
+		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/", "") // Exporting PDF embedded asset files as attachments fails https://github.com/siyuan-note/siyuan/issues/7414#issuecomment-1704573557
 		link.URI, _ = url.PathUnescape(link.URI)
 		if idx := strings.Index(link.URI, "?"); 0 < idx {
 			link.URI = link.URI[:idx]

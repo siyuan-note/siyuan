@@ -149,7 +149,6 @@ export const bindCardEvent = (options: {
             });
         });
     }
-    (options.element.firstElementChild as HTMLElement).style.zIndex = "200";
     options.element.setAttribute("data-key", window.siyuan.config.keymap.general.riffCard.custom);
     const countElement = options.element.querySelector('[data-type="count"]');
     const actionElements = options.element.querySelectorAll(".card__action");

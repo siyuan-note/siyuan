@@ -510,6 +510,10 @@ func createDocWithMd(c *gin.Context) {
 	}
 	ret.Data = id
 
+	if !showInDocTree {
+		return
+	}
+
 	box := model.Conf.Box(notebook)
 	b, _ := model.GetBlock(id, nil)
 	p := b.Path
@@ -648,7 +652,7 @@ func listDocsByPath(c *gin.Context) {
 			maxListCount = math.MaxInt
 		}
 	}
-	showHidden := true
+	showHidden := false
 	if arg["showHidden"] != nil {
 		showHidden = arg["showHidden"].(bool)
 	}

@@ -96,7 +96,7 @@ func heading2Doc(c *gin.Context) {
 
 	name := path.Base(targetPath)
 	box := model.Conf.Box(targetNotebook)
-	files, _, _ := model.ListDocTree(targetNotebook, path.Dir(targetPath), util.SortModeUnassigned, false, model.Conf.FileTree.MaxListCount)
+	files, _, _ := model.ListDocTree(targetNotebook, path.Dir(targetPath), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 	evt := util.NewCmdResult("heading2doc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":            box,
@@ -141,7 +141,7 @@ func li2Doc(c *gin.Context) {
 
 	name := path.Base(targetPath)
 	box := model.Conf.Box(targetNotebook)
-	files, _, _ := model.ListDocTree(targetNotebook, path.Dir(targetPath), util.SortModeUnassigned, false, model.Conf.FileTree.MaxListCount)
+	files, _, _ := model.ListDocTree(targetNotebook, path.Dir(targetPath), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 	evt := util.NewCmdResult("li2doc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":            box,
@@ -449,7 +449,7 @@ func createDailyNote(c *gin.Context) {
 	evt.AppId = app
 
 	name := path.Base(p)
-	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, model.Conf.FileTree.MaxListCount)
+	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 	evt.Data = map[string]interface{}{
 		"box":   box,
 		"path":  p,
@@ -648,8 +648,12 @@ func listDocsByPath(c *gin.Context) {
 			maxListCount = math.MaxInt
 		}
 	}
+	showHidden := true
+	if arg["showHidden"] != nil {
+		showHidden = arg["showHidden"].(bool)
+	}
 
-	files, totals, err := model.ListDocTree(notebook, p, sortMode, flashcard, maxListCount)
+	files, totals, err := model.ListDocTree(notebook, p, sortMode, flashcard, showHidden, maxListCount)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -760,7 +764,7 @@ func getDoc(c *gin.Context) {
 func pushCreate(box *model.Box, p, treeID string, arg map[string]interface{}) {
 	evt := util.NewCmdResult("create", 0, util.PushModeBroadcast)
 	name := path.Base(p)
-	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, model.Conf.FileTree.MaxListCount)
+	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 	evt.Data = map[string]interface{}{
 		"box":   box,
 		"path":  p,

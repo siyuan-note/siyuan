@@ -111,7 +111,7 @@ func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error)
 }
 
 func buildBlockChildren(block *Block) (err error) {
-	files, _, err := ListDocTree(block.Box, block.Path, util.SortModeUnassigned, false, Conf.FileTree.MaxListCount)
+	files, _, err := ListDocTree(block.Box, block.Path, util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
 	if nil != err {
 		return
 	}

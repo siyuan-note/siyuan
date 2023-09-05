@@ -518,6 +518,13 @@ func removeAttributeViewBlock(operation *Operation) (err error) {
 
 	for _, blockID := range operation.SrcIDs {
 		view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
+
+		if bt := treenode.GetBlockTree(blockID); nil != bt && "d" == bt.Type {
+			if tree, _ := loadTreeByBlockID(blockID); nil != tree {
+				tree.Root.RemoveIALAttr("custom-hidden")
+				writeJSONQueue(tree)
+			}
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

@@ -1039,7 +1039,9 @@
     "task.history.database.index.commit": "Execute history database index commit",
     "task.database.index.embedBlock": "Execute database index embed block",
     "task.reload.ui": "Execute reload UI",
-    "task.upgrade.userGuide": "Execute upgrade user guide"
+    "task.upgrade.userGuide": "Execute upgrade user guide",
+    "task.asset.database.index.full": "Execute asset database rebuild index",
+    "task.asset.database.index.commit": "Execute asset database index commit"
   },
   "_trayMenu": {
     "showWindow": "Show Window",

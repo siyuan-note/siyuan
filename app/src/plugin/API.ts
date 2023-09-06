@@ -38,7 +38,7 @@ openWindow = (options: {
         id: string,     // 块 id
     },
 }) => {
-    if (options.doc.id) {
+    if (options.doc && options.doc.id) {
         openNewWindowById(options.doc.id, {position: options.position, width: options.width, height: options.height});
         return;
     }

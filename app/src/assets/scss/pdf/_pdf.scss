@@ -38,6 +38,8 @@
   }
 
   &__util {
+    z-index: 2;
+
     &--hide .pdf__util__hide {
       display: none;
     }

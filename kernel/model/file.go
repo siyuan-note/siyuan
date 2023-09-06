@@ -232,7 +232,7 @@ type FileInfo struct {
 	isdir bool
 }
 
-func ListDocTree(boxID, path string, sortMode int, flashcard, showHidden bool, maxListCount int) (ret []*File, totals int, err error) {
+func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden bool, maxListCount int) (ret []*File, totals int, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -267,7 +267,7 @@ func ListDocTree(boxID, path string, sortMode int, flashcard, showHidden bool, m
 
 	var files []*FileInfo
 	start := time.Now()
-	files, totals, err = box.Ls(path)
+	files, totals, err = box.Ls(listPath)
 	if nil != err {
 		return
 	}
@@ -299,6 +299,11 @@ func ListDocTree(boxID, path string, sortMode int, flashcard, showHidden bool, m
 				subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, file.path))
 				if nil == err {
 					for _, subFile := range subFiles {
+						subDocFilePath := path.Join(file.path, subFile.Name())
+						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL["custom-hidden"] {
+							continue
+						}
+
 						if strings.HasSuffix(subFile.Name(), ".sy") {
 							doc.SubFileCount++
 						}

@@ -109,6 +109,33 @@ type Value struct {
 	Phone   *ValuePhone    `json:"phone,omitempty"`
 }
 
+func (value *Value) String() string {
+	switch value.Type {
+	case KeyTypeBlock:
+		return value.Block.Content
+	case KeyTypeText:
+		return value.Text.Content
+	case KeyTypeNumber:
+		return value.Number.FormattedContent
+	case KeyTypeDate:
+		return value.Date.FormattedContent
+	case KeyTypeMSelect:
+		var ret []string
+		for _, v := range value.MSelect {
+			ret = append(ret, v.Content)
+		}
+		return strings.Join(ret, " ")
+	case KeyTypeURL:
+		return value.URL.Content
+	case KeyTypeEmail:
+		return value.Email.Content
+	case KeyTypePhone:
+		return value.Phone.Content
+	default:
+		return ""
+	}
+}
+
 func (value *Value) ToJSONString() string {
 	data, err := gulu.JSON.MarshalJSON(value)
 	if nil != err {

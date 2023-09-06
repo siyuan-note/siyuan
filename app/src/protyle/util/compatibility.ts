@@ -94,20 +94,24 @@ export const isHuawei = () => {
 };
 
 export const isIPhone = () => {
-    return navigator.userAgent.indexOf("iPhone") > -1
-}
+    return navigator.userAgent.indexOf("iPhone") > -1;
+};
+
+export const isIPad = () => {
+    return navigator.userAgent.indexOf("iPad") > -1;
+};
 
 export const isMac = () => {
     return navigator.platform.toUpperCase().indexOf("MAC") > -1;
 };
 
 export const isInAndroid = () => {
-    return window.siyuan.config.system.container === "android" && window.JSAndroid
-}
+    return window.siyuan.config.system.container === "android" && window.JSAndroid;
+};
 
 export const isInIOS = () => {
-    return window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers
-}
+    return window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers;
+};
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {

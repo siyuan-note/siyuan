@@ -37,7 +37,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     if (typeof yDiff === "undefined" && new Date().getTime() - time > 900 && isIPhone()) {
         // ios 长按行
         // 文档树
-        const fileItemElement = hasClosestByAttribute(target, "data-type", "navigation-root") || hasClosestByAttribute(target, "data-type", "navigation-file")
+        const fileItemElement = hasClosestByAttribute(target, "data-type", "navigation-root") || hasClosestByAttribute(target, "data-type", "navigation-file");
         if (fileItemElement) {
             if (!window.siyuan.config.readonly && fileItemElement.dataset.type === "navigation-root") {
                 initNavigationMenu(app, fileItemElement);

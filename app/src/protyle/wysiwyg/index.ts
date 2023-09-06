@@ -65,7 +65,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isCtrl, isInAndroid, isInIOS, openByMobile} from "../util/compatibility";
+import {isCtrl, isInIOS, openByMobile} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";

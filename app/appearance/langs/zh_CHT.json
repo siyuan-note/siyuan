@@ -1039,7 +1039,9 @@
     "task.history.database.index.commit": "執行歷史資料庫索引提交",
     "task.database.index.embedBlock": "執行資料庫索引嵌入塊",
     "task.reload.ui": "執行重載界面",
-    "task.upgrade.userGuide": "執行升級用戶指南"
+    "task.upgrade.userGuide": "執行升級用戶指南",
+    "task.asset.database.index.full": "執行資源文件數據庫重建索引",
+    "task.asset.database.index.commit": "執行資源文件數據庫索引提交"
   },
   "_trayMenu": {
     "showWindow": "顯示主窗口",

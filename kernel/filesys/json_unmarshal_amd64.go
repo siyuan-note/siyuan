@@ -18,13 +18,22 @@ package filesys
 
 import (
 	"github.com/bytedance/sonic"
+	"github.com/goccy/go-json"
+	"github.com/siyuan-note/logging"
 )
 
-func unmarshalJSON(data []byte, v interface{}) error {
+func unmarshalJSON(data []byte, v interface{}) (err error) {
 	//now := time.Now()
-	//defer func() {
-	//	elapsed := time.Since(now)
-	//	logging.LogInfof("[sonic] unmarshalJSON took %s", elapsed)
-	//}()
-	return sonic.Unmarshal(data, v)
+	defer func() {
+		if e := recover(); nil != e {
+			logging.LogWarnf("[sonic] unmarshalJSON failed: %s", e)
+			err = json.Unmarshal(data, v)
+		} /*else {
+			elapsed := time.Since(now)
+			logging.LogInfof("[sonic] unmarshalJSON took %s", elapsed)
+		}*/
+	}()
+
+	err = sonic.Unmarshal(data, v)
+	return
 }

@@ -66,7 +66,7 @@ export const copyPlainText = async (text: string) => {
 
 // 用户 iPhone 点击延迟/需要双击的处理
 export const getEventName = () => {
-    if (navigator.userAgent.indexOf("iPhone") > -1) {
+    if (isIPhone()) {
         return "touchstart";
     } else {
         return "click";
@@ -92,6 +92,10 @@ export const isCtrl = (event: KeyboardEvent | MouseEvent) => {
 export const isHuawei = () => {
     return window.siyuan.config.system.osPlatform.toLowerCase().indexOf("huawei") > -1;
 };
+
+export const isIPhone = () => {
+    return navigator.userAgent.indexOf("iPhone") > -1
+}
 
 export const isMac = () => {
     return navigator.platform.toUpperCase().indexOf("MAC") > -1;

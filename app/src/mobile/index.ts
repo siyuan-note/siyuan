@@ -106,7 +106,7 @@ class App {
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", (event) => {
-                handleTouchEnd(event);
+                handleTouchEnd(event, siyuanApp);
             }, false);
         });
     }

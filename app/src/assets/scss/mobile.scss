@@ -31,6 +31,16 @@
   width: 80vw;
 }
 
+.fn__flex-column[data-type="sidebar-file"] {
+  .b3-list-item {
+    -webkit-user-select: none;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}
+
 .b3-list--mobile {
 
   & > .fn__flex-column {
@@ -38,6 +48,7 @@
   }
 
   .b3-list-item {
+
     font-size: 16px;
     line-height: 40px;
 

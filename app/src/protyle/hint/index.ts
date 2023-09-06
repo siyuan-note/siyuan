@@ -30,7 +30,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
-import {isCtrl} from "../util/compatibility";
+import {isCtrl, isIPhone} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 
@@ -494,7 +494,7 @@ ${genHintItemHTML(item)}
 
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
-            if (navigator.userAgent.indexOf("iPhone") > -1) {
+            if (isIPhone()) {
                 focusByRange(range);
             }
         }

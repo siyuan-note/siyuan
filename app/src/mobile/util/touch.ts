@@ -1,10 +1,17 @@
-import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
+import {
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasTopClosestByClassName,
+    hasTopClosestByTag
+} from "../../protyle/util/hasClosest";
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
 import {getCurrentEditor} from "../editor";
 import {fileAnnotationRefMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
-import {isInIOS} from "../../protyle/util/compatibility";
+import {isIPhone} from "../../protyle/util/compatibility";
+import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
+import {App} from "../../index";
 
 let clientX: number;
 let clientY: number;
@@ -24,30 +31,49 @@ const popSide = (render = true) => {
     }
 };
 
-export const handleTouchEnd = (event: TouchEvent) => {
+export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const editor = getCurrentEditor();
     const target = event.target as HTMLElement;
-    if (editor && typeof yDiff === "undefined" && new Date().getTime() - time > 900 &&
-        target.tagName === "SPAN" && isInIOS() &&
-        !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
-        // ios 长按行内元素弹出菜单
-        const types = (target.getAttribute("data-type") || "").split(" ");
-        if (types.includes("inline-memo")) {
-            editor.protyle.toolbar.showRender(editor.protyle, target);
-        }
-        if (editor.protyle.disabled) {
+    if (typeof yDiff === "undefined" && new Date().getTime() - time > 900 && isIPhone()) {
+        // ios 长按行
+        // 文档树
+        const fileItemElement = hasClosestByAttribute(target, "data-type", "navigation-root") || hasClosestByAttribute(target, "data-type", "navigation-file")
+        if (fileItemElement) {
+            if (!window.siyuan.config.readonly && fileItemElement.dataset.type === "navigation-root") {
+                initNavigationMenu(app, fileItemElement);
+                window.siyuan.menus.menu.fullscreen("bottom");
+            } else if (fileItemElement.dataset.type === "navigation-file") {
+                const rootElement = hasTopClosestByTag(fileItemElement, "UL");
+                if (rootElement) {
+                    initFileMenu(app, rootElement.dataset.url, fileItemElement.dataset.path, fileItemElement);
+                    window.siyuan.menus.menu.fullscreen("bottom");
+                }
+            }
+            event.stopImmediatePropagation();
+            event.preventDefault();
             return;
         }
-        if (types.includes("block-ref")) {
-            refMenu(editor.protyle, target);
-        } else if (types.includes("file-annotation-ref")) {
-            fileAnnotationRefMenu(editor.protyle, target);
-        } else if (types.includes("tag")) {
-            tagMenu(editor.protyle, target);
-        } else if (types.includes("a")) {
-            linkMenu(editor.protyle, target);
+        // 内元素弹出菜单
+        if (editor && hasClosestByClassName(target, "protyle-wysiwyg") &&
+            target.tagName === "SPAN" && !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
+            const types = (target.getAttribute("data-type") || "").split(" ");
+            if (types.includes("inline-memo")) {
+                editor.protyle.toolbar.showRender(editor.protyle, target);
+            }
+            if (editor.protyle.disabled) {
+                return;
+            }
+            if (types.includes("block-ref")) {
+                refMenu(editor.protyle, target);
+            } else if (types.includes("file-annotation-ref")) {
+                fileAnnotationRefMenu(editor.protyle, target);
+            } else if (types.includes("tag")) {
+                tagMenu(editor.protyle, target);
+            } else if (types.includes("a")) {
+                linkMenu(editor.protyle, target);
+            }
+            return;
         }
-        return;
     }
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
@@ -163,7 +189,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     xDiff = undefined;
     yDiff = undefined;
     lastClientX = undefined;
-    if (navigator.userAgent.indexOf("iPhone") > -1 ||
+    if (isIPhone() ||
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;

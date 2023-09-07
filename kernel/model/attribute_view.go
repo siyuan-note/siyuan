@@ -512,6 +512,7 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 			if !gulu.Str.Contains(values.BlockID, operation.SrcIDs) {
 				tmp = append(tmp, keyValues.Values[i])
 			} else {
+				// Remove av block also remove node attr https://github.com/siyuan-note/siyuan/issues/9091#issuecomment-1709824006
 				if bt := treenode.GetBlockTree(values.BlockID); nil != bt {
 					tree := trees[bt.RootID]
 					if nil == tree {

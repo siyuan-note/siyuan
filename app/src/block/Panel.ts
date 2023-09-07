@@ -49,7 +49,6 @@ export class BlockPanel {
         this.isBacklink = options.isBacklink;
 
         this.element = document.createElement("div");
-        this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.add("block__popover");
 
         const parentElement = hasClosestByClassName(this.targetElement, "block__popover", true);
@@ -305,6 +304,7 @@ export class BlockPanel {
                         }
                     }
                     this.element.classList.add("block__popover--open");
+                    this.element.style.zIndex = (++window.siyuan.zIndex).toString();
                 } : undefined);
             } else {
                 observer.observe(item);

@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805230218-aea8icj",
 		"title": "搜索资源文件内容",
-		"updated": "20230821123142"
+		"updated": "20230903112313"
 	},
 	"Children": [
 		{
@@ -181,6 +181,68 @@
 								{
 									"Type": "NodeText",
 									"Data": ".pdf"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230903112236-sl6rni1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230903112236-sl6rni1",
+				"updated": "20230903112241"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20230903112243-pwm33kc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230903112243-pwm33kc",
+				"updated": "20230903112313"
+			},
+			"Children": [
+				{
+					"ID": "20230903112244-2ye7sed",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230903112244-2ye7sed",
+						"updated": "20230903112313"
+					},
+					"Children": [
+						{
+							"ID": "20230903112244-ux44rel",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230903112244-ux44rel",
+								"updated": "20230903112313"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Android/iOS 端不支持 PDF 资源文件内容搜索"
 								}
 							]
 						}

@@ -126,7 +126,6 @@ export class MobileTags {
                                 },
                             }).element);
                             window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
-                            window.siyuan.menus.menu.element.style.zIndex = "310";
                             event.preventDefault();
                             event.stopPropagation();
                             break;

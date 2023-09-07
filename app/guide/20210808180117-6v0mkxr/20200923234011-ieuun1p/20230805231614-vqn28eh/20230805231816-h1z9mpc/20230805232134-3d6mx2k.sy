@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20230805232134-3d6mx2k",
 		"title": "Search asset content",
-		"updated": "20230821123134"
+		"updated": "20230903112423"
 	},
 	"Children": [
 		{
@@ -179,6 +179,68 @@
 								{
 									"Type": "NodeText",
 									"Data": ".pdf"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230903112419-oart7ii",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230903112419-oart7ii",
+				"updated": "20230903112419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20230903112419-45ps71g",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230903112419-45ps71g",
+				"updated": "20230903112423"
+			},
+			"Children": [
+				{
+					"ID": "20230903112419-t7iom3o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230903112419-t7iom3o",
+						"updated": "20230903112423"
+					},
+					"Children": [
+						{
+							"ID": "20230903112419-8gd73ed",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230903112419-8gd73ed",
+								"updated": "20230903112423"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Android/iOS does not support PDF asset content search"
 								}
 							]
 						}

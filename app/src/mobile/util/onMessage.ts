@@ -30,7 +30,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case"syncing":
                 processSync(data);
-                if (data.code !== 0) {
+                if (data.code === 1) {
                     document.getElementById("toolbarSync").classList.add("fn__none");
                 }
                 break;

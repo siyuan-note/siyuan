@@ -38,11 +38,13 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         window.siyuan.layout.leftDock.hideDock();
         window.siyuan.layout.rightDock.hideDock();
     }
+
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {
         writeText(copyElement.parentElement.nextElementSibling.textContent.trimEnd());
         showMessage(window.siyuan.languages.copied, 2000);
         event.preventDefault();
+        return;
     }
 
     // 点击空白，pdf 搜索、更多消失
@@ -71,4 +73,4 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     ) {
         currentPDFViewerObject.findBar.close();
     }
-}
+};

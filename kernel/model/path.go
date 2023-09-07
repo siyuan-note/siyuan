@@ -33,7 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func createDocsByHPath(boxID, hPath, content, parentID string) (id string, existed bool, err error) {
+func createDocsByHPath(boxID, hPath, content, parentID string, hidden bool) (id string, existed bool, err error) {
 	hPath = strings.TrimSuffix(hPath, ".sy")
 	pathBuilder := bytes.Buffer{}
 	pathBuilder.WriteString("/")
@@ -51,7 +51,7 @@ func createDocsByHPath(boxID, hPath, content, parentID string) (id string, exist
 			// 如果父文档存在且 ID 一致，则直接在父文档下创建
 			id = ast.NewNodeID()
 			p := strings.TrimSuffix(preferredParent.Path, ".sy") + "/" + id + ".sy"
-			if _, err = createDoc(boxID, p, name, content); nil != err {
+			if _, err = createDoc(boxID, p, name, content, hidden); nil != err {
 				return
 			}
 		}
@@ -68,11 +68,11 @@ func createDocsByHPath(boxID, hPath, content, parentID string) (id string, exist
 			pathBuilder.WriteString(id)
 			docP := pathBuilder.String() + ".sy"
 			if isNotLast {
-				if _, err = createDoc(boxID, docP, part, ""); nil != err {
+				if _, err = createDoc(boxID, docP, part, "", hidden); nil != err {
 					return
 				}
 			} else {
-				if _, err = createDoc(boxID, docP, part, content); nil != err {
+				if _, err = createDoc(boxID, docP, part, content, hidden); nil != err {
 					return
 				}
 			}

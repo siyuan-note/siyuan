@@ -7,7 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode, setProxy} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInIOS, openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -56,26 +56,35 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
+<div class="b3-label">
+    <label class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.about5}
+            <div class="b3-label__text">${window.siyuan.languages.about6}</div>
+        </div>
+        <div class="fn__space"></div>
+        <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="authCode">
+            <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
+        </button>
+    </label>
+    <label class="b3-label fn__flex${!window.siyuan.config.accessAuthCode || isBrowser() ? " fn__none" : ""}">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.about7}
+            <div class="b3-label__text">${window.siyuan.languages.about8}</div>
+        </div>
+        <div class="fn__space"></div>
+        <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
+    </label>
+</div>
 <label class="b3-label config__item${isBrowser() ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
         <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
-      
     </div>
     <div class="fn__space"></div>
     <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
-    </button>
-</label>
-<label class="b3-label fn__flex config__item">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.about5}
-        <div class="b3-label__text">${window.siyuan.languages.about6}</div>
-    </div>
-    <div class="fn__space"></div>
-    <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="authCode">
-        <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
     </button>
 </label>
 <div class="b3-label fn__flex config__item">
@@ -140,7 +149,7 @@ export const about = {
             <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
         </button>
         <div class="fn__hr${isBrowser() ? "" : " fn__none"}"></div>
-        <button id="menuSafeQuit" class="b3-button b3-button--outline fn__block${(window.webkit?.messageHandlers || window.JSAndroid) ? "" : " fn__none"}">
+        <button id="menuSafeQuit" class="b3-button b3-button--outline fn__block${(isInIOS() || isInAndroid()) ? "" : " fn__none"}">
             <svg><use xlink:href="#iconQuit"></use></svg>${window.siyuan.languages.safeQuit}
         </button>
     </div>
@@ -299,6 +308,12 @@ export const about = {
                     errorExit: true,
                     cb: exitSiYuan
                 });
+            });
+        });
+        const lockScreenModeElement = about.element.querySelector("#lockScreenMode") as HTMLInputElement;
+        lockScreenModeElement.addEventListener("change", () => {
+            fetchPost("/api/system/setFollowSystemLockScreen", {lockScreenMode: lockScreenModeElement.checked ? 1 : 0}, () => {
+                window.siyuan.config.system.lockScreenMode = lockScreenModeElement.checked ? 1 : 0;
             });
         });
         const googleAnalyticsElement = about.element.querySelector("#googleAnalytics") as HTMLInputElement;

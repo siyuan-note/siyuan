@@ -183,13 +183,11 @@ export class MobileFiles extends Model {
                             } else if (type === "more-root") {
                                 initNavigationMenu(app, target.parentElement);
                                 window.siyuan.menus.menu.fullscreen("bottom");
-                                window.siyuan.menus.menu.element.style.zIndex = "310";
                             }
                         }
                         if (type === "more-file") {
                             initFileMenu(app, notebookId, pathString, target.parentElement);
                             window.siyuan.menus.menu.fullscreen("bottom");
-                            window.siyuan.menus.menu.element.style.zIndex = "310";
                         }
                     }
                     event.preventDefault();
@@ -239,7 +237,6 @@ export class MobileFiles extends Model {
             window.siyuan.menus.menu.append(new MenuItem(item).element);
         });
         window.siyuan.menus.menu.fullscreen("bottom");
-        window.siyuan.menus.menu.element.style.zIndex = "310";
     }
 
     private genNotebook(item: INotebook) {

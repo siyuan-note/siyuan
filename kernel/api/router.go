@@ -38,6 +38,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/system/getEmojiConf", model.CheckAuth, getEmojiConf)
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, model.CheckReadonly, setAccessAuthCode)
+	ginServer.Handle("POST", "/api/system/setFollowSystemLockScreen", model.CheckAuth, model.CheckReadonly, setFollowSystemLockScreen)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, model.CheckReadonly, setNetworkServe)
 	ginServer.Handle("POST", "/api/system/setUploadErrLog", model.CheckAuth, model.CheckReadonly, setUploadErrLog)
 	ginServer.Handle("POST", "/api/system/setAutoLaunch", model.CheckAuth, model.CheckReadonly, setAutoLaunch)
@@ -368,7 +369,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckReadonly, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckReadonly, chatGPTWithAction)
 
-	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, model.CheckReadonly, loadPetals)
+	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckReadonly, setPetalEnabled)
 
 	ginServer.Handle("POST", "/api/network/forwardProxy", model.CheckAuth, model.CheckReadonly, forwardProxy)

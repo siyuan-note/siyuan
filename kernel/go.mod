@@ -17,7 +17,6 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/Xuanwo/go-locale v1.1.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/bytedance/sonic v1.10.0
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/dgraph-io/ristretto v0.1.1
@@ -27,7 +26,7 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gabriel-vasile/mimetype v1.4.2
-	github.com/getsentry/sentry-go v0.23.0
+	github.com/getsentry/sentry-go v0.24.0
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
@@ -35,7 +34,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gofrs/flock v0.8.1
 	github.com/gorilla/websocket v1.5.0
-	github.com/imroc/req/v3 v3.41.9
+	github.com/imroc/req/v3 v3.41.11
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/klippa-app/go-pdfium v1.7.0
@@ -49,11 +48,11 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-openai v1.14.2
 	github.com/shirou/gopsutil/v3 v3.23.7
-	github.com/siyuan-note/dejavu v0.0.0-20230828123730-38af4ad7a900
+	github.com/siyuan-note/dejavu v0.0.0-20230907034025-e0913b2dc340
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
 	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524
-	github.com/siyuan-note/httpclient v0.0.0-20230828123002-29a8f9257bfc
+	github.com/siyuan-note/httpclient v0.0.0-20230907033738-6e93eb0c15a1
 	github.com/siyuan-note/logging v0.0.0-20230327073243-ebe83aec1493
 	github.com/siyuan-note/riff v0.0.0-20230728105206-f7c344346d61
 	github.com/steambap/captcha v1.4.1
@@ -62,9 +61,9 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	github.com/xuri/excelize/v2 v2.8.0
 	golang.org/x/image v0.11.0
-	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda
+	golang.org/x/mobile v0.0.0-20230901161150-52620a4a7557
 	golang.org/x/mod v0.12.0
-	golang.org/x/text v0.12.0
+	golang.org/x/text v0.13.0
 )
 
 require (
@@ -77,7 +76,8 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.44.332 // indirect
+	github.com/aws/aws-sdk-go v1.45.4 // indirect
+	github.com/bytedance/sonic v1.10.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
@@ -96,7 +96,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.1.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/google/pprof v0.0.0-20230821062121-407c9e7a662f // indirect
+	github.com/google/pprof v0.0.0-20230906154834-20cde9067b3b // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
@@ -133,9 +133,9 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/qiniu/go-sdk/v7 v7.17.1 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
-	github.com/quic-go/qtls-go1-20 v0.3.3 // indirect
+	github.com/quic-go/qtls-go1-20 v0.3.4 // indirect
 	github.com/quic-go/quic-go v0.38.1 // indirect
-	github.com/refraction-networking/utls v1.5.0 // indirect
+	github.com/refraction-networking/utls v1.5.3 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
@@ -156,12 +156,12 @@ require (
 	github.com/xuri/nfp v0.0.0-20230819163627-dc951e3ffe1a // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/arch v0.4.0 // indirect
-	golang.org/x/crypto v0.12.0 // indirect
-	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
-	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
+	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
-	golang.org/x/tools v0.12.1-0.20230815132531-74c255bcf846 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

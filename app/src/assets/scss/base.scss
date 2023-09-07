@@ -37,50 +37,19 @@
 /*
 .status: 2
 
-// 需小于 .block__popover
-// 需小于 ctrl+p https://github.com/siyuan-note/siyuan/issues/7174
 .protyle-util: 4
 
-// 引用提示需小于 .block__popover
-.protyle-hint: 201
+.protyle-hint: 5
 
-// 需小于 .block__popover https://github.com/siyuan-note/siyuan/issues/3515
-// 需大于 .protyle-hint https://github.com/siyuan-note/siyuan/pull/7247
-ctrl+p 搜索: 202
+.side-mask: 6
 
-// 需小于 .b3-menu 悬浮窗点击更多
-// 需小于 .b3-dialog https://ld246.com/article/1637204682648
-.block__popover: 205
-.block__popover--top: 206
+#menu & .side-panel: 7
 
-// 需小于 .b3-menu
-.av__panel: 209
+#windowControls: 999998
 
-// 需大于 .block__popover
-.b3-menu: 210
+.b3-snackbar: 999999
 
-// 需小于 .b3-dialog 关于中的锁屏密码设置
-#menu & .side-panel: 220
-
-// 需小于 #windowControls
-// 需大于 .protyle-util https://github.com/siyuan-note/siyuan/issues/5069
-.b3-dialog: 305
-
-// 需大于 mobile .status、.b3-dialog
-.keyboard: 306
-
-// 历史中切换笔记本需临时大于 .b3-dialog https://github.com/siyuan-note/siyuan/issues/5107
-// 移动端排序和菜单需临时大于 .side-panel https://github.com/siyuan-note/siyuan/issues/5254
-.b3-menu: 310
-
-.av__mask: 320
-
-// 需大于 .b3-dialog
-progressLoading: 400
-
-#windowControls: 502
-
-.b3-snackbar: 503
+.b3-tooltips: 1000000
 */
 
 html {
@@ -151,7 +120,7 @@ html {
 
   #windowControls {
     top: 0;
-    z-index: 502;
+    z-index: 999998;
     right: 0;
     position: relative;
     margin-left: 2px;

@@ -16,7 +16,7 @@ import {initAbout} from "../settings/about";
 import {getRecentDocs} from "./getRecentDocs";
 import {initEditor} from "../settings/editor";
 import {App} from "../../index";
-import {isHuawei} from "../../protyle/util/compatibility";
+import {isHuawei, isInAndroid, isInIOS} from "../../protyle/util/compatibility";
 
 export const popMenu = () => {
     activeBlur();
@@ -77,7 +77,7 @@ export const initRightMenu = (app: App) => {
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
         <svg class="b3-menu__icon"><use xlink:href="#iconHistory"></use></svg><span class="b3-menu__label">${window.siyuan.languages.dataHistory}</span>
     </div>
-    <div class="b3-menu__item${(window.webkit?.messageHandlers || window.JSAndroid) ? "" : " fn__none"}" id="menuSafeQuit">
+    <div class="b3-menu__item${(isInAndroid() || isInIOS()) ? "" : " fn__none"}" id="menuSafeQuit">
         <svg class="b3-menu__icon"><use xlink:href="#iconQuit"></use></svg><span class="b3-menu__label">${window.siyuan.languages.safeQuit}</span>
     </div>
     <div class="b3-menu__separator"></div>

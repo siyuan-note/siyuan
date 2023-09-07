@@ -46,6 +46,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -896,6 +897,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 	now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
 	for _, link := range assetLinks {
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/export/temp/", "")
+		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/", "") // Exporting PDF embedded asset files as attachments fails https://github.com/siyuan-note/siyuan/issues/7414#issuecomment-1704573557
 		link.URI, _ = url.PathUnescape(link.URI)
 		if idx := strings.Index(link.URI, "?"); 0 < idx {
 			link.URI = link.URI[:idx]
@@ -1784,6 +1786,86 @@ func exportTree(tree *parse.Tree, wysiwyg, expandKaTexMacros, keepFold bool,
 	}
 	for _, emptyParagraph := range emptyParagraphs {
 		emptyParagraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(editor.Zwj)})
+	}
+
+	unlinks = nil
+	// Attribute View export https://github.com/siyuan-note/siyuan/issues/8710
+	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeAttributeView != n.Type {
+			return ast.WalkContinue
+		}
+
+		avID := n.AttributeViewID
+		if avJSONPath := av.GetAttributeViewDataPath(avID); !gulu.File.IsExist(avJSONPath) {
+			return ast.WalkContinue
+		}
+
+		attrView, err := av.ParseAttributeView(avID)
+		if nil != err {
+			logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+			return ast.WalkContinue
+		}
+
+		var view *av.View
+		if "" != attrView.ViewID {
+			for _, v := range attrView.Views {
+				if v.ID == attrView.ViewID {
+					view = v
+					break
+				}
+			}
+		} else {
+			view = attrView.Views[0]
+		}
+
+		table, err := renderAttributeViewTable(attrView, view)
+		if nil != err {
+			logging.LogErrorf("render attribute view [%s] table failed: %s", avID, err)
+			return ast.WalkContinue
+		}
+
+		var aligns []int
+		for range table.Columns {
+			aligns = append(aligns, 0)
+		}
+		mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
+		mdTableHead := &ast.Node{Type: ast.NodeTableHead}
+		mdTable.AppendChild(mdTableHead)
+		mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
+		mdTableHead.AppendChild(mdTableHeadRow)
+		for _, col := range table.Columns {
+			cell := &ast.Node{Type: ast.NodeTableCell}
+			cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
+			mdTableHeadRow.AppendChild(cell)
+		}
+		for _, row := range table.Rows {
+			mdTableRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
+			mdTable.AppendChild(mdTableRow)
+			for _, cell := range row.Cells {
+				mdTableCell := &ast.Node{Type: ast.NodeTableCell}
+				mdTableRow.AppendChild(mdTableCell)
+				var val string
+				if nil != cell.Value {
+					if av.KeyTypeDate == cell.Value.Type && nil != cell.Value.Date {
+						cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone)
+					}
+
+					val = cell.Value.String()
+				}
+				mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+			}
+		}
+
+		n.InsertBefore(mdTable)
+		unlinks = append(unlinks, n)
+		return ast.WalkContinue
+	})
+	for _, n := range unlinks {
+		n.Unlink()
 	}
 	return ret
 }

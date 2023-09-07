@@ -11,7 +11,7 @@ import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 import {MenuItem} from "./Menu";
 import {App} from "../index";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {isInAndroid, updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const exportAsset = (src: string) => {
     /// #if !BROWSER
@@ -105,7 +105,7 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
 };
 
 export const copyPNG = (imgElement: HTMLImageElement) => {
-    if ("android" === window.siyuan.config.system.container && window.JSAndroid) {
+    if (isInAndroid()) {
         window.JSAndroid.writeImageClipboard(imgElement.getAttribute("src"));
         return;
     } else {

@@ -194,7 +194,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 
 	box.Index()
 	// 缓存根一级的文档树展开
-	ListDocTree(box.ID, "/", util.SortModeUnassigned, false, Conf.FileTree.MaxListCount)
+	ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
 	treenode.SaveBlockTree(false)
 	util.ClearPushProgress(100)
 

@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//go:build !(windows && amd64)
-
 package filesys
 
 import (
@@ -23,10 +21,5 @@ import (
 )
 
 func unmarshalJSON(data []byte, v interface{}) error {
-	//now := time.Now()
-	//defer func() {
-	//	elapsed := time.Since(now)
-	//	logging.LogInfof("[go-json] unmarshalJSON took %s", elapsed)
-	//}()
 	return json.Unmarshal(data, v)
 }

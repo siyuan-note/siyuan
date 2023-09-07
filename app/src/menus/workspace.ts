@@ -8,7 +8,7 @@ import {getOpenNotebookCount, originalPath, pathPosix} from "../util/pathName";
 import {mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {setStorageVal, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInIOS, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
@@ -23,6 +23,7 @@ import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {App} from "../index";
+import {isBrowser} from "../util/functions";
 
 const togglePinDock = (dock: Dock, icon: string) => {
     return {
@@ -204,12 +205,14 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 });
             });
             /// #endif
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.workspaceList,
-                icon: "iconWorkspace",
-                type: "submenu",
-                submenu: workspaceSubMenu,
-            }).element);
+            if (!isBrowser() || isInIOS() || isInAndroid()) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.workspaceList,
+                    icon: "iconWorkspace",
+                    type: "submenu",
+                    submenu: workspaceSubMenu,
+                }).element);
+            }
         }
         const layoutSubMenu: IMenu[] = [{
             iconHTML: Constants.ZWSP,

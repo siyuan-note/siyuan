@@ -56,14 +56,14 @@ export class Menu {
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
-        const parentRect = subMenuElement.parentElement.getBoundingClientRect();
-        subMenuElement.style.top = (parentRect.top - 8) + "px";
-        subMenuElement.style.left = (parentRect.right + 8) + "px";
+        const itemRect = subMenuElement.parentElement.getBoundingClientRect();
+        subMenuElement.style.top = (itemRect.top - 8) + "px";
+        subMenuElement.style.left = (itemRect.right + 8) + "px";
         subMenuElement.style.bottom = "auto";
         const rect = subMenuElement.getBoundingClientRect();
         if (rect.right > window.innerWidth) {
-            if (parentRect.left - 8 > rect.width) {
-                subMenuElement.style.left = (parentRect.left - 8 - rect.width) + "px";
+            if (itemRect.left - 8 > rect.width) {
+                subMenuElement.style.left = (itemRect.left - 8 - rect.width) + "px";
             } else {
                 subMenuElement.style.left = (window.innerWidth - rect.width) + "px";
             }
@@ -134,13 +134,14 @@ export class Menu {
         } else {
             window.addEventListener(this.wheelEvent, this.preventDefault, {passive: false});
         }
-
+        this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
         setPosition(this.element, options.x - (isLeft ? window.siyuan.menus.menu.element.clientWidth : 0), options.y, options.h, options.w);
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
         this.element.classList.add("b3-menu--fullscreen");
+        this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");
         this.element.classList.remove("fn__none");
         window.addEventListener("touchmove", this.preventDefault, {passive: false});
@@ -252,7 +253,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         || event.altKey || event.shiftKey || isCtrl(event)) {
         return false;
     }
-    const target = event.target as HTMLElement
+    const target = event.target as HTMLElement;
     if (window.siyuan.menus.menu.element.contains(target) && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return false;
     }

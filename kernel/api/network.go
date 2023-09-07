@@ -17,6 +17,9 @@
 package api
 
 import (
+	"encoding/base32"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -74,7 +77,60 @@ func forwardProxy(c *gin.Context) {
 	}
 	request.SetHeader("Content-Type", contentType)
 
-	request.SetBody(arg["payload"])
+	payloadEncoding := "json"
+	if payloadEncodingArg := arg["payloadEncoding"]; nil != payloadEncodingArg {
+		payloadEncoding = payloadEncodingArg.(string)
+	}
+
+	switch payloadEncoding {
+	case "base64":
+		fallthrough
+	case "base64-std":
+		if payload, err := base64.StdEncoding.DecodeString(arg["payload"].(string)); nil != err {
+			ret.Code = -2
+			ret.Msg = "decode base64-std payload failed: " + err.Error()
+			return
+		} else {
+			request.SetBody(payload)
+		}
+	case "base64-url":
+		if payload, err := base64.URLEncoding.DecodeString(arg["payload"].(string)); nil != err {
+			ret.Code = -2
+			ret.Msg = "decode base64-url payload failed: " + err.Error()
+			return
+		} else {
+			request.SetBody(payload)
+		}
+	case "base32":
+		fallthrough
+	case "base32-std":
+		if payload, err := base32.StdEncoding.DecodeString(arg["payload"].(string)); nil != err {
+			ret.Code = -2
+			ret.Msg = "decode base32-std payload failed: " + err.Error()
+			return
+		} else {
+			request.SetBody(payload)
+		}
+	case "base32-hex":
+		if payload, err := base32.HexEncoding.DecodeString(arg["payload"].(string)); nil != err {
+			ret.Code = -2
+			ret.Msg = "decode base32-hex payload failed: " + err.Error()
+			return
+		} else {
+			request.SetBody(payload)
+		}
+	case "hex":
+		if payload, err := hex.DecodeString(arg["payload"].(string)); nil != err {
+			ret.Code = -2
+			ret.Msg = "decode hex payload failed: " + err.Error()
+			return
+		} else {
+			request.SetBody(payload)
+		}
+	case "text":
+	default:
+		request.SetBody(arg["payload"])
+	}
 
 	started := time.Now()
 	resp, err := request.Send(method, destURL)
@@ -90,16 +146,45 @@ func forwardProxy(c *gin.Context) {
 		ret.Msg = "read response body failed: " + err.Error()
 		return
 	}
-	body := string(bodyData)
+
 	elapsed := time.Now().Sub(started)
 
+	responseEncoding := "text"
+	if responseEncodingArg := arg["responseEncoding"]; nil != responseEncodingArg {
+		responseEncoding = responseEncodingArg.(string)
+	}
+
+	body := ""
+	switch responseEncoding {
+	case "base64":
+		fallthrough
+	case "base64-std":
+		body = base64.StdEncoding.EncodeToString(bodyData)
+	case "base64-url":
+		body = base64.URLEncoding.EncodeToString(bodyData)
+	case "base32":
+		fallthrough
+	case "base32-std":
+		body = base32.StdEncoding.EncodeToString(bodyData)
+	case "base32-hex":
+		body = base32.HexEncoding.EncodeToString(bodyData)
+	case "hex":
+		body = hex.EncodeToString(bodyData)
+	case "text":
+		fallthrough
+	default:
+		responseEncoding = "text"
+		body = string(bodyData)
+	}
+
 	data := map[string]interface{}{
-		"url":         destURL,
-		"status":      resp.StatusCode,
-		"contentType": resp.GetHeader("content-type"),
-		"body":        body,
-		"headers":     resp.Header,
-		"elapsed":     elapsed.Milliseconds(),
+		"url":          destURL,
+		"status":       resp.StatusCode,
+		"contentType":  resp.GetHeader("content-type"),
+		"body":         body,
+		"bodyEncoding": responseEncoding,
+		"headers":      resp.Header,
+		"elapsed":      elapsed.Milliseconds(),
 	}
 	ret.Data = data
 

@@ -322,6 +322,11 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 }
 
 func SetCloudSyncDir(name string) {
+	if !cloud.IsValidCloudDirName(name) {
+		util.PushErrMsg(Conf.Language(37), 5000)
+		return
+	}
+
 	if Conf.Sync.CloudName == name {
 		return
 	}
@@ -378,6 +383,11 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.Bucket = strings.TrimSpace(s3.Bucket)
 	s3.Region = strings.TrimSpace(s3.Region)
 	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
+
+	if !cloud.IsValidCloudDirName(s3.Bucket) {
+		util.PushErrMsg(Conf.Language(37), 5000)
+		return
+	}
 
 	Conf.Sync.S3 = s3
 	Conf.Save()

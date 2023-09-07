@@ -1091,7 +1091,7 @@
     "34": "Cette opération n'est pas supportée en mode lecture seule.",
     "35": "Recréation de l'index, veuillez patienter...",
     "36": "Il y a trop de contenu dans le document historique, afin de ne pas affecter les performances, il a été basculé sur l'affichage en texte brut",
-    "37": "N'incluez pas d'espaces et de symboles spéciaux dans le nom du répertoire de synchronisation cloud",
+    "37": "Le nom du répertoire de synchronisation cloud (Bucket) ne doit pas contenir d'espaces ni de symboles spéciaux, et la longueur maximale est de 63 caractères.",
     "38": "Trop de mots-clés mentionnés [%d], ajustez si nécessaire [Paramètres - Recherche - Mentions de backlink - Limite de mots-clés]",
     "39": "Suppression de l'index %s",
     "40": "Insertion de l'index %s",

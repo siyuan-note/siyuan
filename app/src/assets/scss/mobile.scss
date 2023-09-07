@@ -474,7 +474,7 @@
 
 html .protyle-wysiwyg [data-node-id]:last-child [spellcheck][contenteditable="true"]:empty:before {
   content: "Enter text";
-  color: var(--b3-theme-on-surface-light);
+  color: var(--b3-empty-color);
 }
 
 html[lang="zh_CN"] .protyle-wysiwyg [data-node-id]:last-child [spellcheck][contenteditable="true"]:empty:before {

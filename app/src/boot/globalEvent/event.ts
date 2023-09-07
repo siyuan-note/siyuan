@@ -86,7 +86,7 @@ export const initWindowEvent = (app: App) => {
             const dockElement = hasClosestByClassName(target, "dock__item");
             if (dockElement && dockElement.getAttribute("data-type")) {
                 const dockRect = dockElement.getBoundingClientRect()
-                initDockMenu(dockElement).popup({x: dockRect.right, y: dockRect.bottom});
+                initDockMenu(dockElement).popup({x: dockRect.right, y: dockRect.top});
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;
@@ -97,7 +97,8 @@ export const initWindowEvent = (app: App) => {
             if (tabElement) {
                 const tabRect = tabElement.getBoundingClientRect()
                 initTabMenu(app, (getInstanceById(tabElement.getAttribute("data-id")) as Tab)).popup({
-                    x: tabRect.left, y: tabRect.bottom
+                    x: tabRect.left,
+                    y: tabRect.bottom
                 });
                 hideTooltip()
                 event.stopImmediatePropagation();

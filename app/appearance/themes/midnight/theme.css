@@ -54,6 +54,9 @@
     --b3-tooltips-color: var(--b3-theme-on-surface-light);
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .3);
 
+    /* 为空提示 */
+    --b3-empty-color: var(--b3-theme-on-surface);
+
     /* 遮罩 */
     --b3-mask-background: rgba(10, 10, 10, 0.4);
 

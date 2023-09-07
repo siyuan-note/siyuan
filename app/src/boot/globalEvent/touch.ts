@@ -22,7 +22,7 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
                 const menu = initNavigationMenu(app, fileItemElement);
                 if (isIPadBoolean) {
                     const rect = fileItemElement.getBoundingClientRect()
-                    menu.popup({x: rect.right, y: rect.bottom, h: rect.height})
+                    menu.popup({x: rect.right - 52, y: rect.bottom, h: rect.height})
                     hideTooltip()
                 } else {
                     window.siyuan.menus.menu.fullscreen("bottom");
@@ -33,7 +33,7 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
                     const menu = initFileMenu(app, rootElement.dataset.url, fileItemElement.dataset.path, fileItemElement);
                     if (isIPadBoolean) {
                         const rect = fileItemElement.getBoundingClientRect()
-                        menu.popup({x: rect.right, y: rect.bottom, h: rect.height})
+                        menu.popup({x: rect.right - 52, y: rect.bottom, h: rect.height})
                         hideTooltip()
                     } else {
                         window.siyuan.menus.menu.fullscreen("bottom");

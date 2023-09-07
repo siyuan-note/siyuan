@@ -380,6 +380,11 @@ func isSkipFile(filename string) bool {
 
 func moveTree(tree *parse.Tree) {
 	treenode.SetBlockTreePath(tree)
+
+	if hidden := tree.Root.IALAttr("custom-hidden"); "true" == hidden {
+		tree.Root.RemoveIALAttr("custom-hidden")
+		filesys.WriteTree(tree)
+	}
 	sql.UpsertTreeQueue(tree)
 
 	box := Conf.Box(tree.Box)

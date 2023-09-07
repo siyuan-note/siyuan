@@ -6,7 +6,7 @@
 		"id": "20210505163537-oo97zov",
 		"title": "剪藏",
 		"type": "doc",
-		"updated": "20230621111754"
+		"updated": "20230905090027"
 	},
 	"Children": [
 		{
@@ -283,7 +283,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220420001522-igble2k",
-				"updated": "20220420001611"
+				"updated": "20230905090027"
 			},
 			"Children": [
 				{
@@ -293,8 +293,8 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20220414110705-tu2un99",
-					"TextMarkBlockRefSubtype": "d",
+					"TextMarkBlockRefID": "20230808120348-hynr7og",
+					"TextMarkBlockRefSubtype": "s",
 					"TextMarkTextContent": "收集箱"
 				},
 				{

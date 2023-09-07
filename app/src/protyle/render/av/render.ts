@@ -363,7 +363,6 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                     x: datetRect.left,
                     y: datetRect.bottom
                 });
-                window.siyuan.menus.menu.element.style.zIndex = "400";
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -438,7 +437,6 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                     x: mSelecttRect.left,
                     y: mSelecttRect.bottom
                 });
-                window.siyuan.menus.menu.element.style.zIndex = "400";
                 event.stopPropagation();
                 event.preventDefault();
                 return;

@@ -76,7 +76,6 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         if (response.data.pageCount > 1) {
             nextElement.removeAttribute("disabled");
         }
-        dialog.element.style.zIndex = "200";
         dialog.element.setAttribute("data-key", "viewCards");
         dialog.element.addEventListener("click", (event) => {
             if (typeof event.detail === "string") {

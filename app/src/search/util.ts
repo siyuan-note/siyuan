@@ -4,7 +4,7 @@ import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
-import {escapeAttr, escapeGreat, escapeHtml} from "../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeGreat, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
@@ -198,10 +198,10 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         <span class="fn__space"></span>
         <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__ne" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
         <span class="fn__space"></span>
-        <span id="searchResult"></span>
+        <span id="searchResult" class="fn__flex-shrink"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1"></span>
-        <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis" title="${escapeAttr(config.hPath)}">
+        <span id="searchPathInput" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(config.hPath)}">
             ${escapeHtml(config.hPath)}
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
         </span>
@@ -418,7 +418,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 config.hPath = "";
                 config.page = 1;
                 searchPathInputElement.innerHTML = config.hPath;
-                searchPathInputElement.setAttribute("title", "");
+                searchPathInputElement.setAttribute("aria-label", "");
                 inputTimeout = inputEvent(element, config, inputTimeout, edit, true);
                 const includeElement = element.querySelector("#searchInclude");
                 includeElement.classList.remove("b3-button--cancel");
@@ -467,7 +467,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         config.hPath = hPathList.join(" ");
                         config.page = 1;
                         searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-                        searchPathInputElement.setAttribute("title", config.hPath);
+                        searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
                         const includeElement = element.querySelector("#searchInclude");
                         includeElement.classList.remove("b3-button--cancel");
                         if (enableIncludeChild) {
@@ -630,6 +630,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 event.preventDefault();
                 break;
             } else if (target.id === "searchFilter") {
+                window.siyuan.menus.menu.remove();
                 filterMenu(config, () => {
                     config.page = 1;
                     inputEvent(element, config, undefined, edit, true);
@@ -1041,10 +1042,10 @@ const updateConfig = (element: Element, item: ISearchOption, config: ISearchOpti
     const searchPathInputElement = element.querySelector("#searchPathInput");
     if (item.hPath) {
         searchPathInputElement.innerHTML = `${escapeHtml(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-        searchPathInputElement.setAttribute("title", item.hPath);
+        searchPathInputElement.setAttribute("aria-label", escapeHtml(item.hPath));
     } else {
         searchPathInputElement.innerHTML = "";
-        searchPathInputElement.setAttribute("title", "");
+        searchPathInputElement.setAttribute("aria-label", "");
     }
     if (config.group !== item.group) {
         if (item.group === 0) {
@@ -1297,7 +1298,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: ISear
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)" title="${escapeAttr(title)}">${escapeGreat(title)}</span>
+<span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAttr(title)}">${escapeGreat(title)}</span>
 </div><div>`;
             item.children.forEach((childItem, childIndex) => {
                 resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item${childIndex === 0 && index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
@@ -1312,7 +1313,7 @@ ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis" title="${escapeAttr(title)}">${escapeGreat(title)}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
 </div>`;
         }
     });

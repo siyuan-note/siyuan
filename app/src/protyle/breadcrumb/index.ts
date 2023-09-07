@@ -30,6 +30,7 @@ import {Menu} from "../../plugin/Menu";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
+import {isInAndroid} from "../util/compatibility";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -266,7 +267,7 @@ export class Breadcrumb {
                     window.siyuan.menus.menu.remove();
                 });
                 window.siyuan.menus.menu.append(uploadMenu);
-                if (window.siyuan.config.system.container !== "android" || !window.JSAndroid) {
+                if (!isInAndroid()) {
                     window.siyuan.menus.menu.append(new MenuItem({
                         current: this.mediaRecorder && this.mediaRecorder.isRecording,
                         icon: "iconRecord",

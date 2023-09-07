@@ -46,7 +46,7 @@ type TEventBus = "ws-main" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" |
     "input-search" |
-    "loaded-protyle" | "loaded-protyle-dynamic"|
+    "loaded-protyle" | "loaded-protyle-dynamic" |
     "destroy-protyle"
 type TAVCol =
     "text"
@@ -268,6 +268,7 @@ interface INotebook {
 }
 
 interface ISiyuan {
+    zIndex: number
     storage?: { [key: string]: any },
     printWin?: import("electron").BrowserWindow
     transactions?: {
@@ -634,6 +635,7 @@ interface IConfig {
     }
     openHelp: boolean
     system: {
+        lockScreenMode: number   // 0：手动，1：手动+跟随系统
         networkProxy: {
             host: string
             port: string

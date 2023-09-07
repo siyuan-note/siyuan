@@ -192,6 +192,11 @@ input::-moz-focus-inner {
   border: 0;
 }
 
+button::placeholder,
+input::placeholder {
+  color: var(--b3-empty-color);
+}
+
 button,
 input[type="button"],
 input[type="reset"],

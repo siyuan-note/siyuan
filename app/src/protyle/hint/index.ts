@@ -30,7 +30,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
-import {isCtrl} from "../util/compatibility";
+import {isCtrl, isIPhone} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 
@@ -423,6 +423,7 @@ ${genHintItemHTML(item)}
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 getSavePath(protyle.path, protyle.notebookId, (pathString) => {
                     fetchPost("/api/filetree/createDocWithMd", {
+                        hidden: false,
                         notebook: protyle.notebookId,
                         path: pathPosix().join(pathString, realFileName),
                         parentID: protyle.block.rootID,
@@ -493,7 +494,7 @@ ${genHintItemHTML(item)}
 
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
-            if (navigator.userAgent.indexOf("iPhone") > -1) {
+            if (isIPhone()) {
                 focusByRange(range);
             }
         }
@@ -763,7 +764,7 @@ ${genHintItemHTML(item)}
                     const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetSubMenu"]');
                     itemElement.classList.add("b3-menu__item--show");
                     window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));
-                    window.siyuan.menus.menu.element.querySelectorAll("input")[0].focus();
+                    window.siyuan.menus.menu.element.querySelector("textarea").focus();
                 } else if (value === "---") {
                     focusBlock(nodeElement);
                 } else if (nodeElement.classList.contains("av")) {

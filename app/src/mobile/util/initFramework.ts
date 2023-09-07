@@ -2,7 +2,7 @@ import {Constants} from "../../constants";
 import {closeModel, closePanel} from "./closePanel";
 import {openMobileFileById} from "../editor";
 import {validateName} from "../../editor/rename";
-import {getEventName} from "../../protyle/util/compatibility";
+import {getEventName, isIPhone} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
@@ -125,7 +125,7 @@ export const initFramework = (app: App) => {
     document.getElementById("toolbarSync").addEventListener(getEventName(), () => {
         syncGuide(app);
     });
-    if (navigator.userAgent.indexOf("iPhone") > -1 && !window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly) {
+    if (isIPhone() && !window.siyuan.config.readonly && !window.siyuan.config.editor.readOnly) {
         // 不知道为什么 iPhone 中如果是编辑状态，点击文档后无法点击标题
         setTimeout(() => {
             editElement.dispatchEvent(new CustomEvent(getEventName()));

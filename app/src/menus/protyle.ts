@@ -1218,16 +1218,15 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
                         as_wide: "1",
                         allowfullscreen: "true"
                     };
-                    if (value.indexOf("player.bilibili.com/player.html") > -1) {
-                        // https://github.com/siyuan-note/siyuan/issues/4434
-                        new URL(value.startsWith("http") ? value : "https:" + value).search.split("&").forEach((item, index) => {
-                            if (index === 0) {
-                                item = item.substr(1);
-                            }
-                            const keyValue = item.split("=");
-                            params[keyValue[0]] = keyValue[1];
-                        });
-                    }
+                    // `//player.bilibili.com/player.html?aid=895154192&bvid=BV1NP4y1M72N&cid=562898119&page=1`
+                    // `https://www.bilibili.com/video/BV1ys411472E?t=3.4&p=4`
+                    new URL(value.startsWith("http") ? value : "https:" + value).search.split("&").forEach((item, index) => {
+                        if (index === 0) {
+                            item = item.substr(1);
+                        }
+                        const keyValue = item.split("=");
+                        params[keyValue[0]] = keyValue[1];
+                    });
                     let src = "https://player.bilibili.com/player.html?";
                     const keys = Object.keys(params);
                     keys.forEach((key, index) => {

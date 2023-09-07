@@ -134,15 +134,17 @@ func FilterUploadFileName(name string) string {
 
 func TruncateLenFileName(name string) (ret string) {
 	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
+	ext := filepath.Ext(name)
 	var byteCount int
 	buf := bytes.Buffer{}
 	for _, r := range name {
 		byteCount += utf8.RuneLen(r)
-		if 189 < byteCount {
+		if 189-len(ext) < byteCount {
 			break
 		}
 		buf.WriteRune(r)
 	}
+	buf.WriteString(ext)
 	ret = buf.String()
 	return
 }

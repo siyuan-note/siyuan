@@ -50,7 +50,6 @@ export class Menu {
             return;
         }
         this.menu.fullscreen(position);
-        this.menu.element.style.zIndex = "310";
     }
 
     close() {

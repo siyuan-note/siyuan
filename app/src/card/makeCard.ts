@@ -68,7 +68,6 @@ export const makeCard = (app: App, ids: string[]) => {
 </div>`,
         });
         dialog.element.setAttribute("data-key", "makeCard");
-        dialog.element.style.zIndex = "200";
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isSameNode(dialog.element)) {

@@ -47,7 +47,6 @@
 
   &__mask {
     position: fixed;
-    z-index: 320;
     top: 0;
     bottom: 0;
     right: 0;
@@ -264,7 +263,6 @@
   }
 
   &__panel {
-    z-index: 209;
     position: relative;
 
     .b3-menu {

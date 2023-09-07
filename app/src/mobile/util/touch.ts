@@ -1,9 +1,15 @@
-import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
+import {
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasTopClosestByClassName,
+    hasTopClosestByTag
+} from "../../protyle/util/hasClosest";
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
-import {getCurrentEditor} from "../editor";
-import {fileAnnotationRefMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
+import {isIPhone} from "../../protyle/util/compatibility";
+import {App} from "../../index";
+import {globalTouchEnd} from "../../boot/globalEvent/touch";
 
 let clientX: number;
 let clientY: number;
@@ -23,31 +29,13 @@ const popSide = (render = true) => {
     }
 };
 
-export const handleTouchEnd = (event: TouchEvent) => {
-    const editor = getCurrentEditor();
-    const target = event.target as HTMLElement;
-    if (editor && typeof yDiff === "undefined" && new Date().getTime() - time > 900 &&
-        target.tagName === "SPAN" && window.webkit?.messageHandlers &&
-        !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
-        // ios 长按行内元素弹出菜单
-        const types = (target.getAttribute("data-type") || "").split(" ");
-        if (types.includes("inline-memo")) {
-            editor.protyle.toolbar.showRender(editor.protyle, target);
-        }
-        if (editor.protyle.disabled) {
-            return;
-        }
-        if (types.includes("block-ref")) {
-            refMenu(editor.protyle, target);
-        } else if (types.includes("file-annotation-ref")) {
-            fileAnnotationRefMenu(editor.protyle, target);
-        } else if (types.includes("tag")) {
-            tagMenu(editor.protyle, target);
-        } else if (types.includes("a")) {
-            linkMenu(editor.protyle, target);
-        }
+export const handleTouchEnd = (event: TouchEvent, app: App) => {
+    if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
         return;
     }
+    const target = event.target as HTMLElement;
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
         hasClosestByClassName(target, "b3-dialog", true) ||
@@ -162,7 +150,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     xDiff = undefined;
     yDiff = undefined;
     lastClientX = undefined;
-    if (navigator.userAgent.indexOf("iPhone") > -1 ||
+    if (isIPhone() ||
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;

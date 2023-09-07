@@ -918,6 +918,8 @@
   "about4": "Open browser",
   "about5": "Access authorization code",
   "about6": "After configuration, it will be used as the access authentication password, leave it blank to close the authentication",
+  "about7": "Follow system lock screen",
+  "about8": "After enabling, the application will be automatically locked when locking the system screen",
   "about9": "Automatically upload error messages and diagnostic data",
   "about10": "After enabling, it will automatically upload error information and diagnostic data through the <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, which does not involve personal privacy data so that developers can fix bugs. The application will be closed automatically after modification, please restart manually",
   "about11": "Network serving",
@@ -1037,7 +1039,9 @@
     "task.history.database.index.commit": "Execute history database index commit",
     "task.database.index.embedBlock": "Execute database index embed block",
     "task.reload.ui": "Execute reload UI",
-    "task.upgrade.userGuide": "Execute upgrade user guide"
+    "task.upgrade.userGuide": "Execute upgrade user guide",
+    "task.asset.database.index.full": "Execute asset database rebuild index",
+    "task.asset.database.index.commit": "Execute asset database index commit"
   },
   "_trayMenu": {
     "showWindow": "Show Window",
@@ -1087,7 +1091,7 @@
     "34": "This operation is not supported in read-only mode",
     "35": "Rebuilding index, please wait...",
     "36": "There is too much content in the historical document, in order not to affect performance, it has been switched to plain text display",
-    "37": "Do not include spaces and special symbols in the name of the cloud sync directory",
+    "37": "The name of the cloud sync directory (Bucket) should not contain spaces and special symbols, and the maximum length is 63 characters",
     "38": "Too many keywords mentioned [%d], adjust if necessary [Settings - Search - Backlink Mentions - Keyword Limit]",
     "39": "Deleting index %s",
     "40": "Inserting index %s",

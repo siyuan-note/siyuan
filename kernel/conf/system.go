@@ -43,6 +43,7 @@ type System struct {
 	DisableGoogleAnalytics bool `json:"disableGoogleAnalytics"`
 	DownloadInstallPkg     bool `json:"downloadInstallPkg"`
 	AutoLaunch             bool `json:"autoLaunch"`
+	LockScreenMode         int  `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
 }
 
 func NewSystem() *System {

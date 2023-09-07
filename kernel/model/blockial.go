@@ -175,7 +175,7 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	}
 
 	for name, value := range nameValues {
-		if strings.HasPrefix(name, "av") {
+		if strings.HasPrefix(name, "custom-av") {
 			// 属性视图设置的属性值可以为空
 			node.SetIALAttr(name, value)
 			continue

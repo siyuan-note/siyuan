@@ -45,7 +45,7 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
         if (target.tagName === "SPAN" && !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
             let editor: Protyle
             if (isIPhone()) {
-                if (hasClosestByClassName(target, "protyle-wysiwyg")) {
+                if (hasClosestByClassName(target, "protyle-wysiwyg", true)) {
                     editor = getCurrentEditor();
                 }
             } else {

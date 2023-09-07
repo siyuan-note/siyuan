@@ -524,10 +524,10 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 							attrs := parse.IAL2Map(node.KramdownIAL)
 							if ast.NodeDocument == node.Type {
 								delete(attrs, "custom-hidden")
+								node.RemoveIALAttr("custom-hidden")
 							}
 							delete(attrs, NodeAttrNamePrefixAvKey+operation.AvID+"-"+values.KeyID)
 							node.RemoveIALAttr(NodeAttrNamePrefixAvKey + operation.AvID + "-" + values.KeyID)
-
 							if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
 								return
 							}

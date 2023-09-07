@@ -454,7 +454,6 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	blockValues.Values = append(blockValues.Values, value)
 
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvKey+operation.AvID+"-"+blockValues.Key.ID] = "" // 将列作为属性添加到块中
 
 	if "" == attrs[NodeAttrNameAvs] {
 		attrs[NodeAttrNameAvs] = operation.AvID

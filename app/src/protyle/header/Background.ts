@@ -1,5 +1,5 @@
 import {hasClosestByClassName} from "../util/hasClosest";
-import {getRandom, isMobile} from "../../util/functions";
+import {getRandom, isMobile, isTouchDevice} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
 import {fetchPost} from "../../util/fetch";
@@ -52,7 +52,7 @@ export class Background {
         this.tagsElement = this.element.querySelector(".b3-chips") as HTMLElement;
         this.iconElement = this.element.querySelector(".protyle-background__icon") as HTMLElement;
         this.imgElement = this.element.firstElementChild.firstElementChild as HTMLImageElement;
-        if (isMobile()) {
+        if (isTouchDevice()) {
             this.imgElement.addEventListener("touchstart", (event: TouchEvent & { target: HTMLElement }) => {
                 event.preventDefault();
                 if (!this.element.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {

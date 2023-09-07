@@ -280,7 +280,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
     });
-    const replaceInputElement = element.querySelector(".toolbar .b3-text-field") as HTMLInputElement;
+    const replaceInputElement = element.querySelector(".toolbar .toolbar__title") as HTMLInputElement;
     replaceInputElement.value = config.r || "";
 
     const criteriaData: ISearchOption[] = [];
@@ -603,7 +603,7 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
         html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border${config.hasReplace ? "" : " fn__none"}">
         <svg class="toolbar__icon"><use xlink:href="#iconReplace"></use></svg>
-        <input id="toolbarReplace" style="font-size: 17px" class="b3-text-field fn__flex-1">
+        <input id="toolbarReplace" class="toolbar__title">
         <svg class="fn__rotate fn__none toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
         <div class="fn__space"></div>
         <button data-type="replace-all" class="b3-button b3-button--outline fn__flex-center">${window.siyuan.languages.replaceAll}</button>

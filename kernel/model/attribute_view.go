@@ -487,14 +487,14 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 }
 
 func (tx *Transaction) doRemoveAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := removeAttributeViewBlock(operation)
+	err := tx.removeAttributeViewBlock(operation)
 	if nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
 	}
 	return
 }
 
-func removeAttributeViewBlock(operation *Operation) (err error) {
+func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if nil != err {
 		return
@@ -505,11 +505,35 @@ func removeAttributeViewBlock(operation *Operation) (err error) {
 		return
 	}
 
+	trees := map[string]*parse.Tree{}
 	for _, keyValues := range attrView.KeyValues {
 		tmp := keyValues.Values[:0]
 		for i, values := range keyValues.Values {
 			if !gulu.Str.Contains(values.BlockID, operation.SrcIDs) {
 				tmp = append(tmp, keyValues.Values[i])
+			} else {
+				if bt := treenode.GetBlockTree(values.BlockID); nil != bt {
+					tree := trees[bt.RootID]
+					if nil == tree {
+						tree, _ = loadTreeByBlockID(values.BlockID)
+					}
+
+					if nil != tree {
+						trees[bt.RootID] = tree
+						if node := treenode.GetNodeInTree(tree, values.BlockID); nil != node {
+							attrs := parse.IAL2Map(node.KramdownIAL)
+							if ast.NodeDocument == node.Type {
+								delete(attrs, "custom-hidden")
+							}
+							delete(attrs, NodeAttrNamePrefixAvKey+operation.AvID+"-"+values.KeyID)
+							node.RemoveIALAttr(NodeAttrNamePrefixAvKey + operation.AvID + "-" + values.KeyID)
+
+							if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+								return
+							}
+						}
+					}
+				}
 			}
 		}
 		keyValues.Values = tmp
@@ -517,13 +541,6 @@ func removeAttributeViewBlock(operation *Operation) (err error) {
 
 	for _, blockID := range operation.SrcIDs {
 		view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
-
-		if bt := treenode.GetBlockTree(blockID); nil != bt && "d" == bt.Type {
-			if tree, _ := loadTreeByBlockID(blockID); nil != tree {
-				tree.Root.RemoveIALAttr("custom-hidden")
-				writeJSONQueue(tree)
-			}
-		}
 	}
 
 	err = av.SaveAttributeView(attrView)

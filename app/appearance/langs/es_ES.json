@@ -1091,7 +1091,7 @@
     "34": "Esta operación no es compatible con el modo de sólo lectura",
     "35": "Reconstruyendo el índice, por favor espere...",
     "36": "Hay demasiado contenido en el documento historico, para no afectar el rendimiento, se ha cambiado a visualizacion de texto sin formato",
-    "37": "No incluyas espacios ni símbolos especiales en el nombre del directorio de sincronización con la nube",
+    "37": "El nombre del directorio de sincronización en la nube (Bucket) no debe contener espacios ni símbolos especiales, y la longitud máxima es 63 caracteres.",
     "38": "Demasiadas palabras clave mencionadas [%d], ajústelas si es necesario [Configuración - Búsqueda - Menciones de backlinks - Límite de palabras clave]",
     "39": "Eliminando índice %s",
     "40": "Insertando índice %s",

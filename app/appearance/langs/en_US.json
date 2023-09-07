@@ -1091,7 +1091,7 @@
     "34": "This operation is not supported in read-only mode",
     "35": "Rebuilding index, please wait...",
     "36": "There is too much content in the historical document, in order not to affect performance, it has been switched to plain text display",
-    "37": "Do not include spaces and special symbols in the name of the cloud sync directory",
+    "37": "The name of the cloud sync directory (Bucket) should not contain spaces and special symbols, and the maximum length is 63 characters",
     "38": "Too many keywords mentioned [%d], adjust if necessary [Settings - Search - Backlink Mentions - Keyword Limit]",
     "39": "Deleting index %s",
     "40": "Inserting index %s",

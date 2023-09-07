@@ -1,4 +1,3 @@
-import {Dialog} from "../../dialog";
 import {fetchPost} from "../../util/fetch";
 import {escapeHtml} from "../../util/escape";
 import {openCard} from "../../card/openCard";
@@ -6,10 +5,15 @@ import {getDockByType} from "../../layout/util";
 import {getAllTabs} from "../../layout/getAll";
 import {App} from "../../index";
 
-export const windowKeyUp  = (app: App,event:KeyboardEvent, switchDialog:Dialog) => {
+export const windowKeyUp  = (app: App,event:KeyboardEvent) => {
     window.siyuan.ctrlIsPressed = false;
     window.siyuan.shiftIsPressed = false;
     window.siyuan.altIsPressed = false;
+    const switchDialog = window.siyuan.dialogs.find(item => {
+        if (item.element.getAttribute("data-key") === "⌃⇥") {
+            return true;
+        }
+    });
     if (switchDialog && switchDialog.element.parentElement) {
         if (event.key === "Tab") {
             let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
@@ -112,7 +116,6 @@ export const windowKeyUp  = (app: App,event:KeyboardEvent, switchDialog:Dialog) 
                 });
             }
             switchDialog.destroy();
-            switchDialog = undefined;
         }
     }
 };

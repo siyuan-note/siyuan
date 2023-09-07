@@ -14,7 +14,7 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     return nodeElement;
 };
 
-export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mouseIsEnter:boolean) => {
+export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mouseIsEnter: boolean) => {
     if (document.body.classList.contains("body--blur")) {
         // 非激活状态下不执行 https://ld246.com/article/1693474547631
         return;

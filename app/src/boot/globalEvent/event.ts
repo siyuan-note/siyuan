@@ -47,14 +47,12 @@ export const initWindowEvent = (app: App) => {
         }
     });
 
-    let switchDialog: Dialog;
-
     window.addEventListener("keyup", (event) => {
-        windowKeyUp(app, event, switchDialog);
+        windowKeyUp(app, event);
     });
 
     window.addEventListener("keydown", (event) => {
-        windowKeyDown(app, event, switchDialog);
+        windowKeyDown(app, event);
     });
 
     window.addEventListener("blur", () => {

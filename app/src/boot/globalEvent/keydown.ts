@@ -57,7 +57,7 @@ import {commandPanel} from "../../plugin/commandPanel";
 import {toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
 
-const switchDialogEvent = (app: App, event: MouseEvent, switchDialog: Dialog) => {
+const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
     let target = event.target as HTMLElement;
     while (!target.isSameNode(switchDialog.element)) {
@@ -815,8 +815,8 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
     return false;
 };
 
-export const windowKeyDown = (app: App, event: KeyboardEvent, switchDialog: Dialog) => {
-
+let switchDialog: Dialog
+export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (document.querySelector(".av__mask") || document.getElementById("errorLog") || event.isComposing) {
         return;
     }
@@ -942,15 +942,16 @@ export const windowKeyDown = (app: App, event: KeyboardEvent, switchDialog: Dial
     <div class="switch-doc__path"></div>
 </div>`,
         });
+        switchDialog.element.setAttribute("data-key", "⌃⇥");
         // 需移走光标，否则编辑器会继续监听并执行按键操作
         switchDialog.element.querySelector("input").focus();
         if (isMac()) {
             switchDialog.element.addEventListener("contextmenu", (event) => {
-                switchDialogEvent(app, event, switchDialog);
+                switchDialogEvent(app, event);
             });
         }
         switchDialog.element.addEventListener("click", (event) => {
-            switchDialogEvent(app, event, switchDialog);
+            switchDialogEvent(app, event);
         });
         return;
     }

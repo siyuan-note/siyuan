@@ -6,6 +6,14 @@ import {windowKeyDown} from "./keydown";
 import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
+import {isIPad} from "../../protyle/util/compatibility";
+import {globalTouchEnd} from "./touch";
+import {initDockMenu} from "../../menus/dock";
+import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {initTabMenu} from "../../menus/tab";
+import {getInstanceById} from "../../layout/util";
+import {Tab} from "../../layout/Tab";
+import {hideTooltip} from "../../dialog/tooltip";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -58,4 +66,44 @@ export const initWindowEvent = (app: App) => {
     window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         globalClick(event);
     });
+
+    if (isIPad()) {
+        let time = 0;
+        document.addEventListener("touchstart", () => {
+            time = new Date().getTime();
+        }, false);
+        document.addEventListener("touchend", (event) => {
+            if (globalTouchEnd(event, undefined, time, app)) {
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                return;
+            }
+            if (new Date().getTime() - time <= 900) {
+                return;
+            }
+            const target = event.target as HTMLElement;
+            // dock right menu
+            const dockElement = hasClosestByClassName(target, "dock__item");
+            if (dockElement && dockElement.getAttribute("data-type")) {
+                const dockRect = dockElement.getBoundingClientRect()
+                initDockMenu(dockElement).popup({x: dockRect.right, y: dockRect.bottom});
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                return;
+            }
+
+            // tab right menu
+            const tabElement = hasClosestByAttribute(target, "data-type", "tab-header");
+            if (tabElement) {
+                const tabRect = tabElement.getBoundingClientRect()
+                initTabMenu(app, (getInstanceById(tabElement.getAttribute("data-id")) as Tab)).popup({
+                    x: tabRect.left, y: tabRect.bottom
+                });
+                hideTooltip()
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                return;
+            }
+        }, false);
+    }
 };

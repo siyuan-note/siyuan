@@ -12,6 +12,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 
 export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, app: App) => {
     const target = event.target as HTMLElement;
+    const isIPadBoolean = isIPad();
     if (typeof yDiff === "undefined" && new Date().getTime() - time > 900) {
         // ios 长按
         // 文档树
@@ -19,7 +20,7 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
         if (fileItemElement) {
             if (!window.siyuan.config.readonly && fileItemElement.dataset.type === "navigation-root") {
                 const menu = initNavigationMenu(app, fileItemElement);
-                if (isIPad()) {
+                if (isIPadBoolean) {
                     const rect = fileItemElement.getBoundingClientRect()
                     menu.popup({x: rect.right, y: rect.bottom, h: rect.height})
                     hideTooltip()
@@ -30,7 +31,7 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
                 const rootElement = hasTopClosestByTag(fileItemElement, "UL");
                 if (rootElement) {
                     const menu = initFileMenu(app, rootElement.dataset.url, fileItemElement.dataset.path, fileItemElement);
-                    if (isIPad()) {
+                    if (isIPadBoolean) {
                         const rect = fileItemElement.getBoundingClientRect()
                         menu.popup({x: rect.right, y: rect.bottom, h: rect.height})
                         hideTooltip()
@@ -44,17 +45,17 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
         // 内元素弹出菜单
         if (target.tagName === "SPAN" && !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
             let editor: Protyle
-            if (isIPhone()) {
-                if (hasClosestByClassName(target, "protyle-wysiwyg", true)) {
-                    editor = getCurrentEditor();
-                }
-            } else {
+            if (isIPadBoolean) {
                 const tabContainerElement = hasClosestByClassName(target, "protyle", true)
                 if (tabContainerElement) {
                     const tab = getInstanceById(tabContainerElement.dataset.id);
                     if (tab instanceof Tab && tab.model instanceof Editor) {
                         editor = tab.model.editor
                     }
+                }
+            } else {
+                if (hasClosestByClassName(target, "protyle-wysiwyg", true)) {
+                    editor = getCurrentEditor();
                 }
             }
             if (!editor) {

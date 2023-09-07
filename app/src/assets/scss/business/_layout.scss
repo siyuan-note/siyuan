@@ -343,6 +343,7 @@
   user-select: none;
   background-color: var(--b3-theme-surface);
   box-sizing: border-box;
+  -webkit-user-select: none;
 
   &:hover .dock__item--pin {
     opacity: 1;

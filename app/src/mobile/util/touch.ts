@@ -7,11 +7,9 @@ import {
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
-import {getCurrentEditor} from "../editor";
-import {fileAnnotationRefMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
 import {isIPhone} from "../../protyle/util/compatibility";
-import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {App} from "../../index";
+import {globalTouchEnd} from "../../boot/globalEvent/touch";
 
 let clientX: number;
 let clientY: number;
@@ -32,49 +30,12 @@ const popSide = (render = true) => {
 };
 
 export const handleTouchEnd = (event: TouchEvent, app: App) => {
-    const editor = getCurrentEditor();
-    const target = event.target as HTMLElement;
-    if (typeof yDiff === "undefined" && new Date().getTime() - time > 900 && isIPhone()) {
-        // ios 长按行
-        // 文档树
-        const fileItemElement = hasClosestByAttribute(target, "data-type", "navigation-root") || hasClosestByAttribute(target, "data-type", "navigation-file");
-        if (fileItemElement) {
-            if (!window.siyuan.config.readonly && fileItemElement.dataset.type === "navigation-root") {
-                initNavigationMenu(app, fileItemElement);
-                window.siyuan.menus.menu.fullscreen("bottom");
-            } else if (fileItemElement.dataset.type === "navigation-file") {
-                const rootElement = hasTopClosestByTag(fileItemElement, "UL");
-                if (rootElement) {
-                    initFileMenu(app, rootElement.dataset.url, fileItemElement.dataset.path, fileItemElement);
-                    window.siyuan.menus.menu.fullscreen("bottom");
-                }
-            }
-            event.stopImmediatePropagation();
-            event.preventDefault();
-            return;
-        }
-        // 内元素弹出菜单
-        if (editor && hasClosestByClassName(target, "protyle-wysiwyg") &&
-            target.tagName === "SPAN" && !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
-            const types = (target.getAttribute("data-type") || "").split(" ");
-            if (types.includes("inline-memo")) {
-                editor.protyle.toolbar.showRender(editor.protyle, target);
-            }
-            if (editor.protyle.disabled) {
-                return;
-            }
-            if (types.includes("block-ref")) {
-                refMenu(editor.protyle, target);
-            } else if (types.includes("file-annotation-ref")) {
-                fileAnnotationRefMenu(editor.protyle, target);
-            } else if (types.includes("tag")) {
-                tagMenu(editor.protyle, target);
-            } else if (types.includes("a")) {
-                linkMenu(editor.protyle, target);
-            }
-            return;
-        }
+    if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        return;
     }
+    const target = event.target as HTMLElement;
     if (!clientX || !clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
         hasClosestByClassName(target, "b3-dialog", true) ||

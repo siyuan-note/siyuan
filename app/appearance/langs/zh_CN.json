@@ -1,4 +1,6 @@
 {
+  "enable": "启用",
+  "disable": "禁用",
   "removeWorkspacePhysically": "是否物理删除工作空间 ${x} 的数据？（物理删除无法恢复）",
   "mainMenu": "主菜单",
   "searchRemoveName": "是否删 ${x} 并将其查询条件赋值给 ${y}？",

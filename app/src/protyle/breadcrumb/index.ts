@@ -432,7 +432,7 @@ export class Breadcrumb {
                     submenu: [{
                         iconHTML: "",
                         current: isCustomFullWidth === "true",
-                        label: window.siyuan.languages.use,
+                        label: window.siyuan.languages.enable,
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id: protyle.block.rootID,
@@ -442,7 +442,7 @@ export class Breadcrumb {
                     }, {
                         iconHTML: "",
                         current: isCustomFullWidth === "false",
-                        label: window.siyuan.languages.close,
+                        label: window.siyuan.languages.disable,
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id: protyle.block.rootID,

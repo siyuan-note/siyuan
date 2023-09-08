@@ -5,8 +5,10 @@ import {fileAnnotationRefMenu, linkMenu, refMenu, tagMenu} from "../../menus/pro
 import {App} from "../../index";
 import {Protyle} from "../../protyle";
 import {getCurrentEditor} from "../../mobile/editor";
+/// #if !MOBILE
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
+/// #endif
 import {Editor} from "../../editor";
 import {hideTooltip} from "../../dialog/tooltip";
 
@@ -45,19 +47,19 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
         // 内元素弹出菜单
         if (target.tagName === "SPAN" && !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
             let editor: Protyle;
-            if (isIPadBoolean) {
-                const tabContainerElement = hasClosestByClassName(target, "protyle", true);
-                if (tabContainerElement) {
-                    const tab = getInstanceById(tabContainerElement.dataset.id);
-                    if (tab instanceof Tab && tab.model instanceof Editor) {
-                        editor = tab.model.editor;
-                    }
-                }
-            } else {
-                if (hasClosestByClassName(target, "protyle-wysiwyg", true)) {
-                    editor = getCurrentEditor();
+            /// #if !MOBILE
+            const tabContainerElement = hasClosestByClassName(target, "protyle", true);
+            if (tabContainerElement) {
+                const tab = getInstanceById(tabContainerElement.dataset.id);
+                if (tab instanceof Tab && tab.model instanceof Editor) {
+                    editor = tab.model.editor;
                 }
             }
+            /// #else
+            if (hasClosestByClassName(target, "protyle-wysiwyg", true)) {
+                editor = getCurrentEditor();
+            }
+            /// #endif
             if (!editor) {
                 return false;
             }

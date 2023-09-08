@@ -2,7 +2,6 @@ import {
     hasClosestByAttribute,
     hasClosestByClassName,
     hasTopClosestByClassName,
-    hasTopClosestByTag
 } from "../../protyle/util/hasClosest";
 import {closePanel} from "./closePanel";
 import {popMenu} from "../menu";

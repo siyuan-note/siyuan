@@ -1985,7 +1985,7 @@ export class WYSIWYG {
                                 updateTransaction(protyle, actionId, actionElement.parentElement.outerHTML, html);
                             }
                         } else {
-                            if (protyle.block.id === actionId) {
+                            if (protyle.block.showAll && protyle.block.id === actionId) {
                                 enterBack(protyle, actionId);
                             } else {
                                 zoomOut({protyle, id: actionId});

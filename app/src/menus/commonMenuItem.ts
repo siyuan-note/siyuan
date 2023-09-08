@@ -155,7 +155,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
     let hasAV = false;
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     Object.keys(attrs).forEach(item => {
-        if ("custom-riff-decks" === item) {
+        if ("custom-riff-decks" === item || item.startsWith("custom-sy-")) {
             return;
         }
         if (item === "custom-reminder-wechat") {

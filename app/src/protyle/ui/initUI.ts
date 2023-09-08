@@ -11,11 +11,6 @@ import {fetchPost} from "../../util/fetch";
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
-    if (window.siyuan.config.editor.fullWidth) {
-        protyle.contentElement.setAttribute("data-fullwidth", "true");
-    } else {
-        protyle.contentElement.removeAttribute("data-fullwidth");
-    }
     if (protyle.options.render.background) {
         protyle.contentElement.appendChild(protyle.background.element);
     }
@@ -129,7 +124,11 @@ export const setPadding = (protyle: IProtyle) => {
     let min24 = 24;
     if (!isMobile()) {
         let padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
-        if (!window.siyuan.config.editor.fullWidth && padding > 96) {
+        let isFullWidth = protyle.wysiwyg.element.getAttribute("custom-sy-fullwidth");
+        if (!isFullWidth) {
+            isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
+        }
+        if (isFullWidth === "false" && padding > 96) {
             if (padding > Constants.SIZE_EDITOR_WIDTH) {
                 // 超宽屏调整 https://ld246.com/article/1668266637363
                 padding = protyle.element.clientWidth * .382 / 1.382;

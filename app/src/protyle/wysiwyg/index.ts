@@ -108,6 +108,15 @@ export class WYSIWYG {
     }
 
     public renderCustom(ial: IObject) {
+        let isFullWidth = ial["custom-sy-fullwidth"];
+        if (!isFullWidth) {
+            isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
+        }
+        if (isFullWidth ==="true") {
+            this.element.parentElement.setAttribute("data-fullwidth", "true");
+        } else {
+            this.element.parentElement.removeAttribute("data-fullwidth");
+        }
         const ialKeys = Object.keys(ial);
         for (let i = 0; i < this.element.attributes.length; i++) {
             const oldKey = this.element.attributes[i].nodeName;

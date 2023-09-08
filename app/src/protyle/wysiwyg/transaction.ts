@@ -18,6 +18,7 @@ import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {needLogin, needSubscribe} from "../../util/needSubscribe";
+import {setPadding} from "../ui/initUI";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -424,7 +425,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     if (operation.action === "delete") {
         if (updateElements.length > 0) {
             deleteBlock(updateElements, operation.id, protyle, isUndo);
-        } else if (isUndo){
+        } else if (isUndo) {
             zoomOut({
                 protyle,
                 id: protyle.block.rootID,
@@ -503,6 +504,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
             }
             protyle.wysiwyg.renderCustom(attrsResult);
+            if (data.new["custom-sy-fullwidth"] !== data.old["custom-sy-fullwidth"]) {
+                setPadding(protyle);
+            }
             if (data.new.icon !== data.old.icon) {
                 /// #if MOBILE
                 if (window.siyuan.mobile.editor.protyle.background.ial.icon !== data.new.icon) {

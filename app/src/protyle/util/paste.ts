@@ -16,7 +16,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
 
-export const pasteEscaped = async (protyle:IProtyle, nodeElement:Element) => {
+export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
         // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ |
         let clipText = await readText();
@@ -210,6 +210,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // 粘贴在代码位置
+        // https://github.com/siyuan-note/siyuan/issues/9142
+        if (range.toString() !== "" && range.startContainer.nodeType !== 3 && (range.startContainer as Element).classList.contains("protyle-action")) {
+            range.setStart(nodeElement.querySelector(".hljs").firstChild, 0);
+        }
         insertHTML(textPlain, protyle);
         return;
     } else if (siyuanHTML) {

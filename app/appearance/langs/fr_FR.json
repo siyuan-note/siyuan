@@ -1,5 +1,5 @@
 {
-  "removeWorkspacePhysically": "Voulez-vous supprimer physiquement les données de l'espace de travail ? (La suppression physique ne peut pas être récupérée)",
+  "removeWorkspacePhysically": "Voulez-vous supprimer physiquement les données de l'espace de travail ${x} ? (La suppression physique ne peut pas être récupérée)",
   "mainMenu": "Menu principal",
   "searchRemoveName": "Voulez-vous supprimer ${x} et affecter sa condition de requête à ${y} ?",
   "searchUpdateName": "Mettre à jour le nom ${x} en ${y} ?",

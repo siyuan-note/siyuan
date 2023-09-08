@@ -1,5 +1,5 @@
 {
-  "removeWorkspacePhysically": "是否物理刪除工作空間數據？（物理刪除無法恢復）",
+  "removeWorkspacePhysically": "是否物理刪除工作空間 ${x} 的數據？（物理刪除無法恢復）",
   "mainMenu": "主菜單",
   "searchRemoveName": "是否刪 ${x} 並將其查詢條件賦值給 ${y}？",
   "searchUpdateName": "是否將查詢名稱 ${x} 更新為 ${y}？",

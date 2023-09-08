@@ -321,7 +321,7 @@ export const initAbout = () => {
                         const removePath = target.parentElement.getAttribute("data-path");
                         fetchPost("/api/system/removeWorkspaceDir", {path: removePath}, () => {
                             genWorkspace(workspaceDirElement);
-                            confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically, () => {
+                            confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", removePath), () => {
                                 fetchPost("/api/system/removeWorkspaceDirPhysically", {path: removePath});
                             });
                         });

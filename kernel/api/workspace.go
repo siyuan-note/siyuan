@@ -173,7 +173,6 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-
 	if gulu.File.IsDir(path) {
 		err := os.RemoveAll(path)
 		if nil != err {
@@ -183,6 +182,7 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		}
 	}
 
+	logging.LogInfof("removed workspace [%s] physically", path)
 	if util.WorkspaceDir == path {
 		os.Exit(logging.ExitCodeOk)
 	}

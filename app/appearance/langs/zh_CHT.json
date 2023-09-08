@@ -1,4 +1,6 @@
 {
+  "enable": "啟用",
+  "disable": "禁用",
   "removeWorkspacePhysically": "是否物理刪除工作空間 ${x} 的數據？（物理刪除無法恢復）",
   "mainMenu": "主菜單",
   "searchRemoveName": "是否刪 ${x} 並將其查詢條件賦值給 ${y}？",

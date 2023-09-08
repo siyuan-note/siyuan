@@ -1,4 +1,6 @@
 {
+  "enable": "Enable",
+  "disable": "Disable",
   "removeWorkspacePhysically": "Do you want to physically delete the data in workspace ${x}? (Physical deletion cannot be recovered)",
   "mainMenu": "Main Menu",
   "searchRemoveName": "Do you want to delete ${x} and assign its query condition to ${y}?",

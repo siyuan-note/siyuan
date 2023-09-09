@@ -232,7 +232,14 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
+        let readOnly = window.siyuan.config.readonly ? "true" : "false";
+        if (readOnly === "false") {
+            readOnly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
+            if (!readOnly) {
+                readOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+            }
+        }
+        if (readOnly === "true") {
             disabledProtyle(protyle);
         } else {
             enableProtyle(protyle);
@@ -305,6 +312,9 @@ export const disabledProtyle = (protyle: IProtyle) => {
         titleElement.setAttribute("contenteditable", "false");
         titleElement.style.userSelect = "text";
     }
+    /// #if MOBILE
+    document.getElementById("toolbarName").setAttribute("readonly", "readonly");
+    /// #endif
     if (protyle.background) {
         protyle.background.element.classList.remove("protyle-background--enable");
         protyle.background.element.classList.remove("protyle-background--mobileshow");
@@ -317,6 +327,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
         item.setAttribute("contenteditable", "false");
     });
+    protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
 };
 
 /** 解除编辑器禁用 */
@@ -328,6 +339,7 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (isMobile()) {
         // Android 端空块输入法弹出会收起 https://ld246.com/article/1689713888289
         // iPhone，iPad 端 protyle.wysiwyg.element contenteditable 为 true 时，输入会在块中间插入 span 导致保存失败 https://ld246.com/article/1643473862873/comment/1643813765839#comments
+        document.getElementById("toolbarName").removeAttribute("readonly");
     } else {
         protyle.wysiwyg.element.setAttribute("contenteditable", "true");
         protyle.wysiwyg.element.style.userSelect = "";
@@ -345,6 +357,7 @@ export const enableProtyle = (protyle: IProtyle) => {
             item.setAttribute("contenteditable", "true");
         }
     });
+    protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");
 };
 
 

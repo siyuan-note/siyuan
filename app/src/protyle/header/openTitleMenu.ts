@@ -122,7 +122,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                 if (!titleElement) {
                     titleElement = document.createElement("div");
                     titleElement.setAttribute("data-node-id", protyle.block.rootID);
-                    titleElement.setAttribute("custom-riff-decks", response.data.ial["custom-riff-decks"]);
+                    titleElement.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
                 }
                 quickMakeCard(protyle, [titleElement]);
             }

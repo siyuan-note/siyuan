@@ -175,9 +175,6 @@ export class BlockPanel {
                 },
                 typewriterMode: false,
                 after: (editor) => {
-                    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
-                        disabledProtyle(editor.protyle);
-                    }
                     editorElement.addEventListener("mouseleave", () => {
                         hideElements(["gutter"], editor.protyle);
                     });

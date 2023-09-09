@@ -23,7 +23,6 @@ import {
 import {initMessage} from "./dialog/message";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
-import {updateEditModeElement} from "./layout/topBar";
 import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
 import {loadPlugins} from "./plugin/loader";
@@ -64,7 +63,6 @@ export class App {
                                 break;
                             case "readonly":
                                 window.siyuan.config.editor.readOnly = data.data;
-                                updateEditModeElement();
                                 hideAllElements(["util"]);
                                 break;
                             case "progress":

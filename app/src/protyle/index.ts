@@ -117,10 +117,12 @@ export class Protyle {
                             });
                             break;
                         case "readonly":
-                            if (data.data) {
-                                disabledProtyle(this.protyle);
-                            } else {
-                                enableProtyle(this.protyle);
+                            if (!this.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY)) {
+                                if (data.data) {
+                                    disabledProtyle(this.protyle);
+                                } else {
+                                    enableProtyle(this.protyle);
+                                }
                             }
                             break;
                         case "heading2doc":

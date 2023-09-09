@@ -108,7 +108,7 @@ export class WYSIWYG {
     }
 
     public renderCustom(ial: IObject) {
-        let isFullWidth = ial["custom-sy-fullwidth"];
+        let isFullWidth = ial[Constants.CUSTOM_SY_FULLWIDTH];
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
         }

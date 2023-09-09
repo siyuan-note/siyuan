@@ -124,7 +124,7 @@ export const setPadding = (protyle: IProtyle) => {
     let min24 = 24;
     if (!isMobile()) {
         let padding = (protyle.element.clientWidth - Constants.SIZE_EDITOR_WIDTH) / 2;
-        let isFullWidth = protyle.wysiwyg.element.getAttribute("custom-sy-fullwidth");
+        let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
         }

@@ -17,6 +17,7 @@ const setEditor = (modelMainElement: Element) => {
     window.siyuan.config.editor.dynamicLoadBlocks = dynamicLoadBlocks;
     window.siyuan.config.editor.justify = (modelMainElement.querySelector("#justify") as HTMLInputElement).checked;
     window.siyuan.config.editor.rtl = (modelMainElement.querySelector("#rtl") as HTMLInputElement).checked;
+    window.siyuan.config.editor.readOnly = (modelMainElement.querySelector("#readOnly") as HTMLInputElement).checked;
     window.siyuan.config.editor.displayBookmarkIcon = (modelMainElement.querySelector("#displayBookmarkIcon") as HTMLInputElement).checked;
     window.siyuan.config.editor.displayNetImgMark = (modelMainElement.querySelector("#displayNetImgMark") as HTMLInputElement).checked;
     window.siyuan.config.editor.codeSyntaxHighlightLineNum = (modelMainElement.querySelector("#codeSyntaxHighlightLineNum") as HTMLInputElement).checked;
@@ -64,6 +65,14 @@ export const initEditor = () => {
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="rtl" type="checkbox"${window.siyuan.config.editor.rtl ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.editReadonly}
+        <div class="b3-label__text">${window.siyuan.languages.editReadonlyTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="readOnly" type="checkbox"${window.siyuan.config.editor.readOnly ? " checked" : ""}/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">

@@ -409,7 +409,7 @@ export class Wnd {
         }
     }
 
-    public switchTab(target: HTMLElement, pushBack = false, update = true) {
+    public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true) {
         setPanelFocus(this.headersElement.parentElement.parentElement);
         let currentTab: Tab;
         this.children.forEach((item) => {
@@ -485,7 +485,7 @@ export class Wnd {
                     focus: true,
                     pushBackStack: pushBack,
                     reload: false,
-                    resize: true,
+                    resize,
                 });
             }
         } else {
@@ -494,7 +494,7 @@ export class Wnd {
                 focus: false,
                 pushBackStack: false,
                 reload: false,
-                resize: true,
+                resize,
             });
         }
     }
@@ -750,7 +750,7 @@ export class Wnd {
                             }
                         });
                         if (latestHeadElement && !closeAll) {
-                            this.switchTab(latestHeadElement, true);
+                            this.switchTab(latestHeadElement, true, true, false);
                         }
                     }
                     if (animate) {

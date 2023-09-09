@@ -1033,7 +1033,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
     if (matchHotKey(window.siyuan.config.keymap.general.editMode.custom, event)) {
         event.preventDefault();
-        editor.setReadonly();
+        editor.setReadonly(!window.siyuan.config.editor.readOnly);
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {

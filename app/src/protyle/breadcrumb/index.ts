@@ -46,6 +46,8 @@ export class Breadcrumb {
             '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
 <button class="protyle-breadcrumb__icon fn__none" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
+<button class="block__icon block__icon--show fn__flex-center" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
+<span class="fn__space"></span>
 <button class="block__icon block__icon--show fn__flex-center" data-type="a" data-position="right" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
 <span class="fn__space"></span>
 <button class="block__icon block__icon--show fn__flex-center" data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
@@ -100,6 +102,14 @@ export class Breadcrumb {
                     this.showMenu(protyle, {
                         x: targetRect.right,
                         y: targetRect.bottom,
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "readonly") {
+                    fetchPost("/api/attr/setBlockAttrs", {
+                        id: protyle.block.rootID,
+                        attrs: {[Constants.CUSTOM_SY_READONLY]: target.querySelector("use").getAttribute("xlink:href") === "#iconUnlock" ? "true" : "false"}
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -364,7 +374,7 @@ export class Breadcrumb {
                     }
                 }).element);
             }
-            if (window.siyuan.menus.menu.element.childElementCount > 0) {
+            if (window.siyuan.menus.menu.element.lastElementChild.childElementCount > 0) {
                 window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             }
             window.siyuan.menus.menu.append(new MenuItem({
@@ -423,9 +433,46 @@ export class Breadcrumb {
                 type: "submenu",
                 submenu: editSubmenu
             }).element);
+            const isCustomReadonly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.editReadonly,
+                icon: "iconLock",
+                type: "submenu",
+                submenu: [{
+                    iconHTML: "",
+                    current: isCustomReadonly === "true",
+                    label: window.siyuan.languages.enable,
+                    click() {
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id: protyle.block.rootID,
+                            attrs: {[Constants.CUSTOM_SY_READONLY]: "true"}
+                        });
+                    }
+                }, {
+                    iconHTML: "",
+                    current: isCustomReadonly === "false",
+                    label: window.siyuan.languages.disable,
+                    click() {
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id: protyle.block.rootID,
+                            attrs: {[Constants.CUSTOM_SY_READONLY]: "false"}
+                        });
+                    }
+                }, {
+                    iconHTML: "",
+                    current: !isCustomReadonly,
+                    label: window.siyuan.languages.default,
+                    click() {
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id: protyle.block.rootID,
+                            attrs: {[Constants.CUSTOM_SY_READONLY]: ""}
+                        });
+                    }
+                }]
+            }).element);
             /// #if !MOBILE
             if (!protyle.disabled) {
-                const isCustomFullWidth = protyle.wysiwyg.element.getAttribute("custom-sy-fullwidth");
+                const isCustomFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.fullWidth,
                     type: "submenu",
@@ -436,7 +483,7 @@ export class Breadcrumb {
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id: protyle.block.rootID,
-                                attrs: {"custom-sy-fullwidth": "true"}
+                                attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: "true"}
                             });
                         }
                     }, {
@@ -446,7 +493,7 @@ export class Breadcrumb {
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id: protyle.block.rootID,
-                                attrs: {"custom-sy-fullwidth": "false"}
+                                attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: "false"}
                             });
                         }
                     }, {
@@ -456,7 +503,7 @@ export class Breadcrumb {
                         click() {
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id: protyle.block.rootID,
-                                attrs: {"custom-sy-fullwidth": ""}
+                                attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: ""}
                             });
                         }
                     }]

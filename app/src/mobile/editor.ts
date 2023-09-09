@@ -69,12 +69,6 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
                 typewriterMode: true,
                 preview: {
                     actions: ["mp-wechat", "zhihu"]
-                },
-                after: (editor) => {
-                    // protyle 仅初始化一次，后续更新时会对 url 等再次复制
-                    if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
-                        disabledProtyle(editor.protyle);
-                    }
                 }
             });
         }

@@ -7,7 +7,7 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {setFold, zoomOut} from "../../menus/protyle";
-import {onGet} from "../util/onGet";
+import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
@@ -492,20 +492,31 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 if (refElement) {
                     nodeAttrHTML += refElement.outerHTML;
                 }
-                if (data.new["custom-riff-decks"] && data.new["custom-riff-decks"] !== data.old["custom-riff-decks"]) {
+                if (data.new[Constants.CUSTOM_RIFF_DECKS] && data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
                     protyle.title.element.style.animation = "addCard 450ms linear";
-                    protyle.title.element.setAttribute("custom-riff-decks", data.new["custom-riff-decks"]);
+                    protyle.title.element.setAttribute(Constants.CUSTOM_RIFF_DECKS, data.new[Constants.CUSTOM_RIFF_DECKS]);
                     setTimeout(() => {
                         protyle.title.element.style.animation = "";
                     }, 450);
-                } else if (!data.new["custom-riff-decks"]) {
-                    protyle.title.element.removeAttribute("custom-riff-decks");
+                } else if (!data.new[Constants.CUSTOM_RIFF_DECKS]) {
+                    protyle.title.element.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
                 }
                 protyle.title.element.querySelector(".protyle-attr").innerHTML = nodeAttrHTML;
             }
             protyle.wysiwyg.renderCustom(attrsResult);
-            if (data.new["custom-sy-fullwidth"] !== data.old["custom-sy-fullwidth"]) {
+            if (data.new[Constants.CUSTOM_SY_FULLWIDTH] !== data.old[Constants.CUSTOM_SY_FULLWIDTH]) {
                 setPadding(protyle);
+            }
+            if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY]) {
+                let customReadOnly = data.new[Constants.CUSTOM_SY_READONLY];
+                if (!customReadOnly) {
+                    customReadOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
+                }
+                if (customReadOnly === "true") {
+                    disabledProtyle(protyle);
+                } else {
+                    enableProtyle(protyle);
+                }
             }
             if (data.new.icon !== data.old.icon) {
                 /// #if MOBILE
@@ -530,12 +541,12 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             Object.keys(data.old).forEach(key => {
                 item.removeAttribute(key);
             });
-            if (data.new.style && data.new["custom-riff-decks"] && data.new["custom-riff-decks"] !== data.old["custom-riff-decks"]) {
+            if (data.new.style && data.new[Constants.CUSTOM_RIFF_DECKS] && data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
                 data.new.style += ";animation:addCard 450ms linear";
             }
             Object.keys(data.new).forEach(key => {
                 item.setAttribute(key, data.new[key]);
-                if (key === "custom-riff-decks" && data.new["custom-riff-decks"] !== data.old["custom-riff-decks"]) {
+                if (key === Constants.CUSTOM_RIFF_DECKS && data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
                     item.style.animation = "addCard 450ms linear";
                     setTimeout(() => {
                         item.style.animation = "";

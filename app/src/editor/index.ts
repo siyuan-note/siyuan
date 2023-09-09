@@ -53,10 +53,6 @@ export class Editor extends Model {
             scrollAttr: options.scrollAttr,
             typewriterMode: true,
             after: (editor) => {
-                if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
-                    disabledProtyle(editor.protyle);
-                }
-
                 if (window.siyuan.editorIsFullscreen) {
                     editor.protyle.element.classList.add("fullscreen");
                     setPadding(editor.protyle);

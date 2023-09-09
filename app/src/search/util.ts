@@ -255,9 +255,6 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             breadcrumbDocName: true
         },
     });
-    if (window.siyuan.config.editor.readOnly) {
-        disabledProtyle(edit.protyle);
-    }
     if (closeCB) {
         if (data.layout === 1) {
             if (data.col) {

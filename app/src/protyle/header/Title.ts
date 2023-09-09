@@ -299,8 +299,8 @@ export class Title {
             return false;
         }
         this.element.setAttribute("data-node-id", protyle.block.rootID);
-        if (response.data.ial["custom-riff-decks"]) {
-            this.element.setAttribute("custom-riff-decks", response.data.ial["custom-riff-decks"]);
+        if (response.data.ial[Constants.CUSTOM_RIFF_DECKS]) {
+            this.element.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
         }
         protyle.background?.render(response.data.ial, protyle.block.rootID);
         protyle.wysiwyg.renderCustom(response.data.ial);

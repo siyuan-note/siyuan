@@ -33,7 +33,7 @@ const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
 export const openWechatNotify = (nodeElement: Element) => {
     const id = nodeElement.getAttribute("data-node-id");
     const range = getEditorRange(nodeElement);
-    const reminder = nodeElement.getAttribute("custom-reminder-wechat");
+    const reminder = nodeElement.getAttribute(Constants.CUSTOM_REMINDER_WECHAT);
     let reminderFormat = "";
     if (reminder) {
         reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
@@ -68,7 +68,7 @@ export const openWechatNotify = (nodeElement: Element) => {
         }
         btnsElement[1].setAttribute("disabled", "disabled");
         fetchPost("/api/block/setBlockReminder", {id, timed: "0"}, () => {
-            nodeElement.removeAttribute("custom-reminder-wechat");
+            nodeElement.removeAttribute(Constants.CUSTOM_REMINDER_WECHAT);
             dialog.destroy();
         });
     });
@@ -85,7 +85,7 @@ export const openWechatNotify = (nodeElement: Element) => {
             btnsElement[2].setAttribute("disabled", "disabled");
             const timed = dayjs(date).format("YYYYMMDDHHmmss");
             fetchPost("/api/block/setBlockReminder", {id, timed}, () => {
-                nodeElement.setAttribute("custom-reminder-wechat", timed);
+                nodeElement.setAttribute(Constants.CUSTOM_REMINDER_WECHAT, timed);
                 dialog.destroy();
             });
         } else {
@@ -98,7 +98,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     fetchPost("/api/block/getDocInfo", {
         id: protyle.block.rootID
     }, (response) => {
-        const reminder = response.data.ial["custom-reminder-wechat"];
+        const reminder = response.data.ial[Constants.CUSTOM_REMINDER_WECHAT];
         let reminderFormat = "";
         if (reminder) {
             reminderFormat = dayjs(reminder).format("YYYY-MM-DDTHH:mm");
@@ -155,10 +155,10 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
     let hasAV = false;
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     Object.keys(attrs).forEach(item => {
-        if ("custom-riff-decks" === item || item.startsWith("custom-sy-")) {
+        if (Constants.CUSTOM_RIFF_DECKS === item || item.startsWith("custom-sy-")) {
             return;
         }
-        if (item === "custom-reminder-wechat") {
+        if (item === Constants.CUSTOM_REMINDER_WECHAT) {
             notifyHTML = `<label class="b3-label b3-label--noborder">
     ${window.siyuan.languages.wechatReminder}
     <div class="fn__hr"></div>

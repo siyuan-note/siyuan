@@ -289,8 +289,6 @@ The growth of SiYuan is inseparable from user feedback and promotion, thank you 
 
 ### Contributors
 
-> > > > > > > a63e1fda2e203917ae7f72cb359155f4094c4f3e
-
 ## 🙏 鸣谢
 
 ### 贡献者列表
@@ -300,7 +298,6 @@ The growth of SiYuan is inseparable from user feedback and promotion, thank you 
 <a href="https://github.com/siyuan-note/siyuan/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=siyuan-note/siyuan" />
 </a>
-<<<<<<< HEAD
 
 ### 开源项目依赖列表
 
@@ -350,6 +347,3 @@ The growth of SiYuan is inseparable from user feedback and promotion, thank you 
 * [https://github.com/visjs/vis-network](https://github.com/visjs/vis-network) `Apache-2.0 License`
 * [https://github.com/mozilla/pdf.js](https://github.com/mozilla/pdf.js) `Apache-2.0 License`
 * [https://github.com/blueimp/JavaScript-MD5](https://github.com/blueimp/JavaScript-MD5) `MIT License`
-  =======
-
-> > > > > > > a63e1fda2e203917ae7f72cb359155f4094c4f3e

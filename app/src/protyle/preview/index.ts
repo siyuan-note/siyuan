@@ -164,7 +164,7 @@ export class Preview {
                 protyle.preview.previewElement.innerHTML = response.data.html;
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
-                avRender(protyle.preview.previewElement);
+                avRender(protyle.preview.previewElement, protyle);
                 speechRender(protyle.preview.previewElement, protyle.options.lang);
                 protyle.preview.previewElement.scrollTop = oldScrollTop;
                 /// #if MOBILE

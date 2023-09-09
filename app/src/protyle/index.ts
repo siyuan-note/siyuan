@@ -103,7 +103,7 @@ export class Protyle {
                         case "refreshAttributeView":
                             Array.from(this.protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${data.data.id}"]`)).forEach((item: HTMLElement) => {
                                 item.removeAttribute("data-render");
-                                avRender(item);
+                                avRender(item, this.protyle);
                             });
                             break;
                         case "addLoading":

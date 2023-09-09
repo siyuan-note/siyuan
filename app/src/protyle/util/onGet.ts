@@ -168,7 +168,7 @@ const setHTML = (options: {
     }
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
-    avRender(protyle.wysiwyg.element);
+    avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;

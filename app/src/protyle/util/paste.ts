@@ -117,7 +117,7 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
     blockRender(protyle, protyle.wysiwyg.element);
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
-    avRender(protyle.wysiwyg.element);
+    avRender(protyle.wysiwyg.element, protyle);
     filterClipboardHint(protyle, textPlain);
     scrollCenter(protyle, undefined, false, "smooth");
 };
@@ -242,7 +242,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
-        avRender(protyle.wysiwyg.element);
+        avRender(protyle.wysiwyg.element, protyle);
     } else if (code) {
         if (!code.startsWith('<div data-type="NodeCodeBlock" class="code-block" data-node-id="')) {
             // 原有代码在行内元素中粘贴会嵌套
@@ -292,7 +292,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 blockRender(protyle, protyle.wysiwyg.element);
                 processRender(protyle.wysiwyg.element);
                 highlightRender(protyle.wysiwyg.element);
-                avRender(protyle.wysiwyg.element);
+                avRender(protyle.wysiwyg.element, protyle);
                 filterClipboardHint(protyle, response.data);
                 scrollCenter(protyle, undefined, false, "smooth");
             });
@@ -330,7 +330,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
-        avRender(protyle.wysiwyg.element);
+        avRender(protyle.wysiwyg.element, protyle);
     }
     scrollCenter(protyle, undefined, false, "smooth");
 };

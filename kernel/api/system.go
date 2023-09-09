@@ -206,20 +206,6 @@ func getConf(c *gin.Context) {
 		"conf":  maskedConf,
 		"start": !util.IsUILoaded,
 	}
-
-	if !util.IsUILoaded {
-		go func() {
-			util.WaitForUILoaded()
-
-			if model.Conf.Editor.ReadOnly {
-				// 编辑器启用只读模式时启动后提示用户 https://github.com/siyuan-note/siyuan/issues/7700
-				time.Sleep(time.Second * 3)
-				if model.Conf.Editor.ReadOnly {
-					util.PushMsg(model.Conf.Language(197), 7000)
-				}
-			}
-		}()
-	}
 }
 
 func setUILayout(c *gin.Context) {

@@ -1475,6 +1475,7 @@ export class Gutter {
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.attr,
+                    icon: "iconAttr",
                     accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
                     click() {
                         openAttr(nodeElement);

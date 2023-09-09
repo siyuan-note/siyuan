@@ -81,7 +81,7 @@ export const exportConfig = {
         ${window.siyuan.languages.export25}
         <div class="b3-label__text">${window.siyuan.languages.export26}</div>
     </div>
-    <input class="b3-text-field fn__flex-center fn__size200" id="docxTemplate">
+    <input class="b3-text-field fn__flex-center fn__size200" id="docxTemplate" placeholder="F:\\template.docx">
 </label>
 <label class="fn__flex b3-label config__item">
     <div class="fn__flex-1">

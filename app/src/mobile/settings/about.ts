@@ -318,8 +318,12 @@ export const initAbout = () => {
                         event.stopPropagation();
                         break;
                     } else if (target.getAttribute("data-type") === "remove") {
-                        fetchPost("/api/system/removeWorkspaceDir", {path: target.parentElement.getAttribute("data-path")}, () => {
+                        const removePath = target.parentElement.getAttribute("data-path");
+                        fetchPost("/api/system/removeWorkspaceDir", {path: removePath}, () => {
                             genWorkspace(workspaceDirElement);
+                            confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", removePath), () => {
+                                fetchPost("/api/system/removeWorkspaceDirPhysically", {path: removePath});
+                            });
                         });
                         event.preventDefault();
                         event.stopPropagation();

@@ -183,7 +183,7 @@ export const quickMakeCard = (protyle: IProtyle, nodeElement: Element[]) => {
         }
         item.classList.remove("protyle-wysiwyg--select");
         ids.push(item.getAttribute("data-node-id"));
-        if ((item.getAttribute("custom-riff-decks") || "").indexOf(Constants.QUICK_DECK_ID) === -1) {
+        if ((item.getAttribute(Constants.CUSTOM_RIFF_DECKS) || "").indexOf(Constants.QUICK_DECK_ID) === -1) {
             isRemove = false;
         }
     });

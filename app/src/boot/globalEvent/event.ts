@@ -1,6 +1,5 @@
 import {App} from "../../index";
 import {windowMouseMove} from "./mousemove";
-import {Dialog} from "../../dialog";
 import {windowKeyUp} from "./keyup";
 import {windowKeyDown} from "./keydown";
 import {globalClick} from "./click";
@@ -83,7 +82,7 @@ export const initWindowEvent = (app: App) => {
             // dock right menu
             const dockElement = hasClosestByClassName(target, "dock__item");
             if (dockElement && dockElement.getAttribute("data-type")) {
-                const dockRect = dockElement.getBoundingClientRect()
+                const dockRect = dockElement.getBoundingClientRect();
                 initDockMenu(dockElement).popup({x: dockRect.right, y: dockRect.top});
                 event.stopImmediatePropagation();
                 event.preventDefault();
@@ -93,12 +92,12 @@ export const initWindowEvent = (app: App) => {
             // tab right menu
             const tabElement = hasClosestByAttribute(target, "data-type", "tab-header");
             if (tabElement) {
-                const tabRect = tabElement.getBoundingClientRect()
+                const tabRect = tabElement.getBoundingClientRect();
                 initTabMenu(app, (getInstanceById(tabElement.getAttribute("data-id")) as Tab)).popup({
                     x: tabRect.left,
                     y: tabRect.bottom
                 });
-                hideTooltip()
+                hideTooltip();
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;

@@ -361,6 +361,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         }));
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.attr,
+            icon: "iconAttr",
             click() {
                 fetchPost("/api/block/getDocInfo", {
                     id

@@ -291,8 +291,8 @@ const renderKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
         if (getSelection().rangeCount === 0 ||
-            window.siyuan.config.editor.readOnly ||
             window.siyuan.config.readonly ||
+            document.getElementById("toolbarName").getAttribute("readonly") === "readonly" ||
             window.screen.height - window.innerHeight < 160 ||  // reloadSync 会导致 selectionchange，从而导致键盘没有弹起的情况下出现工具栏
             !document.activeElement || (
                 document.activeElement &&
@@ -492,7 +492,7 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
-        const protyle = getCurrentEditor().protyle;
+        const protyle = getCurrentEditor()?.protyle;
         if (slashBtnElement && !slashBtnElement.getAttribute("data-type")) {
             const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"));
             protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
@@ -544,7 +544,7 @@ export const initKeyboardToolbar = () => {
             }
             return;
         }
-        if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly || !getCurrentEditor()) {
+        if (window.siyuan.config.readonly || !protyle || protyle.disabled) {
             return;
         }
         if (type === "undo") {

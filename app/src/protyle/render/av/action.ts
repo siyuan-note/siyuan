@@ -254,7 +254,7 @@ export const avContextmenu = (protyle: IProtyle, event: MouseEvent & { detail: a
         });
     });
     menu.addItem({
-        icon: "iconList",
+        icon: "iconAttr",
         label: window.siyuan.languages.attr,
         type: "submenu",
         submenu: editAttrSubmenu

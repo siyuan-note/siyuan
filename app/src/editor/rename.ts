@@ -44,7 +44,7 @@ export const rename = (options: {
     type: "notebook" | "file"
     range?: Range,
 }) => {
-    if (window.siyuan.config.editor.readOnly || window.siyuan.config.readonly) {
+    if (window.siyuan.config.readonly) {
         return;
     }
     const dialog = new Dialog({

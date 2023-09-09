@@ -190,7 +190,11 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
+                                fetchPost("/api/system/removeWorkspaceDir", {path: item.path}, () => {
+                                    confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", item.path), () => {
+                                        fetchPost("/api/system/removeWorkspaceDirPhysically", {path: item.path});
+                                    });
+                                });
                                 return;
                             }
                             confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(item.path)}?`, () => {

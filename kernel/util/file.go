@@ -136,15 +136,19 @@ func TruncateLenFileName(name string) (ret string) {
 	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
 	ext := filepath.Ext(name)
 	var byteCount int
+	truncated := false
 	buf := bytes.Buffer{}
 	for _, r := range name {
 		byteCount += utf8.RuneLen(r)
 		if 189-len(ext) < byteCount {
+			truncated = true
 			break
 		}
 		buf.WriteRune(r)
 	}
-	buf.WriteString(ext)
+	if truncated {
+		buf.WriteString(ext)
+	}
 	ret = buf.String()
 	return
 }

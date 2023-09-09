@@ -39,6 +39,12 @@ export abstract class Constants {
     public static readonly SIYUAN_EXPORT_PREVENT: string = "siyuan-export-prevent";
     public static readonly SIYUAN_AUTO_LAUNCH: string = "siyuan-auto-launch";
 
+    // custom
+    public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
+    public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
+    public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";
+    public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
+
     // size
     public static readonly SIZE_LINK_TEXT_MAX: number = 24;
     public static readonly SIZE_TOOLBAR_HEIGHT: number = isMobile() ? 0 : 32;
@@ -99,7 +105,6 @@ export abstract class Constants {
         en_US: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
     };
-
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 
     public static readonly KEYCODELIST: { [key: number]: string } = {

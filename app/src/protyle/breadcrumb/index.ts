@@ -46,10 +46,12 @@ export class Breadcrumb {
             '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
 <button class="protyle-breadcrumb__icon fn__none" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
-<button class="block__icon block__icon--show fn__flex-center" data-type="a" data-position="right" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.editReadonly}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
 <span class="fn__space"></span>
-<button class="block__icon block__icon--show fn__flex-center" data-type="more"><svg><use xlink:href="#iconMore"></use></svg></button>
-<button class="block__icon block__icon--show fn__flex-center fn__none" style="margin-left: 8px" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="doc" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
+<span class="fn__space"></span>
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center fn__none ariaLabel" style="margin-left: 8px" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
 
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {
@@ -81,7 +83,7 @@ export class Breadcrumb {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "a") {
+                } else if (type === "doc") {
                     if (window.siyuan.shiftIsPressed) {
                         fetchPost("/api/block/getDocInfo", {
                             id: protyle.block.rootID
@@ -100,6 +102,14 @@ export class Breadcrumb {
                     this.showMenu(protyle, {
                         x: targetRect.right,
                         y: targetRect.bottom,
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "readonly") {
+                    fetchPost("/api/attr/setBlockAttrs", {
+                        id: protyle.block.rootID,
+                        attrs: {[Constants.CUSTOM_SY_READONLY]: target.querySelector("use").getAttribute("xlink:href") === "#iconUnlock" ? "true" : "false"}
                     });
                     event.stopPropagation();
                     event.preventDefault();
@@ -325,17 +335,6 @@ export class Breadcrumb {
             }
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.optimizeTypography,
-                    accelerator: window.siyuan.config.keymap.editor.general.optimizeTypography.custom,
-                    icon: "iconFormat",
-                    click: () => {
-                        hideElements(["toolbar"], protyle);
-                        fetchPost("/api/format/autoSpace", {
-                            id: protyle.block.rootID
-                        });
-                    }
-                }).element);
-                window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.netImg2LocalAsset,
                     icon: "iconTransform",
                     accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
@@ -375,7 +374,7 @@ export class Breadcrumb {
                     }
                 }).element);
             }
-            if (window.siyuan.menus.menu.element.childElementCount > 0) {
+            if (window.siyuan.menus.menu.element.lastElementChild.childElementCount > 0) {
                 window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             }
             window.siyuan.menus.menu.append(new MenuItem({
@@ -386,24 +385,30 @@ export class Breadcrumb {
                     reloadProtyle(protyle, !isMobile());
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconTrashcan",
-                label: window.siyuan.languages.delete,
-                click: () => {
-                    deleteFile(protyle.notebookId, protyle.path);
-                }
-            }).element);
-            if (!isMobile()) {
+            if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
-                    icon: protyle.element.className.includes("fullscreen") ? "iconFullscreenExit" : "iconFullscreen",
-                    accelerator: window.siyuan.config.keymap.editor.general.fullscreen.custom,
-                    label: window.siyuan.languages.fullscreen,
+                    label: window.siyuan.languages.optimizeTypography,
+                    accelerator: window.siyuan.config.keymap.editor.general.optimizeTypography.custom,
+                    icon: "iconFormat",
                     click: () => {
-                        fullscreen(protyle.element);
-                        setPadding(protyle);
+                        hideElements(["toolbar"], protyle);
+                        fetchPost("/api/format/autoSpace", {
+                            id: protyle.block.rootID
+                        });
                     }
                 }).element);
             }
+            /// #if !MOBILE
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: protyle.element.className.includes("fullscreen") ? "iconFullscreenExit" : "iconFullscreen",
+                accelerator: window.siyuan.config.keymap.editor.general.fullscreen.custom,
+                label: window.siyuan.languages.fullscreen,
+                click: () => {
+                    fullscreen(protyle.element);
+                    setPadding(protyle);
+                }
+            }).element);
+            /// #endif
             const editSubmenu: IMenu[] = [{
                 current: !protyle.contentElement.classList.contains("fn__none"),
                 label: window.siyuan.languages.wysiwyg,
@@ -428,8 +433,92 @@ export class Breadcrumb {
                 type: "submenu",
                 submenu: editSubmenu
             }).element);
+            const isCustomReadonly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.editReadonly,
+                icon: "iconLock",
+                type: "submenu",
+                submenu: [{
+                    iconHTML: "",
+                    current: isCustomReadonly === "true",
+                    label: window.siyuan.languages.enable,
+                    click() {
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id: protyle.block.rootID,
+                            attrs: {[Constants.CUSTOM_SY_READONLY]: "true"}
+                        });
+                    }
+                }, {
+                    iconHTML: "",
+                    current: isCustomReadonly === "false",
+                    label: window.siyuan.languages.disable,
+                    click() {
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id: protyle.block.rootID,
+                            attrs: {[Constants.CUSTOM_SY_READONLY]: "false"}
+                        });
+                    }
+                }, {
+                    iconHTML: "",
+                    current: !isCustomReadonly,
+                    label: window.siyuan.languages.default,
+                    click() {
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id: protyle.block.rootID,
+                            attrs: {[Constants.CUSTOM_SY_READONLY]: ""}
+                        });
+                    }
+                }]
+            }).element);
+            /// #if !MOBILE
+            if (!protyle.disabled) {
+                const isCustomFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.fullWidth,
+                    icon: "iconDock",
+                    type: "submenu",
+                    submenu: [{
+                        iconHTML: "",
+                        current: isCustomFullWidth === "true",
+                        label: window.siyuan.languages.enable,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: "true"}
+                            });
+                        }
+                    }, {
+                        iconHTML: "",
+                        current: isCustomFullWidth === "false",
+                        label: window.siyuan.languages.disable,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: "false"}
+                            });
+                        }
+                    }, {
+                        iconHTML: "",
+                        current: !isCustomFullWidth,
+                        label: window.siyuan.languages.default,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: ""}
+                            });
+                        }
+                    }]
+                }).element);
+            }
+            /// #endif
             window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
-
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconTrashcan",
+                label: window.siyuan.languages.delete,
+                click: () => {
+                    deleteFile(protyle.notebookId, protyle.path);
+                }
+            }).element);
             if (protyle?.app?.plugins) {
                 emitOpenMenu({
                     plugins: protyle.app.plugins,
@@ -469,12 +558,12 @@ export class Breadcrumb {
         if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
             if (!protyle.wysiwyg.element.isEqualNode(range.startContainer) && !protyle.wysiwyg.element.contains(range.startContainer)) {
-               if (protyle.element.id ==="searchPreview") {
-                   // https://github.com/siyuan-note/siyuan/issues/8807
-                   blockElement = hasClosestBlock(protyle.wysiwyg.element.querySelector('[data-type="search-mark"]')) as Element;
-               } else {
-                   blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
-               }
+                if (protyle.element.id === "searchPreview") {
+                    // https://github.com/siyuan-note/siyuan/issues/8807
+                    blockElement = hasClosestBlock(protyle.wysiwyg.element.querySelector('[data-type="search-mark"]')) as Element;
+                } else {
+                    blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
+                }
             } else {
                 blockElement = hasClosestBlock(range.startContainer) as Element;
             }

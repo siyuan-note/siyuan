@@ -8,7 +8,6 @@ import {App} from "../../index";
 
 export const setEmpty = (app: App) => {
     document.getElementById("toolbarName").classList.add("fn__hidden");
-    document.getElementById("toolbarEdit").classList.add("fn__hidden");
     document.getElementById("editor").classList.add("fn__none");
     const emptyElement = document.getElementById("empty");
     emptyElement.classList.remove("fn__none");
@@ -83,7 +82,6 @@ export const setEmpty = (app: App) => {
 
 export const setEditor = () => {
     document.getElementById("toolbarName").classList.remove("fn__hidden");
-    document.getElementById("toolbarEdit").classList.remove("fn__hidden");
     document.getElementById("editor").classList.remove("fn__none");
     document.getElementById("empty").classList.add("fn__none");
 };

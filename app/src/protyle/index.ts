@@ -117,10 +117,12 @@ export class Protyle {
                             });
                             break;
                         case "readonly":
-                            if (data.data) {
-                                disabledProtyle(this.protyle);
-                            } else {
-                                enableProtyle(this.protyle);
+                            if (!this.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY)) {
+                                if (data.data) {
+                                    disabledProtyle(this.protyle);
+                                } else {
+                                    enableProtyle(this.protyle);
+                                }
                             }
                             break;
                         case "heading2doc":
@@ -204,7 +206,6 @@ export class Protyle {
                     }
                 }
             });
-            setPadding(this.protyle);
             if (options.backlinkData) {
                 this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
@@ -300,7 +301,7 @@ export class Protyle {
             });
             /// #endif
         }
-
+        setPadding(this.protyle);
         // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
         // 只能用 focusin，否则点击表格无法执行
         this.protyle.wysiwyg.element.addEventListener("focusin", () => {

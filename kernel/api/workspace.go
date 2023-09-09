@@ -163,6 +163,31 @@ func removeWorkspaceDir(c *gin.Context) {
 	}
 }
 
+func removeWorkspaceDirPhysically(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	if gulu.File.IsDir(path) {
+		err := os.RemoveAll(path)
+		if nil != err {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+
+	logging.LogInfof("removed workspace [%s] physically", path)
+	if util.WorkspaceDir == path {
+		os.Exit(logging.ExitCodeOk)
+	}
+}
+
 type Workspace struct {
 	Path   string `json:"path"`
 	Closed bool   `json:"closed"`

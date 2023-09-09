@@ -133,9 +133,6 @@ export const bindCardEvent = (options: {
     if (window.siyuan.mobile) {
         window.siyuan.mobile.popEditor = editor;
     }
-    if (window.siyuan.config.editor.readOnly) {
-        disabledProtyle(editor.protyle);
-    }
     if (options.blocks.length > 0) {
         fetchPost("/api/filetree/getDoc", {
             id: options.blocks[index].blockID,

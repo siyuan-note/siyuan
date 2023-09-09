@@ -53,6 +53,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
             }
             window.siyuan.menus.menu.append(new MenuItem({
                 label: window.siyuan.languages.attr,
+                icon: "iconAttr",
                 accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
                 click() {
                     openFileAttr(response.data.ial);
@@ -122,7 +123,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                 if (!titleElement) {
                     titleElement = document.createElement("div");
                     titleElement.setAttribute("data-node-id", protyle.block.rootID);
-                    titleElement.setAttribute("custom-riff-decks", response.data.ial["custom-riff-decks"]);
+                    titleElement.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
                 }
                 quickMakeCard(protyle, [titleElement]);
             }

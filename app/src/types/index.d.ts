@@ -491,6 +491,7 @@ interface IExport {
     addTitle: boolean;
     markdownYFM: boolean;
     pdfFooter: string;
+    docxTemplate: string;
 }
 
 interface IEditor {

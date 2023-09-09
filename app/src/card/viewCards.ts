@@ -65,9 +65,6 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             if (window.siyuan.mobile) {
                 window.siyuan.mobile.popEditor = edit;
             }
-            if (window.siyuan.config.editor.readOnly) {
-                disabledProtyle(edit.protyle);
-            }
             getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         }
         const previousElement = dialog.element.querySelector('[data-type="previous"]');

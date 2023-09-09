@@ -21,19 +21,6 @@ import {needSubscribe} from "../util/needSubscribe";
 import * as dayjs from "dayjs";
 import {commandPanel} from "../plugin/commandPanel";
 
-export const updateEditModeElement = () => {
-    const target = document.querySelector("#barReadonly");
-    if (window.siyuan.config.editor.readOnly) {
-        target.classList.add("toolbar__item--active");
-        target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editMode} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
-        target.querySelector("use").setAttribute("xlink:href", "#iconPreview");
-    } else {
-        target.classList.remove("toolbar__item--active");
-        target.setAttribute("aria-label", `${window.siyuan.languages.use} ${window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}`);
-        target.querySelector("use").setAttribute("xlink:href", "#iconEdit");
-    }
-};
-
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `
@@ -60,9 +47,6 @@ export const initBar = (app: App) => {
 </div>
 <div id="barZoom" class="toolbar__item b3-tooltips b3-tooltips__sw${(window.siyuan.storage[Constants.LOCAL_ZOOM] === 1 || isBrowser()) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.zoom}">
     <svg><use xlink:href="#iconZoom${window.siyuan.storage[Constants.LOCAL_ZOOM] > 1 ? "In" : "Out"}"></use></svg>
-</div>
-<div id="barReadonly" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}${window.siyuan.config.editor.readOnly ? " toolbar__item--active" : ""}" aria-label="${window.siyuan.languages.use} ${window.siyuan.config.editor.readOnly ? window.siyuan.languages.editMode : window.siyuan.languages.editReadonly} ${updateHotkeyTip(window.siyuan.config.keymap.general.editMode.custom)}">
-    <svg><use xlink:href="#icon${window.siyuan.config.editor.readOnly ? "Preview" : "Edit"}"></use></svg>
 </div>
 <div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.appearanceMode}">
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
@@ -126,10 +110,6 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barWorkspace") {
                 workspaceMenu(app, target.getBoundingClientRect());
-                event.stopPropagation();
-                break;
-            } else if (targetId === "barReadonly") {
-                editor.setReadonly();
                 event.stopPropagation();
                 break;
             } else if (targetId === "barMode") {

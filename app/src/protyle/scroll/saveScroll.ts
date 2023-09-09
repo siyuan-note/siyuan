@@ -72,10 +72,8 @@ export const getDocByScroll = (options: {
                 protyle: options.protyle,
                 action: actions,
                 scrollAttr: options.scrollAttr,
+                afterCB: options.cb
             });
-            if (options.cb) {
-                options.cb();
-            }
         });
         return;
     }
@@ -89,9 +87,7 @@ export const getDocByScroll = (options: {
             protyle: options.protyle,
             action: actions,
             scrollAttr: options.scrollAttr,
+            afterCB: options.cb
         });
-        if (options.cb) {
-            options.cb();
-        }
     });
 };

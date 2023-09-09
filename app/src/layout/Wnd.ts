@@ -61,9 +61,9 @@ export class Wnd {
         <ul class="fn__flex layout-tab-bar"></ul>
         <ul class="layout-tab-bar layout-tab-bar--readonly fn__flex-1">
             <li class="item item--readonly">
-                <span data-type="new" class="block__icon block__icon--show" title="${window.siyuan.languages.newFile}"><svg><use xlink:href="#iconAdd"></use></svg></span>
+                <span data-type="new" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.newFile}"><svg><use xlink:href="#iconAdd"></use></svg></span>
                 <span class="fn__flex-1"></span>
-                <span data-type="more" data-menu="true" class="block__icon block__icon--show" title="${window.siyuan.languages.more}"><svg><use xlink:href="#iconDown"></use></svg></span>
+                <span data-type="more" data-menu="true" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.switchTab}"><svg><use xlink:href="#iconDown"></use></svg></span>
             </li>
         </ul>
     </div>
@@ -409,7 +409,7 @@ export class Wnd {
         }
     }
 
-    public switchTab(target: HTMLElement, pushBack = false, update = true) {
+    public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true) {
         setPanelFocus(this.headersElement.parentElement.parentElement);
         let currentTab: Tab;
         this.children.forEach((item) => {
@@ -485,7 +485,7 @@ export class Wnd {
                     focus: true,
                     pushBackStack: pushBack,
                     reload: false,
-                    resize: true,
+                    resize,
                 });
             }
         } else {
@@ -494,7 +494,7 @@ export class Wnd {
                 focus: false,
                 pushBackStack: false,
                 reload: false,
-                resize: true,
+                resize,
             });
         }
     }
@@ -750,7 +750,7 @@ export class Wnd {
                             }
                         });
                         if (latestHeadElement && !closeAll) {
-                            this.switchTab(latestHeadElement, true);
+                            this.switchTab(latestHeadElement, true, true, false);
                         }
                     }
                     if (animate) {

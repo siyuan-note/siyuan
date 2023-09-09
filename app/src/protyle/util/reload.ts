@@ -32,8 +32,8 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean) => {
                 refTreeID: protyle.block.rootID,
                 keyword: isMention ? inputsElement[1].value : inputsElement[0].value
             }, response => {
-                protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks,
-                    renderBacklink(protyle, protyle.options.backlinkData);
+                protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
+                renderBacklink(protyle, protyle.options.backlinkData);
             });
         }
     } else {

@@ -12,5 +12,5 @@ export const escapeAttr = (html: string) => {
 
 export const escapeAriaLabel = (html: string) => {
     return html.replace(/"/g, "&quot;").replace(/'/g, "&apos;")
-        .replace(/</g, "&amp;lt;");
+        .replace(/</g, "&amp;lt;").replace(/&lt;/g, "&amp;lt;");
 };

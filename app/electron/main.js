@@ -720,6 +720,8 @@ app.whenReady().then(() => {
         } else {
             win.center();
         }
+        win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
+        win.webContents.session.setSpellCheckerLanguages(["en-US"]);
         win.loadURL(data.url);
         const targetScreen = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
         if (mainScreen.id !== targetScreen.id) {

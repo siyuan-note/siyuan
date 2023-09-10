@@ -31,7 +31,7 @@ cd ..
 
 echo 'Building Electron'
 cd app
-pnpm run build:export
+call pnpm run build:export
 echo "build export assets"
 call pnpm run dist
 

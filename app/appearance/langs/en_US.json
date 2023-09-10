@@ -1,4 +1,12 @@
 {
+  "defaultMargin": "Default",
+  "noneMargin": "None",
+  "minimalMargin": "Minimal",
+  "customMargin": "Custom",
+  "marginTop": "Top",
+  "marginRight": "Right",
+  "marginBottom": "Bottom",
+  "marginLeft": "Left",
   "lockEdit": "Make doc read-only",
   "unlockEdit": "Make doc writable",
   "enable": "Enable",

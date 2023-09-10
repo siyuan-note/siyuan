@@ -171,23 +171,23 @@ const renderPDF = (id: string) => {
         </div>
         <span class="fn__hr"></span>
         <select class="b3-select" id="marginsType">
-            <option ${localData.marginType === "default" ? "selected" : ""} value="default">Default</option>
-            <option ${localData.marginType === "none" ? "selected" : ""} value="none">None</option>
-            <option ${localData.marginType === "printableArea" ? "selected" : ""} value="printableArea">Minimal</option>
-            <option ${localData.marginType === "custom" ? "selected" : ""} value="custom">${window.siyuan.languages.custom}</option>
+            <option ${localData.marginType === "default" ? "selected" : ""} value="default">${window.siyuan.languages.defaultMargin}</option>
+            <option ${localData.marginType === "none" ? "selected" : ""} value="none">${window.siyuan.languages.noneMargin}</option>
+            <option ${localData.marginType === "printableArea" ? "selected" : ""} value="printableArea">${window.siyuan.languages.minimalMargin}</option>
+            <option ${localData.marginType === "custom" ? "selected" : ""} value="custom">${window.siyuan.languages.customMargin}</option>
         </select>
         <div class="${localData.marginType === "custom" ? "" : "fn__none"}">
             <span class="fn__hr"></span>
-            <div>Top</div>
+            <div>${window.siyuan.languages.marginTop}</div>
             <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
             <span class="fn__hr"></span>
-            <div>Right</div>
+            <div>${window.siyuan.languages.marginRight}</div>
             <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
             <span class="fn__hr"></span>
-            <div>Bottom</div>
+            <div>${window.siyuan.languages.marginBottom}</div>
             <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
             <span class="fn__hr"></span>
-            <div>Left</div>
+            <div>${window.siyuan.languages.marginLeft}</div>
         <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
     </div>
     </label>

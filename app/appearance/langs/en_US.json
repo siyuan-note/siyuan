@@ -1,4 +1,6 @@
 {
+  "lockEdit": "Make doc read-only",
+  "unlockEdit": "Make doc writable",
   "enable": "Enable",
   "disable": "Disable",
   "removeWorkspacePhysically": "Do you want to physically delete the data in workspace ${x}? (Physical deletion cannot be recovered)",

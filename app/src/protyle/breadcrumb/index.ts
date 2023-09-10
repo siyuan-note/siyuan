@@ -46,7 +46,7 @@ export class Breadcrumb {
             '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
 <button class="protyle-breadcrumb__icon fn__none" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
-<button class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.editReadonly}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
 <span class="fn__space"></span>
 <button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="doc" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
 <span class="fn__space"></span>

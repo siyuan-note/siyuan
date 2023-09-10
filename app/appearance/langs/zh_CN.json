@@ -1,4 +1,6 @@
 {
+  "lockEdit": "锁定编辑",
+  "unlockEdit": "解除锁定",
   "enable": "启用",
   "disable": "禁用",
   "removeWorkspacePhysically": "是否物理删除工作空间 ${x} 的数据？（物理删除无法恢复）",

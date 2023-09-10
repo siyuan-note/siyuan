@@ -17,6 +17,7 @@ import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
+import {hideTooltip} from "../../dialog/tooltip";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -328,6 +329,8 @@ export const disabledProtyle = (protyle: IProtyle) => {
         item.setAttribute("contenteditable", "false");
     });
     protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
+    protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.languages.unlockEdit);
+    hideTooltip();
 };
 
 /** 解除编辑器禁用 */
@@ -358,6 +361,8 @@ export const enableProtyle = (protyle: IProtyle) => {
         }
     });
     protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");
+    protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.languages.lockEdit);
+    hideTooltip();
 };
 
 

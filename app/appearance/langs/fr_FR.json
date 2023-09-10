@@ -1,4 +1,6 @@
 {
+  "lockEdit": "Rendre le document en lecture seule",
+  "unlockEdit": "Rendre le document accessible en écriture",
   "enable": "Activer",
   "disable": "Désactiver",
   "removeWorkspacePhysically": "Voulez-vous supprimer physiquement les données de l'espace de travail ${x} ? (La suppression physique ne peut pas être récupérée)",

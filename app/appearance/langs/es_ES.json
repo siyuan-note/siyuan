@@ -1,4 +1,12 @@
 {
+  "defaultMargin": "Predeterminado",
+  "noneMargin": "Ninguno",
+  "minimalMargin": "Mínimo",
+  "customMargin": "Personalizado",
+  "marginTop": "Superior",
+  "marginRight": "Derecho",
+  "marginBottom": "Inferior",
+  "marginLeft": "Izquierda",
   "enable": "Habilitar",
   "disable": "Desactivar",
   "removeWorkspacePhysically": "¿Quieres eliminar físicamente los datos en el espacio de trabajo ${x}? (La eliminación física no se puede recuperar)",

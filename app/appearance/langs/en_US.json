@@ -1,4 +1,12 @@
 {
+  "defaultMargin": "Default",
+  "noneMargin": "None",
+  "minimalMargin": "Minimal",
+  "customMargin": "Custom",
+  "marginTop": "Top",
+  "marginRight": "Right",
+  "marginBottom": "Bottom",
+  "marginLeft": "Left",
   "enable": "Enable",
   "disable": "Disable",
   "removeWorkspacePhysically": "Do you want to physically delete the data in workspace ${x}? (Physical deletion cannot be recovered)",

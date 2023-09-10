@@ -347,7 +347,6 @@ const boot = () => {
             bootWindow.destroy();
         }
     });
-
     // 加载主界面
     currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
 

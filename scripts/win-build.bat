@@ -3,10 +3,11 @@ echo 'use ".\scripts\win-build.bat" instead of "win-build.bat"'
 
 echo 'Building UI'
 cd app
-call pnpm run build:export
-echo "build export assets"
 call pnpm install
 call pnpm run build
+call pnpm run build:export
+echo "build export assets"
+
 cd ..
 
 echo 'Cleaning Builds'

@@ -30,7 +30,7 @@
 ## 更新
 
 - 去重用户相关内容，可以云端同步。去重更新提示
-    - 下载地址 http://wp.start6.cn/s/rEH0?password=9hv0wk
+    - 下载地址(支持mac、windows) http://wp.start6.cn/s/vmIj?password=516gor
 
 ## 💡 简介
 

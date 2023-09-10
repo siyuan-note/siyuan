@@ -76,7 +76,6 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.9",
-    "electron": "^26.2.0"
+    "@electron/remote": "^2.0.9"
   }
 }

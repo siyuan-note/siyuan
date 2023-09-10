@@ -3,6 +3,8 @@ echo 'use ".\scripts\win-build.bat" instead of "win-build.bat"'
 
 echo 'Building UI'
 cd app
+call pnpm run build:export
+echo "build export assets"
 call pnpm install
 call pnpm run build
 cd ..
@@ -31,10 +33,7 @@ cd ..
 
 echo 'Building Electron'
 cd app
-call pnpm run build:export
-echo "build export assets"
 call pnpm run dist
-
 cd ..
 
 echo 'Building Appx'

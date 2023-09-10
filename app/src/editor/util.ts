@@ -180,12 +180,10 @@ export const openFile = (options: IOpenFileOptions) => {
         }
         const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split(Constants.ZWSP);
         if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
-            let execJS = `window.newWindow.switchTabById("${options.rootID || options.assetPath}");`;
-            if (options.assetPath) {
-                execJS += `window.newWindow.positionPDF("${options.assetPath}", ${typeof options.page === "number" ? options.page : `"${options.page}"`})`;
-            }
             item.focus();
-            item.webContents.executeJavaScript(execJS);
+            const optionsClone = Object.assign({}, options);
+            delete optionsClone.app
+            item.webContents.executeJavaScript(`window.newWindow.openFile(${JSON.stringify(optionsClone)});`);
             if (options.afterOpen) {
                 options.afterOpen();
             }

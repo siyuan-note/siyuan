@@ -560,7 +560,7 @@ export class Toolbar {
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
-                        } else if (item.tagName !== "BR") {
+                        } else if (item.tagName !== "BR" && item.tagName !== "IMG") {
                             if (item.getAttribute("data-type")?.indexOf("backslash") > -1 &&
                                 item.firstChild?.textContent === "\\") {
                                 item.firstChild.remove();

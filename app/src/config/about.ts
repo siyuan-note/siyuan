@@ -148,7 +148,7 @@ export const about = {
         <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__block">
             <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
         </button>
-        <div class="fn__hr${isBrowser() ? "" : " fn__none"}"></div>
+        <div class="fn__hr${(isInIOS() || isInAndroid()) ? "" : " fn__none"}"></div>
         <button id="menuSafeQuit" class="b3-button b3-button--outline fn__block${(isInIOS() || isInAndroid()) ? "" : " fn__none"}">
             <svg><use xlink:href="#iconQuit"></use></svg>${window.siyuan.languages.safeQuit}
         </button>

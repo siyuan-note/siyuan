@@ -159,8 +159,11 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         const currentLineValue = protyle.toolbar.range.startContainer.textContent.substring(0, start) || "";
         const key = this.getKey(currentLineValue, protyle.options.hint.extend);
         if (typeof key === "undefined" ||
-            (   // 除 emoji 提示外，其余在 inline-code 内移动不进行提示
-                this.splitChar !== ":" && hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock")
+            (   // 除 emoji 提示外，其余在 code 内移动不进行提示
+                this.splitChar !== ":" && (
+                    hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock") ||
+                    hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "code")
+                )
             )
         ) {
             this.element.classList.add("fn__none");

@@ -463,7 +463,6 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 	for _, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
-			logging.LogWarnf("block tree not found [%s]", id)
 			continue
 		}
 

@@ -7,6 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {updateSearchResult} from "../mobile/menu/search";
 
 export const filterMenu = (config: ISearchOption, cb: () => void) => {
     const filterDialog = new Dialog({
@@ -150,7 +151,7 @@ export const queryMenu = (config: ISearchOption, cb: () => void) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", "searchMethod");
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.keyword,
         current: config.method === 0,
         click() {
@@ -159,7 +160,7 @@ export const queryMenu = (config: ISearchOption, cb: () => void) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.querySyntax,
         current: config.method === 1,
         click() {
@@ -168,7 +169,7 @@ export const queryMenu = (config: ISearchOption, cb: () => void) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: "SQL",
         current: config.method === 2,
         click() {
@@ -177,7 +178,7 @@ export const queryMenu = (config: ISearchOption, cb: () => void) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.regex,
         current: config.method === 3,
         click() {
@@ -323,8 +324,61 @@ export const moreMenu = async (config: ISearchOption,
     }
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", "searchMore");
+    /// #if MOBILE
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: "",
+        label: window.siyuan.languages.type,
+        click() {
+            filterMenu(config, () => {
+                updateSearchResult(config, element, true);
+            });
+        }
+    }).element);
+    window.siyuan.menus.menu.append(new MenuItem({
+        iconHTML: "",
+        label: window.siyuan.languages.searchMethod,
+        type: "submenu",
+        submenu: [{
+            iconHTML: "",
+            label: window.siyuan.languages.keyword,
+            current: config.method === 0,
+            click() {
+                config.method = 0;
+                config.page = 1;
+                updateSearchResult(config, element, true);
+            }
+        }, {
+            iconHTML: "",
+            label: window.siyuan.languages.querySyntax,
+            current: config.method === 1,
+            click() {
+                config.method = 1;
+                config.page = 1;
+                updateSearchResult(config, element, true);
+            }
+        }, {
+            iconHTML: "",
+            label: "SQL",
+            current: config.method === 2,
+            click() {
+                config.method = 2;
+                config.page = 1;
+                updateSearchResult(config, element, true);
+            }
+        }, {
+            iconHTML: "",
+            label: window.siyuan.languages.regex,
+            current: config.method === 3,
+            click() {
+                config.method = 3;
+                config.page = 1;
+                updateSearchResult(config, element, true);
+            }
+        }]
+    }).element);
+    /// #endif
     const sortMenu = [{
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.type,
         current: config.sort === 0,
         click() {
@@ -332,7 +386,7 @@ export const moreMenu = async (config: ISearchOption,
             cb();
         }
     }, {
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.createdASC,
         current: config.sort === 1,
         click() {
@@ -340,7 +394,7 @@ export const moreMenu = async (config: ISearchOption,
             cb();
         }
     }, {
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.createdDESC,
         current: config.sort === 2,
         click() {
@@ -348,7 +402,7 @@ export const moreMenu = async (config: ISearchOption,
             cb();
         }
     }, {
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.modifiedASC,
         current: config.sort === 3,
         click() {
@@ -356,7 +410,7 @@ export const moreMenu = async (config: ISearchOption,
             cb();
         }
     }, {
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.modifiedDESC,
         current: config.sort === 4,
         click() {
@@ -364,7 +418,7 @@ export const moreMenu = async (config: ISearchOption,
             cb();
         }
     }, {
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.sortByRankAsc,
         current: config.sort === 6,
         click() {
@@ -372,7 +426,7 @@ export const moreMenu = async (config: ISearchOption,
             cb();
         }
     }, {
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.sortByRankDesc,
         current: config.sort === 7,
         click() {
@@ -382,7 +436,7 @@ export const moreMenu = async (config: ISearchOption,
     }];
     if (config.group === 1) {
         sortMenu.push({
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.sortByContent,
             current: config.sort === 5,
             click() {
@@ -392,17 +446,17 @@ export const moreMenu = async (config: ISearchOption,
         });
     }
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.sort,
         type: "submenu",
         submenu: sortMenu,
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.group,
         type: "submenu",
         submenu: [{
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.noGroupBy,
             current: config.group === 0,
             click() {
@@ -419,7 +473,7 @@ export const moreMenu = async (config: ISearchOption,
                 cb();
             }
         }, {
-            iconHTML: Constants.ZWSP,
+            iconHTML: "",
             label: window.siyuan.languages.groupByDoc,
             current: config.group === 1,
             click() {
@@ -440,13 +494,13 @@ export const moreMenu = async (config: ISearchOption,
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.saveCriterion,
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         click() {
             saveCriterion(config, criteriaData, element);
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: Constants.ZWSP,
+        iconHTML: "",
         label: window.siyuan.languages.removeCriterion,
         click() {
             removeCriterion();

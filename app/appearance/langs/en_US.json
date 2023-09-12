@@ -289,7 +289,7 @@
   "appearanceMode": "Appearance Mode",
   "editMode": "Edit Mode",
   "editReadonly": "Read-only mode",
-  "editReadonlyTip": "After enabling, the editor will load the document in read-only mode. When you need to edit, you can click the edit button on the top bar to switch to edit mode",
+  "editReadonlyTip": "After enabling, the editor will load the document in read-only mode",
   "generateConflictDoc": "Generate conflict documentation when syncing conflicts",
   "generateConflictDocTip": "After enabling, a conflict document will be generated when a synchronization conflict occurs, so that it can be opened and viewed directly. Whether enabled or not, the data history will record the conflict document",
   "deleteOpConfirm": "⚠️ Delete operation confirmation",

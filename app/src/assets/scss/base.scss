@@ -116,6 +116,7 @@ html {
   height: 32px;
   line-height: 32px;
   padding: 0 5px 0 var(--b3-toolbar-left-mac);
+  overflow: hidden; // 最小化后右上角显示不全
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {

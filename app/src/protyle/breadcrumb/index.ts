@@ -46,12 +46,12 @@ export class Breadcrumb {
             '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
 <button class="protyle-breadcrumb__icon fn__none" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
-<button class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" data-position="right" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
 <span class="fn__space"></span>
-<button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="doc" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" data-position="right" data-type="doc" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
 <span class="fn__space"></span>
-<button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
-<button class="block__icon block__icon--show fn__flex-center fn__none ariaLabel" style="margin-left: 8px" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" data-position="right" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center fn__none ariaLabel" style="margin-left: 8px" data-position="right" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
 
         this.element = element.firstElementChild as HTMLElement;
         element.addEventListener("click", (event) => {

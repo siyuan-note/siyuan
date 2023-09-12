@@ -289,7 +289,7 @@
   "appearanceMode": "外觀模式",
   "editMode": "編輯模式",
   "editReadonly": "只讀模式",
-  "editReadonlyTip": "啟用後編輯器將以只讀模式載入文檔，需要編輯時可點擊頂欄編輯按鈕切換到編輯模式",
+  "editReadonlyTip": "啟用後編輯器將以只讀模式載入文檔",
   "generateConflictDoc": "同步衝突時生成衝突文檔",
   "generateConflictDocTip": "啟用後當同步發生衝突時會生成衝突文檔，以便直接打開查看。無論是否啟用，資料歷史都會記錄衝突文檔",
   "deleteOpConfirm": "⚠️ Delete operation confirmation",

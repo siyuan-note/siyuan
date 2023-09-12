@@ -65,8 +65,8 @@ export class Hint {
                     setTimeout(() => {
                         this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle);
                     }, 148);
-                    focusByRange(protyle.toolbar.range);
                 }
+                focusByRange(protyle.toolbar.range);
 
                 event.preventDefault();
                 event.stopPropagation(); // https://github.com/siyuan-note/siyuan/issues/3710

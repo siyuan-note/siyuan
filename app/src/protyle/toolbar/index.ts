@@ -1224,10 +1224,9 @@ export class Toolbar {
             if (inputElement.value.trim() && !matchInput) {
                 html = `<div class="b3-list-item"><b>${inputElement.value.replace(/`| /g, "_")}</b></div>${html}`;
             }
+            html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>` + html;
             this.subElement.firstElementChild.lastElementChild.innerHTML = html;
-            if (html) {
-                this.subElement.firstElementChild.lastElementChild.firstElementChild.classList.add("b3-list-item--focus");
-            }
+            this.subElement.firstElementChild.lastElementChild.firstElementChild.classList.add("b3-list-item--focus");
             event.stopPropagation();
         });
         this.subElement.lastElementChild.lastElementChild.addEventListener("click", (event) => {

@@ -148,10 +148,6 @@ export const about = {
         <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__block">
             <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
         </button>
-        <div class="fn__hr${(isInIOS() || isInAndroid()) ? "" : " fn__none"}"></div>
-        <button id="menuSafeQuit" class="b3-button b3-button--outline fn__block${(isInIOS() || isInAndroid()) ? "" : " fn__none"}">
-            <svg><use xlink:href="#iconQuit"></use></svg>${window.siyuan.languages.safeQuit}
-        </button>
     </div>
 </label>
 <label class="fn__flex config__item  b3-label">
@@ -207,9 +203,6 @@ export const about = {
             fetchPost("/api/system/exportLog", {}, (response) => {
                 openByMobile(response.data.zip);
             });
-        });
-        about.element.querySelector("#menuSafeQuit").addEventListener("click", () => {
-            exitSiYuan();
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");
         updateElement.addEventListener("click", () => {

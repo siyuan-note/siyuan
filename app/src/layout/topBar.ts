@@ -1,10 +1,9 @@
 import {getWorkspaceName} from "../util/noRelyPCFunction";
-import {isHuawei, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
-import {processSync} from "../dialog/processSystem";
+import {isHuawei, isInAndroid, isInIOS, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {goBack, goForward} from "../util/backForward";
 import {syncGuide} from "../sync/syncGuide";
 import {workspaceMenu} from "../menus/workspace";
-import {editor} from "../config/editor";
 import {MenuItem} from "../menus/Menu";
 import {setMode} from "../util/assets";
 import {openSetting} from "../config";
@@ -50,6 +49,9 @@ export const initBar = (app: App) => {
 </div>
 <div id="barMode" class="toolbar__item b3-tooltips b3-tooltips__sw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.appearanceMode}">
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
+</div>
+<div id="barExit" class="toolbar__item b3-tooltips b3-tooltips__sw${(isInIOS() || isInAndroid()) ? "" : " fn__none"}" aria-label="${window.siyuan.languages.safeQuit}">
+    <svg><use xlink:href="#iconQuit"></use></svg>
 </div>
 <div id="barMore" class="toolbar__item">
     <svg><use xlink:href="#iconMore"></use></svg>
@@ -110,6 +112,10 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barWorkspace") {
                 workspaceMenu(app, target.getBoundingClientRect());
+                event.stopPropagation();
+                break;
+            } else if (targetId === "barExit") {
+                exitSiYuan();
                 event.stopPropagation();
                 break;
             } else if (targetId === "barMode") {

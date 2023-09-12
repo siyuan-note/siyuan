@@ -11,7 +11,6 @@ import {openNewWindowById} from "../window/openNewWindow";
 /// #if !MOBILE
 import {moveResize} from "../dialog/moveResize";
 /// #endif
-import {disabledProtyle} from "../protyle/util/onGet";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";

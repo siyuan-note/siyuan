@@ -3,7 +3,7 @@ import {setEditor} from "./util/setEmpty";
 import {closePanel} from "./util/closePanel";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {scrollCenter} from "../util/highlightById";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";

@@ -7,7 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode, setProxy} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {isInAndroid, isInIOS, openByMobile, writeText} from "../protyle/util/compatibility";
+import {openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";

@@ -8,7 +8,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {onGet} from "../protyle/util/onGet";
 import {App} from "../index";
 
 export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {

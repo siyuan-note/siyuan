@@ -182,7 +182,7 @@ export const openFile = (options: IOpenFileOptions) => {
         if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
             item.focus();
             const optionsClone = Object.assign({}, options);
-            delete optionsClone.app
+            delete optionsClone.app;
             item.webContents.executeJavaScript(`window.newWindow.openFile(${JSON.stringify(optionsClone)});`);
             if (options.afterOpen) {
                 options.afterOpen();

@@ -1,7 +1,6 @@
 import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
 import {Model} from "../layout/Model";
-import {disabledProtyle} from "../protyle/util/onGet";
 import {setPadding} from "../protyle/ui/initUI";
 import {getAllModels} from "../layout/getAll";
 /// #if !BROWSER

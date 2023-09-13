@@ -160,6 +160,20 @@ func CheckAuth(c *gin.Context) {
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 
 	if "" == Conf.AccessAuthCode {
+		if origin := c.GetHeader("Origin"); "" != origin {
+			// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
+			u, parseErr := url.Parse(origin)
+			if nil != parseErr {
+				logging.LogWarnf("parse origin [%s] failed: %s", origin, parseErr)
+			} else {
+				if !strings.HasPrefix(u.Host, util.LocalHost) && !strings.HasPrefix(u.Host, "[::1]") {
+					c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+					c.Abort()
+					return
+				}
+			}
+		}
+
 		c.Next()
 		return
 	}
@@ -175,7 +189,6 @@ func CheckAuth(c *gin.Context) {
 
 	// 放过来自本机的某些请求
 	if strings.HasPrefix(c.Request.RemoteAddr, util.LocalHost) ||
-		strings.HasPrefix(c.Request.RemoteAddr, "127.0.0.1") ||
 		strings.HasPrefix(c.Request.RemoteAddr, "[::1]") {
 		if strings.HasPrefix(c.Request.RequestURI, "/assets/") {
 			c.Next()

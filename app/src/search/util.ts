@@ -282,6 +282,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
         }
     }
     let clickTimeout: number;
+    let lastClickTime = new Date().getTime();
     let inputTimeout: number;
 
     searchInputElement.value = config.k || "";
@@ -735,7 +736,15 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     newFileByName(app, searchInputElement.value);
                 } else if (type === "search-item") {
                     const isAsset = target.dataset.id;
-                    if (event.detail === 1) {
+                    let isClick = event.detail === 1
+                    let isDblClick = event.detail === 2
+                    /// #if BROWSER
+                    const newDate =  new Date().getTime()
+                    isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK
+                    isDblClick = !isClick;
+                    lastClickTime = newDate;
+                    /// #endif
+                    if (isClick) {
                         clickTimeout = window.setTimeout(() => {
                             if (isAsset) {
                                 if (!target.classList.contains("b3-list-item--focus")) {
@@ -782,7 +791,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 }
                             }
                         }, Constants.TIMEOUT_DBLCLICK);
-                    } else if (event.detail === 2 && !event.ctrlKey) {
+                    } else if (isDblClick && !event.ctrlKey) {
                         clearTimeout(clickTimeout);
                         if (isAsset) {
                             /// #if !BROWSER

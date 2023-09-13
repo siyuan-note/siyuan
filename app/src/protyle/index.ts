@@ -301,7 +301,7 @@ export class Protyle {
             });
             /// #endif
         }
-        resize(this.protyle);
+        resize(this.protyle);   // 需等待 fullwidth 获取后设定完毕再重新计算 padding 和元素
         // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
         // 只能用 focusin，否则点击表格无法执行
         this.protyle.wysiwyg.element.addEventListener("focusin", () => {

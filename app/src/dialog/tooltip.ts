@@ -29,18 +29,25 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     }
     if (target.getAttribute("data-inline-memo-content")) {
         messageElement.classList.add("tooltip--memo"); // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
+    } else {
+        messageElement.classList.remove("tooltip--memo");
     }
     let left = targetRect.left;
-    let topSpace = 8;
-    const position = target.getAttribute("data-position");
-    if (position === "right") {
+    if (target.getAttribute("data-position") === "right") {
         left = targetRect.right - messageElement.clientWidth;
-    } else if (position === "center") {
-        left = targetRect.left + (targetRect.width - messageElement.clientWidth) / 2;
-    } else if (position === "top") {
-        topSpace = 0;
     }
-    setPosition(messageElement, left, targetRect.top + targetRect.height + topSpace, targetRect.height * 2 + 8);
+    const bottomHeight = window.innerHeight - targetRect.bottom
+    messageElement.style.maxHeight = Math.max(targetRect.top, bottomHeight) + "px";
+    if (targetRect.top > bottomHeight) {
+        messageElement.style.top = (targetRect.top - messageElement.clientHeight) + "px";
+    } else {
+        messageElement.style.top = targetRect.bottom + "px";
+    }
+    if (left + messageElement.clientWidth > window.innerWidth) {
+        messageElement.style.left = (window.innerWidth - messageElement.clientWidth) + "px";
+    } else {
+        messageElement.style.left = Math.max(0, left) + "px";
+    }
 };
 
 export const hideTooltip = () => {

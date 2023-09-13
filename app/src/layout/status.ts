@@ -16,7 +16,7 @@ export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
     let barDockHTML = "";
     if (!isWindow) {
-        barDockHTML = `<div id="barDock" class="toolbar__item b3-tooltips b3-tooltips__e${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.languages.toggleDock} ${updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom)}">
+        barDockHTML = `<div id="barDock" class="toolbar__item ariaLabel${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.languages.toggleDock} ${updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom)}">
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
@@ -27,7 +27,7 @@ export const initStatus = (isWindow = false) => {
 <div class="fn__flex-1"></div>
 <div class="status__backgroundtask fn__none"></div>
 <div class="status__counter"></div>
-<div id="statusHelp" class="toolbar__item b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.help}">
+<div id="statusHelp" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
     document.querySelector("#status").addEventListener("click", (event) => {

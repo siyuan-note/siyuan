@@ -411,24 +411,24 @@ ${renewHTML}
         let html = "";
         if (window.siyuan.config.account.displayVIP && window.siyuan.user) {
             if (window.siyuan.user.userSiYuanProExpireTime === -1) {
-                html = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.account12}">${Constants.SIYUAN_IMAGE_VIP}</div>`;
+                html = `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.account12}">${Constants.SIYUAN_IMAGE_VIP}</div>`;
             } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
-                    html = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.account3}"><svg><use xlink:href="#iconVIP"></use></svg></div>`;
+                    html = `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.account3}"><svg><use xlink:href="#iconVIP"></use></svg></div>`;
                 } else {
-                    html = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.account10}"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg></div>`;
+                    html = `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.account10}"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg></div>`;
                 }
             }
             if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
-                html += `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.onepay}"><svg><use xlink:href="#iconVIP"></use></svg></div>`;
+                html += `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.onepay}"><svg><use xlink:href="#iconVIP"></use></svg></div>`;
             }
         }
         if (!window.siyuan.user || (window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === -1)) {
-            html = `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.freeSub}"><svg class="ft__error"><use xlink:href="#iconVIP"></use></svg></div>`;
+            html = `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.freeSub}"><svg class="ft__error"><use xlink:href="#iconVIP"></use></svg></div>`;
         }
         if (window.siyuan.config.account.displayTitle && window.siyuan.user) {
             window.siyuan.user.userTitles.forEach(item => {
-                html += `<div class="toolbar__item b3-tooltips b3-tooltips__sw" aria-label="${item.name}：${item.desc}">${item.icon}</div>`;
+                html += `<div class="toolbar__item ariaLabel" aria-label="${item.name}：${item.desc}">${item.icon}</div>`;
             });
         }
         document.getElementById("toolbarVIP").innerHTML = html;

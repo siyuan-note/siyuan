@@ -102,7 +102,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!matchHotKey("⌘C", event) && endElement && !nodeElement.isSameNode(endElement)) {
             event.stopPropagation();
             event.preventDefault();
-            console.log(event);
             return;
         }
 

@@ -1058,7 +1058,8 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		hPaths = append(hPaths, box.Name+bt.HPath)
+		hpath := html.UnescapeString(bt.HPath)
+		hPaths = append(hPaths, util.EscapeHTML(box.Name)+hpath)
 	}
 	return
 }

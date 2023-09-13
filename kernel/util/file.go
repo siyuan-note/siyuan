@@ -31,6 +31,14 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+func IsSymlinkPath(absPath string) bool {
+	fi, err := os.Lstat(absPath)
+	if nil != err {
+		return false
+	}
+	return 0 != fi.Mode()&os.ModeSymlink
+}
+
 func IsEmptyDir(p string) bool {
 	if !gulu.File.IsDir(p) {
 		return false

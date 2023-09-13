@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -152,6 +153,9 @@ func mergeTx() (ret *Transaction) {
 func PerformTransactions(transactions *[]*Transaction) {
 	txQueueLock.Lock()
 	txQueue = append(txQueue, *transactions...)
+	sort.Slice(txQueue, func(i, j int) bool {
+		return txQueue[i].Timestamp < txQueue[j].Timestamp
+	})
 	txQueueLock.Unlock()
 	return
 }
@@ -1101,6 +1105,7 @@ type Operation struct {
 }
 
 type Transaction struct {
+	Timestamp      int64        `json:"timestamp"`
 	DoOperations   []*Operation `json:"doOperations"`
 	UndoOperations []*Operation `json:"undoOperations"`
 

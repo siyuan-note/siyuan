@@ -53,11 +53,15 @@ func performTransactions(c *gin.Context) {
 		return
 	}
 
+	timestamp := int64(arg["reqId"].(float64))
 	var transactions []*model.Transaction
 	if err = gulu.JSON.UnmarshalJSON(data, &transactions); nil != err {
 		ret.Code = -1
 		ret.Msg = "parses request failed"
 		return
+	}
+	for _, transaction := range transactions {
+		transaction.Timestamp = timestamp
 	}
 
 	model.PerformTransactions(&transactions)

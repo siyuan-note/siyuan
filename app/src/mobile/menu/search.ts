@@ -6,7 +6,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../../util/pathName";
-import {getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu} from "../../search/menu";
+import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {escapeGreat, escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";

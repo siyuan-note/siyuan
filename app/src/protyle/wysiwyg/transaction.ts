@@ -18,7 +18,6 @@ import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {needLogin, needSubscribe} from "../../util/needSubscribe";
-import {setPadding} from "../ui/initUI";
 import {resize} from "../util/resize";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {

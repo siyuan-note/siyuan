@@ -13,7 +13,7 @@ import {MenuItem} from "../menus/Menu";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../util/pathName";
 import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
-import {addLoading, setPadding} from "../protyle/ui/initUI";
+import {addLoading} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";

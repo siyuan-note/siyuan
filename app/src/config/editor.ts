@@ -2,7 +2,6 @@ import {getAllModels} from "../layout/getAll";
 import {setInlineStyle} from "../util/assets";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {setPadding} from "../protyle/ui/initUI";
 import {reloadProtyle} from "../protyle/util/reload";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {Constants} from "../constants";

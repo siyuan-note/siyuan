@@ -50,7 +50,6 @@ import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {fullscreen} from "../../protyle/breadcrumb/action";
-import {setPadding} from "../../protyle/ui/initUI";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import {App} from "../../index";
 import {commandPanel} from "../../plugin/commandPanel";

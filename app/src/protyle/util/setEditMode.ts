@@ -1,4 +1,3 @@
-import {setPadding} from "../ui/initUI";
 import {hideElements} from "../ui/hideElements";
 import {getAllModels} from "../../layout/getAll";
 import {updateOutline} from "../../editor/util";

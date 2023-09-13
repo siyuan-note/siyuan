@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {Hint} from "./hint";
 import {setLute} from "./render/setLute";
 import {Preview} from "./preview";
-import {addLoading, initUI, removeLoading, setPadding} from "./ui/initUI";
+import {addLoading, initUI, removeLoading} from "./ui/initUI";
 import {Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";

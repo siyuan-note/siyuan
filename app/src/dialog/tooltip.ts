@@ -36,7 +36,7 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     if (target.getAttribute("data-position") === "right") {
         left = targetRect.right - messageElement.clientWidth;
     }
-    const bottomHeight = window.innerHeight - targetRect.bottom
+    const bottomHeight = window.innerHeight - targetRect.bottom;
     messageElement.style.maxHeight = Math.max(targetRect.top, bottomHeight) + "px";
     if (targetRect.top > bottomHeight) {
         messageElement.style.top = (targetRect.top - messageElement.clientHeight) + "px";

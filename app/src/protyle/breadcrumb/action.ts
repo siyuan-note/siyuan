@@ -1,7 +1,7 @@
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
-import {addLoading, setPadding} from "../ui/initUI";
+import {addLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {hideAllElements, hideElements} from "../ui/hideElements";

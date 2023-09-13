@@ -112,7 +112,7 @@ export class WYSIWYG {
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
         }
-        if (isFullWidth ==="true") {
+        if (isFullWidth === "true") {
             this.element.parentElement.setAttribute("data-fullwidth", "true");
         } else {
             this.element.parentElement.removeAttribute("data-fullwidth");
@@ -1500,7 +1500,7 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.remove();
                 return;
             }
-            const range = getEditorRange(this.element);
+            let range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
                 return;
@@ -1521,6 +1521,10 @@ export class WYSIWYG {
             this.escapeInline(protyle, range, event);
             if (/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“") {
                 setTimeout(() => {
+                    // https://github.com/siyuan-note/siyuan/issues/9179
+                    if (range.startOffset === 0) {
+                        range = getEditorRange(this.element);
+                    }
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
                 });
             } else {

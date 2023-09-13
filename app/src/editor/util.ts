@@ -328,12 +328,12 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     allModels.editor.forEach((item) => {
         if (!item.element.isSameNode(editor.element) && window.siyuan.editorIsFullscreen && item.element.classList.contains("fullscreen")) {
             item.element.classList.remove("fullscreen");
-            setPadding(item.editor.protyle);
+            resize(item.editor.protyle);
         }
     });
     if (window.siyuan.editorIsFullscreen) {
         editor.element.classList.add("fullscreen");
-        setPadding(editor.editor.protyle);
+        resize(editor.editor.protyle);
     }
     if (options.keepCursor) {
         editor.parent.headElement.setAttribute("keep-cursor", options.id);

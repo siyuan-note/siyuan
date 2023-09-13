@@ -19,6 +19,7 @@ import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {needLogin, needSubscribe} from "../../util/needSubscribe";
 import {setPadding} from "../ui/initUI";
+import {resize} from "../util/resize";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -505,7 +506,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             }
             protyle.wysiwyg.renderCustom(attrsResult);
             if (data.new[Constants.CUSTOM_SY_FULLWIDTH] !== data.old[Constants.CUSTOM_SY_FULLWIDTH]) {
-                setPadding(protyle);
+                resize(protyle);
             }
             if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY]) {
                 let customReadOnly = data.new[Constants.CUSTOM_SY_READONLY];

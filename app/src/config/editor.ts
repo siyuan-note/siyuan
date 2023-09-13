@@ -6,6 +6,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {reloadProtyle} from "../protyle/util/reload";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
+import {resize} from "../protyle/util/resize";
 
 export const editor = {
     element: undefined as Element,
@@ -343,11 +344,14 @@ export const editor = {
         window.siyuan.config.editor = editorData;
         getAllModels().editor.forEach((item) => {
             reloadProtyle(item.editor.protyle, false);
-            setPadding(item.editor.protyle);
             let isFullWidth = item.editor.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
             if (!isFullWidth) {
                 isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
             }
+            if (isFullWidth === "true" && item.editor.protyle.contentElement.getAttribute("data-fullwidth") === "true") {
+                return;
+            }
+            resize(item.editor.protyle);
             if (isFullWidth === "true") {
                 item.editor.protyle.contentElement.setAttribute("data-fullwidth", "true");
             } else {

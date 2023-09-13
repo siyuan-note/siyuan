@@ -31,6 +31,7 @@ import {
     renderPreview,
     toggleAssetHistory
 } from "./assets";
+import {resize} from "../protyle/util/resize";
 
 const toggleReplaceHistory = (replaceHistoryElement: Element, historyElement: Element, replaceInputElement: HTMLInputElement) => {
     if (replaceHistoryElement.classList.contains("fn__none")) {
@@ -320,7 +321,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
             window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][direction === "lr" ? (closeCB ? "col" : "colTab") : (closeCB ? "row" : "rowTab")] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
             setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
             if (direction === "lr") {
-                setPadding(edit.protyle);
+                resize(edit.protyle);
             }
         };
     });
@@ -589,7 +590,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 } else {
                                     edit.protyle.element.classList.add("fn__flex-1");
                                 }
-                                setPadding(edit.protyle);
+                                resize(edit.protyle);
                                 if (isPopover) {
                                     localData.layout = 0;
                                 } else {
@@ -610,7 +611,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 } else {
                                     edit.protyle.element.classList.add("fn__flex-1");
                                 }
-                                setPadding(edit.protyle);
+                                resize(edit.protyle);
                                 if (isPopover) {
                                     localData.layout = 1;
                                 } else {

@@ -15,6 +15,7 @@ import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";
 import {isMobile} from "../util/functions";
+import {resize} from "../protyle/util/resize";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -130,7 +131,7 @@ export class BlockPanel {
         moveResize(this.element, (type: string) => {
             if (type !== "move") {
                 this.editors.forEach(item => {
-                    setPadding(item.protyle);
+                    resize(item.protyle);
                 });
             }
             const pinElement = this.element.firstElementChild.querySelector('[data-type="pin"]');

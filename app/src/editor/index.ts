@@ -8,6 +8,7 @@ import {setModelsHash} from "../window/setHeader";
 /// #endif
 import {countBlockWord} from "../layout/status";
 import {App} from "../index";
+import {resize} from "../protyle/util/resize";
 
 export class Editor extends Model {
     public element: HTMLElement;
@@ -58,7 +59,7 @@ export class Editor extends Model {
                     getAllModels().editor.forEach(item => {
                         if (!editor.protyle.element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {
                             item.element.classList.remove("fullscreen");
-                            setPadding(item.editor.protyle);
+                            resize(item.editor.protyle);
                         }
                     });
                 }

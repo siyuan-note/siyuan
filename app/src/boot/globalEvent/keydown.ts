@@ -245,7 +245,6 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.fullscreen.custom, event)) {
         fullscreen(protyle.element);
-        setPadding(protyle);
         event.preventDefault();
         return true;
     }

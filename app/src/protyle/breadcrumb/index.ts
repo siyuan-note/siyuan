@@ -405,7 +405,6 @@ export class Breadcrumb {
                 label: window.siyuan.languages.fullscreen,
                 click: () => {
                     fullscreen(protyle.element);
-                    setPadding(protyle);
                 }
             }).element);
             /// #endif

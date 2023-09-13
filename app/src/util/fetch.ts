@@ -19,7 +19,7 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
             }
         }
         // 并发导出后端接受顺序不一致
-        if (url === "api/transactions") {
+        if (url === "/api/transactions") {
             data.reqId = new Date().getTime();
         }
         if (data instanceof FormData) {

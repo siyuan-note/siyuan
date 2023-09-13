@@ -528,7 +528,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	if util.IsSymlinkPath(util.AppearancePath) {
 		// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
 		var readErr error
-		appearancePath, readErr = os.Readlink(util.AppearancePath)
+		appearancePath, readErr = filepath.EvalSymlinks(util.AppearancePath)
 		if nil != readErr {
 			logging.LogErrorf("readlink [%s] failed: %s", util.AppearancePath, readErr)
 			return
@@ -678,7 +678,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		if util.IsSymlinkPath(util.AppearancePath) {
 			// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
 			var readErr error
-			appearancePath, readErr = os.Readlink(util.AppearancePath)
+			appearancePath, readErr = filepath.EvalSymlinks(util.AppearancePath)
 			if nil != readErr {
 				logging.LogErrorf("readlink [%s] failed: %s", util.AppearancePath, readErr)
 				return

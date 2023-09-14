@@ -68,6 +68,12 @@ export class Undo {
     }
 
     public replace(doOperations: IOperation[]) {
+        // undo 引发 replace 导致 stack 错误 https://github.com/siyuan-note/siyuan/issues/9178
+        if (this.hasUndo && this.redoStack.length > 0) {
+            this.undoStack.push(this.redoStack.pop())
+            this.redoStack = [];
+            this.hasUndo = false;
+        }
         if (this.undoStack.length > 0) {
             this.undoStack[this.undoStack.length - 1].doOperations = doOperations;
         }

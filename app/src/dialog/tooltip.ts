@@ -30,19 +30,20 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     let left = targetRect.left;
     let top = targetRect.bottom;
     const position = target.getAttribute("data-position")
+    const parentRect = target.parentElement.getBoundingClientRect();
     if (position === "right") {
         // block icon
         left = targetRect.right - messageElement.clientWidth;
     } else if (position === "parentE") {
-        // tree and outline
-        const parentRect = target.parentElement.getBoundingClientRect();
+        // file tree and outline、backlink
         top = parentRect.top;
         left = parentRect.right + 8;
     }
+    const topHeight = position === "parentE" ? top : targetRect.top;
     const bottomHeight = window.innerHeight - top;
-    messageElement.style.maxHeight = Math.max(targetRect.top, bottomHeight) + "px";
-    if (targetRect.top > bottomHeight) {
-        messageElement.style.top = (targetRect.top - messageElement.clientHeight) + "px";
+    messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
+    if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
+        messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
     } else {
         messageElement.style.top = top + "px";
     }

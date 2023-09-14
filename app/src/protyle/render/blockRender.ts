@@ -71,7 +71,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
 
             processRender(item);
             highlightRender(item);
-            avRender(item);
+            avRender(item, protyle);
             if (top) {
                 // 前进后退定位 https://ld246.com/article/1667652729995
                 protyle.contentElement.scrollTop = top;

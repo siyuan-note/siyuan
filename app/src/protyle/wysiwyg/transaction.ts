@@ -18,7 +18,7 @@ import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
 import {needLogin, needSubscribe} from "../../util/needSubscribe";
-import {setPadding} from "../ui/initUI";
+import {resize} from "../util/resize";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -124,7 +124,7 @@ const promiseTransaction = () => {
                     });
                     processRender(protyle.wysiwyg.element);
                     highlightRender(protyle.wysiwyg.element);
-                    avRender(protyle.wysiwyg.element);
+                    avRender(protyle.wysiwyg.element, protyle);
                     blockRender(protyle, protyle.wysiwyg.element);
                     protyle.contentElement.scrollTop = scrollTop;
                     protyle.scroll.lastScrollTop = scrollTop;
@@ -164,7 +164,7 @@ const promiseTransaction = () => {
                     });
                     processRender(protyle.wysiwyg.element);
                     highlightRender(protyle.wysiwyg.element);
-                    avRender(protyle.wysiwyg.element);
+                    avRender(protyle.wysiwyg.element, protyle);
                     blockRender(protyle, protyle.wysiwyg.element);
                 }
                 // 当前编辑器中更新嵌入块
@@ -274,7 +274,7 @@ const promiseTransaction = () => {
                     cursorElements.forEach(item => {
                         processRender(item);
                         highlightRender(item);
-                        avRender(item);
+                        avRender(item, protyle);
                         blockRender(protyle, item);
                         const wbrElement = item.querySelector("wbr");
                         if (wbrElement) {
@@ -314,7 +314,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
     if (updatedEmbed) {
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
-        avRender(protyle.wysiwyg.element);
+        avRender(protyle.wysiwyg.element, protyle);
     }
 };
 
@@ -358,7 +358,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
     }
     processRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
     highlightRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
-    avRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
+    avRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element, protyle);
     blockRender(protyle, updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
     // 更新 ws 嵌入块
     updateEmbed(protyle, operation);
@@ -399,7 +399,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         if (operation.retData) {
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);
-            avRender(protyle.wysiwyg.element);
+            avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);
             protyle.contentElement.scrollTop = scrollTop;
             protyle.scroll.lastScrollTop = scrollTop;
@@ -505,7 +505,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             }
             protyle.wysiwyg.renderCustom(attrsResult);
             if (data.new[Constants.CUSTOM_SY_FULLWIDTH] !== data.old[Constants.CUSTOM_SY_FULLWIDTH]) {
-                setPadding(protyle);
+                resize(protyle);
             }
             if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY]) {
                 let customReadOnly = data.new[Constants.CUSTOM_SY_READONLY];
@@ -687,7 +687,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         cursorElements.forEach(item => {
             processRender(item);
             highlightRender(item);
-            avRender(item);
+            avRender(item, protyle);
             blockRender(protyle, item);
             const wbrElement = item.querySelector("wbr");
             if (isUndo) {
@@ -916,7 +916,7 @@ export const turnsIntoTransaction = (options: {
     transaction(options.protyle, doOperations, undoOperations);
     processRender(options.protyle.wysiwyg.element);
     highlightRender(options.protyle.wysiwyg.element);
-    avRender(options.protyle.wysiwyg.element);
+    avRender(options.protyle.wysiwyg.element, options.protyle);
     blockRender(options.protyle, options.protyle.wysiwyg.element);
     if (range) {
         focusByWbr(options.protyle.wysiwyg.element, range);

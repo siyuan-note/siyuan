@@ -53,7 +53,7 @@ func NewEditor() *Editor {
 	return &Editor{
 		FontSize:                        16,
 		FontSizeScrollZoom:              false,
-		CodeSyntaxHighlightLineNum:      true,
+		CodeSyntaxHighlightLineNum:      false,
 		CodeTabSpaces:                   0,
 		CodeLineWrap:                    false,
 		CodeLigatures:                   false,

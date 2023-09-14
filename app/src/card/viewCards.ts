@@ -8,7 +8,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {addLoading} from "../protyle/ui/initUI";
 import {Constants} from "../constants";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {onGet} from "../protyle/util/onGet";
 import {App} from "../index";
 
 export const viewCards = (app: App, deckID: string, title: string, deckType: "Tree" | "" | "Notebook", cb?: (response: IWebSocketData) => void) => {
@@ -65,6 +65,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
             if (window.siyuan.mobile) {
                 window.siyuan.mobile.popEditor = edit;
             }
+            dialog.editor = edit;
             getArticle(edit, dialog.element.querySelector(".b3-list-item--focus")?.getAttribute("data-id"));
         }
         const previousElement = dialog.element.querySelector('[data-type="previous"]');

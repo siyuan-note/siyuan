@@ -1,7 +1,6 @@
 import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
 import {Model} from "../layout/Model";
-import {disabledProtyle} from "../protyle/util/onGet";
 import {setPadding} from "../protyle/ui/initUI";
 import {getAllModels} from "../layout/getAll";
 /// #if !BROWSER
@@ -9,6 +8,7 @@ import {setModelsHash} from "../window/setHeader";
 /// #endif
 import {countBlockWord} from "../layout/status";
 import {App} from "../index";
+import {resize} from "../protyle/util/resize";
 
 export class Editor extends Model {
     public element: HTMLElement;
@@ -59,7 +59,7 @@ export class Editor extends Model {
                     getAllModels().editor.forEach(item => {
                         if (!editor.protyle.element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {
                             item.element.classList.remove("fullscreen");
-                            setPadding(item.editor.protyle);
+                            resize(item.editor.protyle);
                         }
                     });
                 }

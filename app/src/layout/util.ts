@@ -662,8 +662,12 @@ export const resizeTabs = () => {
             }
             item.editors.forEach(editorItem => {
                 hideElements(["gutter"], editorItem.protyle);
+                editorItem.resize();
             });
         });
+        models.search.forEach(item => {
+            item.edit.resize();
+        })
         models.custom.forEach(item => {
             if (item.resize) {
                 item.resize();

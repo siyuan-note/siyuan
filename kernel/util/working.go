@@ -42,7 +42,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "2.10.4"
+	Ver       = "2.10.5"
 	IsInsider = false
 )
 
@@ -392,15 +392,10 @@ func initMime() {
 
 func GetDataAssetsAbsPath() (ret string) {
 	ret = filepath.Join(DataDir, "assets")
-	var err error
-	stat, err := os.Lstat(ret)
-	if nil != err {
-		logging.LogErrorf("stat assets failed: %s", err)
-		return
-	}
-	if 0 != stat.Mode()&os.ModeSymlink {
+	if IsSymlinkPath(ret) {
 		// 跟随符号链接 https://github.com/siyuan-note/siyuan/issues/5480
-		ret, err = os.Readlink(ret)
+		var err error
+		ret, err = filepath.EvalSymlinks(ret)
 		if nil != err {
 			logging.LogErrorf("read assets link failed: %s", err)
 		}

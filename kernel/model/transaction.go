@@ -18,8 +18,10 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -152,6 +154,9 @@ func mergeTx() (ret *Transaction) {
 func PerformTransactions(transactions *[]*Transaction) {
 	txQueueLock.Lock()
 	txQueue = append(txQueue, *transactions...)
+	sort.Slice(txQueue, func(i, j int) bool {
+		return txQueue[i].Timestamp < txQueue[j].Timestamp
+	})
 	txQueueLock.Unlock()
 	return
 }
@@ -449,9 +454,9 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	var err error
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
-		msg := fmt.Sprintf("not found parent block [%s]", operation.ParentID)
-		logging.LogErrorf(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
+		logging.LogWarnf("not found block [%s]", operation.ParentID)
+		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
+		return
 	}
 	tree, err := tx.loadTree(block.ID)
 	if nil != err {
@@ -533,9 +538,9 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	var err error
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
-		msg := fmt.Sprintf("not found parent block [%s]", operation.ParentID)
-		logging.LogErrorf(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
+		logging.LogWarnf("not found block [%s]", operation.ParentID)
+		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
+		return
 	}
 	tree, err := tx.loadTree(block.ID)
 	if nil != err {
@@ -692,11 +697,12 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if ErrBlockNotFound == err {
-		return nil // move 以后这里会空，算作正常情况
-	}
-
 	if nil != err {
+		if errors.Is(err, ErrBlockNotFound) {
+			// move 以后这里会空，算作正常情况
+			return
+		}
+
 		msg := fmt.Sprintf("load tree [%s] failed: %s", id, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
@@ -773,9 +779,9 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	if nil == block {
-		msg := fmt.Sprintf("not found next block [%s]", operation.NextID)
-		logging.LogErrorf(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.NextID}
+		logging.LogWarnf("not found block [%s, %s, %s]", operation.ParentID, operation.PreviousID, operation.NextID)
+		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
+		return
 	}
 
 	tree, err := tx.loadTree(block.ID)
@@ -919,9 +925,13 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
-
 	tree, err := tx.loadTree(id)
 	if nil != err {
+		if errors.Is(err, ErrBlockNotFound) {
+			logging.LogWarnf("not found block [%s]", id)
+			return
+		}
+
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -1101,6 +1111,7 @@ type Operation struct {
 }
 
 type Transaction struct {
+	Timestamp      int64        `json:"timestamp"`
 	DoOperations   []*Operation `json:"doOperations"`
 	UndoOperations []*Operation `json:"undoOperations"`
 

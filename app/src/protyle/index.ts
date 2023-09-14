@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {Hint} from "./hint";
 import {setLute} from "./render/setLute";
 import {Preview} from "./preview";
-import {addLoading, initUI, removeLoading, setPadding} from "./ui/initUI";
+import {addLoading, initUI, removeLoading} from "./ui/initUI";
 import {Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";
@@ -103,7 +103,7 @@ export class Protyle {
                         case "refreshAttributeView":
                             Array.from(this.protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${data.data.id}"]`)).forEach((item: HTMLElement) => {
                                 item.removeAttribute("data-render");
-                                avRender(item);
+                                avRender(item, this.protyle);
                             });
                             break;
                         case "addLoading":
@@ -301,7 +301,7 @@ export class Protyle {
             });
             /// #endif
         }
-        setPadding(this.protyle);
+        resize(this.protyle);   // 需等待 fullwidth 获取后设定完毕再重新计算 padding 和元素
         // 需等待 getDoc 完成后再执行，否则在无页签的时候 updatePanelByEditor 会执行2次
         // 只能用 focusin，否则点击表格无法执行
         this.protyle.wysiwyg.element.addEventListener("focusin", () => {

@@ -19,6 +19,17 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (!blockElement) {
         return false;
     }
+    const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
+    if (copyElement) {
+        writeText(copyElement.previousElementSibling.textContent.trim());
+        showMessage(window.siyuan.languages.copied);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    if (protyle.disabled) {
+        return false;
+    }
     const addElement = hasClosestByAttribute(event.target, "data-type", "av-header-add");
     if (addElement) {
         const addMenu = addCol(protyle, blockElement);
@@ -100,15 +111,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const filtersElement = hasClosestByAttribute(event.target, "data-type", "av-filter");
     if (filtersElement) {
         openMenuPanel({protyle, blockElement, type: "filters"});
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
-    const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
-    if (copyElement) {
-        writeText(copyElement.previousElementSibling.textContent.trim());
-        showMessage(window.siyuan.languages.copied);
         event.preventDefault();
         event.stopPropagation();
         return true;

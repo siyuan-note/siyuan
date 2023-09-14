@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20211226121503-k3jma6m",
 		"title": "存儲空間",
-		"updated": "20220708103705"
+		"updated": "20230912091726"
 	},
 	"Children": [
 		{
@@ -118,15 +118,43 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料文件"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：提供給複製到公眾號、知乎和語雀等使用，HTTPS CDN"
+									"Data": "資料文件：提供給複製到公眾號、知乎和語雀等使用，HTTPS CDN"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091715-21sakbc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091715-21sakbc",
+				"updated": "20230912091726"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用量可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雲端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中查看。"
 				}
 			]
 		},
@@ -251,6 +279,50 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091703-1zitmba",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230912091703-1zitmba",
+				"updated": "20230912091703"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "常見問題"
+				}
+			]
+		},
+		{
+			"ID": "20230912091703-w5ikrgk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230912091703-w5ikrgk",
+				"updated": "20230912091703"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開發者是否能夠解密我的雲端數據？"
+				}
+			]
+		},
+		{
+			"ID": "20230912091703-yno8j38",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091703-yno8j38",
+				"updated": "20230912091703"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "無法解密。如果遺失密鑰，任何人（包括開發者）都無法幫你從雲端恢復數據。"
 				}
 			]
 		}

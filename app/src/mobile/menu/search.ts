@@ -1,12 +1,12 @@
 import {closePanel} from "../util/closePanel";
-import {openMobileFileById} from "../editor";
+import {getCurrentEditor, openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../../util/pathName";
-import {filterMenu, getKeyByLiElement, initCriteriaMenu, moreMenu, queryMenu} from "../../search/menu";
+import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {escapeGreat, escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
@@ -208,7 +208,7 @@ ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 };
 
 let toolbarSearchTimeout = 0;
-const updateSearchResult = (config: ISearchOption, element: Element, rmCurrentCriteria = false) => {
+export const updateSearchResult = (config: ISearchOption, element: Element, rmCurrentCriteria = false) => {
     clearTimeout(toolbarSearchTimeout);
     toolbarSearchTimeout = window.setTimeout(() => {
         if (rmCurrentCriteria) {
@@ -370,6 +370,24 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "currentPath" && !target.hasAttribute("disabled")) {
+                const editProtyle = getCurrentEditor().protyle;
+                fetchPost("/api/filetree/getHPathsByPaths", {paths: [editProtyle.path]}, (response) => {
+                    config.idPath = [pathPosix().join(editProtyle.notebookId, editProtyle.path)];
+                    config.hPath = response.data[0];
+                    const searchPathElement = element.querySelector("#searchPath");
+                    searchPathElement.classList.remove("fn__none");
+                    searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+
+                    const includeElement = element.querySelector('[data-type="include"]');
+                    includeElement.classList.remove("toolbar__icon--active");
+                    includeElement.removeAttribute("disabled");
+                    config.page = 1;
+                    updateSearchResult(config, element, true);
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (type === "path") {
                 movePathTo((toPath, toNotebook) => {
                     fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
@@ -392,7 +410,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
 
                         const searchPathElement = element.querySelector("#searchPath");
                         searchPathElement.classList.remove("fn__none");
-                        element.querySelector("#searchPath").innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
 
                         const includeElement = element.querySelector('[data-type="include"]');
                         includeElement.classList.add("toolbar__icon--active");
@@ -466,22 +484,6 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             embedBlock: window.siyuan.config.search.embedBlock,
                         }
                     }, config);
-                });
-                window.siyuan.menus.menu.fullscreen();
-                event.stopPropagation();
-                event.preventDefault();
-                break;
-            } else if (type === "filter") {
-                filterMenu(config, () => {
-                    updateSearchResult(config, element, true);
-                });
-                event.stopPropagation();
-                event.preventDefault();
-                break;
-            } else if (type === "query") {
-                queryMenu(config, () => {
-                    config.page = 1;
-                    updateSearchResult(config, element, true);
                 });
                 window.siyuan.menus.menu.fullscreen();
                 event.stopPropagation();
@@ -629,10 +631,9 @@ export const popSearch = (app: App, config = window.siyuan.storage[Constants.LOC
     <div class="toolbar">
         <span class="fn__flex-1"></span>
         <svg data-type="toggle-replace" class="toolbar__icon${config.hasReplace ? " toolbar__icon--active" : ""}"><use xlink:href="#iconReplace"></use></svg>
-        <svg data-type="query" class="toolbar__icon"><use xlink:href="#iconRegex"></use></svg>
-        <svg data-type="filter" class="toolbar__icon"><use xlink:href="#iconFilter"></use></svg>
         <svg ${enableIncludeChild ? "" : "disabled"} data-type="include" class="toolbar__icon${includeChild ? " toolbar__icon--active" : ""}"><use xlink:href="#iconCopy"></use></svg>
         <svg data-type="path" class="toolbar__icon"><use xlink:href="#iconFolder"></use></svg>
+        <svg ${document.querySelector("#empty").classList.contains("fn__none") ? "" : "disabled"} data-type="currentPath" class="toolbar__icon"><use xlink:href="#iconFocus"></use></svg>
         <svg data-type="expand" class="toolbar__icon${config.group === 0 ? " fn__none" : ""}"><use xlink:href="#iconExpand"></use></svg>
         <svg data-type="contract" class="toolbar__icon${config.group === 0 ? " fn__none" : ""}"><use xlink:href="#iconContract"></use></svg>
         <svg data-type="more" class="toolbar__icon"><use xlink:href="#iconMore"></use></svg>

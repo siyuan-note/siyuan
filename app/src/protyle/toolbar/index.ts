@@ -364,8 +364,8 @@ export class Toolbar {
                 }
             }
             contents.childNodes.forEach((item: HTMLElement, index) => {
-                if (item.nodeType !== 3 && item.tagName !== "BR") {
-                    const types = item.getAttribute("data-type").split(" ");
+                if (item.nodeType !== 3 && item.tagName !== "BR" && item.tagName !== "IMG") {
+                    const types = (item.getAttribute("data-type") || "").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
                             if (textObj && textObj.type === "text") {
@@ -560,7 +560,7 @@ export class Toolbar {
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
-                        } else if (item.tagName !== "BR") {
+                        } else if (item.tagName !== "BR" && item.tagName !== "IMG") {
                             if (item.getAttribute("data-type")?.indexOf("backslash") > -1 &&
                                 item.firstChild?.textContent === "\\") {
                                 item.firstChild.remove();
@@ -1224,10 +1224,9 @@ export class Toolbar {
             if (inputElement.value.trim() && !matchInput) {
                 html = `<div class="b3-list-item"><b>${inputElement.value.replace(/`| /g, "_")}</b></div>${html}`;
             }
+            html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>` + html;
             this.subElement.firstElementChild.lastElementChild.innerHTML = html;
-            if (html) {
-                this.subElement.firstElementChild.lastElementChild.firstElementChild.classList.add("b3-list-item--focus");
-            }
+            this.subElement.firstElementChild.lastElementChild.firstElementChild.classList.add("b3-list-item--focus");
             event.stopPropagation();
         });
         this.subElement.lastElementChild.lastElementChild.addEventListener("click", (event) => {

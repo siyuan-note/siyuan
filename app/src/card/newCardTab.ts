@@ -43,6 +43,7 @@ export const newCardModel = (options: {
                     cardType: this.data.cardType,
                     blocks: response.data.cards,
                 });
+                customObj.data.editor = editor;
             });
         },
         destroy() {

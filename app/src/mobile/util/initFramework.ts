@@ -2,7 +2,7 @@ import {Constants} from "../../constants";
 import {closeModel, closePanel} from "./closePanel";
 import {openMobileFileById} from "../editor";
 import {validateName} from "../../editor/rename";
-import {getEventName, isIPhone} from "../../protyle/util/compatibility";
+import {getEventName} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";

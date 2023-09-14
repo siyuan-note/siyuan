@@ -112,7 +112,7 @@ export class WYSIWYG {
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
         }
-        if (isFullWidth ==="true") {
+        if (isFullWidth === "true") {
             this.element.parentElement.setAttribute("data-fullwidth", "true");
         } else {
             this.element.parentElement.removeAttribute("data-fullwidth");
@@ -120,14 +120,14 @@ export class WYSIWYG {
         const ialKeys = Object.keys(ial);
         for (let i = 0; i < this.element.attributes.length; i++) {
             const oldKey = this.element.attributes[i].nodeName;
-            if (!["type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "scroll"].includes(oldKey) &&
+            if (!["type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "scroll", "data-realwidth"].includes(oldKey) &&
                 !ialKeys.includes(oldKey)) {
                 this.element.removeAttribute(oldKey);
                 i--;
             }
         }
         ialKeys.forEach((key: string) => {
-            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style"].includes(key)) {
+            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth"].includes(key)) {
                 this.element.setAttribute(key, ial[key]);
             }
         });
@@ -1488,6 +1488,7 @@ export class WYSIWYG {
             }
         });
 
+        let timeout: number
         this.element.addEventListener("input", (event: InputEvent) => {
             const target = event.target as HTMLElement;
             if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {
@@ -1519,8 +1520,9 @@ export class WYSIWYG {
                 return;
             }
             this.escapeInline(protyle, range, event);
-            if (/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“") {
-                setTimeout(() => {
+            if ((/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“")) {
+                clearTimeout(timeout);  // https://github.com/siyuan-note/siyuan/issues/9179
+                timeout = window.setTimeout(() => {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
                 });
             } else {

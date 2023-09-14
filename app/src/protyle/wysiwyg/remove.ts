@@ -412,7 +412,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     transaction(protyle, doOperations, undoOperations);
                 }
                 // toStart 参数不能为 false， 否则 https://github.com/siyuan-note/siyuan/issues/9141
-                previousLastElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${previousId}"]`)
+                previousLastElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${previousId}"]`);
                 focusBlock(previousLastElement, undefined, getContenteditableElement(previousLastElement).textContent === "\n");
             } else {
                 focusBlock(previousLastElement, undefined, false);

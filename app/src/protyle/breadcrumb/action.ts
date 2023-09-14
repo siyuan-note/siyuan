@@ -1,12 +1,13 @@
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
-import {addLoading, setPadding} from "../ui/initUI";
+import {addLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {hideAllElements, hideElements} from "../ui/hideElements";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {reloadProtyle} from "../util/reload";
+import {resize} from "../util/resize";
 
 export const netImg2LocalAssets = (protyle: IProtyle) => {
     if (protyle.element.querySelector(".wysiwygLoading")) {
@@ -70,14 +71,16 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         window.siyuan.editorIsFullscreen = !isFullscreen;
     }
     getAllModels().editor.forEach(item => {
-        if (window.siyuan.editorIsFullscreen) {
-            if (!element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {
+        if (!element.isSameNode(item.element)) {
+            if (window.siyuan.editorIsFullscreen) {
+                if (item.element.classList.contains("fullscreen")) {
+                    item.element.classList.remove("fullscreen");
+                    resize(item.editor.protyle);
+                }
+            } else if (item.element.classList.contains("fullscreen")) {
                 item.element.classList.remove("fullscreen");
-                setPadding(item.editor.protyle);
+                resize(item.editor.protyle);
             }
-        } else if (item.element.classList.contains("fullscreen")) {
-            item.element.classList.remove("fullscreen");
-            setPadding(item.editor.protyle);
         }
     });
     /// #endif

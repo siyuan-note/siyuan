@@ -441,7 +441,7 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
-        avRender(protyle.wysiwyg.element);
+        avRender(protyle.wysiwyg.element, protyle);
         hideElements(["util"], protyle);
     });
 };

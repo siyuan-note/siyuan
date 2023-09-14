@@ -13,7 +13,6 @@ import {needSubscribe} from "../../util/needSubscribe";
 import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";
 import {getEditorRange} from "../util/selection";
-import {setPadding} from "../ui/initUI";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 import {setPanelFocus} from "../../layout/util";
@@ -31,6 +30,7 @@ import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid} from "../util/compatibility";
+import {resize} from "../util/resize";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -46,7 +46,7 @@ export class Breadcrumb {
             '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
 <button class="protyle-breadcrumb__icon fn__none" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
-<button class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.editReadonly}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
+<button class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly"><svg><use xlink:href="#iconUnlock"></use></svg></button>
 <span class="fn__space"></span>
 <button class="block__icon block__icon--show fn__flex-center ariaLabel" data-type="doc" aria-label="${window.siyuan.languages.gutterTip2}"><svg><use xlink:href="#iconFile"></use></svg></button>
 <span class="fn__space"></span>
@@ -405,7 +405,7 @@ export class Breadcrumb {
                 label: window.siyuan.languages.fullscreen,
                 click: () => {
                     fullscreen(protyle.element);
-                    setPadding(protyle);
+                    resize(protyle);
                 }
             }).element);
             /// #endif

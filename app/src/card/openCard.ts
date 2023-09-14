@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {onGet} from "../protyle/util/onGet";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 import {needLogin, needSubscribe} from "../util/needSubscribe";
@@ -15,6 +15,7 @@ import {openFile} from "../editor/util";
 /// #endif
 import {getDisplayName, movePathTo} from "../util/pathName";
 import {App} from "../index";
+import {resize} from "../protyle/util/resize";
 
 export const genCardHTML = (options: {
     id: string,
@@ -198,6 +199,7 @@ export const bindCardEvent = (options: {
             if (fullscreenElement) {
                 fullscreen(options.element.querySelector(".card__main"),
                     options.element.querySelector('[data-type="fullscreen"]'));
+                resize(editor.protyle);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -321,7 +323,7 @@ export const bindCardEvent = (options: {
             editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb");
             actionElements[0].classList.add("fn__none");
             actionElements[1].querySelectorAll(".b3-button").forEach((element, btnIndex) => {
-               element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex];
+                element.previousElementSibling.textContent = options.blocks[index].nextDues[btnIndex];
             });
             actionElements[1].classList.remove("fn__none");
             return;
@@ -444,6 +446,7 @@ export const openCardByData = (app: App, cardsData: {
         cardType,
         dialog
     });
+    dialog.editor = editor;
 };
 
 const nextCard = (options: {

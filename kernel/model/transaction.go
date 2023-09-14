@@ -454,7 +454,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	var err error
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
-		logging.LogErrorf("not found parent block [%s]", operation.ParentID)
+		logging.LogWarnf("not found block [%s]", operation.ParentID)
 		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
 		return
 	}
@@ -538,7 +538,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	var err error
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
-		logging.LogErrorf("not found parent block [%s]", operation.ParentID)
+		logging.LogWarnf("not found block [%s]", operation.ParentID)
 		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
 		return
 	}
@@ -779,7 +779,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	if nil == block {
-		logging.LogErrorf("not found block [%s, %s, %s]", operation.ParentID, operation.PreviousID, operation.NextID)
+		logging.LogWarnf("not found block [%s, %s, %s]", operation.ParentID, operation.PreviousID, operation.NextID)
 		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
 		return
 	}
@@ -925,10 +925,10 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
-
 	tree, err := tx.loadTree(id)
 	if nil != err {
 		if errors.Is(err, ErrBlockNotFound) {
+			logging.LogWarnf("not found block [%s]", id)
 			return
 		}
 

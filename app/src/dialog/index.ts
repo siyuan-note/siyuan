@@ -4,12 +4,14 @@ import {moveResize} from "./moveResize";
 /// #endif
 import {isMobile} from "../util/functions";
 import {isCtrl} from "../protyle/util/compatibility";
+import {Protyle} from "../protyle";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
+    public editor: Protyle
 
     constructor(options: {
         title?: string,

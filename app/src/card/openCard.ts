@@ -446,6 +446,7 @@ export const openCardByData = (app: App, cardsData: {
         cardType,
         dialog
     });
+    dialog.editor = editor;
 };
 
 const nextCard = (options: {

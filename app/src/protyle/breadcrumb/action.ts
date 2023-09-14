@@ -71,14 +71,16 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         window.siyuan.editorIsFullscreen = !isFullscreen;
     }
     getAllModels().editor.forEach(item => {
-        if (window.siyuan.editorIsFullscreen) {
-            if (!element.isSameNode(item.element) && item.element.classList.contains("fullscreen")) {
+        if (!element.isSameNode(item.element)) {
+            if (window.siyuan.editorIsFullscreen) {
+                if (item.element.classList.contains("fullscreen")) {
+                    item.element.classList.remove("fullscreen");
+                    resize(item.editor.protyle);
+                }
+            } else if (item.element.classList.contains("fullscreen")) {
                 item.element.classList.remove("fullscreen");
                 resize(item.editor.protyle);
             }
-        } else if (item.element.classList.contains("fullscreen")) {
-            item.element.classList.remove("fullscreen");
-            resize(item.editor.protyle);
         }
     });
     /// #endif

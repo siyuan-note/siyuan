@@ -15,11 +15,12 @@ export class Dialog {
         title?: string,
         transparent?: boolean,
         content: string,
-        width?: string
+        width?: string,
         height?: string,
-        destroyCallback?: (options?: IObject) => void
-        disableClose?: boolean
-        disableAnimation?: boolean
+        destroyCallback?: (options?: IObject) => void,
+        disableClose?: boolean,
+        disableAnimation?: boolean,
+        resizeCallback?: (type: string) => void
     }) {
         this.disableClose = options.disableClose;
         this.id = genUUID();
@@ -61,7 +62,7 @@ export class Dialog {
             });
         }
         /// #if !MOBILE
-        moveResize(this.element.querySelector(".b3-dialog__container"));
+        moveResize(this.element.querySelector(".b3-dialog__container"), options.resizeCallback);
         /// #endif
     }
 

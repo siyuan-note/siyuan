@@ -30,6 +30,7 @@ import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid} from "../util/compatibility";
+import {resize} from "../util/resize";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -404,6 +405,7 @@ export class Breadcrumb {
                 label: window.siyuan.languages.fullscreen,
                 click: () => {
                     fullscreen(protyle.element);
+                    resize(protyle);
                 }
             }).element);
             /// #endif

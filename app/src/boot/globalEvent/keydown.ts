@@ -55,6 +55,7 @@ import {App} from "../../index";
 import {commandPanel} from "../../plugin/commandPanel";
 import {toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
+import {resize} from "../../protyle/util/resize";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -244,6 +245,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.fullscreen.custom, event)) {
         fullscreen(protyle.element);
+        resize(protyle);
         event.preventDefault();
         return true;
     }

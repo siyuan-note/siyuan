@@ -50,12 +50,15 @@ import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {fullscreen} from "../../protyle/breadcrumb/action";
-import {setPadding} from "../../protyle/ui/initUI";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import {App} from "../../index";
 import {commandPanel} from "../../plugin/commandPanel";
 import {toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
+import {resize} from "../../protyle/util/resize";
+import {Search} from "../../search";
+import {Custom} from "../../layout/dock/Custom";
+import {Protyle} from "../../protyle";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -152,22 +155,73 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
 const editKeydown = (app: App, event: KeyboardEvent) => {
     const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
     let protyle: IProtyle;
-    if (activeTabElement) {
-        const tab = getInstanceById(activeTabElement.getAttribute("data-id")) as Tab;
-        if (!(tab.model instanceof Editor)) {
-            return false;
-        }
-        protyle = tab.model.editor.protyle;
-    } else {
-        const editor = getAllModels().editor.find(item => {
-            if (item.parent.headElement.classList.contains("item--focus")) {
+    let range: Range;
+    if (getSelection().rangeCount > 0) {
+        range = getSelection().getRangeAt(0);
+    }
+    if (range) {
+        window.siyuan.dialogs.find(item => {
+            if (item.editor && item.editor.protyle.element.contains(range.startContainer)) {
+                protyle = item.editor.protyle;
                 return true;
             }
-        });
-        if (!editor) {
+        })
+    }
+    if (!protyle && activeTabElement) {
+        const tab = getInstanceById(activeTabElement.getAttribute("data-id")) as Tab;
+        if (tab.model instanceof Editor) {
+            protyle = tab.model.editor.protyle;
+        } else if (tab.model instanceof Search) {
+            protyle = tab.model.edit.protyle;
+        } else if (tab.model instanceof Custom && tab.model.data?.editor instanceof Protyle) {
+            protyle = tab.model.data.editor.protyle;
+        } else {
             return false;
         }
-        protyle = editor.editor.protyle;
+    } else if (!protyle) {
+        const models = getAllModels();
+        if (!protyle && range) {
+            window.siyuan.blockPanels.find(item => {
+                item.editors.find(editorItem => {
+                    if (editorItem.protyle.element.contains(range.startContainer)) {
+                        protyle = editorItem.protyle;
+                        return true;
+                    }
+                })
+                if (protyle) {
+                    return true
+                }
+            })
+        }
+        if (!protyle) {
+            models.backlink.find(item => {
+                if (item.element.classList.contains("layout__tab--active")) {
+                    if (range) {
+                        item.editors.find(editor => {
+                            if (editor.protyle.element.contains(range.startContainer)) {
+                                protyle = editor.protyle;
+                                return true;
+                            }
+                        });
+                    }
+                    if (!protyle) {
+                        protyle = item.editors[0].protyle;
+                    }
+                    return true;
+                }
+            })
+        }
+        if (!protyle) {
+            models.editor.find(item => {
+                if (item.parent.headElement.classList.contains("item--focus")) {
+                    protyle = item.editor.protyle;
+                    return true;
+                }
+            });
+        }
+        if (!protyle) {
+            return false;
+        }
     }
     const activePanelElement = document.querySelector(".layout__tab--active");
     let isFileFocus = false;
@@ -181,10 +235,6 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         searchKey = window.siyuan.config.keymap.general.search.custom;
     }
     if (!isFileFocus && searchKey) {
-        let range: Range;
-        if (getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0);
-        }
         if (range && protyle.element.contains(range.startContainer)) {
             openSearch({
                 app,
@@ -245,7 +295,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.fullscreen.custom, event)) {
         fullscreen(protyle.element);
-        setPadding(protyle);
+        resize(protyle);
         event.preventDefault();
         return true;
     }

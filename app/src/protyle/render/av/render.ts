@@ -7,7 +7,7 @@ import {hasClosestByAttribute} from "../../util/hasClosest";
 import {Menu} from "../../../plugin/Menu";
 import {escapeAttr} from "../../../util/escape";
 
-export const avRender = (element: Element, cb?: () => void) => {
+export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -138,7 +138,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
             </span>
             <div class="fn__space"></div>
         </div>
-        <div contenteditable="true" class="av__title" data-title="${data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
+        <div contenteditable="${protyle.disabled ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title" data-title="${data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
@@ -174,7 +174,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "addAttrViewCol") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
-            avRender(item, () => {
+            avRender(item, protyle, () => {
                 showColMenu(protyle, item, item.querySelector(`.av__row--header .av__cell[data-col-id="${operation.id}"]`));
             });
         });
@@ -200,7 +200,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     } else {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
-            avRender(item);
+            avRender(item, protyle);
         });
     }
     setTimeout(() => {

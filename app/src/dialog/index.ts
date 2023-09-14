@@ -4,22 +4,25 @@ import {moveResize} from "./moveResize";
 /// #endif
 import {isMobile} from "../util/functions";
 import {isCtrl} from "../protyle/util/compatibility";
+import {Protyle} from "../protyle";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
+    public editor: Protyle
 
     constructor(options: {
         title?: string,
         transparent?: boolean,
         content: string,
-        width?: string
+        width?: string,
         height?: string,
-        destroyCallback?: (options?: IObject) => void
-        disableClose?: boolean
-        disableAnimation?: boolean
+        destroyCallback?: (options?: IObject) => void,
+        disableClose?: boolean,
+        disableAnimation?: boolean,
+        resizeCallback?: (type: string) => void
     }) {
         this.disableClose = options.disableClose;
         this.id = genUUID();
@@ -61,7 +64,7 @@ export class Dialog {
             });
         }
         /// #if !MOBILE
-        moveResize(this.element.querySelector(".b3-dialog__container"));
+        moveResize(this.element.querySelector(".b3-dialog__container"), options.resizeCallback);
         /// #endif
     }
 

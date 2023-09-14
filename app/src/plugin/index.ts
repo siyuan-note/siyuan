@@ -105,7 +105,7 @@ export class Plugin {
             iconElement.innerHTML = (options.icon.startsWith("icon") ? `<svg class="b3-menu__icon"><use xlink:href="#${options.icon}"></use></svg>` : options.icon) +
                 `<span class="b3-menu__label">${options.title}</span>`;
         } else if (!isWindow()) {
-            iconElement.className = "toolbar__item b3-tooltips b3-tooltips__sw";
+            iconElement.className = "toolbar__item ariaLabel";
             iconElement.setAttribute("aria-label", options.title);
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
             iconElement.addEventListener("click", options.callback);

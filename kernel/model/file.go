@@ -463,7 +463,6 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 	for _, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
-			logging.LogWarnf("block tree not found [%s]", id)
 			continue
 		}
 
@@ -1059,7 +1058,8 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		hPaths = append(hPaths, box.Name+bt.HPath)
+		hpath := html.UnescapeString(bt.HPath)
+		hPaths = append(hPaths, box.Name+hpath)
 	}
 	return
 }

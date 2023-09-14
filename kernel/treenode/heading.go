@@ -58,6 +58,24 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 }
 
 func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
+	if nil == node {
+		return false
+	}
+
+	if ast.NodeSuperBlock == node.Type {
+		// The super block below the folded heading contains headings of the same level and cannot be loaded https://github.com/siyuan-note/siyuan/issues/9162
+		if nil == currentHeading {
+			return false
+		}
+
+		sbChildHeading := SuperBlockHeading(node)
+		if nil != sbChildHeading {
+			if sbChildHeading.HeadingLevel <= currentHeading.HeadingLevel {
+				return false
+			}
+		}
+	}
+
 	heading := HeadingParent(node)
 	if nil == heading {
 		return false

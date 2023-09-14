@@ -1004,7 +1004,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     <span class="b3-list-item__icon b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>
-    <span class="b3-list-item__text ariaLabel" 
+    <span class="b3-list-item__text ariaLabel" data-position="parentE"
 aria-label="${escapeHtml(ariaLabel)}">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>

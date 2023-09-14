@@ -7,7 +7,7 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {genUUID} from "../util/genID";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {addBaseURL, setNoteBook} from "../util/pathName";
-import {openFileById} from "../editor/util";
+import {openFile, openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,
@@ -19,7 +19,6 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
-import {positionPDF, switchTabById} from "./global/function";
 import {loadPlugins} from "../plugin/loader";
 
 class App {
@@ -152,6 +151,5 @@ new App();
 
 // 再次点击新窗口已打开的 PDF 时，需进行定位
 window.newWindow = {
-    positionPDF: positionPDF,
-    switchTabById: switchTabById
+    openFile: openFile,
 };

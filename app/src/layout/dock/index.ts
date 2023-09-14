@@ -218,6 +218,7 @@ export class Dock {
         } else {
             this.layout.element.style.opacity = "";
             this.layout.element.style.transform = "";
+            this.layout.element.style.zIndex = "";
             if (hasActive) {
                 this.resizeElement.classList.remove("fn__none");
             }

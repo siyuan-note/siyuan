@@ -378,7 +378,7 @@ export class Gutter {
                 blockRender(options.protyle, options.protyle.wysiwyg.element);
                 processRender(options.protyle.wysiwyg.element);
                 highlightRender(options.protyle.wysiwyg.element);
-                avRender(options.protyle.wysiwyg.element);
+                avRender(options.protyle.wysiwyg.element, options.protyle);
             }
         };
     }

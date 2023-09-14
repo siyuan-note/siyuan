@@ -4,6 +4,7 @@ import {isMobile} from "./functions";
 import {mathRender} from "../protyle/render/mathRender";
 import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
+import {escapeAriaLabel} from "./escape";
 
 export class Tree {
     public element: HTMLElement;
@@ -63,10 +64,10 @@ export class Tree {
             } else if (item.type === "tag") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg>';
             } else if (item.type === "backlink") {
-                titleTip = ` title="${item.hPath}"`;
+                titleTip = ` aria-label="${escapeAriaLabel(item.hPath)}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             } else if (item.type === "outline") {
-                titleTip = ` title="${Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.name))}"`;
+                titleTip = ` aria-label="${escapeAriaLabel(Lute.BlockDOM2Content(item.name))}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
@@ -94,7 +95,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
         <svg data-id="${encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow${hasChild ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
-    <span class="b3-list-item__text"${titleTip}>${item.name}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="parentE"${titleTip}>${item.name}</span>
     ${this.topExtHTML || ""}
     ${countHTML}
 </li>`;
@@ -148,7 +149,7 @@ data-def-path="${item.defPath}">
         <svg data-id="${item.id}" class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
-    <span class="b3-list-item__text" ${type === "outline" ? ' title="' + Lute.EscapeHTMLStr(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="parentE" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
     ${countHTML}
     ${this.blockExtHTML || ""}
 </li>`;

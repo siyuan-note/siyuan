@@ -1,7 +1,7 @@
-import {setPadding} from "../ui/initUI";
 import {hideElements} from "../ui/hideElements";
 import {getAllModels} from "../../layout/getAll";
 import {updateOutline} from "../../editor/util";
+import {resize} from "./resize";
 
 export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
     if (type === "preview") {
@@ -17,11 +17,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         }
         protyle.preview.render(protyle);
     } else if (type === "wysiwyg") {
-        setPadding(protyle);
         if (!protyle.contentElement.classList.contains("fn__none")) {
             return;
         }
-
         protyle.preview.element.classList.add("fn__none");
         protyle.contentElement.classList.remove("fn__none");
         if (protyle.options.render.scroll) {
@@ -34,6 +32,7 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         /// #if !MOBILE
         updateOutline(getAllModels(), protyle, true);
         /// #endif
+        resize(protyle);
     }
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
 };

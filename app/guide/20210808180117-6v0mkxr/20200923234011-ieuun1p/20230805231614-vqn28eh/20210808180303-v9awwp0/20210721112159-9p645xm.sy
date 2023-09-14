@@ -5,7 +5,7 @@
 	"Properties": {
 		"id": "20210721112159-9p645xm",
 		"title": "Storage",
-		"updated": "20220708103624"
+		"updated": "20230912091621"
 	},
 	"Children": [
 		{
@@ -123,6 +123,38 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091521-5avsor2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091521-5avsor2",
+				"updated": "20230912091601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Usage can be viewed in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},
@@ -248,6 +280,50 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091615-fx813ol",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230912091615-fx813ol",
+				"updated": "20230912091621"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "FAQ"
+				}
+			]
+		},
+		{
+			"ID": "20230912091615-gzjc8vp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230912091615-gzjc8vp",
+				"updated": "20230912091615"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Can developers decrypt my cloud data?"
+				}
+			]
+		},
+		{
+			"ID": "20230912091615-cexuk4h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091615-cexuk4h",
+				"updated": "20230912091615"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unable to decrypt. If you lose your key, no one (including developers) can help you recover your data from the cloud."
 				}
 			]
 		}

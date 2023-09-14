@@ -90,6 +90,11 @@ export const openSearch = async (options: {
             if (edit) {
                 edit.destroy();
             }
+        },
+        resizeCallback(type: string) {
+            if (type !== "d" && type !== "t" && edit) {
+                edit.resize();
+            }
         }
     });
     dialog.element.setAttribute("data-key", options.hotkey);
@@ -108,4 +113,5 @@ export const openSearch = async (options: {
     }, dialog.element.querySelector(".b3-dialog__body"), () => {
         dialog.destroy({focus: "false"});
     });
+    dialog.editor = edit;
 };

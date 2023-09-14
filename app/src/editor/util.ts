@@ -8,7 +8,6 @@ import {getDisplayName, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {Files} from "../layout/dock/Files";
-import {setPadding} from "../protyle/ui/initUI";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {focusBlock, focusByRange} from "../protyle/util/selection";
 import {onGet} from "../protyle/util/onGet";
@@ -180,12 +179,10 @@ export const openFile = (options: IOpenFileOptions) => {
         }
         const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split(Constants.ZWSP);
         if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
-            let execJS = `window.newWindow.switchTabById("${options.rootID || options.assetPath}");`;
-            if (options.assetPath) {
-                execJS += `window.newWindow.positionPDF("${options.assetPath}", ${typeof options.page === "number" ? options.page : `"${options.page}"`})`;
-            }
             item.focus();
-            item.webContents.executeJavaScript(execJS);
+            const optionsClone = Object.assign({}, options);
+            delete optionsClone.app;
+            item.webContents.executeJavaScript(`window.newWindow.openFile(${JSON.stringify(optionsClone)});`);
             if (options.afterOpen) {
                 options.afterOpen();
             }
@@ -330,12 +327,12 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     allModels.editor.forEach((item) => {
         if (!item.element.isSameNode(editor.element) && window.siyuan.editorIsFullscreen && item.element.classList.contains("fullscreen")) {
             item.element.classList.remove("fullscreen");
-            setPadding(item.editor.protyle);
+            resize(item.editor.protyle);
         }
     });
     if (window.siyuan.editorIsFullscreen) {
         editor.element.classList.add("fullscreen");
-        setPadding(editor.editor.protyle);
+        resize(editor.editor.protyle);
     }
     if (options.keepCursor) {
         editor.parent.headElement.setAttribute("keep-cursor", options.id);

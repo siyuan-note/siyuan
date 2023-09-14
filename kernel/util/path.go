@@ -60,12 +60,69 @@ func GetLocalIPs() (ret []string) {
 		logging.LogWarnf("get interface addresses failed: %s", err)
 		return
 	}
+
+	IPv4Nets := []*net.IPNet{}
+	IPv6Nets := []*net.IPNet{}
 	for _, addr := range addrs {
-		if networkIp, ok := addr.(*net.IPNet); ok && !networkIp.IP.IsLoopback() && networkIp.IP.To4() != nil &&
-			bytes.Equal([]byte{255, 255, 255, 0}, networkIp.Mask) {
-			ret = append(ret, networkIp.IP.String())
+		if networkIp, ok := addr.(*net.IPNet); ok && networkIp.IP.String() != "<nil>" {
+			if networkIp.IP.To4() != nil {
+				IPv4Nets = append(IPv4Nets, networkIp)
+			} else if networkIp.IP.To16() != nil {
+				IPv6Nets = append(IPv6Nets, networkIp)
+			}
 		}
 	}
+
+	// loopback address
+	for _, net := range IPv4Nets {
+		if net.IP.IsLoopback() {
+			ret = append(ret, net.IP.String())
+		}
+	}
+	// private address
+	for _, net := range IPv4Nets {
+		if net.IP.IsPrivate() {
+			ret = append(ret, net.IP.String())
+		}
+	}
+	// IPv4 private address
+	for _, net := range IPv4Nets {
+		if net.IP.IsGlobalUnicast() {
+			ret = append(ret, net.IP.String())
+		}
+	}
+	// link-local unicast address
+	for _, net := range IPv4Nets {
+		if net.IP.IsLinkLocalUnicast() {
+			ret = append(ret, net.IP.String())
+		}
+	}
+
+	// loopback address
+	for _, net := range IPv6Nets {
+		if net.IP.IsLoopback() {
+			ret = append(ret, "["+net.IP.String()+"]")
+		}
+	}
+	// private address
+	for _, net := range IPv6Nets {
+		if net.IP.IsPrivate() {
+			ret = append(ret, "["+net.IP.String()+"]")
+		}
+	}
+	// IPv6 private address
+	for _, net := range IPv6Nets {
+		if net.IP.IsGlobalUnicast() {
+			ret = append(ret, "["+net.IP.String()+"]")
+		}
+	}
+	// link-local unicast address
+	for _, net := range IPv6Nets {
+		if net.IP.IsLinkLocalUnicast() {
+			ret = append(ret, "["+net.IP.String()+"]")
+		}
+	}
+
 	ret = append(ret, LocalHost)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return

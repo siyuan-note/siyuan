@@ -29,12 +29,13 @@ export const initAbout = () => {
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </div>
 <div class="b3-label">
-       ${window.siyuan.languages.about2}
-       <div class="fn__hr"></div>
-       <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}">
-       <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
-       <div class="fn__hr"></div>
-       <span class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.join("</code> <code class='fn__code'>")}</code></span>
+        ${window.siyuan.languages.about2}
+        <div class="fn__hr"></div>
+        <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}">
+        <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
+        <div class="fn__hr"></div>
+        <div class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.filter(ip => !(ip.startsWith("[") && ip.endsWith("]"))).join("</code> <code class='fn__code'>")}</code></div>
+        <div class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.filter(ip => (ip.startsWith("[") && ip.endsWith("]"))).join("</code> <code class='fn__code'>")}</code></div>
 </div>
 <div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.about5}

@@ -942,6 +942,7 @@
   "about13": "API token",
   "about14": "The token needs to be authenticated when calling the API",
   "about17": "Do not enable proxy when set to <code class='fn__code'>Direct connection</code>",
+  "about18": "When using a non-loopback address (<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code>) please set the Access authorization code first",
   "checkUpdate": "Check update",
   "currentVer": "Current version",
   "downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Download the latest version</a>",

@@ -385,7 +385,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
 
     const parentElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
-    let previousLastElement = getLastBlock(previousElement) as HTMLElement;
+    const previousLastElement = getLastBlock(previousElement) as HTMLElement;
     const isSelectNode = previousLastElement && (previousLastElement.classList.contains("table") || previousLastElement.classList.contains("render-node") || previousLastElement.classList.contains("iframe") || previousLastElement.classList.contains("hr") || previousLastElement.classList.contains("code-block"));
     const previousId = previousLastElement.getAttribute("data-node-id");
     if (isSelectNode) {
@@ -411,9 +411,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 } else {
                     transaction(protyle, doOperations, undoOperations);
                 }
-                // toStart 参数不能为 false， 否则 https://github.com/siyuan-note/siyuan/issues/9141
-                previousLastElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${previousId}"]`);
-                focusBlock(previousLastElement, undefined, getContenteditableElement(previousLastElement).textContent === "\n");
+                focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${previousId}"]`), undefined, false);
             } else {
                 focusBlock(previousLastElement, undefined, false);
             }

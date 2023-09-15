@@ -26,7 +26,7 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gabriel-vasile/mimetype v1.4.2
-	github.com/getsentry/sentry-go v0.24.0
+	github.com/getsentry/sentry-go v0.24.1
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
@@ -48,7 +48,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/sashabaranov/go-openai v1.14.2
 	github.com/shirou/gopsutil/v3 v3.23.7
-	github.com/siyuan-note/dejavu v0.0.0-20230909144037-4b41832c5a15
+	github.com/siyuan-note/dejavu v0.0.0-20230915120736-69389a144f09
 	github.com/siyuan-note/encryption v0.0.0-20220713091850-5ecd92177b75
 	github.com/siyuan-note/eventbus v0.0.0-20230804030110-cf250f838c80
 	github.com/siyuan-note/filelock v0.0.0-20230615140405-d05a21d49524
@@ -76,7 +76,7 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
-	github.com/aws/aws-sdk-go v1.45.6 // indirect
+	github.com/aws/aws-sdk-go v1.45.10 // indirect
 	github.com/bytedance/sonic v1.10.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
@@ -96,7 +96,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/glog v1.1.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/google/pprof v0.0.0-20230907193218-d3ddc7976beb // indirect
+	github.com/google/pprof v0.0.0-20230912144702-c363fe2c2ed8 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect

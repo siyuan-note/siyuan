@@ -301,7 +301,7 @@ export const initWindow = (app: App) => {
     }
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
         if (isWindow()) {
-          closeWindow(app);
+            closeWindow(app);
         } else {
             winOnClose(currentWindow, close);
         }
@@ -521,7 +521,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     });
     closeBtnElement.addEventListener("click", () => {
         if (isWindow()) {
-            currentWindow.destroy();
+            closeWindow(app);
         } else {
             winOnClose(currentWindow);
         }

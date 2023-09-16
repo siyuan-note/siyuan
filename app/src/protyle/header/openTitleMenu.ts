@@ -1,20 +1,32 @@
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {MenuItem} from "../../menus/Menu";
-import {copySubMenu, movePathToMenu, openFileAttr, openFileWechatNotify} from "../../menus/commonMenuItem";
+import {
+    copySubMenu,
+    exportMd,
+    movePathToMenu,
+    openFileAttr,
+    openFileWechatNotify,
+} from "../../menus/commonMenuItem";
 import {deleteFile} from "../../editor/deleteFile";
-import {transferBlockRef} from "../../menus/block";
 import {updateHotkeyTip} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
+import {shell} from "electron";
+import * as path from "path";
 /// #endif
 import {Constants} from "../../constants";
 import {openCardByData} from "../../card/openCard";
 import {viewCards} from "../../card/viewCards";
-import {getNotebookName, pathPosix} from "../../util/pathName";
+import {getDisplayName, getNotebookName, pathPosix} from "../../util/pathName";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import * as dayjs from "dayjs";
 import {hideTooltip} from "../../dialog/tooltip";
+import {popSearch} from "../../mobile/menu/search";
+import {openSearch} from "../../search/spread";
+import {openDocHistory} from "../../history/doc";
+import {openNewWindowById} from "../../window/openNewWindow";
+import {genImportMenu} from "../../menus/navigation";
 
 export const openTitleMenu = (protyle: IProtyle, position: {
     x: number
@@ -47,18 +59,6 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                     deleteFile(protyle.notebookId, protyle.path);
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-            if (response.data.refCount && response.data.refCount > 0) {
-                transferBlockRef(protyle.block.rootID);
-            }
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.attr,
-                icon: "iconAttr",
-                accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
-                click() {
-                    openFileAttr(response.data.ial);
-                }
-            }).element);
         }
         /// #if !MOBILE
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -88,6 +88,14 @@ export const openTitleMenu = (protyle: IProtyle, position: {
         }).element);
         /// #endif
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.attr,
+            icon: "iconAttr",
+            accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
+            click() {
+                openFileAttr(response.data.ial);
+            }
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.wechatReminder,
             icon: "iconMp",
@@ -155,7 +163,105 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                 separatorPosition: "top",
             });
         }
-
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.search,
+            icon: "iconSearch",
+            accelerator: window.siyuan.config.keymap.general.search.custom,
+            async click() {
+                const searchPath = getDisplayName(protyle.path, false, true);
+                /// #if MOBILE
+                const pathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
+                    notebook: protyle.notebookId,
+                    path: searchPath + ".sy"
+                });
+                const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+                popSearch(protyle.app, {
+                    removed: localData.removed,
+                    sort: localData.sort,
+                    group: localData.group,
+                    hasReplace: false,
+                    method: localData.method,
+                    hPath: pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),
+                    idPath: [pathPosix().join(protyle.notebookId, searchPath)],
+                    k: localData.k,
+                    r: localData.r,
+                    page: 1,
+                    types: Object.assign({}, localData.types)
+                });
+                /// #else
+                openSearch({
+                    app: protyle.app,
+                    hotkey: window.siyuan.config.keymap.general.search.custom,
+                    notebookId: protyle.notebookId,
+                    searchPath
+                });
+                /// #endif
+            }
+        }).element);
+        if (!protyle.disabled) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.replace,
+                accelerator: window.siyuan.config.keymap.general.replace.custom,
+                icon: "iconReplace",
+                async click() {
+                    const searchPath = getDisplayName(protyle.path, false, true);
+                    /// #if MOBILE
+                    const pathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
+                        notebook: protyle.notebookId,
+                        path: searchPath + ".sy"
+                    });
+                    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+                    popSearch(protyle.app, {
+                        removed: localData.removed,
+                        sort: localData.sort,
+                        group: localData.group,
+                        hasReplace: true,
+                        method: localData.method,
+                        hPath: pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),
+                        idPath: [pathPosix().join(protyle.notebookId, searchPath)],
+                        k: localData.k,
+                        r: localData.r,
+                        page: 1,
+                        types: Object.assign({}, localData.types)
+                    });
+                    /// #else
+                    openSearch({
+                        app: protyle.app,
+                        hotkey: window.siyuan.config.keymap.general.replace.custom,
+                        notebookId: protyle.notebookId,
+                        searchPath
+                    });
+                    /// #endif
+                }
+            }).element);
+        }
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        /// #if !BROWSER
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.openByNewWindow,
+            icon: "iconOpenWindow",
+            click() {
+                openNewWindowById(protyle.block.rootID);
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.showInFolder,
+            click: () => {
+                shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, protyle.notebookId, protyle.path));
+            }
+        }).element);
+        /// #endif
+        if (!protyle.disabled) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.fileHistory,
+                icon: "iconHistory",
+                click() {
+                    openDocHistory({app: protyle.app, id: protyle.block.rootID, notebookId: protyle.notebookId, pathString: response.data.name});
+                }
+            }).element);
+        }
+        genImportMenu(protyle.notebookId, protyle.path);
+        window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: Constants.ZWSP,
@@ -163,6 +269,10 @@ export const openTitleMenu = (protyle: IProtyle, position: {
             label: `${window.siyuan.languages.modifiedAt} ${dayjs(response.data.ial.updated).format("YYYY-MM-DD HH:mm:ss")}<br>
 ${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`
         }).element);
+        /// #if MOBILE
+        window.siyuan.menus.menu.fullscreen();
+        /// #else
         window.siyuan.menus.menu.popup(position, position.isLeft);
+        /// #endif
     });
 };

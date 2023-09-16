@@ -488,7 +488,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     return window.siyuan.menus.menu;
 };
 
-const genImportMenu = (notebookId: string, pathString: string) => {
+export const genImportMenu = (notebookId: string, pathString: string) => {
     if (!window.siyuan.config.readonly) {
         /// #if !BROWSER
         const importstdmd = (label: string, isDoc?: boolean) => {

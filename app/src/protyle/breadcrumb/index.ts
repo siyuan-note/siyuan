@@ -31,6 +31,7 @@ import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid} from "../util/compatibility";
 import {resize} from "../util/resize";
+import {transferBlockRef} from "../../menus/block";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -511,14 +512,9 @@ export class Breadcrumb {
                 }).element);
             }
             /// #endif
-            window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconTrashcan",
-                label: window.siyuan.languages.delete,
-                click: () => {
-                    deleteFile(protyle.notebookId, protyle.path);
-                }
-            }).element);
+            if (!protyle.disabled) {
+                transferBlockRef(protyle.block.rootID);
+            }
             if (protyle?.app?.plugins) {
                 emitOpenMenu({
                     plugins: protyle.app.plugins,
@@ -530,7 +526,6 @@ export class Breadcrumb {
                     separatorPosition: "top",
                 });
             }
-
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 iconHTML: Constants.ZWSP,

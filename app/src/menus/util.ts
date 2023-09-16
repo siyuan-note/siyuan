@@ -82,20 +82,18 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
     });
     /// #if !BROWSER
     openSubmenus.push({type: "separator"});
-    if (!window.siyuan.config.readonly) {
-        openSubmenus.push({
-            label: window.siyuan.languages.showInFolder,
-            click: () => {
-                if (notebookId) {
-                    shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, notebookId, pathString));
-                } else {
-                    fetchPost("/api/block/getBlockInfo", {id}, (response) => {
-                        shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, response.data.box, response.data.path));
-                    });
-                }
+    openSubmenus.push({
+        label: window.siyuan.languages.showInFolder,
+        click: () => {
+            if (notebookId) {
+                shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, notebookId, pathString));
+            } else {
+                fetchPost("/api/block/getBlockInfo", {id}, (response) => {
+                    shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, response.data.box, response.data.path));
+                });
             }
-        });
-    }
+        }
+    });
     /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.openBy,

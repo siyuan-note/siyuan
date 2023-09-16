@@ -28,6 +28,7 @@ import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 import {App} from "../index";
 import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/keydown";
+import {closeWindow} from "../window/closeWin";
 
 const matchKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -297,10 +298,14 @@ export const initWindow = (app: App) => {
                 return;
             }
         });
-        ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
-            winOnClose(currentWindow, close);
-        });
     }
+    ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
+        if (isWindow()) {
+          closeWindow(app);
+        } else {
+            winOnClose(currentWindow, close);
+        }
+    });
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
         onWindowsMsg(ipcData);
     });

@@ -723,6 +723,12 @@ app.whenReady().then(() => {
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
         win.loadURL(data.url);
+        win.on("close", (event) => {
+            if (win && !win.isDestroyed()) {
+                win.webContents.send("siyuan-save-close");
+            }
+            event.preventDefault();
+        });
         const targetScreen = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
         if (mainScreen.id !== targetScreen.id) {
             win.setBounds(targetScreen.workArea);

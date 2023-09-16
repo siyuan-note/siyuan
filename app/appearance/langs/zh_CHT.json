@@ -1,4 +1,5 @@
 {
+  "removeBookmark": "移除 ${x} 中的書籤？",
   "lockEdit": "鎖定編輯",
   "unlockEdit": "解除鎖定",
   "defaultMargin": "默認",

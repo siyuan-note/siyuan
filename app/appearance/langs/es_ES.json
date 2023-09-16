@@ -1,4 +1,5 @@
 {
+  "removeBookmark": "¿Eliminar marcador de ${x}?",
   "lockEdit": "Hacer que el documento sea de sólo lectura",
   "unlockEdit": "Hacer que el documento sea escribible",
   "defaultMargin": "Predeterminado",

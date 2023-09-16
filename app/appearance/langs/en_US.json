@@ -1,4 +1,5 @@
 {
+  "removeBookmark": "Remove bookmark from ${x}?",
   "defaultMargin": "Default",
   "noneMargin": "None",
   "minimalMargin": "Minimal",

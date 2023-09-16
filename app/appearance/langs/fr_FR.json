@@ -943,6 +943,7 @@
   "about13": "API token",
   "about14": "Le token doit être authentifié lors de l'appel de l'API.",
   "about17": "N'activez pas le proxy lorsqu'il est défini sur <code class='fn__code'>Connexion directe</code>.",
+  "about18": "Lors de l'utilisation d'une adresse sans bouclage (<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code> ) Veuillez d'abord définir le Accès code d'autorisation",
   "checkUpdate": "Vérifier la mise à jour",
   "currentVer": "Version actuelle",
   "downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Télécharger la dernière version</a>",

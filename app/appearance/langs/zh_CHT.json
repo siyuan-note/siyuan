@@ -943,6 +943,7 @@
   "about13": "API token",
   "about14": "調用 API 時需要通過該 token 進行鑒權",
   "about17": "設置為 <code class='fn__code'>直接連接</code> 時不啟用代理",
+  "about18": "使用非環回地址（<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code>）時請先設置訪問授權碼",
   "checkUpdate": "檢查更新",
   "currentVer": "當前版本",
   "downloadLatestVer": "<a href=\"https://b3log.org/siyuan/download.html\", target=\"_blank\">下載最新版</a>",

@@ -653,14 +653,14 @@ export class Graph extends Model {
                             app: this.app,
                             id: node.id,
                             position: "bottom",
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
                         });
                     } else if (window.siyuan.altIsPressed) {
                         openFileById({
                             app: this.app,
                             id: node.id,
                             position: "right",
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
                         });
                     } else if (window.siyuan.ctrlIsPressed) {
                         window.siyuan.blockPanels.push(new BlockPanel({
@@ -674,7 +674,7 @@ export class Graph extends Model {
                         openFileById({
                             app: this.app,
                             id: node.id,
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]
                         });
                     }
                 });

@@ -281,7 +281,7 @@ export const initWindow = (app: App) => {
                         openFileById({
                             app,
                             id,
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                             zoomIn: focus,
                         });
                         ipcRenderer.send(Constants.SIYUAN_SHOW, getCurrentWindow().id);

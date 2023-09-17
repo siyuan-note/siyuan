@@ -739,7 +739,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     let isClick = event.detail === 1
                     let isDblClick = event.detail === 2
                     /// #if BROWSER
-                    const newDate =  new Date().getTime()
+                    const newDate = new Date().getTime()
                     isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK
                     isDblClick = !isClick;
                     lastClickTime = newDate;
@@ -763,7 +763,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                         openFileById({
                                             app,
                                             id,
-                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
+                                                (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
                                             zoomIn: foldResponse.data,
                                             position: "right"
                                         });
@@ -803,7 +804,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                                 openFileById({
                                     app,
                                     id,
-                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
+                                        (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
                                     zoomIn: foldResponse.data
                                 });
                                 if (closeCB) {
@@ -862,7 +864,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     app,
                     id,
                     position: "right",
-                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                    action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
+                        (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
                     zoomIn: foldResponse.data
                 });
                 if (closeCB) {
@@ -891,7 +894,8 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         openFileById({
                             app,
                             id,
-                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] :
+                                (id === target.getAttribute("data-root-id") ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ROOTSCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]),
                             zoomIn: foldResponse.data
                         });
                         if (closeCB) {

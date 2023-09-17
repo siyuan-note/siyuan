@@ -560,7 +560,7 @@ const initSearchEvent = (app: App, element: Element, config: ISearchOption) => {
                             preventScroll(window.siyuan.mobile.editor.protyle);
                         }
                         fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
-                            openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                            openMobileFileById(app, id, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                         closePanel();
                     } else {

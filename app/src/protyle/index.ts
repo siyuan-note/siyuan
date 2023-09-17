@@ -14,7 +14,7 @@ import {WYSIWYG} from "./wysiwyg";
 import {Toolbar} from "./toolbar";
 import {Gutter} from "./gutter";
 import {Breadcrumb} from "./breadcrumb";
-import {onTransaction} from "./wysiwyg/transaction";
+import {onTransaction, transaction} from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {Title} from "./header/Title";
@@ -382,5 +382,9 @@ export class Protyle {
 
     public insert(html: string, isBlock = false, useProtyleRange = false) {
         insertHTML(html, this.protyle, isBlock, useProtyleRange);
+    }
+
+    public transaction( doOperations: IOperation[], undoOperations?: IOperation[]) {
+        transaction(this.protyle,  doOperations, undoOperations);
     }
 }

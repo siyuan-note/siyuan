@@ -104,6 +104,11 @@ func html2BlockDOM(c *gin.Context) {
 			if gulu.OS.IsWindows() {
 				localPath = strings.TrimPrefix(localPath, "/")
 			}
+
+			if !filepath.IsAbs(localPath) {
+				// Kernel crash when copy-pasting from some browsers https://github.com/siyuan-note/siyuan/issues/9203
+				return ast.WalkContinue
+			}
 			if !gulu.File.IsExist(localPath) {
 				return ast.WalkContinue
 			}

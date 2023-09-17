@@ -92,8 +92,10 @@ export const onGet = (options: {
         if (options.protyle.options.render.title) {
             // 页签没有打开
             options.protyle.title.render(options.protyle, response);
-        } else if (options.protyle.options.render.background) {
-            options.protyle.background.render(response.data.ial, options.protyle.block.rootID);
+        } else {
+            if (options.protyle.options.render.background) {
+                options.protyle.background.render(response.data.ial, options.protyle.block.rootID);
+            }
             options.protyle.wysiwyg.renderCustom(response.data.ial);
         }
 

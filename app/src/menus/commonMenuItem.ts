@@ -473,7 +473,7 @@ export const exportMd = (id: string) => {
 
                     fetchPost("/api/template/docSaveAsTemplate", {
                         id,
-                        name,
+                        name: inputElement.value,
                         overwrite: false
                     }, response => {
                         if (response.code === 1) {
@@ -481,7 +481,7 @@ export const exportMd = (id: string) => {
                             confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
                                 fetchPost("/api/template/docSaveAsTemplate", {
                                     id,
-                                    name,
+                                    name: inputElement.value,
                                     overwrite: true
                                 }, resp => {
                                     if (resp.code === 0) {
@@ -493,7 +493,6 @@ export const exportMd = (id: string) => {
                         }
                         showMessage(window.siyuan.languages.exportTplSucc);
                     });
-
                     dialog.destroy();
                 });
             }

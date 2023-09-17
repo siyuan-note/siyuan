@@ -1488,7 +1488,7 @@ export class WYSIWYG {
             }
         });
 
-        let timeout: number
+        let timeout: number;
         this.element.addEventListener("input", (event: InputEvent) => {
             const target = event.target as HTMLElement;
             if (target.tagName === "VIDEO" || target.tagName === "AUDIO" || event.inputType === "historyRedo") {

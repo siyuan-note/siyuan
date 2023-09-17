@@ -667,7 +667,7 @@ export const resizeTabs = () => {
         });
         models.search.forEach(item => {
             item.edit.resize();
-        })
+        });
         models.custom.forEach(item => {
             if (item.resize) {
                 item.resize();

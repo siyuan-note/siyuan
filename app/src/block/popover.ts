@@ -45,7 +45,7 @@ export const initBlockPopover = (app: App) => {
                 return;
             }
         } else if (!aElement) {
-            const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true)
+            const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
             if (!tipElement || (
                 tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
             )) {

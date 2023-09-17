@@ -6,4 +6,4 @@ export const closeWindow = async (app: App) => {
         await app.plugins[i].onunload();
     }
     getCurrentWindow().destroy();
-}
+};

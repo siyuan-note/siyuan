@@ -11,7 +11,7 @@ export class Dialog {
     public element: HTMLElement;
     private id: string;
     private disableClose: boolean;
-    public editor: Protyle
+    public editor: Protyle;
 
     constructor(options: {
         title?: string,

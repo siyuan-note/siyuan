@@ -736,11 +736,11 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                     newFileByName(app, searchInputElement.value);
                 } else if (type === "search-item") {
                     const isAsset = target.dataset.id;
-                    let isClick = event.detail === 1
-                    let isDblClick = event.detail === 2
+                    let isClick = event.detail === 1;
+                    let isDblClick = event.detail === 2;
                     /// #if BROWSER
-                    const newDate = new Date().getTime()
-                    isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK
+                    const newDate = new Date().getTime();
+                    isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK;
                     isDblClick = !isClick;
                     lastClickTime = newDate;
                     /// #endif

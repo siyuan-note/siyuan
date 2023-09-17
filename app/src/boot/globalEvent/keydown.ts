@@ -165,7 +165,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 protyle = item.editor.protyle;
                 return true;
             }
-        })
+        });
     }
     if (!protyle && activeTabElement) {
         const tab = getInstanceById(activeTabElement.getAttribute("data-id")) as Tab;
@@ -187,11 +187,11 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                         protyle = editorItem.protyle;
                         return true;
                     }
-                })
+                });
                 if (protyle) {
-                    return true
+                    return true;
                 }
-            })
+            });
         }
         if (!protyle) {
             models.backlink.find(item => {
@@ -209,7 +209,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                     }
                     return true;
                 }
-            })
+            });
         }
         if (!protyle) {
             models.editor.find(item => {

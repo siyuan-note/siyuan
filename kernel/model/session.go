@@ -165,12 +165,21 @@ func CheckAuth(c *gin.Context) {
 			u, parseErr := url.Parse(origin)
 			if nil != parseErr {
 				logging.LogWarnf("parse origin [%s] failed: %s", origin, parseErr)
-			} else {
-				if !strings.HasPrefix(u.Host, util.LocalHost) && !strings.HasPrefix(u.Host, "[::1]") {
-					c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed"})
-					c.Abort()
-					return
-				}
+				c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+				c.Abort()
+				return
+
+			}
+
+			if "chrome-extension" == strings.ToLower(u.Scheme) {
+				c.Next()
+				return
+			}
+
+			if !strings.HasPrefix(u.Host, util.LocalHost) && !strings.HasPrefix(u.Host, "[::1]") {
+				c.JSON(401, map[string]interface{}{"code": -1, "msg": "Auth failed"})
+				c.Abort()
+				return
 			}
 		}
 

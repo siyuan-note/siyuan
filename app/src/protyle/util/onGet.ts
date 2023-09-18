@@ -157,10 +157,15 @@ const setHTML = (options: {
         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad) {
-            while (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT &&
-            protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().top > window.innerHeight) {
-                protyle.wysiwyg.element.lastElementChild.remove();
+            const removeElements:HTMLElement[] = []
+            if (protyle.wysiwyg.element.childElementCount > 2 && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT){
+                protyle.wysiwyg.element.childNodes.forEach((el)=>{
+                    if((el as HTMLElement).getBoundingClientRect().top > window.innerHeight * 2){
+                        removeElements.push((el as HTMLElement))
+                    }
+                })
             }
+            removeElements.forEach((el)=>{el.remove()})
             hideElements(["toolbar"], protyle);
         }
     } else {

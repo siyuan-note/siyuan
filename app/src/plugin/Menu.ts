@@ -1,4 +1,4 @@
-import { Menu as SiyuanMenu } from "../menus/Menu";
+import {Menu as SiyuanMenu} from "../menus/Menu";
 
 export class Menu {
     private menu: SiyuanMenu;

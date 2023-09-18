@@ -64,6 +64,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 const blockElement = hasClosestBlock(targetElement);
                 if (!blockElement) {
                     if ((protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
+                        // goHome 时 data-eof 不为 1
                             protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0") &&
                         (hasClosestByClassName(targetElement, "protyle-background") || hasClosestByClassName(targetElement, "protyle-title"))) {
                         const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;

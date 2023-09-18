@@ -1,13 +1,9 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@electron/remote':
     specifier: ^2.0.9
-    version: 2.0.9(electron@25.7.0)
+    version: 2.0.9(electron@25.8.1)
 
 devDependencies:
   '@types/node':
@@ -32,8 +28,8 @@ devDependencies:
     specifier: ^1.11.5
     version: 1.11.5
   electron:
-    specifier: 25.7.0
-    version: 25.7.0
+    specifier: 25.8.1
+    version: 25.8.1
   electron-builder:
     specifier: ^24.6.3
     version: 24.6.3
@@ -160,12 +156,12 @@ packages:
       - supports-color
     dev: true
 
-  /@electron/remote@2.0.9(electron@25.7.0):
+  /@electron/remote@2.0.9(electron@25.8.1):
     resolution: {integrity: sha512-LR0W0ID6WAKHaSs0x5LX9aiG+5pFBNAJL6eQAJfGkCuZPUa6nZz+czZLdlTDETG45CgF/0raSvCtYOYUpr6c+A==}
     peerDependencies:
       electron: '>= 13.0.0'
     dependencies:
-      electron: 25.7.0
+      electron: 25.8.1
     dev: false
 
   /@electron/universal@1.3.4:
@@ -1014,7 +1010,7 @@ packages:
       minimatch: 5.1.6
       read-config-file: 6.3.2
       sanitize-filename: 1.6.3
-      semver: 7.3.8
+      semver: 7.5.4
       tar: 6.1.13
       temp-file: 3.4.0
     transitivePeerDependencies:
@@ -1666,8 +1662,8 @@ packages:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
     dev: true
 
-  /electron@25.7.0:
-    resolution: {integrity: sha512-P82EzYZ8k9J21x5syhXV7EkezDmEXwycReXnagfzS0kwepnrlWzq1aDIUWdNvzTdHobky4m/nYcL98qd73mEVA==}
+  /electron@25.8.1:
+    resolution: {integrity: sha512-GtcP1nMrROZfFg0+mhyj1hamrHvukfF6of2B/pcWxmWkd5FVY1NJib0tlhiorFZRzQN5Z+APLPr7aMolt7i2AQ==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
@@ -2135,7 +2131,7 @@ packages:
       es6-error: 4.1.1
       matcher: 3.0.0
       roarr: 2.15.4
-      semver: 7.3.8
+      semver: 7.5.4
       serialize-error: 7.0.1
     optional: true
 
@@ -3299,6 +3295,7 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: true
 
   /semver@7.5.4:
     resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
@@ -3306,7 +3303,6 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
-    dev: true
 
   /serialize-error@7.0.1:
     resolution: {integrity: sha512-8I8TjW5KMOKsZQTvoxjuSIa7foAwPWGOts+6o7sgjz41/qMD9VQHEDxi6PBvK2l0MXUmqZyNpUK+T2tQaaElvw==}
@@ -3859,3 +3855,7 @@ packages:
     dependencies:
       buffer-crc32: 0.2.13
       fd-slicer: 1.1.0
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false

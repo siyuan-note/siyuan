@@ -288,7 +288,6 @@
   "embedBlockBreadcrumb": "嵌入塊導覽路徑",
   "embedBlockBreadcrumbTip": "啟用後嵌入塊將顯示導覽路徑，在超級塊中的嵌入塊忽略該選項，始終不顯示導覽路徑",
   "appearanceMode": "外觀模式",
-  "editMode": "編輯模式",
   "editReadonly": "只讀模式",
   "editReadonlyTip": "啟用後編輯器將以只讀模式載入文檔",
   "generateConflictDoc": "同步衝突時生成衝突文檔",

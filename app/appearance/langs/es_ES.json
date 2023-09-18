@@ -288,7 +288,6 @@
   "embedBlockBreadcrumb": "Incrustar migas de pan de bloque",
   "embedBlockBreadcrumbTip": "Después de habilitar los bloques incrustados, se mostrarán migas de pan, incrustar bloques en superbloques ignora esta opción y nunca muestra migas de pan",
   "appearanceMode": "Modo de apariencia",
-  "editMode": "Modo de edición",
   "editReadonly": "Modo de solo lectura",
   "editReadonlyTip": "Después de habilitarlo, el editor cargará el documento en modo de solo lectura",
   "generateConflictDoc": "Generar documentación de conflicto al sincronizar conflictos",

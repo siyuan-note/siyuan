@@ -1081,7 +1081,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         commandPanel(app);
         return;
     }
-    if (matchHotKey(window.siyuan.config.keymap.general.editMode.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.general.editReadonly.custom, event)) {
         event.preventDefault();
         editor.setReadonly(!window.siyuan.config.editor.readOnly);
         return;

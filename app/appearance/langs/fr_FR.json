@@ -288,7 +288,6 @@
   "embedBlockBreadcrumb": "Intégrer le fil d'Ariane du bloc",
   "embedBlockBreadcrumbTip": "Après avoir activé l'intégration, les blocs afficheront le fil d'Ariane, intégrer des blocs dans des super blocs ignorent cette option et n'affichent jamais le fil d'Ariane",
   "appearanceMode": "Mode d'apparence",
-  "editMode": "Mode d'édition",
   "editReadonly": "Mode lecture seule",
   "editReadonlyTip": "Lorsqu'il est activé, l'éditeur charge le document en mode lecture seule",
   "generateConflictDoc": "Générer une documentation sur les conflits lors de la synchronisation des conflits",

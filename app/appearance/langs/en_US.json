@@ -288,7 +288,6 @@
   "embedBlockBreadcrumb": "Embed Block Breadcrumb",
   "embedBlockBreadcrumbTip": "After enabling embed blocks will display breadcrumbs, embed blocks in super blocks ignore this option and never show breadcrumbs",
   "appearanceMode": "Appearance Mode",
-  "editMode": "Edit Mode",
   "editReadonly": "Read-only mode",
   "editReadonlyTip": "After enabling, the editor will load the document in read-only mode",
   "generateConflictDoc": "Generate conflict documentation when syncing conflicts",

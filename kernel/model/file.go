@@ -681,6 +681,19 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 			if 1 > len(nodes) {
 				// 按 mode 加载兜底
 				nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)
+			} else {
+				// 文档块没有指定 index 时需要计算 index，否则初次打开文档时 node-index 会为 0，导致首次 Ctrl+Home 无法回到顶部
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering {
+						return ast.WalkContinue
+					}
+
+					index++
+					if nodes[0].ID == n.ID {
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
 			}
 		} else {
 			nodes, eof = loadNodesByMode(node, inputIndex, mode, size, isDoc, isHeading)

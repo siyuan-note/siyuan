@@ -1,5 +1,4 @@
 /// #if !BROWSER
-import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";

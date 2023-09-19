@@ -1,6 +1,5 @@
 /// #if !BROWSER
 import {escapeHtml} from "../../util/escape";
-import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {hideMessage, showMessage} from "../../dialog/message";

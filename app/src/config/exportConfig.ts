@@ -1,7 +1,6 @@
 import {fetchPost} from "../util/fetch";
 /// #if !BROWSER
 import {dialog} from "@electron/remote";
-import {shell} from "electron";
 import {afterExport} from "../protyle/export/util";
 import * as path from "path";
 /// #endif

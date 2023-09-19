@@ -157,7 +157,7 @@ const setHTML = (options: {
         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
         // 动态加载移除
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad) {
-            const removeElements: Element[] = []
+            const removeElements: Element[] = [];
             let childCount = protyle.wysiwyg.element.childElementCount;
             let scrollHeight = protyle.contentElement.scrollHeight;
             let lastElement = protyle.wysiwyg.element.lastElementChild;

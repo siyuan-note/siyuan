@@ -11,7 +11,6 @@ import {deleteFile} from "../../editor/deleteFile";
 import {updateHotkeyTip} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
-import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../../constants";

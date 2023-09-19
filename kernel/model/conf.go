@@ -519,11 +519,11 @@ func Close(force bool, execInstallPkg int) (exitCode int) {
 		// 这里多等待一段时间，等待安装程序启动
 		time.Sleep(4 * time.Second)
 	}
-	logging.LogInfof("exited kernel")
 	closeSyncWebSocket()
-	util.WebSocketServer.Close()
 	go func() {
 		time.Sleep(500 * time.Millisecond)
+		logging.LogInfof("exited kernel")
+		util.WebSocketServer.Close()
 		os.Exit(logging.ExitCodeOk)
 	}()
 	return

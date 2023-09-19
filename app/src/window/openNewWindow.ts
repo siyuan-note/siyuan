@@ -21,7 +21,7 @@ export const openNewWindow = (tab: Tab, options: windowOptions = {}) => {
     const json = {};
     layoutToJSON(tab, json);
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+    ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
         position: options.position,
         width: options.width,
         height: options.height,
@@ -61,7 +61,7 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
                     json.children.scrollAttr.rootId = response.data.rootID;
                 }
                 /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+                ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                     position: options.position,
                     width: options.width,
                     height: options.height,
@@ -76,7 +76,7 @@ export const openNewWindowById = (id: string, options: windowOptions = {}) => {
                 zoomInId: id,
             };
             /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_OPENWINDOW, {
+            ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                 position: options.position,
                 width: options.width,
                 height: options.height,

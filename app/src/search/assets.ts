@@ -12,6 +12,7 @@ import {getQueryTip} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
+import {showFileInFolder} from "../util/pathName";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -135,7 +136,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
             if (!isHistory) {
                 if (currentList) {
                     /// #if !BROWSER
-                    shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, currentList.lastElementChild.getAttribute("aria-label")));
+                    showFileInFolder(path.join(window.siyuan.config.system.dataDir, currentList.lastElementChild.getAttribute("aria-label")));
                     /// #endif
                 }
             } else {

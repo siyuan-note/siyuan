@@ -10,7 +10,14 @@ import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
-import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../util/pathName";
+import {
+    getDisplayName,
+    getNotebookIcon,
+    getNotebookName,
+    movePathTo,
+    pathPosix,
+    showFileInFolder
+} from "../util/pathName";
 import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
@@ -796,7 +803,7 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                         clearTimeout(clickTimeout);
                         if (isAsset) {
                             /// #if !BROWSER
-                            shell.showItemInFolder(path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
+                            showFileInFolder(path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
                             /// #endif
                         } else {
                             const id = target.getAttribute("data-node-id");

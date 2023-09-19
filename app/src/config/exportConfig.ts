@@ -7,6 +7,7 @@ import * as path from "path";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {showMessage} from "../dialog/message";
+import {showFileInFolder} from "../util/pathName";
 
 export const exportConfig = {
     element: undefined as Element,
@@ -204,7 +205,7 @@ export const exportConfig = {
         /// #if !BROWSER
         pandocBinPathElement.addEventListener("click", () => {
             if (window.siyuan.config.export.pandocBin) {
-                shell.showItemInFolder(window.siyuan.config.export.pandocBin);
+                showFileInFolder(window.siyuan.config.export.pandocBin);
             }
         });
         const pandocBinElement = exportConfig.element.querySelector("#pandocBin") as HTMLInputElement;

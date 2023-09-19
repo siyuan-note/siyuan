@@ -26,18 +26,21 @@ export abstract class Constants {
     // 渲染进程调主进程
     public static readonly SIYUAN_SHOW: string = "siyuan-show";
     public static readonly SIYUAN_CONFIG_TRAY: string = "siyuan-config-tray";
-    public static readonly SIYUAN_OPEN_WORKSPACE: string = "siyuan-open-workspace";
     public static readonly SIYUAN_QUIT: string = "siyuan-quit";
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
     public static readonly SIYUAN_INIT: string = "siyuan-init";
-    public static readonly SIYUAN_OPENURL: string = "siyuan-openurl";
-    public static readonly SIYUAN_OPENWINDOW: string = "siyuan-openwindow";
-    public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send_windows"; // 主窗口和各新窗口之间的通信，{cmd: "closetab"|"lockscreen"|"lockscreenByMode", data: {}})
+    public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send-windows"; // 主窗口和各新窗口之间的通信，{cmd: "closetab"|"lockscreen"|"lockscreenByMode", data: {}})
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
+    public static readonly SIYUAN_AUTO_LAUNCH: string = "siyuan-auto-launch";
+
+    public static readonly SIYUAN_OPEN_WORKSPACE: string = "siyuan-open-workspace";
+    public static readonly SIYUAN_OPEN_URL: string = "siyuan-open-url";
+    public static readonly SIYUAN_OPEN_WINDOW: string = "siyuan-open-window";
+    public static readonly SIYUAN_OPEN_FOLDER: string = "siyuan-open-folder";
+
     public static readonly SIYUAN_EXPORT_PDF: string = "siyuan-export-pdf";
     public static readonly SIYUAN_EXPORT_CLOSE: string = "siyuan-export-close";
     public static readonly SIYUAN_EXPORT_PREVENT: string = "siyuan-export-prevent";
-    public static readonly SIYUAN_AUTO_LAUNCH: string = "siyuan-auto-launch";
 
     // custom
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";

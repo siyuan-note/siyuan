@@ -242,7 +242,7 @@ export const initWindow = (app: App) => {
     currentWindow.on("focus", winOnFocus);
     currentWindow.on("blur", winOnBlur);
     if (!isWindow()) {
-        ipcRenderer.on(Constants.SIYUAN_OPENURL, (event, url) => {
+        ipcRenderer.on(Constants.SIYUAN_OPEN_URL, (event, url) => {
             if (url.startsWith("siyuan://plugins/")) {
                 const pluginId = url.replace("siyuan://plugins/", "").split("?")[0];
                 if (!pluginId) {

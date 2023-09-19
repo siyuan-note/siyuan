@@ -47,7 +47,11 @@ export const showTooltip = (message: string, target: Element, error = false) => 
         messageElement.style.top = top + "px";
     }
     if (left + messageElement.clientWidth > window.innerWidth) {
-        messageElement.style.left = (window.innerWidth - messageElement.clientWidth) + "px";
+        if (position === "parentE") {
+            messageElement.style.left = (parentRect.left - 8 - messageElement.clientWidth) + "px";
+        } else {
+            messageElement.style.left = (window.innerWidth - messageElement.clientWidth) + "px";
+        }
     } else {
         messageElement.style.left = Math.max(0, left) + "px";
     }

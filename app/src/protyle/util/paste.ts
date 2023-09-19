@@ -301,6 +301,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             uploadFiles(protyle, files);
         } else if (textPlain.trim() !== "" && files && files.length === 0) {
             if (range.toString() !== "") {
+                const firstLine = textPlain.split("\n")[0];
                 if (isDynamicRef(textPlain)) {
                     protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
@@ -308,10 +309,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
                     });
                     return;
-                } else if (isFileAnnotation(textPlain)) {
+                } else if (isFileAnnotation(firstLine)) {
                     protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {
                         type: "file-annotation-ref",
-                        color: textPlain.substring(2).replace(/ ".+">>$/, "")
+                        color: firstLine.substring(2).replace(/ ".+">>$/, "")
                     });
                     return;
                 } else if (protyle.lute.IsValidLinkDest(textPlain)) {

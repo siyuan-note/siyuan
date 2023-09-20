@@ -651,7 +651,8 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             action: "insert",
             id: parentLiItemElement.getAttribute("data-node-id"),
             data: parentLiItemElement.outerHTML,
-            previousID: parentLiItemElement.previousElementSibling.getAttribute("data-node-id")
+            previousID: parentLiItemElement.previousElementSibling?.getAttribute("data-node-id"),
+            parentID: parentLiItemElement.parentElement.getAttribute("data-node-id"),
         });
         parentLiItemElement.remove();
     } else if (liElement.childElementCount === 1) {

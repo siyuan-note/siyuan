@@ -314,7 +314,7 @@ const renderPDF = (id: string) => {
 <script src="appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
-<script>
+<script type="module">
     const actionElement = document.getElementById("action");
     const pageSizeElement = document.getElementById("pageSize");
     const marginsTypeElement = document.getElementById("marginsType");

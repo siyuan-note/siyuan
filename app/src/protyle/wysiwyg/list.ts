@@ -652,6 +652,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             id: parentLiItemElement.getAttribute("data-node-id"),
             data: parentLiItemElement.outerHTML,
             previousID: parentLiItemElement.previousElementSibling?.getAttribute("data-node-id"),
+            // https://github.com/siyuan-note/siyuan/issues/9237 无 previousID
             parentID: parentLiItemElement.parentElement.getAttribute("data-node-id"),
         });
         parentLiItemElement.remove();

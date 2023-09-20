@@ -32,34 +32,24 @@ svg {
 }
 
 .b3-typography,
-.protyle-wysiwyg [data-node-id].table {
+.protyle-wysiwyg .table[data-node-id] {
   table {
     display: table;
   }
 }
 
 @media print {
+  // 尽量避免块内分页
   .protyle-wysiwyg [data-node-id] {
-
-    // 尽量避免音频块内分页
     &[data-type=NodeAudio],
-    // 尽量避免图表块内分页
-    &[data-type=NodeCodeBlock].render-node,
-    // 尽量避免标题块内分页
+    &.render-node[data-type=NodeCodeBlock],
     &[data-type=NodeHeading],
-    // 尽量避免 Iframe 块内分页
     &[data-type=NodeIFrame],
-    // 尽量避免公式块内分页
     &[data-type=NodeMathBlock],
-    // 尽量避免段落块内分页
     &[data-type=NodeParagraph],
-    // 尽量避免分割线内分页
     &[data-type=NodeThematicBreak],
-    // 尽量避免视频块内分页
     &[data-type=NodeVideo],
-    // 尽量避免挂件块内分页
     &[data-type=NodeWidget],
-    // 尽量避免图片内分页
     .img {
       break-inside: avoid;
     }

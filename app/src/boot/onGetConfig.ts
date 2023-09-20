@@ -384,33 +384,40 @@ export const initWindow = (app: App) => {
                         height = 66.2;
                         break;
                     case "ISO-A0":
-                        width = 33.1;
-                        height = 46.8;
-                        break;
+                        // width = 33.1;
+                        // height = 46.8;
+                        // break;
+                        return "A0"
                     case "ISO-A1":
-                        width = 23.4;
-                        height = 33.1;
-                        break;
+                        // width = 23.4;
+                        // height = 33.1;
+                        // break;
+                        return "A1";
                     case "ISO-A2":
-                        width = 16.5;
-                        height = 23.4;
-                        break;
+                        // width = 16.5;
+                        // height = 23.4;
+                        // break;
+                        return "A2";
                     case "ISO-A3":
-                        width = 11.7;
-                        height = 16.5;
-                        break;
+                        // width = 11.7;
+                        // height = 16.5;
+                        // break;
+                        return "A3";
                     case "ISO-A4":
-                        width = 8.3;
-                        height = 11.7;
-                        break;
+                        // width = 8.3;
+                        // height = 11.7;
+                        // break;
+                        return "A4";
                     case "ISO-A5":
-                        width = 5.8;
-                        height = 8.3;
-                        break;
+                        // width = 5.8;
+                        // height = 8.3;
+                        // break;
+                        return "A5";
                     case "ISO-A6":
-                        width = 4.1;
-                        height = 5.8;
-                        break;
+                        // width = 4.1;
+                        // height = 5.8;
+                        // break;
+                        return "A6";
                     case "ISO-A7":
                         width = 2.9;
                         height = 4.1;
@@ -564,21 +571,25 @@ export const initWindow = (app: App) => {
                         break;
 
                     case "ANS-Letter":
-                        width = 8.5;
-                        height = 11.0;
-                        break;
+                        // width = 8.5;
+                        // height = 11.0;
+                        // break;
+                        return "Letter";
                     case "ANS-Legal":
-                        width = 8.5;
-                        height = 14.0;
-                        break;
+                        // width = 8.5;
+                        // height = 14.0;
+                        // break;
+                        return "Legal";
                     case "ANS-Ledger":
-                        width = 11.0;
-                        height = 17.0;
-                        break;
+                        // width = 11.0;
+                        // height = 17.0;
+                        // break;
+                        return "Ledger";
                     case "ANS-Tabloid":
-                        width = 11.0;
-                        height = 17.0;
-                        break;
+                        // width = 11.0;
+                        // height = 17.0;
+                        // break;
+                        return "Tabloid";
                     case "ANS-Executive":
                         width = 5.5;
                         height = 8.5;

@@ -15,18 +15,6 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
         return;
     }
     addScript(`${cdn}/js/echarts/echarts.min.js?v=0.0.0`, "protyleEchartsScript").then(() => {
-        let width: number = undefined;
-        if (mindmapElements[0].firstElementChild.clientWidth === 0) {
-            const tabElement = hasClosestByClassName(mindmapElements[0], "layout-tab-container", true);
-            if (tabElement) {
-                Array.from(tabElement.children).find(item => {
-                    if (item.classList.contains("protyle") && !item.classList.contains("fn__none") && item.querySelector(".protyle-wysiwyg").firstElementChild) {
-                        width = item.querySelector(".protyle-wysiwyg").firstElementChild.clientWidth;
-                        return true;
-                    }
-                });
-            }
-        }
         mindmapElements.forEach((e: HTMLDivElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
@@ -37,9 +25,8 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {
                 renderElement.style.height = e.style.height;
-                echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
-                    width,
-                }).setOption({
+                const instance = echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined);
+                instance.setOption({
                     series: [
                         {
                             data: [JSON.parse(Lute.EChartsMindmapStr(Lute.UnEscapeHTMLStr(e.getAttribute("data-content"))))],
@@ -81,6 +68,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                     },
                     backgroundColor: "transparent",
                 });
+                instance.resize();
                 e.setAttribute("data-render", "true");
                 if (!renderElement.textContent.endsWith(Constants.ZWSP)) {
                     renderElement.firstElementChild.insertAdjacentText("beforeend", Constants.ZWSP);

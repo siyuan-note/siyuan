@@ -4,6 +4,7 @@
 @import "protyle/wysiwyg";
 @import "protyle/attr";
 @import "util/function";
+@import "util/scroll";
 @import "business/history";
 @import "component/button";
 @import "component/select";
@@ -20,6 +21,7 @@
   color: var(--b3-protyle-inline-link-color);
   cursor: pointer;
   transition: var(--b3-transition);
+  word-wrap: break-word;
 }
 
 svg {
@@ -39,8 +41,10 @@ svg {
 }
 
 @media print {
+
   // 尽量避免块内分页
   .protyle-wysiwyg [data-node-id] {
+
     &[data-type=NodeAudio],
     &.render-node[data-type=NodeCodeBlock],
     &[data-type=NodeHeading],

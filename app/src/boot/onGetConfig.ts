@@ -328,12 +328,17 @@ export const initWindow = (app: App) => {
         });
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, (e, ipcData) => {
+        const [contentWidth, contentHeight] = window.siyuan.printWin.getContentSize() as [number, number];
+        if (ipcData.contentWidth < contentWidth) {
+            window.siyuan.printWin.setContentSize(ipcData.contentWidth, contentHeight);
+        }
+
         dialog.showOpenDialog({
             title: window.siyuan.languages.export + " PDF",
             properties: ["createDirectory", "openDirectory"],
         }).then(async (result: OpenDialogReturnValue) => {
             if (result.canceled) {
-                window.siyuan.printWin.destroy();
+                window.siyuan.printWin.close();
                 return;
             }
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -341,15 +346,250 @@ export const initWindow = (app: App) => {
                 removeAssets: ipcData.removeAssets,
                 keepFold: ipcData.keepFold,
                 mergeSubdocs: ipcData.mergeSubdocs,
+                pageSize: ipcData.pageSize,
                 landscape: ipcData.pdfOptions.landscape,
                 marginType: ipcData.pdfOptions.marginType,
-                pageSize: ipcData.pdfOptions.pageSize,
                 scale: ipcData.pdfOptions.scale,
                 marginTop: ipcData.pdfOptions.margins.top,
                 marginRight: ipcData.pdfOptions.margins.right,
                 marginBottom: ipcData.pdfOptions.margins.bottom,
                 marginLeft: ipcData.pdfOptions.margins.left,
             };
+            ipcData.pdfOptions.pageSize = (() => {
+                let width: number;
+                let height: number;
+
+                switch (ipcData.pageSize) {
+                    default:
+                        return undefined;
+                    case "A0":
+                    case "A1":
+                    case "A2":
+                    case "A3":
+                    case "A4":
+                    case "A5":
+                    case "A6":
+                    case "Letter":
+                    case "Legal":
+                    case "Tabloid":
+                    case "Ledger":
+                        return ipcData.pageSize;
+
+                    case "ISO-4A0":
+                        width = 66.2;
+                        height = 93.6;
+                        break;
+                    case "ISO-2A0":
+                        width = 46.8;
+                        height = 66.2;
+                        break;
+                    case "ISO-A0":
+                        width = 33.1;
+                        height = 46.8;
+                        break;
+                    case "ISO-A1":
+                        width = 23.4;
+                        height = 33.1;
+                        break;
+                    case "ISO-A2":
+                        width = 16.5;
+                        height = 23.4;
+                        break;
+                    case "ISO-A3":
+                        width = 11.7;
+                        height = 16.5;
+                        break;
+                    case "ISO-A4":
+                        width = 8.3;
+                        height = 11.7;
+                        break;
+                    case "ISO-A5":
+                        width = 5.8;
+                        height = 8.3;
+                        break;
+                    case "ISO-A6":
+                        width = 4.1;
+                        height = 5.8;
+                        break;
+                    case "ISO-A7":
+                        width = 2.9;
+                        height = 4.1;
+                        break;
+                    case "ISO-A8":
+                        width = 2.0;
+                        height = 2.9;
+                        break;
+                    case "ISO-A9":
+                        width = 1.5;
+                        height = 2.0;
+                        break;
+                    case "ISO-A10":
+                        width = 1.0;
+                        height = 1.5;
+                        break;
+
+                    case "ISO-B0":
+                        width = 39.4;
+                        height = 55.7;
+                        break;
+                    case "ISO-B1":
+                        width = 27.8;
+                        height = 39.4;
+                        break;
+                    case "ISO-B2":
+                        width = 19.7;
+                        height = 27.8;
+                        break;
+                    case "ISO-B3":
+                        width = 13.9;
+                        height = 19.7;
+                        break;
+                    case "ISO-B4":
+                        width = 9.8;
+                        height = 13.9;
+                        break;
+                    case "ISO-B5":
+                        width = 6.9;
+                        height = 9.8;
+                        break;
+                    case "ISO-B6":
+                        width = 4.9;
+                        height = 6.9;
+                        break;
+                    case "ISO-B7":
+                        width = 3.5;
+                        height = 4.9;
+                        break;
+                    case "ISO-B8":
+                        width = 2.4;
+                        height = 3.5;
+                        break;
+                    case "ISO-B9":
+                        width = 1.7;
+                        height = 2.4;
+                        break;
+                    case "ISO-B10":
+                        width = 1.2;
+                        height = 1.7;
+                        break;
+
+                    case "ISO-C0":
+                        width = 36.1;
+                        height = 51.5;
+                        break;
+                    case "ISO-C1":
+                        width = 25.5;
+                        height = 36.1;
+                        break;
+                    case "ISO-C2":
+                        width = 18.0;
+                        height = 25.5;
+                        break;
+                    case "ISO-C3":
+                        width = 12.8;
+                        height = 18.0;
+                        break;
+                    case "ISO-C4":
+                        width = 9.0;
+                        height = 12.8;
+                        break;
+                    case "ISO-C5":
+                        width = 6.4;
+                        height = 9.0;
+                        break;
+                    case "ISO-C6":
+                        width = 4.5;
+                        height = 6.4;
+                        break;
+                    case "ISO-C7":
+                        width = 3.2;
+                        height = 4.5;
+                        break;
+                    case "ISO-C8":
+                        width = 2.2;
+                        height = 3.2;
+                        break;
+                    case "ISO-C9":
+                        width = 1.6;
+                        height = 2.2;
+                        break;
+                    case "ISO-C10":
+                        width = 1.1;
+                        height = 1.6;
+                        break;
+
+                    case "JIS-C0":
+                        width = 40.6;
+                        height = 57.3;
+                        break;
+                    case "JIS-C1":
+                        width = 28.7;
+                        height = 40.6;
+                        break;
+                    case "JIS-C2":
+                        width = 20.3;
+                        height = 28.7;
+                        break;
+                    case "JIS-C3":
+                        width = 14.3;
+                        height = 20.3;
+                        break;
+                    case "JIS-C4":
+                        width = 10.1;
+                        height = 14.3;
+                        break;
+                    case "JIS-C5":
+                        width = 7.2;
+                        height = 10.1;
+                        break;
+                    case "JIS-C6":
+                        width = 5.0;
+                        height = 7.2;
+                        break;
+                    case "JIS-C7":
+                        width = 3.6;
+                        height = 5.0;
+                        break;
+                    case "JIS-C8":
+                        width = 2.5;
+                        height = 3.6;
+                        break;
+                    case "JIS-C9":
+                        width = 1.8;
+                        height = 2.5;
+                        break;
+                    case "JIS-C10":
+                        width = 1.3;
+                        height = 1.8;
+                        break;
+
+                    case "ANS-Letter":
+                        width = 8.5;
+                        height = 11.0;
+                        break;
+                    case "ANS-Legal":
+                        width = 8.5;
+                        height = 14.0;
+                        break;
+                    case "ANS-Ledger":
+                        width = 11.0;
+                        height = 17.0;
+                        break;
+                    case "ANS-Tabloid":
+                        width = 11.0;
+                        height = 17.0;
+                        break;
+                    case "ANS-Executive":
+                        width = 5.5;
+                        height = 8.5;
+                        break;
+                    case "ANS-Statement":
+                        width = 7.25;
+                        height = 10.55;
+                        break;
+                }
+                return {width, height};
+            })();
             setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
             try {
                 if (window.siyuan.config.export.pdfFooter.trim()) {
@@ -370,7 +610,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                     }, () => {
                         const pdfFilePath = path.join(result.filePaths[0], replaceLocalPath(ipcData.rootTitle) + ".pdf");
                         fs.writeFileSync(pdfFilePath, pdfData);
-                        window.siyuan.printWin.destroy();
+                        window.siyuan.printWin.close();
                         fetchPost("/api/export/processPDF", {
                             id: ipcData.rootId,
                             merge: ipcData.mergeSubdocs,
@@ -404,13 +644,12 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                     });
                 }).catch((error: string) => {
                     showMessage("Export PDF error:" + error, 0, "error", msgId);
-                    window.siyuan.printWin.destroy();
+                    window.siyuan.printWin.close();
                 });
             } catch (e) {
                 showMessage("Export PDF failed: " + e, 0, "error", msgId);
-                window.siyuan.printWin.destroy();
+                window.siyuan.printWin.close();
             }
-            window.siyuan.printWin.hide();
         });
     });
 

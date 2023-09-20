@@ -76,7 +76,7 @@ const renderPDF = (id: string) => {
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
     let themeStyle = "";
     if (!isDefault) {
-        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}/appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
+        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>
@@ -89,62 +89,68 @@ const renderPDF = (id: string) => {
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}/stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
-    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/appearance/themes/daylight/theme.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="baseStyle" href="stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="appearance/themes/daylight/theme.css?${Constants.SIYUAN_VERSION}"/>
     ${themeStyle}
     <title>${window.siyuan.languages.export} PDF</title>
     <style>
         body {
-          margin: 0;
+            margin: 0;
+            display: flex;
+            overflow-x: hidden;
+            flex-direction: row-reverse;
         }
-        
+
+        body.exporting {
+            flex-direction: unset;
+            overflow: auto;
+        }
+
+        body.exporting::-webkit-scrollbar {
+            display: none;
+        }
+
+        body.exporting #preview {
+            border: initial;
+        }
+
         #action {
-          width: 200px;
-          background: var(--b3-theme-surface);
-          padding: 16px;
-          position: fixed;
-          right: 0;
-          top: 0;
-          overflow-y: auto;
-          bottom: 0;
-          overflow-x: hidden;
-          z-index: 1;
+            position: sticky;
+            top: 0;
+            right: 0;
+
+            width: 232px;
+            height: 100vh;
+            box-sizing: border-box;
+
+            padding: 16px;
+            background: var(--b3-theme-surface);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1;
         }
-        
+
         #preview {
-          max-width: 800px;
-          margin: 0 auto;
-          position: absolute;
-          right: 232px;
-          left: 0;
+            margin: 0 auto;
+            border-left: 1px double currentColor;
+            border-right: 1px double currentColor;
         }
-        
-        #preview.exporting {
-          position: inherit;
-          max-width: none;
-        }
-        
+
         .b3-switch {
             margin-left: 14px;
         }
-        
-        .exporting::-webkit-scrollbar {
-          width: 0;
-          height: 0;
-        }
-        
+
         .protyle-wysiwyg {
-          height: 100%;
-          overflow: auto;
-          box-sizing: border-box;
+            padding: 0;
+            overflow: initial;
         }
-        
+
         .b3-label {
-          border-bottom: 1px solid var(--b3-theme-surface-lighter);
-          display: block;
-          color: var(--b3-theme-on-surface);
-          padding-bottom: 12px;
-          margin-bottom: 12px;
+            border-bottom: 1px solid var(--b3-theme-surface-lighter);
+            display: block;
+            color: var(--b3-theme-on-surface);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
         }
         ${setInlineStyle(false)}
     </style>
@@ -156,13 +162,81 @@ const renderPDF = (id: string) => {
             ${window.siyuan.languages.exportPDF0}
         </div>
         <span class="fn__hr"></span>
-        <select class="b3-select" id="pageSize">
-            <option ${localData.pageSize === "A3" ? "selected" : ""} value="A3">A3</option>
-            <option ${localData.pageSize === "A4" ? "selected" : ""} value="A4">A4</option>
-            <option ${localData.pageSize === "A5" ? "selected" : ""} value="A5">A5</option>
-            <option ${localData.pageSize === "Legal" ? "selected" : ""} value="Legal">Legal</option>
-            <option ${localData.pageSize === "Letter" ? "selected" : ""} value="Letter">Letter</option>
-            <option ${localData.pageSize === "Tabloid" ? "selected" : ""} value="Tabloid">Tabloid</option>
+        <select class="b3-select fn__block" id="pageSize">
+            <optgroup label="Common">
+                <option ${localData.pageSize === "A0" ? "selected" : ""} value="A0">A0</option>
+                <option ${localData.pageSize === "A1" ? "selected" : ""} value="A1">A1</option>
+                <option ${localData.pageSize === "A2" ? "selected" : ""} value="A2">A2</option>
+                <option ${localData.pageSize === "A3" ? "selected" : ""} value="A3">A3</option>
+                <option ${localData.pageSize === "A4" ? "selected" : ""} value="A4">A4</option>
+                <option ${localData.pageSize === "A5" ? "selected" : ""} value="A5">A5</option>
+                <option ${localData.pageSize === "A6" ? "selected" : ""} value="A6">A6</option>
+                <option ${localData.pageSize === "Legal" ? "selected" : ""} value="Legal">Legal</option>
+                <option ${localData.pageSize === "Letter" ? "selected" : ""} value="Letter">Letter</option>
+                <option ${localData.pageSize === "Tabloid" ? "selected" : ""} value="Tabloid">Tabloid</option>
+            </optgroup>
+            <optgroup label="ISO A">
+                <option ${localData.pageSize === "ISO-4A0" ? "selected" : ""} value="ISO-4A0">4A0 (ISO)</option>
+                <option ${localData.pageSize === "ISO-2A0" ? "selected" : ""} value="ISO-2A0">2A0 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A0" ? "selected" : ""} value="ISO-A0">A0 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A1" ? "selected" : ""} value="ISO-A1">A1 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A2" ? "selected" : ""} value="ISO-A2">A2 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A3" ? "selected" : ""} value="ISO-A3">A3 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A4" ? "selected" : ""} value="ISO-A4">A4 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A5" ? "selected" : ""} value="ISO-A5">A5 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A6" ? "selected" : ""} value="ISO-A6">A6 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A7" ? "selected" : ""} value="ISO-A7">A7 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A8" ? "selected" : ""} value="ISO-A8">A8 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A9" ? "selected" : ""} value="ISO-A9">A9 (ISO)</option>
+                <option ${localData.pageSize === "ISO-A10" ? "selected" : ""} value="ISO-A10">A10 (ISO)</option>
+            </optgroup>
+            <optgroup label="ISO B">
+                <option ${localData.pageSize === "ISO-B0" ? "selected" : ""} value="ISO-B0">B0 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B1" ? "selected" : ""} value="ISO-B1">B1 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B2" ? "selected" : ""} value="ISO-B2">B2 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B3" ? "selected" : ""} value="ISO-B3">B3 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B4" ? "selected" : ""} value="ISO-B4">B4 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B5" ? "selected" : ""} value="ISO-B5">B5 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B6" ? "selected" : ""} value="ISO-B6">B6 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B7" ? "selected" : ""} value="ISO-B7">B7 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B8" ? "selected" : ""} value="ISO-B8">B8 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B9" ? "selected" : ""} value="ISO-B9">B9 (ISO)</option>
+                <option ${localData.pageSize === "ISO-B10" ? "selected" : ""} value="ISO-B10">B10 (ISO)</option>
+            </optgroup>
+            <optgroup label="ISO C">
+                <option ${localData.pageSize === "ISO-C0" ? "selected" : ""} value="ISO-C0">C0 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C1" ? "selected" : ""} value="ISO-C1">C1 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C2" ? "selected" : ""} value="ISO-C2">C2 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C3" ? "selected" : ""} value="ISO-C3">C3 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C4" ? "selected" : ""} value="ISO-C4">C4 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C5" ? "selected" : ""} value="ISO-C5">C5 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C6" ? "selected" : ""} value="ISO-C6">C6 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C7" ? "selected" : ""} value="ISO-C7">C7 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C8" ? "selected" : ""} value="ISO-C8">C8 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C9" ? "selected" : ""} value="ISO-C9">C9 (ISO)</option>
+                <option ${localData.pageSize === "ISO-C10" ? "selected" : ""} value="ISO-C10">C10 (ISO)</option>
+            </optgroup>
+            <optgroup label="JIS (Japanese Industrial Standards)">
+                <option ${localData.pageSize === "JIS-B0" ? "selected" : ""} value="JIS-B0">B0 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B1" ? "selected" : ""} value="JIS-B1">B1 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B2" ? "selected" : ""} value="JIS-B2">B2 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B3" ? "selected" : ""} value="JIS-B3">B3 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B4" ? "selected" : ""} value="JIS-B4">B4 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B5" ? "selected" : ""} value="JIS-B5">B5 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B6" ? "selected" : ""} value="JIS-B6">B6 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B7" ? "selected" : ""} value="JIS-B7">B7 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B8" ? "selected" : ""} value="JIS-B8">B8 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B9" ? "selected" : ""} value="JIS-B9">B9 (JIS)</option>
+                <option ${localData.pageSize === "JIS-B10" ? "selected" : ""} value="JIS-B10">B10 (JIS)</option>
+            </optgroup>
+            <optgroup label="ANS (American National Standards)">
+                <option ${localData.pageSize === "ANS-Letter" ? "selected" : ""} value="ANS-Letter">Letter (ANS)</option>
+                <option ${localData.pageSize === "ANS-Legal" ? "selected" : ""} value="ANS-Legal">Legal (ANS)</option>
+                <option ${localData.pageSize === "ANS-Ledger" ? "selected" : ""} value="ANS-Ledger">Ledger (ANS)</option>
+                <option ${localData.pageSize === "ANS-Tabloid" ? "selected" : ""} value="ANS-Tabloid">Tabloid (ANS)</option>
+                <option ${localData.pageSize === "ANS-Executive" ? "selected" : ""} value="ANS-Executive">Executive (ANS)</option>
+                <option ${localData.pageSize === "ANS-Statement" ? "selected" : ""} value="ANS-Statement">Statement (ANS)</option>
+            </optgroup>
         </select>
     </label>
     <label class="b3-label">
@@ -170,7 +244,7 @@ const renderPDF = (id: string) => {
             ${window.siyuan.languages.exportPDF2}
         </div>
         <span class="fn__hr"></span>
-        <select class="b3-select" id="marginsType">
+        <select class="b3-select fn__block" id="marginsType">
             <option ${localData.marginType === "default" ? "selected" : ""} value="default">${window.siyuan.languages.defaultMargin}</option>
             <option ${localData.marginType === "none" ? "selected" : ""} value="none">${window.siyuan.languages.noneMargin}</option>
             <option ${localData.marginType === "printableArea" ? "selected" : ""} value="printableArea">${window.siyuan.languages.minimalMargin}</option>
@@ -194,17 +268,17 @@ const renderPDF = (id: string) => {
     <label class="b3-label">
         <div>
             ${window.siyuan.languages.exportPDF3}
-            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale || 1}</span>
+            <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${Math.round(localData.scale * 100) || 100} %</span>
         </div>
         <span class="fn__hr"></span>
-        <input style="width: 192px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
+        <input id="scale" class="fn__block" value="${Math.round(localData.scale * 100) || 100}" type="range" min="10" step="1" max="200">
     </label>
     <label class="b3-label">
         <div>
             ${window.siyuan.languages.exportPDF1}
         </div>
         <span class="fn__hr"></span>
-      <input id="landscape" class="b3-switch" type="checkbox" ${localData.landscape ? "checked" : ""}>
+        <input id="landscape" class="b3-switch" type="checkbox" ${localData.landscape ? "checked" : ""}>
     </label>
     <label class="b3-label">
         <div>
@@ -228,115 +302,350 @@ const renderPDF = (id: string) => {
         <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
     </label>
     <div class="fn__flex">
-      <div class="fn__flex-1"></div>
-      <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
-      <div class="fn__space"></div>
-      <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+        <div class="fn__flex-1"></div>
+        <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+        <div class="fn__space"></div>
+        <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div style="zoom:${localData.scale || 1}" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}" id="preview">
-    <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
+<div id="preview" style="zoom:1" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">
+    <div class="fn__loading" style="left:0"><img width="48px" src="stage/loading-pure.svg"></div>
 </div>
-<script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
-<script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
-<script src="${servePath}/stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
+<script src="appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
+<script src="stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
+<script src="stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
-    const previewElement = document.getElementById('preview');
-    const fixBlockWidth = () => {
-        const isLandscape = document.querySelector("#landscape").checked;
-        let width = 800
-        switch (document.querySelector("#action #pageSize").value) {
+    const actionElement = document.getElementById("action");
+    const pageSizeElement = document.getElementById("pageSize");
+    const marginsTypeElement = document.getElementById("marginsType");
+    const marginsTopElement = document.getElementById("marginsTop");
+    const marginsRightElement = document.getElementById("marginsRight");
+    const marginsBottomElement = document.getElementById("marginsBottom");
+    const marginsLeftElement = document.getElementById("marginsLeft");
+    const scaleTipElement = document.getElementById("scaleTip");
+    const scaleElement = document.getElementById("scale");
+    const landscapeElement = document.getElementById("landscape");
+    const removeAssetsElement = document.getElementById("removeAssets");
+    const keepFoldElement = document.getElementById("keepFold");
+    const mergeSubdocsElement = document.getElementById("mergeSubdocs");
+    const cancelElement = actionElement.querySelector(".b3-button--cancel");
+    const confirmElement = actionElement.querySelector(".b3-button--text");
+    const previewElement = document.getElementById("preview");
+
+    const getScale = () => {
+        return parseFloat(scaleElement.value);
+    }
+    const getPageWidth = () => {
+        const isLandscape = landscapeElement.checked;
+        let width = 210
+        switch (pageSizeElement.value) {
+            case "ISO-4A0":
+                width = isLandscape ? 2378 : 1682;
+                break;
+            case "ISO-2A0":
+                width = isLandscape ? 1682 : 1189;
+                break;
+            case "A0":
+            case "ISO-A0":
+                width = isLandscape ? 1189 : 841;
+                break;
+            case "A1":
+            case "ISO-A1":
+                width = isLandscape ? 841 : 594;
+                break;
+            case "A2":
+            case "ISO-A2":
+                width = isLandscape ? 594 : 420;
+                break;
             case "A3":
-              width = isLandscape ? 1587.84 : 1122.24 
-              break;
+            case "ISO-A3":
+                width = isLandscape ? 420 : 297;
+                break;
             case "A4":
-              width = isLandscape ? 1122.24 : 793.92
-              break;
+            case "ISO-A4":
+                width = isLandscape ? 297 : 210;
+                break;
             case "A5":
-              width = isLandscape ? 793.92 : 559.68
-              break;
-            case "Legal":
-              width = isLandscape ? 1344: 816 
-              break;
+            case "ISO-A5":
+                width = isLandscape ? 210 : 148;
+                break;
+            case "A6":
+            case "ISO-A6":
+                width = isLandscape ? 148 : 105;
+                break;
+            case "ISO-A7":
+                width = isLandscape ? 105 : 74;
+                break;
+            case "ISO-A8":
+                width = isLandscape ? 74 : 52;
+                break;
+            case "ISO-A9":
+                width = isLandscape ? 52 : 37;
+                break;
+            case "ISO-A10":
+                width = isLandscape ? 37 : 26;
+                break;
+
+            case "ISO-B0":
+                width = isLandscape ? 1414 : 1000;
+                break;
+            case "ISO-B1":
+                width = isLandscape ? 1000 : 707;
+                break;
+            case "ISO-B2":
+                width = isLandscape ? 707 : 500;
+                break;
+            case "ISO-B3":
+                width = isLandscape ? 500 : 353;
+                break;
+            case "ISO-B4":
+                width = isLandscape ? 353 : 250;
+                break;
+            case "ISO-B5":
+                width = isLandscape ? 250 : 176;
+                break;
+            case "ISO-B6":
+                width = isLandscape ? 176 : 125;
+                break;
+            case "ISO-B7":
+                width = isLandscape ? 125 : 88;
+                break;
+            case "ISO-B8":
+                width = isLandscape ? 88 : 62;
+                break;
+            case "ISO-B9":
+                width = isLandscape ? 62 : 44;
+                break;
+            case "ISO-B10":
+                width = isLandscape ? 44 : 31;
+                break;
+
+            case "ISO-C0":
+                width = isLandscape ? 1297 : 917;
+                break;
+            case "ISO-C1":
+                width = isLandscape ? 917 : 648;
+                break;
+            case "ISO-C2":
+                width = isLandscape ? 648 : 458;
+                break;
+            case "ISO-C3":
+                width = isLandscape ? 458 : 324;
+                break;
+            case "ISO-C4":
+                width = isLandscape ? 324 : 229;
+                break;
+            case "ISO-C5":
+                width = isLandscape ? 229 : 162;
+                break;
+            case "ISO-C6":
+                width = isLandscape ? 162 : 114;
+                break;
+            case "ISO-C7":
+                width = isLandscape ? 114 : 81;
+                break;
+            case "ISO-C8":
+                width = isLandscape ? 81 : 57;
+                break;
+            case "ISO-C9":
+                width = isLandscape ? 57 : 40;
+                break;
+            case "ISO-C10":
+                width = isLandscape ? 40 : 28;
+                break;
+
+            case "JIS-C0":
+                width = isLandscape ? 1456 : 1030;
+                break;
+            case "JIS-C1":
+                width = isLandscape ? 1030 : 728;
+                break;
+            case "JIS-C2":
+                width = isLandscape ? 728 : 515;
+                break;
+            case "JIS-C3":
+                width = isLandscape ? 515 : 364;
+                break;
+            case "JIS-C4":
+                width = isLandscape ? 364 : 257;
+                break;
+            case "JIS-C5":
+                width = isLandscape ? 257 : 182;
+                break;
+            case "JIS-C6":
+                width = isLandscape ? 182 : 128;
+                break;
+            case "JIS-C7":
+                width = isLandscape ? 128 : 91;
+                break;
+            case "JIS-C8":
+                width = isLandscape ? 91 : 64;
+                break;
+            case "JIS-C9":
+                width = isLandscape ? 64 : 45;
+                break;
+            case "JIS-C10":
+                width = isLandscape ? 45 : 32;
+                break;
+
             case "Letter":
-              width = isLandscape ? 1056 : 816
-              break;
+            case "ANS-Letter":
+                width = isLandscape ? 279.4 : 215.9;
+                break;
+            case "Legal":
+            case "ANS-Legal":
+                width = isLandscape ? 355.6 : 215.9;
+                break;
+            case "ANS-Ledger":
+                width = isLandscape ? 431.8 : 279.4;
+                break;
             case "Tabloid":
-              width = isLandscape ? 1632 : 1056
-              break;
+            case "ANS-Tabloid":
+                width = isLandscape ? 431.8 : 279.4;
+                break;
+            case "ANS-Executive":
+                width = isLandscape ? 266.7 : 184.1;
+                break;
+            case "ANS-Statement":
+                width = isLandscape ? 215.9 : 139.7;
+                break;
         }
-        width = width / parseFloat(document.querySelector("#scale").value);
-        previewElement.style.width = width + "px";
-        width = width - parseFloat(previewElement.style.paddingLeft) * 96 * 2;
+        return width;
+    }
+    const getContentWidth = () => {
+        let contentWidth = getPageWidth();;
+        contentWidth -= (parseFloat(marginsRightElement.value) || 0) * 25.4;
+        contentWidth -= (parseFloat(marginsLeftElement.value) || 0) * 25.4;
+        return contentWidth;
+    }
+    const mm2px = (millimetre, dpi = 96) => {
+        const inch = millimetre / 25.4;
+        const pixel = inch * dpi;
+        return pixel;
+    }
+    const getZoom = (pageWidth = getPageWidth(), scale = getScale()) => {
+        let zoom = 1;
+        if (pageWidth > 210) {
+            zoom = (210 / pageWidth) * (scale / 100);
+        } else {
+            zoom = scale / 100;
+        }
+        return zoom;
+    }
+    const updatePageSize = (pageWidth = getPageWidth(), scale = getScale()) => {
+        const zoom = getZoom(pageWidth, scale);
+        if (pageWidth > 210) {
+            previewElement.style.width = \`\${210 / zoom}mm\`;
+        } else {
+            previewElement.style.width = \`\${pageWidth / zoom}mm\`;
+        }
+        previewElement.style.zoom = zoom;
+        return zoom;
+    }
+    const updatePadding = () => {
+        const isLandscape = landscapeElement.checked;
+        switch (marginsTypeElement.value) {
+            case "default":
+                if (isLandscape) {
+                    marginsTopElement.value = "0.42";
+                    marginsRightElement.value = "0.42";
+                    marginsBottomElement.value = "0.42";
+                    marginsLeftElement.value = "0.42";
+                } else {
+                    marginsTopElement.value = "1";
+                    marginsRightElement.value = "0.54";
+                    marginsBottomElement.value = "1";
+                    marginsLeftElement.value = "0.54";
+                }
+                break;
+            case "none": // none
+                marginsTopElement.value = "0";
+                marginsRightElement.value = "0";
+                marginsBottomElement.value = "0";
+                marginsLeftElement.value = "0";
+                break;
+            case "printableArea": // minimal
+                if (isLandscape) {
+                    marginsTopElement.value = ".07";
+                    marginsRightElement.value = ".07";
+                    marginsBottomElement.value = ".07";
+                    marginsLeftElement.value = ".07";
+                } else {
+                    marginsTopElement.value = "0.58";
+                    marginsRightElement.value = "0.1";
+                    marginsBottomElement.value = "0.58";
+                    marginsLeftElement.value = "0.1";
+                }
+                break;
+        }
+        const zoom0 = getZoom();
+        let zoom1 = 1;
+        const pageWidth = getPageWidth();
+        if (pageWidth > 210) {
+            zoom1 = (210 / pageWidth);
+        }
+        previewElement.style.padding = [
+            \`\${marginsTopElement.value * zoom1 / zoom0}in\`,
+            \`\${marginsRightElement.value * zoom1 / zoom0}in\`,
+            \`\${marginsBottomElement.value * zoom1 / zoom0}in\`,
+            \`\${marginsLeftElement.value * zoom1 / zoom0}in\`,
+        ].join(" ");
+    }
+    const protyleRender = () => {
+        Protyle.mermaidRender(previewElement, "stage/protyle");
+        Protyle.flowchartRender(previewElement, "stage/protyle");
+        Protyle.graphvizRender(previewElement, "stage/protyle");
+        Protyle.chartRender(previewElement, "stage/protyle");
+        Protyle.mindmapRender(previewElement, "stage/protyle");
+        Protyle.abcRender(previewElement, "stage/protyle");
+        Protyle.htmlRender(previewElement);
+        Protyle.plantumlRender(previewElement, "stage/protyle");
+    }
+    const fixBlockWidth = (padding = true) => {
+        /* 内容可用宽度 (px) */
+        const contentWidth = mm2px(getContentWidth());
+
         // 为保持代码块宽度一致，全部都进行宽度设定 https://github.com/siyuan-note/siyuan/issues/7692 
         previewElement.querySelectorAll('.hljs').forEach((item) => {
             // 强制换行 https://ld246.com/article/1679228783553
             item.parentElement.setAttribute("linewrap", "true");
             item.parentElement.style.width = "";
-            item.parentElement.style.width = Math.min(item.parentElement.clientWidth, width) + "px";
-            item.removeAttribute('data-render');
+            item.parentElement.style.width = \`\${Math.min(item.parentElement.clientWidth, contentWidth)}px\`;
+            delete item.dataset.render;
         })
-        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.highlightRender(previewElement, "stage/protyle");
+
         previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
             item.style.width = "";
-            item.style.width = Math.min(item.clientWidth, width) + "px";
-            item.removeAttribute('data-render');
+            item.style.width = \`\${Math.min(item.clientWidth, contentWidth)}px\`;
+            delete item.dataset.render;
         })
-        Protyle.mathRender(previewElement, "${servePath}/stage/protyle", true);
+        Protyle.mathRender(previewElement, "stage/protyle", true);
+
         previewElement.querySelectorAll("table").forEach(item => {
             if (item.clientWidth > item.parentElement.clientWidth) {
-                item.style.zoom = (item.parentElement.clientWidth / item.clientWidth).toFixed(2) - 0.01;
+                item.style.zoom = (item.parentElement.clientWidth / item.clientWidth).toFixed(6) - 0.000001;
                 item.parentElement.style.overflow = "hidden";
             }
         })
+
+        previewElement.querySelectorAll('.render-node[data-type="NodeCodeBlock"]').forEach(item => {
+            delete item.dataset.render;
+        })
+
+        protyleRender();
     }
-    const setPadding = () => {
-        const isLandscape = document.querySelector("#landscape").checked;
-        const topElement = document.querySelector("#marginsTop")
-        const rightElement = document.querySelector("#marginsRight")
-        const bottomElement = document.querySelector("#marginsBottom")
-        const leftElement = document.querySelector("#marginsLeft")
-        switch (document.querySelector("#marginsType").value) {
-            case "default":
-                if (isLandscape) {
-                    topElement.value = "0.42";
-                    rightElement.value = "0.42";
-                    bottomElement.value = "0.42";
-                    leftElement.value = "0.42";
-                } else {
-                    topElement.value = "1";
-                    rightElement.value = "0.54";
-                    bottomElement.value = "1";
-                    leftElement.value = "0.54";
-                }
-                break;
-            case "none": // none
-                topElement.value = "0";
-                rightElement.value = "0";
-                bottomElement.value = "0";
-                leftElement.value = "0";
-                break;
-            case "printableArea": // minimal
-                if (isLandscape) {
-                    topElement.value = ".07";
-                    rightElement.value = ".07";
-                    bottomElement.value = ".07";
-                    leftElement.value = ".07";
-                } else {
-                    topElement.value = "0.58";
-                    rightElement.value = "0.1";
-                    bottomElement.value = "0.58";
-                    leftElement.value = "0.1";
-                }
-                break;
-        }
-        document.getElementById('preview').style.padding = topElement.value + "in " 
-                             + rightElement.value + "in "
-                             + bottomElement.value + "in "
-                             + leftElement.value + "in";
-        setTimeout(() => {
-            fixBlockWidth();
-        }, 300);
+    const fixPageSize = () => {
+        updatePageSize();
+        updatePadding();
+        fixBlockWidth();
+    }
+    const updatePage = () => {
+        setTimeout(fixPageSize, 0);
+    }
+    const renderPreview = (html) => {
+        previewElement.innerHTML = html;
+        protyleRender();
     }
     const fetchPost = (url, data, cb) => {
         fetch("${servePath}" + url, {
@@ -347,17 +656,6 @@ const renderPDF = (id: string) => {
         }).then((response) => {
             cb(response);
         })
-    }
-    const renderPreview = (html) => {
-        previewElement.innerHTML = html;
-        Protyle.mermaidRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.flowchartRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.graphvizRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.chartRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.mindmapRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.abcRender(previewElement, "${servePath}/stage/protyle");
-        Protyle.htmlRender(previewElement);
-        Protyle.plantumlRender(previewElement, "${servePath}/stage/protyle");
     }
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
@@ -370,17 +668,17 @@ const renderPDF = (id: string) => {
         }
         document.title = '${window.siyuan.languages.export} PDF - ' + response.data.name
         window.siyuan = {
-          config: {
-            appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
-            editor: { 
-              codeLineWrap: true,
-              codeLigatures: ${window.siyuan.config.editor.codeLigatures},
-              plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
-              codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-              katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
-            }
-          },
-          languages: {copy:"${window.siyuan.languages.copy}"}
+            config: {
+                appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
+                editor: { 
+                    codeLineWrap: true,
+                    codeLigatures: ${window.siyuan.config.editor.codeLigatures},
+                    plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
+                    codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
+                    katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+                }
+            },
+            languages: {copy:"${window.siyuan.languages.copy}"}
         };
         previewElement.addEventListener("click", (event) => {
             let target = event.target;
@@ -403,18 +701,15 @@ const renderPDF = (id: string) => {
                 target = target.parentElement;
             }
         });
-        const actionElement = document.getElementById('action');
-        const keepFoldElement = actionElement.querySelector('#keepFold');
         keepFoldElement.addEventListener('change', () => {
             refreshPreview();
         });
-        const mergeSubdocsElement = actionElement.querySelector('#mergeSubdocs');
         mergeSubdocsElement.addEventListener('change', () => {
             refreshPreview();
         });
         
         const refreshPreview = () => {
-          previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
+            previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="stage/loading-pure.svg"></div>'
             fetchPost("/api/export/exportPreviewHTML", {
                 id: "${id}",
                 keepFold: keepFoldElement.checked,
@@ -424,88 +719,93 @@ const renderPDF = (id: string) => {
                     alert(response2.msg)
                     return;
                 }
-                setPadding();
                 renderPreview(response2.data.content);
+                updatePage();
             })
         };
-        
-        actionElement.querySelector("#scale").addEventListener("input", () => {
-            const scale = actionElement.querySelector("#scale").value;
-            actionElement.querySelector("#scaleTip").innerText = scale;
-            previewElement.style.zoom = scale;
-            fixBlockWidth();
+
+        scaleElement.addEventListener("input", () => {
+            const scale = scaleElement.value;
+            scaleTipElement.innerText = \`\${scale} %\`;
+            fixPageSize();
         })
-        actionElement.querySelector("#pageSize").addEventListener('change', () => {
-            fixBlockWidth();
+        pageSizeElement.addEventListener('change', () => {
+            fixPageSize();
         });
-        actionElement.querySelector("#marginsType").addEventListener('change', (event) => {
-            setPadding();
+        marginsTypeElement.addEventListener('change', (event) => {
+            updatePage();
             if (event.target.value === "custom") {
                 event.target.nextElementSibling.classList.remove("fn__none");
             } else {
                 event.target.nextElementSibling.classList.add("fn__none");
             }
         });
-        actionElement.querySelector("#marginsTop").addEventListener('change', () => {
-            setPadding();
+        marginsTopElement.addEventListener('change', () => {
+            fixPageSize();
         });
-        actionElement.querySelector("#marginsRight").addEventListener('change', () => {
-            setPadding();
+        marginsRightElement.addEventListener('change', () => {
+            fixPageSize();
         });
-        actionElement.querySelector("#marginsBottom").addEventListener('change', () => {
-            setPadding();
+        marginsBottomElement.addEventListener('change', () => {
+            fixPageSize();
         });
-        actionElement.querySelector("#marginsLeft").addEventListener('change', () => {
-            setPadding();
+        marginsLeftElement.addEventListener('change', () => {
+            fixPageSize();
         });
-        actionElement.querySelector("#landscape").addEventListener('change', () => {
-            setPadding();
+        landscapeElement.addEventListener('change', () => {
+            fixPageSize();
         });
+
         const currentWindowId = ${getCurrentWindow().id};
         actionElement.querySelector('.b3-button--cancel').addEventListener('click', () => {
             const {ipcRenderer}  = require("electron");
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_CLOSE}", currentWindowId)
         });
         actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
-            const {ipcRenderer}  = require("electron");
-            ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", {
-              id: currentWindowId,
-              pdfOptions:{
-                printBackground: true,
-                landscape: actionElement.querySelector("#landscape").checked,
-                marginType: actionElement.querySelector("#marginsType").value,
-                margins: {
-                  top: parseFloat(document.querySelector("#marginsTop").value),
-                  bottom: parseFloat(document.querySelector("#marginsBottom").value),
-                  left: parseFloat(document.querySelector("#marginsLeft").value),
-                  right: parseFloat(document.querySelector("#marginsRight").value),
-                },
-                scale:  parseFloat(actionElement.querySelector("#scale").value),
-                pageSize: actionElement.querySelector("#pageSize").value,
-              },
-              keepFold: keepFoldElement.checked,
-              mergeSubdocs: mergeSubdocsElement.checked,
-              removeAssets: actionElement.querySelector("#removeAssets").checked,
-              rootId: "${id}",
-              rootTitle: response.data.name,
-            })
-            previewElement.classList.add("exporting");
-            previewElement.style.zoom = "";
-            previewElement.style.paddingTop = "6px";
-            previewElement.style.paddingBottom = "0";
-            fixBlockWidth();
+            const contentWidth = getContentWidth();
             actionElement.remove();
+            document.body.classList.toggle("exporting", true);
+
+            previewElement.style.width = \`\${contentWidth}mm\`;
+            previewElement.style.zoom = "";
+            previewElement.style.padding = "0";
+
+            const { ipcRenderer } = require("electron");
+            ipcRenderer.send("siyuan-export-pdf", {
+                id: currentWindowId,
+                pdfOptions: {
+                    printBackground: true,
+                    landscape: landscapeElement.checked,
+                    marginType: marginsTypeElement.value,
+                    margins: {
+                        top: parseFloat(marginsTopElement.value),
+                        bottom: parseFloat(marginsBottomElement.value),
+                        left: parseFloat(marginsLeftElement.value),
+                        right: parseFloat(marginsRightElement.value),
+                    },
+                    scale: parseFloat(scaleElement.value) / 100,
+                },
+                contentWidth: previewElement.clientWidth,
+                pageSize: pageSizeElement.value,
+                keepFold: keepFoldElement.checked,
+                mergeSubdocs: mergeSubdocsElement.checked,
+                removeAssets: removeAssetsElement.checked,
+                rootId: "${id}",
+                rootTitle: response.data.name,
+            })
         });
-        setPadding();
         renderPreview(response.data.content);
+        updatePage();
     });
-</script></body></html>`;
+</script>
+</body>
+</html>`;
     window.siyuan.printWin = new BrowserWindow({
         parent: getCurrentWindow(),
         modal: true,
         show: true,
-        width: 1032,
-        height: 650,
+        width: 1040,
+        height: 780,
         resizable: false,
         frame: "darwin" === window.siyuan.config.system.os,
         icon: path.join(window.siyuan.config.system.appDir, "stage", "icon-large.png"),
@@ -623,17 +923,17 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
 <script src="stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
     window.siyuan = {
-      config: {
-        appearance: { mode: ${mode}, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
-        editor: { 
-          codeLineWrap: true,
-          codeLigatures: ${window.siyuan.config.editor.codeLigatures},
-          plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
-          codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-          katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
-        }
-      },
-      languages: {copy:"${window.siyuan.languages.copy}"}
+        config: {
+            appearance: { mode: ${mode}, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
+            editor: { 
+            codeLineWrap: true,
+            codeLigatures: ${window.siyuan.config.editor.codeLigatures},
+            plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
+            codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
+            katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+            }
+        },
+        languages: {copy:"${window.siyuan.languages.copy}"}
     };
     const previewElement = document.getElementById('preview');
     Protyle.highlightRender(previewElement, "stage/protyle");
@@ -647,11 +947,11 @@ const onExport = (data: IWebSocketData, filePath: string, type: string, removeAs
     Protyle.htmlRender(previewElement);
     Protyle.plantumlRender(previewElement, "stage/protyle");
     document.querySelectorAll(".protyle-action__copy").forEach((item) => {
-      item.addEventListener("click", (event) => {
+        item.addEventListener("click", (event) => {
             navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd());
             event.preventDefault();
             event.stopPropagation();
-      })
+        })
     });
 </script></body></html>`;
     const htmlPath = path.join(filePath, "index.html");

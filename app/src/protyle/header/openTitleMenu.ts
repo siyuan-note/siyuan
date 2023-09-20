@@ -151,17 +151,6 @@ export const openTitleMenu = (protyle: IProtyle, position: {
             submenu: riffCardMenu,
         }).element);
 
-        if (protyle?.app?.plugins) {
-            emitOpenMenu({
-                plugins: protyle.app.plugins,
-                type: "click-editortitleicon",
-                detail: {
-                    protyle,
-                    data: response.data,
-                },
-                separatorPosition: "top",
-            });
-        }
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.search,
             icon: "iconSearch",
@@ -261,7 +250,19 @@ export const openTitleMenu = (protyle: IProtyle, position: {
         }
         genImportMenu(protyle.notebookId, protyle.path);
         window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+
+        if (protyle?.app?.plugins) {
+            emitOpenMenu({
+                plugins: protyle.app.plugins,
+                type: "click-editortitleicon",
+                detail: {
+                    protyle,
+                    data: response.data,
+                },
+                separatorPosition: "top",
+            });
+        }
+        window.siyuan.menus.menu.append(new MenuItem({ type: "separator" }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: Constants.ZWSP,
             type: "readonly",

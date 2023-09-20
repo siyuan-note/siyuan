@@ -215,9 +215,7 @@ func FindReplace(keyword, replacement string, ids []string, paths, boxes []strin
 		return
 	}
 
-	keyword = strings.TrimSpace(keyword)
-	replacement = strings.TrimSpace(replacement)
-
+	// No longer trim spaces for the keyword and replacement https://github.com/siyuan-note/siyuan/issues/9229
 	if keyword == replacement {
 		return
 	}

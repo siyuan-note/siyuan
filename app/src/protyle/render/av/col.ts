@@ -247,6 +247,8 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconCalendar";
         case "url":
             return "iconLink";
+        case "mAsset":
+            return "iconImage";
         case "email":
             return "iconEmail";
         case "phone":

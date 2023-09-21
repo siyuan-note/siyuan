@@ -33,6 +33,7 @@ import {isMobile} from "../../util/functions";
 import {isCtrl, isIPhone} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
+import {insertAttrViewBlockAnimation} from "../render/av/action";
 
 export class Hint {
     public timeId: number;
@@ -452,6 +453,7 @@ ${genHintItemHTML(item)}
                     avID,
                 }]);
             }
+            insertAttrViewBlockAnimation(nodeElement, 1, previousID);
             return;
         }
         this.enableExtend = false;

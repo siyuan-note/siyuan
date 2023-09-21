@@ -296,3 +296,20 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     }]);
     nameElement.dataset.title = nameElement.textContent.trim();
 };
+
+export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string) => {
+    const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(`.av__row--header`);
+    let colHTML = ""
+    previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
+        colHTML += `<div class="av__cell" style="width: ${item.style.width}"></div>`
+    })
+
+    let html = ""
+    new Array(size).fill(1).forEach(() => {
+        html += `<div class="av__row">
+    <div class="av__firstcol"><img src="/stage/loading-pure.svg"></div>
+    ${colHTML}
+</div>`
+    })
+    previousElement.insertAdjacentHTML("afterend", html)
+}

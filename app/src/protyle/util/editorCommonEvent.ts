@@ -19,6 +19,7 @@ import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
+import {insertAttrViewBlockAnimation} from "../render/av/action";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -882,6 +883,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             srcIDs: sourceIds,
                             avID,
                         }]);
+                        insertAttrViewBlockAnimation(blockElement, sourceIds.length, previousID);
                     }
                     return;
                 }
@@ -941,6 +943,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     srcIDs: ids,
                     avID,
                 }]);
+                insertAttrViewBlockAnimation(blockElement, ids.length, previousID);
                 return;
             }
             for (let i = 0; i < ids.length; i++) {

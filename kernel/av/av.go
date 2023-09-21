@@ -65,7 +65,7 @@ const (
 	KeyTypeURL     KeyType = "url"
 	KeyTypeEmail   KeyType = "email"
 	KeyTypePhone   KeyType = "phone"
-	KeyTypeMAsset  KeyType = "asset"
+	KeyTypeMAsset  KeyType = "mAsset"
 )
 
 // Key 描述了属性视图属性列的基础结构。

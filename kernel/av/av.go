@@ -65,6 +65,7 @@ const (
 	KeyTypeURL     KeyType = "url"
 	KeyTypeEmail   KeyType = "email"
 	KeyTypePhone   KeyType = "phone"
+	KeyTypeMAsset  KeyType = "mAsset"
 )
 
 // Key 描述了属性视图属性列的基础结构。
@@ -107,6 +108,7 @@ type Value struct {
 	URL     *ValueURL      `json:"url,omitempty"`
 	Email   *ValueEmail    `json:"email,omitempty"`
 	Phone   *ValuePhone    `json:"phone,omitempty"`
+	MAsset  []*ValueAsset  `json:"mAsset,omitempty"`
 }
 
 func (value *Value) String() string {
@@ -131,6 +133,12 @@ func (value *Value) String() string {
 		return value.Email.Content
 	case KeyTypePhone:
 		return value.Phone.Content
+	case KeyTypeMAsset:
+		var ret []string
+		for _, v := range value.MAsset {
+			ret = append(ret, v.Content)
+		}
+		return strings.Join(ret, " ")
 	default:
 		return ""
 	}
@@ -322,6 +330,19 @@ type ValueEmail struct {
 
 type ValuePhone struct {
 	Content string `json:"content"`
+}
+
+type AssetType string
+
+const (
+	AssetTypeFile  = "file"
+	AssetTypeImage = "image"
+)
+
+type ValueAsset struct {
+	Type    AssetType `json:"type"`
+	Name    string    `json:"name"`
+	Content string    `json:"content"`
 }
 
 // View 描述了视图的结构。

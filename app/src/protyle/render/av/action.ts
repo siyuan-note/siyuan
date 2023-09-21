@@ -297,6 +297,53 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     nameElement.dataset.title = nameElement.textContent.trim();
 };
 
+export const addAttrViewColAnimation = (options: {
+    blockElement: Element,
+    protyle: IProtyle,
+    type: TAVCol,
+    name: string,
+    previousId?: string,
+    id: string
+}) => {
+    if (!options.blockElement) {
+        return
+    }
+    options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {
+        let previousElement
+        if (options.previousId) {
+            previousElement = item.querySelector(`[data-col-id="${options.previousId}"]`)
+        } else {
+            previousElement = item.lastElementChild.previousElementSibling;
+        }
+        let html = ""
+        if (index === 0) {
+            html = `<div class="av__cell" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
+    <div draggable="true" class="av__cellheader">
+        <svg><use xlink:href="#${getColIconByType(options.type)}"></use></svg>
+        <span class="av__celltext">${options.name}</span>
+    </div>
+    <div class="av__widthdrag"></div>
+</div>`
+        } else {
+            html = '<div class="av__cell" style="width: 200px"></div>'
+        }
+        previousElement.insertAdjacentHTML("afterend", html)
+    })
+    window.siyuan.menus.menu.remove();
+    showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
+};
+
+export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {
+    cellElement.style.opacity = "0.38"
+    cellElement.style.backgroundColor = "var(--b3-theme-surface-light)";
+}
+
+export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
+    blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
+        item.remove();
+    })
+}
+
 export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(`.av__row--header`);
     let colHTML = ""

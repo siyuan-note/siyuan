@@ -2,6 +2,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
 import {Menu} from "../../../plugin/Menu";
+import {updateAttrViewCellAnimation} from "./action";
 
 export const getCalcValue = (column: IAVColumn) => {
     if (!column.calc || !column.calc.result) {
@@ -439,6 +440,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
                 [type]: oldValue
             }
         });
+        updateAttrViewCellAnimation(item);
     });
     transaction(protyle, doOperations, undoOperations);
     setTimeout(() => {

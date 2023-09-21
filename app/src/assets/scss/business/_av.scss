@@ -173,6 +173,7 @@
     border-right: 1px solid var(--b3-theme-surface-lighter);
     display: flex;
     align-items: center;
+    transition: var(--b3-transition);
 
     [data-type="block-ref"] {
       display: none;

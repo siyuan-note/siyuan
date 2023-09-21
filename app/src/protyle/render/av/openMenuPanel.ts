@@ -9,10 +9,11 @@ import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML, setDateValue} from "./date";
 import {formatNumber} from "./number";
+import {removeAttrViewColAnimation} from "./action";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
-    blockElement: HTMLElement,
+    blockElement: Element,
     type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date",
     colId?: string, // for edit
     cellElements?: HTMLElement[]    // for select & date
@@ -608,6 +609,7 @@ export const openMenuPanel = (options: {
                         type: colData.type,
                         id: colId
                     }]);
+                    removeAttrViewColAnimation(options.blockElement, colId);
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

@@ -4,6 +4,7 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getEditHTML} from "./col";
+import {updateAttrViewCellAnimation} from "./action";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -91,6 +92,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
                 mSelect: oldValue
             }
         });
+        updateAttrViewCellAnimation(item);
     });
     transaction(protyle, doOperations, undoOperations);
     target.remove();
@@ -460,6 +462,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                 [colData.type]: oldValue
             }
         });
+        updateAttrViewCellAnimation(item);
     });
 
     if (currentElement.querySelector(".b3-menu__accelerator")) {

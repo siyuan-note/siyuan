@@ -6,6 +6,7 @@ import {getDefaultOperatorByType, setFilter} from "./filter";
 import {genCellValue} from "./cell";
 import {openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
+import {addAttrViewColAnimation, removeAttrViewColAnimation} from "./action";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -72,6 +73,14 @@ export const duplicateCol = (options: {
             avID: options.avID,
         }]);
     }
+    addAttrViewColAnimation({
+        blockElement: options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.nodeID}"]`),
+        protyle: options.protyle,
+        type: options.type,
+        name: options.newValue,
+        previousId: options.colId,
+        id
+    });
 };
 
 export const getEditHTML = (options: {
@@ -274,7 +283,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
-export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellElement: HTMLElement) => {
+export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
@@ -405,7 +414,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     filter,
                     protyle,
                     data: avData,
-                    target: cellElement,
+                    target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
                 });
             });
         }
@@ -458,6 +467,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: HTMLElement, cellEl
                     type: type,
                     id: colId
                 }]);
+                removeAttrViewColAnimation(blockElement, colId)
             }
         });
         menu.addSeparator();

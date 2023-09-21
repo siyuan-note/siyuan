@@ -171,14 +171,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     lastElement = protyle.contentElement;
     lastParentID = operation.parentID;
     const avId = operation.avID;
-    if (operation.action === "addAttrViewCol") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
-            item.removeAttribute("data-render");
-            avRender(item, protyle, () => {
-                showColMenu(protyle, item, item.querySelector(`.av__row--header .av__cell[data-col-id="${operation.id}"]`));
-            });
-        });
-    } else if (operation.action === "setAttrViewColWidth") {
+    if (operation.action === "setAttrViewColWidth") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
             const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
             if (!cellElement || cellElement.style.width === operation.data) {

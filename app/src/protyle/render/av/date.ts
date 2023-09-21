@@ -1,5 +1,6 @@
 import {transaction} from "../../wysiwyg/transaction";
 import * as dayjs from "dayjs";
+import {updateAttrViewCellAnimation} from "./action";
 
 export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     let hasEndDate = true;
@@ -152,6 +153,7 @@ export const setDateValue = (options: {
                 date: oldValue
             }
         });
+        updateAttrViewCellAnimation(item);
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
 };

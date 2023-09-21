@@ -1,7 +1,8 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
+import {addAttrViewColAnimation} from "./action";
 
-export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
+export const addCol = (protyle: IProtyle, blockElement: Element) => {
     const menu = new Menu("av-header-add");
     const avID = blockElement.getAttribute("data-av-id");
     menu.addItem({
@@ -20,6 +21,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "text",
+                name: "Text",
+                id
+            });
         }
     });
     menu.addItem({
@@ -38,6 +46,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "number",
+                name: "Number",
+                id
+            });
         }
     });
     menu.addItem({
@@ -56,6 +71,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "select",
+                name: "Select",
+                id
+            });
         }
     });
     menu.addItem({
@@ -74,6 +96,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "mSelect",
+                name: "Multi-select",
+                id
+            });
         }
     });
     menu.addItem({
@@ -92,6 +121,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "date",
+                name: "Date",
+                id
+            });
         }
     });
     menu.addItem({
@@ -110,6 +146,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "url",
+                name: "URL",
+                id
+            });
         }
     });
     menu.addItem({
@@ -128,6 +171,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "email",
+                name: "Email",
+                id
+            });
         }
     });
     menu.addItem({
@@ -146,6 +196,13 @@ export const addCol = (protyle: IProtyle, blockElement: HTMLElement) => {
                 id,
                 avID,
             }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "phone",
+                name: "Phone",
+                id
+            });
         }
     });
     return menu;

@@ -155,7 +155,13 @@ export class Preview {
         if (this.element.style.display === "none") {
             return;
         }
-
+        let loadingElement = this.element.querySelector(".fn__loading");
+        if (!loadingElement) {
+            this.element.insertAdjacentHTML("beforeend", `<div style="flex-direction: column;" class="fn__loading">
+    <img width="48px" src="/stage/loading-pure.svg">
+</div>`);
+            loadingElement = this.element.querySelector(".fn__loading");
+        }
         this.mdTimeoutId = window.setTimeout(() => {
             fetchPost("/api/export/preview", {
                 id: protyle.block.parentID || protyle.options.blockId,
@@ -183,6 +189,7 @@ export class Preview {
                     }
                 });
                 /// #endif
+                loadingElement.remove();
             });
         }, protyle.options.preview.delay);
     }

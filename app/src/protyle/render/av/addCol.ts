@@ -12,7 +12,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Text",
+                name: window.siyuan.languages.text,
                 avID,
                 type: "text",
                 id
@@ -25,7 +25,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "text",
-                name: "Text",
+                name: window.siyuan.languages.text,
                 id
             });
         }
@@ -37,7 +37,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Number",
+                name: window.siyuan.languages.number,
                 avID,
                 type: "number",
                 id
@@ -50,7 +50,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "number",
-                name: "Number",
+                name: window.siyuan.languages.number,
                 id
             });
         }
@@ -62,7 +62,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Select",
+                name: window.siyuan.languages.select,
                 avID,
                 type: "select",
                 id
@@ -75,7 +75,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "select",
-                name: "Select",
+                name: window.siyuan.languages.select,
                 id
             });
         }
@@ -87,7 +87,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Multi-select",
+                name: window.siyuan.languages.multiSelect,
                 avID,
                 type: "mSelect",
                 id
@@ -100,7 +100,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "mSelect",
-                name: "Multi-select",
+                name: window.siyuan.languages.multiSelect,
                 id
             });
         }
@@ -112,7 +112,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Date",
+                name: window.siyuan.languages.date,
                 avID,
                 type: "date",
                 id
@@ -125,7 +125,32 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "date",
-                name: "Date",
+                name: window.siyuan.languages.date,
+                id
+            });
+        }
+    });
+    menu.addItem({
+        icon: "iconImage",
+        label: window.siyuan.languages.filesMedia,
+        click() {
+            const id = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                name: window.siyuan.languages.filesMedia,
+                avID,
+                type: "mAsset",
+                id
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }]);
+            addAttrViewColAnimation({
+                blockElement: blockElement,
+                protyle: protyle,
+                type: "mAsset",
+                name: window.siyuan.languages.filesMedia,
                 id
             });
         }
@@ -137,7 +162,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "URL",
+                name: window.siyuan.languages.link,
                 avID,
                 type: "url",
                 id
@@ -150,7 +175,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "url",
-                name: "URL",
+                name: window.siyuan.languages.link,
                 id
             });
         }
@@ -162,7 +187,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Email",
+                name: window.siyuan.languages.email,
                 avID,
                 type: "email",
                 id
@@ -175,7 +200,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "email",
-                name: "Email",
+                name: window.siyuan.languages.email,
                 id
             });
         }
@@ -187,7 +212,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: "Phone",
+                name: window.siyuan.languages.phone,
                 avID,
                 type: "phone",
                 id
@@ -200,7 +225,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "phone",
-                name: "Phone",
+                name: window.siyuan.languages.phone,
                 id
             });
         }

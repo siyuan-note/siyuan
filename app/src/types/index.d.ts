@@ -60,6 +60,7 @@ type TAVCol =
     | "url"
     | "email"
     | "phone"
+    | "mAsset"
 type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="

@@ -1,4 +1,5 @@
 {
+  "filesMedia":"文件和多媒体",
   "removeBookmark": "移除 ${x} 中的书签？",
   "lockEdit": "锁定编辑",
   "unlockEdit": "解除锁定",

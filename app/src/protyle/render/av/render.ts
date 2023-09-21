@@ -81,7 +81,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         } else if (cell.valueType === "number") {
                             text = `<span class="av__celltext" data-content="${cell.value?.number.content || ""}">${cell.value?.number.formattedContent || ""}</span>`;
                         } else if (cell.valueType === "mSelect" || cell.valueType === "select") {
-                            cell.value?.mSelect?.forEach((item: { content: string, color: string }) => {
+                            cell.value?.mSelect?.forEach((item) => {
                                 text += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
                             });
                             if (!text) {
@@ -98,6 +98,19 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<svg><use xlink:href="#iconForward"></use></svg>${dayjs(cell.value.date.content2).format("YYYY-MM-DD HH:mm")}`;
                             }
                             text += "</span>";
+                        } else if (cell.valueType === "mAsset") {
+                            cell.value?.mAsset?.forEach((item) => {
+                                if (item.type === "image") {
+                                    text += `<span class="b3-chip b3-chip--middle" style="background-image:url("${item.content}")"></span>`;
+                                } else {
+                                    text += `<span class="b3-chip b3-chip--middle" data-url="${item.content}">${item.name}</span>`;
+                                }
+                            });
+                            if (!text) {
+                                text = '<span class="av__celltext"></span>';
+                            } else {
+                                text = `<span class="av__celltext">${text}</span>`;
+                            }
                         }
                         tableHTML += `<div class="av__cell" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""}  

@@ -283,9 +283,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     const target = event.target as HTMLElement;
-    if (target.tagName !== "TABLE" && (
-        target.tagName === "INPUT" || target.tagName === "TEXTAREA" || hasClosestByAttribute(target, "contenteditable", null)
-    )) {
+    if (target.tagName !== "TABLE" && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         return false;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.refresh.custom, event)) {
@@ -315,6 +313,9 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         });
         event.preventDefault();
         return true;
+    }
+    if (hasClosestByClassName(target, "protyle-title__input")) {
+        return false;
     }
     // 没有光标时，无法撤销 https://ld246.com/article/1624021111567
     if (matchHotKey(window.siyuan.config.keymap.editor.general.undo.custom, event)) {

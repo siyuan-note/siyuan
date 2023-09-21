@@ -113,7 +113,11 @@ export class Protyle {
                             break;
                         case "transactions":
                             data.data[0].doOperations.forEach((item: IOperation) => {
-                                onTransaction(this.protyle, item, false);
+                                if (!this.protyle.preview.element.classList.contains("fn__none")) {
+                                    this.protyle.preview.render(this.protyle);
+                                } else {
+                                    onTransaction(this.protyle, item, false);
+                                }
                             });
                             break;
                         case "readonly":

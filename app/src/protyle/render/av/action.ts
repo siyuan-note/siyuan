@@ -306,16 +306,16 @@ export const addAttrViewColAnimation = (options: {
     id: string
 }) => {
     if (!options.blockElement) {
-        return
+        return;
     }
     options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {
-        let previousElement
+        let previousElement;
         if (options.previousId) {
-            previousElement = item.querySelector(`[data-col-id="${options.previousId}"]`)
+            previousElement = item.querySelector(`[data-col-id="${options.previousId}"]`);
         } else {
             previousElement = item.lastElementChild.previousElementSibling;
         }
-        let html = ""
+        let html = "";
         if (index === 0) {
             html = `<div class="av__cell" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
     <div draggable="true" class="av__cellheader">
@@ -323,40 +323,40 @@ export const addAttrViewColAnimation = (options: {
         <span class="av__celltext">${options.name}</span>
     </div>
     <div class="av__widthdrag"></div>
-</div>`
+</div>`;
         } else {
-            html = '<div class="av__cell" style="width: 200px"></div>'
+            html = '<div class="av__cell" style="width: 200px"></div>';
         }
-        previousElement.insertAdjacentHTML("afterend", html)
-    })
+        previousElement.insertAdjacentHTML("afterend", html);
+    });
     window.siyuan.menus.menu.remove();
     showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
 };
 
 export const updateAttrViewCellAnimation = (cellElement: HTMLElement) => {
-    cellElement.style.opacity = "0.38"
+    cellElement.style.opacity = "0.38";
     cellElement.style.backgroundColor = "var(--b3-theme-surface-light)";
-}
+};
 
 export const removeAttrViewColAnimation = (blockElement: Element, id: string) => {
     blockElement.querySelectorAll(`.av__cell[data-col-id="${id}"]`).forEach(item => {
         item.remove();
-    })
-}
+    });
+};
 
 export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string) => {
-    const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(`.av__row--header`);
-    let colHTML = ""
+    const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
+    let colHTML = "";
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
-        colHTML += `<div class="av__cell" style="width: ${item.style.width}"></div>`
-    })
+        colHTML += `<div class="av__cell" style="width: ${item.style.width}"></div>`;
+    });
 
-    let html = ""
+    let html = "";
     new Array(size).fill(1).forEach(() => {
         html += `<div class="av__row">
     <div class="av__firstcol"><img src="/stage/loading-pure.svg"></div>
     ${colHTML}
-</div>`
-    })
-    previousElement.insertAdjacentHTML("afterend", html)
-}
+</div>`;
+    });
+    previousElement.insertAdjacentHTML("afterend", html);
+};

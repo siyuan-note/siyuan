@@ -1,5 +1,5 @@
 import {fetchPost} from "../../../util/fetch";
-import {getColIconByType, showColMenu} from "./col";
+import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
 import {getCalcValue} from "./cell";
 import * as dayjs from "dayjs";

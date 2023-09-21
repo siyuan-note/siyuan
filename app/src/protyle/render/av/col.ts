@@ -467,7 +467,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     type: type,
                     id: colId
                 }]);
-                removeAttrViewColAnimation(blockElement, colId)
+                removeAttrViewColAnimation(blockElement, colId);
             }
         });
         menu.addSeparator();

@@ -172,4 +172,8 @@
   &__secondary {
     color: var(--b3-theme-secondary);
   }
+
+  &__selectnone {
+    user-select: none;
+  }
 }

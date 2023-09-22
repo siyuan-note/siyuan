@@ -301,7 +301,7 @@ export const addFilter = (options: {
                 return true;
             }
         });
-        if (!hasFilter) {
+        if (!hasFilter && column.type !== "mAsset") {
             menu.addItem({
                 label: column.name,
                 icon: getColIconByType(column.type),

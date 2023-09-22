@@ -379,48 +379,50 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             });
         }
     });
-    menu.addItem({
-        icon: "iconFilter",
-        label: window.siyuan.languages.filter,
-        click() {
-            fetchPost("/api/av/renderAttributeView", {
-                id: avID,
-                nodeID
-            }, (response) => {
-                const avData = response.data as IAV;
-                let filter: IAVFilter;
-                avData.view.filters.find((item) => {
-                    if (item.column === colId) {
-                        filter = item;
-                        return true;
+    if (type !== "mAsset") {
+        menu.addItem({
+            icon: "iconFilter",
+            label: window.siyuan.languages.filter,
+            click() {
+                fetchPost("/api/av/renderAttributeView", {
+                    id: avID,
+                    nodeID
+                }, (response) => {
+                    const avData = response.data as IAV;
+                    let filter: IAVFilter;
+                    avData.view.filters.find((item) => {
+                        if (item.column === colId) {
+                            filter = item;
+                            return true;
+                        }
+                    });
+                    if (!filter) {
+                        filter = {
+                            column: colId,
+                            operator: getDefaultOperatorByType(type),
+                            value: genCellValue(type, "")
+                        };
+                        avData.view.filters.push(filter);
+                        transaction(protyle, [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: [filter]
+                        }], [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: []
+                        }]);
                     }
+                    setFilter({
+                        filter,
+                        protyle,
+                        data: avData,
+                        target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
+                    });
                 });
-                if (!filter) {
-                    filter = {
-                        column: colId,
-                        operator: getDefaultOperatorByType(type),
-                        value: genCellValue(type, "")
-                    };
-                    avData.view.filters.push(filter);
-                    transaction(protyle, [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: [filter]
-                    }], [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: []
-                    }]);
-                }
-                setFilter({
-                    filter,
-                    protyle,
-                    data: avData,
-                    target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
-                });
-            });
-        }
-    });
+            }
+        });
+    }
     menu.addSeparator();
     if (type !== "block") {
         menu.addItem({

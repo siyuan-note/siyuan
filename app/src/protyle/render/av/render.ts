@@ -103,7 +103,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 if (item.type === "image") {
                                     text += `<img class="av__cellassetimg" src="${item.content}">`;
                                 } else {
-                                    text += `<span class="b3-chip b3-chip--middle" data-url="${item.content}">${item.name}</span>`;
+                                    text += `<span class="b3-chip b3-chip--middle av__celltext--url" data-url="${item.content}">${item.name}</span>`;
                                 }
                             });
                             if (!text) {

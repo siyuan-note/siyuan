@@ -13,6 +13,7 @@ import {hideElements} from "../../ui/hideElements";
 import {focusByRange} from "../../util/selection";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
+import {previewImage} from "../../preview/image";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -118,13 +119,23 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const linkElement = hasClosestByClassName(event.target, "av__celltext--url");
     if (linkElement) {
-        let prefix = "";
+        let linkAddress = linkElement.textContent.trim();
         if (linkElement.dataset.type === "phone") {
-            prefix = "tel:";
+            linkAddress = "tel:" + linkAddress;
         } else if (linkElement.dataset.type === "email") {
-            prefix = "mailto:";
+            linkAddress = "mailto:" + linkAddress;
+        } else if (linkElement.classList.contains("b3-chip")) {
+            linkAddress = linkElement.dataset.url;
         }
-        window.open(prefix + linkElement.textContent.trim());
+        window.open(linkAddress);
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    const imgElement = hasClosestByClassName(event.target, "av__cellassetimg") as HTMLImageElement
+    if (imgElement) {
+        previewImage(imgElement.src);
         event.preventDefault();
         event.stopPropagation();
         return true;

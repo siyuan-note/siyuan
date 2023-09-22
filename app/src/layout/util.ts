@@ -533,7 +533,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, drop
     } else if (layout instanceof Custom) {
         json.instance = "Custom";
         json.customModelType = layout.type;
-        json.customModelData = layout.data;
+        json.customModelData = Object.assign({}, layout.data);
+        // https://github.com/siyuan-note/siyuan/issues/9250
+        delete json.customModelData.editor;
     }
 
     if (layout instanceof Layout || layout instanceof Wnd) {

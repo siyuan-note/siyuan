@@ -132,12 +132,12 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
     });
     menu.addItem({
         icon: "iconImage",
-        label: window.siyuan.languages.filesMedia,
+        label: window.siyuan.languages.assets,
         click() {
             const id = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "addAttrViewCol",
-                name: window.siyuan.languages.filesMedia,
+                name: window.siyuan.languages.assets,
                 avID,
                 type: "mAsset",
                 id
@@ -150,7 +150,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element) => {
                 blockElement: blockElement,
                 protyle: protyle,
                 type: "mAsset",
-                name: window.siyuan.languages.filesMedia,
+                name: window.siyuan.languages.assets,
                 id
             });
         }

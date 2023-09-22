@@ -10,7 +10,8 @@ import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML, setDateValue} from "./date";
 import {formatNumber} from "./number";
 import {removeAttrViewColAnimation} from "./action";
-import {addAssetLink, bindAssetEvent, getAssetHTML} from "./asset";
+import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML} from "./asset";
+import {Constants} from "../../../constants";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -60,18 +61,21 @@ export const openMenuPanel = (options: {
         const tabRect = options.blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
         if (["select", "date", "asset"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
             if (options.type === "select") {
                 bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
             } else if (options.type === "date") {
                 bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
             } else if (options.type === "asset") {
                 bindAssetEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+                setTimeout(() => {
+                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+                }, Constants.TIMEOUT_LOAD);  // 等待图片加载
             }
             if (["select", "date"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
                 inputElement.select();
                 inputElement.focus();
+                setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
             }
         } else {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
@@ -636,6 +640,11 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "addAssetLink") {
                     addAssetLink(options.protyle, data, options.cellElements, target)
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "editAssetItem") {
+                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement)
                     event.preventDefault();
                     event.stopPropagation();
                     break;

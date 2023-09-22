@@ -998,12 +998,6 @@ interface IAVCell {
     valueType: TAVCol,
 }
 
-interface IAVCellAssetValue {
-    content: string,
-    name: string,
-    type: "file" | "image"
-}
-
 interface IAVCellValue {
     type?: TAVCol,
     text?: {
@@ -1015,10 +1009,7 @@ interface IAVCellValue {
         format?: string,
         formattedContent?: string
     },
-    mSelect?: {
-        content: string,
-        color: string
-    }[]
+    mSelect?: IAVCellSelectValue[]
     mAsset?: IAVCellAssetValue[]
     block?: {
         content: string,
@@ -1042,4 +1033,15 @@ interface IAVCellDateValue {
     content2?: number,
     isNotEmpty2?: boolean
     hasEndDate?: boolean
+}
+
+interface IAVCellSelectValue {
+    content: string,
+    color: string
+}
+
+interface IAVCellAssetValue {
+    content: string,
+    name: string,
+    type: "file" | "image"
 }

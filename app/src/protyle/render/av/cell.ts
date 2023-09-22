@@ -64,10 +64,7 @@ export const getCalcValue = (column: IAVColumn) => {
     return value;
 };
 
-export const genCellValue = (colType: TAVCol, value: string | {
-    content: string,
-    color: string
-}[] | IAVCellDateValue) => {
+export const genCellValue = (colType: TAVCol, value: string | any) => {
     let cellValue: IAVCellValue;
     if (typeof value === "string") {
         if (colType === "number") {
@@ -118,15 +115,17 @@ export const genCellValue = (colType: TAVCol, value: string | {
         if (colType === "mSelect" || colType === "select") {
             cellValue = {
                 type: colType,
-                mSelect: value as {
-                    content: string,
-                    color: string
-                }[]
+                mSelect: value as IAVCellSelectValue[]
             };
         } else if (colType === "date") {
             cellValue = {
                 type: colType,
                 date: value as IAVCellDateValue
+            };
+        } else if (colType === "mAsset") {
+            cellValue = {
+                type: colType,
+                mAsset: value as IAVCellAssetValue[]
             };
         }
     }

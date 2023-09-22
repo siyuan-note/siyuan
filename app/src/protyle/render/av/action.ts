@@ -133,7 +133,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
-    const imgElement = hasClosestByClassName(event.target, "av__cellassetimg") as HTMLImageElement
+    const imgElement = hasClosestByClassName(event.target, "av__cellassetimg") as HTMLImageElement;
     if (imgElement) {
         previewImage(imgElement.src);
         event.preventDefault();

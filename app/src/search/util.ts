@@ -1268,7 +1268,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 searchElement: searchInputElement,
             });
         });
-        const searchResultElement = element.querySelector("#searchResult")
+        const searchResultElement = element.querySelector("#searchResult");
         if (inputValue === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                 onSearch(response.data, edit, element, config);
@@ -1304,7 +1304,7 @@ const inputEvent = (element: Element, config: ISearchOption, inputTimeout: numbe
                 searchResultElement.innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
 <span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>`;
                 loadingElement.classList.add("fn__none");
-                searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1)
+                searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
             });
         }
     }, Constants.TIMEOUT_INPUT);

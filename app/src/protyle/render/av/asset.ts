@@ -24,21 +24,21 @@ export const bindAssetEvent = (options: {
             return;
         }
         uploadFiles(options.protyle, event.target.files, event.target, (res) => {
-            const resData = JSON.parse(res)
-            const value: IAVCellAssetValue[] = []
+            const resData = JSON.parse(res);
+            const value: IAVCellAssetValue[] = [];
             Object.keys(resData.data.succMap).forEach((key) => {
                 value.push({
                     name: key,
                     content: resData.data.succMap[key],
                     type: Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(resData.data.succMap[key]).toLowerCase()) ? "image" : "file"
-                })
-            })
+                });
+            });
             updateAssetCell({
                 protyle: options.protyle,
                 data: options.data,
                 cellElements: options.cellElements,
                 value
-            })
+            });
         });
     });
 };
@@ -46,39 +46,39 @@ export const bindAssetEvent = (options: {
 export const getAssetHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     const cellId = cellElements[0].dataset.id;
     const rowId = cellElements[0].parentElement.dataset.id;
-    let cellData: IAVCell
+    let cellData: IAVCell;
     data.rows.find(row => {
         if (row.id === rowId) {
             row.cells.find(cell => {
                 if (cell.id === cellId) {
-                    cellData = cell
-                    return true
+                    cellData = cell;
+                    return true;
                 }
-            })
-            return true
+            });
+            return true;
         }
-    })
-    let html = ""
+    });
+    let html = "";
     if (cellData?.value?.mAsset) {
         cellData.value.mAsset.forEach(item => {
             if (!item.content) {
-                return
+                return;
             }
-            let contentHTML
+            let contentHTML;
             if (item.type === "image") {
                 contentHTML = `<span class="fn__flex-1">
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${item.content}"/>
-</span>`
+</span>`;
             } else {
-                contentHTML = `<span class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`
+                contentHTML = `<span class="fn__ellipsis b3-menu__label" style="max-width: 360px">${item.name}</span>`;
             }
 
             html += `<button class="b3-menu__item" draggable="true" data-name="${item.name}" data-type="${item.type}" data-content="${item.content}">
 <svg class="b3-menu__icon"><use xlink:href="#iconDrag"></use></svg>
 ${contentHTML}
 <svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>
-</button>`
-        })
+</button>`;
+        });
     }
     return `<div class="b3-menu__items">
     ${html}
@@ -130,14 +130,14 @@ const updateAssetCell = (options: {
         if (options.removeContent) {
             cellData.value.mAsset.find((oldItem, index) => {
                 if (oldItem.content === options.removeContent) {
-                    cellData.value.mAsset.splice(index, 1)
+                    cellData.value.mAsset.splice(index, 1);
                     return true;
                 }
             });
         } else {
             options.value.forEach(newitem => {
                 if (!newitem.content) {
-                    return
+                    return;
                 }
                 const hasMatch = cellData.value.mAsset.find(oldItem => {
                     if (oldItem.content === newitem.content) {
@@ -145,14 +145,14 @@ const updateAssetCell = (options: {
                         oldItem.type = newitem.type;
                         return true;
                     }
-                })
+                });
                 if (!hasMatch) {
                     if (newitem.type === "file" && !newitem.name) {
-                        newitem.name = newitem.content
+                        newitem.name = newitem.content;
                     }
                     cellData.value.mAsset.push(newitem);
                 }
-            })
+            });
         }
         cellDoOperations.push({
             action: "updateAttrViewCell",
@@ -178,20 +178,20 @@ const updateAssetCell = (options: {
     const menuElement = document.querySelector(".av__panel > .b3-menu") as HTMLElement;
     if (menuElement) {
         menuElement.innerHTML = getAssetHTML(options.data.view, options.cellElements);
-        bindAssetEvent({protyle: options.protyle, data: options.data, menuElement, cellElements: options.cellElements})
+        bindAssetEvent({protyle: options.protyle, data: options.data, menuElement, cellElements: options.cellElements});
         const cellRect = options.protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`).getBoundingClientRect();
         setTimeout(() => {
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
         }, Constants.TIMEOUT_LOAD);  // 等待图片加载
     }
-}
+};
 
 export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement) => {
-    const linkAddress = target.dataset.content
-    const type = target.dataset.type as "image" | "file"
+    const linkAddress = target.dataset.content;
+    const type = target.dataset.type as "image" | "file";
     const menu = new Menu("av-asset-edit", () => {
         if (!textElement || !textElement.value || textElement.value === target.dataset.name) {
-            return
+            return;
         }
         updateAssetCell({
             protyle,
@@ -202,8 +202,8 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
                 name: textElement.value,
                 type
             }]
-        })
-    })
+        });
+    });
     if (menu.isOpen) {
         return;
     }
@@ -230,7 +230,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
                 data,
                 cellElements,
                 removeContent: linkAddress
-            })
+            });
         }
     });
     openMenu(protyle.app, linkAddress, false, true);
@@ -239,7 +239,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
     }
     /// #endif
-    const textElement = menu.element.querySelector("textarea")
+    const textElement = menu.element.querySelector("textarea");
     if (textElement) {
         textElement.value = target.dataset.name;
     }
@@ -250,13 +250,13 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
         w: rect.width,
         h: rect.height,
     });
-}
+};
 
 export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLElement[], target: HTMLElement) => {
     const menu = new Menu("av-asset-link", () => {
-        const textElements = menu.element.querySelectorAll("textarea")
+        const textElements = menu.element.querySelectorAll("textarea");
         if (!textElements[0].value) {
-            return
+            return;
         }
         updateAssetCell({
             protyle,
@@ -267,8 +267,8 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
                 name: textElements[1].value,
                 content: textElements[0].value,
             }]
-        })
-    })
+        });
+    });
     if (menu.isOpen) {
         return;
     }
@@ -287,4 +287,4 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
         w: rect.width,
         h: rect.height,
     });
-}
+};

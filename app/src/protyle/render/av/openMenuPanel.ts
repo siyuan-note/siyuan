@@ -639,12 +639,12 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addAssetLink") {
-                    addAssetLink(options.protyle, data, options.cellElements, target)
+                    addAssetLink(options.protyle, data, options.cellElements, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "editAssetItem") {
-                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement)
+                    editAssetItem(options.protyle, data, options.cellElements, target.parentElement);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

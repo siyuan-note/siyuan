@@ -101,7 +101,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                         } else if (cell.valueType === "mAsset") {
                             cell.value?.mAsset?.forEach((item) => {
                                 if (item.type === "image") {
-                                    text += `<span class="b3-chip b3-chip--middle" style="background-image:url("${item.content}")"></span>`;
+                                    text += `<img class="av__cellassetimg" src="${item.content}">`;
                                 } else {
                                     text += `<span class="b3-chip b3-chip--middle" data-url="${item.content}">${item.name}</span>`;
                                 }

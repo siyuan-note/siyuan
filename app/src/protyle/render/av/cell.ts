@@ -356,6 +356,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
     } else if (["select", "mSelect"].includes(type) && blockElement) {
         openMenuPanel({protyle, blockElement, type: "select", cellElements});
         return;
+    } else if (type === "mAsset" && blockElement) {
+        openMenuPanel({protyle, blockElement, type: "asset", cellElements});
+        return;
     } else if (type === "date" && blockElement) {
         openMenuPanel({protyle, blockElement, type: "date", cellElements});
         return;

@@ -84,7 +84,9 @@ interface Window {
     dataLayer: any[]
     siyuan: ISiyuan
     webkit: any
-    html2canvas: (element: Element, opitons: { useCORS: boolean }) => Promise<any>;
+    html2canvas: (element: Element, opitons: {
+        useCORS: boolean
+    }) => Promise<any>;
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
@@ -237,7 +239,10 @@ interface IBackStack {
     },
     scrollTop?: number,
     callback?: string[],
-    position?: { start: number, end: number }
+    position?: {
+        start: number,
+        end: number
+    }
     // 仅桌面端
     protyle?: IProtyle,
     zoomId?: string
@@ -269,14 +274,18 @@ interface INotebook {
 
 interface ISiyuan {
     zIndex: number
-    storage?: { [key: string]: any },
+    storage?: {
+        [key: string]: any
+    },
     printWin?: import("electron").BrowserWindow
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],
         undoOperations: IOperation[]
     }[]
-    reqIds: { [key: string]: number },
+    reqIds: {
+        [key: string]: number
+    },
     editorIsFullscreen?: boolean,
     hideBreadcrumb?: boolean,
     notebooks?: INotebook[],
@@ -300,7 +309,11 @@ interface ISiyuan {
         userSiYuanSubscriptionType: number // 0 年付；1 终生；2 月付
         userSiYuanSubscriptionStatus: number // -1：未订阅，0：订阅可用，1：订阅封禁，2：订阅过期
         userToken: string
-        userTitles: { name: string, icon: string, desc: string }[]
+        userTitles: {
+            name: string,
+            icon: string,
+            desc: string
+        }[]
     },
     dragElement?: HTMLElement,
     layout?: {
@@ -395,7 +408,10 @@ interface ILayoutJSON extends ILayoutOptions {
 
 interface IDockTab {
     type: string;
-    size: { width: number, height: number }
+    size: {
+        width: number,
+        height: number
+    }
     show: boolean
     icon: string
     title: string
@@ -425,7 +441,10 @@ interface IPluginData {
 
 interface IPluginDockTab {
     position: TPluginDockPosition,
-    size: { width: number, height: number },
+    size: {
+        width: number,
+        height: number
+    },
     icon: string,
     hotkey?: string,
     title: string,
@@ -666,7 +685,10 @@ interface IConfig {
     localIPs: string[]
     readonly: boolean   // 全局只读
     uiLayout: Record<string, any>
-    langs: { label: string, name: string }[]
+    langs: {
+        label: string,
+        name: string
+    }[]
     appearance: IAppearance
     editor: IEditor,
     fileTree: IFileTree
@@ -761,13 +783,25 @@ interface IKeymap {
             [key: string]: IKeymapItem
         }
     }
-    general: { [key: string]: IKeymapItem }
+    general: {
+        [key: string]: IKeymapItem
+    }
     editor: {
-        general: { [key: string]: IKeymapItem }
-        insert: { [key: string]: IKeymapItem }
-        heading: { [key: string]: IKeymapItem }
-        list: { [key: string]: IKeymapItem }
-        table: { [key: string]: IKeymapItem }
+        general: {
+            [key: string]: IKeymapItem
+        }
+        insert: {
+            [key: string]: IKeymapItem
+        }
+        heading: {
+            [key: string]: IKeymapItem
+        }
+        list: {
+            [key: string]: IKeymapItem
+        }
+        table: {
+            [key: string]: IKeymapItem
+        }
     }
 }
 
@@ -964,16 +998,41 @@ interface IAVCell {
     valueType: TAVCol,
 }
 
+interface IAVCellAssetValue {
+    content: string,
+    name: string,
+    type: "file" | "image"
+}
+
 interface IAVCellValue {
     type?: TAVCol,
-    text?: { content: string },
-    number?: { content?: number, isNotEmpty: boolean, format?: string, formattedContent?: string },
-    mSelect?: { content: string, color: string }[]
-    mAsset?: { content: string, name: string, type: "file" | "image" }[]
-    block?: { content: string, id?: string }
-    url?: { content: string }
-    phone?: { content: string }
-    email?: { content: string }
+    text?: {
+        content: string
+    },
+    number?: {
+        content?: number,
+        isNotEmpty: boolean,
+        format?: string,
+        formattedContent?: string
+    },
+    mSelect?: {
+        content: string,
+        color: string
+    }[]
+    mAsset?: IAVCellAssetValue[]
+    block?: {
+        content: string,
+        id?: string
+    }
+    url?: {
+        content: string
+    }
+    phone?: {
+        content: string
+    }
+    email?: {
+        content: string
+    }
     date?: IAVCellDateValue
 }
 

@@ -10,11 +10,12 @@ import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML, setDateValue} from "./date";
 import {formatNumber} from "./number";
 import {removeAttrViewColAnimation} from "./action";
+import {addAssetLink, bindAssetEvent, getAssetHTML} from "./asset";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
     blockElement: Element,
-    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date",
+    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset",
     colId?: string, // for edit
     cellElements?: HTMLElement[]    // for select & date
 }) => {
@@ -42,6 +43,8 @@ export const openMenuPanel = (options: {
             html = getFiltersHTML(data.view);
         } else if (options.type === "select") {
             html = getSelectHTML(data.view, options.cellElements);
+        } else if (options.type === "asset") {
+            html = getAssetHTML(data.view, options.cellElements);
         } else if (options.type === "edit") {
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId});
         } else if (options.type === "date") {
@@ -55,20 +58,21 @@ export const openMenuPanel = (options: {
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         const tabRect = options.blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
-        if (options.type === "select") {
+        if (["select", "date", "asset"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-            bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
-            const inputElement = menuElement.querySelector("input");
-            inputElement.select();
-            inputElement.focus();
-        } else if (options.type === "date") {
-            const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
-            bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
-            const inputElement = menuElement.querySelector("input");
-            inputElement.select();
-            inputElement.focus();
+            if (options.type === "select") {
+                bindSelectEvent(options.protyle, data, menuElement, options.cellElements);
+            } else if (options.type === "date") {
+                bindDateEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+            } else if (options.type === "asset") {
+                bindAssetEvent({protyle: options.protyle, data, menuElement, cellElements: options.cellElements});
+            }
+            if (["select", "date"].includes(options.type)) {
+                const inputElement = menuElement.querySelector("input");
+                inputElement.select();
+                inputElement.focus();
+            }
         } else {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
             if (options.type === "sorts") {
@@ -627,6 +631,11 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "removeCellOption") {
                     removeCellOption(options.protyle, data, options.cellElements, target.parentElement);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "addAssetLink") {
+                    addAssetLink(options.protyle, data, options.cellElements, target)
                     event.preventDefault();
                     event.stopPropagation();
                     break;

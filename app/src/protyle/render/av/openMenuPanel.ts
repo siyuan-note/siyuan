@@ -228,31 +228,27 @@ export const openMenuPanel = (options: {
                 return;
             }
             if (type === "assets") {
-                const changeData = data.view.filters;
-                let targetFilter: IAVFilter;
-                changeData.find((filter, index: number) => {
-                    if (filter.column === sourceId) {
-                        targetFilter = changeData.splice(index, 1)[0];
-                        return true;
+                if (isTop) {
+                    targetElement.before(sourceElement)
+                } else {
+                    targetElement.after(sourceElement);
+                }
+                const replaceValue: IAVCellAssetValue[] = []
+                Array.from(targetElement.parentElement.children).forEach((item: HTMLElement) => {
+                    if (item.dataset.content) {
+                        replaceValue.push({
+                            content: item.dataset.content,
+                            name: item.dataset.name,
+                            type: item.dataset.type as "image" | "file",
+                        })
                     }
-                });
-                changeData.find((filter, index: number) => {
-                    if (filter.column === targetId) {
-                        if (isTop) {
-                            changeData.splice(index, 0, targetFilter);
-                        } else {
-                            changeData.splice(index + 1, 0, targetFilter);
-                        }
-                        return true;
-                    }
-                });
-
+                })
                 updateAssetCell({
-                    protyle:options.protyle,
+                    protyle: options.protyle,
                     data,
-                    cellElements:options.cellElements,
+                    cellElements: options.cellElements,
                     type: "replace",
-                    // replaceValue
+                    replaceValue
                 });
                 return;
             }

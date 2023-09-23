@@ -112,7 +112,8 @@ const updateAssetCell = (options: {
     const colId = options.cellElements[0].dataset.colId;
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    options.cellElements.forEach(item => {
+    let newValue: IAVCellAssetValue[] = []
+    options.cellElements.forEach((item, elementIndex) => {
         let cellData: IAVCell;
         const rowID = item.parentElement.dataset.id;
         options.data.view.rows.find(row => {
@@ -128,31 +129,41 @@ const updateAssetCell = (options: {
         });
         const oldValue = Object.assign([], cellData.value.mAsset);
         if (options.removeContent) {
-            cellData.value.mAsset.find((oldItem, index) => {
-                if (oldItem.content === options.removeContent) {
-                    cellData.value.mAsset.splice(index, 1);
-                    return true;
-                }
-            });
-        } else {
-            options.value.forEach(newitem => {
-                if (!newitem.content) {
-                    return;
-                }
-                const hasMatch = cellData.value.mAsset.find(oldItem => {
-                    if (oldItem.content === newitem.content) {
-                        oldItem.name = newitem.name;
-                        oldItem.type = newitem.type;
+            if (elementIndex === 0) {
+                cellData.value.mAsset.find((oldItem, index) => {
+                    if (oldItem.content === options.removeContent) {
+                        cellData.value.mAsset.splice(index, 1);
                         return true;
                     }
                 });
-                if (!hasMatch) {
-                    if (newitem.type === "file" && !newitem.name) {
-                        newitem.name = newitem.content;
+                newValue = cellData.value.mAsset;
+            } else {
+                cellData.value.mAsset = newValue;
+            }
+        } else {
+            if (elementIndex === 0) {
+                options.value.forEach(newitem => {
+                    if (!newitem.content) {
+                        return;
                     }
-                    cellData.value.mAsset.push(newitem);
-                }
-            });
+                    const hasMatch = cellData.value.mAsset.find(oldItem => {
+                        if (oldItem.content === newitem.content) {
+                            oldItem.name = newitem.name;
+                            oldItem.type = newitem.type;
+                            return true;
+                        }
+                    });
+                    if (!hasMatch) {
+                        if (newitem.type === "file" && !newitem.name) {
+                            newitem.name = newitem.content;
+                        }
+                        cellData.value.mAsset.push(newitem);
+                    }
+                });
+                newValue = cellData.value.mAsset;
+            } else {
+                cellData.value.mAsset = newValue;
+            }
         }
         cellDoOperations.push({
             action: "updateAttrViewCell",

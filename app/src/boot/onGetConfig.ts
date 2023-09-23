@@ -256,14 +256,14 @@ export const initWindow = (app: App) => {
                 if (!pluginPathname) {
                     return;
                 }
-                const pluginTabId = pluginPathname.split("/")[0];
+                const pluginId = pluginPathname.split("/")[0];
                 app.plugins.forEach(plugin => {
                     if (pluginPathname.startsWith(plugin.name)) {
                         // siyuan://plugins/plugin-name/foo?bar=baz
                         plugin.eventBus.emit("open-siyuan-url-plugin", {url});
 
                         // https://github.com/siyuan-note/siyuan/pull/9256
-                        if (pluginTabId !== plugin.name) {
+                        if (pluginId !== plugin.name) {
                             // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
                             let data = urlObj.searchParams.get("data");
                             try {
@@ -277,7 +277,7 @@ export const initWindow = (app: App) => {
                                     title: urlObj.searchParams.get("title"),
                                     icon: urlObj.searchParams.get("icon"),
                                     data,
-                                    id: pluginTabId
+                                    id: pluginPathname
                                 },
                             });
                         }

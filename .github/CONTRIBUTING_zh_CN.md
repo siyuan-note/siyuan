@@ -2,8 +2,10 @@
 
 ## 获取源码
 
-* `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git` 例如保存在 `D:/siyuan/`
-* 切换到 dev 分支
+* `git clone --depth=1 git@github.com:siyuan-note/siyuan.git`
+* 切换到 dev 分支 `git checkout dev`
+
+备注：`app/stage/protyle/**` 使用 git lfs 管理，正常情况下无需关注，关联 [#9253](https://github.com/siyuan-note/siyuan/issues/9253)。
 
 ## NPM 依赖
 

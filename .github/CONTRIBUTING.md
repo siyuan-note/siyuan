@@ -2,8 +2,10 @@
 
 ## Get the source code
 
-* `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git` For example saved in `D:/siyuan/`
-* switch to dev branch
+* `git clone --depth=1 git@github.com:siyuan-note/siyuan.git`
+* switch to dev branch `git checkout dev`
+
+Note: `app/stage/protyle/**` is managed by git lfs, and you don't need to pay attention to it under normal circumstances, related to [#9253](https://github.com/siyuan-note/siyuan/issues/9253).
 
 ## User Interface
 

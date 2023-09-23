@@ -10,7 +10,7 @@ import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML, setDateValue} from "./date";
 import {formatNumber} from "./number";
 import {removeAttrViewColAnimation} from "./action";
-import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML} from "./asset";
+import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
 import {Constants} from "../../../constants";
 
 export const openMenuPanel = (options: {
@@ -225,6 +225,35 @@ export const openMenuPanel = (options: {
                     data: oldData
                 }]);
                 menuElement.innerHTML = getFiltersHTML(data.view);
+                return;
+            }
+            if (type === "assets") {
+                const changeData = data.view.filters;
+                let targetFilter: IAVFilter;
+                changeData.find((filter, index: number) => {
+                    if (filter.column === sourceId) {
+                        targetFilter = changeData.splice(index, 1)[0];
+                        return true;
+                    }
+                });
+                changeData.find((filter, index: number) => {
+                    if (filter.column === targetId) {
+                        if (isTop) {
+                            changeData.splice(index, 0, targetFilter);
+                        } else {
+                            changeData.splice(index + 1, 0, targetFilter);
+                        }
+                        return true;
+                    }
+                });
+
+                updateAssetCell({
+                    protyle:options.protyle,
+                    data,
+                    cellElements:options.cellElements,
+                    type: "replace",
+                    replaceValue
+                });
                 return;
             }
             transaction(options.protyle, [{

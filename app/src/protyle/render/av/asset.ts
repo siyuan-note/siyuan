@@ -37,7 +37,8 @@ export const bindAssetEvent = (options: {
                 protyle: options.protyle,
                 data: options.data,
                 cellElements: options.cellElements,
-                value
+                type: "addUpdate",
+                addUpdateValue: value
             });
         });
     });
@@ -94,11 +95,13 @@ ${contentHTML}
 </div>`;
 };
 
-const updateAssetCell = (options: {
+export const updateAssetCell = (options: {
     protyle: IProtyle,
     data: IAV,
     cellElements: HTMLElement[],
-    value?: IAVCellAssetValue[],
+    type: "replace" | "addUpdate" | "remove",
+    replaceValue?: IAVCellAssetValue[],
+    addUpdateValue?: IAVCellAssetValue[],
     removeContent?: string
 }) => {
     let cellIndex = 0;
@@ -128,7 +131,7 @@ const updateAssetCell = (options: {
             }
         });
         const oldValue = Object.assign([], cellData.value.mAsset);
-        if (options.removeContent) {
+        if (options.type === "remove") {
             if (elementIndex === 0) {
                 cellData.value.mAsset.find((oldItem, index) => {
                     if (oldItem.content === options.removeContent) {
@@ -140,9 +143,9 @@ const updateAssetCell = (options: {
             } else {
                 cellData.value.mAsset = newValue;
             }
-        } else {
+        } else if (options.type === "addUpdate") {
             if (elementIndex === 0) {
-                options.value.forEach(newitem => {
+                options.addUpdateValue.forEach(newitem => {
                     if (!newitem.content) {
                         return;
                     }
@@ -164,6 +167,8 @@ const updateAssetCell = (options: {
             } else {
                 cellData.value.mAsset = newValue;
             }
+        } else {
+            cellData.value.mAsset = options.replaceValue;
         }
         cellDoOperations.push({
             action: "updateAttrViewCell",
@@ -208,7 +213,8 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
             protyle,
             data,
             cellElements,
-            value: [{
+            type: "addUpdate",
+            addUpdateValue: [{
                 content: linkAddress,
                 name: textElement.value,
                 type
@@ -240,6 +246,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
                 protyle,
                 data,
                 cellElements,
+                type: "remove",
                 removeContent: linkAddress
             });
         }
@@ -273,7 +280,8 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
             protyle,
             data,
             cellElements,
-            value: [{
+            type: "addUpdate",
+            addUpdateValue: [{
                 type: "file",
                 name: textElements[1].value,
                 content: textElements[0].value,

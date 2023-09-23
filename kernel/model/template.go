@@ -271,6 +271,11 @@ func renderTemplate(p, id string) (string, error) {
 					unlinks = append(unlinks, n)
 				}
 			}
+		} else if n.IsTextMarkType("inline-math") {
+			if n.ParentIs(ast.NodeTableCell) {
+				// 表格中的公式中带有管道符时使用 HTML 实体替换管道符 Improve the handling of inline-math containing `|` in the table https://github.com/siyuan-note/siyuan/issues/9227
+				n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, "|", "&#124;")
+			}
 		}
 		return ast.WalkContinue
 	})

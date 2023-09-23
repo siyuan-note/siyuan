@@ -252,7 +252,7 @@ export const openMenuPanel = (options: {
                     data,
                     cellElements:options.cellElements,
                     type: "replace",
-                    replaceValue
+                    // replaceValue
                 });
                 return;
             }

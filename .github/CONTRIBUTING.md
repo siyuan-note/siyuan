@@ -2,8 +2,8 @@
 
 ## Get the source code
 
-* `git clone --recurse-submodules git@github.com:siyuan-note/siyuan.git` For example saved in `D:/siyuan/`
-* switch to dev branch
+* `git clone --depth=1 git@github.com:siyuan-note/siyuan.git`
+* switch to dev branch `git checkout dev`
 
 ## User Interface
 

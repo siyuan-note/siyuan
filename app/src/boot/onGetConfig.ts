@@ -16,7 +16,7 @@ import {renderSnippet} from "../config/util/snippets";
 import {openFile, openFileById} from "../editor/util";
 import {focusByRange} from "../protyle/util/selection";
 import {exitSiYuan} from "../dialog/processSystem";
-import {getSearch, isWindow} from "../util/functions";
+import {getSearch, isWindow, trimPrefix} from "../util/functions";
 import {initStatus} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
@@ -243,31 +243,43 @@ export const initWindow = (app: App) => {
     currentWindow.on("blur", winOnBlur);
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPEN_URL, (event, url) => {
-            if (url.startsWith("siyuan://plugins/")) {
-                const pluginId = url.replace("siyuan://plugins/", "").split("?")[0];
-                if (!pluginId) {
+            try {
+                var urlObj = new URL(url);
+                if (urlObj.protocol !== "siyuan:") {
+                    return;
+                }
+            } catch (error) {
+                return;
+            }
+            if (urlObj.pathname.startsWith("//plugins/")) {
+                const pluginPathname = trimPrefix(urlObj.pathname, "//plugins/");
+                if (!pluginPathname) {
                     return;
                 }
                 app.plugins.find(plugin => {
-                    if (pluginId.startsWith(plugin.name)) {
+                    if (pluginPathname.startsWith(plugin.name)) {
                         // siyuan://plugins/plugin-name/foo?bar=baz
                         plugin.eventBus.emit("open-siyuan-url-plugin", {url});
-                        // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-                        let data = getSearch("data", url);
-                        try {
-                            data = JSON.parse(data || "{}");
-                        } catch (e) {
-                            console.log("Error open plugin tab with protocol:", e);
+                        
+                        const pluginTabId = pluginPathname.split("/")[0];
+                        if (pluginTabId !== plugin.name) {
+                            // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
+                            let data = urlObj.searchParams.get("data");
+                            try {
+                                data = JSON.parse(data || "{}");
+                            } catch (e) {
+                                console.log("Error open plugin tab with protocol:", e);
+                            }
+                            openFile({
+                                app,
+                                custom: {
+                                    title: urlObj.searchParams.get("title"),
+                                    icon: urlObj.searchParams.get("icon"),
+                                    data,
+                                    id: pluginTabId
+                                },
+                            });
                         }
-                        openFile({
-                            app,
-                            custom: {
-                                title: getSearch("title", url),
-                                icon: getSearch("icon", url),
-                                data,
-                                id: pluginId
-                            },
-                        });
                         return true;
                     }
                 });
@@ -275,7 +287,7 @@ export const initWindow = (app: App) => {
             }
             if (isSYProtocol(url)) {
                 const id = getIdFromSYProtocol(url);
-                const focus = getSearch("focus", url) === "1";
+                const focus = urlObj.searchParams.get("focus") === "1";
                 fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
                     if (existResponse.data) {
                         openFileById({

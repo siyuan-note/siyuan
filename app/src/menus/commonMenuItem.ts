@@ -19,7 +19,7 @@ import * as dayjs from "dayjs";
 import {Constants} from "../constants";
 import {exportImage} from "../protyle/export/util";
 import {App} from "../index";
-import {renderAVAttribute} from "../protyle/render/av/render";
+import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {

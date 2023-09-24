@@ -191,13 +191,6 @@
       opacity: 1;
       background-color: var(--b3-theme-background-light) !important;
     }
-
-    .av__cellassetimg {
-      max-height: 24px;
-      border-radius: var(--b3-border-radius);
-      margin: 1px 2px;
-      max-width: none;
-    }
   }
 
   &__cellheader {
@@ -352,4 +345,10 @@
   }
 }
 
+img.av__cellassetimg {
+  max-height: 24px;
+  border-radius: var(--b3-border-radius);
+  margin: 1px 2px;
+  max-width: none;
+}
 

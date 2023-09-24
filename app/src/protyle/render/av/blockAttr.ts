@@ -58,84 +58,6 @@ export const genAVValueHTML = (value: IAVCellValue) => {
     return html;
 };
 
-const popDateMenu = (dateElement: HTMLElement) => {
-    const dateMenu = new Menu("custom-attr-av-date", () => {
-        const textElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
-        const hasEndDate = (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked;
-        fetchPost("/api/av/setAttributeViewBlockAttr", {
-            avID: dateElement.dataset.avId,
-            keyID: dateElement.dataset.colId,
-            rowID: dateElement.dataset.blockId,
-            cellID: dateElement.dataset.id,
-            value: {
-                date: {
-                    isNotEmpty: textElements[0].value !== "",
-                    isNotEmpty2: textElements[1].value !== "",
-                    content: new Date(textElements[0].value).getTime(),
-                    content2: new Date(textElements[1].value).getTime(),
-                    hasEndDate
-                }
-            }
-        });
-        let dataHTML = "";
-        if (textElements[0].value !== "") {
-            dataHTML = `<span data-content="${new Date(textElements[0].value).getTime()}">${dayjs(textElements[0].value).format("YYYY-MM-DD HH:mm")}</span>`;
-        }
-        if (hasEndDate && textElements[0].value !== "" && textElements[1].value !== "") {
-            dataHTML += `<svg class="custom-attr__avarrow"><use xlink:href="#iconForward"></use></svg><span data-content="${new Date(textElements[1].value).getTime()}">${dayjs(textElements[1].value).format("YYYY-MM-DD HH:mm")}</span>`;
-        }
-        dateElement.innerHTML = dataHTML;
-    });
-    if (dateMenu.isOpen) {
-        return;
-    }
-    const hasEndDate = dateElement.querySelector("svg");
-    const timeElements = dateElement.querySelectorAll("span");
-    dateMenu.addItem({
-        iconHTML: "",
-        label: `<input value="${timeElements[0] ? dayjs(parseInt(timeElements[0].dataset.content)).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200" style="margin: 4px 0">`
-    });
-    dateMenu.addItem({
-        iconHTML: "",
-        label: `<input value="${timeElements[1] ? dayjs(parseInt(timeElements[1].dataset.content)).format("YYYY-MM-DDTHH:mm") : ""}" type="datetime-local" class="b3-text-field fn__size200${hasEndDate ? "" : " fn__none"}" style="margin: 4px 0">`
-    });
-    dateMenu.addSeparator();
-    dateMenu.addItem({
-        iconHTML: "",
-        label: `<label class="fn__flex">
-    <span>${window.siyuan.languages.endDate}</span>
-    <span class="fn__space fn__flex-1"></span>
-    <input type="checkbox" class="b3-switch fn__flex-center"${hasEndDate ? " checked" : ""}>
-</label>`,
-        click(element, event) {
-            const switchElement = element.querySelector(".b3-switch") as HTMLInputElement;
-            if ((event.target as HTMLElement).tagName !== "INPUT") {
-                switchElement.checked = !switchElement.checked;
-            } else {
-                switchElement.outerHTML = `<input type="checkbox" class="b3-switch fn__flex-center"${switchElement.checked ? " checked" : ""}>`;
-            }
-            window.siyuan.menus.menu.element.querySelectorAll('[type="datetime-local"]')[1].classList.toggle("fn__none");
-            return true;
-        }
-    });
-    dateMenu.addSeparator();
-    dateMenu.addItem({
-        icon: "iconTrashcan",
-        label: window.siyuan.languages.clear,
-        click() {
-            const textElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
-            textElements[0].value = "";
-            textElements[1].value = "";
-            (window.siyuan.menus.menu.element.querySelector(".b3-switch") as HTMLInputElement).checked = false;
-        }
-    });
-    const datetRect = dateElement.getBoundingClientRect();
-    dateMenu.open({
-        x: datetRect.left,
-        y: datetRect.bottom
-    });
-}
-
 export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IProtyle) => {
     fetchPost("/api/av/getAttributeViewKeys", {id}, (response) => {
         let html = "";
@@ -174,7 +96,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             const target = event.target as HTMLElement;
             const dateElement = hasClosestByAttribute(target, "data-type", "date");
             if (dateElement) {
-                popDateMenu(dateElement);
+                popTextCell(protyle, [dateElement], "date");
                 event.stopPropagation();
                 event.preventDefault();
                 return;

@@ -5,6 +5,7 @@ import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
+import {genAVValueHTML} from "./blockAttr";
 
 const filterSelectHTML = (key: string, options: { name: string, color: string }[]) => {
     let html = "";
@@ -98,7 +99,11 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
                 mSelect: oldValue
             }
         });
-        updateAttrViewCellAnimation(item);
+        if (item.classList.contains("custom-attr__avvalue")) {
+            item.innerHTML = genAVValueHTML(cellData.value);
+        } else {
+            updateAttrViewCellAnimation(item);
+        }
     });
     transaction(protyle, doOperations, undoOperations);
     target.remove();
@@ -161,6 +166,11 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                         return true;
                                     }
                                 });
+                                if (cellElement.classList.contains("custom-attr__avvalue")) {
+                                    cellElement.innerHTML = genAVValueHTML(cell.value);
+                                } else {
+                                    updateAttrViewCellAnimation(cellElement);
+                                }
                                 return true;
                             }
                         });
@@ -234,6 +244,11 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                                 return true;
                                             }
                                         });
+                                        if (cellElement.classList.contains("custom-attr__avvalue")) {
+                                            cellElement.innerHTML = genAVValueHTML(cell.value);
+                                        } else {
+                                            updateAttrViewCellAnimation(cellElement);
+                                        }
                                         return true;
                                     }
                                 });
@@ -309,6 +324,11 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                                 return true;
                                             }
                                         });
+                                        if (cellElement.classList.contains("custom-attr__avvalue")) {
+                                            cellElement.innerHTML = genAVValueHTML(cell.value);
+                                        } else {
+                                            updateAttrViewCellAnimation(cellElement);
+                                        }
                                         return true;
                                     }
                                 });
@@ -394,7 +414,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     }
 
     const colId = cellElements[0].dataset.colId;
-    let cellIndex = 0;
+    let cellIndex: number;
     Array.from(cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
         if (item.dataset.id === cellElements[0].dataset.id) {
             cellIndex = index;
@@ -420,11 +440,19 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         const rowID = item.parentElement.dataset.id;
         data.view.rows.find(row => {
             if (row.id === rowID) {
-                cellData = row.cells[cellIndex];
-                // 为空时 cellId 每次请求都不一致
-                cellData.id = item.dataset.id;
-                if (!cellData.value || !cellData.value.mSelect) {
-                    cellData.value = {mSelect: []} as IAVCellValue;
+                if (typeof cellIndex === "number") {
+                    cellData = row.cells[cellIndex];
+                    // 为空时 cellId 每次请求都不一致
+                    cellData.id = item.dataset.id;
+                    if (!cellData.value || !cellData.value.mSelect) {
+                        cellData.value = {mSelect: []} as IAVCellValue;
+                    }
+                } else {
+                    cellData = row.cells.find(cellItem => {
+                        if (cellItem.id === item.dataset.id) {
+                            return true;
+                        }
+                    });
                 }
                 return true;
             }
@@ -479,7 +507,11 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                 [colData.type]: oldValue
             }
         });
-        updateAttrViewCellAnimation(item);
+        if (item.classList.contains("custom-attr__avvalue")) {
+            item.innerHTML = genAVValueHTML(cellData.value);
+        } else {
+            updateAttrViewCellAnimation(item);
+        }
     });
 
     if (currentElement.querySelector(".b3-menu__accelerator")) {

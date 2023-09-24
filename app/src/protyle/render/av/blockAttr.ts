@@ -136,77 +136,6 @@ const popDateMenu = (dateElement: HTMLElement) => {
     });
 }
 
-const popSelectMenu = (mSelectElement: HTMLElement) => {
-    const mSelectMenu = new Menu("custom-attr-av-select", () => {
-        const mSelect: { content: string, color: string }[] = [];
-        let mSelectHTML = "";
-        window.siyuan.menus.menu.element.querySelectorAll(".svg").forEach(item => {
-            const chipElement = item.parentElement.previousElementSibling.firstElementChild as HTMLElement;
-            const content = chipElement.textContent.trim();
-            const color = chipElement.dataset.color;
-            mSelect.push({
-                content,
-                color
-            });
-            mSelectHTML += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${color});color:var(--b3-font-color${color})">${content}</span>`;
-        });
-        fetchPost("/api/av/setAttributeViewBlockAttr", {
-            avID: mSelectElement.dataset.avId,
-            keyID: mSelectElement.dataset.colId,
-            rowID: mSelectElement.dataset.blockId,
-            cellID: mSelectElement.dataset.id,
-            value: {
-                mSelect
-            }
-        });
-        mSelectElement.innerHTML = mSelectHTML;
-    });
-    if (mSelectMenu.isOpen) {
-        return;
-    }
-    const names: string[] = [];
-    mSelectElement.querySelectorAll(".b3-chip").forEach(item => {
-        names.push(item.textContent.trim());
-    });
-    JSON.parse(mSelectElement.dataset.options || "").forEach((item: { name: string, color: string }) => {
-        mSelectMenu.addItem({
-            iconHTML: "",
-            label: `<span class="b3-chip" data-color="${item.color}" style="height:24px;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
-    <span class="fn__ellipsis">${item.name}</span>
-</span>`,
-            accelerator: names.includes(item.name) ? '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>' : Constants.ZWSP,
-            click(element) {
-                const acceleratorElement = element.querySelector(".b3-menu__accelerator");
-                if (mSelectElement.dataset.type === "select") {
-                    window.siyuan.menus.menu.element.querySelectorAll(".b3-menu__accelerator").forEach(itemElement => {
-                        if (itemElement.isSameNode(acceleratorElement)) {
-                            if (acceleratorElement.querySelector("svg")) {
-                                acceleratorElement.innerHTML = "";
-                            } else {
-                                acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>';
-                            }
-                        } else {
-                            itemElement.innerHTML = "";
-                        }
-                    });
-                    return false;
-                }
-                if (acceleratorElement.querySelector("svg")) {
-                    acceleratorElement.innerHTML = "";
-                } else {
-                    acceleratorElement.innerHTML = '<svg class="svg" style="height: 30px; float: left;"><use xlink:href="#iconSelect"></use></svg>';
-                }
-                return true;
-            }
-        });
-    });
-    const mSelecttRect = mSelectElement.getBoundingClientRect();
-    mSelectMenu.open({
-        x: mSelecttRect.left,
-        y: mSelecttRect.bottom
-    });
-}
-
 export const renderAVAttribute = (element: HTMLElement, id: string, protyle?: IProtyle) => {
     fetchPost("/api/av/getAttributeViewKeys", {id}, (response) => {
         let html = "";
@@ -252,7 +181,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             }
             const mSelectElement = hasClosestByAttribute(target, "data-type", "select") || hasClosestByAttribute(target, "data-type", "mSelect");
             if (mSelectElement) {
-                popSelectMenu(mSelectElement);
+                popTextCell(protyle, [mSelectElement], mSelectElement.getAttribute("data-type") as TAVCol);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

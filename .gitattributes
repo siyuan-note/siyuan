@@ -1,4 +1,1 @@
 app/stage/protyle/** linguist-vendored
-app/stage/protyle/*/** filter=lfs diff=lfs merge=lfs -text
-app/stage/protyle/**.min.js filter=lfs diff=lfs merge=lfs -text
-app/pandoc/* filter=lfs diff=lfs merge=lfs -text

@@ -3,3 +3,7 @@ themes/*
 !themes/daylight/
 !themes/midnight/
 
+icons/
+!icons/ant/
+!icons/material/
+!icons/index.html

@@ -339,8 +339,10 @@ export const openCalcMenu = (protyle: IProtyle, calcElement: HTMLElement) => {
     menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
 };
 
-export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[]) => {
-    const type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol) => {
+    if (!type) {
+        type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
+    }
     if (type === "block") {
         return;
     }

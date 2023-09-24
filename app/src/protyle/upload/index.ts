@@ -152,6 +152,31 @@ export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: b
 };
 
 export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement, successCB?: (res: string) => void) => {
+    // 文档书中点开属性->数据库后的变更操作
+    if (!protyle) {
+        const formData = new FormData();
+        for (let i = 0, iMax = files.length; i < iMax; i++) {
+            formData.append("file[]", files[i] as File);
+        }
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST",  Constants.UPLOAD_ADDRESS);
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                        successCB(xhr.responseText);
+                } else if (xhr.status === 0) {
+                    showMessage(window.siyuan.languages.fileTypeError);
+                } else {
+                        showMessage(xhr.responseText);
+                }
+                if (element) {
+                    element.value = "";
+                }
+            }
+        };
+        xhr.send(formData);
+        return;
+    }
     // FileList | DataTransferItemList | File[] => File[]
     let fileList = [];
     for (let i = 0; i < files.length; i++) {

@@ -92,7 +92,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
             icon: "iconAttr",
             accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧Click"),
             click() {
-                openFileAttr(response.data.ial);
+                openFileAttr(response.data.ial, "bookmark", protyle);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({

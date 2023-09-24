@@ -17,9 +17,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, "bookmark");
+                openFileAttr(data, "bookmark", protyle);
             } else {
-                openAttr(attrBookmarkElement.parentElement.parentElement, "bookmark");
+                openAttr(attrBookmarkElement.parentElement.parentElement, "bookmark", protyle);
             }
         }
         event.stopPropagation();
@@ -34,9 +34,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, "name");
+                openFileAttr(data, "name", protyle);
             } else {
-                openAttr(attrNameElement.parentElement.parentElement, "name");
+                openAttr(attrNameElement.parentElement.parentElement, "name", protyle);
             }
         }
         event.stopPropagation();
@@ -51,9 +51,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, "alias");
+                openFileAttr(data, "alias", protyle);
             } else {
-                openAttr(attrAliasElement.parentElement.parentElement, "alias");
+                openAttr(attrAliasElement.parentElement.parentElement, "alias", protyle);
             }
         }
         event.stopPropagation();
@@ -68,9 +68,9 @@ export const commonClick = (event: MouseEvent & {
             /// #endif
         } else {
             if (data) {
-                openFileAttr(data, "memo");
+                openFileAttr(data, "memo", protyle);
             } else {
-                openAttr(attrMemoElement.parentElement.parentElement, "memo");
+                openAttr(attrMemoElement.parentElement.parentElement, "memo", protyle);
             }
         }
         event.stopPropagation();

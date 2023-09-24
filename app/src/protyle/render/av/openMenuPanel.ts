@@ -58,7 +58,7 @@ export const openMenuPanel = (options: {
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
-        const tabRect = options.blockElement.querySelector(".layout-tab-bar").getBoundingClientRect();
+        const tabRect = options.blockElement.querySelector(".layout-tab-bar")?.getBoundingClientRect();
         if (["select", "date", "asset"].includes(options.type)) {
             const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
             if (options.type === "select") {
@@ -94,7 +94,12 @@ export const openMenuPanel = (options: {
             window.siyuan.dragElement.style.opacity = "";
             const sourceElement = window.siyuan.dragElement;
             window.siyuan.dragElement = undefined;
-            if (options.protyle.disabled) {
+            if (options.protyle && options.protyle.disabled) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (!options.protyle && window.siyuan.config.readonly) {
                 event.preventDefault();
                 event.stopPropagation();
                 return;

@@ -88,7 +88,7 @@ export class Breadcrumb {
                         fetchPost("/api/block/getDocInfo", {
                             id: protyle.block.rootID
                         }, (response) => {
-                            openFileAttr(response.data.ial);
+                            openFileAttr(response.data.ial, "bookmark", protyle);
                         });
                     } else {
                         const targetRect = target.getBoundingClientRect();

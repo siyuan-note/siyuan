@@ -10,6 +10,7 @@ import {MenuItem} from "../../../menus/Menu";
 import {exportAsset} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {previewImage} from "../../preview/image";
+import {genAVValueHTML} from "./blockAttr";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -104,14 +105,13 @@ export const updateAssetCell = (options: {
     addUpdateValue?: IAVCellAssetValue[],
     removeContent?: string
 }) => {
-    let cellIndex = 0;
+    let cellIndex: number;
     Array.from(options.cellElements[0].parentElement.querySelectorAll(".av__cell")).find((item: HTMLElement, index) => {
         if (item.dataset.id === options.cellElements[0].dataset.id) {
             cellIndex = index;
             return true;
         }
     });
-
     const colId = options.cellElements[0].dataset.colId;
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
@@ -121,11 +121,19 @@ export const updateAssetCell = (options: {
         const rowID = item.parentElement.dataset.id;
         options.data.view.rows.find(row => {
             if (row.id === rowID) {
-                cellData = row.cells[cellIndex];
-                // 为空时 cellId 每次请求都不一致
-                cellData.id = item.dataset.id;
-                if (!cellData.value || !cellData.value.mAsset) {
-                    cellData.value = {mAsset: []} as IAVCellValue;
+                if (typeof cellIndex === "number") {
+                    cellData = row.cells[cellIndex];
+                    // 为空时 cellId 每次请求都不一致
+                    cellData.id = item.dataset.id;
+                    if (!cellData.value || !cellData.value.mAsset) {
+                        cellData.value = {mAsset: []} as IAVCellValue;
+                    }
+                } else {
+                    cellData = row.cells.find(cellItem => {
+                        if (cellItem.id === item.dataset.id) {
+                            return true;
+                        }
+                    });
                 }
                 return true;
             }
@@ -188,14 +196,18 @@ export const updateAssetCell = (options: {
                 mAsset: oldValue
             }
         });
-        updateAttrViewCellAnimation(item);
+        if (item.classList.contains("custom-attr__avvalue")) {
+            item.innerHTML = genAVValueHTML(cellData.value)
+        } else {
+            updateAttrViewCellAnimation(item);
+        }
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
     const menuElement = document.querySelector(".av__panel > .b3-menu") as HTMLElement;
     if (menuElement) {
         menuElement.innerHTML = getAssetHTML(options.data.view, options.cellElements);
         bindAssetEvent({protyle: options.protyle, data: options.data, menuElement, cellElements: options.cellElements});
-        const cellRect = options.protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`).getBoundingClientRect();
+        const cellRect = (options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] : options.protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`)).getBoundingClientRect();
         setTimeout(() => {
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
         }, Constants.TIMEOUT_LOAD);  // 等待图片加载
@@ -251,7 +263,7 @@ export const editAssetItem = (protyle: IProtyle, data: IAV, cellElements: HTMLEl
             });
         }
     });
-    openMenu(protyle.app, linkAddress, false, true);
+    openMenu(protyle ? protyle.app : window.siyuan.ws.app, linkAddress, false, true);
     /// #if !BROWSER
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
@@ -302,7 +314,7 @@ export const addAssetLink = (protyle: IProtyle, data: IAV, cellElements: HTMLEle
     const rect = target.getBoundingClientRect();
     menu.open({
         x: rect.right,
-        y: rect.bottom,
+        y: rect.top,
         w: rect.width,
         h: rect.height,
     });

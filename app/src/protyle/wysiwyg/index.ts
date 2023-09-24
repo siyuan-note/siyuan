@@ -1978,7 +1978,7 @@ export class WYSIWYG {
                         }
                         hideElements(["gutter"], protyle);
                     } else if (event.shiftKey && !protyle.disabled) {
-                        openAttr(actionElement.parentElement);
+                        openAttr(actionElement.parentElement, "bookmark", protyle);
                     } else if (ctrlIsPressed) {
                         zoomOut({protyle, id: actionId});
                     } else {

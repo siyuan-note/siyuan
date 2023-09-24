@@ -149,7 +149,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     });
 };
 
-export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
+export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: IProtyle) => {
     let customHTML = "";
     let notifyHTML = "";
     let hasAV = false;
@@ -187,7 +187,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
             <span class="item__text">${window.siyuan.languages.builtIn}</span>
             <span class="fn__flex-1"></span>
         </div>
-        <div class="item item--full${hasAV ? "" : " fn__none"}" data-type="av">
+        <div class="item item--full${hasAV ? "" : " fn__none"}" data-type="NodeAttributeView">
             <span class="fn__flex-1"></span>
             <span class="item__text">${window.siyuan.languages.database}</span>
             <span class="fn__flex-1"></span>
@@ -225,7 +225,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
             </label>
             ${notifyHTML}
         </div>
-        <div data-type="av" class="fn__none custom-attr"></div>
+        <div data-type="NodeAttributeView" class="fn__none custom-attr" data-av-id="${attrs["custom-avs"]}" data-node-id="${attrs.id}"></div>
         <div data-type="custom" class="fn__none custom-attr">
            ${customHTML}
            <div class="b3-label">
@@ -252,8 +252,8 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
                 target.classList.add("item--focus");
                 dialog.element.querySelectorAll(".custom-attr").forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
-                        if (item.dataset.type === "av" && item.innerHTML === "") {
-                            renderAVAttribute(item, attrs.id);
+                        if (item.dataset.type === "NodeAttributeView" && item.innerHTML === "") {
+                            renderAVAttribute(item, attrs.id, protyle);
                         }
                         item.classList.remove("fn__none");
                     } else {
@@ -349,13 +349,13 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark") => {
     });
 };
 
-export const openAttr = (nodeElement: Element, focusName = "bookmark") => {
+export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?: IProtyle) => {
     if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return;
     }
     const id = nodeElement.getAttribute("data-node-id");
     fetchPost("/api/attr/getBlockAttrs", {id}, (response) => {
-        openFileAttr(response.data, focusName);
+        openFileAttr(response.data, focusName, protyle);
     });
 };
 

@@ -1056,7 +1056,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else {
                     actionElement = topElement;
                 }
-                openAttr(actionElement);
+                openAttr(actionElement, "bookmark", protyle);
             } else {
                 const oldHTML = topElement.outerHTML;
                 const name = Lute.EscapeHTMLStr(selectText);

@@ -518,9 +518,6 @@ export class Breadcrumb {
                 }).element);
             }
             /// #endif
-            if (!protyle.disabled) {
-                transferBlockRef(protyle.block.rootID);
-            }
             if (protyle?.app?.plugins) {
                 emitOpenMenu({
                     plugins: protyle.app.plugins,

@@ -287,7 +287,6 @@ export class Title {
         }, Constants.TIMEOUT_INPUT);
     }
 
-
     public setTitle(title: string) {
         if (code160to32(title) !== code160to32(this.editElement.textContent)) {
             this.editElement.textContent = title === "Untitled" ? "" : title;

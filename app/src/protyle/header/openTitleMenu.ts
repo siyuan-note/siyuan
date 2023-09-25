@@ -26,6 +26,7 @@ import {openSearch} from "../../search/spread";
 import {openDocHistory} from "../../history/doc";
 import {openNewWindowById} from "../../window/openNewWindow";
 import {genImportMenu} from "../../menus/navigation";
+import {transferBlockRef} from "../../menus/block";
 
 export const openTitleMenu = (protyle: IProtyle, position: {
     x: number
@@ -222,6 +223,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                     /// #endif
                 }
             }).element);
+            transferBlockRef(protyle.block.rootID);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         /// #if !BROWSER
@@ -262,7 +264,7 @@ export const openTitleMenu = (protyle: IProtyle, position: {
                 separatorPosition: "top",
             });
         }
-        window.siyuan.menus.menu.append(new MenuItem({ type: "separator" }).element);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: Constants.ZWSP,
             type: "readonly",

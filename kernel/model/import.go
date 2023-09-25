@@ -187,6 +187,16 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		})
 	}
 
+	// 将关联的数据库文件移动到 data/storage/av/ 下
+	storageAvDir := filepath.Join(unzipRootPath, "storage", "av")
+	if gulu.File.IsExist(storageAvDir) {
+		targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
+		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
+			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+		}
+
+	}
+
 	// 写回 .sy
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)

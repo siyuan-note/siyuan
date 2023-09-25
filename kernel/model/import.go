@@ -199,7 +199,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	// 将关联的数据库文件移动到 data/storage/av/ 下
-	storageAvDir := filepath.Join(unzipRootPath, "storage", "av")
+	storage := filepath.Join(unzipRootPath, "storage")
+	storageAvDir := filepath.Join(storage, "av")
 	if gulu.File.IsExist(storageAvDir) {
 		// 将数据库文件中的块 ID 替换为新的块 ID
 		filepath.Walk(storageAvDir, func(path string, info fs.FileInfo, err error) error {
@@ -230,10 +231,11 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
 			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
 		}
+	}
 
-		if removeErr := os.RemoveAll(storageAvDir); nil != removeErr {
-			logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
-		}
+	// storage 文件夹已在上方处理，所以这里删除源 storage 文件夹，避免后面拷贝到导入目录下
+	if removeErr := os.RemoveAll(storage); nil != removeErr {
+		logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
 	}
 
 	// 写回 .sy

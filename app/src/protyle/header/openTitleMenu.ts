@@ -188,41 +188,6 @@ export const openTitleMenu = (protyle: IProtyle, position: {
             }
         }).element);
         if (!protyle.disabled) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.replace,
-                accelerator: window.siyuan.config.keymap.general.replace.custom,
-                icon: "iconReplace",
-                async click() {
-                    const searchPath = getDisplayName(protyle.path, false, true);
-                    /// #if MOBILE
-                    const pathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
-                        notebook: protyle.notebookId,
-                        path: searchPath + ".sy"
-                    });
-                    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
-                    popSearch(protyle.app, {
-                        removed: localData.removed,
-                        sort: localData.sort,
-                        group: localData.group,
-                        hasReplace: true,
-                        method: localData.method,
-                        hPath: pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),
-                        idPath: [pathPosix().join(protyle.notebookId, searchPath)],
-                        k: localData.k,
-                        r: localData.r,
-                        page: 1,
-                        types: Object.assign({}, localData.types)
-                    });
-                    /// #else
-                    openSearch({
-                        app: protyle.app,
-                        hotkey: window.siyuan.config.keymap.general.replace.custom,
-                        notebookId: protyle.notebookId,
-                        searchPath
-                    });
-                    /// #endif
-                }
-            }).element);
             transferBlockRef(protyle.block.rootID);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

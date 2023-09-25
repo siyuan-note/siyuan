@@ -1836,44 +1836,46 @@ export class WYSIWYG {
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {
                 const embedId = embedItemElement.getAttribute("data-id");
-                /// #if MOBILE
-                openMobileFileById(protyle.app, embedId, [Constants.CB_GET_ALL]);
-                activeBlur();
-                hideKeyboardToolbar();
-                /// #else
-                if (event.shiftKey) {
-                    openFileById({
-                        app: protyle.app,
-                        id: embedId,
-                        position: "bottom",
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
-                        zoomIn: true
-                    });
-                } else if (event.altKey) {
-                    openFileById({
-                        app: protyle.app,
-                        id: embedId,
-                        position: "right",
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
-                        zoomIn: true
-                    });
-                } else if (ctrlIsPressed) {
-                    openFileById({
-                        app: protyle.app,
-                        id: embedId,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL],
-                        keepCursor: true,
-                        zoomIn: true
-                    });
-                } else if (!protyle.disabled) {
-                    window.siyuan.blockPanels.push(new BlockPanel({
-                        app: protyle.app,
-                        targetElement: embedItemElement,
-                        isBacklink: false,
-                        nodeIds: [embedId],
-                    }));
-                }
-                /// #endif
+                fetchPost("/api/block/checkBlockFold", {id: embedId}, (foldResponse) => {
+                    /// #if MOBILE
+                    openMobileFileById(protyle.app, embedId, foldResponse.data ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                    activeBlur();
+                    hideKeyboardToolbar();
+                    /// #else
+                    if (event.shiftKey) {
+                        openFileById({
+                            app: protyle.app,
+                            id: embedId,
+                            position: "bottom",
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                            zoomIn: foldResponse.data
+                        });
+                    } else if (event.altKey) {
+                        openFileById({
+                            app: protyle.app,
+                            id: embedId,
+                            position: "right",
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                            zoomIn: foldResponse.data
+                        });
+                    } else if (ctrlIsPressed) {
+                        openFileById({
+                            app: protyle.app,
+                            id: embedId,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                            zoomIn: foldResponse.data,
+                            keepCursor: true,
+                        });
+                    } else if (!protyle.disabled) {
+                        window.siyuan.blockPanels.push(new BlockPanel({
+                            app: protyle.app,
+                            targetElement: embedItemElement,
+                            isBacklink: false,
+                            nodeIds: [embedId],
+                        }));
+                    }
+                    /// #endif
+                });
                 event.stopPropagation();
                 return;
             }

@@ -2,6 +2,27 @@
   user-select: none;
   box-sizing: border-box;
 
+  &__pulse {
+    width: 70%;
+    height: 26px;
+    position: relative;
+    overflow: hidden;
+    background: var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+
+    &:after {
+      content: " ";
+      border-radius: var(--b3-border-radius);
+      position: absolute;
+      z-index: 1;
+      animation: 1s linear infinite keyframes-pulse;
+      background: linear-gradient(90deg,transparent 0,rgba(255,255,255,.4) 50%,transparent 100%);
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+  }
+
   &:hover .av__row--footer > .av__calc--show {
     opacity: 1;
   }
@@ -248,11 +269,6 @@
 
     &:hover svg {
       opacity: 1;
-    }
-
-    img {
-      height: 36px;
-      width: 24px;
     }
   }
 

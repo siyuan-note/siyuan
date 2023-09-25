@@ -359,13 +359,13 @@ export const insertAttrViewBlockAnimation = (blockElement: Element, size: number
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     let colHTML = "";
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
-        colHTML += `<div class="av__cell" style="width: ${item.style.width}"></div>`;
+        colHTML += `<div class="av__cell" style="width: ${item.style.width}"><span class="av__pulse"></span></div>`;
     });
 
     let html = "";
     new Array(size).fill(1).forEach(() => {
         html += `<div class="av__row">
-    <div class="av__firstcol"><img src="/stage/loading-pure.svg"></div>
+    <div style="width: 24px"></div>
     ${colHTML}
 </div>`;
     });

@@ -810,7 +810,7 @@
   "md9": "Virtual Reference keyword inclusion list",
   "md12": "Whether to display bookmark, name, alias, memo and reference count",
   "md16": "After enabling, if there is such information, it will be displayed on the upper right side of the block",
-  "md27": "The code block shows the line number",
+  "md27": "Code block line number",
   "md28": "After enabling, the code block will display the line number (Please note that enabling may reduce editor performance)",
   "md29": "Number of Tab Spaces",
   "md30": "Replaces with spaces only when tab is pressed, does not replace tabs in clipboard with spaces",

@@ -235,7 +235,7 @@ func checkSync(boot, exit, byHand bool) bool {
 			return false
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3:
-		if !IsOneTimePaid() {
+		if !IsPaidUser() {
 			return false
 		}
 	}

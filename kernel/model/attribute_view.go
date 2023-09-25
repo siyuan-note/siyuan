@@ -450,7 +450,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		}
 	}
 
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
+	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
 	blockValues.Values = append(blockValues.Values, value)
 
 	attrs := parse.IAL2Map(node.KramdownIAL)

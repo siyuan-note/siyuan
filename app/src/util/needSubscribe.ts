@@ -12,7 +12,8 @@ export const needLogin = (tip = window.siyuan.languages.needLogin) => {
 };
 
 export const needSubscribe = (tip = window.siyuan.languages._kernel[29]) => {
-    if (window.siyuan.user && (window.siyuan.user.userSiYuanProExpireTime === -1 || window.siyuan.user.userSiYuanProExpireTime > 0)) {
+    if (window.siyuan.user && (window.siyuan.user.userSiYuanProExpireTime === -1 || window.siyuan.user.userSiYuanProExpireTime > 0) ||
+        window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
         return false;
     }
     if (tip) {
@@ -27,3 +28,7 @@ export const needSubscribe = (tip = window.siyuan.languages._kernel[29]) => {
     }
     return true;
 };
+
+export const isPaidUser = () => {
+    return window.siyuan.user && (0 === window.siyuan.user.userSiYuanSubscriptionStatus || 1 === window.siyuan.user.userSiYuanOneTimePayStatus);
+}

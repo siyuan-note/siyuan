@@ -233,7 +233,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
-	// storage 文件夹已在上方处理，所以这里删除源 storage 文件夹，避免后面拷贝到导入目录下
+	// storage 文件夹已在上方处理，所以这里删除源 storage 文件夹，避免后面被拷贝到导入目录下 targetDir
 	if removeErr := os.RemoveAll(storage); nil != removeErr {
 		logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
 	}

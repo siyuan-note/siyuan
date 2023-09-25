@@ -110,7 +110,7 @@ class App {
             document.addEventListener("touchend", (event) => {
                 handleTouchEnd(event, siyuanApp);
             }, false);
-            // https://github.com/siyuan-note/siyuan/issues/9259
+            // 移动端删除键 https://github.com/siyuan-note/siyuan/issues/9259
             window.addEventListener("keydown", (event) => {
                 if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);

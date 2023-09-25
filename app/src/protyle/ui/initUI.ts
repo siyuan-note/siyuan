@@ -6,6 +6,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";
+import {lineNumberRender} from "../render/highlightRender";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -92,6 +93,11 @@ export const initUI = (protyle: IProtyle) => {
         clearTimeout(wheelTimeout);
         wheelTimeout = window.setTimeout(() => {
             fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+            if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
+                protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber").forEach((block: HTMLElement) => {
+                    lineNumberRender(block);
+                });
+            }
         }, Constants.TIMEOUT_LOAD);
     }, {passive: false});
 };

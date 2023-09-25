@@ -199,6 +199,7 @@ export const addGA = () => {
 
 export const setInlineStyle = (set = true) => {
     const height = Math.floor(window.siyuan.config.editor.fontSize * 1.625);
+    // .protyle-wysiwyg .hljs.protyle-linenumber 的设置是由于 lineNumberRender 中 clientHeight 总是取的整数
     let style = `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
@@ -209,6 +210,8 @@ export const setInlineStyle = (set = true) => {
 .protyle-wysiwyg [data-node-id] [spellcheck] {min-height:${height}px;}
 .protyle-wysiwyg [data-node-id] {${window.siyuan.config.editor.rtl ? " direction: rtl;" : ""}${window.siyuan.config.editor.justify ? " text-align: justify;" : ""}}
 .protyle-wysiwyg .li {min-height:${height + 8}px}
+.protyle-wysiwyg .hljs.protyle-linenumber {line-height: ${(height * 0.85).toFixed(0)}px}
+.protyle-wysiwyg .av__calc {line-height: ${height}px}
 .protyle-gutters button svg {height:${height}px}
 .protyle-wysiwyg img.emoji, .b3-typography img.emoji {width:${height - 8}px}
 .protyle-wysiwyg .h1 img.emoji, .b3-typography h1 img.emoji {width:${Math.floor(window.siyuan.config.editor.fontSize * 1.75 * 1.25)}px}

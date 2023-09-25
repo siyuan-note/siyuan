@@ -1,7 +1,6 @@
 .av {
   user-select: none;
   box-sizing: border-box;
-  font-size: 14px;
 
   &:hover .av__row--footer > .av__calc--show {
     opacity: 1;
@@ -13,14 +12,12 @@
 
     .layout-tab-bar {
       background-color: transparent;
+      font-size: 87.5%;
     }
   }
 
   &__title {
-    height: 30px;
     outline: none;
-    line-height: 30px;
-    font-size: 16px;
 
     &:empty::after {
       color: var(--b3-theme-on-surface);
@@ -62,6 +59,7 @@
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
     position: relative;
+    font-size: 87.5%;
 
     &:hover {
       [data-type="block-ref"] {
@@ -118,9 +116,8 @@
         flex-direction: row-reverse;
         box-sizing: border-box;
         opacity: 0;
-        line-height: 26px;
         overflow: hidden;
-        font-size: 12px;
+        font-size: 75%;
 
         &.av__calc--ashow {
           opacity: 1;
@@ -133,7 +130,7 @@
         }
 
         span {
-          font-size: 14px;
+          font-size: 116%;
           color: var(--b3-theme-on-background);
           margin-left: 5px;
         }
@@ -150,6 +147,7 @@
       display: flex;
       align-items: center;
       transition: background 20ms ease-in 0s;
+      font-size: 87.5%;
 
       svg {
         height: 12px;
@@ -179,7 +177,7 @@
       display: none;
       position: absolute;
       right: 5px;
-      font-size: 10px;
+      font-size: 85%;
     }
 
     .block__icon {

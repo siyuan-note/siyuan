@@ -191,7 +191,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)
 		if "" == tree.Root.Spec {
-			parse.NestedInlines2FlattedSpans(tree)
+			parse.NestedInlines2FlattedSpans(tree, false)
 			tree.Root.Spec = "1"
 		}
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
@@ -751,7 +751,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	}
 	genTreeID(ret)
 	imgHtmlBlock2InlineImg(ret)
-	parse.NestedInlines2FlattedSpansHybrid(ret)
+	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
 }
 
@@ -1070,7 +1070,7 @@ func buildBlockRefInText() {
 			}
 
 			t := parse.Inline("", n.Tokens, lute.ParseOptions) // 使用行级解析
-			parse.NestedInlines2FlattedSpans(t)
+			parse.NestedInlines2FlattedSpans(t, false)
 			var children []*ast.Node
 			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {
 				children = append(children, c)

@@ -89,7 +89,7 @@ func ParseJSON(jsonData []byte, options *parse.Options) (ret *parse.Tree, needFi
 	}
 
 	if needMigrate2Spec1 {
-		parse.NestedInlines2FlattedSpans(ret)
+		parse.NestedInlines2FlattedSpans(ret, false)
 		needFix = true
 	}
 	return

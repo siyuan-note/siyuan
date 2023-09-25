@@ -810,7 +810,7 @@
   "md9": "Liste d'inclusion de mots-clés de référence virtuelle",
   "md12": "Affichage ou non du nombre de signets, de noms, d'alias, de mémos et de références.",
   "md16": "Après l'activation, si de telles informations existent, elles seront affichées dans la partie haute à droite du bloc.",
-  "md27": "Le bloc de code indique le numéro de ligne",
+  "md27": "Numéro de ligne du bloc de code",
   "md28": "Après l'activation, le bloc de code affichera le numéro de ligne. (Veuillez noter que l'activation peut réduire les performances de l'éditeur)",
   "md29": "Nombre d'espaces Tabulation ",
   "md30": "Remplace par des espaces uniquement lorsque la tabulation est enfoncée, ne remplace pas les tabulations dans le presse-papiers par des espaces",

@@ -810,7 +810,7 @@
   "md9": "Lista de inclusión de palabras clave de referencia virtual",
   "md12": "Mostrar el marcador, el nombre, el alias, el memo y el recuento de referencias",
   "md16": "Una vez habilitado, si existe dicha información, se mostrará en la parte superior derecha del bloque",
-  "md27": "El bloque de código muestra el número de línea",
+  "md27": "Número de línea del bloque de código",
   "md28": "Tras la habilitación, el bloque de código mostrará el número de línea (Tenga en cuenta que habilitarlo puede reducir el rendimiento del editor)",
   "md29": "Número de espacios de tabulación",
   "md30": "Sustituye por espacios sólo cuando se pulsa el tabulador, no sustituye los tabuladores del portapapeles por espacios",

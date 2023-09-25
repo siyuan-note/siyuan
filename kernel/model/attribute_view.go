@@ -529,6 +529,19 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 							}
 							delete(attrs, NodeAttrNamePrefixAvKey+operation.AvID+"-"+values.KeyID)
 							node.RemoveIALAttr(NodeAttrNamePrefixAvKey + operation.AvID + "-" + values.KeyID)
+
+							if avs := attrs[NodeAttrNameAvs]; "" != avs {
+								avIDs := strings.Split(avs, ",")
+								avIDs = gulu.Str.RemoveElem(avIDs, operation.AvID)
+								if 0 == len(avIDs) {
+									delete(attrs, NodeAttrNameAvs)
+									node.RemoveIALAttr(NodeAttrNameAvs)
+								} else {
+									attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+									node.SetIALAttr(NodeAttrNameAvs, strings.Join(avIDs, ","))
+								}
+							}
+
 							if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
 								return
 							}

@@ -86,11 +86,11 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	return
 }
 
-func RenderAttributeView(avID, nodeID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !gulu.File.IsExist(avJSONPath) {
-		attrView = av.NewAttributeView(avID, nodeID)
+		attrView = av.NewAttributeView(avID)
 		if err = av.SaveAttributeView(attrView); nil != err {
 			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 			return
@@ -101,14 +101,6 @@ func RenderAttributeView(avID, nodeID string) (viewable av.Viewable, attrView *a
 	if nil != err {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
-	}
-
-	if "" == attrView.NodeID {
-		attrView.NodeID = nodeID
-		if err = av.SaveAttributeView(attrView); nil != err {
-			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-			return
-		}
 	}
 
 	if 1 > len(attrView.Views) {

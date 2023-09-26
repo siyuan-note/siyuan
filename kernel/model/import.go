@@ -141,24 +141,23 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			return
 		}
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
+			if !entering || "" == n.ID {
 				return ast.WalkContinue
 			}
-			if "" != n.ID {
-				newNodeID := ast.NewNodeID()
-				blockIDs[n.ID] = newNodeID
-				oldNodeID := n.ID
-				n.ID = newNodeID
-				n.SetIALAttr("id", newNodeID)
 
-				// 重新指向数据库属性值
-				ial := parse.IAL2Map(n.KramdownIAL)
-				for k, v := range ial {
-					if strings.HasPrefix(k, NodeAttrNamePrefixAvKey) {
-						v = strings.ReplaceAll(v, oldNodeID, newNodeID)
-						n.SetIALAttr(k, v)
-						avBlockIDs[oldNodeID] = newNodeID
-					}
+			newNodeID := ast.NewNodeID()
+			blockIDs[n.ID] = newNodeID
+			oldNodeID := n.ID
+			n.ID = newNodeID
+			n.SetIALAttr("id", newNodeID)
+
+			// 重新指向数据库属性值
+			ial := parse.IAL2Map(n.KramdownIAL)
+			for k, v := range ial {
+				if strings.HasPrefix(k, NodeAttrNamePrefixAvKey) {
+					v = strings.ReplaceAll(v, oldNodeID, newNodeID)
+					n.SetIALAttr(k, v)
+					avBlockIDs[oldNodeID] = newNodeID
 				}
 			}
 			return ast.WalkContinue
@@ -201,13 +200,23 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 将关联的数据库文件移动到 data/storage/av/ 下
 	storage := filepath.Join(unzipRootPath, "storage")
 	storageAvDir := filepath.Join(storage, "av")
+	avIDs := map[string]string{}
+	renameAvPaths := map[string]string{}
 	if gulu.File.IsExist(storageAvDir) {
-		// 将数据库文件中的块 ID 替换为新的块 ID
+		// 重新生成数据库数据
 		filepath.Walk(storageAvDir, func(path string, info fs.FileInfo, err error) error {
 			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(info.Name(), ".json")) {
 				return nil
 			}
 
+			// 重命名数据库
+			newAvID := ast.NewNodeID()
+			oldAvID := strings.TrimSuffix(info.Name(), ".json")
+			newPath := filepath.Join(filepath.Dir(path), newAvID+".json")
+			renameAvPaths[path] = newPath
+			avIDs[oldAvID] = newAvID
+
+			// 将数据库文件中的块 ID 替换为新的块 ID
 			data, readErr := os.ReadFile(path)
 			if nil != readErr {
 				logging.LogErrorf("read av file [%s] failed: %s", path, readErr)
@@ -218,6 +227,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			for oldID, newID := range avBlockIDs {
 				newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
 			}
+			newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
 			if !bytes.Equal(data, newData) {
 				if writeErr := os.WriteFile(path, newData, 0644); nil != writeErr {
 					logging.LogErrorf("write av file [%s] failed: %s", path, writeErr)
@@ -227,9 +237,37 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			return nil
 		})
 
+		// 重命名数据库文件
+		for oldPath, newPath := range renameAvPaths {
+			if err = os.Rename(oldPath, newPath); nil != err {
+				logging.LogErrorf("rename av file from [%s] to [%s] failed: %s", oldPath, newPath, err)
+				return
+			}
+		}
+
 		targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
 		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
 			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+		}
+
+		// 重新指向数据库属性值
+		for _, tree := range trees {
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || "" == n.ID {
+					return ast.WalkContinue
+				}
+
+				ial := parse.IAL2Map(n.KramdownIAL)
+				for k, v := range ial {
+					if strings.HasPrefix(k, NodeAttrNamePrefixAvKey) || strings.HasPrefix(k, NodeAttrNameAvs) {
+						for oldAvID, newAvID := range avIDs {
+							v = strings.ReplaceAll(v, oldAvID, newAvID)
+							n.SetIALAttr(k, v)
+						}
+					}
+				}
+				return ast.WalkContinue
+			})
 		}
 	}
 

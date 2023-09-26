@@ -1380,7 +1380,6 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 			return ast.WalkContinue
 		})
-
 	}
 
 	// 导出自定义排序

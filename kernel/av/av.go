@@ -40,7 +40,6 @@ import (
 type AttributeView struct {
 	Spec      int          `json:"spec"`      // 格式版本
 	ID        string       `json:"id"`        // 属性视图 ID
-	NodeID    string       `json:"nodeID"`    // 属性视图所在节点 ID
 	Name      string       `json:"name"`      // 属性视图名称
 	KeyValues []*KeyValues `json:"keyValues"` // 属性视图属性列值
 	ViewID    string       `json:"viewID"`    // 当前视图 ID
@@ -386,7 +385,7 @@ type Viewable interface {
 	GetID() string
 }
 
-func NewAttributeView(id, nodeID string) (ret *AttributeView) {
+func NewAttributeView(id string) (ret *AttributeView) {
 	view := NewView()
 	key := NewKey(ast.NewNodeID(), "Block", KeyTypeBlock)
 	ret = &AttributeView{
@@ -395,7 +394,6 @@ func NewAttributeView(id, nodeID string) (ret *AttributeView) {
 		KeyValues: []*KeyValues{{Key: key}},
 		ViewID:    view.ID,
 		Views:     []*View{view},
-		NodeID:    nodeID,
 	}
 	view.Table.Columns = []*ViewTableColumn{{ID: key.ID}}
 	return

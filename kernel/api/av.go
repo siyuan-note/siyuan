@@ -35,8 +35,7 @@ func renderAttributeView(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	nodeID := arg["nodeID"].(string)
-	view, attrView, err := model.RenderAttributeView(id, nodeID)
+	view, attrView, err := model.RenderAttributeView(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -200,7 +200,7 @@ ${renewHTML}
                 fetchPost("/api/setting/getCloudUser", {
                     token: window.siyuan.user.userToken,
                 }, response => {
-                    window.siyuan.user = response.data || {};
+                    window.siyuan.user = response.data;
                     element.innerHTML = account.genHTML();
                     account.bindEvent(element);
                     showMessage(window.siyuan.languages.refreshUser, 3000);
@@ -211,7 +211,7 @@ ${renewHTML}
             element.querySelector("#logout").addEventListener("click", () => {
                 fetchPost("/api/setting/logoutCloudUser", {}, () => {
                     fetchPost("/api/setting/getCloudUser", {}, response => {
-                        window.siyuan.user = response.data || {};
+                        window.siyuan.user = response.data;
                         element.innerHTML = account.genHTML();
                         account.bindEvent(element);
                         account.onSetaccount();
@@ -383,7 +383,7 @@ ${renewHTML}
         });
     },
     _afterLogin(userResponse: IWebSocketData, element: Element) {
-        window.siyuan.user = userResponse.data || {};
+        window.siyuan.user = userResponse.data;
         processSync();
         element.innerHTML = account.genHTML();
         account.bindEvent(element);

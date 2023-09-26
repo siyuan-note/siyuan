@@ -168,7 +168,7 @@ export class App {
                     window.siyuan.menus = new Menus(this);
                     bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
-                        window.siyuan.user = userResponse.data || {};
+                        window.siyuan.user = userResponse.data;
                         onGetConfig(response.data.start, this);
                         account.onSetaccount();
                         setTitle(window.siyuan.languages.siyuanNote);

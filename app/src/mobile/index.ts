@@ -89,7 +89,7 @@ class App {
                     initMessage();
                     initAssets();
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
-                        window.siyuan.user = userResponse.data || {};
+                        window.siyuan.user = userResponse.data;
                         fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
                             setNoteBook(() => {

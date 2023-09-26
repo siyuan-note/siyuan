@@ -12,8 +12,7 @@ export const needLogin = (tip = window.siyuan.languages.needLogin) => {
 };
 
 export const needSubscribe = (tip = window.siyuan.languages._kernel[29]) => {
-    if (window.siyuan.user && (window.siyuan.user.userSiYuanProExpireTime === -1 || window.siyuan.user.userSiYuanProExpireTime > 0) ||
-        window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
+    if (window.siyuan.user && (window.siyuan.user.userSiYuanProExpireTime === -1 || window.siyuan.user.userSiYuanProExpireTime > 0)) {
         return false;
     }
     if (tip) {

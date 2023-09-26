@@ -76,7 +76,7 @@ export const showAccountInfo = () => {
                 fetchPost("/api/setting/getCloudUser", {
                     token: window.siyuan.user.userToken,
                 }, response => {
-                    window.siyuan.user = response.data;
+                    window.siyuan.user = response.data || {};
                     showMessage(window.siyuan.languages.refreshUser, 3000);
                     showAccountInfo();
                     const menuAccountElement = document.getElementById("menuAccount");
@@ -169,7 +169,7 @@ const afterLogin = (response: IWebSocketData, deactive = false) => {
         fetchPost("/api/setting/getCloudUser", {
             token: response.data.token,
         }, response => {
-            window.siyuan.user = response.data;
+            window.siyuan.user = response.data || {};
             closePanel();
             document.getElementById("menuAccount").innerHTML = `<img class="b3-menu__icon" src="${window.siyuan.user.userAvatarURL}"/>
 <span class="b3-menu__label">${window.siyuan.user.userName}</span>`;

@@ -1357,6 +1357,32 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 	}
 
+	// 导出数据库 Attribute View export https://github.com/siyuan-note/siyuan/issues/8710
+	exportStorageAvDir := filepath.Join(exportFolder, "storage", "av")
+	for _, tree := range trees {
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			if ast.NodeAttributeView != n.Type {
+				return ast.WalkContinue
+			}
+
+			avID := n.AttributeViewID
+			avJSONPath := av.GetAttributeViewDataPath(avID)
+			if !gulu.File.IsExist(avJSONPath) {
+				return ast.WalkContinue
+			}
+
+			if copyErr := filelock.Copy(avJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
+				logging.LogErrorf("copy av json failed: %s", copyErr)
+			}
+			return ast.WalkContinue
+		})
+
+	}
+
 	// 导出自定义排序
 	sortPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
 	fullSortIDs := map[string]int{}

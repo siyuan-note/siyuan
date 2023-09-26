@@ -123,6 +123,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	luteEngine := util.NewLute()
 	blockIDs := map[string]string{}
+	avBlockIDs := map[string]string{}
 	trees := map[string]*parse.Tree{}
 
 	// 重新生成块 ID
@@ -146,9 +147,19 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if "" != n.ID {
 				newNodeID := ast.NewNodeID()
 				blockIDs[n.ID] = newNodeID
+				oldNodeID := n.ID
 				n.ID = newNodeID
 				n.SetIALAttr("id", newNodeID)
 
+				// 重新指向数据库属性值
+				ial := parse.IAL2Map(n.KramdownIAL)
+				for k, v := range ial {
+					if strings.HasPrefix(k, NodeAttrNamePrefixAvKey) {
+						v = strings.ReplaceAll(v, oldNodeID, newNodeID)
+						n.SetIALAttr(k, v)
+						avBlockIDs[oldNodeID] = newNodeID
+					}
+				}
 			}
 			return ast.WalkContinue
 		})
@@ -187,11 +198,49 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		})
 	}
 
+	// 将关联的数据库文件移动到 data/storage/av/ 下
+	storageAvDir := filepath.Join(unzipRootPath, "storage", "av")
+	if gulu.File.IsExist(storageAvDir) {
+		// 将数据库文件中的块 ID 替换为新的块 ID
+		filepath.Walk(storageAvDir, func(path string, info fs.FileInfo, err error) error {
+			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(info.Name(), ".json")) {
+				return nil
+			}
+
+			data, readErr := os.ReadFile(path)
+			if nil != readErr {
+				logging.LogErrorf("read av file [%s] failed: %s", path, readErr)
+				return nil
+			}
+			var newData []byte
+			newData = data
+			for oldID, newID := range avBlockIDs {
+				newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
+			}
+			if !bytes.Equal(data, newData) {
+				if writeErr := os.WriteFile(path, newData, 0644); nil != writeErr {
+					logging.LogErrorf("write av file [%s] failed: %s", path, writeErr)
+					return nil
+				}
+			}
+			return nil
+		})
+
+		targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
+		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
+			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+		}
+
+		if removeErr := os.RemoveAll(storageAvDir); nil != removeErr {
+			logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
+		}
+	}
+
 	// 写回 .sy
 	for _, tree := range trees {
 		syPath := filepath.Join(unzipRootPath, tree.Path)
 		if "" == tree.Root.Spec {
-			parse.NestedInlines2FlattedSpans(tree)
+			parse.NestedInlines2FlattedSpans(tree, false)
 			tree.Root.Spec = "1"
 		}
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
@@ -751,7 +800,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	}
 	genTreeID(ret)
 	imgHtmlBlock2InlineImg(ret)
-	parse.NestedInlines2FlattedSpansHybrid(ret)
+	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
 }
 
@@ -1070,7 +1119,7 @@ func buildBlockRefInText() {
 			}
 
 			t := parse.Inline("", n.Tokens, lute.ParseOptions) // 使用行级解析
-			parse.NestedInlines2FlattedSpans(t)
+			parse.NestedInlines2FlattedSpans(t, false)
 			var children []*ast.Node
 			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {
 				children = append(children, c)

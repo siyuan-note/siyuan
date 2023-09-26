@@ -263,10 +263,20 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 						for oldAvID, newAvID := range avIDs {
 							newKey := strings.ReplaceAll(k, oldAvID, newAvID)
 							newVal := strings.ReplaceAll(v, oldAvID, newAvID)
-							n.SetIALAttr(newKey, newVal)
-							n.RemoveIALAttr(k)
+							if newKey != k {
+								n.SetIALAttr(newKey, v)
+								n.RemoveIALAttr(k)
+								k = newKey
+							}
+							if newVal != v {
+								n.SetIALAttr(k, newVal)
+							}
 						}
 					}
+				}
+
+				if ast.NodeAttributeView == n.Type {
+					n.AttributeViewID = avIDs[n.AttributeViewID]
 				}
 				return ast.WalkContinue
 			})

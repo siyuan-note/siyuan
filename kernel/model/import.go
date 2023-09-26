@@ -260,18 +260,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				ial := parse.IAL2Map(n.KramdownIAL)
 				for k, v := range ial {
 					if strings.HasPrefix(k, NodeAttrNamePrefixAvKey) || strings.HasPrefix(k, NodeAttrNameAvs) {
+						newKey, newVal := k, v
 						for oldAvID, newAvID := range avIDs {
-							newKey := strings.ReplaceAll(k, oldAvID, newAvID)
-							newVal := strings.ReplaceAll(v, oldAvID, newAvID)
-							if newKey != k {
-								n.SetIALAttr(newKey, v)
-								n.RemoveIALAttr(k)
-								k = newKey
-							}
-							if newVal != v {
-								n.SetIALAttr(k, newVal)
-							}
+							newKey = strings.ReplaceAll(newKey, oldAvID, newAvID)
+							newVal = strings.ReplaceAll(newVal, oldAvID, newAvID)
 						}
+						n.RemoveIALAttr(k)
+						n.SetIALAttr(newKey, newVal)
 					}
 				}
 

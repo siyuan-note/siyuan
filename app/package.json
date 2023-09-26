@@ -1,6 +1,6 @@
 {
   "name": "SiYuan",
-  "version": "2.10.6",
+  "version": "2.10.7",
   "description": "Refactor your thinking",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",

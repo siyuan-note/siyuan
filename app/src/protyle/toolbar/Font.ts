@@ -5,6 +5,7 @@ import {focusByRange, getSelectionPosition} from "../util/selection";
 import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
+import {lineNumberRender} from "../render/highlightRender";
 
 export class Font extends ToolbarItem {
     public element: HTMLElement;
@@ -46,6 +47,13 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 
     const element = document.createElement("div");
     element.classList.add("protyle-font");
+    let disableFont = false;
+    nodeElements?.find((item: HTMLElement) => {
+        if (item.classList.contains("list") || item.classList.contains("li")) {
+            disableFont = true;
+            return true;
+        }
+    });
     let lastColorHTML = "";
     const lastFonts = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (lastFonts.length > 0) {
@@ -72,7 +80,9 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>`;
                     break;
                 case "fontSize":
-                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
+                    if (!disableFont) {
+                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
+                    }
                     break;
                 case "style1":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}" class="color__square">A</button>`;
@@ -126,10 +136,10 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     <button data-type="style2" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>
     <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>
 </div>
-<div class="fn__hr"></div>
-<div>${window.siyuan.languages.fontSize}</div>
-<div class="fn__hr--small"></div>
-<div class="fn__flex">
+<div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
+<div class="${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
+<div class="fn__hr--small${disableFont ? " fn__none" : ""}"></div>
+<div class="fn__flex${disableFont ? " fn__none" : ""}">
     <select class="b3-select fn__block">
         <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
         <option ${fontSize === "13px" ? "selected" : ""} value="13px">13px</option>
@@ -220,6 +230,9 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.backgroundColor = color;
             } else if (type === "fontSize") {
                 e.style.fontSize = color;
+            }
+            if ((type === "fontSize" || type === "clear") && e.getAttribute("data-type") === "NodeCodeBlock") {
+                lineNumberRender(e.querySelector(".hljs"));
             }
         });
         focusByRange(protyle.toolbar.range);

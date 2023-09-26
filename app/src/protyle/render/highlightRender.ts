@@ -132,6 +132,8 @@ export const lineNumberRender = (block: HTMLElement) => {
         return;
     }
     block.classList.add("protyle-linenumber");
+    // clientHeight 总是取的整数
+    block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
     const lineNumberTemp = document.createElement("div");
     lineNumberTemp.className = "hljs protyle-linenumber";
     lineNumberTemp.setAttribute("style", `padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${block.style.whiteSpace};word-break:${block.style.wordBreak};font-variant-ligatures:${block.style.fontVariantLigatures};`);

@@ -115,7 +115,7 @@ export const updateAssetCell = (options: {
     const colId = options.cellElements[0].dataset.colId;
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    let newValue: IAVCellAssetValue[] = []
+    let newValue: IAVCellAssetValue[] = [];
     options.cellElements.forEach((item, elementIndex) => {
         let cellData: IAVCell;
         const rowID = item.parentElement.dataset.id;
@@ -197,7 +197,7 @@ export const updateAssetCell = (options: {
             }
         });
         if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellData.value)
+            item.innerHTML = genAVValueHTML(cellData.value);
         } else {
             updateAttrViewCellAnimation(item);
         }

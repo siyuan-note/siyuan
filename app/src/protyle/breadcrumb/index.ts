@@ -30,7 +30,6 @@ import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid} from "../util/compatibility";
 import {resize} from "../util/resize";
-import {transferBlockRef} from "../../menus/block";
 
 export class Breadcrumb {
     public element: HTMLElement;

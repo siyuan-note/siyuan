@@ -232,7 +232,7 @@ export const openMenuPanel = (options: {
             }
             if (type === "assets") {
                 if (isTop) {
-                    targetElement.before(sourceElement)
+                    targetElement.before(sourceElement);
                 } else {
                     targetElement.after(sourceElement);
                 }
@@ -243,9 +243,9 @@ export const openMenuPanel = (options: {
                             content: item.dataset.content,
                             name: item.dataset.name,
                             type: item.dataset.type as "image" | "file",
-                        })
+                        });
                     }
-                })
+                });
                 updateAssetCell({
                     protyle: options.protyle,
                     data,

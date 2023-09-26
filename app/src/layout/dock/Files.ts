@@ -46,7 +46,7 @@ export class Files extends Model {
                             break;
                         case "createnotebook":
                             setNoteBook((notebooks) => {
-                                let previousId: string
+                                let previousId: string;
                                 notebooks.find(item => {
                                     if (!item.closed) {
                                         if (item.id === data.data.box.id) {
@@ -59,7 +59,7 @@ export class Files extends Model {
                                         }
                                         previousId = item.id;
                                     }
-                                })
+                                });
                             });
                             break;
                         case "unmount":

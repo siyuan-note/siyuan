@@ -2,8 +2,6 @@ import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {escapeAttr} from "../../../util/escape";
 import {hasClosestByAttribute} from "../../util/hasClosest";
-import {Menu} from "../../../plugin/Menu";
-import {Constants} from "../../../constants";
 import * as dayjs from "dayjs";
 import {popTextCell} from "./cell";
 

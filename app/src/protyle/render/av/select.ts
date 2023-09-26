@@ -52,7 +52,7 @@ export const removeCellOption = (protyle: IProtyle, data: IAV, cellElements: HTM
     const colId = cellElements[0].dataset.colId;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    let newData: IAVCellSelectValue[]
+    let newData: IAVCellSelectValue[];
     cellElements.forEach((item, elementIndex) => {
         const rowID = item.parentElement.dataset.id;
         const cellId = item.dataset.id;
@@ -434,7 +434,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
 
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
-    let newValue: IAVCellSelectValue[]
+    let newValue: IAVCellSelectValue[];
     cellElements.forEach((item, index) => {
         let cellData: IAVCell;
         const rowID = item.parentElement.dataset.id;
@@ -474,7 +474,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                         content: currentElement.dataset.name
                     });
                 }
-                newValue = cellData.value.mSelect
+                newValue = cellData.value.mSelect;
             } else {
                 cellData.value.mSelect = newValue;
             }

@@ -23,7 +23,6 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void) =
             const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
             fetchPost("/api/av/renderAttributeView", {
                 id: e.getAttribute("data-av-id"),
-                nodeID: e.getAttribute("data-node-id")
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 // header

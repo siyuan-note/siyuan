@@ -27,10 +27,8 @@ export const openMenuPanel = (options: {
     }
     window.siyuan.menus.menu.remove();
     const avID = options.blockElement.getAttribute("data-av-id");
-    const nodeID = options.blockElement.getAttribute("data-node-id");
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
-        nodeID
     }, (response) => {
         const data = response.data as IAV;
         let html;
@@ -238,7 +236,7 @@ export const openMenuPanel = (options: {
                 } else {
                     targetElement.after(sourceElement);
                 }
-                const replaceValue: IAVCellAssetValue[] = []
+                const replaceValue: IAVCellAssetValue[] = [];
                 Array.from(targetElement.parentElement.children).forEach((item: HTMLElement) => {
                     if (item.dataset.content) {
                         replaceValue.push({
@@ -628,7 +626,6 @@ export const openMenuPanel = (options: {
                         type: colData.type,
                         avID,
                         colId,
-                        nodeID,
                         newValue: colData.name
                     });
                     avPanelElement.remove();

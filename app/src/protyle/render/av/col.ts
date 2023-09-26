@@ -12,7 +12,6 @@ export const duplicateCol = (options: {
     protyle: IProtyle,
     type: TAVCol,
     avID: string,
-    nodeID: string,
     colId: string,
     newValue: string
 }) => {
@@ -24,7 +23,7 @@ export const duplicateCol = (options: {
         options.newValue = `${options.newValue} (1)`;
     }
     if (["select", "mSelect"].includes(options.type)) {
-        fetchPost("/api/av/renderAttributeView", {id: options.avID, nodeID: options.nodeID}, (response) => {
+        fetchPost("/api/av/renderAttributeView", {id: options.avID}, (response) => {
             const data = response.data as IAV;
             let colOptions;
             data.view.columns.find((item) => {
@@ -74,7 +73,7 @@ export const duplicateCol = (options: {
         }]);
     }
     addAttrViewColAnimation({
-        blockElement: options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.nodeID}"]`),
+        blockElement: options.protyle.wysiwyg.element.querySelector(`[data-av-id="${options.avID}"]`),
         protyle: options.protyle,
         type: options.type,
         name: options.newValue,
@@ -289,7 +288,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
-    const nodeID = blockElement.getAttribute("data-node-id");
     const menu = new Menu("av-header-cell", () => {
         const newValue = (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue === cellElement.textContent.trim()) {
@@ -339,7 +337,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         click() {
             fetchPost("/api/av/renderAttributeView", {
                 id: avID,
-                nodeID
             }, (response) => {
                 transaction(protyle, [{
                     action: "setAttrViewSorts",
@@ -362,7 +359,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         click() {
             fetchPost("/api/av/renderAttributeView", {
                 id: avID,
-                nodeID
             }, (response) => {
                 transaction(protyle, [{
                     action: "setAttrViewSorts",
@@ -386,7 +382,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             click() {
                 fetchPost("/api/av/renderAttributeView", {
                     id: avID,
-                    nodeID
                 }, (response) => {
                     const avData = response.data as IAV;
                     let filter: IAVFilter;
@@ -450,7 +445,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     protyle,
                     type,
                     avID,
-                    nodeID,
                     colId,
                     newValue: (window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement).value
                 });

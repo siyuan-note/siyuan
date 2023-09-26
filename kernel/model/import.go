@@ -261,8 +261,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				for k, v := range ial {
 					if strings.HasPrefix(k, NodeAttrNamePrefixAvKey) || strings.HasPrefix(k, NodeAttrNameAvs) {
 						for oldAvID, newAvID := range avIDs {
-							v = strings.ReplaceAll(v, oldAvID, newAvID)
-							n.SetIALAttr(k, v)
+							newKey := strings.ReplaceAll(k, oldAvID, newAvID)
+							newVal := strings.ReplaceAll(v, oldAvID, newAvID)
+							n.SetIALAttr(newKey, newVal)
+							n.RemoveIALAttr(k)
 						}
 					}
 				}

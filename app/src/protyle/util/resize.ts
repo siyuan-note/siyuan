@@ -42,20 +42,5 @@ export const resize = (protyle: IProtyle) => {
                 }
             }
         }
-        if (abs.padding > MIN_ABS || abs.width > MIN_ABS || isNaN(abs.padding)) {
-            protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-                item.style.width = item.parentElement.clientWidth + "px";
-                if (item.getAttribute("data-render") === "true") {
-                    const paddingLeft = item.parentElement.style.paddingLeft;
-                    const paddingRight = item.parentElement.style.paddingRight;
-                    const avHeaderElement = item.firstElementChild.firstElementChild as HTMLElement;
-                    avHeaderElement.style.paddingLeft = paddingLeft;
-                    avHeaderElement.style.paddingRight = paddingRight;
-                    const avBodyElement = item.querySelector(".av__scroll").firstElementChild as HTMLElement;
-                    avBodyElement.style.paddingLeft = paddingLeft;
-                    avBodyElement.style.paddingRight = paddingRight;
-                }
-            });
-        }
     }, Constants.TIMEOUT_TRANSITION);   // 等待 setPadding 动画结束
 };

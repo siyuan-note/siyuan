@@ -125,12 +125,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
     <span class="item__text">${item.name}</span>
 </div>`;
                 });
-                const paddingLeft = e.parentElement.style.paddingLeft;
-                const paddingRight = e.parentElement.style.paddingRight;
-                e.style.width = e.parentElement.clientWidth + "px";
-                e.style.alignSelf = "center";
                 e.firstElementChild.outerHTML = `<div>
-    <div class="av__header" style="padding-left: ${paddingLeft};padding-right: ${paddingRight};">
+    <div class="av__header">
         <div class="layout-tab-bar fn__flex">
             ${tabHTML}
             <div class="fn__flex-1"></div>
@@ -151,7 +147,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${text}</div>`;
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div style="padding-left: ${paddingLeft};padding-right: ${paddingRight};float: left;">
+        <div style="float: left;">
             ${tableHTML}
             <div class="av__row--add">
                 <svg><use xlink:href="#iconAdd"></use></svg>

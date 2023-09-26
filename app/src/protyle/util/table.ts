@@ -17,7 +17,7 @@ const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IP
     } else {
         scrollCenter(protyle, rowElement);
     }
-}
+};
 
 export const getColIndex = (cellElement: HTMLElement) => {
     let previousElement = cellElement.previousElementSibling;

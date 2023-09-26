@@ -61,6 +61,8 @@
   * 带 assets 文件夹的标准 Markdown
   * PDF、Word 和 HTML
   * 复制到微信公众号、知乎和语雀
+* 数据库
+  * 表格视图
 * 间隔重复
 * 模板片段
 * JavaScript/CSS 代码片段

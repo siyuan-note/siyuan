@@ -60,6 +60,8 @@ Most features are free, even for commercial use.
   * Standard Markdown with assets
   * PDF, Word and HTML
   * Copy to WeChat MP, Zhihu and Yuque
+* Database
+  * Table view
 * Spaced repetition
 * Multi-tab, drag and drop to split screen
 * Template snippet

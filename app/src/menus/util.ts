@@ -39,14 +39,38 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
         label: window.siyuan.languages.insertRight,
         accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥Click")}`,
         click: () => {
-            openFileById({app, id, position: "right", action: [Constants.CB_GET_FOCUS]});
+            if (notebookId) {
+                openFileById({app, id, position: "right", action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]});
+            } else {
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        app,
+                        id,
+                        position: "right",
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                        zoomIn: foldResponse.data
+                    });
+                });
+            }
         }
     }, {
         icon: "iconLayoutBottom",
         label: window.siyuan.languages.insertBottom,
         accelerator: "⇧Click",
         click: () => {
-            openFileById({app, id, position: "bottom", action: [Constants.CB_GET_FOCUS]});
+            if (notebookId) {
+                openFileById({app, id, position: "bottom", action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]});
+            } else {
+                fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                    openFileById({
+                        app,
+                        id,
+                        position: "bottom",
+                        action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                        zoomIn: foldResponse.data
+                    });
+                });
+            }
         }
     }];
     if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
@@ -54,11 +78,19 @@ export const openEditorTab = (app: App, id: string, notebookId?: string, pathStr
             label: window.siyuan.languages.openInNewTab,
             accelerator: "⌥⌘Click",
             click: () => {
-                openFileById({
-                    app,
-                    id, action: [Constants.CB_GET_FOCUS],
-                    removeCurrentTab: false
-                });
+                if (notebookId) {
+                    openFileById({app, id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL], removeCurrentTab: false});
+                } else {
+                    fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+                        openFileById({
+                            app,
+                            id,
+                            action: foldResponse.data ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                            zoomIn: foldResponse.data,
+                            removeCurrentTab: false
+                        });
+                    });
+                }
             }
         });
     }

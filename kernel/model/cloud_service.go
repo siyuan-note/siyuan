@@ -330,7 +330,6 @@ func RefreshUser(token string) {
 			Conf.User = loadUserFromConf()
 		}
 		if nil == Conf.User {
-			util.PushErrMsg(Conf.Language(19), 5000)
 			return
 		}
 

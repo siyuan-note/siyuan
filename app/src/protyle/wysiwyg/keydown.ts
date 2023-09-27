@@ -1463,7 +1463,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (matchHotKey("⌘C", event)) {
+        if (matchHotKey("⌘C", event) && selectText === "") {
             let html = "";
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 html += removeEmbed(item);
@@ -1475,7 +1475,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
-        if (matchHotKey("⌘X", event)) {
+        if (matchHotKey("⌘X", event) && selectText === "") {
             let html = "";
             nodeElement.classList.add("protyle-wysiwyg--select");
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");

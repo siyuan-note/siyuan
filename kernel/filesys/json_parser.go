@@ -174,6 +174,7 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 
 		for _, kv := range node.KramdownIAL {
 			if strings.Contains(kv[0], "custom-av-key-") {
+				// TODO: 数据库正式上线以后移除这里的修复
 				// 删除数据库属性键值对 https://github.com/siyuan-note/siyuan/issues/9293
 				node.RemoveIALAttr(kv[0])
 				*needFix = true

@@ -992,6 +992,24 @@ export const genSearch = (app: App, config: ISearchOption, element: Element, clo
                 edit,
             });
             event.preventDefault();
+        } else if (Constants.KEYCODELIST[event.keyCode] === "PageUp") {
+            const previousElement = element.querySelector('[data-type="previous"]');
+            if (!previousElement.getAttribute("disabled")) {
+                if (config.page > 1) {
+                    config.page--;
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                }
+            }
+            event.preventDefault();
+        } else if (Constants.KEYCODELIST[event.keyCode] === "PageDown") {
+            const nextElement = element.querySelector('[data-type="next"]');
+            if (!nextElement.getAttribute("disabled")) {
+                if (config.page < parseInt(nextElement.parentElement.querySelector("#searchResult").getAttribute("data-pagecount"))) {
+                    config.page++;
+                    inputTimeout = inputEvent(element, config, inputTimeout, edit);
+                }
+            }
+            event.preventDefault();
         }
     });
     replaceInputElement.addEventListener("keydown", (event: KeyboardEvent) => {

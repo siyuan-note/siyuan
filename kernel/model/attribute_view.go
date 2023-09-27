@@ -25,7 +25,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -391,6 +390,16 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	if 1 > len(operation.SrcIDs) {
+		// 不绑定到任何块的情况，比如直接在属性视图中添加一个块
+		// New a row in the database no longer require to create a relevant doc https://github.com/siyuan-note/siyuan/issues/9294
+		var avErr error
+		if avErr = addAttributeViewBlock("", operation, nil, tx); nil != avErr {
+			return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: avErr.Error()}
+		}
+		return
+	}
+
 	for _, id := range operation.SrcIDs {
 		tree, err := tx.loadTree(id)
 		if nil != err {
@@ -407,21 +416,18 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 }
 
 func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tree, tx *Transaction) (err error) {
-	node := treenode.GetNodeInTree(tree, blockID)
-	if nil == node {
-		err = ErrBlockNotFound
-		return
-	}
+	var node *ast.Node
+	if "" != blockID {
+		node = treenode.GetNodeInTree(tree, blockID)
+		if nil == node {
+			err = ErrBlockNotFound
+			return
+		}
 
-	if ast.NodeAttributeView == node.Type {
-		// 不能将一个属性视图拖拽到另一个属性视图中
-		return
-	}
-
-	block := sql.BuildBlockFromNode(node, tree)
-	if nil == block {
-		err = ErrBlockNotFound
-		return
+		if ast.NodeAttributeView == node.Type {
+			// 不能将一个属性视图拖拽到另一个属性视图中
+			return
+		}
 	}
 
 	attrView, err := av.ParseAttributeView(operation.AvID)
@@ -445,19 +451,21 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
 	blockValues.Values = append(blockValues.Values, value)
 
-	attrs := parse.IAL2Map(node.KramdownIAL)
+	if nil != node {
+		attrs := parse.IAL2Map(node.KramdownIAL)
 
-	if "" == attrs[NodeAttrNameAvs] {
-		attrs[NodeAttrNameAvs] = operation.AvID
-	} else {
-		avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
-		avIDs = append(avIDs, operation.AvID)
-		avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-		attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
-	}
+		if "" == attrs[NodeAttrNameAvs] {
+			attrs[NodeAttrNameAvs] = operation.AvID
+		} else {
+			avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
+			avIDs = append(avIDs, operation.AvID)
+			avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+			attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+		}
 
-	if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
-		return
+		if err = setNodeAttrsWithTx(tx, node, tree, attrs); nil != err {
+			return
+		}
 	}
 
 	switch view.LayoutType {
@@ -519,8 +527,6 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 								delete(attrs, "custom-hidden")
 								node.RemoveIALAttr("custom-hidden")
 							}
-							delete(attrs, NodeAttrNamePrefixAvKey+operation.AvID+"-"+values.KeyID)
-							node.RemoveIALAttr(NodeAttrNamePrefixAvKey + operation.AvID + "-" + values.KeyID)
 
 							if avs := attrs[NodeAttrNameAvs]; "" != avs {
 								avIDs := strings.Split(avs, ",")
@@ -937,13 +943,6 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 		return
 	}
 
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvKey+avID+"-"+val.KeyID] = val.ToJSONString()
-
-	if err = setNodeAttrs(node, tree, attrs); nil != err {
-		return
-	}
-
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
 	}
@@ -1095,6 +1094,5 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 }
 
 const (
-	NodeAttrNameAvs         = "custom-avs"     // 用于标记块所属的属性视图，逗号分隔 av id
-	NodeAttrNamePrefixAvKey = "custom-av-key-" // 用于标记列
+	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
 )

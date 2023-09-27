@@ -422,7 +422,6 @@ ${genHintItemHTML(item)}
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 getSavePath(protyle.path, protyle.notebookId, (pathString) => {
                     fetchPost("/api/filetree/createDocWithMd", {
-                        hidden: false,
                         notebook: protyle.notebookId,
                         path: pathPosix().join(pathString, realFileName),
                         parentID: protyle.block.rootID,

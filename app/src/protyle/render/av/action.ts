@@ -171,14 +171,21 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const addRowElement = hasClosestByClassName(event.target, "av__row--add");
     if (addRowElement) {
-        if (protyle.hint.element.classList.contains("fn__none")) {
-            protyle.toolbar.range = document.createRange();
-            protyle.toolbar.range.selectNodeContents(blockElement.querySelector(".av__title"));
-            focusByRange(protyle.toolbar.range);
-            hintRef("", protyle, "av");
-        } else {
-            hideElements(["hint"], protyle);
-        }
+        const avID = blockElement.getAttribute("data-av-id");
+        const srcIDs = [Lute.NewNodeID()]
+        const previousID = addRowElement.getAttribute("data-id") || "", ;
+        transaction(protyle, [{
+            action: "insertAttrViewBlock",
+            avID,
+            previousID,
+            srcIDs,
+            isDetached: true,
+        }], [{
+            action: "removeAttrViewBlock",
+            srcIDs,
+            avID,
+        }]);
+        insertAttrViewBlockAnimation(blockElement, 1, previousID);
         event.preventDefault();
         event.stopPropagation();
         return true;

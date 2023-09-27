@@ -373,6 +373,7 @@ interface IOperation {
     previousID?: string
     retData?: any
     nextID?: string // insert 专享
+    isDetached?: boolean // insertAttrViewBlock 专享
     srcIDs?: string[] // insertAttrViewBlock 专享
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享

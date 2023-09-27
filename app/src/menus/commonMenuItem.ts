@@ -308,7 +308,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                 });
                 const inputElement = addDialog.element.querySelector("input") as HTMLInputElement;
                 const btnsElement = addDialog.element.querySelectorAll(".b3-button");
-                dialog.bindInput(inputElement, () => {
+                addDialog.bindInput(inputElement, () => {
                     (btnsElement[1] as HTMLButtonElement).click();
                 });
                 inputElement.focus();

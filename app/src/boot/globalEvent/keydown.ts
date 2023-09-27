@@ -59,6 +59,7 @@ import {resize} from "../../protyle/util/resize";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
 import {Protyle} from "../../protyle";
+import {transaction} from "../../protyle/wysiwyg/transaction";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -405,6 +406,29 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
                 openCardByData(app, response.data, "notebook", notebookId, getNotebookName(notebookId));
             });
         }
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+        const blockIDs: string[] = []
+        liElements.forEach(item => {
+            const id = item.getAttribute("data-node-id")
+            if (id) {
+                blockIDs.push(id)
+            }
+        })
+        if (blockIDs.length > 0) {
+            transaction(undefined, [{
+                action: "addFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }], [{
+                action: "removeFlashcards",
+                deckID: Constants.QUICK_DECK_ID,
+                blockIDs,
+            }]);
+        }
+        event.preventDefault();
+        return true;
     }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {

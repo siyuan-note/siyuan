@@ -151,6 +151,35 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    const createDocElement = hasClosestByAttribute(event.target, "data-type", "createdoc");
+    if (createDocElement) {
+        fetchPost("/api/filetree/getHPathByPath", {
+            notebook: protyle.notebookId,
+            path: protyle.path,
+        }, (response) => {
+            fetchPost("/api/filetree/createDocWithMd", {
+                notebook: protyle.notebookId,
+                path: pathPosix().join(response.data, createDocElement.previousElementSibling.textContent.trim() || "Untitled"),
+                parentID: protyle.block.rootID,
+                markdown: ""
+            }, response => {
+                transaction(protyle, [{
+                    action: "updateAttrViewCell",
+                    id: createDocElement.parentElement.dataset.id,
+                    avID: blockElement.getAttribute("data-av-id"),
+                    keyID: createDocElement.parentElement.dataset.colId,
+                    rowID: createDocElement.parentElement.parentElement.dataset.id,
+                    data: {
+                        isDetached: false
+                    }
+                }]);
+            });
+        });
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     const cellElement = hasClosestByClassName(event.target, "av__cell");
     if (cellElement && !cellElement.parentElement.classList.contains("av__row--header")) {
         cellElement.parentElement.parentElement.querySelectorAll(".av__row--select").forEach(item => {
@@ -175,7 +204,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (addRowElement) {
         const avID = blockElement.getAttribute("data-av-id");
         const srcIDs = [Lute.NewNodeID()];
-        const previousID = addRowElement.getAttribute("data-id") || "";
+        const previousID = addRowElement.previousElementSibling.getAttribute("data-id") || "";
         transaction(protyle, [{
             action: "insertAttrViewBlock",
             avID,
@@ -188,30 +217,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             avID,
         }]);
         insertAttrViewBlockAnimation(blockElement, 1, previousID);
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
-    const createDocElement = hasClosestByAttribute(event.target, "data-type","createdoc");
-    if (createDocElement) {
-        // fetchPost("/api/filetree/createDocWithMd", {
-        //     notebook: protyle.notebookId,
-        //     path: pathPosix().join(pathString, realFileName),
-        //     parentID: protyle.block.rootID,
-        //     markdown: ""
-        // }, response => {
-        //     transaction(protyle, [{
-        //         action: "updateAttrViewCell",
-        //         id: cellId,
-        //         avID,
-        //         keyID: colId,
-        //         rowID,
-        //         data: {
-        //             isDetached: false
-        //         }
-        //     }]);
-        // });
         event.preventDefault();
         event.stopPropagation();
         return true;

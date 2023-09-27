@@ -16,7 +16,7 @@
       position: absolute;
       z-index: 1;
       animation: 1s linear infinite keyframes-pulse;
-      background: linear-gradient(90deg,transparent 0,rgba(255,255,255,.4) 50%,transparent 100%);
+      background: linear-gradient(90deg, transparent 0, rgba(255, 255, 255, .4) 50%, transparent 100%);
       display: block;
       height: 100%;
       width: 100%;
@@ -87,7 +87,8 @@
     font-size: 87.5%;
 
     &:hover {
-      [data-type="block-ref"] {
+      [data-type="block-ref"],
+      [data-type="createdoc"] {
         display: block;
       }
 
@@ -198,7 +199,8 @@
     align-items: center;
     transition: var(--b3-transition);
 
-    [data-type="block-ref"] {
+    [data-type="block-ref"],
+    [data-type="createdoc"] {
       display: none;
       position: absolute;
       right: 5px;

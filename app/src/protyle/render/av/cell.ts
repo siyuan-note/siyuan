@@ -343,7 +343,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!type) {
         type = cellElements[0].parentElement.parentElement.firstElementChild.querySelector(`[data-col-id="${cellElements[0].getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
     }
-    if (type === "block" && (cellElements.length > 0 || !cellElements[0].getAttribute("data-detached"))) {
+    if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {
         return;
     }
     const cellRect = cellElements[0].getBoundingClientRect();
@@ -416,7 +416,7 @@ const updateCellValue = (protyle: IProtyle, type: TAVCol, cellElements: HTMLElem
             content: (avMaskElement.querySelector(".b3-text-field") as HTMLInputElement).value
         };
         const oldValue: { content: string | number, isNotEmpty?: boolean } = {
-            content: item.textContent.trim()
+            content: type === "block" ? item.firstElementChild.textContent.trim() : item.textContent.trim()
         };
         if (type === "number") {
             oldValue.content = parseFloat(oldValue.content as string);

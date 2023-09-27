@@ -171,6 +171,14 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 			node.Children = node.Children[:len(node.Children)-1]
 			*needFix = true
 		}
+
+		for _, kv := range node.KramdownIAL {
+			if strings.Contains(kv[0], "custom-av-key-") {
+				// 删除数据库属性键值对 https://github.com/siyuan-note/siyuan/issues/9293
+				node.RemoveIALAttr(kv[0])
+				*needFix = true
+			}
+		}
 	}
 	if "" != node.ID {
 		if _, ok := (*idMap)[node.ID]; ok {

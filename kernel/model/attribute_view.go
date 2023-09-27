@@ -519,8 +519,6 @@ func (tx *Transaction) removeAttributeViewBlock(operation *Operation) (err error
 								delete(attrs, "custom-hidden")
 								node.RemoveIALAttr("custom-hidden")
 							}
-							delete(attrs, NodeAttrNamePrefixAvKey+operation.AvID+"-"+values.KeyID)
-							node.RemoveIALAttr(NodeAttrNamePrefixAvKey + operation.AvID + "-" + values.KeyID)
 
 							if avs := attrs[NodeAttrNameAvs]; "" != avs {
 								avIDs := strings.Split(avs, ",")
@@ -937,13 +935,6 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 		return
 	}
 
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[NodeAttrNamePrefixAvKey+avID+"-"+val.KeyID] = val.ToJSONString()
-
-	if err = setNodeAttrs(node, tree, attrs); nil != err {
-		return
-	}
-
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
 	}
@@ -1095,6 +1086,5 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 }
 
 const (
-	NodeAttrNameAvs         = "custom-avs"     // 用于标记块所属的属性视图，逗号分隔 av id
-	NodeAttrNamePrefixAvKey = "custom-av-key-" // 用于标记列
+	NodeAttrNameAvs = "custom-avs" // 用于标记块所属的属性视图，逗号分隔 av id
 )

@@ -925,12 +925,42 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 		break
 	}
 
+	oldIsDetached := val.IsDetached
+
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &val); nil != err {
 		return
+	}
+
+	if oldIsDetached && !val.IsDetached {
+		// 将游离行绑定到新建的块上
+		tree, loadErr := loadTreeByBlockID(rowID)
+		if nil != loadErr {
+			logging.LogWarnf("load tree by block id [%s] failed: %s", rowID, loadErr)
+		} else {
+			node := treenode.GetNodeInTree(tree, rowID)
+			if nil == node {
+				logging.LogWarnf("node [%s] not found in tree [%s]", rowID, tree.ID)
+			} else {
+				attrs := parse.IAL2Map(node.KramdownIAL)
+
+				if "" == attrs[NodeAttrNameAvs] {
+					attrs[NodeAttrNameAvs] = avID
+				} else {
+					avIDs := strings.Split(attrs[NodeAttrNameAvs], ",")
+					avIDs = append(avIDs, avID)
+					avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+					attrs[NodeAttrNameAvs] = strings.Join(avIDs, ",")
+				}
+
+				if err = setNodeAttrs(node, tree, attrs); nil != err {
+					logging.LogWarnf("set node [%s] attrs failed: %s", rowID, err)
+				}
+			}
+		}
 	}
 
 	if err = av.SaveAttributeView(attrView); nil != err {

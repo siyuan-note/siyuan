@@ -551,7 +551,7 @@ ${genHintItemHTML(item)}
                 emoji = unicode2Emoji(value) + " ";
             }
             insertHTML(protyle.lute.SpinBlockDOM(emoji), protyle);
-        } else if (["「「", "{{"].includes(this.splitChar) || this.splitChar === "#" || this.splitChar === ":") {
+        } else if (["「「", "「『", "『「", "『『", "{{"].includes(this.splitChar) || this.splitChar === "#" || this.splitChar === ":") {
             if (value === "") {
                 const editElement = getContenteditableElement(nodeElement);
                 if (editElement.textContent === "") {

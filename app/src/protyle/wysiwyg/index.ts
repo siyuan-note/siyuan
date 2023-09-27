@@ -1510,7 +1510,7 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            if ([":", "(", "【", "（", "[", "{", "「", "#", "/", "、"].includes(event.data)) {
+            if ([":", "(", "【", "（", "[", "{", "「", "『", "#", "/", "、"].includes(event.data)) {
                 protyle.hint.enableExtend = true;
             }
             if (event.isComposing || isComposition ||
@@ -1520,7 +1520,7 @@ export class WYSIWYG {
                 return;
             }
             this.escapeInline(protyle, range, event);
-            if ((/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“")) {
+            if ((/^\d{1}$/.test(event.data) || event.data === "‘" || event.data === "“" || event.data === "「")) {
                 clearTimeout(timeout);  // https://github.com/siyuan-note/siyuan/issues/9179
                 timeout = window.setTimeout(() => {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入

@@ -171,8 +171,12 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 	}
 
 	// 过滤掉不存在的行
-	notFound := []string{}
-	for blockID, _ := range rows {
+	var notFound []string
+	for blockID, v := range rows {
+		if v[0].IsDetached {
+			continue
+		}
+
 		if treenode.GetBlockTree(blockID) == nil {
 			notFound = append(notFound, blockID)
 		}
@@ -417,7 +421,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
-	if "" != blockID {
+	if !operation.IsDetached {
 		node = treenode.GetNodeInTree(tree, blockID)
 		if nil == node {
 			err = ErrBlockNotFound
@@ -428,6 +432,8 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 			// 不能将一个属性视图拖拽到另一个属性视图中
 			return
 		}
+	} else {
+		blockID = ast.NewNodeID()
 	}
 
 	attrView, err := av.ParseAttributeView(operation.AvID)
@@ -448,7 +454,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		}
 	}
 
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
+	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
 	blockValues.Values = append(blockValues.Values, value)
 
 	if nil != node {

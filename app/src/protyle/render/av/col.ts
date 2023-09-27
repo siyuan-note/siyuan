@@ -6,7 +6,7 @@ import {getDefaultOperatorByType, setFilter} from "./filter";
 import {genCellValue} from "./cell";
 import {openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
-import {addAttrViewColAnimation, removeAttrViewColAnimation} from "./action";
+import {removeAttrViewColAnimation} from "./action";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -282,6 +282,42 @@ export const updateHeader = (rowElement: HTMLElement) => {
     counterElement.classList.remove("fn__none");
     counterElement.innerHTML = `${selectCount} selected`;
     avHeadElement.style.position = "sticky";
+};
+
+export const addAttrViewColAnimation = (options: {
+    blockElement: Element,
+    protyle: IProtyle,
+    type: TAVCol,
+    name: string,
+    previousId?: string,
+    id: string
+}) => {
+    if (!options.blockElement) {
+        return;
+    }
+    options.blockElement.querySelectorAll(".av__row").forEach((item, index) => {
+        let previousElement;
+        if (options.previousId) {
+            previousElement = item.querySelector(`[data-col-id="${options.previousId}"]`);
+        } else {
+            previousElement = item.lastElementChild.previousElementSibling;
+        }
+        let html = "";
+        if (index === 0) {
+            html = `<div class="av__cell" data-col-id="${options.id}" data-dtype="${options.type}" style="width: 200px;white-space: nowrap;">
+    <div draggable="true" class="av__cellheader">
+        <svg><use xlink:href="#${getColIconByType(options.type)}"></use></svg>
+        <span class="av__celltext">${options.name}</span>
+    </div>
+    <div class="av__widthdrag"></div>
+</div>`;
+        } else {
+            html = '<div class="av__cell" style="width: 200px"></div>';
+        }
+        previousElement.insertAdjacentHTML("afterend", html);
+    });
+    window.siyuan.menus.menu.remove();
+    showColMenu(options.protyle, options.blockElement, options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${options.id}"]`));
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {

@@ -60,6 +60,7 @@ import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
 import {Protyle} from "../../protyle";
 import {transaction} from "../../protyle/wysiwyg/transaction";
+import {quickMakeCard} from "../../card/makeCard";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -249,6 +250,25 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 app,
                 hotkey: searchKey,
             });
+        }
+        event.preventDefault();
+        return true;
+    }
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+        if (protyle.title.editElement.contains(range.startContainer)) {
+            quickMakeCard(protyle, [protyle.title.element]);
+        } else {
+            const selectElement: Element[] = [];
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                selectElement.push(item);
+            });
+            if (selectElement.length === 0) {
+                const nodeElement = hasClosestBlock(range.startContainer);
+                if (nodeElement) {
+                    selectElement.push(nodeElement);
+                }
+            }
+            quickMakeCard(protyle, selectElement);
         }
         event.preventDefault();
         return true;

@@ -1033,19 +1033,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-            const selectElement: Element[] = [];
-            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                selectElement.push(item);
-            });
-            if (selectElement.length === 0) {
-                selectElement.push(nodeElement);
-            }
-            quickMakeCard(protyle, selectElement);
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {
             const topElement = getTopAloneElement(nodeElement);
             if (selectText === "") {

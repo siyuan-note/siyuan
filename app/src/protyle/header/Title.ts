@@ -144,11 +144,6 @@ export class Title {
                 });
                 event.preventDefault();
                 event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
-                quickMakeCard(protyle, [this.element]);
-                event.preventDefault();
-                event.stopPropagation();
-                return true;
             } else if (matchHotKey("⌘A", event)) {
                 getEditorRange(this.editElement).selectNodeContents(this.editElement);
                 event.preventDefault();

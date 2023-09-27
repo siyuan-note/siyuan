@@ -172,8 +172,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const addRowElement = hasClosestByClassName(event.target, "av__row--add");
     if (addRowElement) {
         const avID = blockElement.getAttribute("data-av-id");
-        const srcIDs = [Lute.NewNodeID()]
-        const previousID = addRowElement.getAttribute("data-id") || "", ;
+        const srcIDs = [Lute.NewNodeID()];
+        const previousID = addRowElement.getAttribute("data-id") || "";
         transaction(protyle, [{
             action: "insertAttrViewBlock",
             avID,

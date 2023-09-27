@@ -171,8 +171,12 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View) (ret *a
 	}
 
 	// 过滤掉不存在的行
-	notFound := []string{}
-	for blockID, _ := range rows {
+	var notFound []string
+	for blockID, v := range rows {
+		if v[0].IsDetached {
+			continue
+		}
+
 		if treenode.GetBlockTree(blockID) == nil {
 			notFound = append(notFound, blockID)
 		}
@@ -390,19 +394,9 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	if 1 > len(operation.SrcIDs) {
-		// 不绑定到任何块的情况，比如直接在属性视图中添加一个块
-		// New a row in the database no longer require to create a relevant doc https://github.com/siyuan-note/siyuan/issues/9294
-		var avErr error
-		if avErr = addAttributeViewBlock("", operation, nil, tx); nil != avErr {
-			return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: avErr.Error()}
-		}
-		return
-	}
-
 	for _, id := range operation.SrcIDs {
 		tree, err := tx.loadTree(id)
-		if nil != err {
+		if nil != err && !operation.IsDetached {
 			logging.LogErrorf("load tree [%s] failed: %s", id, err)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: err.Error()}
 		}
@@ -417,7 +411,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 
 func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
-	if "" != blockID {
+	if !operation.IsDetached {
 		node = treenode.GetNodeInTree(tree, blockID)
 		if nil == node {
 			err = ErrBlockNotFound
@@ -428,6 +422,8 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 			// 不能将一个属性视图拖拽到另一个属性视图中
 			return
 		}
+	} else {
+		blockID = ast.NewNodeID()
 	}
 
 	attrView, err := av.ParseAttributeView(operation.AvID)
@@ -448,10 +444,14 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		}
 	}
 
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
+	var content string
+	if !operation.IsDetached {
+		content = getNodeRefText(node)
+	}
+	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content}}
 	blockValues.Values = append(blockValues.Values, value)
 
-	if nil != node {
+	if !operation.IsDetached {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 
 		if "" == attrs[NodeAttrNameAvs] {
@@ -923,16 +923,6 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 			keyValues.Values = append(keyValues.Values, val)
 		}
 		break
-	}
-
-	tree, err := loadTreeByBlockID(val.BlockID)
-	if nil != err {
-		return
-	}
-
-	node := treenode.GetNodeInTree(tree, val.BlockID)
-	if nil == node {
-		return
 	}
 
 	data, err := gulu.JSON.MarshalJSON(valueData)

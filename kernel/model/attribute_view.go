@@ -925,16 +925,6 @@ func UpdateAttributeViewCell(avID, keyID, rowID, cellID string, valueData interf
 		break
 	}
 
-	tree, err := loadTreeByBlockID(val.BlockID)
-	if nil != err {
-		return
-	}
-
-	node := treenode.GetNodeInTree(tree, val.BlockID)
-	if nil == node {
-		return
-	}
-
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if nil != err {
 		return

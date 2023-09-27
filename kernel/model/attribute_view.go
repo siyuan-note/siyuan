@@ -444,7 +444,11 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 		}
 	}
 
-	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
+	var content string
+	if !operation.IsDetached {
+		content = getNodeRefText(node)
+	}
+	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: content}}
 	blockValues.Values = append(blockValues.Values, value)
 
 	if !operation.IsDetached {

@@ -217,7 +217,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             srcIDs,
             avID,
         }]);
-        insertAttrViewBlockAnimation(blockElement, 1, previousID);
+        insertAttrViewBlockAnimation(blockElement, 1, previousID, avID);
+        popTextCell(protyle, [addRowElement.previousElementSibling.querySelector('[data-detached="true"]')], "block");
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -359,16 +360,16 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
     });
 };
 
-export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string) => {
+export const insertAttrViewBlockAnimation = (blockElement: Element, size: number, previousId: string, avId?:string) => {
     const previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
     let colHTML = "";
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
-        colHTML += `<div class="av__cell" style="width: ${item.style.width}"><span class="av__pulse"></span></div>`;
+        colHTML += `<div class="av__cell" style="width: ${item.style.width}" ${item.getAttribute("data-block-id") ? ' data-detached="true"' : ""}><span class="av__pulse"></span></div>`;
     });
 
     let html = "";
     new Array(size).fill(1).forEach(() => {
-        html += `<div class="av__row">
+        html += `<div class="av__row" data-avid="${avId}">
     <div style="width: 24px"></div>
     ${colHTML}
 </div>`;

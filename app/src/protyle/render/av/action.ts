@@ -14,6 +14,8 @@ import {focusByRange} from "../../util/selection";
 import {writeText} from "../../util/compatibility";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
+import {fetchPost} from "../../../util/fetch";
+import {pathPosix} from "../../../util/pathName";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const blockElement = hasClosestBlock(event.target);
@@ -190,6 +192,31 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
+
+    const createDocElement = hasClosestByAttribute(event.target, "data-type","createdoc");
+    if (createDocElement) {
+        // fetchPost("/api/filetree/createDocWithMd", {
+        //     notebook: protyle.notebookId,
+        //     path: pathPosix().join(pathString, realFileName),
+        //     parentID: protyle.block.rootID,
+        //     markdown: ""
+        // }, response => {
+        //     transaction(protyle, [{
+        //         action: "updateAttrViewCell",
+        //         id: cellId,
+        //         avID,
+        //         keyID: colId,
+        //         rowID,
+        //         data: {
+        //             isDetached: false
+        //         }
+        //     }]);
+        // });
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
     return false;
 };
 

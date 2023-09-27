@@ -70,8 +70,10 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                                 text += `<span data-type="copy" class="b3-tooltips b3-tooltips__n block__icon" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
                             }
                         } else if (cell.valueType === "block") {
-                            text = `<span class="av__celltext">${cell.value?.block.content || ""}</span>`;
-                            if (cell.value?.block.id) {
+                            text = `<span class="av__celltext"${cell.value.isDetached ? ' data-detached="true""' : ""}>${cell.value.block.content || ""}</span>`;
+                            if (cell.value?.isDetached) {
+                                text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="createdoc" >${window.siyuan.languages.new}</span>`;
+                            } else {
                                 text += `<span class="b3-chip b3-chip--info b3-chip--small" data-type="block-ref" data-id="${cell.value.block.id}" data-subtype="s">${window.siyuan.languages.openBy}</span>`;
                             }
                         } else if (cell.valueType === "number") {

@@ -162,7 +162,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 path: pathPosix().join(response.data, createDocElement.previousElementSibling.textContent.trim() || "Untitled"),
                 parentID: protyle.block.rootID,
                 markdown: "",
-                id: createDocElement.parentElement.dataset.id,
+                id: createDocElement.parentElement.dataset.blockId,
             }, response => {
                 transaction(protyle, [{
                     action: "updateAttrViewCell",

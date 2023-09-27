@@ -394,19 +394,9 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	if 1 > len(operation.SrcIDs) {
-		// 不绑定到任何块的情况，比如直接在属性视图中添加一个块
-		// New a row in the database no longer require to create a relevant doc https://github.com/siyuan-note/siyuan/issues/9294
-		var avErr error
-		if avErr = addAttributeViewBlock("", operation, nil, tx); nil != avErr {
-			return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: avErr.Error()}
-		}
-		return
-	}
-
 	for _, id := range operation.SrcIDs {
 		tree, err := tx.loadTree(id)
-		if nil != err {
+		if nil != err && !operation.IsDetached {
 			logging.LogErrorf("load tree [%s] failed: %s", id, err)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: err.Error()}
 		}
@@ -457,7 +447,7 @@ func addAttributeViewBlock(blockID string, operation *Operation, tree *parse.Tre
 	value := &av.Value{ID: ast.NewNodeID(), KeyID: blockValues.Key.ID, BlockID: blockID, Type: av.KeyTypeBlock, IsDetached: operation.IsDetached, Block: &av.ValueBlock{ID: blockID, Content: getNodeRefText(node)}}
 	blockValues.Values = append(blockValues.Values, value)
 
-	if nil != node {
+	if !operation.IsDetached {
 		attrs := parse.IAL2Map(node.KramdownIAL)
 
 		if "" == attrs[NodeAttrNameAvs] {

@@ -28,7 +28,7 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
                 const url = window.URL || window.webkitURL;
                 const blobUrl = url.createObjectURL(blob);
                 const worker = new Worker(blobUrl);
-                new window.Viz({worker})
+                new Viz({worker})
                     .renderSVGElement(Lute.UnEscapeHTMLStr(e.getAttribute("data-content"))).then((result: HTMLElement) => {
                     renderElement.innerHTML = result.outerHTML;
                     renderElement.classList.remove("ft__error");

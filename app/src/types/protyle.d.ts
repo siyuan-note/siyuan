@@ -1,55 +1,3 @@
-interface IABCJS  {
-    renderAbc(element: Element, text: string, options: { responsive: string }): void;
-}
-
-interface IViz {
-    new(worker: { worker: Worker }): IViz;
-    renderSVGElement: (code: string) => Promise<any>;
-}
-
-interface IEChartsInstance {
-    setOption(option: any): void;
-
-    getZr(): any;
-
-    on(name: string, event: (e: any) => void): any;
-
-    containPixel(name: string, position: number[]): any;
-
-    resize(): void;
-}
-
-interface IECharts  {
-    init(element: HTMLElement, theme?: string, options?: { width: number }): IEChartsInstance;
-    dispose(element: Element): void;
-    getInstanceById(id: string): { resize: () => void };
-}
-
-interface IHLJS  {
-    highlight(text: string, options: { language?: string, ignoreIllegals: boolean }): { value: string };
-    getLanguage(text: string): { name: string };
-    listLanguages(): string[];
-}
-
-interface IKaTeX  {
-    renderToString(math: string, option: {
-        displayMode: boolean;
-        output: string;
-        macros: IObject;
-        trust: boolean;
-        strict: (errorCode: string) => "ignore" | "warn";
-    }): string;
-}
-
-interface IMermaid  {
-    initialize(options: any): void;
-    init(options: any, element: Element): void;
-}
-
-interface IPlantumlEncoder {
-    encode(options: string): string;
-}
-
 interface ILuteNode {
     TokensStr: () => string;
     __internal_object__: {
@@ -147,6 +95,42 @@ interface ILuteOptions extends IMarkdownConfig {
     emojiSite: string;
     headingAnchor: boolean;
     lazyLoadImage?: string;
+}
+
+declare class Viz {
+    constructor(worker: { worker: Worker });
+
+    renderSVGElement: (code: string) => Promise<any>;
+}
+
+declare class Viewer {
+    public destroyed: boolean;
+
+    constructor(element: Element, options: {
+        title: [number, (image: HTMLImageElement, imageData: IObject) => string],
+        button: boolean,
+        initialViewIndex?: number,
+        transition: boolean,
+        hidden: () => void,
+        toolbar: {
+            zoomIn: boolean,
+            zoomOut: boolean,
+            oneToOne: boolean,
+            reset: boolean,
+            prev: boolean,
+            play: boolean,
+            next: boolean,
+            rotateLeft: boolean,
+            rotateRight: boolean,
+            flipHorizontal: boolean,
+            flipVertical: boolean,
+            close: () => void
+        }
+    })
+
+    public destroy(): void
+
+    public show(): void
 }
 
 declare class Lute {

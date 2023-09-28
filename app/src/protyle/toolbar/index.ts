@@ -1146,14 +1146,11 @@ export class Toolbar {
         const id = nodeElement.getAttribute("data-node-id");
         let oldHtml = nodeElement.outerHTML;
 
-        const languages = Array.from(new Set<string>([
-            ...Constants.EXTRA_CODE_LANGUAGES,
-            ...(window.hljs?.listLanguages() ?? []),
-        ])).sort();
-        const html = [
-            `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`,
-            ...languages.map(item => `<div class="b3-list-item">${item}</div>`),
-        ].join("\n");
+        let html = `<div class="b3-list-item b3-list-item--focus">${window.siyuan.languages.clear}</div>`;
+        const hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+        hljsLanguages.forEach((item) => {
+            html += `<div class="b3-list-item">${item}</div>`;
+        });
 
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
@@ -1196,7 +1193,7 @@ export class Toolbar {
         });
         inputElement.addEventListener("input", (event) => {
             const lowerCaseValue = inputElement.value.toLowerCase();
-            const matchLanguages = languages.filter(item => item.includes(lowerCaseValue));
+            const matchLanguages = hljsLanguages.filter(item => item.includes(lowerCaseValue));
             let html = "";
             // sort
             let matchInput = false;
